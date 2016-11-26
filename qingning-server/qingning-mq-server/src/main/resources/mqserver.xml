@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util-4.0.xsd
+    http://www.springframework.org/schema/rabbit
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
+    http://www.springframework.org/schema/task
+    http://www.springframework.org/schema/task/spring-task-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo
+    http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+	default-lazy-init="false">
+	<context:annotation-config/>
+    <task:annotation-driven  scheduler="messageScheduler"/>
+    <task:scheduler id="messageScheduler" pool-size="20"/>
+	<context:component-scan base-package="gcw.message.server.imp,gcw.message.server.scheduler" />
+	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+	<import resource="classpath:mqbasicconfig.xml"/>
+	<import resource="classpath:db-config.xml"/>	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.mq.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
+	
+   	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener">
+   	 	<property name="propertiesFilePath" value="classpath:application.properties"/>
+   	</bean>
+	<rabbit:listener-container connection-factory="connectionFactory" acknowledge="auto"
+		auto-startup="false">
+		<rabbit:listener queues="${rmq.queue}" ref="listener"/>
+	</rabbit:listener-container>
+	 
+	<bean id="jedisUtils" class="gcw.common.util.JedisUtils" >
+			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
+	</bean>
+		 
+	
+</beans>

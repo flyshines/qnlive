@@ -1,0 +1,1 @@
+package qingning.common.db.persistence.mybatis;

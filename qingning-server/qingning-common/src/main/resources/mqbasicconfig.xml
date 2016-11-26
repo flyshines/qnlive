@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util-4.0.xsd
+    http://www.springframework.org/schema/rabbit
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd"
+	default-lazy-init="false">
+	<context:property-placeholder location="classpath:application.properties" />
+	<bean id="jsonMessageConverter" class="qingning.server.rabbitmq.RabbitMQMessageConverter"/>
+	
+	<rabbit:connection-factory id="connectionFactory"
+		username="${rmq.manager.user}" password="${rmq.manager.password}"
+		host="${rmq.ip}" port="${rmq.port}"/>
+	<rabbit:admin connection-factory="connectionFactory"/>
+	<rabbit:template id="rabbitTemplate" connection-factory="connectionFactory"
+		exchange="${rmq.exchange}" routing-key="${rmq.queue.key}" message-converter="jsonMessageConverter"/>
+
+	<rabbit:queue name="${rmq.queue}" durable="true" auto-delete="false"
+		exclusive="false"/>
+	<rabbit:direct-exchange name="${rmq.exchange}" durable="true" auto-delete="false">
+		<rabbit:bindings>
+			<rabbit:binding queue="${rmq.queue}" key="${rmq.queue.key}"/>
+		</rabbit:bindings>
+	</rabbit:direct-exchange>	
+</beans>

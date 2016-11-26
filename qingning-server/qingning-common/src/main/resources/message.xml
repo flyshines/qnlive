@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans        
+    http://www.springframework.org/schema/beans/spring-beans.xsd        
+    http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/rabbit
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd">
+    
+	<bean id="message" class="qingning.common.entity.MessageEntity">
+		<property name="messages">
+			<map>
+				<entry key="0" value="处理成功"/>
+				<entry key="000001" value="服务不存在"/>
+				<entry key="000002" value="请求太频繁"/>
+				<entry key="000003" value="访问Token验证失败"/>
+				<entry key="000004" value="输入数据格式不正确"/>				
+				<entry key="000099" value="系统错误"/>				
+				<entry key="10101" value="必填参数为空"/>				
+				<entry key="10102" value="参数类型错误"/>				
+				<entry key="100011" value="时间不一致"/>					
+				<entry key="100012" value="手机号已使用"/>
+				<entry key="100013" value="数据不存在"/>
+				<entry key="100014" value="未找到该支付方式"/>					
+				<entry key="100015" value="调用微信统一下单API,返回失败"/>		
+				<entry key="100016" value="创建失败！"/>	
+				<entry key="100017" value="更新失败！"/>	
+				<entry key="100018" value="优惠卷不满足要求"/>	
+			</map>
+		</property>
+	</bean>	
+</beans>

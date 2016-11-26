@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+<!--
+	<server name="BillsManger">
+		<default class="gcw.manager.server.imp.BillsManger">
+			<function name="billsList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="start_time" type="date" require="N,10101" validate="(start_time,end_time)=>{return !start_time.after(end_time);},22222" />
+					<param name="end_time" require="date,10101" format="N,11111"
+						validate="(start_time,end_time)=>{return !start_time.after(end_time);},22222" type="date" />
+				</inputs>
+				<outputs>
+					
+				</outputs>
+			</function>
+			
+		</default>
+		<version num="1.0.0" class="">
+
+		</version>
+	</server>
+	
+	<server name="UserManger">
+		<default class="gcw.manager.server.imp.UserManger">
+			<function name="userList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="start_time" type="date" require="N,10101" validate="(start_time,end_time)=>{return !start_time.after(end_time);},22222" />
+					<param name="end_time" require="date,10101" format="N,11111"
+						validate="(start_time,end_time)=>{return !start_time.after(end_time);},22222" type="date" />
+				</inputs>
+				<outputs>
+					
+				</outputs>
+			</function>
+			<function name="userWallet">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="user_id" type="string" require="Y,10101"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+		</default>
+		<version num="1.0.0" class="">
+
+		</version>
+	</server>
+-->	
+	
+</servers>

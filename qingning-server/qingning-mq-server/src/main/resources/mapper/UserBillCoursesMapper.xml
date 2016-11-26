@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gcw.message.persistence.mybatis.UserBillCoursesMapper" >
+  
+  <!-- 搜索订单列表
+	0：课程名搜索   course_name
+	1：教练名搜索   choreographer_name
+	2：用户名搜索   user_name
+	3：票号搜索	  student_no
+	4：课程ID搜索    course_id
+  -->
+  <select id="getBillsList" resultType="java.util.Map" parameterType="java.util.Map" >
+    select bill_no ,student_no ,course_name ,course_id ,start_date,start_time,end_time,choreographer_name ,number ,coupon_descriptions ,total_money ,pay_money ,price
+     ,user_name ,phone_number ,status ,bill_id ,user_id ,create_time as record_time,course_type_id ,line_dance,square_dance
+    from t_user_bill_courses  order by create_time desc 
+    limit 1000
+  </select>
+  
+   <select id="getBillsListCount" resultType="java.lang.Long" parameterType="java.util.Map" >
+    select count(1)
+    from t_user_bill_courses  
+  </select>
+  
+  
+  </mapper>

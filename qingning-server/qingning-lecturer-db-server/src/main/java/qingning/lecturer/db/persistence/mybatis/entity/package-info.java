@@ -1,0 +1,1 @@
+package qingning.lecturer.db.persistence.mybatis.entity;
