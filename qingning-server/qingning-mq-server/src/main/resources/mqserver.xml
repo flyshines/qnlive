@@ -23,7 +23,7 @@
 	<context:annotation-config/>
     <task:annotation-driven  scheduler="messageScheduler"/>
     <task:scheduler id="messageScheduler" pool-size="20"/>
-	<context:component-scan base-package="gcw.message.server.imp,gcw.message.server.scheduler" />
+	<context:component-scan base-package="qingning.mq.server.imp,qingning.mq.server.scheduler" />
 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 	<import resource="classpath:mqbasicconfig.xml"/>
 	<import resource="classpath:db-config.xml"/>	
@@ -37,7 +37,7 @@
 		<rabbit:listener queues="${rmq.queue}" ref="listener"/>
 	</rabbit:listener-container>
 	 
-	<bean id="jedisUtils" class="gcw.common.util.JedisUtils" >
+	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
 			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
 	</bean>
 		 
