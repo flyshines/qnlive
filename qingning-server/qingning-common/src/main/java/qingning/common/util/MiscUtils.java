@@ -14,13 +14,23 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import com.alibaba.dubbo.common.utils.StringUtils;
+
+import qingning.common.entity.QNLiveException;
+import qingning.common.entity.RequestEntity;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
+import qingning.server.rpc.CommonReadOperation;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 public final class MiscUtils {
 	private MiscUtils(){};
@@ -197,51 +207,12 @@ public final class MiscUtils {
 	public static String getUUId() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
-	
-	/**
-	 * Generate the card No. Luhn algorithm 
-	 * @param cityNo     city No.,
-	 * @param cardTypeId card Type ID,
-	 * @param seqNo      Sequence No.,
-	 * @return
-	 */
-	public  static String generateCardNo(String cityNo, long cardTypeId, long seqNo){
-		StringBuilder builded = new StringBuilder();
-		builded.append(Constants.SYS_CARD_FLAG).append(cityNo);
-		builded.append(String.format("%02d", cardTypeId)).append("0");
-		builded.append(String.format("%06d", seqNo));
-		String cardNoStr=builded.toString();
-		int len = cardNoStr.length();
-		long cardNo=Long.parseLong(cardNoStr);
-		int sum = 0;
-		for(int i = 0; i < len;++i){
-			long value= cardNo%10;
-			cardNo = (cardNo-value)/10;
-			if(i%2==0){
-				value=value*2;
-				if(value>9){
-					value=value-9;
-				}
-			}
-			sum+=value;
-		}
-		sum=sum%10;
-		if(sum != 0){
-			sum=10-sum;
-		}		
-		builded.append(sum);
-		return builded.toString();	
-	}
-	
+		
 	/**
 	 * Generate the Random No. 
 	 * @return
 	 */
 	public static String generateNormalNo(){
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {				
-		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());		
 		long maxLen=10000000000000000L;		
@@ -342,4 +313,24 @@ public final class MiscUtils {
        return date;
     }
 	
+    @SuppressWarnings("rawtypes")
+	public static String getKeyOfCachedData(String keyTemplate, Map map){
+    	if(isEmpty(keyTemplate) || isEmpty(map)){
+    		return "";
+    	}
+    	String[] keySection = keyTemplate.split(":");
+    	StringBuilder build = new StringBuilder();
+    	for(int i=0; i < keySection.length; ++i){
+    		String section=keySection[i].trim();
+    		if(section.startsWith("{") && section.endsWith("}")){
+    			section = convertString(map.get(section.substring(1, section.length()-1)));
+    		}
+    		if(i==0){
+    			build.append(section);
+    		} else {
+    			build.append(":").append(section);
+    		}
+    	}
+    	return build.toString();
+    }
 }
