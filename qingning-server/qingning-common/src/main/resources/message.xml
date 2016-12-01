@@ -19,16 +19,12 @@
 				<entry key="000003" value="访问Token验证失败"/>
 				<entry key="000004" value="输入数据格式不正确"/>				
 				<entry key="000099" value="系统错误"/>				
-				<entry key="10101" value="必填参数为空"/>				
-				<entry key="10102" value="参数类型错误"/>				
-				<entry key="100011" value="时间不一致"/>					
-				<entry key="100012" value="手机号已使用"/>
-				<entry key="100013" value="数据不存在"/>
-				<entry key="100014" value="未找到该支付方式"/>					
-				<entry key="100015" value="调用微信统一下单API,返回失败"/>		
-				<entry key="100016" value="创建失败！"/>	
-				<entry key="100017" value="更新失败！"/>	
-				<entry key="100018" value="优惠卷不满足要求"/>	
+				<entry key="000100" value="必填参数为空"/>
+				<entry key="000101" value="参数类型错误"/>
+
+				<entry key="120001" value="用户名或者密码不正确"/>
+				<entry key="120002" value="用户不存在"/>
+				<entry key="120003" value="注册IM失败"/>
 			</map>
 		</property>
 	</bean>	

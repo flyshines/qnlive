@@ -104,7 +104,7 @@ public class InputParameter {
 		} else {
 			int pos =require.lastIndexOf(",");
 			if(pos < 1){
-				this.require = "y".equalsIgnoreCase(require.substring(0, pos).trim());
+				this.require = "y".equalsIgnoreCase(require.trim());
 				this.requireErrorCode=null;
 			} else {
 				this.require = "y".equalsIgnoreCase(require.substring(0, pos).trim());

@@ -19,7 +19,7 @@
 	default-lazy-init="false">
 	<!-- 启用注解 -->
 	<context:annotation-config />
-	<context:component-scan base-package="qingning.manager.db.server.imp,qingning.manager.db.persistence.mybatis" />
+	<context:component-scan base-package="qingning.common.db.server.imp,qingning.common.db.persistence.mybatis" />
 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>  
 	
 	<context:property-placeholder location="classpath:application.properties" />
@@ -44,6 +44,9 @@
 	<bean id="choreographerServer"  class="gcw.manager.db.server.imp.ChoreographerServerImpl"/>
 	<bean id="userManagerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
 	 -->
+	<dubbo:service interface="qingning.server.rpc.manager.ICommonModuleServer" ref="commonModuleServer"  timeout="1200000" delay="-1" retries="0"/>
+	<bean id="commonModuleServer"  class="qingning.common.db.server.imp.CommonModuleServerImpl"/>
+
 	<import resource="classpath:db-config.xml"/>
 		
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.common.db.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />

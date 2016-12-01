@@ -333,4 +333,17 @@ public final class MiscUtils {
     	}
     	return build.toString();
     }
+
+	public static void converObjectMapToStringMap(Map<String,Object> objectMap, Map<String,String> stringMap){
+
+		for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+			if(entry.getValue() != null){
+				if(entry.getValue() instanceof Date){
+					stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
+				}else {
+					stringMap.put(entry.getKey(), entry.getValue().toString());
+				}
+			}
+		}
+	}
 }

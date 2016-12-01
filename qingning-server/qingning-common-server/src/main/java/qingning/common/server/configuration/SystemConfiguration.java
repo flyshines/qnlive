@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import qingning.server.ServiceManger;
 @Configuration
 @EnableWebMvc
-@ComponentScan({"qingning.manager.server.controller","qingning.manager.server.advice"})
+@ComponentScan({"qingning.common.server.controller","qingning.common.server.advice"})
 @ImportResource(value={"classpath:message.xml","classpath:mqbasicconfig.xml"})
 public class SystemConfiguration extends WebMvcConfigurerAdapter {
 	private ClassPathXmlApplicationContext context = null;	
@@ -41,7 +41,7 @@ public class SystemConfiguration extends WebMvcConfigurerAdapter {
 	public ServiceManger getServiceManger() throws Exception{
 		ServiceManger serviceManger= new ServiceManger();
 		serviceManger.initSystem("classpath:application.properties");
-		serviceManger.initServer(new String[]{"classpath:bill-manager-server.xml"});
+		serviceManger.initServer(new String[]{"classpath:qingning-common-server.xml"});
 		
 		return serviceManger;
 	}

@@ -22,10 +22,11 @@ import qingning.common.util.MiscUtils;
 
 public class ServiceManger {
 	private static Log log = LogFactory.getLog(ServiceManger.class);
-	private Map<String, Map<String,GCWServer>> servicerMap = new HashMap<String, Map<String,GCWServer>>();
+	private Map<String, Map<String,QNLiveServer>> servicerMap = new HashMap<String, Map<String,QNLiveServer>>();
 	private JedisUtils jedisUtils = null;
+	private Map<String,Object> serverUrlInfoMap = new HashMap<String,Object>();
 	
-	private void initServerDetails(Map<String,GCWServer> map, Element element) throws Exception {
+	private void initServerDetails(Map<String,QNLiveServer> map, Element element) throws Exception {
 		List<Element> children = element.getChildren();
 		if(MiscUtils.isEmpty(children)){
 			return;
@@ -56,7 +57,7 @@ public class ServiceManger {
 				continue;
 			}
 			
-			GCWServer gcwServer = (GCWServer) Class.forName(className).newInstance();
+			QNLiveServer gcwServer = (QNLiveServer) Class.forName(className).newInstance();
 			map.put(elementName, gcwServer);
 			gcwServer.setJedisUtils(jedisUtils);
 			for(Element functionElement : functionElementList){
@@ -190,9 +191,9 @@ public class ServiceManger {
 					log.info("The empty serviceName exists in the file "+path);
 					continue;
 				}
-				Map<String,GCWServer> map = servicerMap.get(serviceName);
+				Map<String,QNLiveServer> map = servicerMap.get(serviceName);
 				if(map==null){
-					map = new HashMap<String,GCWServer>();
+					map = new HashMap<String,QNLiveServer>();
 					servicerMap.put(serviceName, map);
 				}
 				initServerDetails(map, child);
@@ -204,13 +205,13 @@ public class ServiceManger {
 		}
 	}
 	
-	public GCWServer getServer(String serverName){
+	public QNLiveServer getServer(String serverName){
 		return getServer(serverName,null);
 	}
 	
-	public GCWServer getServer(String serverName, String version){
-		GCWServer server = null;
-		Map<String,GCWServer> map = servicerMap.get(serverName);
+	public QNLiveServer getServer(String serverName, String version){
+		QNLiveServer server = null;
+		Map<String,QNLiveServer> map = servicerMap.get(serverName);
 		if(map!=null){
 			if(!MiscUtils.isEmptyString(version)){				
 				server=map.get(version);
@@ -220,5 +221,12 @@ public class ServiceManger {
 			}			
 		}
 		return server;
+	}
+
+	private void initServerUrlInfoMap() throws Exception{
+		//从数据库中读取数据
+		//Map<String,Object> serverUrlInfoMap =
+
+		//将数据放入该方法的map中
 	}
 }

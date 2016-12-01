@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.common.db.persistence.mybatis.ServerFunctionMapper" >
+  <resultMap id="BaseResultMap" type="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
+    <id column="server_name" property="serverName" jdbcType="VARCHAR" />
+    <result column="server_url" property="serverUrl" jdbcType="VARCHAR" />
+    <result column="method" property="method" jdbcType="CHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    server_name, server_url, method, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_server_function
+    where server_name = #{serverName,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_server_function
+    where server_name = #{serverName,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
+    insert into t_server_function (server_name, server_url, method, 
+      update_time)
+    values (#{serverName,jdbcType=VARCHAR}, #{serverUrl,jdbcType=VARCHAR}, #{method,jdbcType=CHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
+    insert into t_server_function
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="serverName != null" >
+        server_name,
+      </if>
+      <if test="serverUrl != null" >
+        server_url,
+      </if>
+      <if test="method != null" >
+        method,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="serverName != null" >
+        #{serverName,jdbcType=VARCHAR},
+      </if>
+      <if test="serverUrl != null" >
+        #{serverUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="method != null" >
+        #{method,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
+    update t_server_function
+    <set >
+      <if test="serverUrl != null" >
+        server_url = #{serverUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="method != null" >
+        method = #{method,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where server_name = #{serverName,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
+    update t_server_function
+    set server_url = #{serverUrl,jdbcType=VARCHAR},
+      method = #{method,jdbcType=CHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where server_name = #{serverName,jdbcType=VARCHAR}
+  </update>
+
+  <select id="getServerUrls" resultType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_server_function
+  </select>
+</mapper>
