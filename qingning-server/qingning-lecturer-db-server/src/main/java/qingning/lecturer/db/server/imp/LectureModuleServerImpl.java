@@ -11,12 +11,10 @@ import qingning.lecturer.db.persistence.mybatis.UserMapper;
 import qingning.lecturer.db.persistence.mybatis.entity.Lecturer;
 import qingning.lecturer.db.persistence.mybatis.entity.LiveRoom;
 import qingning.lecturer.db.persistence.mybatis.entity.LoginInfo;
-import qingning.server.rpc.manager.ICommonModuleServer;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LectureModuleServerImpl implements ILectureModuleServer {
@@ -34,6 +32,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	private LoginInfoMapper loginInfoMapper;
 
 	@Override
+	/**
+	 * 创建直播间
+	 */
 	public Map<String,Object> createLiveRoom(Map<String, Object> reqMap) {
 		Map<String,Object> userMap = null;
 		Date now = new Date();
@@ -110,5 +111,32 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public Map<String, Object> findLiveRoomByRoomId(String room_id) {
 		return liveRoomMapper.findLiveRoomByRoomId(room_id);
+	}
+
+	@Override
+	/**
+	 * 更新直播间
+	 */
+	public Map<String, Object> updateLiveRoom(Map<String, Object> reqMap) {
+
+		LiveRoom updateLiveRoom = new LiveRoom();
+		updateLiveRoom.setRoomId(reqMap.get("room_id").toString());
+		updateLiveRoom.setUpdateTime(new Date());
+
+		if(reqMap.get("avatar_address") != null ){
+			updateLiveRoom.setAvatarAddress(reqMap.get("avatar_address").toString());
+		}
+		if(reqMap.get("room_name") != null ){
+			updateLiveRoom.setRoomName(reqMap.get("room_name").toString());
+		}
+		if(reqMap.get("room_remark") != null ){
+			updateLiveRoom.setRoomRemark(reqMap.get("room_remark").toString());
+		}
+
+		Integer updateCount = liveRoomMapper.updateByPrimaryKeySelective(updateLiveRoom);
+		Map<String,Object> dbResultMap = new HashMap<String,Object>();
+		dbResultMap.put("updateCount", updateCount);
+		dbResultMap.put("update_time", updateLiveRoom.getUpdateTime());
+		return dbResultMap;
 	}
 }

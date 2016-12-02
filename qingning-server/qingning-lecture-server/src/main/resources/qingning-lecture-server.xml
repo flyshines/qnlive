@@ -28,7 +28,20 @@
 					<param name="room_name" type="string" require="N"  />
 					<param name="room_remark" type="string" require="N"  />
 					<param name="room_id" type="long" require="Y"  />
-					<param name="update_time" type="long" require="Y"  />
+					<param name="update_time" type="long" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="liveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="50" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100"  />
+					<param name="room_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>

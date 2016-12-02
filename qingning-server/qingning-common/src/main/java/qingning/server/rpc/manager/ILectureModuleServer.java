@@ -1,7 +1,6 @@
 package qingning.server.rpc.manager;
 
 
-import java.util.List;
 import java.util.Map;
 
 public interface ILectureModuleServer {
@@ -10,4 +9,6 @@ public interface ILectureModuleServer {
 	Map<String,Object> findLectureByLectureId(String lecture_id);
 
 	Map<String,Object> findLiveRoomByRoomId(String room_id);
+
+	Map<String,Object> updateLiveRoom(Map<String, Object> reqMap);
 }

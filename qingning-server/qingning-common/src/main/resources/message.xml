@@ -23,8 +23,10 @@
 				<entry key="000101" value="参数类型错误"/>
 
 
-				<entry key="100002" value="非法，直播间不存在"/>
+				<entry key="100002" value="直播间不存在"/>
+				<entry key="100003" value="直播间信息已经被修改，请刷新同步"/>
 				<entry key="100006" value="目前讲师不能创建多个直播间"/>
+				<entry key="100007" value="修改直播间参数不足"/>
 
 
 				<entry key="120001" value="用户名或者密码不正确"/>
