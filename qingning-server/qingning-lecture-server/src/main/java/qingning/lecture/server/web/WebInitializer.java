@@ -47,7 +47,7 @@ public class WebInitializer implements WebApplicationInitializer{
 					httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");
 					//httpServletResponse.setHeader("Access-Control-Allow-Credentials", "true");
 					httpServletResponse.setHeader("Access-Control-Allow-Methods","POST,GET,DELETE,PUT");
-					httpServletResponse.setHeader("Access-Control-Allow-Headers","x-requested-with,content-type,accessToken,version");
+					httpServletResponse.setHeader("Access-Control-Allow-Headers","x-requested-with,content-type,access_token,version");
 				}
 				filterchain.doFilter(request, response);
 			}

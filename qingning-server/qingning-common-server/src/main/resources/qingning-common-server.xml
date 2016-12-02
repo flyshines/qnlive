@@ -35,6 +35,7 @@
 			<function name="qiNiuUploadToken">
 				<auth>
 					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
 					<param name="upload_type" type="string" require="Y,000100"  />

@@ -22,9 +22,15 @@
 				<entry key="000100" value="必填参数为空"/>
 				<entry key="000101" value="参数类型错误"/>
 
+
+				<entry key="100002" value="非法，直播间不存在"/>
+				<entry key="100006" value="目前讲师不能创建多个直播间"/>
+
+
 				<entry key="120001" value="用户名或者密码不正确"/>
 				<entry key="120002" value="用户不存在"/>
 				<entry key="120003" value="注册IM失败"/>
+
 			</map>
 		</property>
 	</bean>	

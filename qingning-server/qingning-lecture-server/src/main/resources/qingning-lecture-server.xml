@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+
+	<server name="LectureServer">
+		<default class="qingning.lecture.server.imp.LectureServerImpl">
+
+			<function name="createLiveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="avatar_address" type="string" require="N"  />
+					<param name="room_name" type="string" require="N"  />
+					<param name="room_remark" type="string" require="N"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="updateLiveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="avatar_address" type="string" require="N"  />
+					<param name="room_name" type="string" require="N"  />
+					<param name="room_remark" type="string" require="N"  />
+					<param name="room_id" type="long" require="Y"  />
+					<param name="update_time" type="long" require="Y"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+		</default>
+
+		<version num="1.0.0" class="">
+		</version>
+	</server>
+
+</servers>

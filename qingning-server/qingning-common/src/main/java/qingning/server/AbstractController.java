@@ -49,7 +49,7 @@ public abstract class AbstractController {
 		if(mqUtils==null){
 			mqUtils = new MqUtils(rabbitTemplate);
 		}
-		if(CollectionUtils.isEmpty(serverUrlInfoMap)){
+		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(serverUrlInfoMap)){
 			generateServerUrlInfoMap();
 		}
 		servicer.setApplicationContext(applicationContext);

@@ -33,6 +33,7 @@
 	<dubbo:reference id="distributorManagerServer" interface="gcw.server.rpc.manager.IDistributorManagerServer" timeout="1200000"/>
 	 -->
 
+	<dubbo:reference id="lectureModuleServer" interface="qingning.server.rpc.manager.ILectureModuleServer" timeout="1200000"/>
 
 	 
 </beans>

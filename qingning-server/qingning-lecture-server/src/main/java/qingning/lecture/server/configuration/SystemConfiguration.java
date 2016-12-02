@@ -41,7 +41,7 @@ public class SystemConfiguration extends WebMvcConfigurerAdapter {
 	public ServiceManger getServiceManger() throws Exception{
 		ServiceManger serviceManger= new ServiceManger();
 		serviceManger.initSystem("classpath:application.properties");
-		serviceManger.initServer(new String[]{"classpath:bill-manager-server.xml"});
+		serviceManger.initServer(new String[]{"classpath:qingning-lecture-server.xml"});
 		
 		return serviceManger;
 	}
