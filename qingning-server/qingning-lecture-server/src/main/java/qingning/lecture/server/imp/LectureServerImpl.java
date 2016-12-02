@@ -84,6 +84,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		//增加讲师直播间对应关系缓存(一对多关系)
 		jedis.hset(lectureLiveRoomKey, createResultMap.get("room_id").toString(), "1");
 
+		resultMap.put("room_id", room_id);
 		return resultMap;
 	}
 

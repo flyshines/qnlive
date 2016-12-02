@@ -48,7 +48,7 @@ public class SystemConfiguration extends WebMvcConfigurerAdapter {
 	@Bean(name="applicationContext")
 	public ClassPathXmlApplicationContext getApplicationContext(){
 		if(context==null){
-			context=new ClassPathXmlApplicationContext(new String[] {"lecture-rpc-server.xml"});
+			context=new ClassPathXmlApplicationContext(new String[] {"lecturer-rpc-server.xml"});
 			context.start();
 		}
 		return context;
