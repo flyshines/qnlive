@@ -30,6 +30,7 @@ public abstract class AbstractController {
 
 	protected Map<String,Object> serverUrlInfoMap;
 	private List<Map<String,Object>> serverUrlInfoList;
+	protected Long serverUrlInfoUpdateTime;
 
 	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version){
 		RequestEntity requestEntity = new RequestEntity();
@@ -75,7 +76,7 @@ public abstract class AbstractController {
 
 			if(i == 0){
 				Date date = (Date)infoMap.get("update_time");
-				serverUrlInfoMap.put("update_time", date.getTime());
+				serverUrlInfoUpdateTime = date.getTime();
 			}
 
 			Map<String,Object> innerMap = new HashMap<String,Object>();

@@ -11,7 +11,7 @@
   	<module>qingning-common-db-server</module>
   	<module>qingning-common-server</module>
   	<module>qingning-lecturer-db-server</module>
-  	<module>qingning-lecture-server</module>
+  	<module>qingning-lecturer-server</module>
   	<module>qingning-user-db-server</module>
   	<module>qingning-user-server</module>
   	<module>qingning-mq-server</module>

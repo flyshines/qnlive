@@ -25,8 +25,18 @@
 
 				<entry key="100002" value="直播间不存在"/>
 				<entry key="100003" value="直播间信息已经被修改，请刷新同步"/>
+				<entry key="100004" value="课程不存在"/>
+				<entry key="100005" value="更新失败"/>
 				<entry key="100006" value="目前讲师不能创建多个直播间"/>
 				<entry key="100007" value="修改直播间参数不足"/>
+				<entry key="100008" value="参数范围不正确"/>
+				<entry key="100009" value="金额格式错误"/>
+				<entry key="100010" value="课程状态不正确，无法修改"/>
+				<entry key="100011" value="课程信息已经被修改，请刷新同步后，再更新"/>
+
+
+
+				<entry key="110003" value="关注直播间操作失败"/>
 
 
 				<entry key="120001" value="用户名或者密码不正确"/>

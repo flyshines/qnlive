@@ -32,6 +32,8 @@
 	<dubbo:reference id="incomeManagerServer" interface="gcw.server.rpc.manager.IIncomeManagerServer" timeout="1200000"/>
 	<dubbo:reference id="distributorManagerServer" interface="gcw.server.rpc.manager.IDistributorManagerServer" timeout="1200000"/>
 	 -->
+
+	<dubbo:reference id="userModuleServer" interface="qingning.server.rpc.manager.IUserModuleServer" timeout="1200000"/>
 	 
 </beans>
 

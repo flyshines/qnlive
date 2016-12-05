@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+
+	<server name="UserServer">
+		<default class="qingning.user.server.imp.UserServerImpl">
+
+			<function name="userFollowRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="50" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"  />
+					<param name="follow_type" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+		</default>
+
+		<version num="1.0.0" class="">
+		</version>
+	</server>
+
+</servers>

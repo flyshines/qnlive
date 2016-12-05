@@ -1,18 +1,17 @@
 package qingning.common.util;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import qingning.common.entity.RequestEntity;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public final class CacheUtils {
 	private static ObjectMapper objectMapper = new ObjectMapper();
@@ -23,7 +22,7 @@ public final class CacheUtils {
 		Map<String,String> dataValue = null;
 		Map<String, String> keyMap = new HashMap<String, String>();
 		keyMap.put(keyField, searchKey);
-		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, keyMap);
+		String key = MiscUtils.getKeyOfCachedData(keyFormat, keyMap);
 		Jedis jedis = null;
 		if(useCached){
 			jedis = jedisUtils.getJedis();
@@ -31,8 +30,8 @@ public final class CacheUtils {
 		}
 		
 		if(MiscUtils.isEmpty(dataValue)){
-			Map result = (Map) operation.invoke(requestEntity);
-			if(!MiscUtils.isEmpty(dataValue) && cachedValue){
+			Map result = (Map) operation.invokeProcess(requestEntity);
+			if(!MiscUtils.isEmpty(result) && cachedValue){
 				dataValue = new HashMap<String, String>();
 				for(Object curKey:result.keySet()){
 					dataValue.put((String)curKey,MiscUtils.convertString(result.get(curKey)));
@@ -49,7 +48,7 @@ public final class CacheUtils {
 	private static List<Map<String,String>> readListFromDB(String keyFormat, String listKey, String sortKey, String primaryKey, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedList) throws Exception{
 		boolean useCached = jedisUtils!=null && cachedList;		
-		List result = (List) operation.invoke(requestEntity);
+		List result = (List) operation.invokeProcess(requestEntity);
 		
 		List<Map<String,String>> listValue = new LinkedList<Map<String,String>>();
 		if(result != null){
@@ -114,8 +113,8 @@ public final class CacheUtils {
 	}
 	
 	public static Map<String,String> readCourse(String course_id, RequestEntity requestEntity, 
-			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
-		return readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, false);
+			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		return readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -135,7 +134,7 @@ public final class CacheUtils {
 			List<Map<String,Object>> list = null;
 			if(MiscUtils.isEmpty(pptJsonList)){
 				//TODO requestEntity. function
-				list = (List<Map<String,Object>>)operation.invoke(requestEntity);
+				list = (List<Map<String,Object>>)operation.invokeProcess(requestEntity);
 				if(MiscUtils.isEmpty(list)){
 					list = new LinkedList<Map<String,Object>>();
 				}
@@ -155,7 +154,7 @@ public final class CacheUtils {
 			List<Map<String,Object>> list = null;
 			if(MiscUtils.isEmpty(audiosJsonList)){
 				//TODO requestEntity. function
-				list = (List<Map<String,Object>>)operation.invoke(requestEntity);
+				list = (List<Map<String,Object>>)operation.invokeProcess(requestEntity);
 				if(MiscUtils.isEmpty(list)){
 					list = new LinkedList<Map<String,Object>>();
 				}

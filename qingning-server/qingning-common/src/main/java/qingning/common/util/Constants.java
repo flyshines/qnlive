@@ -82,6 +82,9 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
 
 	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";
-	
+
+	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";
+	public static final String CACHED_KEY_PLATFORM_COURSE_FINISH = "SYS:COURSES:FINISH";
+
 	
 }

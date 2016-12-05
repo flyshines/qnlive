@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+
+	<server name="LectureServer">
+		<default class="qingning.lecture.server.imp.LectureServerImpl">
+
+			<function name="createLiveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="avatar_address" type="string" require="N"  />
+					<param name="room_name" type="string" require="N"  />
+					<param name="room_remark" type="string" require="N"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="updateLiveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="avatar_address" type="string" require="N"  />
+					<param name="room_name" type="string" require="N"  />
+					<param name="room_remark" type="string" require="N"  />
+					<param name="room_id" type="long" require="Y"  />
+					<param name="update_time" type="long" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="liveRoom">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="50" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100"  />
+					<param name="room_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="createCourse">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="100" />
+				</auth>
+				<inputs>
+					<param name="course_title" type="string" require="Y,000100"  />
+					<param name="start_time" type="long" require="Y,000100"  />
+					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
+					<param name="room_id" type="string" require="Y,000100"  />
+					<param name="course_price" type="string" require="N"  />
+					<param name="course_password" type="string" require="N"  />
+					<param name="course_url" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="courseDetail">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="50" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="updateCourse">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="course_title" type="string" require="N"  />
+					<param name="start_time" type="long" require="N"  />
+					<param name="course_remark" type="string" require="N"  />
+					<param name="course_url" type="string" require="N"  />
+					<param name="course_password" type="string" require="N"  />
+					<param name="status" type="string" require="N"  />
+					<param name="update_time" type="long" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="courseList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N"  />
+					<param name="room_id" type="string" require="N"  />
+					<param name="start_time" type="long" require="N"  />
+					<param name="course_id" type="string" require="N"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+		</default>
+
+		<version num="1.0.0" class="">
+		</version>
+	</server>
+
+</servers>

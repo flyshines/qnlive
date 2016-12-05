@@ -4,18 +4,15 @@ package qingning.lecturer.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.util.MiscUtils;
-import qingning.lecturer.db.persistence.mybatis.LecturerMapper;
-import qingning.lecturer.db.persistence.mybatis.LiveRoomMapper;
-import qingning.lecturer.db.persistence.mybatis.LoginInfoMapper;
-import qingning.lecturer.db.persistence.mybatis.UserMapper;
+import qingning.lecturer.db.persistence.mybatis.*;
+import qingning.lecturer.db.persistence.mybatis.entity.Courses;
 import qingning.lecturer.db.persistence.mybatis.entity.Lecturer;
 import qingning.lecturer.db.persistence.mybatis.entity.LiveRoom;
 import qingning.lecturer.db.persistence.mybatis.entity.LoginInfo;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 public class LectureModuleServerImpl implements ILectureModuleServer {
 
@@ -30,6 +27,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Autowired(required = true)
 	private LoginInfoMapper loginInfoMapper;
+
+	@Autowired(required = true)
+	private CoursesMapper coursesMapper;
 
 	@Override
 	/**
@@ -138,5 +138,92 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		dbResultMap.put("updateCount", updateCount);
 		dbResultMap.put("update_time", updateLiveRoom.getUpdateTime());
 		return dbResultMap;
+	}
+
+	@Override
+	public Map<String,Object> createCourse(Map<String, Object> reqMap) {
+		Courses courses = new Courses();
+		courses.setCourseId(MiscUtils.getUUId());
+		courses.setRoomId(reqMap.get("room_id").toString());
+		courses.setLecturerId(reqMap.get("user_id").toString());
+		courses.setCourseTitle(reqMap.get("course_title").toString());
+		courses.setCourseUrl(reqMap.get("course_url").toString());
+		//courses.setCourseRemark();
+		Date startTime = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+		courses.setStartTime(startTime);
+		courses.setCourseType(reqMap.get("course_type").toString());
+		courses.setStatus("1");
+		courses.setRqCode(courses.getCourseId());
+
+		if(reqMap.get("course_type").toString().equals("1")){
+			courses.setCoursePassword(reqMap.get("course_password").toString());
+		}else if(reqMap.get("course_type").toString().equals("2")){
+			courses.setCoursePrice((new BigDecimal(reqMap.get("course_price").toString())).doubleValue());
+		}
+
+		courses.setStudentNum(0L);
+		courses.setCourseAmount(0.0);
+		courses.setExtraNum(0L);
+		courses.setExtraAmount(0.0);
+		Date now = new Date();
+		courses.setCreateTime(now);
+		courses.setCreateDate(now);
+		courses.setUpdateTime(now);
+		coursesMapper.insert(courses);
+
+		Map<String ,Object> dbResultMap = new HashMap<String,Object>();
+		dbResultMap.put("course_id",courses.getCourseId());
+		return dbResultMap;
+	}
+
+	@Override
+	public Map<String, Object> findCourseByCourseId(String courseId) {
+		return coursesMapper.findCourseByCourseId(courseId);
+	}
+
+	@Override
+	public Map<String, Object> updateCourse(Map<String, Object> reqMap) {
+		Integer updateCount = null;
+		Date now = new Date();
+		if(reqMap.get("status") != null && reqMap.get("status").toString().equals("2")){
+			Courses courses = new Courses();
+			courses.setCourseId(reqMap.get("course_id").toString());
+			courses.setEndTime(now);
+			courses.setUpdateTime(now);
+			courses.setStatus("2");
+			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
+		}else {
+			Courses courses = new Courses();
+			courses.setCourseId(reqMap.get("course_id").toString());
+			if(reqMap.get("course_title") != null){
+				courses.setCourseTitle(reqMap.get("course_title").toString());
+			}
+			if(reqMap.get("start_time") != null){
+				courses.setStartTime(new Date(Long.parseLong(reqMap.get("start_time").toString())));
+			}
+			if(reqMap.get("course_remark") != null){
+				courses.setCourseRemark(reqMap.get("course_remark").toString());
+			}
+			if(reqMap.get("course_url") != null){
+				courses.setCourseUrl(reqMap.get("course_url").toString());
+			}
+			if(reqMap.get("course_password") != null){
+				courses.setCoursePassword(reqMap.get("course_password").toString());
+			}
+			courses.setUpdateTime(now);
+			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
+		}
+
+		Map<String, Object> dbResultMap = new HashMap<String, Object>();
+		dbResultMap.put("update_count", updateCount);
+		dbResultMap.put("update_time", now);
+		return dbResultMap;
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseListForLecturer(Map<String, Object> queryMap) {
+		queryMap.put("status","2");
+		queryMap.put("orderType","2");
+		return coursesMapper.findCourseListForLecturer(queryMap);
 	}
 }

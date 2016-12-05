@@ -44,6 +44,8 @@
 	<bean id="choreographerServer"  class="gcw.manager.db.server.imp.ChoreographerServerImpl"/>
 	<bean id="userManagerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
 	 -->
+	<dubbo:service interface="qingning.server.rpc.manager.IUserModuleServer" ref="userModuleServer"  timeout="1200000" delay="-1" retries="0"/>
+	<bean id="userModuleServer"  class="qingning.user.db.server.imp.UserModuleServerImpl"/>
 	<import resource="classpath:db-config.xml"/>
 		
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.user.db.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
