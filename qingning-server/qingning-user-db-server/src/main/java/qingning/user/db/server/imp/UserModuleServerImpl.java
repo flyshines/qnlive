@@ -4,7 +4,9 @@ package qingning.user.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.server.rpc.manager.IUserModuleServer;
+import qingning.user.db.persistence.mybatis.CoursesMapper;
 import qingning.user.db.persistence.mybatis.FansMapper;
+import qingning.user.db.persistence.mybatis.LiveRoomMapper;
 import qingning.user.db.persistence.mybatis.UserMapper;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 import qingning.user.db.persistence.mybatis.entity.FansKey;
@@ -21,6 +23,12 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Autowired(required = true)
 	private UserMapper userMapper;
+
+	@Autowired(required = true)
+	private LiveRoomMapper liveRoomMapper;
+
+	@Autowired(required = true)
+	private CoursesMapper coursesMapper;
 
 
 	@Override
@@ -53,5 +61,23 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public void updateLiveRoomNumForUser(Map<String, Object> reqMap) {
 		userMapper.updateLiveRoomNumForUser(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findLiveRoomByRoomId(String room_id) {
+		return liveRoomMapper.findLiveRoomByRoomId(room_id);
+	}
+
+	@Override
+	public Map<String, Object> findFansByFansKey(Map<String, Object> reqMap) {
+		FansKey fansKey = new FansKey();
+		fansKey.setFansId(reqMap.get("user_id").toString());
+		fansKey.setRoomId(reqMap.get("room_id").toString());
+		return fansMapper.findFansByFansKey(fansKey);
+	}
+
+	@Override
+	public Map<String, Object> findCourseByCourseId(String string) {
+		return coursesMapper.findCourseByCourseId(string);
 	}
 }

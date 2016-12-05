@@ -6,12 +6,50 @@
 
 			<function name="userFollowRoom">
 				<auth>
-					<accessToken require="Y" />
+					<access_token require="Y" />
 					<timesLimit millisecond="50" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
 					<param name="follow_type" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="userCourses">
+				<auth>
+					<access_token require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N"  />
+					<param name="course_id" type="string" require="N"  />
+					<param name="query_type" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="roomInfo">
+				<auth>
+					<access_token require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="courseDetailInfo">
+				<auth>
+					<access_token require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>

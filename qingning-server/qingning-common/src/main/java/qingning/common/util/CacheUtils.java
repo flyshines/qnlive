@@ -164,4 +164,9 @@ public final class CacheUtils {
 		}
 		return values;
 	}
+
+	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
+												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		return readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
+	}
 }

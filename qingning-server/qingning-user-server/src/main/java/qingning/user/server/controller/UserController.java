@@ -8,6 +8,7 @@ import qingning.server.AbstractController;
 
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -15,6 +16,15 @@ public class UserController extends AbstractController{
 	
 	private static final Logger logger = Logger.getLogger(UserController.class);
 
+	/**
+	 * 用户关注直播间
+	 * @param entity
+	 * @param room_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/user/live_rooms/{room_id}/notice", method = RequestMethod.PUT)
 	public
 	@ResponseBody
@@ -26,6 +36,79 @@ public class UserController extends AbstractController{
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userFollowRoom", accessToken, version);
 		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 用户-查询课程列表（我加入的课程列表、正在直播（用户查看））
+	 * @param page_count
+	 * @param course_id
+	 * @param query_type
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/courses", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getCourse(
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "course_id", defaultValue = "") String   course_id,
+			@RequestParam(value = "query_type", defaultValue = "") String  query_type,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("page_count", page_count);
+		param.put("course_id", course_id);
+		param.put("query_type", query_type);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 用户查询直播间信息
+	 * @param room_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/rooms/{room_id}", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getRoomInfo(
+			@PathVariable("room_id") String room_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomInfo", accessToken, version);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("room_id", room_id);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+
+	/**
+	 * 用户查询课程详情
+	 * @param course_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/courses/{course_id}", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getCourseDetailInfo(
+			@PathVariable("course_id") String course_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseDetailInfo", accessToken, version);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("course_id", course_id);
+		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
 	

@@ -9,6 +9,7 @@ import qingning.common.util.CacheUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.lecture.server.other.ReadCourseOperation;
+import qingning.lecture.server.other.ReadLiveRoomOperation;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ILectureModuleServer;
@@ -25,13 +26,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     private ILectureModuleServer lectureModuleServer;
 
     private ReadCourseOperation readCourseOperation;
+    private ReadLiveRoomOperation readLiveRoomOperation;
 
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
             lectureModuleServer = this.getRpcService("lectureModuleServer");
         }
-
+        readLiveRoomOperation = new ReadLiveRoomOperation(lectureModuleServer);
         readCourseOperation = new ReadCourseOperation(lectureModuleServer);
     }
 
@@ -317,6 +319,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 room_id = courseDBMap.get("room_id").toString();
             }
         }
+        if(CollectionUtils.isEmpty(courseMap)){
+            throw new QNLiveException("100004");
+        }
 
         resultMap.put("course_type", courseMap.get("course_type"));
         resultMap.put("status", courseMap.get("status"));
@@ -331,10 +336,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //TODO student_list 参与学生数组
 
         //从缓存中获取直播间信息
-        map.clear();
-        map.put(Constants.FIELD_ROOM_ID, room_id);
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        Map<String, String> liveRoomMap = jedis.hgetAll(liveRoomKey);
+        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));

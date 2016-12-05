@@ -103,4 +103,12 @@
       and lecturer_id = #{lecturerId,jdbcType=VARCHAR}
       and room_id = #{roomId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findFansByFansKey" resultType="hashmap" parameterType="qingning.user.db.persistence.mybatis.entity.FansKey" >
+    select
+    <include refid="Base_Column_List" />
+    from t_fans
+    where fans_id = #{fansId,jdbcType=VARCHAR}
+    and room_id = #{roomId,jdbcType=VARCHAR}
+  </select>
 </mapper>
