@@ -80,6 +80,7 @@ public final class Constants {
 	
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
+	public static final String CACHED_KEY_COURSE_ONLIVE = "SYS:LECTURER:{lecturer_id}:COURSES:ONLIVE";
 
 	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";
 

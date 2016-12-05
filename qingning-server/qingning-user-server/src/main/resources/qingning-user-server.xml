@@ -55,6 +55,18 @@
 				</outputs>
 			</function>
 
+			<function name="roomCourses">
+				<auth>
+					<access_token require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">

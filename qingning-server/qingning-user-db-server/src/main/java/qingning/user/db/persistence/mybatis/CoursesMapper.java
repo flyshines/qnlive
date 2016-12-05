@@ -3,6 +3,7 @@ package qingning.user.db.persistence.mybatis;
 
 import qingning.user.db.persistence.mybatis.entity.Courses;
 
+import java.util.List;
 import java.util.Map;
 
 public interface CoursesMapper {
@@ -19,4 +20,6 @@ public interface CoursesMapper {
     int updateByPrimaryKey(Courses record);
 
     Map<String,Object> findCourseByCourseId(String courseId);
+
+    List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
 }

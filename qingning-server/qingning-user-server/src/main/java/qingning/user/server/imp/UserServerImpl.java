@@ -12,6 +12,7 @@ import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ILectureModuleServer;
 import qingning.server.rpc.manager.IUserModuleServer;
+import qingning.user.server.other.ReadCourseOperation;
 import qingning.user.server.other.ReadLiveRoomOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
@@ -27,6 +28,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private IUserModuleServer userModuleServer;
 
     private ReadLiveRoomOperation readLiveRoomOperation;
+    private ReadCourseOperation readCourseOperation;
 
     @Override
     public void initRpcServer() {
@@ -34,6 +36,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             userModuleServer = this.getRpcService("userModuleServer");
 
             readLiveRoomOperation = new ReadLiveRoomOperation(userModuleServer);
+            readCourseOperation = new ReadCourseOperation(userModuleServer);
         }
     }
 
@@ -250,5 +253,155 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
 
+    @SuppressWarnings("unchecked")
+    @FunctionName("roomCourses")
+    public Map<String, Object> getRoomCourses(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
+        List<Map<String ,String>> courseResultList = new ArrayList<>();
+
+        //目前一个讲师仅能创建一个直播间，所以查询的是该讲师发布的课程
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
+        String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String lecturerId = jedis.hget(roomKey, "lecturer_id");
+
+        //TODO 目前只有查询讲师的课程列表，查询直播间的课程列表暂未实现
+        //if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+
+        String startIndex = null;
+        String endIndex = "+inf";
+        String startIndexDB = null;
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        if (reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())) {
+            startIndex = "0";
+        } else {
+            startIndex = "(" + reqMap.get("start_time").toString();
+        }
+
+        Set<Tuple> predictionList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndex, endIndex, 0, pageCount);
+        Set<Tuple> finishList = null;
+        List<Map<String,Object>> dbList = null;
+        Map<String,Object> finishResultMap = new HashMap<>();
+
+        if (predictionList == null || predictionList.isEmpty()) {
+            if(startIndex.equals("0")){
+                endIndex = "-inf";
+                startIndex = "+inf";
+                startIndexDB = null;
+            }else {
+                endIndex = "-inf";
+                startIndexDB = startIndex;
+            }
+
+            finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, startIndexDB, endIndex, 0 , pageCount);
+
+        } else {
+            if (predictionList.size() < pageCount) {
+                startIndex = "+inf";
+                endIndex = "-inf";
+                finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, null, endIndex, 0 , pageCount - predictionList.size());
+            }
+        }
+
+        //未结束课程列表，结束课程列表，数据库课程列表三者拼接到最终的课程结果列表，即可得到结果
+        //分别迭代这三个列表
+        if(!CollectionUtils.isEmpty(finishResultMap)){
+            if(finishResultMap.get("finishList") != null){
+                finishList = (Set<Tuple>)finishResultMap.get("finishList");
+            }
+
+            if(finishResultMap.get("dbList") != null){
+                dbList = (List<Map<String,Object>>)finishResultMap.get("dbList");
+            }
+        }
+
+
+        if(predictionList != null){
+            for (Tuple tuple : predictionList) {
+                ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
+                Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
+                courseResultList.add(courseInfoMap);
+            }
+        }
+
+        if(finishList != null){
+            for (Tuple tuple : finishList) {
+                ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
+                Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
+                courseResultList.add(courseInfoMap);
+            }
+        }
+
+        if(dbList != null){
+            for (Map<String,Object> courseDBMap : dbList) {
+                Map<String,String> courseDBMapString = new HashMap<>();
+                MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
+                courseResultList.add(courseDBMapString);
+            }
+        }
+
+        //}
+
+        if(! CollectionUtils.isEmpty(courseResultList)){
+            resultMap.put("course_list", courseResultList);
+        }
+
+        return resultMap;
+    }
+
+    Map<String,Object> findCourseFinishList(Jedis jedis, String key,
+                                            String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count){
+        Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
+        Map<String,Object> queryMap = new HashMap<>();
+        List<Map<String,Object>> dbList = null;
+
+        //如果结束课程列表为空，则查询数据库
+        if (finishList == null || finishList.isEmpty()) {
+            queryMap.put("pageCount", count);
+            if(startIndexDB != null){
+                Date date = new Date(Long.parseLong(startIndexDB.substring(1)));
+                queryMap.put("startIndex", date);
+            }
+            dbList = userModuleServer.findCourseListForLecturer(queryMap);
+        } else {
+            //如果结束课程列表中的数量不够，则剩余需要查询数据库
+            if (finishList.size() < count) {
+                startIndexDB = findLastElementForRedisSet(finishList).get("startIndexDB");
+                queryMap.put("pageCount", count - finishList.size());
+                if(startIndexDB != null){
+                    Date date = new Date(Long.parseLong(startIndexDB));
+                    queryMap.put("startIndex", date);
+                }
+                dbList = userModuleServer.findCourseListForLecturer(queryMap);
+            }
+        }
+
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("finishList",finishList);
+        resultMap.put("dbList",dbList);
+        return resultMap;
+    }
+
+    Map<String,String> findLastElementForRedisSet(Set<Tuple> redisSet){
+        Map<String,String> resultMap = new HashMap<>();
+        String startIndexCache = null;
+        String startIndexDB = null;
+        DecimalFormat decimalFormat = new DecimalFormat("#");
+        for (Tuple tuple : redisSet) {
+            startIndexCache = "(" + decimalFormat.format(tuple.getScore());
+            startIndexDB = decimalFormat.format(tuple.getScore()) + "";
+        }
+        resultMap.put("startIndexCache", startIndexCache);
+        resultMap.put("startIndexDB", startIndexDB);
+        return resultMap;
+    }
 
 }

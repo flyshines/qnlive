@@ -17,4 +17,6 @@ public interface IUserModuleServer {
 	Map<String,Object> findFansByFansKey(Map<String, Object> reqMap);
 
 	Map<String,Object> findCourseByCourseId(String string);
+
+	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
 }

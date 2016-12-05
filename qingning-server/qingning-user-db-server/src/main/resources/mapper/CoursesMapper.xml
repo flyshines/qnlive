@@ -287,4 +287,28 @@
     from t_courses
     where course_id = #{courseId}
   </select>
+
+  <select id="findCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_courses
+    where 1 =1
+    <if test="orderType == 1" >
+      and start_time > #{startIndex}
+    </if>
+    <if test="orderType == 2" >
+      <if test="startIndex != null" >
+        and start_time <![CDATA[ < ]]> #{startIndex}
+      </if>
+    </if>
+    and `status` = #{status}
+    order by start_time
+    <if test="orderType == 1" >
+      asc
+    </if>
+    <if test="orderType == 2" >
+      desc
+    </if>
+    limit #{pageCount}
+  </select>
 </mapper>
