@@ -444,7 +444,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
 
-        if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
+        //TODO 目前只有查询讲师的课程列表，查询直播间的课程列表暂未实现
+        //if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
             String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
@@ -522,7 +523,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
             }
 
-        }
+        //}
 
         if(! CollectionUtils.isEmpty(courseResultList)){
             resultMap.put("course_list", courseResultList);
