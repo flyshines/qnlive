@@ -84,8 +84,6 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public List<Map<String, Object>> findCourseListForLecturer(Map<String, Object> queryMap) {
-		queryMap.put("status","2");
-		queryMap.put("orderType","2");
 		return coursesMapper.findCourseListForLecturer(queryMap);
 	}
 }

@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import qingning.server.ServiceManger;
 @Configuration
 @EnableWebMvc
-@ComponentScan({"qingning.user.server.controller","qingning.user.server.advice"})
+@ComponentScan({"qingning.user.server.controller","qingning.server.advice"})
 @ImportResource(value={"classpath:message.xml","classpath:mqbasicconfig.xml"})
 public class SystemConfiguration extends WebMvcConfigurerAdapter {
 	private ClassPathXmlApplicationContext context = null;	

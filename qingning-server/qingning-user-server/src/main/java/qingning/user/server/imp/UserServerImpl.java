@@ -142,8 +142,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Set<Tuple> predictionList = null;
         Set<Tuple> finishList = null;
         Set<Tuple> DBList = null;
+        List<Map<String,Object>> dbList = null;
+        Map<String,Object> queryMap = new HashMap<>();
 
         //1.2如果直播中列表数量不足，则查询预告中列表
+        //1.3如果预告中列表不足，则查询已经结束课程列表
+        //1.4如果已经结束课程列表数量仍然不足，查询数据库。
+        //1.4.1如果存在已经结束课程列表，则说明数据库剩余待查部分数据均为已经结束课程列表；
+        //1.4.2如果不存在已经结束课程列表，则说明数据库中的数据可能包含未结束的和已经结束的数据。此时先查询预告中课程，若预告中课程不足，则查询已经结束的课程。
         if(liveList == null || liveList.size() < pageCount){
             String startIndexPrediction;
             String endIndexPrediction;
@@ -184,19 +190,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
                 if(finishList == null){
 
+                    //TODO
                 }else {
-
+                    queryMap.clear();
+                    queryMap.put("status","2");
+                    queryMap.put("orderType","2");
+                    dbList = userModuleServer.findCourseListForLecturer(queryMap);
                 }
             }
         }
-
-
-
-        //1.3如果预告中列表不足，则查询已经结束课程列表
-        //1.4如果已经结束课程列表数量仍然不足，查询数据库。
-        //1.4.1如果存在已经结束课程列表，则说明数据库剩余待查部分数据均为已经结束课程列表；
-        //1.4.2如果不存在已经结束课程列表，则说明数据库中的数据可能包含未结束的和已经结束的数据。此时先查询预告中课程，若预告中课程不足，则查询已经结束的课程。
-
 
 
 

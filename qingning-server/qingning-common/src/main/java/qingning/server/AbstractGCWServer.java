@@ -112,14 +112,14 @@ public abstract class AbstractGCWServer implements GCWServer {
 			for(InputParameter inputParamter : functionInfo.getInputParameterList()){
 				Object value = inputParameterMap.get(inputParamter.getName());
 				if(inputParamter.isRequire() && MiscUtils.isEmpty(value)){
-					throw new QNLiveException(inputParamter.getRequireErrorCode());
+					throw new QNLiveException(inputParamter.getRequireErrorCode(), inputParamter.getName());
 				}
 				
 				if(!MiscUtils.isEmpty(inputParamter.getFormat()) && !MiscUtils.isEmpty(value)){
 					if(value instanceof String){
 						String valueStr = (String)value;
 						if(!Pattern.matches(inputParamter.getFormat(), valueStr)){
-							throw new QNLiveException(inputParamter.getFormatErrorCode());
+							throw new QNLiveException(inputParamter.getFormatErrorCode() ,inputParamter.getName());
 						}
 					}
 				}
