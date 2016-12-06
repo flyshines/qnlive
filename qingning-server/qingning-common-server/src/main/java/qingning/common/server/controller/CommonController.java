@@ -90,4 +90,22 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
+    /**
+     * 获得微信JS端配置
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/weixin/configuration", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getWeiXinConfiguration(
+            @RequestParam(value = "url", defaultValue = "") String url,
+            @RequestHeader("version") String version
+    ) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weiXinConfiguration", null, version);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("url", url);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 }

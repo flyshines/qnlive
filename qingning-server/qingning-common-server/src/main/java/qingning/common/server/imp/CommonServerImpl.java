@@ -173,4 +173,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		resultMap.put("access_prefix_url", url);
 		return resultMap;
 	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("weiXinConfiguration")
+	public Map<String,String> getWeiXinConfiguration (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		String JSApiTIcket = WeiXinUtil.getJSApiTIcket(jedisUtils.getJedis());
+		return WeiXinUtil.sign(JSApiTIcket, reqMap.get("url").toString());
+	}
 }
