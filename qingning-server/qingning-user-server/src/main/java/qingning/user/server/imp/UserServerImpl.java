@@ -10,18 +10,14 @@ import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
-import qingning.server.rpc.manager.ILectureModuleServer;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.server.other.ReadCourseOperation;
 import qingning.user.server.other.ReadLiveRoomOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
-import sun.misc.Cache;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class UserServerImpl extends AbstractQNLiveServer {
 
@@ -131,6 +127,75 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
+
+        //1.1查询直播中列表,越新开始的排在越前面
+        Jedis jedis = jedisUtils.getJedis();
+        String startIndex;
+        if(reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())){
+            startIndex = "+inf";
+        }else {
+            startIndex = reqMap.get("start_time").toString();
+        }
+        String endIndex = "-inf";
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        Set<Tuple> liveList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE, startIndex, endIndex, 0, pageCount);
+        Set<Tuple> predictionList = null;
+        Set<Tuple> finishList = null;
+        Set<Tuple> DBList = null;
+
+        //1.2如果直播中列表数量不足，则查询预告中列表
+        if(liveList == null || liveList.size() < pageCount){
+            String startIndexPrediction;
+            String endIndexPrediction;
+            if(liveList == null){
+                endIndexPrediction = "+inf";
+                if(reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())){
+                    startIndexPrediction = "-inf";
+                }else {
+                    startIndexPrediction = reqMap.get("start_time").toString();
+                }
+            }else {
+                startIndexPrediction = "-inf";
+                endIndexPrediction = "+inf";
+                pageCount = pageCount - liveList.size();
+            }
+
+            predictionList = jedis.zrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, startIndexPrediction, endIndexPrediction, 0 ,pageCount);
+
+            if(predictionList == null || predictionList.size() < pageCount){
+                String startIndexFinish;
+                String endIndexFinish = "-inf";
+                if(predictionList == null){
+                    if(liveList == null){
+                        if(reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())){
+                            startIndexFinish = "+inf";
+                        }else {
+                            startIndexFinish = reqMap.get("start_time").toString();
+                        }
+                    }else {
+                        startIndexFinish = "+inf";
+                    }
+                }else {
+                    startIndexFinish = "+inf";
+                    pageCount = pageCount - predictionList.size();
+                }
+
+                finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0 ,pageCount);
+
+                if(finishList == null){
+
+                }else {
+
+                }
+            }
+        }
+
+
+
+        //1.3如果预告中列表不足，则查询已经结束课程列表
+        //1.4如果已经结束课程列表数量仍然不足，查询数据库。
+        //1.4.1如果存在已经结束课程列表，则说明数据库剩余待查部分数据均为已经结束课程列表；
+        //1.4.2如果不存在已经结束课程列表，则说明数据库中的数据可能包含未结束的和已经结束的数据。此时先查询预告中课程，若预告中课程不足，则查询已经结束的课程。
 
 
 
