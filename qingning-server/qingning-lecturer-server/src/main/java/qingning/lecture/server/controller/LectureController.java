@@ -179,6 +179,15 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 处理课程PPT信息
+	 * @param course_id
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.PUT)
 	public
 	@ResponseBody ResponseEntity processCoursePPTs(
@@ -191,4 +200,19 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+
+	@RequestMapping(value = "/lecturer/courses/{course_id}/info", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getCourseInfo(
+			@PathVariable("course_id") String course_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseInfo", accessToken, version);
+		Map<String, Object> parMap = new HashMap<String, Object>();
+		parMap.put("course_id", course_id);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 }

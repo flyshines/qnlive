@@ -120,4 +120,11 @@
     where course_id = #{course_id}
   </delete>
 
+  <select id="findPPTListByCourseId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_course_image
+    where course_id = #{course_id}
+    order by image_pos asc
+  </select>
 </mapper>

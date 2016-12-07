@@ -34,6 +34,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private CourseImageMapper courseImageMapper;
 
+	@Autowired(required = true)
+	private CourseAudioMapper courseAudioMapper;
+
 	@Override
 	/**
 	 * 创建直播间
@@ -238,6 +241,16 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public void deletePPTByCourseId(String course_id) {
 		courseImageMapper.deletePPTByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findPPTListByCourseId(String course_id) {
+		return courseImageMapper.findPPTListByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findAudioListByCourseId(String course_id) {
+		return courseAudioMapper.findAudioListByCourseId(course_id);
 	}
 
 }

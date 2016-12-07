@@ -1,5 +1,6 @@
 package qingning.lecture.server.imp;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -196,6 +197,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("room_name", liveRoomMap.get("room_name"));
                 resultMap.put("last_course_amount", new BigDecimal(liveRoomMap.get("last_course_amount").toString()));
                 resultMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
+                resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
                 break;
             case "1":
                 resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
@@ -203,12 +205,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("room_remark", liveRoomMap.get("room_remark"));
                 resultMap.put("rq_code", liveRoomMap.get("rq_code"));
                 resultMap.put("room_address", liveRoomMap.get("room_address"));
+                resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time")));
                 break;
             case "2":
                 resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
                 resultMap.put("room_name", liveRoomMap.get("room_name"));
                 resultMap.put("room_remark", liveRoomMap.get("room_remark"));
                 resultMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
+                resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
                 break;
         }
 
@@ -615,7 +619,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(StringUtils.isBlank(lecturerId) || !lecturerId.equals(userId)){
                 throw new QNLiveException("100013");
             }
-
+            map.clear();
             map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
             String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
             if(pptList.size() == 0){
@@ -666,6 +670,70 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
 
         return resultMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseInfo")
+    public Map<String, Object> getCourseInfo(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
+        //1.先检查该课程是否在缓存中
+        if(jedis.exists(courseKey)){
+            JSONArray pptList = null;
+            map.clear();
+            map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
+            String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+            if(jedis.exists(pptListKey)){
+                pptList = JSONObject.parseArray(jedis.get(pptListKey));
+            }
+
+            JSONArray audioList = null;
+            map.clear();
+            map.put(Constants.CACHED_KEY_COURSE_AUDIOS_FIELD, reqMap.get("course_id").toString());
+            String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
+            if(jedis.exists(audioListKey)){
+                audioList = JSONObject.parseArray(jedis.get(audioListKey));
+            }
+
+            if(! CollectionUtils.isEmpty(pptList)){
+                resultMap.put("ppt_list", pptList);
+            }
+
+            if(! CollectionUtils.isEmpty(audioList)){
+                resultMap.put("audio_list", audioList);
+            }
+
+            return resultMap;
+
+        }else{
+            //2.如果不在缓存中，则查询数据库
+            Map<String,Object> courseInfoMap = lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            if(courseInfoMap == null){
+                throw new QNLiveException("100004");
+            }
+
+            //查询课程PPT列表
+            List<Map<String,Object>> pptList = lectureModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
+
+            //查询课程语音列表
+            List<Map<String,Object>> audioList = lectureModuleServer.findAudioListByCourseId(reqMap.get("course_id").toString());
+
+            if(! CollectionUtils.isEmpty(pptList)){
+                resultMap.put("ppt_list", pptList);
+            }
+
+            if(! CollectionUtils.isEmpty(audioList)){
+                resultMap.put("audio_list", audioList);
+            }
+
+            return resultMap;
+        }
     }
 
 }
