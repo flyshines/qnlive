@@ -178,4 +178,17 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.POST)
+	public
+	@ResponseBody ResponseEntity createCoursePPTs(
+			@PathVariable("course_id") String course_id,
+			HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createCoursePPTs", accessToken, version);
+		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 }

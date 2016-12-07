@@ -20,4 +20,6 @@ public interface ILectureModuleServer {
 	Map<String,Object> updateCourse(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
+
+	void createCoursePPTs(Map<String, Object> reqMap);
 }

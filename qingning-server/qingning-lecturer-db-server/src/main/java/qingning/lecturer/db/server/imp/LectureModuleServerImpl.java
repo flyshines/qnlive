@@ -31,6 +31,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private CoursesMapper coursesMapper;
 
+	@Autowired(required = true)
+	private CourseImageMapper courseImageMapper;
+
 	@Override
 	/**
 	 * 创建直播间
@@ -225,5 +228,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		queryMap.put("status","2");
 		queryMap.put("orderType","2");
 		return coursesMapper.findCourseListForLecturer(queryMap);
+	}
+
+	@Override
+	public void createCoursePPTs(Map<String, Object> reqMap) {
+		courseImageMapper.batchInsertPPT(reqMap);
 	}
 }

@@ -1,5 +1,6 @@
 package qingning.lecture.server.imp;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
@@ -582,5 +583,78 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    @SuppressWarnings("unchecked")
+    @FunctionName("createCoursePPTs")
+    public Map<String, Object> createCoursePPTs(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        List<Map<String,Object>> pptList;
+        //具体的参数校验
+        if(reqMap.get("ppt_list") == null){
+            throw new QNLiveException("000100");
+        }else {
+            pptList = (List<Map<String,Object>>)reqMap.get("ppt_list");
+        }
+
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
+        //3 如果该课程信息在缓存中，则直接修改缓存中的信息，不修改数据库，每天凌晨由定时任务将该部分数据存入输入数据库
+        if(jedis.exists(courseKey)){
+            String status = jedis.hget(courseKey, "status");
+            if(StringUtils.isBlank(status) || !status.equals("1")){
+                throw new QNLiveException("100012");
+            }
+
+            //判断该课程是否属于该讲师
+            String lecturerId = jedis.hget(courseKey, "lecturer_id");
+            if(StringUtils.isBlank(lecturerId) || !lecturerId.equals(userId)){
+                throw new QNLiveException("100013");
+            }
+
+            //将PPT信息存入缓存中
+            map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
+            String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+            Date pptDate = new Date();
+            String pptDateString = pptDate.getTime()+"";
+            for(Map<String,Object> pptMap : pptList){
+                pptMap.put("image_id", MiscUtils.getUUId());
+                pptMap.put("create_time", pptDateString);
+                pptMap.put("update_time", pptDateString);
+            }
+            jedis.set(pptListKey, JSONObject.toJSONString(pptList));
+        }else {
+            //4 如果该课程为非当天课程，则直接修改数据库
+            //4.1检查课程是否存在
+            Map<String,Object> courseMap = lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            if(CollectionUtils.isEmpty(courseMap)){
+                throw new QNLiveException("100004");
+            }
+
+            if(courseMap.get("status") == null || !courseMap.get("status").toString().equals("1")){
+                throw new QNLiveException("100012");
+            }
+
+            if(courseMap.get("lecturer_id") == null || !courseMap.get("lecturer_id").toString().equals(userId)){
+                throw new QNLiveException("100013");
+            }
+
+            //4.2将PPT信息存入课程PPT表
+            for(Map<String,Object> pptMap : pptList){
+                pptMap.put("image_id", MiscUtils.getUUId());
+            }
+            Map<String,Object> insertMap = new HashMap<>();
+            insertMap.put("course_id",reqMap.get("course_id").toString());
+            insertMap.put("list",pptList);
+            insertMap.put("pptTime",new Date());
+
+            lectureModuleServer.createCoursePPTs(insertMap);
+        }
+
+        return resultMap;
+    }
 
 }
