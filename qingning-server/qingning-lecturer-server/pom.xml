@@ -5,8 +5,8 @@
     <artifactId>qingning-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>qingning.lecture.server</groupId>
-  <artifactId>qingning-lecture-server</artifactId>
+  <groupId>qingning.lecturer.server</groupId>
+  <artifactId>qingning-lecturer-server</artifactId>
   <packaging>war</packaging>
   
   <dependencies>
@@ -18,7 +18,7 @@
   </dependencies>
 
   <build>
-	<finalName>qingning-lecture-server</finalName>
+	<finalName>qingning-lecturer-server</finalName>
 	<plugins> 
 	  <plugin>
 	  	<groupId>org.apache.maven.plugins</groupId> 

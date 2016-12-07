@@ -294,7 +294,9 @@
     from t_courses
     where 1 =1
     <if test="orderType == 1" >
-      and start_time > #{startIndex}
+      <if test="startIndex != null" >
+         and start_time > #{startIndex}
+      </if>
     </if>
     <if test="orderType == 2" >
       <if test="startIndex != null" >
