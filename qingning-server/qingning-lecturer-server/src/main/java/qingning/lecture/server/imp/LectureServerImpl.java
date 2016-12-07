@@ -585,7 +585,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
     @SuppressWarnings("unchecked")
-    @FunctionName("createCoursePPTs")
+    @FunctionName("processCoursePPTs")
     public Map<String, Object> createCoursePPTs(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
