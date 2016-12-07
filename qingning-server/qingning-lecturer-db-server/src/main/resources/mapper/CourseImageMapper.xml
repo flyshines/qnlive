@@ -115,9 +115,9 @@
 
   </insert>
 
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+  <delete id="deletePPTByCourseId" parameterType="java.lang.String" >
     delete from t_course_image
-    where image_id = #{imageId,jdbcType=VARCHAR}
+    where course_id = #{course_id}
   </delete>
 
 </mapper>

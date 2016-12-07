@@ -652,15 +652,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             lectureModuleServer.deletePPTByCourseId(reqMap.get("course_id").toString());
 
             //4.3如果传递的课程列表长度大于0，则将PPT信息存入课程PPT表
-            for(Map<String,Object> pptMap : pptList){
-                pptMap.put("image_id", MiscUtils.getUUId());
-            }
-            Map<String,Object> insertMap = new HashMap<>();
-            insertMap.put("course_id",reqMap.get("course_id").toString());
-            insertMap.put("list",pptList);
-            insertMap.put("pptTime",new Date());
+            if(pptList.size() > 0){
+                for(Map<String,Object> pptMap : pptList){
+                    pptMap.put("image_id", MiscUtils.getUUId());
+                }
+                Map<String,Object> insertMap = new HashMap<>();
+                insertMap.put("course_id",reqMap.get("course_id").toString());
+                insertMap.put("list",pptList);
+                insertMap.put("pptTime",new Date());
 
-            lectureModuleServer.createCoursePPTs(insertMap);
+                lectureModuleServer.createCoursePPTs(insertMap);
+            }
         }
 
         return resultMap;
