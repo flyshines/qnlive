@@ -56,6 +56,8 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "course_id", defaultValue = "") String   course_id,
 			@RequestParam(value = "query_type", defaultValue = "") String  query_type,
+			@RequestParam(value = "status", defaultValue = "") String  status,
+			@RequestParam(value = "data_source", defaultValue = "") String  data_source,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version);
@@ -63,6 +65,8 @@ public class UserController extends AbstractController{
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
 		param.put("query_type", query_type);
+		param.put("status", status);
+		param.put("data_source", data_source);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}

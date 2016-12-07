@@ -42,6 +42,7 @@
 				<entry key="120001" value="用户名或者密码不正确"/>
 				<entry key="120002" value="用户不存在"/>
 				<entry key="120003" value="注册IM失败"/>
+				<entry key="120004" value="分页参数不完整"/>
 
 			</map>
 		</property>

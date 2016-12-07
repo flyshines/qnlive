@@ -130,6 +130,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
 
+        //进一步参数校验，传递了分页使用的课程id，则需要同时传递课程状态和数据来源信息
+        if(StringUtils.isNotBlank(reqMap.get("course_id").toString())){
+            if(StringUtils.isBlank(reqMap.get("status").toString()) || StringUtils.isBlank(reqMap.get("data_source").toString())){
+                throw new QNLiveException("120004");
+            }
+        }
+
         //1.如果课程id为空，则进行初始化查询，仅仅查询缓存即可
         Jedis jedis = jedisUtils.getJedis();
         if (reqMap.get("course_id") == null || StringUtils.isBlank(reqMap.get("course_id").toString())) {
@@ -143,6 +150,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Set<Tuple> liveList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE, startIndex, endIndex, 0, pageCount);
             Set<Tuple> predictionList = null;
             Set<Tuple> finishList = null;
+            List<Map<String, Object>> dbList = new ArrayList<>();
 
             //1.2直播列表为空或者不足，则继续查询预告列表
             if (liveList == null || liveList.size() < pageCount) {
@@ -163,6 +171,22 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     String endIndexFinish = "-inf";
 
                     finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0, pageCount);
+
+                    if(finishList == null || finishList.size() < pageCount){
+                        if(finishList != null){
+                            pageCount = pageCount - finishList.size();
+                        }
+                        //直接查询数据库中的结束课程
+                        Map<String, Object> queryMap = new HashMap<>();
+                        queryMap.put("orderType", "2");
+                        queryMap.put("status", "2");
+                        queryMap.put("pageCount", pageCount);
+                        if(finishList != null && finishList.size() > 0){
+                            Date queryDate = new Date(Long.parseLong(findLastElementForRedisSet(finishList).get("startIndexDB")));
+                            queryMap.put("startIndex", queryDate);
+                        }
+                        dbList = userModuleServer.findCourseListForLecturer(queryMap);
+                    }
                 }
             }
 
@@ -190,6 +214,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                     courseInfoMap.put("data_source", "1");
                     courseResultList.add(courseInfoMap);
+                }
+            }
+
+            if (dbList != null) {
+                for (Map<String, Object> courseDBMap : dbList) {
+                    Map<String, String> courseDBMapString = new HashMap<>();
+                    MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
+                    courseDBMapString.put("data_source", "2");
+                    courseResultList.add(courseDBMapString);
                 }
             }
 
@@ -323,7 +356,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     queryMap.put("status", "1");
                     queryMap.put("pageCount", pageCount);
                     Date start_time = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-                    queryMap.put("start_time", start_time);
+                    queryMap.put("startIndex", start_time);
                     dbList = userModuleServer.findCourseListForLecturer(queryMap);
                 }else {
                     //已经结束
@@ -332,7 +365,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     queryMap.put("status", "2");
                     queryMap.put("pageCount", pageCount);
                     Date start_time = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-                    queryMap.put("start_time", start_time);
+                    queryMap.put("startIndex", start_time);
                     dbList = userModuleServer.findCourseListForLecturer(queryMap);
                 }
 
