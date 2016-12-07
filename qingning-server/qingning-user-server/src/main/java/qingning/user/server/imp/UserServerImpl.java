@@ -132,7 +132,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //进一步参数校验，传递了分页使用的课程id，则需要同时传递课程状态和数据来源信息
         if(StringUtils.isNotBlank(reqMap.get("course_id").toString())){
-            if(StringUtils.isBlank(reqMap.get("status").toString()) || StringUtils.isBlank(reqMap.get("data_source").toString())){
+            if(StringUtils.isBlank(reqMap.get("status").toString()) || StringUtils.isBlank(reqMap.get("data_source").toString()) || StringUtils.isBlank(reqMap.get("start_time").toString())){
                 throw new QNLiveException("120004");
             }
         }
