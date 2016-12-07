@@ -22,4 +22,6 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
 
 	void createCoursePPTs(Map<String, Object> reqMap);
+
+	void deletePPTByCourseId(String string);
 }

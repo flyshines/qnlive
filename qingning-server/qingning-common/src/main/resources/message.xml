@@ -35,6 +35,7 @@
 				<entry key="100011" value="课程信息已经被修改，请刷新同步后，再更新"/>
 				<entry key="100012" value="课程状态不正确，无法上传PPT"/>
 				<entry key="100013" value="该课程不属于当前用户"/>
+				<entry key="100014" value="已经上传PPT，无法再次上传"/>
 
 
 

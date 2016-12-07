@@ -19,4 +19,8 @@ public interface CourseImageMapper {
     int updateByPrimaryKey(CourseImage record);
 
     void batchInsertPPT(Map<String, Object> reqMap);
+
+    Map<String,Object> findOnePPTByCourseId(String course_id);
+
+    void deletePPTByCourseId(String course_id);
 }

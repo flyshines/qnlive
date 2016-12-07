@@ -179,14 +179,14 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.POST)
+	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.PUT)
 	public
-	@ResponseBody ResponseEntity createCoursePPTs(
+	@ResponseBody ResponseEntity processCoursePPTs(
 			@PathVariable("course_id") String course_id,
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createCoursePPTs", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "processCoursePPTs", accessToken, version);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);

@@ -114,4 +114,10 @@
     </foreach>
 
   </insert>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_course_image
+    where image_id = #{imageId,jdbcType=VARCHAR}
+  </delete>
+
 </mapper>

@@ -334,6 +334,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("start_time", Long.parseLong(courseMap.get("start_time")));
         resultMap.put("student_num", Long.parseLong(courseMap.get("student_num")));
         resultMap.put("course_remark", courseMap.get("course_remark"));
+        resultMap.put("update_time", courseMap.get("update_time"));
         //TODO student_list 参与学生数组
 
         //从缓存中获取直播间信息
@@ -615,17 +616,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("100013");
             }
 
-            //将PPT信息存入缓存中
             map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
             String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
-            Date pptDate = new Date();
-            String pptDateString = pptDate.getTime()+"";
-            for(Map<String,Object> pptMap : pptList){
-                pptMap.put("image_id", MiscUtils.getUUId());
-                pptMap.put("create_time", pptDateString);
-                pptMap.put("update_time", pptDateString);
+            if(pptList.size() == 0){
+                jedis.del(pptListKey);
+            }else {
+                //将PPT信息存入缓存中
+                Date pptDate = new Date();
+                String pptDateString = pptDate.getTime()+"";
+                for(Map<String,Object> pptMap : pptList){
+                    pptMap.put("image_id", MiscUtils.getUUId());
+                    pptMap.put("create_time", pptDateString);
+                    pptMap.put("update_time", pptDateString);
+                }
+                jedis.set(pptListKey, JSONObject.toJSONString(pptList));
             }
-            jedis.set(pptListKey, JSONObject.toJSONString(pptList));
+
         }else {
             //4 如果该课程为非当天课程，则直接修改数据库
             //4.1检查课程是否存在
@@ -642,7 +648,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("100013");
             }
 
-            //4.2将PPT信息存入课程PPT表
+            //4.2先删除数据库表中的该课程所有PPT
+            lectureModuleServer.deletePPTByCourseId(reqMap.get("course_id").toString());
+
+            //4.3如果传递的课程列表长度大于0，则将PPT信息存入课程PPT表
             for(Map<String,Object> pptMap : pptList){
                 pptMap.put("image_id", MiscUtils.getUUId());
             }

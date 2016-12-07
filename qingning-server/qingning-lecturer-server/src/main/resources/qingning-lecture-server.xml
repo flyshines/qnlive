@@ -111,7 +111,7 @@
 				</outputs>
 			</function>
 
-			<function name="createCoursePPTs">
+			<function name="processCoursePPTs">
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="100" />

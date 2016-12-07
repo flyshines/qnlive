@@ -234,4 +234,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public void createCoursePPTs(Map<String, Object> reqMap) {
 		courseImageMapper.batchInsertPPT(reqMap);
 	}
+
+	@Override
+	public void deletePPTByCourseId(String course_id) {
+		courseImageMapper.deletePPTByCourseId(course_id);
+	}
+
 }
