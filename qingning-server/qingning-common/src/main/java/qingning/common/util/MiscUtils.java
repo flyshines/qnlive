@@ -143,10 +143,11 @@ public final class MiscUtils {
 			obj = ((Date)obj).getTime();
 			return obj.toString();
 		}
-		if(StringUtils.isBlank(obj.toString())){
+		String result = obj.toString().trim();
+		if(StringUtils.isBlank(result)){
 			return "";
 		}   
-		return obj.toString();
+		return result;
 	}
 	
 	/**
