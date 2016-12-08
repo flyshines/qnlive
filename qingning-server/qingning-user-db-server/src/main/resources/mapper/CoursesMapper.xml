@@ -313,4 +313,11 @@
     </if>
     limit #{pageCount}
   </select>
+
+  <update id="increaseStudentNumByCourseId" parameterType="string" >
+    update t_courses
+    set
+    student_num = student_num + 1
+    where course_id = #{course_id}
+  </update>
 </mapper>

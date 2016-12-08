@@ -46,6 +46,8 @@
 				<entry key="120002" value="用户不存在"/>
 				<entry key="120003" value="注册IM失败"/>
 				<entry key="120004" value="分页参数不完整"/>
+				<entry key="120005" value="已经参与该课程，不能重复参与"/>
+				<entry key="120006" value="课程密码错误"/>
 
 			</map>
 		</property>

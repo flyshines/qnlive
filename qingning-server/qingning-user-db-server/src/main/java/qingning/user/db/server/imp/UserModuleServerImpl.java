@@ -2,12 +2,12 @@
 package qingning.user.db.server.imp;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.server.rpc.manager.IUserModuleServer;
-import qingning.user.db.persistence.mybatis.CoursesMapper;
-import qingning.user.db.persistence.mybatis.FansMapper;
-import qingning.user.db.persistence.mybatis.LiveRoomMapper;
-import qingning.user.db.persistence.mybatis.UserMapper;
+import qingning.user.db.persistence.mybatis.*;
+import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
+import qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 import qingning.user.db.persistence.mybatis.entity.FansKey;
 
@@ -30,6 +30,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Autowired(required = true)
 	private CoursesMapper coursesMapper;
+
+	@Autowired(required = true)
+	private CoursesStudentsMapper coursesStudentsMapper;
 
 
 	@Override
@@ -85,5 +88,41 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public List<Map<String, Object>> findCourseListForLecturer(Map<String, Object> queryMap) {
 		return coursesMapper.findCourseListForLecturer(queryMap);
+	}
+
+	@Override
+	public Map<String, Object> findStudentByKey(Map<String,Object> queryStudentMap) {
+		CoursesStudentsKey key = new CoursesStudentsKey();
+		key.setUserId(queryStudentMap.get("user_id").toString());
+		key.setRoomId(queryStudentMap.get("room_id").toString());
+		key.setLecturerId(queryStudentMap.get("lecturer_id").toString());
+		key.setCourseId(queryStudentMap.get("course_id").toString());
+		return coursesStudentsMapper.findStudentByKey(key);
+	}
+
+	@Override
+	public Map<String, Object> joinCourse(Map<String, String> courseMap) {
+		CoursesStudents students = new CoursesStudents();
+		students.setUserId(courseMap.get("user_id"));
+		students.setLecturerId(courseMap.get("lecturer_id"));
+		students.setRoomId(courseMap.get("room_id"));
+		students.setCourseId(courseMap.get("course_id"));
+		//students.setPaymentAmount();//todo
+		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
+			students.setCoursePassword(courseMap.get("course_password"));
+		}
+		students.setStudentType("0");//TODO
+		Date now = new Date();
+		students.setCreateTime(now);
+		students.setCreateDate(now);
+		Integer insertCount = coursesStudentsMapper.insert(students);
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("insertCount", insertCount);
+		return resultMap;
+	}
+
+	@Override
+	public void increaseStudentNumByCourseId(String course_id) {
+		coursesMapper.increaseStudentNumByCourseId(course_id);
 	}
 }

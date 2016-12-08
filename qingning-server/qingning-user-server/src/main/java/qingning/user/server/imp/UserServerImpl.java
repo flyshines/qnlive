@@ -753,4 +753,75 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    @SuppressWarnings("unchecked")
+    @FunctionName("joinCourse")
+    public Map<String, Object> joinCourse(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        Map<String,String> courseMap = new HashMap<>();
+        //1.先检测课程存在情况和状态
+        //1.1如果课程在缓存中
+        if(jedis.exists(courseKey)){
+            courseMap = jedis.hgetAll(courseKey);
+        }else {
+            //1.2如果课程在数据库中
+            Map<String,Object> courseObjectMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            if(courseObjectMap == null){
+                throw new QNLiveException("100004");
+            }
+            MiscUtils.converObjectMapToStringMap(courseObjectMap, courseMap);
+        }
+
+        //2.检测课程验证信息是否正确
+        //2.1如果课程为私密课程则检验密码
+        if(courseMap.get("course_type").equals("1")){
+            if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
+                throw new QNLiveException("000100");
+            }
+            if(! reqMap.get("course_password").toString().equals(courseMap.get("course_password").toString())){
+                throw new QNLiveException("120006");
+            }
+        }else if(courseMap.get("course_type").equals("2")){
+            //TODO 支付课程要验证支付信息
+            if(reqMap.get("payment_id") == null){
+                throw new QNLiveException("000100");
+            }
+        }
+
+        //3.检测学生是否参与了该课程
+        Map<String,Object> studentQueryMap = new HashMap<>();
+        studentQueryMap.put("user_id",userId);
+        studentQueryMap.put("lecturer_id",courseMap.get("lecturer_id"));
+        studentQueryMap.put("room_id",courseMap.get("room_id"));
+        studentQueryMap.put("course_id",courseMap.get("course_id"));
+        Map<String,Object> studentMap = userModuleServer.findStudentByKey(studentQueryMap);
+        if(studentMap != null){
+            throw new QNLiveException("100004");
+        }
+
+        //3.将学员信息插入到学员参与表中
+        courseMap.put("user_id",userId);
+        Map<String,Object> insertResultMap = userModuleServer.joinCourse(courseMap);
+
+        //4.修改讲师缓存中的课程参与人数
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id").toString());
+        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+        jedis.hincrBy(lecturerKey, "total_student_num", 1);
+
+        if(jedis.exists(courseKey)){
+            jedis.hincrBy(courseKey, "student_num", 1);
+        }else {
+            userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+        }
+
+        return resultMap;
+    }
+
 }
