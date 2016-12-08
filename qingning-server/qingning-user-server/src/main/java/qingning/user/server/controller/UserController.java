@@ -177,7 +177,7 @@ public class UserController extends AbstractController{
 	@RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
 	public
 	@ResponseBody
-	ResponseEntity getRoomCourses(
+	ResponseEntity getCoursesInfo(
 			@PathVariable("course_id") String course_id,
 			@RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
 			@RequestHeader("access_token") String accessToken,
