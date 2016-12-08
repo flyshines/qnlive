@@ -1,12 +1,12 @@
 package qingning.user.server.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.server.AbstractController;
-
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 public class UserController extends AbstractController{
 	
-	private static final Logger logger = Logger.getLogger(UserController.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	/**
 	 * 用户关注直播间

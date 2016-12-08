@@ -7,7 +7,8 @@ import qingning.server.AbstractController;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,7 +23,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 @RestController
 public class CommonController extends AbstractController {
 
-    private static final Logger logger = Logger.getLogger(CommonController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 
 
     /**

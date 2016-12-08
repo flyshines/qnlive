@@ -1,6 +1,7 @@
 package qingning.lecture.server.controller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
@@ -13,7 +14,7 @@ import java.util.Map;
 @RestController
 public class LectureController extends AbstractController {
 
-	private static final Logger logger = Logger.getLogger(LectureController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LectureController.class);
 
 	/**
 	 * 创建直播间

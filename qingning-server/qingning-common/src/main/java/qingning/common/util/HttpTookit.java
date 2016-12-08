@@ -15,7 +15,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -28,7 +29,7 @@ import java.util.Map;
  * Created by qingning on 2015/9/15.
  */
 public class HttpTookit {
-    private static Logger logger = Logger.getLogger(HttpTookit.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpTookit.class);
     private static final CloseableHttpClient httpClient;
     public static final String CHARSET = "UTF-8";
 
