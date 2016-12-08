@@ -19,4 +19,11 @@ public interface IUserModuleServer {
 	Map<String,Object> findCourseByCourseId(String string);
 
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
+
+
+	Map<String,Object> findStudentByKey(Map<String, Object> studentQueryMap);
+
+	Map<String,Object> joinCourse(Map<String, String> courseMap);
+
+	void increaseStudentNumByCourseId(String course_id);
 }
