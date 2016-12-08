@@ -29,9 +29,7 @@
 	<import resource="classpath:db-config.xml"/>	
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.mq.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
 	
-   	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener">
-   	 	<property name="propertiesFilePath" value="classpath:application.properties"/>
-   	</bean>
+   	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener"/>
 	<rabbit:listener-container connection-factory="connectionFactory" acknowledge="auto"
 		auto-startup="false">
 		<rabbit:listener queues="${rmq.queue}" ref="listener"/>
@@ -40,6 +38,30 @@
 	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
 			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
 	</bean>
-		 
+	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />
 	
+	<rabbit:connection-factory id="imConnectionFactory"
+		username="${im.rmq.manager.user}" password="${im.rmq.manager.password}"
+		host="${im.rmq.ip}" port="${im.rmq.port}"/>
+	<rabbit:admin id="imAdmin" connection-factory="imConnectionFactory"/>
+	<rabbit:template id="imRabbitTemplate" connection-factory="imConnectionFactory"
+		exchange="${im.rmq.exchange}" routing-key="${im.rmq.queue.key}"/>
+
+	<rabbit:queue name="${im.rmq.queue}" durable="true" auto-delete="false"
+		exclusive="false"/>
+	<rabbit:direct-exchange name="${im.rmq.exchange}" durable="true" auto-delete="false">
+		<rabbit:bindings>
+			<rabbit:binding queue="${im.rmq.queue}" key="${im.rmq.queue.key}"/>
+		</rabbit:bindings>
+	</rabbit:direct-exchange>	
+   	<bean id="imListener" class="qingning.server.rabbitmq.ImRabbitMQMessageListener"/>
+	<rabbit:listener-container connection-factory="imConnectionFactory" acknowledge="auto"
+		auto-startup="false">
+		<rabbit:listener queues="${im.rmq.queue}" ref="imListener"/>
+	</rabbit:listener-container>
+
+	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />
+	
+	
+	<bean id="CommonServer" class="qingning.mq.server.imp.DemoService"/>
 </beans>

@@ -72,6 +72,7 @@ public class WeiXinUtil {
                 }
             }
         }else {
+        	accessToken = new AccessToken();
             accessToken.setToken(token);
             accessToken.setExpiresIn(jedis.ttl(Constants.CACHED_KEY_WEIXIN_TOKEN).intValue());
         }

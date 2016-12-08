@@ -78,6 +78,20 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
 
+	public static final String MSG_TYPE_ATTR = "type";
+	public static final String MSG_NEWSTYPE_ATTR = "newstype";
+	public static final String MSG_IP_ATTR = "ip";
+	public static final String MSG_MID_ATTR = "mid";
+	public static final String MSG_ID_ATTR = "id";
+	public static final String MSG_TO_ATTR = "to";
+	
+	public static final String MSG_FROMJID_ELEMENT = "fromjid";
+	public static final String MSG_GROUPID_ELEMENT = "groupid";
+	public static final String MSG_BODY_ELEMENT = "body";	
+	
+	public static final String MQ_METHOD_SYNCHRONIZED = "SYNCHRONIZED";
+	public static final String MQ_METHOD_ASYNCHRONIZED = "ASYNCHRONIZED";
+
 	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";
 
 	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";
