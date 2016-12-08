@@ -148,6 +148,15 @@ public class UserController extends AbstractController{
 	}
 
 
+	/**
+	 * 用户加入课程
+	 * @param course_id
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/user/study/courses/{course_id}", method = RequestMethod.PUT)
 	public
 	@ResponseBody
@@ -161,5 +170,26 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+
+//	@RequestMapping(value = "/user/live_rooms/{room_id}/courses", method = RequestMethod.GET)
+//	public
+//	@ResponseBody
+//	ResponseEntity getRoomCourses(
+//			@PathVariable("room_id") String room_id,
+//			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+//			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+//			@RequestParam(value = "start_time", defaultValue = "") String start_time,
+//			@RequestHeader("access_token") String accessToken,
+//			@RequestHeader("version") String version) throws Exception {
+//		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version);
+//		Map<String, Object> param = new HashMap<String, Object>();
+//		param.put("room_id", room_id);
+//		param.put("page_count", page_count);
+//		param.put("course_id", course_id);
+//		param.put("start_time", start_time);
+//		requestEntity.setParam(param);
+//		return this.process(requestEntity, serviceManger, message);
+//	}
 
 }

@@ -32,7 +32,7 @@
 				</outputs>
 			</function>
 
-			<function name="weiXinConfiguration">
+			<function name="qiNiuUploadToken">
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="500" />
