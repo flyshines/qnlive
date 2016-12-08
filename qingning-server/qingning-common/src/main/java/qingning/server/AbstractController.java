@@ -11,11 +11,9 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.MqUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
+import qingning.server.rpc.manager.IUserModuleServer;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AbstractController {
 	private MqUtils mqUtils; 
@@ -31,6 +29,10 @@ public abstract class AbstractController {
 	protected Map<String,Object> serverUrlInfoMap;
 	private List<Map<String,Object>> serverUrlInfoList;
 	protected Long serverUrlInfoUpdateTime;
+	private List<Map<String,Object>> rewardConfigurationList;
+	protected Map<String,Object> rewardConfigurationMap;
+	protected Long rewardConfigurationTime;
+	private List<Map<String,Object>> processRewardConfigurationList;
 
 	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version){
 		RequestEntity requestEntity = new RequestEntity();
@@ -53,6 +55,9 @@ public abstract class AbstractController {
 		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(serverUrlInfoMap)){
 			generateServerUrlInfoMap();
 		}
+		if(reqEntity.getServerName().toString().equals("UserServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
+			generateRewardConfigurationMap();
+		}
 		servicer.setApplicationContext(applicationContext);
 		servicer.setMqUtils(mqUtils);
 		servicer.initRpcServer();
@@ -64,6 +69,36 @@ public abstract class AbstractController {
 		respEntity.setMsg(message.getMessages("0"));
 		respEntity.setReturnData(returnValue);
 		return respEntity;
+	}
+
+	private void generateRewardConfigurationMap(){
+		IUserModuleServer userModuleServer = (IUserModuleServer)applicationContext.getBean("userModuleServer");
+		rewardConfigurationList = userModuleServer.findRewardConfigurationList();
+		rewardConfigurationMap = new HashMap<>();
+		processRewardConfigurationList = new ArrayList<>();
+
+		if(rewardConfigurationList != null){
+			for(int i = 0; i < rewardConfigurationList.size(); i++){
+				Map<String,Object> infoMap = rewardConfigurationList.get(i);
+
+				if(i == 0){
+					Date date = (Date)infoMap.get("update_time");
+					rewardConfigurationTime = date.getTime();
+				}
+
+				Map<String,Object> innerMap = new HashMap<String,Object>();
+				innerMap.put("reward_id", infoMap.get("reward_id"));
+				innerMap.put("amount", infoMap.get("amount"));
+				innerMap.put("reward_pos", infoMap.get("reward_pos"));
+				processRewardConfigurationList.add(innerMap);
+			}
+		}
+
+
+		if(rewardConfigurationList != null && rewardConfigurationList.size() > 0){
+			rewardConfigurationMap.put("reward_update_time", rewardConfigurationTime);
+			rewardConfigurationMap.put("reward_list", processRewardConfigurationList);
+		}
 	}
 
 	private void generateServerUrlInfoMap() {

@@ -26,4 +26,12 @@ public interface IUserModuleServer {
 	Map<String,Object> joinCourse(Map<String, String> courseMap);
 
 	void increaseStudentNumByCourseId(String course_id);
+
+	List<Map<String,Object>> findPPTListByCourseId(String string);
+
+	List<Map<String,Object>> findAudioListByCourseId(String string);
+
+	List<Map<String,Object>> findRewardConfigurationList();
+
+	
 }

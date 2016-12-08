@@ -79,6 +79,19 @@
 				</outputs>
 			</function>
 
+			<function name="courseInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="100" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="reward_update_time" type="long" require="N"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">

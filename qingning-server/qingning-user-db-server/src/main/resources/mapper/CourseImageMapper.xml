@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.user.db.persistence.mybatis.CourseImageMapper" >
+  <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.CourseImage" >
+    <id column="image_id" property="imageId" jdbcType="VARCHAR" />
+    <result column="course_id" property="courseId" jdbcType="VARCHAR" />
+    <result column="image_url" property="imageUrl" jdbcType="VARCHAR" />
+    <result column="image_pos" property="imagePos" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    image_id, course_id, image_url, image_pos, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_course_image
+    where image_id = #{imageId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_course_image
+    where image_id = #{imageId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.CourseImage" >
+    insert into t_course_image (image_id, course_id, image_url, 
+      image_pos, create_time, update_time
+      )
+    values (#{imageId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{imageUrl,jdbcType=VARCHAR}, 
+      #{imagePos,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.CourseImage" >
+    insert into t_course_image
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="imageId != null" >
+        image_id,
+      </if>
+      <if test="courseId != null" >
+        course_id,
+      </if>
+      <if test="imageUrl != null" >
+        image_url,
+      </if>
+      <if test="imagePos != null" >
+        image_pos,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="imageId != null" >
+        #{imageId,jdbcType=VARCHAR},
+      </if>
+      <if test="courseId != null" >
+        #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="imageUrl != null" >
+        #{imageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="imagePos != null" >
+        #{imagePos,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.user.db.persistence.mybatis.entity.CourseImage" >
+    update t_course_image
+    <set >
+      <if test="courseId != null" >
+        course_id = #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="imageUrl != null" >
+        image_url = #{imageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="imagePos != null" >
+        image_pos = #{imagePos,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where image_id = #{imageId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.CourseImage" >
+    update t_course_image
+    set course_id = #{courseId,jdbcType=VARCHAR},
+      image_url = #{imageUrl,jdbcType=VARCHAR},
+      image_pos = #{imagePos,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where image_id = #{imageId,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="batchInsertPPT" parameterType="hashmap" >
+    insert into t_course_image
+    (image_id, course_id, image_url,image_pos, create_time, update_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.image_id}, #{course_id}, #{item.image_url},
+      #{item.image_pos}, #{pptTime}, #{pptTime})
+    </foreach>
+
+  </insert>
+
+  <delete id="deletePPTByCourseId" parameterType="java.lang.String" >
+    delete from t_course_image
+    where course_id = #{course_id}
+  </delete>
+
+  <select id="findPPTListByCourseId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_course_image
+    where course_id = #{course_id}
+    order by image_pos asc
+  </select>
+</mapper>

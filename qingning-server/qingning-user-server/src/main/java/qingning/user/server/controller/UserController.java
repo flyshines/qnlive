@@ -1,5 +1,6 @@
 package qingning.user.server.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
@@ -172,24 +173,31 @@ public class UserController extends AbstractController{
 	}
 
 
-//	@RequestMapping(value = "/user/live_rooms/{room_id}/courses", method = RequestMethod.GET)
-//	public
-//	@ResponseBody
-//	ResponseEntity getRoomCourses(
-//			@PathVariable("room_id") String room_id,
-//			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-//			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-//			@RequestParam(value = "start_time", defaultValue = "") String start_time,
-//			@RequestHeader("access_token") String accessToken,
-//			@RequestHeader("version") String version) throws Exception {
-//		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version);
-//		Map<String, Object> param = new HashMap<String, Object>();
-//		param.put("room_id", room_id);
-//		param.put("page_count", page_count);
-//		param.put("course_id", course_id);
-//		param.put("start_time", start_time);
-//		requestEntity.setParam(param);
-//		return this.process(requestEntity, serviceManger, message);
-//	}
+
+	@RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getRoomCourses(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseInfo", accessToken, version);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("course_id", course_id);
+		param.put("reward_update_time", reward_update_time);
+		requestEntity.setParam(param);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+
+		//处理打赏信息
+		Map<String, Object> resultMap = null;
+		if(! reward_update_time.equals(rewardConfigurationTime.toString())){
+			resultMap = (Map<String, Object>) responseEntity.getReturnData();
+			resultMap.put("reward_info",rewardConfigurationMap);
+			responseEntity.setReturnData(resultMap);
+		}
+
+		return responseEntity;
+	}
 
 }

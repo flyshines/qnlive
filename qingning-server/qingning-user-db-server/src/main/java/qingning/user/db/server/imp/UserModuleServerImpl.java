@@ -34,6 +34,15 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Autowired(required = true)
 	private CoursesStudentsMapper coursesStudentsMapper;
 
+	@Autowired(required = true)
+	private CourseImageMapper courseImageMapper;
+
+	@Autowired(required = true)
+	private CourseAudioMapper courseAudioMapper;
+
+	@Autowired(required = true)
+	private RewardConfigurationMapper rewardConfigurationMapper;
+
 
 	@Override
 	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) {
@@ -124,5 +133,20 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public void increaseStudentNumByCourseId(String course_id) {
 		coursesMapper.increaseStudentNumByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findPPTListByCourseId(String course_id) {
+		return courseImageMapper.findPPTListByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findAudioListByCourseId(String course_id) {
+		return courseAudioMapper.findAudioListByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRewardConfigurationList() {
+		return rewardConfigurationMapper.findRewardConfigurationList();
 	}
 }

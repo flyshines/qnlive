@@ -1,5 +1,7 @@
 package qingning.user.server.imp;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
@@ -826,4 +828,96 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseInfo")
+    public Map<String, Object> getCourseInfo(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
+        //1.先检查该课程是否在缓存中
+        if(jedis.exists(courseKey)){
+
+            //检测学员是否加入了该课程，加入课程才能查询相关信息，如果没加入课程则提示学员未加入该课程（120007）
+            Map<String,Object> queryStudentMap = new HashMap<>();
+            queryStudentMap.put("user_id", userId);
+            queryStudentMap.put("lecturer_id", jedis.hget(courseKey, "lecturer_id"));
+            queryStudentMap.put("room_id",jedis.hget(courseKey, "room_id"));
+            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
+            findStudentByKey(queryStudentMap);
+
+            JSONArray pptList = null;
+            map.clear();
+            map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
+            String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+            if(jedis.exists(pptListKey)){
+                pptList = JSONObject.parseArray(jedis.get(pptListKey));
+            }
+
+            JSONArray audioList = null;
+            map.clear();
+            map.put(Constants.CACHED_KEY_COURSE_AUDIOS_FIELD, reqMap.get("course_id").toString());
+            String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
+            if(jedis.exists(audioListKey)){
+                audioList = JSONObject.parseArray(jedis.get(audioListKey));
+            }
+
+            if(! CollectionUtils.isEmpty(pptList)){
+                resultMap.put("ppt_list", pptList);
+            }
+
+            if(! CollectionUtils.isEmpty(audioList)){
+                resultMap.put("audio_list", audioList);
+            }
+
+        }else{
+            //2.如果不在缓存中，则查询数据库
+            Map<String,Object> courseInfoMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            if(courseInfoMap == null){
+                throw new QNLiveException("100004");
+            }
+
+            Map<String,Object> queryStudentMap = new HashMap<>();
+            queryStudentMap.put("user_id", userId);
+            queryStudentMap.put("lecturer_id", courseInfoMap.get("lecturer_id"));
+            queryStudentMap.put("room_id",courseInfoMap.get("room_id"));
+            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
+            findStudentByKey(queryStudentMap);
+
+            //查询课程PPT列表
+            List<Map<String,Object>> pptList = userModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
+
+            //查询课程语音列表
+            List<Map<String,Object>> audioList = userModuleServer.findAudioListByCourseId(reqMap.get("course_id").toString());
+
+            if(! CollectionUtils.isEmpty(pptList)){
+                resultMap.put("ppt_list", pptList);
+            }
+
+            if(! CollectionUtils.isEmpty(audioList)){
+                resultMap.put("audio_list", audioList);
+            }
+
+        }
+
+        return resultMap;
+    }
+
+    private void findStudentByKey(Map<String,Object> courseMap) throws Exception{
+        Map<String,Object> studentQueryMap = new HashMap<>();
+        studentQueryMap.put("user_id",courseMap.get("user_id"));
+        studentQueryMap.put("lecturer_id",courseMap.get("lecturer_id"));
+        studentQueryMap.put("room_id",courseMap.get("room_id"));
+        studentQueryMap.put("course_id",courseMap.get("course_id"));
+        Map<String,Object> studentMap = userModuleServer.findStudentByKey(studentQueryMap);
+        if(studentMap != null){
+            throw new QNLiveException("120007");
+        }
+    }
 }
