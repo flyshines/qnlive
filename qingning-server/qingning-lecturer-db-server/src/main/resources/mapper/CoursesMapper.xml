@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.user.db.persistence.mybatis.CoursesMapper" >
-  <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.Courses" >
+<mapper namespace="qingning.lecturer.db.persistence.mybatis.CoursesMapper" >
+  <resultMap id="BaseResultMap" type="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     <id column="course_id" property="courseId" jdbcType="VARCHAR" />
     <result column="room_id" property="roomId" jdbcType="VARCHAR" />
     <result column="lecturer_id" property="lecturerId" jdbcType="VARCHAR" />
@@ -41,7 +41,7 @@
     delete from t_courses
     where course_id = #{courseId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.Courses" >
+  <insert id="insert" parameterType="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     insert into t_courses (course_id, room_id, lecturer_id, 
       course_title, course_url, course_remark, 
       start_time, end_time, course_type, 
@@ -59,7 +59,7 @@
       #{createDate,jdbcType=DATE}, #{updateTime,jdbcType=TIMESTAMP}, #{realStartTime,jdbcType=TIMESTAMP}, 
       #{imCourseId,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.Courses" >
+  <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     insert into t_courses
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="courseId != null" >
@@ -198,7 +198,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.user.db.persistence.mybatis.entity.Courses" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     update t_courses
     <set >
       <if test="roomId != null" >
@@ -267,7 +267,7 @@
     </set>
     where course_id = #{courseId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.Courses" >
+  <update id="updateByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     update t_courses
     set room_id = #{roomId,jdbcType=VARCHAR},
       lecturer_id = #{lecturerId,jdbcType=VARCHAR},
@@ -306,9 +306,7 @@
     from t_courses
     where 1 =1
     <if test="orderType == 1" >
-      <if test="startIndex != null" >
-        and start_time > #{startIndex}
-      </if>
+      and start_time > #{startIndex}
     </if>
     <if test="orderType == 2" >
       <if test="startIndex != null" >
@@ -325,11 +323,4 @@
     </if>
     limit #{pageCount}
   </select>
-
-  <update id="increaseStudentNumByCourseId" parameterType="string" >
-    update t_courses
-    set
-    student_num = student_num + 1
-    where course_id = #{course_id}
-  </update>
 </mapper>

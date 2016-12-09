@@ -277,7 +277,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //2.1创建IM 聊天群组
         Map<String,Object> userMap = lectureModuleServer.findLoginInfoByUserId(userId);
         String mGroupId = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
-        reqMap.put("mGroupId",mGroupId);
+        reqMap.put("im_course_id",mGroupId);
         Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
 
         //4 修改相关缓存
@@ -729,6 +729,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("audio_list", audioList);
             }
 
+            resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
+
             return resultMap;
 
         }else{
@@ -751,6 +753,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(! CollectionUtils.isEmpty(audioList)){
                 resultMap.put("audio_list", audioList);
             }
+
+            resultMap.put("im_course_id", courseInfoMap.get("im_course_id"));
 
             return resultMap;
         }

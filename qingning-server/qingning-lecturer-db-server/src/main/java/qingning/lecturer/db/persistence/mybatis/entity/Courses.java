@@ -45,6 +45,8 @@ public class Courses {
 
     private Date realStartTime;
 
+    private String imCourseId;
+
     public String getCourseId() {
         return courseId;
     }
@@ -211,5 +213,13 @@ public class Courses {
 
     public void setRealStartTime(Date realStartTime) {
         this.realStartTime = realStartTime;
+    }
+
+    public String getImCourseId() {
+        return imCourseId;
+    }
+
+    public void setImCourseId(String imCourseId) {
+        this.imCourseId = imCourseId == null ? null : imCourseId.trim();
     }
 }

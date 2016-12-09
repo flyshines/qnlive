@@ -876,6 +876,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 resultMap.put("audio_list", audioList);
             }
 
+            resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
+
         }else{
             //2.如果不在缓存中，则查询数据库
             Map<String,Object> courseInfoMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
@@ -903,6 +905,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(! CollectionUtils.isEmpty(audioList)){
                 resultMap.put("audio_list", audioList);
             }
+
+            resultMap.put("im_course_id",  courseInfoMap.get("im_course_id"));
 
         }
 
