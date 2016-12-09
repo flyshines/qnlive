@@ -40,6 +40,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private CourseMessageMapper courseMessageMapper;
 
+	@Autowired(required = true)
+	private CoursesStudentsMapper coursesStudentsMapper;
+
 	@Override
 	/**
 	 * 创建直播间
@@ -263,7 +266,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Override
 	public List<Map<String, Object>> findCourseStudentList(Map<String, Object> queryMap) {
-		return null; //TODO
+		return coursesStudentsMapper.findCourseStudentList(queryMap);
 	}
 
 	@Override

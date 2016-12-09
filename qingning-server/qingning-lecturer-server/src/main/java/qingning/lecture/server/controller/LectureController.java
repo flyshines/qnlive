@@ -268,7 +268,7 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStudents", accessToken, version);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("course_id", course_id);
 		parMap.put("page_count", page_count);

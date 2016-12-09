@@ -233,6 +233,16 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 查询课程学员列表
+	 * @param course_id
+	 * @param page_count
+	 * @param student_pos
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/user/courses/{course_id}/students", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity getCourseStudentList(

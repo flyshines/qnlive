@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.user.db.persistence.mybatis.CoursesStudentsMapper" >
-  <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.CoursesStudents" >
+<mapper namespace="qingning.lecturer.db.persistence.mybatis.CoursesStudentsMapper" >
+  <resultMap id="BaseResultMap" type="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents" >
     <id column="user_id" property="userId" jdbcType="VARCHAR" />
     <id column="lecturer_id" property="lecturerId" jdbcType="VARCHAR" />
     <id column="room_id" property="roomId" jdbcType="VARCHAR" />
@@ -17,7 +17,7 @@
     user_id, lecturer_id, room_id, course_id, payment_amount, course_password, student_type, 
     create_time, create_date, student_pos
   </sql>
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudentsKey" >
     select 
     <include refid="Base_Column_List" />
     from t_courses_students
@@ -26,14 +26,14 @@
       and room_id = #{roomId,jdbcType=VARCHAR}
       and course_id = #{courseId,jdbcType=VARCHAR}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey" >
+  <delete id="deleteByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudentsKey" >
     delete from t_courses_students
     where user_id = #{userId,jdbcType=VARCHAR}
       and lecturer_id = #{lecturerId,jdbcType=VARCHAR}
       and room_id = #{roomId,jdbcType=VARCHAR}
       and course_id = #{courseId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudents" >
+  <insert id="insert" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents" >
     insert into t_courses_students (user_id, lecturer_id, room_id, 
       course_id, payment_amount, course_password, 
       student_type, create_time, create_date, 
@@ -43,7 +43,7 @@
       #{studentType,jdbcType=CHAR}, #{createTime,jdbcType=TIMESTAMP}, #{createDate,jdbcType=DATE}, 
       #{studentPos,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudents" >
+  <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents" >
     insert into t_courses_students
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="userId != null" >
@@ -110,7 +110,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudents" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents" >
     update t_courses_students
     <set >
       <if test="paymentAmount != null" >
@@ -137,7 +137,7 @@
       and room_id = #{roomId,jdbcType=VARCHAR}
       and course_id = #{courseId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudents" >
+  <update id="updateByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents" >
     update t_courses_students
     set payment_amount = #{paymentAmount,jdbcType=DOUBLE},
       course_password = #{coursePassword,jdbcType=VARCHAR},
@@ -151,15 +151,7 @@
       and course_id = #{courseId,jdbcType=VARCHAR}
   </update>
 
-  <select id="findStudentByKey" resultType="hashmap" parameterType="qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey" >
-    select
-    <include refid="Base_Column_List" />
-    from t_courses_students
-    where user_id = #{userId,jdbcType=VARCHAR}
-    and lecturer_id = #{lecturerId,jdbcType=VARCHAR}
-    and room_id = #{roomId,jdbcType=VARCHAR}
-    and course_id = #{courseId,jdbcType=VARCHAR}
-  </select>
+
 
   <select id="findCourseStudentList" resultType="hashmap" parameterType="hashmap" >
     select

@@ -159,7 +159,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public List<Map<String, Object>> findCourseStudentList(Map<String, Object> queryMap) {
-		return null;//TODO
+		return coursesStudentsMapper.findCourseStudentList(queryMap);
 	}
 
 
