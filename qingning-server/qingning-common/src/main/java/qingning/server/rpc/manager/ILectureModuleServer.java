@@ -28,4 +28,10 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findPPTListByCourseId(String course_id);
 
 	List<Map<String,Object>> findAudioListByCourseId(String course_id);
+
+	List<Map<String,Object>> findCourseMessageList(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
+
+	Map<String,Object> findLoginInfoByUserId(String userId);
 }

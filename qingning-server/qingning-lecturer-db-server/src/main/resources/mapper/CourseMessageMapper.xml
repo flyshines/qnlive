@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.lecturer.db.persistence.mybatis.CourseMessageMapper" >
+  <resultMap id="BaseResultMap" type="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+    <id column="message_id" property="messageId" jdbcType="VARCHAR" />
+    <result column="course_id" property="courseId" jdbcType="VARCHAR" />
+    <result column="message" property="message" jdbcType="VARCHAR" />
+    <result column="message_url" property="messageUrl" jdbcType="VARCHAR" />
+    <result column="message_question" property="messageQuestion" jdbcType="VARCHAR" />
+    <result column="audio_time" property="audioTime" jdbcType="BIGINT" />
+    <result column="message_pos" property="messagePos" jdbcType="BIGINT" />
+    <result column="message_type" property="messageType" jdbcType="CHAR" />
+    <result column="send_type" property="sendType" jdbcType="CHAR" />
+    <result column="creator_id" property="creatorId" jdbcType="VARCHAR" />
+    <result column="creator_avatar_address" property="creatorAvatarAddress" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    message_id, course_id, message, message_url, message_question, audio_time, message_pos, 
+    message_type, send_type, creator_id, creator_avatar_address, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_course_message
+    where message_id = #{messageId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_course_message
+    where message_id = #{messageId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+    insert into t_course_message (message_id, course_id, message, 
+      message_url, message_question, audio_time, 
+      message_pos, message_type, send_type, 
+      creator_id, creator_avatar_address, create_time
+      )
+    values (#{messageId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR}, 
+      #{messageUrl,jdbcType=VARCHAR}, #{messageQuestion,jdbcType=VARCHAR}, #{audioTime,jdbcType=BIGINT}, 
+      #{messagePos,jdbcType=BIGINT}, #{messageType,jdbcType=CHAR}, #{sendType,jdbcType=CHAR}, 
+      #{creatorId,jdbcType=VARCHAR}, #{creatorAvatarAddress,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+    insert into t_course_message
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="messageId != null" >
+        message_id,
+      </if>
+      <if test="courseId != null" >
+        course_id,
+      </if>
+      <if test="message != null" >
+        message,
+      </if>
+      <if test="messageUrl != null" >
+        message_url,
+      </if>
+      <if test="messageQuestion != null" >
+        message_question,
+      </if>
+      <if test="audioTime != null" >
+        audio_time,
+      </if>
+      <if test="messagePos != null" >
+        message_pos,
+      </if>
+      <if test="messageType != null" >
+        message_type,
+      </if>
+      <if test="sendType != null" >
+        send_type,
+      </if>
+      <if test="creatorId != null" >
+        creator_id,
+      </if>
+      <if test="creatorAvatarAddress != null" >
+        creator_avatar_address,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="messageId != null" >
+        #{messageId,jdbcType=VARCHAR},
+      </if>
+      <if test="courseId != null" >
+        #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="message != null" >
+        #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="messageUrl != null" >
+        #{messageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="messageQuestion != null" >
+        #{messageQuestion,jdbcType=VARCHAR},
+      </if>
+      <if test="audioTime != null" >
+        #{audioTime,jdbcType=BIGINT},
+      </if>
+      <if test="messagePos != null" >
+        #{messagePos,jdbcType=BIGINT},
+      </if>
+      <if test="messageType != null" >
+        #{messageType,jdbcType=CHAR},
+      </if>
+      <if test="sendType != null" >
+        #{sendType,jdbcType=CHAR},
+      </if>
+      <if test="creatorId != null" >
+        #{creatorId,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorAvatarAddress != null" >
+        #{creatorAvatarAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+    update t_course_message
+    <set >
+      <if test="courseId != null" >
+        course_id = #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="message != null" >
+        message = #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="messageUrl != null" >
+        message_url = #{messageUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="messageQuestion != null" >
+        message_question = #{messageQuestion,jdbcType=VARCHAR},
+      </if>
+      <if test="audioTime != null" >
+        audio_time = #{audioTime,jdbcType=BIGINT},
+      </if>
+      <if test="messagePos != null" >
+        message_pos = #{messagePos,jdbcType=BIGINT},
+      </if>
+      <if test="messageType != null" >
+        message_type = #{messageType,jdbcType=CHAR},
+      </if>
+      <if test="sendType != null" >
+        send_type = #{sendType,jdbcType=CHAR},
+      </if>
+      <if test="creatorId != null" >
+        creator_id = #{creatorId,jdbcType=VARCHAR},
+      </if>
+      <if test="creatorAvatarAddress != null" >
+        creator_avatar_address = #{creatorAvatarAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where message_id = #{messageId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+    update t_course_message
+    set course_id = #{courseId,jdbcType=VARCHAR},
+      message = #{message,jdbcType=VARCHAR},
+      message_url = #{messageUrl,jdbcType=VARCHAR},
+      message_question = #{messageQuestion,jdbcType=VARCHAR},
+      audio_time = #{audioTime,jdbcType=BIGINT},
+      message_pos = #{messagePos,jdbcType=BIGINT},
+      message_type = #{messageType,jdbcType=CHAR},
+      send_type = #{sendType,jdbcType=CHAR},
+      creator_id = #{creatorId,jdbcType=VARCHAR},
+      creator_avatar_address = #{creatorAvatarAddress,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where message_id = #{messageId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="findCourseMessageList" resultType="hashmap" parameterType="hashmap" >
+    select
+    cm.message_pos, cm.message_id, cm.message_type, cm.send_type, cm.message, cm.message_url,
+    cm.audio_time, cm.create_time, cm.creator_id, cm.message_question,
+    u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
+    from t_course_message cm join t_user u on cm.creator_id = u.user_id
+    where 1 = 1
+    and
+    cm.course_id = #{course_id}
+    <if test="messagePos != null" >
+      and  cm.message_pos > #{message_pos}
+    </if>
+    order by cm.message_pos asc
+    limit #{page_count}
+
+
+  </select>
+
+</mapper>

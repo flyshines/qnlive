@@ -6,10 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.AccessTokenUtil;
-import qingning.common.util.CacheUtils;
-import qingning.common.util.Constants;
-import qingning.common.util.MiscUtils;
+import qingning.common.util.*;
 import qingning.lecture.server.other.ReadCourseOperation;
 import qingning.lecture.server.other.ReadLiveRoomOperation;
 import qingning.server.AbstractQNLiveServer;
@@ -258,6 +255,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //2.将课程信息插入到数据库
         reqMap.put("user_id", userId);
+
+        //2.1创建IM 聊天群组
+        Map<String,Object> userMap = lectureModuleServer.findLoginInfoByUserId(userId);
+        String mGroupId = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
+        reqMap.put("mGroupId",mGroupId);
         Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
 
         //4 修改相关缓存
@@ -735,5 +737,49 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("messageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
+            queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
+        }
+        queryMap.put("course_id", reqMap.get("course_id").toString());
+        List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
+
+        if(! CollectionUtils.isEmpty(messageList)){
+            resultMap.put("message_list", messageList);
+        }
+
+        return resultMap;
+
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseStudents")
+    public Map<String, Object> getCourseStudentList(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
+            queryMap.put("student_pos", Long.parseLong(reqMap.get("student_pos").toString()));
+        }
+        queryMap.put("course_id", reqMap.get("course_id").toString());
+        List<Map<String,Object>> messageList = lectureModuleServer.findCourseStudentList(queryMap);
+
+        if(! CollectionUtils.isEmpty(messageList)){
+            resultMap.put("message_list", messageList);
+        }
+
+        return resultMap;
+
+    }
+
 
 }

@@ -11,7 +11,6 @@ import qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 import qingning.user.db.persistence.mybatis.entity.FansKey;
 
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Autowired(required = true)
 	private RewardConfigurationMapper rewardConfigurationMapper;
+
+	@Autowired(required = true)
+	private CourseMessageMapper courseMessageMapper;
 
 
 	@Override
@@ -149,4 +151,17 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	public List<Map<String, Object>> findRewardConfigurationList() {
 		return rewardConfigurationMapper.findRewardConfigurationList();
 	}
+
+	@Override
+	public List<Map<String, Object>> findCourseMessageList(Map<String, Object> queryMap) {
+		return courseMessageMapper.findCourseMessageList(queryMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseStudentList(Map<String, Object> queryMap) {
+		return null;//TODO
+	}
+
+
+
 }

@@ -33,5 +33,8 @@ public interface IUserModuleServer {
 
 	List<Map<String,Object>> findRewardConfigurationList();
 
-	
+
+	List<Map<String,Object>> findCourseMessageList(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 }

@@ -1,13 +1,11 @@
 package qingning.user.server.controller;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.server.AbstractController;
-
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -173,7 +171,15 @@ public class UserController extends AbstractController{
 	}
 
 
-
+	/**
+	 * 查询课程综合信息，包括PPT信息，讲课音频信息，打赏列表信息
+	 * @param course_id
+	 * @param reward_update_time
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
 	public
 	@ResponseBody
@@ -198,6 +204,50 @@ public class UserController extends AbstractController{
 		}
 
 		return responseEntity;
+	}
+
+	/**
+	 * 查询课程消息列表
+	 * @param course_id
+	 * @param page_count
+	 * @param message_pos
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/courses/{course_id}/messages", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getMessageList(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "messageList", accessToken, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("course_id", course_id);
+		parMap.put("page_count", page_count);
+		parMap.put("message_pos", message_pos);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	@RequestMapping(value = "/user/courses/{course_id}/students", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getCourseStudentList(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseStudents", accessToken, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("course_id", course_id);
+		parMap.put("page_count", page_count);
+		parMap.put("student_pos", student_pos);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
 	}
 
 }

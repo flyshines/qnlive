@@ -202,6 +202,14 @@ public class LectureController extends AbstractController {
 	}
 
 
+	/**
+	 * 查询课程综合信息（PPT信息和音频信息）
+	 * @param course_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/lecturer/courses/{course_id}/info", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity getCourseInfo(
@@ -211,6 +219,60 @@ public class LectureController extends AbstractController {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseInfo", accessToken, version);
 		Map<String, Object> parMap = new HashMap<String, Object>();
 		parMap.put("course_id", course_id);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 查询某个课程消息列表
+	 * @param course_id
+	 * @param page_count
+	 * @param message_pos
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/lecturer/courses/{course_id}/messages", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getMessageList(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("course_id", course_id);
+		parMap.put("page_count", page_count);
+		parMap.put("message_pos", message_pos);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 查询课程学员列表
+	 * @param course_id
+	 * @param page_count
+	 * @param student_pos
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/lecturer/courses/{course_id}/students", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getCourseStudentList(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("course_id", course_id);
+		parMap.put("page_count", page_count);
+		parMap.put("student_pos", student_pos);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

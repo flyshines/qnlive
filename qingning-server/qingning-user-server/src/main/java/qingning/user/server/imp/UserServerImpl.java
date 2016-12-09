@@ -920,4 +920,45 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("120007");
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("messageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
+            queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
+        }
+        queryMap.put("course_id", reqMap.get("course_id").toString());
+        List<Map<String,Object>> messageList = userModuleServer.findCourseMessageList(queryMap);
+
+        if(! CollectionUtils.isEmpty(messageList)){
+            resultMap.put("message_list", messageList);
+        }
+
+        return resultMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseStudents")
+    public Map<String, Object> getCourseStudentList(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
+            queryMap.put("student_pos", Long.parseLong(reqMap.get("student_pos").toString()));
+        }
+        queryMap.put("course_id", reqMap.get("course_id").toString());
+        List<Map<String,Object>> messageList = userModuleServer.findCourseStudentList(queryMap);
+
+        if(! CollectionUtils.isEmpty(messageList)){
+            resultMap.put("message_list", messageList);
+        }
+
+        return resultMap;
+
+    }
 }

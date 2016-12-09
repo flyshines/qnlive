@@ -92,6 +92,31 @@
 				</outputs>
 			</function>
 
+
+			<function name="messageList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="courseStudents">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">

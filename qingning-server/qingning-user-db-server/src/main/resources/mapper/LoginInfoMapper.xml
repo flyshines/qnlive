@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.lecturer.db.persistence.mybatis.LoginInfoMapper" >
-  <resultMap id="BaseResultMap" type="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
+<mapper namespace="qingning.user.db.persistence.mybatis.LoginInfoMapper" >
+  <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.LoginInfo" >
     <id column="user_id" property="userId" jdbcType="VARCHAR" />
     <result column="union_id" property="unionId" jdbcType="VARCHAR" />
     <result column="qq_id" property="qqId" jdbcType="VARCHAR" />
@@ -19,11 +19,11 @@
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    user_id, union_id, qq_id, phone_number, passwd, m_user_id, m_pwd, user_role, system_role,
+    user_id, union_id, qq_id, phone_number, passwd, m_user_id, m_pwd, user_role, system_role, 
     status, province_id, city_id, district_id, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select
+    select 
     <include refid="Base_Column_List" />
     from t_login_info
     where user_id = #{userId,jdbcType=VARCHAR}
@@ -32,21 +32,21 @@
     delete from t_login_info
     where user_id = #{userId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
-    insert into t_login_info (user_id, union_id, qq_id,
-    phone_number, passwd, m_user_id,
-    m_pwd, user_role, system_role,
-    status, province_id, city_id,
-    district_id, create_time, update_time
-    )
-    values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR},
-    #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR},
-    #{mPwd,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{systemRole,jdbcType=VARCHAR},
-    #{status,jdbcType=CHAR}, #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR},
-    #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-    )
+  <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.LoginInfo" >
+    insert into t_login_info (user_id, union_id, qq_id, 
+      phone_number, passwd, m_user_id, 
+      m_pwd, user_role, system_role, 
+      status, province_id, city_id, 
+      district_id, create_time, update_time
+      )
+    values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR}, 
+      #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR}, 
+      #{mPwd,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{systemRole,jdbcType=VARCHAR}, 
+      #{status,jdbcType=CHAR}, #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR}, 
+      #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
   </insert>
-  <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
+  <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.LoginInfo" >
     insert into t_login_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="userId != null" >
@@ -143,7 +143,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.user.db.persistence.mybatis.entity.LoginInfo" >
     update t_login_info
     <set >
       <if test="unionId != null" >
@@ -191,24 +191,40 @@
     </set>
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
+  <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.LoginInfo" >
     update t_login_info
     set union_id = #{unionId,jdbcType=VARCHAR},
-    qq_id = #{qqId,jdbcType=VARCHAR},
-    phone_number = #{phoneNumber,jdbcType=VARCHAR},
-    passwd = #{passwd,jdbcType=VARCHAR},
-    m_user_id = #{mUserId,jdbcType=VARCHAR},
-    m_pwd = #{mPwd,jdbcType=VARCHAR},
-    user_role = #{userRole,jdbcType=VARCHAR},
-    system_role = #{systemRole,jdbcType=VARCHAR},
-    status = #{status,jdbcType=CHAR},
-    province_id = #{provinceId,jdbcType=VARCHAR},
-    city_id = #{cityId,jdbcType=VARCHAR},
-    district_id = #{districtId,jdbcType=VARCHAR},
-    create_time = #{createTime,jdbcType=TIMESTAMP},
-    update_time = #{updateTime,jdbcType=TIMESTAMP}
+      qq_id = #{qqId,jdbcType=VARCHAR},
+      phone_number = #{phoneNumber,jdbcType=VARCHAR},
+      passwd = #{passwd,jdbcType=VARCHAR},
+      m_user_id = #{mUserId,jdbcType=VARCHAR},
+      m_pwd = #{mPwd,jdbcType=VARCHAR},
+      user_role = #{userRole,jdbcType=VARCHAR},
+      system_role = #{systemRole,jdbcType=VARCHAR},
+      status = #{status,jdbcType=CHAR},
+      province_id = #{provinceId,jdbcType=VARCHAR},
+      city_id = #{cityId,jdbcType=VARCHAR},
+      district_id = #{districtId,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
+
+
+  <select id="getLoginInfoByLoginIdAndLoginType" resultType="hashmap" parameterType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_login_info
+    where
+      <if test='login_type != null and login_type == "0"'>
+        union_id = #{login_id}
+        <!--微信登录-->
+    </if>
+    <if test='login_type != null and login_type == "2"'>
+      <!--手机号登录-->
+      phone_number = #{login_id}
+    </if>
+  </select>
 
   <select id="findLoginInfoByUserId" resultType="hashmap" parameterType="string" >
     select
