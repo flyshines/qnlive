@@ -41,7 +41,6 @@
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  />
-					<param name="room_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>

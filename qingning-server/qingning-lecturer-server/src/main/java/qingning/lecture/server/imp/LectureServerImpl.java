@@ -157,63 +157,81 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        //0.查询缓存中是否存在key，存在则将缓存中的信息返回
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
-        Map<String, String> liveRoomMap = null;
+        String queryType = reqMap.get("query_type").toString();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
 
-        //1.如果缓存中不存在则查询数据库
-        if (!jedis.exists(liveRoomKey)) {
-            Map<String, Object> dbResultMap = lectureModuleServer.findLiveRoomByRoomId(reqMap.get("room_id").toString());
+        //0查询我创建的直播间列表
+        if(queryType.equals("0")){
 
-            //2.如果缓存和数据库中均不存在，则返回直播间不存在
-            if (CollectionUtils.isEmpty(dbResultMap)) {
-                throw new QNLiveException("100002");
-            } else {
-                //1.1如果数据库中查询出数据，将查询出的结果放入缓存
-                Map<String, String> liveRoomStringMap = new HashMap<String, String>();
-                MiscUtils.converObjectMapToStringMap(dbResultMap, liveRoomStringMap);
-                jedis.hmset(liveRoomKey, liveRoomStringMap);
+            if(jedis.exists(liveRoomListKey)){
+               Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
-                liveRoomMap = liveRoomStringMap;
+                if(CollectionUtils.isEmpty(liveRoomsMap)){
+                   return resultMap;
+
+               }else {
+                   List<Map<String,Object>> liveRoomListResult = new ArrayList<>();
+                   for(String roomIdCache : liveRoomsMap.keySet()){
+                       Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomIdCache, reqEntity, readLiveRoomOperation, jedisUtils, true);
+                       Map<String,Object> peocessLiveRoomMap;
+
+                       if(! CollectionUtils.isEmpty(liveRoomMap)){
+                           peocessLiveRoomMap = new HashMap<>();
+                           peocessLiveRoomMap.put("avatar_address", liveRoomMap.get("avatar_address"));
+                           peocessLiveRoomMap.put("room_name", liveRoomMap.get("room_name"));
+                           peocessLiveRoomMap.put("last_course_amount", new BigDecimal(liveRoomMap.get("last_course_amount").toString()));
+                           peocessLiveRoomMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
+                           peocessLiveRoomMap.put("room_id", liveRoomMap.get("room_id"));
+                           peocessLiveRoomMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
+                           liveRoomListResult.add(peocessLiveRoomMap);
+                       }
+                   }
+
+                   if(! CollectionUtils.isEmpty(liveRoomListResult)){
+                       resultMap.put("room_list", liveRoomListResult);
+                   }
+
+                   return resultMap;
+               }
+
+           }else {
+               return resultMap;
+           }
+
+
+        }else {
+            //查询单个直播间的详细信息
+            if(reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())){
+                throw new QNLiveException("000100");
             }
 
-        } else {
-            //缓存中有数据
-            liveRoomMap = jedis.hgetAll(liveRoomKey);
-        }
+            Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedisUtils, true);
+            if(CollectionUtils.isEmpty(liveRoomMap)){
+                throw new QNLiveException("100002");
+            }
 
-
-        String queryType = reqMap.get("query_type").toString();
-
-        switch (queryType) {
-            case "0":
-                resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
-                resultMap.put("room_name", liveRoomMap.get("room_name"));
-                resultMap.put("last_course_amount", new BigDecimal(liveRoomMap.get("last_course_amount").toString()));
-                resultMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
-                resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
-                break;
-            case "1":
+            if(queryType.equals("1")){
                 resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
                 resultMap.put("room_name", liveRoomMap.get("room_name"));
                 resultMap.put("room_remark", liveRoomMap.get("room_remark"));
                 resultMap.put("rq_code", liveRoomMap.get("rq_code"));
                 resultMap.put("room_address", liveRoomMap.get("room_address"));
                 resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time")));
-                break;
-            case "2":
+                return resultMap;
+
+            }else {
                 resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
                 resultMap.put("room_name", liveRoomMap.get("room_name"));
                 resultMap.put("room_remark", liveRoomMap.get("room_remark"));
                 resultMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
                 resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
-                break;
+                return resultMap;
+            }
         }
-
-        return resultMap;
     }
 
 
