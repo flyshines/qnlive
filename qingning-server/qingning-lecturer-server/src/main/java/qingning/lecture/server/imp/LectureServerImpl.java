@@ -278,6 +278,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> userMap = lectureModuleServer.findLoginInfoByUserId(userId);
         String mGroupId = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
         reqMap.put("im_course_id",mGroupId);
+        if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
+            reqMap.put("course_url", "http://7xt3lm.com1.z0.glb.clouddn.com/images/A21c457d4bab7640bb5eeb9ee053cbdca.png");//TODO
+        }
         Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
 
         //4 修改相关缓存
