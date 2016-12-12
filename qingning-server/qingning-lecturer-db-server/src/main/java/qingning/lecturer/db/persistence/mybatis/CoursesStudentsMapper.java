@@ -6,6 +6,7 @@ import qingning.lecturer.db.persistence.mybatis.entity.CoursesStudentsKey;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface CoursesStudentsMapper {
     int deleteByPrimaryKey(CoursesStudentsKey key);
@@ -21,4 +22,6 @@ public interface CoursesStudentsMapper {
     int updateByPrimaryKey(CoursesStudents record);
 
     List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
+
+    List<Map<String,Object>> findBanUserListInfo(Set<String> banUserIdList);
 }

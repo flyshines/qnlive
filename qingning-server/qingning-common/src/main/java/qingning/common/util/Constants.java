@@ -101,5 +101,7 @@ public final class Constants {
 	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";
 	public static final String CACHED_KEY_WEIXIN_JS_API_TIKET="SYS:WEIXIN:JS_API_TIKET";
 
+	public static final String CACHED_KEY_COURSE_BAN_USER_LIST="SYS:COURSE:{course_id}:BAN_USER_LIST";
+
 	
 }

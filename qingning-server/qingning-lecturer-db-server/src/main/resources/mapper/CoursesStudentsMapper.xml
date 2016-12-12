@@ -162,8 +162,28 @@
     <if test="student_pos != null" >
       and cs.student_pos <![CDATA[ < ]]> #{student_pos}
     </if>
+    <if test="all_ban_user_id_list != null" >
+      and cs.user_id not in
+      <foreach collection="all_ban_user_id_list" item="item" index="index" open="("
+               separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
     order by cs.student_pos desc
+
     limit #{page_count}
+  </select>
+
+  <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.HashSet" >
+    select
+    u.user_id, u.nick_name, u.avatar_address, cs.create_time
+    from t_courses_students cs join t_user u on cs.user_id = u.user_id
+    where
+    cs.user_id in
+    <foreach collection="collection" item="item" index="index" open="("
+             separator="," close=")">
+      #{item}
+    </foreach>
   </select>
 
 

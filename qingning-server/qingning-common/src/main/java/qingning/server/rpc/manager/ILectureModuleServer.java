@@ -3,6 +3,7 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface ILectureModuleServer {
 	Map<String,Object> createLiveRoom(Map<String, Object> reqMap);
@@ -34,4 +35,6 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 
 	Map<String,Object> findLoginInfoByUserId(String userId);
+
+	List<Map<String,Object>> findBanUserListInfo(Set<String> banUserIdList);
 }

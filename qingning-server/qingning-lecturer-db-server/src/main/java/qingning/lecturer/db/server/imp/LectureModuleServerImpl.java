@@ -275,4 +275,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return loginInfoMapper.findLoginInfoByUserId(user_id);
 	}
 
+	@Override
+	public List<Map<String, Object>> findBanUserListInfo(Set<String> banUserIdList) {
+
+		return coursesStudentsMapper.findBanUserListInfo(banUserIdList);
+	}
+
 }

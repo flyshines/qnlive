@@ -589,6 +589,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
+        resultMap.put("room_id", liveRoomMap.get("room_id"));
 
         //TODO 查询加入课程状态
 

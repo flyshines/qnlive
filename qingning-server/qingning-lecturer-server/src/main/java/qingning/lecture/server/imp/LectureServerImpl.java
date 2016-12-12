@@ -369,6 +369,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
+        resultMap.put("room_id", liveRoomMap.get("room_id"));
 
         return resultMap;
     }
@@ -789,21 +790,113 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("courseStudents")
     public Map<String, Object> getCourseStudentList(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
-        if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
-            queryMap.put("student_pos", Long.parseLong(reqMap.get("student_pos").toString()));
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        List<Map<String,Object>> studentList = new ArrayList<>();
+
+        //1.先判断数据来源  数据来源：1：缓存 2.：数据库
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String bandKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
+
+        //1.数据来源为缓存
+        if( StringUtils.isBlank(reqMap.get("data_source").toString()) || reqMap.get("data_source").toString().equals("1")){
+            //1.1先查找缓存中的数据
+            String startIndex;
+            String endIndex = "-inf";
+            if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
+                startIndex = reqMap.get("student_pos").toString();
+            }else {
+                startIndex = "+inf";
+            }
+            Set<String> banUserIdList = jedis.zrevrangeByScore(bandKey, startIndex, endIndex, 0, pageCount);
+            List<Map<String,Object>> banUserList;
+            List<Map<String,Object>> processBanUserList = new ArrayList<>();
+
+            //1.1.1如果存在禁言列表，则根据禁言列表中的用户id从数据库中查询用户相应信息
+            if(banUserIdList != null && banUserIdList.size() > 0){
+                Set<Tuple> banUserTupleList = jedis.zrevrangeByScoreWithScores(bandKey, startIndex, endIndex, 0, pageCount);
+                banUserList = lectureModuleServer.findBanUserListInfo(banUserIdList);
+
+                DecimalFormat decimalFormat = new DecimalFormat("#");
+                for(Tuple tuple : banUserTupleList){
+                    for(Map<String,Object> banMap : banUserList){
+                        if(tuple.getElement().equals(banMap.get("user_id").toString())){
+                            banMap.put("student_pos",decimalFormat.format(tuple.getScore()));
+                            banMap.put("ban_status","1");
+                            banMap.put("data_source","1");
+                            processBanUserList.add(banMap);
+                            break;
+                        }
+                    }
+                }
+
+                if(! CollectionUtils.isEmpty(processBanUserList)){
+                    studentList.addAll(processBanUserList);
+                }
+            }
+
+            //1.2缓存中数据不够，则查询数据库中的数据补足
+            List<Map<String,Object>> studentListDB;
+            if(banUserIdList == null || banUserIdList.size() < pageCount){
+                //1.2.1查找被禁言的所有学生用户id列表，查询数据库时对这部分数据进行排除
+                Set<String> allBanUserIdList = null;
+                if(! startIndex.equals("+inf")){
+                    allBanUserIdList = jedis.zrevrangeByScore(bandKey, "+inf", "-inf", 0, pageCount);
+                }else {
+                    allBanUserIdList = banUserIdList;
+                }
+
+                if(banUserIdList != null && banUserIdList.size() > 0){
+                    pageCount = pageCount - banUserIdList.size();
+                }
+
+                queryMap.put("page_count", pageCount);
+                queryMap.put("course_id", reqMap.get("course_id").toString());
+                if(allBanUserIdList != null && allBanUserIdList.size() > 0){
+                    queryMap.put("all_ban_user_id_list", allBanUserIdList);
+                }
+                studentListDB = lectureModuleServer.findCourseStudentList(queryMap);
+
+                if(! CollectionUtils.isEmpty(studentListDB)){
+                    for(Map<String,Object> banMap : studentListDB){
+                        banMap.put("data_source","2");
+                    }
+
+                    studentList.addAll(studentListDB);
+                }
+            }
+
+            if(! CollectionUtils.isEmpty(studentList)){
+                resultMap.put("student_list",studentList);
+            }
+            return resultMap;
+
+
+        }else {
+            //2.数据来源为数据库，则直接查询数据库
+            queryMap.put("page_count", pageCount);
+            if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
+                queryMap.put("student_pos", Long.parseLong(reqMap.get("student_pos").toString()));
+            }
+            queryMap.put("course_id", reqMap.get("course_id").toString());
+            Set<String> allBanUserIdList = jedis.zrevrangeByScore(bandKey, "+inf", "-inf", 0, pageCount);
+            if(allBanUserIdList != null && allBanUserIdList.size() > 0){
+                queryMap.put("all_ban_user_id_list", allBanUserIdList);
+            }
+            List<Map<String,Object>> studentListDB = lectureModuleServer.findCourseStudentList(queryMap);
+
+            if(! CollectionUtils.isEmpty(studentListDB)){
+                for(Map<String,Object> banMap : studentListDB){
+                    banMap.put("data_source","2");
+                }
+                resultMap.put("student_list", studentListDB);
+            }
+
+            return resultMap;
         }
-        queryMap.put("course_id", reqMap.get("course_id").toString());
-        List<Map<String,Object>> messageList = lectureModuleServer.findCourseStudentList(queryMap);
-
-        if(! CollectionUtils.isEmpty(messageList)){
-            resultMap.put("message_list", messageList);
-        }
-
-        return resultMap;
-
     }
 
 

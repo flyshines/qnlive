@@ -146,6 +146,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		resultMap.put("access_token", access_token);
 		resultMap.put("m_user_id", m_user_id);
 		resultMap.put("m_pwd", m_pwd);
+		resultMap.put("user_id", user_id);
 	}
 
 	@SuppressWarnings("unchecked")

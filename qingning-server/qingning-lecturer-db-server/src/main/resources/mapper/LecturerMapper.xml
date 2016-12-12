@@ -134,5 +134,15 @@
     where lecturer_id = #{lecturer_id}
   </select>
 
+  <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.HashSet" >
+    select
+    user_id, nick_name, avatar_address, create_time
+    from t_user
+    where user_id in
+    <foreach collection="set" item="item" index="index" open="("
+             separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
 
 </mapper>
