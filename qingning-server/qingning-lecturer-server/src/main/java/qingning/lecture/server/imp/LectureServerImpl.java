@@ -735,7 +735,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
 
-            return resultMap;
 
         }else{
             //2.如果不在缓存中，则查询数据库
@@ -760,8 +759,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id", courseInfoMap.get("im_course_id"));
 
-            return resultMap;
         }
+
+        map.clear();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String bandKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
+        Set<String> banUserIdList = jedis.zrange(bandKey, 0 , -1);
+        if(banUserIdList != null && banUserIdList.size() > 0){
+            resultMap.put("ban_user_id_list", banUserIdList);
+        }
+        return resultMap;
     }
 
     @SuppressWarnings("unchecked")

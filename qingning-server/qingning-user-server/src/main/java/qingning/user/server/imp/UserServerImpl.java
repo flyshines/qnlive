@@ -911,6 +911,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         }
 
+        map.clear();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String banKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
+        Double banScore = jedis.zscore(banKey, userId);
+        if(banScore == null){
+            resultMap.put("ban_status", "0");
+        }else {
+            resultMap.put("ban_status", "1");
+        }
         return resultMap;
     }
 
