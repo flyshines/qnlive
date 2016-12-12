@@ -2,6 +2,7 @@ package qingning.common.server.imp;
 
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
@@ -57,6 +58,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				//如果登录信息为空，则进行注册
 				if(loginInfoMap == null){
 					//注册IM
+					Jedis jedis = jedisUtils.getJedis();
 					Map<String,String> imResultMap = IMMsgUtil.createIMAccount(reqMap.get("device_id").toString());
 					if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
 						throw new QNLiveException("120003");
@@ -64,6 +66,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						//初始化数据库相关表
 						reqMap.put("m_user_id", imResultMap.get("uid"));
 						reqMap.put("m_pwd", imResultMap.get("password"));
+						//设置默认用户头像
+						if(reqMap.get("avatar_address") == null || StringUtils.isBlank(reqMap.get("avatar_address").toString())){
+							reqMap.put("avatar_address","http://7xt3lm.com1.z0.glb.clouddn.com/images/1467E3DB24D3F6EA884511BF6B24D2D9.png");//TODO
+						}
+						if(reqMap.get("nick_name") == null || StringUtils.isBlank(reqMap.get("nick_name").toString())){
+							reqMap.put("avatar_address","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+						}
 						Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
 
 						//生成access_token，将相关信息放入缓存，构造返回参数
