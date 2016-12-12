@@ -104,14 +104,15 @@ public class IMMsgUtil {
      * 创建IM群组
      * creator：创建者ID
      */
-    public static String createIMGroup(String creator){
+    public static Map<String,String> createIMGroup(String creator){
         // app_id
         String appId = configMap.get("app_id");
         // 签名参数
         String sign = "appid=" + appId + "creator=" + creator + "type=create" + configMap.get("app_key");
         // 请求地址
         String address = configMap.get("url") + "/mgr/group?appid=" + appId + "&creator=" + creator + "&type=create&sign=" + MD5Util.getMD5(sign).toLowerCase();
-        return HttpTookit.doGet(address);
+        String result = HttpTookit.doGet(address);
+        return parseText(result);
     }
 
     /*
@@ -240,8 +241,11 @@ public class IMMsgUtil {
 //        System.out.println(map);
         //String imGroup = createIMGroup("600435");
         //System.out.println(imGroup);
-        String content = "pppsdmkkj测试推送AES6652";
-        String custom = "{\"type\":\"editgroup\",\"group_id\":\"443\",\"member\":{\"user_id\":\"68\",\"m_user_id\":\"600506\",\"group_nick_name\":\"数字证书test\"}}\n";
+//        String groupid = "13843";
+//        String muserid= "855179";
+//        joinGroup(groupid,muserid,muserid);
+//        String content = "pppsdmkkj测试推送AES6652";
+//        String custom = "{\"type\":\"editgroup\",\"group_id\":\"443\",\"member\":{\"user_id\":\"68\",\"m_user_id\":\"600506\",\"group_nick_name\":\"数字证书test\"}}\n";
         //String custom = "looo+pppp+oooo+kkkkkk";
         //sendMessageForP2P("system","600561",content,custom);
         //sendMessageInIM("319","test",custom,"system");
@@ -265,6 +269,8 @@ public class IMMsgUtil {
 //        System.out.println(repalceBefore);
         //String test = "<result>success</result>";
         //System.out.println(parseText(test));
+        Map<String,String> map = createIMAccount("1234sfsfdsfds");
+        System.out.println(map);
     }
 
 
