@@ -83,5 +83,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return loginInfoMapper.findLoginInfoByUserId(user_id);
 	}
 
+	@Override
+	public Map<String, Object> findUserInfoByUserId(String user_id) {
+		return userMapper.findByUserId(user_id);
+	}
+
 
 }

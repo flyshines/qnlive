@@ -156,6 +156,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		resultMap.put("m_user_id", m_user_id);
 		resultMap.put("m_pwd", m_pwd);
 		resultMap.put("user_id", user_id);
+		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(user_id);
+		resultMap.put("avatar_address", userMap.get("avatar_address"));
+		resultMap.put("nick_name", userMap.get("nick_name"));
 	}
 
 	@SuppressWarnings("unchecked")

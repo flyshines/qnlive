@@ -239,8 +239,8 @@ public class IMMsgUtil {
 
 //        Map<String,String> map = createIMAccount("1234sfsfdsfds");
 //        System.out.println(map);
-        //String imGroup = createIMGroup("600435");
-        //System.out.println(imGroup);
+        Map<String,String> map = createIMGroup("854165");
+        System.out.println(map);
 //        String groupid = "13843";
 //        String muserid= "855179";
 //        joinGroup(groupid,muserid,muserid);
@@ -269,8 +269,8 @@ public class IMMsgUtil {
 //        System.out.println(repalceBefore);
         //String test = "<result>success</result>";
         //System.out.println(parseText(test));
-        Map<String,String> map = createIMAccount("1234sfsfdsfds");
-        System.out.println(map);
+//        Map<String,String> map = createIMAccount("1234sfsfdsfds");
+//        System.out.println(map);
     }
 
 

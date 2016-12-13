@@ -441,6 +441,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 updateCacheMap.put("status", "2");
                 jedis.hmset(courseKey, updateCacheMap);
 
+                //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
+
+
             } else {
                 //2.不为课程结束
                 //修改缓存，同时修改数据库
@@ -783,20 +786,58 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("messageList")
     public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        Map<String, Object> resultMap = new HashMap<>();
+
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
+
+        //初始化下标
+        long startIndex;
+        long endIndex;
         if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
-            queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
+            startIndex = Long.parseLong(reqMap.get("message_pos").toString()) + 1;
+        }else {
+            startIndex = 0L;
         }
-        queryMap.put("course_id", reqMap.get("course_id").toString());
-        List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
+        endIndex = startIndex + pageCount - 1;
 
-        if(! CollectionUtils.isEmpty(messageList)){
-            resultMap.put("message_list", messageList);
+        Set<String> messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+        //缓存不存在则读取数据库中的内容
+        if(messageIdList == null || messageIdList.size() == 0){
+            Map<String, Object> queryMap = new HashMap<>();
+            queryMap.put("page_count", pageCount);
+            if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
+                queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
+            }
+            queryMap.put("course_id", reqMap.get("course_id").toString());
+            List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
+
+            if(! CollectionUtils.isEmpty(messageList)){
+                resultMap.put("message_list", messageList);
+            }
+
+            return resultMap;
+
+        }else {
+            //缓存中存在则读取缓存内容
+            List<Map<String,String>> messageListCache = new ArrayList<>();
+            for(String messageId : messageIdList){
+                map.put(Constants.FIELD_MESSAGE_ID, messageId);
+                String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
+                Map<String,String> messageMap = jedis.hgetAll(messageKey);
+                messageMap.put("message_pos", startIndex+"");
+                messageListCache.add(messageMap);
+                startIndex++;
+            }
+
+            resultMap.put("message_list", messageListCache);
+            return resultMap;
         }
 
-        return resultMap;
 
     }
 

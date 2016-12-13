@@ -189,8 +189,24 @@
     </if>
     order by cm.message_pos asc
     limit #{page_count}
-
-
   </select>
+
+  <insert id="batchInsert" parameterType="list" >
+    insert into t_course_message (message_id, course_id, message,
+    message_url, message_question, audio_time,
+    message_pos, message_type, send_type,
+    creator_id, creator_avatar_address, create_time
+    )
+    values
+    <foreach collection="list" item="item" index="index"
+             separator=",">
+      (#{item.groupId},#{item.userId},#{item.joinTime},#{item.identityType},#{item.msgSet},#{item.groupOrder},#{item.groupNickName})
+    </foreach>
+    (#{messageId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR},
+    #{messageUrl,jdbcType=VARCHAR}, #{messageQuestion,jdbcType=VARCHAR}, #{audioTime,jdbcType=BIGINT},
+    #{messagePos,jdbcType=BIGINT}, #{messageType,jdbcType=CHAR}, #{sendType,jdbcType=CHAR},
+    #{creatorId,jdbcType=VARCHAR}, #{creatorAvatarAddress,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+    )
+  </insert>
 
 </mapper>
