@@ -195,18 +195,13 @@
     insert into t_course_message (message_id, course_id, message,
     message_url, message_question, audio_time,
     message_pos, message_type, send_type,
-    creator_id, creator_avatar_address, create_time
+    creator_id, create_time
     )
     values
-    <foreach collection="list" item="item" index="index"
-             separator=",">
-      (#{item.groupId},#{item.userId},#{item.joinTime},#{item.identityType},#{item.msgSet},#{item.groupOrder},#{item.groupNickName})
+    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+      #{item.message_id},#{item.course_id},#{item.message},#{item.message_url},#{item.message_question},#{item.audio_time},#{item.message_pos},
+      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time}
     </foreach>
-    (#{messageId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR},
-    #{messageUrl,jdbcType=VARCHAR}, #{messageQuestion,jdbcType=VARCHAR}, #{audioTime,jdbcType=BIGINT},
-    #{messagePos,jdbcType=BIGINT}, #{messageType,jdbcType=CHAR}, #{sendType,jdbcType=CHAR},
-    #{creatorId,jdbcType=VARCHAR}, #{creatorAvatarAddress,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
-    )
   </insert>
 
 </mapper>

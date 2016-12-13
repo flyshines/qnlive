@@ -29,6 +29,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 		Set<String> messageIdList = jedis.zrange(messageListKey, 0 , -1);
 
 		List<Map<String,Object>> messageList = new ArrayList<>();
+		List<String> messageKeyList = new ArrayList<>();
 		JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
 		callBack.invoke(new JedisBatchOperation(){
 			@Override
@@ -56,6 +57,8 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						messageObjectMap.put("create_time", createTime);
 					}
 					messageList.add(messageObjectMap);
+
+					messageKeyList.add(messageKey);
 				}
 
 				pipeline.sync();
@@ -65,8 +68,11 @@ public class SaveCourseMessageService extends AbstractMsgService{
 		//批量插入到数据库中
 
 
-		//判断插入结果，插入结果正常则批量删除缓存中的内容
 
-		System.out.println("test");
+		String[] messageKeyArray = new String[messageKeyList.size()];
+		messageKeyList.toArray(messageKeyArray);
+		jedis.del(messageKeyArray);
+		jedis.del(messageListKey);
+
 	}
 }
