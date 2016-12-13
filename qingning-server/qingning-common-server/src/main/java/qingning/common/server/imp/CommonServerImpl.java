@@ -169,7 +169,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		if("1".equals (reqMap.get("upload_type"))){ //图片
 			url = IMMsgUtil.configMap.get("images_space_domain_name");
 
-			token = auth.uploadToken(IMMsgUtil.configMap.get("images_space"), null, expiredTime, new StringMap()
+			token = auth.uploadToken(IMMsgUtil.configMap.get("image_space"), null, expiredTime, new StringMap()
 					.putNotEmpty("returnBody", "{\"key\": $(key), \"hash\": $(etag), \"width\": $(imageInfo.width), \"height\": $(imageInfo.height)}"));
 
 		} else if("2".equals (reqMap.get("upload_type"))){ //音频
