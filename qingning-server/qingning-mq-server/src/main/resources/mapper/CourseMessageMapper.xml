@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.lecturer.db.persistence.mybatis.CourseMessageMapper" >
-  <resultMap id="BaseResultMap" type="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+<mapper namespace="qingning.mq.persistence.mybatis.CourseMessageMapper" >
+  <resultMap id="BaseResultMap" type="qingning.mq.persistence.entity.CourseMessage" >
     <id column="message_id" property="messageId" jdbcType="VARCHAR" />
     <result column="course_id" property="courseId" jdbcType="VARCHAR" />
     <result column="message" property="message" jdbcType="VARCHAR" />
@@ -29,7 +29,7 @@
     delete from t_course_message
     where message_id = #{messageId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+  <insert id="insert" parameterType="qingning.mq.persistence.entity.CourseMessage" >
     insert into t_course_message (message_id, course_id, message, 
       message_url, message_question, audio_time, 
       message_pos, message_type, send_type, 
@@ -41,7 +41,7 @@
       #{creatorId,jdbcType=VARCHAR}, #{creatorAvatarAddress,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
       )
   </insert>
-  <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+  <insert id="insertSelective" parameterType="qingning.mq.persistence.entity.CourseMessage" >
     insert into t_course_message
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="messageId != null" >
@@ -120,7 +120,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.mq.persistence.entity.CourseMessage" >
     update t_course_message
     <set >
       <if test="courseId != null" >
@@ -159,7 +159,7 @@
     </set>
     where message_id = #{messageId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.lecturer.db.persistence.mybatis.entity.CourseMessage" >
+  <update id="updateByPrimaryKey" parameterType="qingning.mq.persistence.entity.CourseMessage" >
     update t_course_message
     set course_id = #{courseId,jdbcType=VARCHAR},
       message = #{message,jdbcType=VARCHAR},
@@ -200,22 +200,22 @@
     values
     <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
       #{item.message_id},#{item.course_id},
-      <if test="message != null" >
+      <if test="item.message != null" >
         #{item.message},
       </if>
-      <if test="message == null" >
+      <if test="item.message == null" >
         null,
       </if>
-      <if test="message_url != null" >
+      <if test="item.message_url != null" >
         #{item.message_url},
       </if>
-      <if test="message_url == null" >
+      <if test="item.message_url == null" >
         null,
       </if>
-      <if test="message_question != null" >
+      <if test="item.message_question != null" >
         #{item.message_question},
       </if>
-      <if test="message_question == null" >
+      <if test="item.message_question == null" >
         null,
       </if>
       #{item.audio_time},#{item.message_pos},
