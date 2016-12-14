@@ -38,6 +38,10 @@ public class ExceptionHanderAdvice {
 		}else{
 			log.error(exception.getMessage());
 			responseEntity.setCode("000099");
+			String msg = message.getMessages("000099");
+			if(debug){
+				msg=msg+"("+exception.getMessage()+")";
+			}
 			responseEntity.setMsg(message.getMessages("000099"));
 		}
 		return responseEntity;

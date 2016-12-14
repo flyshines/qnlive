@@ -580,7 +580,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    Map<String,Object> findCourseFinishList(Jedis jedis, String key,
+    private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
                                     String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count){
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
         Map<String,Object> queryMap = new HashMap<>();
@@ -613,7 +613,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    Map<String,String> findLastElementForRedisSet(Set<Tuple> redisSet){
+    private Map<String,String> findLastElementForRedisSet(Set<Tuple> redisSet){
         Map<String,String> resultMap = new HashMap<>();
         String startIndexCache = null;
         String startIndexDB = null;

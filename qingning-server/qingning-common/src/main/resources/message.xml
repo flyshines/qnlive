@@ -39,9 +39,10 @@
 				<entry key="100013" value="该课程不属于当前用户"/>
 				<entry key="100014" value="已经上传PPT，无法再次上传"/>
 				<entry key="100015" value="创建IM群组失败"/>
-
-
-
+				<entry key="100016" value="无效的直播间"/>
+				<entry key="100017" value="直播间名称不能超过三十个字符"/>
+				<entry key="100018" value="直播间简介不能超过一百个字符"/>
+				
 				<entry key="110003" value="关注直播间操作失败"/>
 
 

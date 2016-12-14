@@ -10,6 +10,7 @@ public final class Constants {
 	public static final String SYSLONG="long";
 	public static final String SYSDOUBLE="double";
 	public static final String SYSDATE="date";
+	public static int COURSE_MAX_INTERVAL = 10;
 	
 	public static final String QUEUE_NAME="GCW_DB_W";
 	

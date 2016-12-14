@@ -11,8 +11,8 @@
 				</auth>
 				<inputs>
 					<param name="avatar_address" type="string" require="N"  />
-					<param name="room_name" type="string" require="N"  />
-					<param name="room_remark" type="string" require="N"  />
+					<param name="room_name" type="string" require="N"  format=".{0,30},100017"/>
+					<param name="room_remark" type="string" require="N"  format=".{0,100},100018"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -27,7 +27,7 @@
 					<param name="avatar_address" type="string" require="N"  />
 					<param name="room_name" type="string" require="N"  />
 					<param name="room_remark" type="string" require="N"  />
-					<param name="room_id" type="long" require="Y"  />
+					<param name="room_id" type="string" require="Y"  />
 					<param name="update_time" type="long" require="Y,000100"  />
 				</inputs>
 				<outputs>
@@ -41,6 +41,9 @@
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  />
+					<param name="room_id" type="string" validate="(query_type,room_id)=>{
+					       		var isEmpty= room_id==null || room_id.length == 0;
+					       		return query_type == 0 || !isEmpty;},100016"/>
 				</inputs>
 				<outputs>
 				</outputs>

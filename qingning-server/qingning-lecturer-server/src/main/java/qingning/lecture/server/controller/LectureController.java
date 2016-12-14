@@ -66,7 +66,7 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/lecturer/rooms", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity queryLiveRoomDetail(
-			@RequestParam(value = "query_type") String query_type,
+			@RequestParam(value = "query_type",defaultValue = "") String query_type,
 			@RequestParam(value = "room_id",defaultValue = "") String room_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version
