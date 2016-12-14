@@ -31,7 +31,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		auth = Auth.create (IMMsgUtil.configMap.get("AK"), IMMsgUtil.configMap.get("SK"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@FunctionName("serverTime")
 	public Map<String,Object> getServerTime (RequestEntity reqEntity) throws Exception{
 
