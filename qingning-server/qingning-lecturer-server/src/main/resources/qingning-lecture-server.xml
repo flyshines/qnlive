@@ -103,8 +103,16 @@
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
 					<param name="room_id" type="string" require="N"  />
-					<param name="start_time" type="long" require="N"  />
-					<param name="course_id" type="string" require="N"  />
+					<param name="start_time" type="long" require="N"
+					       validate="(start_time,course_id)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  start_time == null; 
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					<param name="course_id" type="string" require="N"  
+					       validate="(start_time,course_id)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  start_time == null; 
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 				</inputs>
 				<outputs>
 				</outputs>

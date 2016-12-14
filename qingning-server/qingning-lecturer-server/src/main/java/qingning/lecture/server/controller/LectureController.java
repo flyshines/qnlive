@@ -1,7 +1,5 @@
 package qingning.lecture.server.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
@@ -12,10 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class LectureController extends AbstractController {
-
-	private static final Logger logger = LoggerFactory.getLogger(LectureController.class);
-
+public class LectureController extends AbstractController {	
 	/**
 	 * 创建直播间
 	 * @param entity
@@ -45,6 +40,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/lecturer/rooms/{room_id}", method = RequestMethod.PUT)
 	public
 	@ResponseBody ResponseEntity updateLiveRoom(
@@ -92,6 +88,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/lecturer/rooms/{room_id}/courses", method = RequestMethod.POST)
 	public
 	@ResponseBody ResponseEntity createCourse(
@@ -136,6 +133,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/lecturer/courses/{course_id}", method = RequestMethod.PUT)
 	public
 	@ResponseBody ResponseEntity updateCourse(
@@ -188,6 +186,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.PUT)
 	public
 	@ResponseBody ResponseEntity processCoursePPTs(

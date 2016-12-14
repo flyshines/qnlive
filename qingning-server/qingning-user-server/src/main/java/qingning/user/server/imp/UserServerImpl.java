@@ -126,7 +126,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param reqEntity
      * @return
      */
-    private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());

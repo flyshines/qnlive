@@ -1,6 +1,5 @@
 package qingning.user.server.controller;
 
-import org.apache.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
@@ -12,9 +11,6 @@ import java.util.Map;
 
 @RestController
 public class UserController extends AbstractController{
-	
-	private static final Logger logger = Logger.getLogger(UserController.class);
-
 	/**
 	 * 用户关注直播间
 	 * @param entity
@@ -24,6 +20,7 @@ public class UserController extends AbstractController{
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/user/live_rooms/{room_id}/notice", method = RequestMethod.PUT)
 	public
 	@ResponseBody
@@ -156,6 +153,7 @@ public class UserController extends AbstractController{
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/user/study/courses/{course_id}", method = RequestMethod.PUT)
 	public
 	@ResponseBody
@@ -180,6 +178,7 @@ public class UserController extends AbstractController{
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
 	public
 	@ResponseBody

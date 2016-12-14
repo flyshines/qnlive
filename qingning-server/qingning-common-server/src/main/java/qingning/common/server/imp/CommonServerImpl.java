@@ -3,11 +3,8 @@ package qingning.common.server.imp;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
-import qingning.common.server.enums.LoginType;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
@@ -34,7 +31,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		auth = Auth.create (IMMsgUtil.configMap.get("AK"), IMMsgUtil.configMap.get("SK"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@FunctionName("serverTime")
 	public Map<String,Object> getServerTime (RequestEntity reqEntity) throws Exception{
 

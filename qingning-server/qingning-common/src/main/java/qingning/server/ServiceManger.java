@@ -24,8 +24,7 @@ public class ServiceManger {
 	private static Log log = LogFactory.getLog(ServiceManger.class);
 	private Map<String, Map<String,QNLiveServer>> servicerMap = new HashMap<String, Map<String,QNLiveServer>>();
 	private JedisUtils jedisUtils = null;
-	private Map<String,Object> serverUrlInfoMap = new HashMap<String,Object>();
-	
+		
 	private void initServerDetails(Map<String,QNLiveServer> map, Element element) throws Exception {
 		List<Element> children = element.getChildren();
 		if(MiscUtils.isEmpty(children)){
@@ -221,12 +220,5 @@ public class ServiceManger {
 			}			
 		}
 		return server;
-	}
-
-	private void initServerUrlInfoMap() throws Exception{
-		//从数据库中读取数据
-		//Map<String,Object> serverUrlInfoMap =
-
-		//将数据放入该方法的map中
 	}
 }

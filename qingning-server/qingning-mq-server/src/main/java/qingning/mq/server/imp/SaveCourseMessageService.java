@@ -22,6 +22,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 	@Autowired(required = true)
 	private CourseMessageMapper courseMessageMapper;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context)
 			throws Exception {

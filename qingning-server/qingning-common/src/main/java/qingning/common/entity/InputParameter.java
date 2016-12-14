@@ -77,7 +77,7 @@ public class InputParameter {
 			if(functionStr.length != 2){
 				this.validate=null;
 			} else {
-				functionStr[1]=functionStr[1].replaceAll("&lt;", "<");
+				functionStr[1]=MiscUtils.specialCharReplace(functionStr[1]);
 				int length = functionStr[0].trim().length();
 				String parameters = functionStr[0].substring(1, length-1);
 				String[] tmpArr = parameters.split(",");

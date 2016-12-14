@@ -14,23 +14,14 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.regex.Pattern;
-
 import com.alibaba.dubbo.common.utils.StringUtils;
 
 import qingning.common.entity.QNLiveException;
-import qingning.common.entity.RequestEntity;
-import qingning.server.JedisBatchCallback;
-import qingning.server.JedisBatchOperation;
-import qingning.server.rpc.CommonReadOperation;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 
 public final class MiscUtils {
 	private MiscUtils(){};
@@ -67,7 +58,7 @@ public final class MiscUtils {
 	        return date.getTime() / 1000;
 	 }
 	 
-	public static Object convertStringToObject(Object obj , String type){
+	public static Object convertStringToObject(Object obj , String type,String fieldName) throws Exception{
 		if(!isEmpty(obj) && !isEmpty(type)){
 			try{
 				if(!(obj instanceof String)){
@@ -88,7 +79,7 @@ public final class MiscUtils {
 					obj = new Date(Long.parseLong((String)obj));
 				}
 			} catch(Exception e){
-				
+				throw new QNLiveException("000101",fieldName);
 			}
 		}
 		return obj;
@@ -346,5 +337,17 @@ public final class MiscUtils {
 				}
 			}
 		}
+	}
+	
+	public static String specialCharReplace(String value){
+		if(isEmpty(value)){
+			return value;
+		}
+		String[] specailChar={"<","&"};
+		String[] specailCode={"&lt;","&amp;"};
+		for(int i=0; i < specailChar.length; ++i){
+			value=value.replaceAll(specailCode[i], specailChar[i]);
+		}
+		return value;
 	}
 }

@@ -35,6 +35,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param jedisUtils
 	 * @param context
 	 */
+	@SuppressWarnings("unchecked")
 	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
@@ -64,6 +65,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param jedisUtils
 	 * @param context
 	 */
+	@SuppressWarnings("unchecked")
 	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");

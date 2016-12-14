@@ -7,10 +7,7 @@ import qingning.server.AbstractController;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,13 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
-
 @RestController
 public class CommonController extends AbstractController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
-
 
     /**
      * 获取系统时间
@@ -50,7 +42,8 @@ public class CommonController extends AbstractController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/user/login", method = RequestMethod.POST)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/user/login", method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity userLogin(

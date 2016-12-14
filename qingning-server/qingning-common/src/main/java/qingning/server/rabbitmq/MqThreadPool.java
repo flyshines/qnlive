@@ -15,7 +15,6 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.JedisUtils;
 import qingning.server.AbstractMsgService;
-import qingning.server.ServiceManger;
 
 public class MqThreadPool {	
 	private static int MAX_QUEUQ_SIZE = 2000;
