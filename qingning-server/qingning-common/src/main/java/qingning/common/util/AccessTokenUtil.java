@@ -1,5 +1,7 @@
 package qingning.common.util;
 
+import qingning.common.entity.QNLiveException;
+
 /**
  * Created by loovee on 2016/11/28.
  */
@@ -136,61 +138,64 @@ public class AccessTokenUtil {
 
         //System.out.println(generateAccessToken("Z", "1234567896543"));
         //System.out.println(getUserIdFromAccessToken("1UW3969Y742V9426U96U55W9U21W3W62U4070613363005"));//fd3969b742e9426f96f55d9f21d3d62f
-        System.out.println(getUserIdFromAccessToken("0uw6030y257v0573u03u44w0u78w6w37u386720956557"));//fd3969b742e9426f96f55d9f21d3d62f
+        //System.out.println(getUserIdFromAccessToken("0uw6030y257v0573u03u44w0u78w6w37u386720956557"));//fd3969b742e9426f96f55d9f21d3d62f
     }
 
-    public static String getUserIdFromAccessToken(String accessToken) {
+    public static String getUserIdFromAccessToken(String accessToken) throws Exception {
+    	try{
+    		Character firstCharacter = accessToken.charAt(0);
+    		StringBuilder transferResult = new StringBuilder();
+    		//对第一位进行校验
+    		if (firstCharacter.equals('0') || firstCharacter.equals('1')) {
 
-        Character firstCharacter = accessToken.charAt(0);
-        StringBuilder transferResult = new StringBuilder();
-        //对第一位进行校验
-        if (firstCharacter.equals('0') || firstCharacter.equals('1')) {
-
-            //取出被加密的userid
-            String preAccessToken = accessToken.substring(1, 33);
-            char[] tokenArray = preAccessToken.toCharArray();
+    			//取出被加密的userid
+    			String preAccessToken = accessToken.substring(1, 33);
+    			char[] tokenArray = preAccessToken.toCharArray();
 
 
-            //还原userid
-            if (firstCharacter.toString().equals("0")) {
-                for (char tokenChar : tokenArray) {
-                    if (Character.isDigit(tokenChar)) {
-                        Integer userIdCharTransferNum = Integer.valueOf(tokenChar + "");
-                        transferResult.append(9 - userIdCharTransferNum);
-                    } else {
-                        if (Character.isUpperCase(tokenChar)) {
-                            int temp = 'Z' - tokenChar + 65;
-                            char transferResultTemp = (char) temp;
-                            transferResult.append(transferResultTemp);
-                        } else {
-                            int temp = 'z' - tokenChar + 97;
-                            char transferResultTemp = (char) temp;
-                            transferResult.append(transferResultTemp);
-                        }
-                    }
-                }
-            } else if (firstCharacter.toString().equals("1")) {
-                for (char tokenChar : tokenArray) {
-                    if (Character.isDigit(tokenChar)) {
-                        transferResult.append(tokenChar + "");
-                        continue;
-                    } else {
-                        if (Character.isUpperCase(tokenChar)) {
-                            int temp = 'Z' - tokenChar + 65;
-                            Character tempChar = (char) temp;
-                            tempChar = Character.toLowerCase(tempChar);
-                            transferResult.append(tempChar);
-                        } else {
-                            int temp = 'z' - tokenChar + 97;
-                            char tempChar = (char) temp;
-                            tempChar = Character.toUpperCase(tempChar);
-                            transferResult.append(tempChar);
-                        }
-                    }
-                }
-            }
-        }
-        return transferResult.toString();
+    			//还原userid
+    			if (firstCharacter.toString().equals("0")) {
+    				for (char tokenChar : tokenArray) {
+    					if (Character.isDigit(tokenChar)) {
+    						Integer userIdCharTransferNum = Integer.valueOf(tokenChar + "");
+    						transferResult.append(9 - userIdCharTransferNum);
+    					} else {
+    						if (Character.isUpperCase(tokenChar)) {
+    							int temp = 'Z' - tokenChar + 65;
+    							char transferResultTemp = (char) temp;
+    							transferResult.append(transferResultTemp);
+    						} else {
+    							int temp = 'z' - tokenChar + 97;
+    							char transferResultTemp = (char) temp;
+    							transferResult.append(transferResultTemp);
+    						}
+    					}
+    				}
+    			} else if (firstCharacter.toString().equals("1")) {
+    				for (char tokenChar : tokenArray) {
+    					if (Character.isDigit(tokenChar)) {
+    						transferResult.append(tokenChar + "");
+    						continue;
+    					} else {
+    						if (Character.isUpperCase(tokenChar)) {
+    							int temp = 'Z' - tokenChar + 65;
+    							Character tempChar = (char) temp;
+    							tempChar = Character.toLowerCase(tempChar);
+    							transferResult.append(tempChar);
+    						} else {
+    							int temp = 'z' - tokenChar + 97;
+    							char tempChar = (char) temp;
+    							tempChar = Character.toUpperCase(tempChar);
+    							transferResult.append(tempChar);
+    						}
+    					}
+    				}
+    			}
+    		}
+    		return transferResult.toString();
+    	} catch(Exception e){
+    		throw new QNLiveException("000005");
+    	}
     }
 
 }

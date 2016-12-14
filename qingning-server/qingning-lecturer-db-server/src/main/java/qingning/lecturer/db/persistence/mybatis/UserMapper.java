@@ -4,9 +4,7 @@ package qingning.lecturer.db.persistence.mybatis;
 
 import qingning.lecturer.db.persistence.mybatis.entity.User;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface UserMapper {
     int deleteByPrimaryKey(String userId);

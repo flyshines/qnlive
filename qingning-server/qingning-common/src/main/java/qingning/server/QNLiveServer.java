@@ -8,11 +8,6 @@ import qingning.common.util.JedisUtils;
 import qingning.common.util.MqUtils;
 
 public interface QNLiveServer {
-/*	void setAccessTokenRequire(boolean accessTokenRequire);
-	void setTimesLimits(long millisecond);	
-	void addInputParameter(InputParameter inputParameter);
-	void addOutputParameter(OutputParameter outputParameter);*/
-	
 	void addFunctionInfo(FunctionInfo functionInfo);
 	void setJedisUtils(JedisUtils jedisUtils);
 	void validateRequestParamters(RequestEntity reqEntity) throws Exception;

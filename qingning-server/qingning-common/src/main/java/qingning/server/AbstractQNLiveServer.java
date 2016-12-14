@@ -125,14 +125,12 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 				}
 				List<String> condition= inputParamter.getCheckCondition();
 				if(!condition.isEmpty()){
-					boolean check=true;
+					boolean check=false;
 					Map<String,Object> conditionValue = new HashMap<String,Object>();
 					for(String key:condition){
 						Object currValue = inputParameterMap.get(key);
-						if(MiscUtils.isEmpty(currValue)){
-							check=false;
-							break;
-						} else {
+						if(!MiscUtils.isEmpty(currValue)){
+							check=true;
 							conditionValue.put(key, currValue);
 						}
 					}
@@ -145,11 +143,11 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void convertStringToObject(FunctionInfo functionInfo, Object inputParameterObj){
+	private void convertStringToObject(FunctionInfo functionInfo, Object inputParameterObj) throws Exception{
 		if(inputParameterObj instanceof Map){
 			Map inputParameterMap = (Map)inputParameterObj;
 			for(InputParameter inputParamter : functionInfo.getInputParameterList()){
-				inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(inputParameterMap.get(inputParamter.getName()), inputParamter.getType()));
+				inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(inputParameterMap.get(inputParamter.getName()), inputParamter.getType(), inputParamter.getName()));
 			}
 		}
 	}
@@ -248,7 +246,7 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		
 		String accessToken = reqEntity.getAccessToken();
 		Map<String,Object> map = new HashMap<String,Object>();
-		map.put("access_token", accessToken);
+		map.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, accessToken);
 		String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
 		String accessTokenKey=process_access_token;
 

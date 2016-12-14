@@ -3,8 +3,6 @@ package qingning.lecture.server.other;
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.ILectureModuleServer;
-import qingning.server.rpc.manager.IUserModuleServer;
-
 import java.util.Map;
 
 /**
