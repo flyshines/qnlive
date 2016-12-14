@@ -26,8 +26,13 @@ public class ImMsgServiceImp implements ImMsgService {
 			case "2"://禁言
 				processCourseBanUser(imMessage, jedisUtils, context);
 				break;
+			case "3"://讲师讲课音频
+				processCourseAudio(imMessage, jedisUtils, context);
+				break;
 		}
 	}
+
+
 
 	/**
 	 * 存储课程聊天消息到缓存中
@@ -90,4 +95,32 @@ public class ImMsgServiceImp implements ImMsgService {
 	}
 
 
+	/**
+	 * 存储讲师讲课音频到缓存
+	 * @param imMessage
+	 * @param jedisUtils
+	 * @param context
+	 */
+	private void processCourseAudio(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
+		Map<String,Object> body = imMessage.getBody();
+		Map<String,Object> information = (Map<String,Object>)body.get("information");
+
+		Jedis jedis = jedisUtils.getJedis();
+		Map<String, Object> map = new HashMap<>();
+		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
+		String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
+		double createTime = Double.parseDouble(body.get("send_time").toString());
+		String audioId = MiscUtils.getUUId();
+
+		//1.将讲课音频信息id插入到redis zsort列表中
+		jedis.zadd(audioListKey, createTime, audioId);
+
+		//2.将讲课音频信息放入redis的map中
+		map.put(Constants.FIELD_AUDIO_ID, audioId);
+		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, map);
+		Map<String,String> stringMap = new HashMap<>();
+		MiscUtils.converObjectMapToStringMap(information, stringMap);
+		stringMap.put("audio_id", audioId);
+		jedis.hmset(messageKey, stringMap);
+	}
 }

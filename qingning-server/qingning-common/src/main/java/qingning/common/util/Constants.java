@@ -75,6 +75,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PPTS_FIELD = "ppt_list";
 	public static final String CACHED_KEY_COURSE_AUDIOS = "SYS:COURSE:{course_id}:AUDIOS";
 	public static final String CACHED_KEY_COURSE_AUDIOS_FIELD = "audio_list";
+	public static final String FIELD_AUDIO_ID="audio_id";
+	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";
 	
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
@@ -102,8 +104,8 @@ public final class Constants {
 	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";
 	public static final String CACHED_KEY_WEIXIN_JS_API_TIKET="SYS:WEIXIN:JS_API_TIKET";
 
-	public static final String CACHED_KEY_COURSE_BAN_USER_LIST="SYS:COURSE:{course_id}:BAN_USER_LIST";
-	public static final String CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM="CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM";
+	public static final String CACHED_KEY_COURSE_BAN_USER_LIST="COURSE:{course_id}:BAN_USER_LIST";
+	public static final String CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM="SYS:USER_NICK_NAME_INCREMENT_NUM";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST="COURSE:{course_id}:MESSAGE_LIST";
 	public static final String FIELD_MESSAGE_ID="message_id";
 	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_id}";
