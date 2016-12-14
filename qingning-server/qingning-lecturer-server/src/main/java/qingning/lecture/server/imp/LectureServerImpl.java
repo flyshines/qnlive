@@ -401,9 +401,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("100011");
             }
 
+            //0.2进一步校验课程状态
             String statusFromCache = jedis.hget(courseKey, "status");
             if (statusFromCache == null || statusFromCache.equals("2")) {
                 throw new QNLiveException("100011");
+            }
+
+            //0.3校验该课程是否属于该用户
+            String courseOwner = jedis.hget(courseKey, "lecturer_id");
+            if(courseOwner == null || !userId.equals(courseOwner)){
+                throw new QNLiveException("100013");
             }
 
             //1如果为课程结束
@@ -718,10 +725,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
+        //0.校验该课程是否属于该讲师
+        String courseOwner = jedis.hget(courseKey, "lecturer_id");
+        if(courseOwner == null || !userId.equals(courseOwner)){
+            throw new QNLiveException("100013");
+        }
 
         //1.先检查该课程是否在缓存中
         if(jedis.exists(courseKey)){
