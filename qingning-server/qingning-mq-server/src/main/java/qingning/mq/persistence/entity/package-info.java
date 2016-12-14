@@ -1,1 +1,0 @@
-package qingning.mq.persistence.entity;

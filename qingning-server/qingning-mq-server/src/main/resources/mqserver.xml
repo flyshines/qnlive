@@ -63,5 +63,5 @@
 	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />
 	
 	
-	<bean id="CommonServer" class="qingning.mq.server.imp.DemoService"/>
+	<bean id="SaveCourseMessageServer" class="qingning.mq.server.imp.SaveCourseMessageService"/>
 </beans>

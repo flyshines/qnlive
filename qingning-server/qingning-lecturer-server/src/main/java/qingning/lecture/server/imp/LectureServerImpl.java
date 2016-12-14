@@ -2,6 +2,7 @@ package qingning.lecture.server.imp;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
@@ -442,7 +443,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(courseKey, updateCacheMap);
 
                 //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
-
+                RequestEntity mqRequestEntity = new RequestEntity();
+                mqRequestEntity.setServerName("SaveCourseMessageServer");
+                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqRequestEntity.setParam(reqEntity.getParam());
+                this.mqUtils.sendMessage(mqRequestEntity);
 
             } else {
                 //2.不为课程结束
