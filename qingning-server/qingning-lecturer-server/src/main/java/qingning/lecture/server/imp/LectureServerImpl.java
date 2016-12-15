@@ -777,7 +777,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             List<Map<String,String>> audioObjectMapList = new ArrayList<>();
             map.clear();
-            map.put(Constants.CACHED_KEY_COURSE_AUDIOS_FIELD, reqMap.get("course_id").toString());
+            map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
             String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
             String audioJsonStringKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
             Set<String> audioIdList = jedis.zrange(audioListKey, 0 , -1);
@@ -791,7 +791,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                         List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
                         for(String audio : audioIdList){
-                            map.put(Constants.FIELD_MESSAGE_ID, audio);
+                            map.put(Constants.FIELD_AUDIO_ID, audio);
                             String audioKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, map);
                             redisResponseList.add(pipeline.hgetAll(audioKey));
                         }

@@ -119,9 +119,12 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		students.setRoomId(courseMap.get("room_id"));
 		students.setCourseId(courseMap.get("course_id"));
 		//students.setPaymentAmount();//todo
-		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
+		if(courseMap.get("course_password") != null){
 			students.setCoursePassword(courseMap.get("course_password"));
 		}
+//		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
+//			students.setCoursePassword(courseMap.get("course_password"));
+//		}
 		students.setStudentType("0");//TODO
 		Date now = new Date();
 		students.setCreateTime(now);

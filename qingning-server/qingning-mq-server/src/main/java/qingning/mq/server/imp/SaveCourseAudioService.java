@@ -54,7 +54,7 @@ public class SaveCourseAudioService extends AbstractMsgService {
 				Long messagePos = 0L;
 				List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
 				for(String audio : audioIdList){
-					map.put(Constants.FIELD_MESSAGE_ID, audio);
+					map.put(Constants.FIELD_AUDIO_ID, audio);
 					String audioKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, map);
 					redisResponseList.add(pipeline.hgetAll(audioKey));
 					pipeline.del(audioKey);
