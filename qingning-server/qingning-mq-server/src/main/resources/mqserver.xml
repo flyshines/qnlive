@@ -25,30 +25,36 @@
     <task:scheduler id="messageScheduler" pool-size="20"/>
 	<context:component-scan base-package="qingning.mq.server.imp,qingning.mq.server.scheduler" />
 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
-	<import resource="classpath:mqbasicconfig.xml"/>
-	<import resource="classpath:db-config.xml"/>	
+	<import resource="classpath:db-config.xml"/>
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.mq.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
-	
+	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
+			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
+	</bean>
+		
+	<bean id="jsonMessageConverter" class="qingning.server.rabbitmq.RabbitMQMessageConverter"/>	
+	<rabbit:connection-factory id="connectionFactory"
+		username="${rmq.manager.user}" password="${rmq.manager.password}"
+		host="${rmq.ip}" port="${rmq.port}"/>
+	<rabbit:admin connection-factory="connectionFactory"/>
+	<rabbit:queue name="${rmq.queue}" durable="true" auto-delete="false"
+		exclusive="false"/>
+	<rabbit:direct-exchange name="${rmq.exchange}" durable="true" auto-delete="false">
+		<rabbit:bindings>
+			<rabbit:binding queue="${rmq.queue}" key="${rmq.queue.key}"/>
+		</rabbit:bindings>
+	</rabbit:direct-exchange>	
    	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener"/>
 	<rabbit:listener-container connection-factory="connectionFactory" acknowledge="auto"
 		auto-startup="false">
 		<rabbit:listener queues="${rmq.queue}" ref="listener"/>
 	</rabbit:listener-container>
-	 
-	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
-			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
-	</bean>
-	
-		
-	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />
-	
+			
+	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />	
 	<rabbit:connection-factory id="imConnectionFactory"
 		username="${im.rmq.manager.user}" password="${im.rmq.manager.password}"
 		host="${im.rmq.ip}" port="${im.rmq.port}"/>
 	<rabbit:admin id="imAdmin" connection-factory="imConnectionFactory"/>
-	<rabbit:template id="imRabbitTemplate" connection-factory="imConnectionFactory"
-		exchange="${im.rmq.exchange}" routing-key="${im.rmq.queue.key}"/>
-
+	
 	<rabbit:queue name="${im.rmq.queue}" durable="false" auto-delete="false"
 		exclusive="false"/>
 	<rabbit:direct-exchange name="${im.rmq.exchange}" durable="true" auto-delete="false">
@@ -62,8 +68,7 @@
 		<rabbit:listener queues="${im.rmq.queue}" ref="imListener"/>
 	</rabbit:listener-container>
 
-	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />
-	
+	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />	
 	
 	<bean id="SaveCourseMessageServer" class="qingning.mq.server.imp.SaveCourseMessageService"/>
 	<bean id="SaveAudioMessageServer" class="qingning.mq.server.imp.SaveCourseAudioService"/>
