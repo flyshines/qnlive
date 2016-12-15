@@ -37,4 +37,6 @@ public interface IUserModuleServer {
 	List<Map<String,Object>> findCourseMessageList(Map<String, Object> queryMap);
 
 	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
+
+	Map<String,Object> findLoginInfoByUserId(String user_id);
 }
