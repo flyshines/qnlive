@@ -55,10 +55,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				if(loginInfoMap == null){
 					//注册IM
 					Jedis jedis = jedisUtils.getJedis();
-					Map<String,String> imResultMap = IMMsgUtil.createIMAccount(reqMap.get("device_id").toString());
-					if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
-						throw new QNLiveException("120003");
-					}else {
+					Map<String,String> imResultMap = null;
+					try {
+						imResultMap =	IMMsgUtil.createIMAccount(reqMap.get("device_id").toString());
+					}catch (Exception e){
+						//TODO 暂不处理
+					}
+					//if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
+						//throw new QNLiveException("120003");
+					//}else {
 						//初始化数据库相关表
 						reqMap.put("m_user_id", imResultMap.get("uid"));
 						reqMap.put("m_pwd", imResultMap.get("password"));
@@ -73,7 +78,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 						//生成access_token，将相关信息放入缓存，构造返回参数
 						processLoginSuccess(1, dbResultMap, null, resultMap);
-					}
+					//}
 
 				}else{
 					//构造相关返回参数 TODO

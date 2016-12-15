@@ -290,13 +290,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //2.1创建IM 聊天群组
         Map<String,Object> userMap = lectureModuleServer.findLoginInfoByUserId(userId);
-        Map<String,String> groupMap = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
-        if(groupMap == null || StringUtils.isBlank(groupMap.get("groupid"))){
-            throw new QNLiveException("100015");
+        try {
+            Map<String,String> groupMap = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
+            if(groupMap == null || StringUtils.isBlank(groupMap.get("groupid"))){
+                throw new QNLiveException("100015");
+            }
+            reqMap.put("im_course_id",groupMap.get("groupid"));
+            //2.1.1将讲师加入到该群组中
+            IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
+        }catch (Exception e){
+            //TODO  暂时不处理
         }
-        reqMap.put("im_course_id",groupMap.get("groupid"));
-        //2.1.1将讲师加入到该群组中
-        IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
 
         if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
             reqMap.put("course_url", "http://7xt3lm.com1.z0.glb.clouddn.com/images/A21c457d4bab7640bb5eeb9ee053cbdca.png");//TODO
@@ -469,6 +473,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setParam(reqEntity.getParam());
                 this.mqUtils.sendMessage(mqRequestEntity);
 
+
+                //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
+                RequestEntity mqAudioRequestEntity = new RequestEntity();
+                mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
+                mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqAudioRequestEntity.setParam(reqEntity.getParam());
+                this.mqUtils.sendMessage(mqAudioRequestEntity);
             } else {
                 //2.不为课程结束
                 //修改缓存，同时修改数据库

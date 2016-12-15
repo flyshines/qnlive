@@ -181,7 +181,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		courses.setCreateTime(now);
 		courses.setCreateDate(now);
 		courses.setUpdateTime(now);
-		courses.setImCourseId(reqMap.get("im_course_id").toString());
+		if(reqMap.get("im_course_id") != null){
+			courses.setImCourseId(reqMap.get("im_course_id").toString());
+		}
 		coursesMapper.insert(courses);
 
 		Map<String ,Object> dbResultMap = new HashMap<String,Object>();

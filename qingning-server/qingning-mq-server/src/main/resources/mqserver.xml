@@ -64,4 +64,5 @@
 	
 	
 	<bean id="SaveCourseMessageServer" class="qingning.mq.server.imp.SaveCourseMessageService"/>
+	<bean id="SaveAudioMessageServer" class="qingning.mq.server.imp.SaveCourseAudioService"/>
 </beans>
