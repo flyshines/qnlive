@@ -119,6 +119,7 @@ public final class JedisUtils {
 		
 		public JedisProxy(JedisUtils jedisUtils){
 			enhancer.setSuperclass(Jedis.class);
+			enhancer.setClassLoader(JedisBatchCallback.class.getClassLoader());
 			enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
 			enhancer.setCallback(this);
 			jedis = (Jedis)enhancer.create();
