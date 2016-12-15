@@ -38,6 +38,8 @@
 	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
 			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
 	</bean>
+	
+		
 	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />
 	
 	<rabbit:connection-factory id="imConnectionFactory"
@@ -47,7 +49,7 @@
 	<rabbit:template id="imRabbitTemplate" connection-factory="imConnectionFactory"
 		exchange="${im.rmq.exchange}" routing-key="${im.rmq.queue.key}"/>
 
-	<rabbit:queue name="${im.rmq.queue}" durable="true" auto-delete="false"
+	<rabbit:queue name="${im.rmq.queue}" durable="false" auto-delete="false"
 		exclusive="false"/>
 	<rabbit:direct-exchange name="${im.rmq.exchange}" durable="true" auto-delete="false">
 		<rabbit:bindings>
