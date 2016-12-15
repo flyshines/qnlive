@@ -29,8 +29,7 @@
       <jedis.version>2.9.0</jedis.version>
       <jedis.version>2.9.0</jedis.version>
       <rabbitmq.version>3.6.5</rabbitmq.version>
-      <spring-rabbit.version>1.6.3.RELEASE</spring-rabbit.version>
-      <cglib.version>3.2.4</cglib.version>
+      <spring-rabbit.version>1.6.3.RELEASE</spring-rabbit.version>      
   </properties>
   
   <dependencies>  
@@ -195,14 +194,7 @@
 	    <artifactId>zkclient</artifactId>
     	<version>0.1</version>
 	</dependency>
-	<!-- Dubbo Setting End -->
-	
-	<dependency>
-	    <groupId>cglib</groupId>
-	    <artifactId>cglib</artifactId>
-	    <version>${cglib.version}</version>
-	</dependency>
-		
+	<!-- Dubbo Setting End -->		
 	<dependency>
 	    <groupId>org.apache.solr</groupId>
 	    <artifactId>solr-solrj</artifactId>
