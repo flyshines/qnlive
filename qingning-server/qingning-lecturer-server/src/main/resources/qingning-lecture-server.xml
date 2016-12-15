@@ -55,7 +55,7 @@
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
-					<param name="course_title" type="string" require="Y,000100"  />
+					<param name="course_title" type="string" require="Y,000100"  format=".{0,30},100020"/>
 					<param name="start_time" type="long" require="Y,000100"  />
 					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -86,12 +86,18 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
-					<param name="course_title" type="string" require="N"  />
+					<param name="course_title" type="string" require="N" format=".{0,30},100020"/>
 					<param name="start_time" type="long" require="N"  />
-					<param name="course_remark" type="string" require="N"  />
+					<param name="course_remark" type="string" require="N" format=".{0,200},100021"/>
 					<param name="course_url" type="string" require="N"  />
 					<param name="course_password" type="string" require="N"  />
-					<param name="status" type="string" require="N"  />
+					<param name="status" type="string" require="N"  validate="(status,course_title,start_time,course_remark,course_url,course_password)=>{
+					       		var isEmpty= course_title==null || course_title.length == 0;
+					       		isEmpty = isEmpty &amp;&amp; (course_remark == null || course_remark.length == 0);
+					       		isEmpty = isEmpty &amp;&amp; (course_url == null || course_url.length == 0);
+					       		isEmpty = isEmpty &amp;&amp; (course_password == null || course_password.length == 0);
+					       		isEmpty = isEmpty &amp;&amp; start_time == null;					       		
+					       		return status != 2 || isEmpty;},100023"/>
 					<param name="update_time" type="long" require="Y,000100"  />
 				</inputs>
 				<outputs>
