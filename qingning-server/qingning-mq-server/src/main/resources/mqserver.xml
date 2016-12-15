@@ -35,7 +35,6 @@
 	<rabbit:connection-factory id="connectionFactory"
 		username="${rmq.manager.user}" password="${rmq.manager.password}"
 		host="${rmq.ip}" port="${rmq.port}"/>
-	<rabbit:admin connection-factory="connectionFactory"/>
 	<rabbit:queue name="${rmq.queue}" durable="true" auto-delete="false"
 		exclusive="false"/>
 	<rabbit:direct-exchange name="${rmq.exchange}" durable="true" auto-delete="false">
@@ -52,9 +51,7 @@
 	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />	
 	<rabbit:connection-factory id="imConnectionFactory"
 		username="${im.rmq.manager.user}" password="${im.rmq.manager.password}"
-		host="${im.rmq.ip}" port="${im.rmq.port}"/>
-	<rabbit:admin id="imAdmin" connection-factory="imConnectionFactory"/>
-	
+		host="${im.rmq.ip}" port="${im.rmq.port}"/>		
 	<rabbit:queue name="${im.rmq.queue}" durable="false" auto-delete="false"
 		exclusive="false"/>
 	<rabbit:direct-exchange name="${im.rmq.exchange}" durable="true" auto-delete="false">
