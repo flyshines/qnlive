@@ -74,6 +74,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PPTS = "SYS:COURSE:{course_id}:PPTS";
 	public static final String CACHED_KEY_COURSE_PPTS_FIELD = "ppt_list";
 	public static final String CACHED_KEY_COURSE_AUDIOS = "SYS:COURSE:{course_id}:AUDIOS";
+	public static final String CACHED_KEY_COURSE_AUDIOS_JSON_STRING = "SYS:COURSE:{course_id}:AUDIOS:JSON_STRING";
 	public static final String CACHED_KEY_COURSE_AUDIOS_FIELD = "audio_list";
 	public static final String FIELD_AUDIO_ID="audio_id";
 	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";
