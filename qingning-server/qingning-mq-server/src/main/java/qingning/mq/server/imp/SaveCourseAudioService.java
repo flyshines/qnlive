@@ -1,5 +1,6 @@
 package qingning.mq.server.imp;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -56,6 +57,7 @@ public class SaveCourseAudioService extends AbstractMsgService {
 					map.put(Constants.FIELD_MESSAGE_ID, audio);
 					String audioKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, map);
 					redisResponseList.add(pipeline.hgetAll(audioKey));
+					pipeline.del(audioKey);
 				}
 				pipeline.sync();
 
@@ -90,5 +92,7 @@ public class SaveCourseAudioService extends AbstractMsgService {
 		//3.批量插入到数据库中
 		Integer insertResult = courseAudioMapper.batchInsert(audioList);
 
+		jedisObject.set(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, JSONObject.toJSONString(audioList));
+		jedisObject.del(audioListKey);
 	}
 }
