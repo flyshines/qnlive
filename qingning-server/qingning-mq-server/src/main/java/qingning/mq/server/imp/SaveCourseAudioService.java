@@ -92,7 +92,10 @@ public class SaveCourseAudioService extends AbstractMsgService {
 		//3.批量插入到数据库中
 		Integer insertResult = courseAudioMapper.batchInsert(audioList);
 
-		jedisObject.set(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, JSONObject.toJSONString(audioList));
+		map.clear();
+		map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+		String audioJsonStringKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
+		jedisObject.set(audioJsonStringKey, JSONObject.toJSONString(audioList));
 		jedisObject.del(audioListKey);
 	}
 }

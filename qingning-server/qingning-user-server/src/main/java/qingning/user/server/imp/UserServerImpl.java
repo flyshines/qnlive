@@ -6,10 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.AccessTokenUtil;
-import qingning.common.util.CacheUtils;
-import qingning.common.util.Constants;
-import qingning.common.util.MiscUtils;
+import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.IUserModuleServer;
@@ -812,11 +809,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100004");
         }
 
-        //3.将学员信息插入到学员参与表中
+
+        //4.将学生加入该课程的IM群组
+        try {
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+            Map<String,Object> lecturerUserMap = userModuleServer.findLoginInfoByUserId(courseMap.get("lecturer_id"));
+            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),lecturerUserMap.get("m_user_id").toString());
+        }catch (Exception e){
+            //TODO 暂时不处理
+        }
+
+        //5.将学员信息插入到学员参与表中
         courseMap.put("user_id",userId);
         Map<String,Object> insertResultMap = userModuleServer.joinCourse(courseMap);
 
-        //4.修改讲师缓存中的课程参与人数
+        //6.修改讲师缓存中的课程参与人数
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id").toString());
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "total_student_num", 1);

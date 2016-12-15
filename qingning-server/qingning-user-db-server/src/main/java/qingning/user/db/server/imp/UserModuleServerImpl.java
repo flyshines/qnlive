@@ -45,6 +45,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Autowired(required = true)
 	private CourseMessageMapper courseMessageMapper;
 
+	@Autowired(required = true)
+	private LoginInfoMapper loginInfoMapper;
+
 
 	@Override
 	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) {
@@ -165,6 +168,10 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return coursesStudentsMapper.findCourseStudentList(queryMap);
 	}
 
+	@Override
+	public Map<String, Object> findLoginInfoByUserId(String userId) {
+		return loginInfoMapper.findLoginInfoByUserId(userId);
+	}
 
 
 }
