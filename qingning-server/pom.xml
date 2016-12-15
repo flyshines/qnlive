@@ -30,6 +30,7 @@
       <jedis.version>2.9.0</jedis.version>
       <rabbitmq.version>3.6.5</rabbitmq.version>
       <spring-rabbit.version>1.6.3.RELEASE</spring-rabbit.version>
+      <cglib.version>3.2.4</cglib.version>
   </properties>
   
   <dependencies>  
@@ -197,9 +198,15 @@
 	<!-- Dubbo Setting End -->
 	
 	<dependency>
-   		<groupId>org.apache.solr</groupId>
-   		<artifactId>solr-solrj</artifactId>
-   		<version>4.10.4</version>
+	    <groupId>cglib</groupId>
+	    <artifactId>cglib</artifactId>
+	    <version>${cglib.version}</version>
+	</dependency>
+		
+	<dependency>
+	    <groupId>org.apache.solr</groupId>
+	    <artifactId>solr-solrj</artifactId>
+	    <version>4.10.4</version>
 	</dependency>
 	
 	<dependency>

@@ -4,10 +4,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
-
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import redis.clients.jedis.Jedis;
@@ -113,21 +112,23 @@ public final class JedisUtils {
 	}
 
 	private static class JedisProxy implements MethodInterceptor{
+		
 		private Jedis jedis = null;
 		private JedisUtils jedisUtils = null;
-		private Enhancer enhancer = new Enhancer();		
+		private Enhancer enhancer = new Enhancer();	
+		
 		public JedisProxy(JedisUtils jedisUtils){
 			enhancer.setSuperclass(Jedis.class);
 			enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
 			enhancer.setCallback(this);
 			jedis = (Jedis)enhancer.create();
-			this.jedisUtils=jedisUtils;
+			this.jedisUtils=jedisUtils;			
 		}
-
+		
 		public Jedis getJedis(){
 			return jedis;
 		}
-
+		
 		@Override
 		public Object intercept(Object arg0, Method method, Object[] parameters, MethodProxy proxy) throws Throwable {
 			JedisPool pool = jedisUtils.getJedisPool();
@@ -144,8 +145,6 @@ public final class JedisUtils {
 						if(jedisBatchOperation!=null){
 							Pipeline pipeline = realJedis.pipelined();
 							jedisBatchOperation.batchOperation(pipeline, realJedis);
-							//pipeline.sync();
-//							System.err.println("=============================");
 						}
 					}
 				} else {					
@@ -160,7 +159,6 @@ public final class JedisUtils {
 				}
 			}
 			return retValue;
-		} 
-
+		}
 	}
 }
