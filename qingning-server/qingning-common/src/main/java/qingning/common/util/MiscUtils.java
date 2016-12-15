@@ -343,8 +343,8 @@ public final class MiscUtils {
 		if(isEmpty(value)){
 			return value;
 		}
-		String[] specailChar={"<","&"};
-		String[] specailCode={"&lt;","&amp;"};
+		String[] specailChar={"<",   "&",    "\"",    ">",   " "};
+		String[] specailCode={"&lt;","&amp;","&quot;","&gt;","&nbsp;"};
 		for(int i=0; i < specailChar.length; ++i){
 			value=value.replaceAll(specailCode[i], specailChar[i]);
 		}

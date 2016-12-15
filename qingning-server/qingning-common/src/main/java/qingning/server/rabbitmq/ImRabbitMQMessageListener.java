@@ -36,8 +36,8 @@ public class ImRabbitMQMessageListener implements MessageListener {
 	@Override
 	public void onMessage(Message message) {
 		String messageStr = null;
-		try {
-			messageStr = new String(message.getBody(),"UTF-8");		
+		try {			
+			messageStr = MiscUtils.specialCharReplace(new String(message.getBody(),"UTF-8"));
 		} catch (Exception e) {
 			log.error(message.getBody() +":" + e.getLocalizedMessage());
 		}
@@ -58,6 +58,9 @@ public class ImRabbitMQMessageListener implements MessageListener {
 					ImMessage imMessage = new ImMessage();
 					
 					imMessage.setType(MiscUtils.convertString(element.attributeValue(Constants.MSG_TYPE_ATTR)));
+					if(!Constants.IM_TYPE_CHAT.equals(imMessage.getType())){
+						return;
+					}
 					imMessage.setMid(MiscUtils.convertString(element.attributeValue(Constants.MSG_MID_ATTR)));
 					imMessage.setNewsType(MiscUtils.convertString(element.attributeValue(Constants.MSG_NEWSTYPE_ATTR)));
 					imMessage.setIp(MiscUtils.convertString(element.attributeValue(Constants.MSG_IP_ATTR)));

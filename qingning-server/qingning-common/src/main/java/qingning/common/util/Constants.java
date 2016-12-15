@@ -30,6 +30,7 @@ public final class Constants {
 	public static final String MILLISECOND = "millisecond";
 	public static final String FORMAT = "format";
 	public static final String TYPE = "type";
+	public static final String IM_TYPE_CHAT="chat";
 	//public static final String ERRORCODE = "errorcode";
 	public static final String VALIDATE = "validate";
 	public static final String PARAM = "param";
