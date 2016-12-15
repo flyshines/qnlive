@@ -8,11 +8,15 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.server.other.ReadCourseOperation;
 import qingning.user.server.other.ReadLiveRoomOperation;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
 import java.text.DecimalFormat;
@@ -869,20 +873,44 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 pptList = JSONObject.parseArray(jedis.get(pptListKey));
             }
 
-            JSONArray audioList = null;
+            List<Map<String,String>> audioObjectMapList = new ArrayList<>();
             map.clear();
-            map.put(Constants.CACHED_KEY_COURSE_AUDIOS_FIELD, reqMap.get("course_id").toString());
+            map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
             String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
-            if(jedis.exists(audioListKey)){
-                audioList = JSONObject.parseArray(jedis.get(audioListKey));
+            String audioJsonStringKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
+            Set<String> audioIdList = jedis.zrange(audioListKey, 0 , -1);
+
+            //如果存在zsort列表，则从zsort列表中读取
+            if(audioIdList != null && audioIdList.size() > 0){
+                JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
+                callBack.invoke(new JedisBatchOperation(){
+                    @Override
+                    public void batchOperation(Pipeline pipeline, Jedis jedis) {
+
+                        List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
+                        for(String audio : audioIdList){
+                            map.put(Constants.FIELD_AUDIO_ID, audio);
+                            String audioKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, map);
+                            redisResponseList.add(pipeline.hgetAll(audioKey));
+                        }
+                        pipeline.sync();
+
+                        for(Response<Map<String, String>> redisResponse : redisResponseList){
+                            Map<String,String> messageStringMap = redisResponse.get();
+                            audioObjectMapList.add(messageStringMap);
+                        }
+                    }
+                });
+
+                resultMap.put("audio_list", audioObjectMapList);
+
+                //如果存在讲课音频的json字符串，则读取讲课音频json字符串
+            } else if(jedis.exists(audioJsonStringKey)){
+                resultMap.put("audio_list", JSONObject.parse(jedis.get(audioJsonStringKey)));
             }
 
             if(! CollectionUtils.isEmpty(pptList)){
                 resultMap.put("ppt_list", pptList);
-            }
-
-            if(! CollectionUtils.isEmpty(audioList)){
-                resultMap.put("audio_list", audioList);
             }
 
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
