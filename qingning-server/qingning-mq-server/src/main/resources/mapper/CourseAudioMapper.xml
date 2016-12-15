@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.mq.persistence.mybatis.CourseAudioMapper" >
-  <resultMap id="BaseResultMap" type="qingning.mq.persistence.mybatis.entity.CourseAudio" >
+  <resultMap id="BaseResultMap" type="qingning.mq.persistence.entity.CourseAudio" >
     <id column="audio_id" property="audioId" jdbcType="VARCHAR" />
     <result column="course_id" property="courseId" jdbcType="VARCHAR" />
     <result column="audio_url" property="audioUrl" jdbcType="VARCHAR" />
@@ -23,7 +23,7 @@
     delete from t_course_audio
     where audio_id = #{audioId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.mq.persistence.mybatis.entity.CourseAudio" >
+  <insert id="insert" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     insert into t_course_audio (audio_id, course_id, audio_url, 
       audio_pos, audio_time, audio_image, 
       create_time)
@@ -31,7 +31,7 @@
       #{audioPos,jdbcType=BIGINT}, #{audioTime,jdbcType=BIGINT}, #{audioImage,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="qingning.mq.persistence.mybatis.entity.CourseAudio" >
+  <insert id="insertSelective" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     insert into t_course_audio
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="audioId != null" >
@@ -80,7 +80,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.mq.persistence.mybatis.entity.CourseAudio" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     update t_course_audio
     <set >
       <if test="courseId != null" >
@@ -104,7 +104,7 @@
     </set>
     where audio_id = #{audioId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.mq.persistence.mybatis.entity.CourseAudio" >
+  <update id="updateByPrimaryKey" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     update t_course_audio
     set course_id = #{courseId,jdbcType=VARCHAR},
       audio_url = #{audioUrl,jdbcType=VARCHAR},
