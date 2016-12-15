@@ -240,7 +240,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> createCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-
+        Long startTime = (Long)reqMap.get("start_time");
+        boolean pass=true;
+        if(startTime==null){
+        	pass=false;
+        } else {
+        	Calendar cal = Calendar.getInstance();
+        	cal.setTime(new Date());
+        	cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
+        	if(cal.getTimeInMillis()>startTime){
+        		pass=false;
+        	}
+        }
+        if(!pass){
+        	throw new QNLiveException("100019");
+        }
         //0.参数详细校验
         //0:公开课程 1:加密课程 2:收费课程
         //加密课程需要校验是否有密码
