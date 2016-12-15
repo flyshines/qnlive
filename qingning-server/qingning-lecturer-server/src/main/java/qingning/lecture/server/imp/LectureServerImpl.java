@@ -455,6 +455,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setParam(reqEntity.getParam());
                 this.mqUtils.sendMessage(mqRequestEntity);
 
+
+                //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
+                RequestEntity mqAudioRequestEntity = new RequestEntity();
+                mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
+                mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqAudioRequestEntity.setParam(reqEntity.getParam());
+                this.mqUtils.sendMessage(mqAudioRequestEntity);
             } else {
                 //2.不为课程结束
                 //修改缓存，同时修改数据库
