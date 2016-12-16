@@ -2,8 +2,9 @@ package qingning.server.rabbitmq;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -21,7 +22,7 @@ import qingning.common.util.MiscUtils;
 import qingning.server.ImMsgService;
 
 public class ImRabbitMQMessageListener implements MessageListener {
-	private static Log log = LogFactory.getLog(ImRabbitMQMessageListener.class);
+	private static Logger log = LoggerFactory.getLogger(ImRabbitMQMessageListener.class);
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	@Autowired
@@ -37,7 +38,7 @@ public class ImRabbitMQMessageListener implements MessageListener {
 	public void onMessage(Message message) {
 		String messageStr = null;
 		try {			
-			messageStr = MiscUtils.specialCharReplace(new String(message.getBody(),"UTF-8"));
+			messageStr = new String(message.getBody(),"UTF-8");
 		} catch (Exception e) {
 			log.error(message.getBody() +":" + e.getLocalizedMessage());
 		}
@@ -53,7 +54,8 @@ public class ImRabbitMQMessageListener implements MessageListener {
 			@Override
 			public void run() {
 				try {
-					Document document = DocumentHelper.parseText(msg);									
+					String message = MiscUtils.specialCharReplace(msg);
+					Document document = DocumentHelper.parseText(message);
 					Element element = document.getRootElement();
 					ImMessage imMessage = new ImMessage();
 					
