@@ -43,7 +43,7 @@ public class CommonController extends AbstractController {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-	@RequestMapping(value = "/user/login", method = RequestMethod.POST)
+	@RequestMapping(value = "/common/login", method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity userLogin(

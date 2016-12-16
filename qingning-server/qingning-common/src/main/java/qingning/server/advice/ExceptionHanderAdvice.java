@@ -42,7 +42,7 @@ public class ExceptionHanderAdvice {
 			if(debug){
 				msg=msg+"("+exception.getMessage()+")";
 			}
-			responseEntity.setMsg(message.getMessages("000099"));
+			responseEntity.setMsg(msg);
 		}
 		return responseEntity;
 	}

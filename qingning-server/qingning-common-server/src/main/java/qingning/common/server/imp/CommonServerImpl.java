@@ -69,7 +69,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						reqMap.put("m_pwd", imResultMap.get("password"));
 						//设置默认用户头像
 						if(reqMap.get("avatar_address") == null || StringUtils.isBlank(reqMap.get("avatar_address").toString())){
-							reqMap.put("avatar_address","http://7xt3lm.com1.z0.glb.clouddn.com/images/1467E3DB24D3F6EA884511BF6B24D2D9.png");//TODO
+							reqMap.put("avatar_address",IMMsgUtil.configMap.get("default_avatar_address"));//TODO
 						}
 						if(reqMap.get("nick_name") == null || StringUtils.isBlank(reqMap.get("nick_name").toString())){
 							reqMap.put("avatar_address","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
