@@ -1,5 +1,7 @@
 package qingning.mq.server.imp;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import qingning.common.entity.ImMessage;
@@ -8,11 +10,16 @@ import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.server.ImMsgService;
 import redis.clients.jedis.Jedis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ImMsgServiceImp implements ImMsgService {
+
+	private static Logger log = LoggerFactory.getLogger(ImMsgServiceImp.class);
+
 
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
@@ -47,6 +54,11 @@ public class ImMsgServiceImp implements ImMsgService {
 
 		Jedis jedis = jedisUtils.getJedis();
 		Map<String, Object> map = new HashMap<>();
+		//课程id为空，则该条消息为无效消息
+		if(information.get("course_id") == null){
+			log.info("msgType"+body.get("msg_type").toString() + "消息course_id为空" + JSON.toJSONString(imMessage));
+			return;
+		}
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(body.get("send_time").toString());

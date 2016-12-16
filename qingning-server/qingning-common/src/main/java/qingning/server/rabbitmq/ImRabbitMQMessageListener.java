@@ -57,6 +57,10 @@ public class ImRabbitMQMessageListener implements MessageListener {
 					String message = MiscUtils.specialCharReplace(msg);
 					Document document = DocumentHelper.parseText(message);
 					Element element = document.getRootElement();
+					Element bodyElement = element.element(Constants.MSG_BODY_ELEMENT);
+					if(bodyElement == null){
+						return;
+					}
 					ImMessage imMessage = new ImMessage();
 					
 					imMessage.setType(MiscUtils.convertString(element.attributeValue(Constants.MSG_TYPE_ATTR)));
@@ -76,9 +80,9 @@ public class ImRabbitMQMessageListener implements MessageListener {
 					if(child!=null){
 						imMessage.setGroupId(MiscUtils.convertString(child.getText()));
 					}
-					child = element.element(Constants.MSG_BODY_ELEMENT);
-					if(child!=null){
-						String body = MiscUtils.convertString(child.getText());
+
+
+						String body = MiscUtils.convertString(bodyElement.getText());
 						if(!MiscUtils.isEmpty(body)){
 							try{
 								imMessage.setBody((Map<String,Object>)objectMapper.readValue(body, Map.class));
@@ -87,9 +91,6 @@ public class ImRabbitMQMessageListener implements MessageListener {
 								map.put(body, body);
 								imMessage.setBody(map);
 							}
-						}
-					}
-					if(imMsgService != null){
 						imMsgService.process(imMessage, jedisUtils, context);
 					}
 				} catch(Exception e){
