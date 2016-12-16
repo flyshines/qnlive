@@ -112,5 +112,9 @@ public final class Constants {
 	public static final String FIELD_MESSAGE_ID="message_id";
 	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_id}";
 
+
+	public static final String USER_ROLE_LECTURER="lecture";
+	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
+	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 500;
 	
 }

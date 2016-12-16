@@ -128,7 +128,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @return
      */
     @SuppressWarnings("unchecked")
-	private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
+    private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -270,7 +270,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                             pageCount = pageCount - liveList.size();
                         }
 
-                       queryResultMap = findCoursesStartWithPrediction(jedis, "-inf", "+inf", pageCount);
+                        queryResultMap = findCoursesStartWithPrediction(jedis, "-inf", "+inf", pageCount);
 
                     }
 
@@ -489,7 +489,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("dbList", dbList);
         return resultMap;
 
-}
+    }
 
 
     /**
@@ -867,7 +867,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             JSONArray pptList = null;
             map.clear();
-            map.put(Constants.CACHED_KEY_COURSE_PPTS_FIELD, reqMap.get("course_id").toString());
+            map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
             String pptListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
             if(jedis.exists(pptListKey)){
                 pptList = JSONObject.parseArray(jedis.get(pptListKey));
@@ -1012,7 +1012,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             return resultMap;
 
         }else {
-           //缓存中存在则读取缓存内容
+            //缓存中存在则读取缓存内容
             List<Map<String,String>> messageListCache = new ArrayList<>();
             for(String messageId : messageIdList){
                 map.put(Constants.FIELD_MESSAGE_ID, messageId);

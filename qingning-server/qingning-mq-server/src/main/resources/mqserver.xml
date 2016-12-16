@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:util="http://www.springframework.org/schema/util" xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-	xmlns:task="http://www.springframework.org/schema/task"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:util="http://www.springframework.org/schema/util" xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
     http://www.springframework.org/schema/context
     http://www.springframework.org/schema/context/spring-context-4.0.xsd
@@ -11,7 +11,7 @@
     http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
     http://www.springframework.org/schema/aop
     http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
-    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util
     http://www.springframework.org/schema/util/spring-util-4.0.xsd
     http://www.springframework.org/schema/rabbit
     http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
@@ -19,54 +19,62 @@
     http://www.springframework.org/schema/task/spring-task-3.2.xsd
     http://code.alibabatech.com/schema/dubbo
     http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
-	default-lazy-init="false">
+	   default-lazy-init="false">
 	<context:annotation-config/>
-    <task:annotation-driven  scheduler="messageScheduler"/>
-    <task:scheduler id="messageScheduler" pool-size="20"/>
+	<task:annotation-driven  scheduler="messageScheduler"/>
+	<task:scheduler id="messageScheduler" pool-size="20"/>
 	<context:component-scan base-package="qingning.mq.server.imp,qingning.mq.server.scheduler" />
 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 	<import resource="classpath:db-config.xml"/>
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.mq.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
 	<bean id="jedisUtils" class="qingning.common.util.JedisUtils" >
-			<constructor-arg type="java.lang.String" value="classpath:application.properties" />
+		<constructor-arg type="java.lang.String" value="classpath:application.properties" />
 	</bean>
-		
-	<bean id="jsonMessageConverter" class="qingning.server.rabbitmq.RabbitMQMessageConverter"/>	
+
+	<bean id="jsonMessageConverter" class="qingning.server.rabbitmq.RabbitMQMessageConverter"/>
 	<rabbit:connection-factory id="connectionFactory"
-		username="${rmq.manager.user}" password="${rmq.manager.password}"
-		host="${rmq.ip}" port="${rmq.port}"/>
+							   username="${rmq.manager.user}" password="${rmq.manager.password}"
+							   host="${rmq.ip}" port="${rmq.port}"/>
 	<rabbit:queue name="${rmq.queue}" durable="true" auto-delete="false"
-		exclusive="false"/>
+				  exclusive="false"/>
 	<rabbit:direct-exchange name="${rmq.exchange}" durable="true" auto-delete="false">
 		<rabbit:bindings>
 			<rabbit:binding queue="${rmq.queue}" key="${rmq.queue.key}"/>
 		</rabbit:bindings>
-	</rabbit:direct-exchange>	
-   	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener"/>
+	</rabbit:direct-exchange>
+	<bean id="listener" class="qingning.server.rabbitmq.RabbitMQMessageListener"/>
 	<rabbit:listener-container connection-factory="connectionFactory" acknowledge="auto"
-		auto-startup="false">
+							   auto-startup="false">
 		<rabbit:listener queues="${rmq.queue}" ref="listener"/>
 	</rabbit:listener-container>
-			
-	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />	
+
+	<bean id="imMsgService" class="qingning.mq.server.imp.ImMsgServiceImp" />
 	<rabbit:connection-factory id="imConnectionFactory"
-		username="${im.rmq.manager.user}" password="${im.rmq.manager.password}"
-		host="${im.rmq.ip}" port="${im.rmq.port}"/>		
+							   username="${im.rmq.manager.user}" password="${im.rmq.manager.password}"
+							   host="${im.rmq.ip}" port="${im.rmq.port}"/>
 	<rabbit:queue name="${im.rmq.queue}" durable="false" auto-delete="false"
-		exclusive="false"/>
+				  exclusive="false"/>
 	<rabbit:direct-exchange name="${im.rmq.exchange}" durable="true" auto-delete="false">
 		<rabbit:bindings>
 			<rabbit:binding queue="${im.rmq.queue}" key="${im.rmq.queue.key}"/>
 		</rabbit:bindings>
-	</rabbit:direct-exchange>	
-   	<bean id="imListener" class="qingning.server.rabbitmq.ImRabbitMQMessageListener"/>
+	</rabbit:direct-exchange>
+	<bean id="imListener" class="qingning.server.rabbitmq.ImRabbitMQMessageListener"/>
 	<rabbit:listener-container connection-factory="imConnectionFactory" acknowledge="auto"
-		auto-startup="false">
+							   auto-startup="false">
 		<rabbit:listener queues="${im.rmq.queue}" ref="imListener"/>
 	</rabbit:listener-container>
 
-	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />	
-	
+	<bean id="mqThreadPool" class="qingning.server.rabbitmq.MqThreadPool" />
+
 	<bean id="SaveCourseMessageServer" class="qingning.mq.server.imp.SaveCourseMessageService"/>
 	<bean id="SaveAudioMessageServer" class="qingning.mq.server.imp.SaveCourseAudioService"/>
+
+	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl"/>
+	<bean id="PlatformCoursesServer" class="qingning.mq.server.imp.PlatformCoursesServerImpl"/>
+
+
+
+
+	<bean id="MainBusinessTask" class="qingning.mq.server.scheduler.MainBusinessTask"/>
 </beans>
