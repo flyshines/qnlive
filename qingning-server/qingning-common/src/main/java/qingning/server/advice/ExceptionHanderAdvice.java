@@ -1,7 +1,7 @@
 package qingning.server.advice;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @ControllerAdvice
 public class ExceptionHanderAdvice {
-	private static Log log = LogFactory.getLog(ExceptionHanderAdvice.class);
+	private static Logger log = LoggerFactory.getLogger(ExceptionHanderAdvice.class);
 	@Autowired
 	private MessageEntity message;
 	@ExceptionHandler(value=Exception.class)
