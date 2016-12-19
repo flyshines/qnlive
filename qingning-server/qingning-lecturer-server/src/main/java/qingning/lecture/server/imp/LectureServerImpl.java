@@ -246,7 +246,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Long startTime = (Long)reqMap.get("start_time");
         boolean pass=true;
-        if(startTime==null){
+        if(MiscUtils.isEmpty(startTime)){
             pass=false;
         } else {
             Calendar cal = Calendar.getInstance();
@@ -407,7 +407,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-
+        Long startTime = (Long)reqMap.get("start_time");
+        boolean pass=true;
+        if(MiscUtils.isEmpty(startTime)){
+            pass=false;
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(new Date());
+            cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
+            if(cal.getTimeInMillis()>startTime){
+                pass=false;
+            }
+        }
+        if(!pass){
+            throw new QNLiveException("100019");
+        }
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<String, Object>();
