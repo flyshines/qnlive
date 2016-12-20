@@ -412,6 +412,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
+        System.out.print("---------------------------reqMap"+reqMap);
 
         boolean pass=true;
         if(reqMap.get("start_time") != null){
