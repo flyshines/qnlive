@@ -69,8 +69,6 @@ public class MainBusinessTask {
 		platformCoursesServerimpl.setJedisUtils(jedisUtils);
 		list.add(platformCoursesServerimpl);
 
-		//数据同步定时任务
-		//同步讲师学员数、讲师课程数、讲师粉丝数//TODO
 	}
 
 	//本地测试 5秒执行一次，开发服30分钟执行一次，正式每天凌晨1点执行
