@@ -602,10 +602,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
 
 
+        long currentTime = System.currentTimeMillis();
         if(predictionList != null){
             for (Tuple tuple : predictionList) {
                 ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
                 Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
+                MiscUtils.courseTranferState(currentTime, courseInfoMap);
                 courseResultList.add(courseInfoMap);
             }
         }
@@ -614,6 +616,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             for (Tuple tuple : finishList) {
                 ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
                 Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
+                MiscUtils.courseTranferState(currentTime, courseInfoMap);
                 courseResultList.add(courseInfoMap);
             }
         }
@@ -622,6 +625,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             for (Map<String,Object> courseDBMap : dbList) {
                 Map<String,String> courseDBMapString = new HashMap<>();
                 MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
+                MiscUtils.courseTranferState(currentTime, courseDBMapString);
                 courseResultList.add(courseDBMapString);
             }
         }
@@ -633,6 +637,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return resultMap;
     }
+
+
 
     private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
                                                     String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count){

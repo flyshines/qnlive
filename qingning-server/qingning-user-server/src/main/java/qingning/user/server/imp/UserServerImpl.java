@@ -194,11 +194,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
 
+            long currentTime = System.currentTimeMillis();
             if (liveList != null) {
                 for (Tuple tuple : predictionList) {
                     ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                     Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                     courseInfoMap.put("data_source", "1");
+                    MiscUtils.courseTranferState(currentTime, courseInfoMap);
                     courseResultList.add(courseInfoMap);
                 }
             }
@@ -208,6 +210,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                     Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                     courseInfoMap.put("data_source", "1");
+                    MiscUtils.courseTranferState(currentTime, courseInfoMap);
                     courseResultList.add(courseInfoMap);
                 }
             }
@@ -218,6 +221,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                     if(courseInfoMap != null){
                         courseInfoMap.put("data_source", "1");
+                        MiscUtils.courseTranferState(currentTime, courseInfoMap);
                         courseResultList.add(courseInfoMap);
                     }
                 }
@@ -228,6 +232,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     Map<String, String> courseDBMapString = new HashMap<>();
                     MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
                     courseDBMapString.put("data_source", "2");
+                    MiscUtils.courseTranferState(currentTime, courseDBMapString);
                     courseResultList.add(courseDBMapString);
                 }
             }
@@ -307,11 +312,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
 
 
+                long currentTime = System.currentTimeMillis();
                 if (liveList != null) {
                     for (Tuple tuple : predictionList) {
                         ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                         Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                         courseInfoMap.put("data_source", "1");
+                        MiscUtils.courseTranferState(currentTime, courseInfoMap);
                         courseResultList.add(courseInfoMap);
                     }
                 }
@@ -321,6 +328,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                         Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                         courseInfoMap.put("data_source", "1");
+                        MiscUtils.courseTranferState(currentTime, courseInfoMap);
                         courseResultList.add(courseInfoMap);
                     }
                 }
@@ -330,6 +338,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                         Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
                         courseInfoMap.put("data_source", "1");
+                        MiscUtils.courseTranferState(currentTime, courseInfoMap);
                         courseResultList.add(courseInfoMap);
                     }
                 }
@@ -339,6 +348,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         Map<String, String> courseDBMapString = new HashMap<>();
                         MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
                         courseDBMapString.put("data_source", "2");
+                        MiscUtils.courseTranferState(currentTime, courseDBMapString);
                         courseResultList.add(courseDBMapString);
                     }
                 }
@@ -353,6 +363,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
                 //从数据库中查询
             } else {
+                long currentTime = System.currentTimeMillis();
                 List<Map<String, Object>> dbList = new ArrayList<>();
                 int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
                 //预告中
@@ -380,6 +391,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         Map<String, String> courseDBMapString = new HashMap<>();
                         MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
                         courseDBMapString.put("data_source", "2");
+                        MiscUtils.courseTranferState(currentTime, courseDBMapString);
                         courseResultList.add(courseDBMapString);
                     }
                 }
