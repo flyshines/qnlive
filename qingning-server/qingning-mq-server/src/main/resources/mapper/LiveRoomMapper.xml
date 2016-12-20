@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.mq.persistence.mybatis.LiveRoomMapper" >
+  <resultMap id="BaseResultMap" type="qingning.mq.persistence.entity.LiveRoom" >
+    <id column="room_id" property="roomId" jdbcType="VARCHAR" />
+    <result column="lecturer_id" property="lecturerId" jdbcType="VARCHAR" />
+    <result column="course_num" property="courseNum" jdbcType="BIGINT" />
+    <result column="fans_num" property="fansNum" jdbcType="BIGINT" />
+    <result column="distributer_num" property="distributerNum" jdbcType="BIGINT" />
+    <result column="room_name" property="roomName" jdbcType="VARCHAR" />
+    <result column="avatar_address" property="avatarAddress" jdbcType="VARCHAR" />
+    <result column="room_remark" property="roomRemark" jdbcType="VARCHAR" />
+    <result column="rq_code" property="rqCode" jdbcType="VARCHAR" />
+    <result column="room_address" property="roomAddress" jdbcType="VARCHAR" />
+    <result column="total_amount" property="totalAmount" jdbcType="DOUBLE" />
+    <result column="last_course_amount" property="lastCourseAmount" jdbcType="DOUBLE" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    room_id, lecturer_id, course_num, fans_num, distributer_num, room_name, avatar_address, 
+    room_remark, rq_code, room_address, total_amount, last_course_amount, create_time, 
+    update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_live_room
+    where room_id = #{roomId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_live_room
+    where room_id = #{roomId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.mq.persistence.entity.LiveRoom" >
+    insert into t_live_room (room_id, lecturer_id, course_num, 
+      fans_num, distributer_num, room_name, 
+      avatar_address, room_remark, rq_code, 
+      room_address, total_amount, last_course_amount, 
+      create_time, update_time)
+    values (#{roomId,jdbcType=VARCHAR}, #{lecturerId,jdbcType=VARCHAR}, #{courseNum,jdbcType=BIGINT}, 
+      #{fansNum,jdbcType=BIGINT}, #{distributerNum,jdbcType=BIGINT}, #{roomName,jdbcType=VARCHAR}, 
+      #{avatarAddress,jdbcType=VARCHAR}, #{roomRemark,jdbcType=VARCHAR}, #{rqCode,jdbcType=VARCHAR}, 
+      #{roomAddress,jdbcType=VARCHAR}, #{totalAmount,jdbcType=DOUBLE}, #{lastCourseAmount,jdbcType=DOUBLE}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.mq.persistence.entity.LiveRoom" >
+    insert into t_live_room
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="roomId != null" >
+        room_id,
+      </if>
+      <if test="lecturerId != null" >
+        lecturer_id,
+      </if>
+      <if test="courseNum != null" >
+        course_num,
+      </if>
+      <if test="fansNum != null" >
+        fans_num,
+      </if>
+      <if test="distributerNum != null" >
+        distributer_num,
+      </if>
+      <if test="roomName != null" >
+        room_name,
+      </if>
+      <if test="avatarAddress != null" >
+        avatar_address,
+      </if>
+      <if test="roomRemark != null" >
+        room_remark,
+      </if>
+      <if test="rqCode != null" >
+        rq_code,
+      </if>
+      <if test="roomAddress != null" >
+        room_address,
+      </if>
+      <if test="totalAmount != null" >
+        total_amount,
+      </if>
+      <if test="lastCourseAmount != null" >
+        last_course_amount,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="roomId != null" >
+        #{roomId,jdbcType=VARCHAR},
+      </if>
+      <if test="lecturerId != null" >
+        #{lecturerId,jdbcType=VARCHAR},
+      </if>
+      <if test="courseNum != null" >
+        #{courseNum,jdbcType=BIGINT},
+      </if>
+      <if test="fansNum != null" >
+        #{fansNum,jdbcType=BIGINT},
+      </if>
+      <if test="distributerNum != null" >
+        #{distributerNum,jdbcType=BIGINT},
+      </if>
+      <if test="roomName != null" >
+        #{roomName,jdbcType=VARCHAR},
+      </if>
+      <if test="avatarAddress != null" >
+        #{avatarAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="roomRemark != null" >
+        #{roomRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="rqCode != null" >
+        #{rqCode,jdbcType=VARCHAR},
+      </if>
+      <if test="roomAddress != null" >
+        #{roomAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="totalAmount != null" >
+        #{totalAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="lastCourseAmount != null" >
+        #{lastCourseAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.mq.persistence.entity.LiveRoom" >
+    update t_live_room
+    <set >
+      <if test="lecturerId != null" >
+        lecturer_id = #{lecturerId,jdbcType=VARCHAR},
+      </if>
+      <if test="courseNum != null" >
+        course_num = #{courseNum,jdbcType=BIGINT},
+      </if>
+      <if test="fansNum != null" >
+        fans_num = #{fansNum,jdbcType=BIGINT},
+      </if>
+      <if test="distributerNum != null" >
+        distributer_num = #{distributerNum,jdbcType=BIGINT},
+      </if>
+      <if test="roomName != null" >
+        room_name = #{roomName,jdbcType=VARCHAR},
+      </if>
+      <if test="avatarAddress != null" >
+        avatar_address = #{avatarAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="roomRemark != null" >
+        room_remark = #{roomRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="rqCode != null" >
+        rq_code = #{rqCode,jdbcType=VARCHAR},
+      </if>
+      <if test="roomAddress != null" >
+        room_address = #{roomAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="totalAmount != null" >
+        total_amount = #{totalAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="lastCourseAmount != null" >
+        last_course_amount = #{lastCourseAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where room_id = #{roomId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.mq.persistence.entity.LiveRoom" >
+    update t_live_room
+    set lecturer_id = #{lecturerId,jdbcType=VARCHAR},
+      course_num = #{courseNum,jdbcType=BIGINT},
+      fans_num = #{fansNum,jdbcType=BIGINT},
+      distributer_num = #{distributerNum,jdbcType=BIGINT},
+      room_name = #{roomName,jdbcType=VARCHAR},
+      avatar_address = #{avatarAddress,jdbcType=VARCHAR},
+      room_remark = #{roomRemark,jdbcType=VARCHAR},
+      rq_code = #{rqCode,jdbcType=VARCHAR},
+      room_address = #{roomAddress,jdbcType=VARCHAR},
+      total_amount = #{totalAmount,jdbcType=DOUBLE},
+      last_course_amount = #{lastCourseAmount,jdbcType=DOUBLE},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where room_id = #{roomId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="findLiveRoomByRoomId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_live_room
+    where room_id = #{room_id}
+  </select>
+
+
+</mapper>

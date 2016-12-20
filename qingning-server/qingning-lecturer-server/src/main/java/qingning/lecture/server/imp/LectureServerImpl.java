@@ -71,13 +71,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //3.缓存修改
         //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
+        String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         if (reqMap.get("user_role") == null || reqMap.get("user_role").toString().split(",").length == 1) {
             Map<String, Object> lectureObjectMap = lectureModuleServer.findLectureByLectureId(reqMap.get("user_id").toString());
             Map<String, String> lectureStringMap = new HashMap<String, String>();
             MiscUtils.converObjectMapToStringMap(lectureObjectMap, lectureStringMap);
-            map.clear();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
-            String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+
             jedis.hmset(lectureKey, lectureStringMap);
 
             jedis.hset(accessTokenKey, "user_role", "normal_user,lecture");
@@ -95,6 +96,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //增加讲师直播间对应关系缓存(一对多关系)
         jedis.hset(lectureLiveRoomKey, createResultMap.get("room_id").toString(), "1");
+
+        //增加讲师缓存中的直播间数
+        jedis.hincrBy(lectureKey, "live_room_num", 1L);
 
         resultMap.put("room_id", room_id);
         return resultMap;

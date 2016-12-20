@@ -1,8 +1,11 @@
 package qingning.mq.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
+import qingning.mq.persistence.mybatis.CourseAudioMapper;
+import qingning.mq.persistence.mybatis.CourseImageMapper;
 import qingning.mq.persistence.mybatis.CoursesMapper;
 import qingning.mq.persistence.mybatis.LoginInfoMapper;
 import qingning.server.JedisBatchCallback;
@@ -20,6 +23,8 @@ public class LecturerCoursesServerImpl extends MessageServer {
 
     private CoursesMapper coursesMapper;
     private LoginInfoMapper loginInfoMapper;
+    private CourseAudioMapper courseAudioMapper;
+    private CourseImageMapper courseImageMapper;
 
     @Override
     public void process(RequestEntity requestEntity) throws Exception {
@@ -72,11 +77,17 @@ public class LecturerCoursesServerImpl extends MessageServer {
                     }
 
 
+                    //删除课程实体、PPT实体、讲课音频实体
                     if(! MiscUtils.isEmpty(predictionCourseIdList)){
                         for(String courseId : predictionCourseIdList){
                             courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
                             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                             pipeline.del(courseKey);
+
+                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                            pipeline.del(pptsKey);
+                            pipeline.del(audiosKey);
                         }
                     }
 
@@ -85,13 +96,18 @@ public class LecturerCoursesServerImpl extends MessageServer {
                             courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
                             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                             pipeline.del(courseKey);
+
+                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                            pipeline.del(pptsKey);
+                            pipeline.del(audiosKey);
                         }
                     }
 
                     pipeline.del(predictionListKey);
                     pipeline.del(finishListKey);
 
-                    //2.4将新的课程列表及新的课程实体放入缓存中
+                    //2.4将新的课程列表及新的课程实体、PPT信息、讲课音频放入缓存中
                     if(! MiscUtils.isEmpty(lecturerCoursePredictionList)){
                         for(Map<String,Object> courseMap : lecturerCoursePredictionList){
                             Date courseStartTime = (Date)courseMap.get("start_time");
@@ -101,6 +117,20 @@ public class LecturerCoursesServerImpl extends MessageServer {
                             Map<String,String> courseStringMap = new HashMap<>();
                             MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
                             pipeline.hmset(courseKey,courseStringMap);
+
+                            //PPT信息
+                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                            List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
+                            if(! MiscUtils.isEmpty(pptList)){
+                                pipeline.set(pptsKey, JSON.toJSONString(pptList));
+                            }
+
+                            //讲课音频信息
+                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                            List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
+                            if(! MiscUtils.isEmpty(audioList)){
+                                pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                            }
                         }
                     }
 
@@ -113,6 +143,20 @@ public class LecturerCoursesServerImpl extends MessageServer {
                             Map<String,String> courseStringMap = new HashMap<>();
                             MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
                             pipeline.hmset(courseKey,courseStringMap);
+
+                            //PPT信息
+                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                            List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
+                            if(! MiscUtils.isEmpty(pptList)){
+                                pipeline.set(pptsKey, JSON.toJSONString(pptList));
+                            }
+
+                            //讲课音频信息
+                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                            List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
+                            if(! MiscUtils.isEmpty(audioList)){
+                                pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                            }
                         }
                     }
 
@@ -136,5 +180,21 @@ public class LecturerCoursesServerImpl extends MessageServer {
 
     public void setLoginInfoMapper(LoginInfoMapper loginInfoMapper) {
         this.loginInfoMapper = loginInfoMapper;
+    }
+
+    public CourseAudioMapper getCourseAudioMapper() {
+        return courseAudioMapper;
+    }
+
+    public void setCourseAudioMapper(CourseAudioMapper courseAudioMapper) {
+        this.courseAudioMapper = courseAudioMapper;
+    }
+
+    public CourseImageMapper getCourseImageMapper() {
+        return courseImageMapper;
+    }
+
+    public void setCourseImageMapper(CourseImageMapper courseImageMapper) {
+        this.courseImageMapper = courseImageMapper;
     }
 }

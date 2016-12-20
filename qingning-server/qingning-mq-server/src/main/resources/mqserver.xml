@@ -73,6 +73,7 @@
 
 	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl"/>
 	<bean id="PlatformCoursesServer" class="qingning.mq.server.imp.PlatformCoursesServerImpl"/>
+	<bean id="CacheSyncDatabaseServer" class="qingning.mq.server.imp.CacheSyncDatabaseServerImpl"/>
 
 
 

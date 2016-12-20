@@ -14,7 +14,7 @@
     audio_id, course_id, audio_url, audio_pos, audio_time, audio_image, create_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_course_audio
     where audio_id = #{audioId,jdbcType=VARCHAR}
@@ -24,12 +24,12 @@
     where audio_id = #{audioId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="qingning.mq.persistence.entity.CourseAudio" >
-    insert into t_course_audio (audio_id, course_id, audio_url, 
-      audio_pos, audio_time, audio_image, 
-      create_time)
-    values (#{audioId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{audioUrl,jdbcType=VARCHAR}, 
-      #{audioPos,jdbcType=BIGINT}, #{audioTime,jdbcType=BIGINT}, #{audioImage,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP})
+    insert into t_course_audio (audio_id, course_id, audio_url,
+    audio_pos, audio_time, audio_image,
+    create_time)
+    values (#{audioId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{audioUrl,jdbcType=VARCHAR},
+    #{audioPos,jdbcType=BIGINT}, #{audioTime,jdbcType=BIGINT}, #{audioImage,jdbcType=VARCHAR},
+    #{createTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     insert into t_course_audio
@@ -107,11 +107,11 @@
   <update id="updateByPrimaryKey" parameterType="qingning.mq.persistence.entity.CourseAudio" >
     update t_course_audio
     set course_id = #{courseId,jdbcType=VARCHAR},
-      audio_url = #{audioUrl,jdbcType=VARCHAR},
-      audio_pos = #{audioPos,jdbcType=BIGINT},
-      audio_time = #{audioTime,jdbcType=BIGINT},
-      audio_image = #{audioImage,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
+    audio_url = #{audioUrl,jdbcType=VARCHAR},
+    audio_pos = #{audioPos,jdbcType=BIGINT},
+    audio_time = #{audioTime,jdbcType=BIGINT},
+    audio_image = #{audioImage,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=TIMESTAMP}
     where audio_id = #{audioId,jdbcType=VARCHAR}
   </update>
 

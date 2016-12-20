@@ -1,8 +1,11 @@
 package qingning.mq.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
+import qingning.mq.persistence.mybatis.CourseAudioMapper;
+import qingning.mq.persistence.mybatis.CourseImageMapper;
 import qingning.mq.persistence.mybatis.CoursesMapper;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -18,6 +21,8 @@ import java.util.*;
 public class PlatformCoursesServerImpl extends MessageServer {
 
     private CoursesMapper coursesMapper;
+    private CourseAudioMapper courseAudioMapper;
+    private CourseImageMapper courseImageMapper;
 
     @Override
     public void process(RequestEntity requestEntity) throws Exception {
@@ -46,6 +51,11 @@ public class PlatformCoursesServerImpl extends MessageServer {
                         courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                         pipeline.del(courseKey);
+
+                        String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                        String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                        pipeline.del(pptsKey);
+                        pipeline.del(audiosKey);
                     }
                 }
 
@@ -54,6 +64,11 @@ public class PlatformCoursesServerImpl extends MessageServer {
                         courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                         pipeline.del(courseKey);
+
+                        String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                        String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                        pipeline.del(pptsKey);
+                        pipeline.del(audiosKey);
                     }
                 }
 
@@ -89,6 +104,21 @@ public class PlatformCoursesServerImpl extends MessageServer {
                         Map<String,String> courseStringMap = new HashMap<>();
                         MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
                         pipeline.hmset(courseKey,courseStringMap);
+
+                        //PPT信息
+                        String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                        List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
+                        if(! MiscUtils.isEmpty(pptList)){
+                            pipeline.set(pptsKey, JSON.toJSONString(pptList));
+                        }
+
+                        //讲课音频信息
+                        String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                        List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
+                        if(! MiscUtils.isEmpty(audioList)){
+                            pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                        }
+
                     }
                 }
 
@@ -101,6 +131,20 @@ public class PlatformCoursesServerImpl extends MessageServer {
                         Map<String,String> courseStringMap = new HashMap<>();
                         MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
                         pipeline.hmset(courseKey,courseStringMap);
+
+                        //PPT信息
+                        String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
+                        List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
+                        if(! MiscUtils.isEmpty(pptList)){
+                            pipeline.set(pptsKey, JSON.toJSONString(pptList));
+                        }
+
+                        //讲课音频信息
+                        String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
+                        List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
+                        if(! MiscUtils.isEmpty(audioList)){
+                            pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                        }
                     }
                 }
 
@@ -118,4 +162,19 @@ public class PlatformCoursesServerImpl extends MessageServer {
         this.coursesMapper = coursesMapper;
     }
 
+    public CourseAudioMapper getCourseAudioMapper() {
+        return courseAudioMapper;
+    }
+
+    public void setCourseAudioMapper(CourseAudioMapper courseAudioMapper) {
+        this.courseAudioMapper = courseAudioMapper;
+    }
+
+    public CourseImageMapper getCourseImageMapper() {
+        return courseImageMapper;
+    }
+
+    public void setCourseImageMapper(CourseImageMapper courseImageMapper) {
+        this.courseImageMapper = courseImageMapper;
+    }
 }
