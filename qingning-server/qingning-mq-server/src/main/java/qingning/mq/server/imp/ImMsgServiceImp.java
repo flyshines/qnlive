@@ -59,7 +59,41 @@ public class ImMsgServiceImp implements ImMsgService {
 			log.info("msgType"+body.get("msg_type").toString() + "消息course_id为空" + JSON.toJSONString(imMessage));
 			return;
 		}
+
+		//判断课程状态
+		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
+		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+		Map<String,String> courseMap = jedis.hgetAll(courseKey);
+		//课程为已结束
+		if(courseMap.get("status").equals("2")){
+			return;
+		}
+
+		//课程为预告中
+		//如果课程状态为预告中，则继续判断当前时间是否大于课程开播时间，如果大于，则将课程变更为直播中状态
+		if(courseMap.get("status").equals("1")){
+			String courseStartTimeString = courseMap.get("start_time");
+			long courseStartTime = Long.parseLong(courseStartTimeString);
+			long currentTime = System.currentTimeMillis();
+			if(currentTime > courseStartTime){
+				//课程变更为直播中状态操作
+				//1.更新课程缓存中的状态为直播中,更新课程实际开始时间
+				jedis.hset(courseKey, "status", "4");
+				jedis.hset(courseKey, "real_start_time", currentTime+"");
+
+				//2.将该课程移动到讲师的预告列表第一条
+				map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
+				String lecturerPredictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+				String oppositeCurrentTime = "-"+currentTime;
+				jedis.zadd(lecturerPredictionListKey, Double.parseDouble(oppositeCurrentTime), courseMap.get("course_id"));//讲师预告课程列表为升序排序，将分数值设置开播时间绝对值取负
+
+				//3.操作平台的课程列表，将其从预告列表中删除，按照实际开播时间放入直播中列表
+				jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, courseMap.get("course_id"));
+				jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE, (double) currentTime, courseMap.get("course_id"));
+			}
+		}
+
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(body.get("send_time").toString());
 		String messageId = MiscUtils.getUUId();
