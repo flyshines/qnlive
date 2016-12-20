@@ -411,11 +411,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        Long startTime = (Long)reqMap.get("start_time");
+
+
         boolean pass=true;
-        if(MiscUtils.isEmpty(startTime)){
-            pass=false;
-        } else {
+        if(reqMap.get("start_time") != null){
+            Long startTime = (Long)reqMap.get("start_time");
             Calendar cal = Calendar.getInstance();
             cal.setTime(new Date());
             cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
@@ -423,6 +423,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 pass=false;
             }
         }
+
         if(!pass){
             throw new QNLiveException("100019");
         }
