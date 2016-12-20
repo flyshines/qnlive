@@ -74,9 +74,9 @@ public class MainBusinessTask {
 	}
 
 	//本地测试 5秒执行一次，开发服30分钟执行一次，正式每天凌晨1点执行
-	@Scheduled(cron = "*/5 * * * * ? ")
+	//@Scheduled(cron = "*/5 * * * * ? ")
 	//@Scheduled(cron = "0 */30 * * * ? ")
-	//@Scheduled(cron = "0 0 1 * * ?")
+	@Scheduled(cron = "0 0 1 * * ?")
 	public void backstageMethod(){
 		init();
 		logger.info("=====> 主业务定时任务驱动开始  ====");
