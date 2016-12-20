@@ -994,7 +994,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         endIndex = startIndex + pageCount - 1;
 
-        Set<String> messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+        Set<String> messageIdList = jedis.zrevrange(messageListKey, startIndex, endIndex);
         //缓存不存在则读取数据库中的内容
         if(messageIdList == null || messageIdList.size() == 0){
             Map<String, Object> queryMap = new HashMap<>();

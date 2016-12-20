@@ -36,7 +36,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 
 		Jedis jedisObject = jedisUtils.getJedis();
 		//1.从缓存中查询该课程的消息列表
-		Set<String> messageIdList = jedisObject.zrange(messageListKey, 0 , -1);
+		Set<String> messageIdList = jedisObject.zrevrange(messageListKey, 0 , -1);
 		if(messageIdList == null || messageIdList.size() == 0){
 			return;
 		}
