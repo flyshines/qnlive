@@ -361,7 +361,7 @@ public final class MiscUtils {
 		//如果课程状不为结束，则判断其开始时间是否大于当前时间，如果大于当前时间，则修改其状态为直播中
 		if(! courseInfoMap.get("status").equals("2")){
 			long courseStartTime = Long.parseLong(courseInfoMap.get("start_time"));
-			if(courseStartTime > currentTime){
+			if(currentTime > courseStartTime){
 				courseInfoMap.put("status", "4");
 			}
 		}
