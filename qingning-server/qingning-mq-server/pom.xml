@@ -18,6 +18,11 @@
 		<artifactId>qingning-db-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency>
+	<dependency>
+		<groupId>org.mongodb</groupId>
+		<artifactId>mongo-java-driver</artifactId>
+		<version>3.4.0</version>
+	</dependency>
   </dependencies>
   <build>
 	<finalName>qingning-mq-server</finalName>	
