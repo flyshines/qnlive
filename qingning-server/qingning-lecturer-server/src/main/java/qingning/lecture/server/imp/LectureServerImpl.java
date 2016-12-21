@@ -412,8 +412,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        System.out.print("---------------------------reqMap"+reqMap);
-
         boolean pass=true;
         if(reqMap.get("start_time") != null){
             Long startTime = (Long)reqMap.get("start_time");
@@ -430,7 +428,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.检查课程是否存在并且状态是否正确。

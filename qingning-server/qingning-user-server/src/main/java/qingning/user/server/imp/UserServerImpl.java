@@ -146,64 +146,46 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if (reqMap.get("course_id") == null || StringUtils.isBlank(reqMap.get("course_id").toString())) {
 
             List<Map<String, String>> courseResultList = new ArrayList<>();
-            String startIndex = "+inf";
-            String endIndex = "-inf";
             int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
 
             //1.1先查询直播列表
-            Set<Tuple> liveList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE, startIndex, endIndex, 0, pageCount);
-            Set<Tuple> predictionList = null;
+            Set<Tuple> predictionList ;
             Set<Tuple> finishList = null;
             List<Map<String, Object>> dbList = new ArrayList<>();
 
-            //1.2直播列表为空或者不足，则继续查询预告列表
-            if (liveList == null || liveList.size() < pageCount) {
-                if (liveList != null) {
-                    pageCount = pageCount - liveList.size();
+            String startIndexPrediction = "-inf";
+            String endIndexPrediction = "+inf";
+            predictionList = jedis.zrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, startIndexPrediction, endIndexPrediction, 0, pageCount);
+
+            //1.3预告列表为空或者不足，则继续查询结束列表
+            if (predictionList == null || predictionList.size() < pageCount) {
+                if (predictionList != null) {
+                    pageCount = pageCount - predictionList.size();
                 }
-                String startIndexPrediction = "-inf";
-                String endIndexPrediction = "+inf";
-                predictionList = jedis.zrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, startIndexPrediction, endIndexPrediction, 0, pageCount);
 
-                //1.3预告列表为空或者不足，则继续查询结束列表
-                if (predictionList == null || predictionList.size() < pageCount) {
-                    if (predictionList != null) {
-                        pageCount = pageCount - predictionList.size();
+                String startIndexFinish = "+inf";
+                String endIndexFinish = "-inf";
+
+                finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0, pageCount);
+
+                if(finishList == null || finishList.size() < pageCount){
+                    if(finishList != null){
+                        pageCount = pageCount - finishList.size();
                     }
-
-                    String startIndexFinish = "+inf";
-                    String endIndexFinish = "-inf";
-
-                    finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0, pageCount);
-
-                    if(finishList == null || finishList.size() < pageCount){
-                        if(finishList != null){
-                            pageCount = pageCount - finishList.size();
-                        }
-                        //直接查询数据库中的结束课程
-                        Map<String, Object> queryMap = new HashMap<>();
-                        queryMap.put("orderType", "2");
-                        queryMap.put("status", "2");
-                        queryMap.put("pageCount", pageCount);
-                        if(finishList != null && finishList.size() > 0){
-                            Date queryDate = new Date(Long.parseLong(findLastElementForRedisSet(finishList).get("startIndexDB")));
-                            queryMap.put("startIndex", queryDate);
-                        }
-                        dbList = userModuleServer.findCourseListForLecturer(queryMap);
+                    //直接查询数据库中的结束课程
+                    Map<String, Object> queryMap = new HashMap<>();
+                    queryMap.put("orderType", "2");
+                    queryMap.put("status", "2");
+                    queryMap.put("pageCount", pageCount);
+                    if(finishList != null && finishList.size() > 0){
+                        Date queryDate = new Date(Long.parseLong(findLastElementForRedisSet(finishList).get("startIndexDB")));
+                        queryMap.put("startIndex", queryDate);
                     }
+                    dbList = userModuleServer.findCourseListForLecturer(queryMap);
                 }
             }
 
             long currentTime = System.currentTimeMillis();
-            if (liveList != null) {
-                for (Tuple tuple : predictionList) {
-                    ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
-                    Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
-                    courseInfoMap.put("data_source", "1");
-                    MiscUtils.courseTranferState(currentTime, courseInfoMap);
-                    courseResultList.add(courseInfoMap);
-                }
-            }
 
             if (predictionList != null) {
                 for (Tuple tuple : predictionList) {
@@ -250,36 +232,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //从缓存中查询
             if (reqMap.get("data_source").toString().equals("1")) {
 
-                Set<Tuple> liveList = null;
                 Set<Tuple> predictionList = null;
                 Set<Tuple> finishList = null;
                 List<Map<String, Object>> dbList = new ArrayList<>();
-                List<Map<String, Object>> finishDbList = new ArrayList<>();
-                List<Map<String, Object>> predictionListDbList = new ArrayList<>();
                 Map<String,Object> queryResultMap = new HashMap<>();
 
                 int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
 
-
                 //课程状态 1:预告（对应为数据库中的已发布） 2:已结束 4:直播中
-                if (reqMap.get("status").toString().equals("4")) {
-                    String startIndex = reqMap.get("start_time").toString();
-                    String endIndex = "-inf";
-
-                    //1.1先查询直播列表
-                    liveList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE, startIndex, endIndex, 0, pageCount);
-
-                    //1.2直播列表为空或者不足，则继续查询预告列表
-                    if (liveList == null || liveList.size() < pageCount) {
-                        if (liveList != null) {
-                            pageCount = pageCount - liveList.size();
-                        }
-
-                        queryResultMap = findCoursesStartWithPrediction(jedis, "-inf", "+inf", pageCount);
-
-                    }
-
-                } else if (reqMap.get("status").toString().equals("1")) {
+                if (reqMap.get("status").toString().equals("1") || reqMap.get("status").toString().equals("4")) {
                     queryResultMap = findCoursesStartWithPrediction(jedis, reqMap.get("start_time").toString(), "+inf", pageCount);
 
                 } else {
@@ -313,15 +274,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
                 long currentTime = System.currentTimeMillis();
-                if (liveList != null) {
-                    for (Tuple tuple : predictionList) {
-                        ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
-                        Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
-                        courseInfoMap.put("data_source", "1");
-                        MiscUtils.courseTranferState(currentTime, courseInfoMap);
-                        courseResultList.add(courseInfoMap);
-                    }
-                }
 
                 if (predictionList != null) {
                     for (Tuple tuple : predictionList) {
@@ -365,6 +317,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             } else {
                 long currentTime = System.currentTimeMillis();
                 List<Map<String, Object>> dbList = new ArrayList<>();
+                List<Map<String, Object>> dbFinishList = new ArrayList<>();
                 int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
                 //预告中
                 if(reqMap.get("status").equals("1")){
@@ -375,6 +328,22 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     Date start_time = new Date(Long.parseLong(reqMap.get("start_time").toString()));
                     queryMap.put("startIndex", start_time);
                     dbList = userModuleServer.findCourseListForLecturer(queryMap);
+
+                    //如果预告列表不足，则查询结束列表
+                    if(dbList == null || dbList.size() < pageCount){
+                        Date finish_list_start_time = null;
+                        if(dbList != null){
+                            pageCount = pageCount - dbList.size();
+                            Map<String,Object> lastCourse = dbList.get(dbList.size() - 1);
+                            finish_list_start_time = (Date)lastCourse.get("start_time");
+                        }
+                        queryMap.clear();
+                        queryMap.put("orderType", "2");
+                        queryMap.put("status", "2");
+                        queryMap.put("pageCount", pageCount);
+                        queryMap.put("startIndex", finish_list_start_time);
+                        dbFinishList = userModuleServer.findCourseListForLecturer(queryMap);
+                    }
                 }else {
                     //已经结束
                     Map<String, Object> queryMap = new HashMap<>();
