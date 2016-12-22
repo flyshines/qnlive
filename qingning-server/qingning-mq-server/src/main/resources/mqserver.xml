@@ -74,6 +74,10 @@
 	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl"/>
 	<bean id="PlatformCoursesServer" class="qingning.mq.server.imp.PlatformCoursesServerImpl"/>
 	<bean id="CacheSyncDatabaseServer" class="qingning.mq.server.imp.CacheSyncDatabaseServerImpl"/>
+	<bean id="MessagePushServer" class="qingning.mq.server.imp.MessagePushServerImpl">
+		<property name="saveCourseMessageService" ref="SaveCourseMessageServer"/>
+		<property name="saveCourseAudioService" ref="SaveAudioMessageServer"/>
+	</bean>
 
 
 

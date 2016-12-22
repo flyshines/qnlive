@@ -199,7 +199,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public Map<String, Object> updateCourse(Map<String, Object> reqMap) {
 		Integer updateCount = null;
-		Date now = new Date();
+		Date now = (Date)reqMap.get("now");
 		if(reqMap.get("status") != null && reqMap.get("status").toString().equals("2")){
 			Courses courses = new Courses();
 			courses.setCourseId(reqMap.get("course_id").toString());
