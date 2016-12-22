@@ -502,10 +502,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(courseKey, updateCacheMap);
 
                 //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
-                RequestEntity mqRequestEntity = new RequestEntity();
-                mqRequestEntity.setServerName("SaveCourseMessageServer");
-                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                mqRequestEntity.setParam(reqEntity.getParam());
+                RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
                 this.mqUtils.sendMessage(mqRequestEntity);
 
 
@@ -520,11 +517,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(jedis.hget(courseKey, "real_start_time") == null){
                     String courseStartTime = jedis.hget(courseKey, "start_time");
                     if(Long.parseLong(courseStartTime) < MiscUtils.getEndTimeOfToday().getTime()){
-                        RequestEntity timerRequestEntity = new RequestEntity();
-                        timerRequestEntity.setServerName("MessagePushServer");
-                        timerRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                        timerRequestEntity.setFunctionName("processCourseNotStartCancel");
-                        timerRequestEntity.setParam(reqEntity.getParam());
+                        RequestEntity timerRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseNotStartCancel",reqEntity.getParam());
                         this.mqUtils.sendMessage(timerRequestEntity);
                     }
                 }
@@ -552,19 +545,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if (reqMap.get("start_time") != null) {
                     String newStartTime = reqMap.get("start_time").toString();
                     Date end = MiscUtils.getEndTimeOfToday();
-                    //如果原有的课程开播时间为今天，则需要取消原有未开播定时任务
+                    //如果原有的课程开播时间为今天，新的课程开播时间为今天，则需要先取消原有定时任务，再新增新的定时任务
                     String originalCourseStartTime = jedis.hget(courseKey, "start_time");
-                    if(Long.parseLong(originalCourseStartTime) < end.getTime()){
+                    if(Long.parseLong(originalCourseStartTime) < end.getTime() && Long.parseLong(newStartTime) < end.getTime()){
+                        RequestEntity timerRequestEntity = new RequestEntity();
+                        timerRequestEntity.setServerName("MessagePushServer");
+                        timerRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                        timerRequestEntity.setFunctionName("processCourseNotStartUpdate");
+                        timerRequestEntity.setParam(reqEntity.getParam());
+                        this.mqUtils.sendMessage(timerRequestEntity);
+                        //如果旧课程时间为今天，新的课程时间为今天之后，则需要取消原有定时任务
+                    }else if(Long.parseLong(originalCourseStartTime) < end.getTime() && Long.parseLong(newStartTime) > end.getTime()){
                         RequestEntity timerRequestEntity = new RequestEntity();
                         timerRequestEntity.setServerName("MessagePushServer");
                         timerRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
                         timerRequestEntity.setFunctionName("processCourseNotStartCancel");
                         timerRequestEntity.setParam(reqEntity.getParam());
                         this.mqUtils.sendMessage(timerRequestEntity);
-                    }
-
-                    //如果新的课程开播时间为今天，则需要增加新的未开播定时任务
-                    if(Long.parseLong(newStartTime) < end.getTime()){
+                        //如果旧课程时间为今天之后，新课程时间在今天之内，则需要新增定时任务
+                    }else if(Long.parseLong(originalCourseStartTime) > end.getTime() && Long.parseLong(newStartTime) < end.getTime()){
                         RequestEntity mqRequestEntity = new RequestEntity();
                         mqRequestEntity.setServerName("MessagePushServer");
                         mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);

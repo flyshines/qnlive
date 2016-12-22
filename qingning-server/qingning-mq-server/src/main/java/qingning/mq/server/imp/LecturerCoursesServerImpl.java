@@ -1,6 +1,7 @@
 package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
@@ -26,6 +27,9 @@ public class LecturerCoursesServerImpl extends MessageServer {
     private CourseAudioMapper courseAudioMapper;
     private CourseImageMapper courseImageMapper;
 
+    @Autowired
+    private MessagePushServerImpl messagePushServerimpl;
+
     @Override
     public void process(RequestEntity requestEntity) throws Exception {
         //将讲师的课程列表放入缓存中
@@ -38,7 +42,7 @@ public class LecturerCoursesServerImpl extends MessageServer {
 
         //1.找出系统中的所有讲师，得到讲师用户id列表
         List<String> lecturerIdList = loginInfoMapper.findRoleUserIds(Constants.USER_ROLE_LECTURER);
-
+        Date endDate = MiscUtils.getEndTimeOfToday();
         //2.遍历讲师用户id列表，得到讲师相关课程信息列表
         for(String lecturerId : lecturerIdList){
 
@@ -107,6 +111,7 @@ public class LecturerCoursesServerImpl extends MessageServer {
                     pipeline.del(predictionListKey);
                     pipeline.del(finishListKey);
 
+                    Map<String,Object> timerMap = new HashMap<>();
                     //2.4将新的课程列表及新的课程实体、PPT信息、讲课音频放入缓存中
                     if(! MiscUtils.isEmpty(lecturerCoursePredictionList)){
                         for(Map<String,Object> courseMap : lecturerCoursePredictionList){
@@ -130,6 +135,13 @@ public class LecturerCoursesServerImpl extends MessageServer {
                             List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
                             if(! MiscUtils.isEmpty(audioList)){
                                 pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                            }
+
+                            //如果课程时间为今天，则需要将其加入定时任务
+                            if(courseStartTime.getTime() < endDate.getTime()){
+                                timerMap.put("course_id", courseMap.get("course_id").toString());
+                                RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", timerMap);
+                                messagePushServerimpl.processCourseNotStart(requestEntity, jedisUtils, null);
                             }
                         }
                     }
@@ -196,5 +208,13 @@ public class LecturerCoursesServerImpl extends MessageServer {
 
     public void setCourseImageMapper(CourseImageMapper courseImageMapper) {
         this.courseImageMapper = courseImageMapper;
+    }
+
+    public MessagePushServerImpl getMessagePushServerimpl() {
+        return messagePushServerimpl;
+    }
+
+    public void setMessagePushServerimpl(MessagePushServerImpl messagePushServerimpl) {
+        this.messagePushServerimpl = messagePushServerimpl;
     }
 }

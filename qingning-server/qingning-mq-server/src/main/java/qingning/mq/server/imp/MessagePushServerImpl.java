@@ -139,9 +139,16 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
+    //课程未开播处理定时任务取消
+    @FunctionName("processCourseNotStartUpdate")
+    public void processCourseNotStartUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        processCourseNotStartCancel(requestEntity,jedisUtils,context);
+        processCourseNotStart(requestEntity,jedisUtils,context);
+    }
+
     //课程直播超时处理
     private void processCourseLiveOvertime(){
-
+        //TODO
     }
 
     public CoursesMapper getCoursesMapper() {

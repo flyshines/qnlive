@@ -61,4 +61,13 @@ public abstract class MessageServer {
 		}
 		return billMap;
 	}
+
+	protected RequestEntity generateRequestEntity(String serverName, String method, String functionName, Object param) {
+		RequestEntity requestEntity = new RequestEntity();
+		requestEntity.setServerName(serverName);
+		requestEntity.setMethod(method);
+		requestEntity.setFunctionName(functionName);
+		requestEntity.setParam(param);
+		return requestEntity;
+	}
 }
