@@ -117,6 +117,8 @@ public abstract class AbstractController {
 			Map<String,Object> innerMap = new HashMap<String,Object>();
 			innerMap.put("server_url", infoMap.get("server_url"));
 			innerMap.put("method", infoMap.get("method"));
+			innerMap.put("protocol", infoMap.get("protocol"));
+			innerMap.put("domain_name", infoMap.get("domain_name"));
 			serverUrlInfoMap.put((String)infoMap.get("server_name"), innerMap);
 		}
 	}
