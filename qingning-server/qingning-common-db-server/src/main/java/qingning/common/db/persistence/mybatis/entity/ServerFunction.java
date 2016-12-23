@@ -11,6 +11,10 @@ public class ServerFunction {
 
     private Date updateTime;
 
+    private String protocol;
+
+    private String domainName;
+
     public String getServerName() {
         return serverName;
     }
@@ -41,5 +45,21 @@ public class ServerFunction {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol == null ? null : protocol.trim();
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName == null ? null : domainName.trim();
     }
 }

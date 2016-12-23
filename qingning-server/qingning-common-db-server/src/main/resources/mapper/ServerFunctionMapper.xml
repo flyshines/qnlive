@@ -6,31 +6,35 @@
     <result column="server_url" property="serverUrl" jdbcType="VARCHAR" />
     <result column="method" property="method" jdbcType="CHAR" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="protocol" property="protocol" jdbcType="VARCHAR" />
+    <result column="domain_name" property="domainName" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    server_name, server_url, method, update_time
+    `server_name`, server_url, method, update_time, protocol, domain_name
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_server_function
-    where server_name = #{serverName,jdbcType=VARCHAR}
+    where `server_name` = #{serverName,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from t_server_function
-    where server_name = #{serverName,jdbcType=VARCHAR}
+    where `server_name` = #{serverName,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
-    insert into t_server_function (server_name, server_url, method, 
-      update_time)
-    values (#{serverName,jdbcType=VARCHAR}, #{serverUrl,jdbcType=VARCHAR}, #{method,jdbcType=CHAR}, 
-      #{updateTime,jdbcType=TIMESTAMP})
+    insert into t_server_function (`server_name`, server_url, method,
+    update_time, protocol, domain_name
+    )
+    values (#{serverName,jdbcType=VARCHAR}, #{serverUrl,jdbcType=VARCHAR}, #{method,jdbcType=CHAR},
+    #{updateTime,jdbcType=TIMESTAMP}, #{protocol,jdbcType=VARCHAR}, #{domainName,jdbcType=VARCHAR}
+    )
   </insert>
   <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
     insert into t_server_function
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="serverName != null" >
-        server_name,
+        `server_name`,
       </if>
       <if test="serverUrl != null" >
         server_url,
@@ -40,6 +44,12 @@
       </if>
       <if test="updateTime != null" >
         update_time,
+      </if>
+      <if test="protocol != null" >
+        protocol,
+      </if>
+      <if test="domainName != null" >
+        domain_name,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -55,6 +65,12 @@
       <if test="updateTime != null" >
         #{updateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="protocol != null" >
+        #{protocol,jdbcType=VARCHAR},
+      </if>
+      <if test="domainName != null" >
+        #{domainName,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
@@ -69,15 +85,23 @@
       <if test="updateTime != null" >
         update_time = #{updateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="protocol != null" >
+        protocol = #{protocol,jdbcType=VARCHAR},
+      </if>
+      <if test="domainName != null" >
+        domain_name = #{domainName,jdbcType=VARCHAR},
+      </if>
     </set>
-    where server_name = #{serverName,jdbcType=VARCHAR}
+    where `server_name` = #{serverName,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.ServerFunction" >
     update t_server_function
     set server_url = #{serverUrl,jdbcType=VARCHAR},
-      method = #{method,jdbcType=CHAR},
-      update_time = #{updateTime,jdbcType=TIMESTAMP}
-    where server_name = #{serverName,jdbcType=VARCHAR}
+    method = #{method,jdbcType=CHAR},
+    update_time = #{updateTime,jdbcType=TIMESTAMP},
+    protocol = #{protocol,jdbcType=VARCHAR},
+    domain_name = #{domainName,jdbcType=VARCHAR}
+    where `server_name` = #{serverName,jdbcType=VARCHAR}
   </update>
 
   <select id="getServerUrls" resultType="hashmap" >
