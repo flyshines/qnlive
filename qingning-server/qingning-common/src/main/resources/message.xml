@@ -57,6 +57,7 @@
 				<entry key="120005" value="已经参与该课程，不能重复参与"/>
 				<entry key="120006" value="课程密码错误"/>
 				<entry key="120007" value="学员未加入该课程"/>
+				<entry key="120008" value="微信授权code方式登录失败"/>
 
 			</map>
 		</property>

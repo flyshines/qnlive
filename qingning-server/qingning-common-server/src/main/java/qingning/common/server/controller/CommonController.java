@@ -66,6 +66,36 @@ public class CommonController extends AbstractController {
     }
 
     /**
+     * 微信授权code登录
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/weixin/code/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity weixinCodeUserLogin(
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+
+        //根据相关条件将server_url列表信息返回
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
+        if (bodyMap.get("server_url_update_time") == null ||
+                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
+            resultMap.put("server_url_info_list", serverUrlInfoMap);
+            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+        }
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
+
+    /**
      * 获得上传到七牛token
      * @param accessToken
      * @param version

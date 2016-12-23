@@ -1,20 +1,19 @@
 package qingning.common.util;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qingning.common.entity.AccessToken;
-
 import redis.clients.jedis.Jedis;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -25,9 +24,13 @@ import redis.clients.jedis.Jedis;
 public class WeiXinUtil {
     private static Logger log = LoggerFactory.getLogger(WeiXinUtil.class);
 
-    // 获取access_token的接口地址（GET） 限200（次/天）
+    // 获取access_token的接口地址（GET） 限2000（次/天）
     public final static String access_token_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
-
+    public final static String get_user_info_by_code_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=APPSECRET&code=CODE&grant_type=authorization_code";
+    public final static String get_user_info_by_access_token = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+    //获取JSAPI_Ticket
+    public static String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi";
+    
     private static final String appid = "wxb57d497bf6a3f4e5";
     private static final String appsecret = "9f7280d1da98ba65ecad07d3c81cee82";
 
@@ -60,7 +63,7 @@ public class WeiXinUtil {
                 }
             }
         }else {
-        	accessToken = new AccessToken();
+            accessToken = new AccessToken();
             accessToken.setToken(token);
             accessToken.setExpiresIn(jedis.ttl(Constants.CACHED_KEY_WEIXIN_TOKEN).intValue());
         }
@@ -69,11 +72,30 @@ public class WeiXinUtil {
     }
 
 
-    //获取JSAPI_Ticket
-    public static String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi";
+    public static JSONObject getUserInfoByCode(String code) {
+        String requestUrl = get_user_info_by_code_url.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
+
+    /**
+     * 未关注公众号，已经授权，通过accessToken和union_id获得用户详细信息
+     * @param accessToken
+     * @return
+     */
+    public static JSONObject getUserInfoByAccessToken(String accessToken, String unionId) {
+        String requestUrl = get_user_info_by_access_token.replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
+
+
     /**
      * 获取jsapi_ticket
-     * @param accessToken
      * @return
      */
     public static String getJSApiTIcket(Jedis jedis){

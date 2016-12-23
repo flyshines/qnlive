@@ -1,5 +1,6 @@
 package qingning.common.server.imp;
 
+import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
@@ -107,6 +108,100 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				}
 				break;
 
+		}
+
+		return resultMap;
+	}
+
+	/**
+	 * 微信授权code登录
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@FunctionName("weixinCodeUserLogin")
+	public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		String code = reqMap.get("code").toString();
+		//1.传递授权code及相关参数，调用微信验证code接口
+		JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
+		if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null){
+			throw new QNLiveException("120008");
+		}
+
+		//1.2如果验证成功，则得到用户的union_id和用户的access_token。
+		//1.2.1根据 union_id查询数据库
+		String openid = getCodeResultJson.getString("openid");
+		Map<String,Object> queryMap = new HashMap<>();
+		queryMap.put("login_type","0");//0.微信登录
+		queryMap.put("union_id",openid);
+		Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+
+		//1.2.1.1如果用户存在则进行登录流程
+		if(loginInfoMap != null){
+			processLoginSuccess(2, null, loginInfoMap, resultMap);
+		}else {
+			//1.2.1.2如果用户不存在，则根据用户的union_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
+			String userWeixinAccessToken = getCodeResultJson.getString("access_token");
+			JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
+			// 根据得到的相关用户信息注册用户，并且进行登录流程。
+			if(userJson == null || userJson.getInteger("errcode") != null){
+				throw new QNLiveException("120008");
+			}
+
+			String nickname = userJson.getString("nickname");
+			String sex = userJson.getString("sex");
+			String headimgurl = userJson.getString("headimgurl");
+
+			Jedis jedis = jedisUtils.getJedis();
+			Map<String,String> imResultMap = null;
+			try {
+				imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");
+			}catch (Exception e){
+				//TODO 暂不处理
+			}
+			//if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
+			//throw new QNLiveException("120003");
+			//}else {
+			//初始化数据库相关表
+			reqMap.put("m_user_id", imResultMap.get("uid"));
+			reqMap.put("m_pwd", imResultMap.get("password"));
+			//设置默认用户头像
+			if(MiscUtils.isEmpty(headimgurl)){
+				reqMap.put("avatar_address",IMMsgUtil.configMap.get("default_avatar_address"));//TODO
+			}else {
+				reqMap.put("avatar_address", headimgurl);//TODO
+			}
+
+			if(MiscUtils.isEmpty(nickname)){
+				reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+			}else {
+				reqMap.put("nick_name", nickname);
+			}
+
+			if(MiscUtils.isEmpty(sex)){
+				reqMap.put("gender","2");//TODO
+			}
+
+			//微信性别与本系统性别转换
+			//微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
+			if(sex.equals("1")){
+				reqMap.put("gender","1");//TODO
+			}
+			if(sex.equals("2")){
+				reqMap.put("gender","0");//TODO
+			}
+			if(sex.equals("0")){
+				reqMap.put("gender","2");//TODO
+			}
+
+			Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
+
+			//生成access_token，将相关信息放入缓存，构造返回参数
+			processLoginSuccess(1, dbResultMap, null, resultMap);
+			//}
 		}
 
 		return resultMap;
