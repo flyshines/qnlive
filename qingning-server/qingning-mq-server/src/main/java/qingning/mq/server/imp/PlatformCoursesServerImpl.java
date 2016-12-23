@@ -1,12 +1,15 @@
 package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.mq.persistence.mybatis.CourseAudioMapper;
 import qingning.mq.persistence.mybatis.CourseImageMapper;
 import qingning.mq.persistence.mybatis.CoursesMapper;
+import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.rabbitmq.MessageServer;
@@ -18,20 +21,20 @@ import java.util.*;
 /**
  * Created by loovee on 2016/12/16.
  */
-public class PlatformCoursesServerImpl extends MessageServer {
+public class PlatformCoursesServerImpl extends AbstractMsgService {
 
     private CoursesMapper coursesMapper;
     private CourseAudioMapper courseAudioMapper;
     private CourseImageMapper courseImageMapper;
 
     @Override
-    public void process(RequestEntity requestEntity) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
         //将讲师的课程列表放入缓存中
-        processPlatformCoursesCache();
+        processPlatformCoursesCache(requestEntity, jedisUtils, context);
     }
 
 
-    private void processPlatformCoursesCache() {
+    private void processPlatformCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
 
         String predictionListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;

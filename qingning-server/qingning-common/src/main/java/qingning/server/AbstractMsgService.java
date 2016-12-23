@@ -51,4 +51,13 @@ public abstract class AbstractMsgService {
 	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception{
 
 	}
+
+	protected RequestEntity generateRequestEntity(String serverName, String method, String functionName, Object param) {
+		RequestEntity requestEntity = new RequestEntity();
+		requestEntity.setServerName(serverName);
+		requestEntity.setMethod(method);
+		requestEntity.setFunctionName(functionName);
+		requestEntity.setParam(param);
+		return requestEntity;
+	}
 }

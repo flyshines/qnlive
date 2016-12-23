@@ -2,13 +2,16 @@ package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.mq.persistence.mybatis.CourseAudioMapper;
 import qingning.mq.persistence.mybatis.CourseImageMapper;
 import qingning.mq.persistence.mybatis.CoursesMapper;
 import qingning.mq.persistence.mybatis.LoginInfoMapper;
+import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.rabbitmq.MessageServer;
@@ -20,24 +23,23 @@ import java.util.*;
 /**
  * Created by loovee on 2016/12/16.
  */
-public class LecturerCoursesServerImpl extends MessageServer {
+public class LecturerCoursesServerImpl extends AbstractMsgService {
 
     private CoursesMapper coursesMapper;
     private LoginInfoMapper loginInfoMapper;
     private CourseAudioMapper courseAudioMapper;
     private CourseImageMapper courseImageMapper;
 
-    @Autowired
     private MessagePushServerImpl messagePushServerimpl;
 
     @Override
-    public void process(RequestEntity requestEntity) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
         //将讲师的课程列表放入缓存中
-        processLecturerCoursesCache();
+        processLecturerCoursesCache(requestEntity, jedisUtils, context);
     }
 
 
-    private void processLecturerCoursesCache() {
+    private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
 
         //1.找出系统中的所有讲师，得到讲师用户id列表
@@ -140,8 +142,9 @@ public class LecturerCoursesServerImpl extends MessageServer {
                             //如果课程时间为今天，则需要将其加入定时任务
                             if(courseStartTime.getTime() < endDate.getTime()){
                                 timerMap.put("course_id", courseMap.get("course_id").toString());
+                                timerMap.put("start_time", ((Date)courseMap.get("start_time")).getTime());
                                 RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", timerMap);
-                                messagePushServerimpl.processCourseNotStart(requestEntity, jedisUtils, null);
+                                messagePushServerimpl.processCourseNotStart(requestEntity, jedisUtils, context);
                             }
                         }
                     }
@@ -210,9 +213,6 @@ public class LecturerCoursesServerImpl extends MessageServer {
         this.courseImageMapper = courseImageMapper;
     }
 
-    public MessagePushServerImpl getMessagePushServerimpl() {
-        return messagePushServerimpl;
-    }
 
     public void setMessagePushServerimpl(MessagePushServerImpl messagePushServerimpl) {
         this.messagePushServerimpl = messagePushServerimpl;

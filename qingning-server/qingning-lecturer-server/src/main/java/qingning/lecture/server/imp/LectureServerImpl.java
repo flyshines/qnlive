@@ -352,9 +352,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(startTime < end.getTime()){
             RequestEntity mqRequestEntity = new RequestEntity();
             mqRequestEntity.setServerName("MessagePushServer");
-            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            //mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
             mqRequestEntity.setFunctionName("processCourseNotStart");
-            mqRequestEntity.setParam(reqEntity.getParam());
+            Map<String,Object> timerMap = new HashMap<>();
+            timerMap.put("course_id", dbResultMap.get("course_id").toString());
+            timerMap.put("start_time", startTime + "");
+            mqRequestEntity.setParam(timerMap);
             this.mqUtils.sendMessage(mqRequestEntity);
         }
 
@@ -498,6 +501,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 //1.6更新课程缓存信息
                 Map<String, String> updateCacheMap = new HashMap<String, String>();
                 updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
+                updateCacheMap.put("end_time", courseEndTime.getTime() + "");
                 updateCacheMap.put("status", "2");
                 jedis.hmset(courseKey, updateCacheMap);
 

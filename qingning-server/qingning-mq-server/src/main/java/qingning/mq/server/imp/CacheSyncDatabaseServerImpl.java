@@ -1,11 +1,14 @@
 package qingning.mq.server.imp;
 
+import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.mq.persistence.entity.Courses;
 import qingning.mq.persistence.entity.LiveRoom;
 import qingning.mq.persistence.mybatis.*;
+import qingning.server.AbstractMsgService;
 import qingning.server.rabbitmq.MessageServer;
 import redis.clients.jedis.Jedis;
 
@@ -17,7 +20,7 @@ import java.util.Set;
 /**
  * Created by loovee on 2016/12/20.
  */
-public class CacheSyncDatabaseServerImpl extends MessageServer {
+public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 
     private CoursesMapper coursesMapper;
     private LiveRoomMapper liveRoomMapper;
@@ -25,15 +28,15 @@ public class CacheSyncDatabaseServerImpl extends MessageServer {
     private LoginInfoMapper loginInfoMapper;
 
     @Override
-    public void process(RequestEntity requestEntity) throws Exception {
-        syncCourseStudentNum();
-        syncCourseNum();
-        syncLiveRoomNum();
-        syncFansNum();
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
+        syncCourseStudentNum(requestEntity, jedisUtils, context);
+        syncCourseNum(requestEntity, jedisUtils, context);
+        syncLiveRoomNum(requestEntity, jedisUtils, context);
+        syncFansNum(requestEntity, jedisUtils, context);
     }
 
     //粉丝数(冗余存)（讲师和直播间缓存）
-    private void syncFansNum() {
+    private void syncFansNum(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         //查询出所有讲师
         //同步讲师数据
@@ -83,7 +86,7 @@ public class CacheSyncDatabaseServerImpl extends MessageServer {
     }
 
     //直播间数（讲师缓存）
-    private void syncLiveRoomNum() {
+    private void syncLiveRoomNum(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         //查询出所有讲师
         //同步讲师数据
@@ -105,7 +108,7 @@ public class CacheSyncDatabaseServerImpl extends MessageServer {
     }
 
     //同步课程数（直播间、讲师）
-    private void syncCourseNum() {
+    private void syncCourseNum(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         //查询出所有讲师
         //同步讲师数据
@@ -155,7 +158,7 @@ public class CacheSyncDatabaseServerImpl extends MessageServer {
     }
 
     //同步课程参与人次(讲师、课程)
-    private void syncCourseStudentNum() {
+    private void syncCourseStudentNum(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         //查询出所有讲师
         List<String> lecturerIdList = loginInfoMapper.findRoleUserIds(Constants.USER_ROLE_LECTURER);
