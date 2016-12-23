@@ -25,14 +25,14 @@ public class WeiXinUtil {
     private static Logger log = LoggerFactory.getLogger(WeiXinUtil.class);
 
     // 获取access_token的接口地址（GET） 限2000（次/天）
-    public final static String access_token_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
-    public final static String get_user_info_by_code_url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=APPSECRET&code=CODE&grant_type=authorization_code";
-    public final static String get_user_info_by_access_token = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+    public final static String access_token_url = IMMsgUtil.configMap.get("access_token_url");
+    public final static String get_user_info_by_code_url = IMMsgUtil.configMap.get("get_user_info_by_code_url");
+    public final static String get_user_info_by_access_token = IMMsgUtil.configMap.get("get_user_info_by_access_token");
     //获取JSAPI_Ticket
-    public static String jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi";
-    
-    private static final String appid = "wxb57d497bf6a3f4e5";
-    private static final String appsecret = "9f7280d1da98ba65ecad07d3c81cee82";
+    public static String jsapi_ticket_url = IMMsgUtil.configMap.get("jsapi_ticket_url");
+
+    private static final String appid = IMMsgUtil.configMap.get("appid");
+    private static final String appsecret = IMMsgUtil.configMap.get("appsecret");
 
 
     /**
