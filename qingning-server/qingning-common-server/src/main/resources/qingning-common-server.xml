@@ -60,7 +60,9 @@
 					<accessToken require="N" />
 				</auth>
 				<inputs>
-					<param name="login_id" type="string" require="Y,000100"  />
+					<param name="login_id" type="string"  validate="(login_id)=>{
+					       		var isEmpty= login_id==null || login_id.length == 0;
+					       		return !isEmpty;},000100"/>
 				</inputs>
 				<outputs>
 				</outputs>

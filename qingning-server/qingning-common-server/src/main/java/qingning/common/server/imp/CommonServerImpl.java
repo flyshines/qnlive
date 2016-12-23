@@ -124,7 +124,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
-		String code = reqMap.get("code").toString();
+		String code = reqMap.get("login_id").toString();
 		//1.传递授权code及相关参数，调用微信验证code接口
 		JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
 		if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null){
