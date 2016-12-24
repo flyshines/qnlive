@@ -3,9 +3,7 @@ package qingning.common.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import qingning.common.db.persistence.mybatis.LoginInfoMapper;
-import qingning.common.db.persistence.mybatis.ServerFunctionMapper;
-import qingning.common.db.persistence.mybatis.UserMapper;
+import qingning.common.db.persistence.mybatis.*;
 import qingning.common.db.persistence.mybatis.entity.LoginInfo;
 import qingning.common.db.persistence.mybatis.entity.User;
 import qingning.common.util.MiscUtils;
@@ -24,6 +22,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private UserMapper userMapper;
 
+	@Autowired(required = true)
+	private CoursesMapper coursesMapper;
+
+	@Autowired(required = true)
+	private RewardConfigurationMapper rewardConfigurationMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -91,6 +94,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findUserInfoByUserId(String user_id) {
 		return userMapper.findByUserId(user_id);
+	}
+
+	@Override
+	public Map<String, Object> findCourseByCourseId(String courseId) {
+		return coursesMapper.findCourseByCourseId(courseId);
+	}
+
+	@Override
+	public Map<String, Object> findRewardInfoByRewardId(String reward_id) {
+		return rewardConfigurationMapper.findRewardInfoByRewardId(Long.parseLong(reward_id));
 	}
 
 

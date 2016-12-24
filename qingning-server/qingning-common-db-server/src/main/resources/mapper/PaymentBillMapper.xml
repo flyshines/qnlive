@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.common.db.persistence.mybatis.PaymentBillMapper" >
+  <resultMap id="BaseResultMap" type="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    <id column="payment_id" property="paymentId" jdbcType="VARCHAR" />
+    <result column="trade_id" property="tradeId" jdbcType="VARCHAR" />
+    <result column="payment_type" property="paymentType" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="payment" property="payment" jdbcType="DOUBLE" />
+    <result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    payment_id, trade_id, payment_type, status, payment, trade_no, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_payment_bill
+    where payment_id = #{paymentId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_payment_bill
+    where payment_id = #{paymentId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    insert into t_payment_bill (payment_id, trade_id, payment_type, 
+      status, payment, trade_no, 
+      create_time, update_time)
+    values (#{paymentId,jdbcType=VARCHAR}, #{tradeId,jdbcType=VARCHAR}, #{paymentType,jdbcType=VARCHAR}, 
+      #{status,jdbcType=VARCHAR}, #{payment,jdbcType=DOUBLE}, #{tradeNo,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    insert into t_payment_bill
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="paymentId != null" >
+        payment_id,
+      </if>
+      <if test="tradeId != null" >
+        trade_id,
+      </if>
+      <if test="paymentType != null" >
+        payment_type,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="payment != null" >
+        payment,
+      </if>
+      <if test="tradeNo != null" >
+        trade_no,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="paymentId != null" >
+        #{paymentId,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeId != null" >
+        #{tradeId,jdbcType=VARCHAR},
+      </if>
+      <if test="paymentType != null" >
+        #{paymentType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="payment != null" >
+        #{payment,jdbcType=DOUBLE},
+      </if>
+      <if test="tradeNo != null" >
+        #{tradeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    update t_payment_bill
+    <set >
+      <if test="tradeId != null" >
+        trade_id = #{tradeId,jdbcType=VARCHAR},
+      </if>
+      <if test="paymentType != null" >
+        payment_type = #{paymentType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="payment != null" >
+        payment = #{payment,jdbcType=DOUBLE},
+      </if>
+      <if test="tradeNo != null" >
+        trade_no = #{tradeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where payment_id = #{paymentId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    update t_payment_bill
+    set trade_id = #{tradeId,jdbcType=VARCHAR},
+      payment_type = #{paymentType,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      payment = #{payment,jdbcType=DOUBLE},
+      trade_no = #{tradeNo,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where payment_id = #{paymentId,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -134,4 +134,26 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**
+     * 生成微信支付单
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/payment/weixin/bill", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity generateWeixinPayBill(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "generateWeixinPayBill", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
 }

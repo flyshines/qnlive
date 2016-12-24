@@ -15,4 +15,8 @@ public interface ICommonModuleServer {
 	Map<String,Object> findLoginInfoByUserId(String user_id);
 
 	Map<String,Object> findUserInfoByUserId(String user_id);
+
+	Map<String,Object> findCourseByCourseId(String courseId);
+
+	Map<String,Object> findRewardInfoByRewardId(String reward_id);
 }

@@ -290,4 +290,48 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String JSApiTIcket = WeiXinUtil.getJSApiTIcket(jedisUtils.getJedis());
 		return WeiXinUtil.sign(JSApiTIcket, reqMap.get("url").toString());
 	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("generateWeixinPayBill")
+	public Map<String,Object> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+
+		//1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
+		String courseId = reqMap.get("course_id").toString();
+		Map<String, Object> map = new HashMap<>();
+		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+		Jedis jedis = jedisUtils.getJedis();
+
+		//1.1如果课程不在缓存中，则查询数据库
+		if(!jedis.exists(courseKey)){
+			Map<String,Object> courseMap = commonModuleServer.findCourseByCourseId(courseId);
+			if(courseMap == null){
+				throw new QNLiveException("120009");
+			}
+		}
+
+		//2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
+		String profit_type = reqMap.get("profit_type").toString();
+		String reward_id = null;
+		//0:课程收益 1:打赏
+		if(profit_type.equals("1")){
+			if(reqMap.get("reward_id") == null || StringUtils.isBlank(reqMap.get("reward_id").toString())){
+				throw new QNLiveException("000100");
+			}
+			reward_id = reqMap.get("reward_id").toString();
+			Map<String,Object> rewardInfoMap = commonModuleServer.findRewardInfoByRewardId(reward_id);
+			if(rewardInfoMap == null){
+				throw new QNLiveException("120010");
+			}
+		}
+
+		//3.插入t_trade_bill表和t_payment_bill表
+		//TODO
+
+
+
+		return resultMap;
+	}
 }
