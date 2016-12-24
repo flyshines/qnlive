@@ -91,7 +91,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					timerMap.put("course_id", courseMap.get("course_id"));
 					timerMap.put("real_start_time", now+"");
 					requestEntity.setParam(timerMap);
-					messagePushServerImpl.processCourseNotStartUpdate(requestEntity,jedisUtils,context);
+					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 				}
 			}
 		}

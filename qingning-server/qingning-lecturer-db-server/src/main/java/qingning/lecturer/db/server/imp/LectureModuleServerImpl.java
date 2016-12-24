@@ -283,4 +283,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return coursesStudentsMapper.findBanUserListInfo(banUserIdList);
 	}
 
+	@Override
+	public long findCourseMessageMaxPos(String course_id) {
+		return courseMessageMapper.findCourseMessageMaxPos(course_id);
+	}
+
 }

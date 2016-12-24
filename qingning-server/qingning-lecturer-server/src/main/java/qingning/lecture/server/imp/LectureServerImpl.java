@@ -942,23 +942,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 
-        //初始化下标
-        long startIndex;
-        long endIndex;
-        if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
-            startIndex = Long.parseLong(reqMap.get("message_pos").toString()) + 1;
-        }else {
-            startIndex = 0L;
-        }
-        endIndex = startIndex + pageCount - 1;
-
-        Set<String> messageIdList = jedis.zrevrange(messageListKey, startIndex, endIndex);
         //缓存不存在则读取数据库中的内容
-        if(messageIdList == null || messageIdList.size() == 0){
+        if(! jedis.exists(messageListKey)){
             Map<String, Object> queryMap = new HashMap<>();
             queryMap.put("page_count", pageCount);
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
+            }else {
+                long maxPos = lectureModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+                queryMap.put("message_pos", maxPos);
             }
             queryMap.put("course_id", reqMap.get("course_id").toString());
             List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
@@ -970,18 +962,44 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return resultMap;
 
         }else {
-            //缓存中存在则读取缓存内容
-            List<Map<String,String>> messageListCache = new ArrayList<>();
-            for(String messageId : messageIdList){
-                map.put(Constants.FIELD_MESSAGE_ID, messageId);
-                String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-                Map<String,String> messageMap = jedis.hgetAll(messageKey);
-                messageMap.put("message_pos", startIndex+"");
-                messageListCache.add(messageMap);
-                startIndex++;
+            //缓存中存在，则读取缓存中的内容
+            //初始化下标
+            long startIndex;
+            long endIndex;
+            Set<String> messageIdList;
+            //如果分页的message_id不为空
+            if(reqMap.get("message_id") != null && StringUtils.isNotBlank(reqMap.get("message_id").toString())){
+                long endRank = jedis.zrank(messageListKey, reqMap.get("message_id").toString());
+                endIndex = endRank - 1;
+                startIndex = endRank - pageCount + 1;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+                messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+            }else {
+                endIndex = -1;
+                startIndex = jedis.zcard(messageListKey) - pageCount;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+                messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
             }
 
-            resultMap.put("message_list", messageListCache);
+            if(! CollectionUtils.isEmpty(messageIdList)){
+                //缓存中存在则读取缓存内容
+                List<Map<String,String>> messageListCache = new ArrayList<>();
+                for(String messageId : messageIdList){
+                    map.put(Constants.FIELD_MESSAGE_ID, messageId);
+                    String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
+                    Map<String,String> messageMap = jedis.hgetAll(messageKey);
+                    messageMap.put("message_pos", startIndex+"");
+                    messageListCache.add(messageMap);
+                    startIndex++;
+                }
+
+                resultMap.put("message_list", messageListCache);
+            }
+
             return resultMap;
         }
 

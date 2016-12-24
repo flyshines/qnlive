@@ -173,5 +173,10 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return loginInfoMapper.findLoginInfoByUserId(userId);
 	}
 
+	@Override
+	public long findCourseMessageMaxPos(String course_id) {
+		return courseMessageMapper.findCourseMessageMaxPos(course_id);
+	}
+
 
 }

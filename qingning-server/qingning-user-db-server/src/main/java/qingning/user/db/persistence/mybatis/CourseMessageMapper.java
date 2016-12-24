@@ -20,4 +20,6 @@ public interface CourseMessageMapper {
     int updateByPrimaryKey(CourseMessage record);
 
     List<Map<String,Object>> findCourseMessageList(Map<String, Object> queryMap);
+
+    long findCourseMessageMaxPos(String course_id);
 }

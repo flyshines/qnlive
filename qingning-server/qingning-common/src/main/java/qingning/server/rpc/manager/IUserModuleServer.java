@@ -39,4 +39,6 @@ public interface IUserModuleServer {
 	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 
 	Map<String,Object> findLoginInfoByUserId(String user_id);
+
+	long findCourseMessageMaxPos(String course_id);
 }

@@ -184,14 +184,22 @@
     where 1 = 1
     and
     cm.course_id = #{course_id}
-
     <if test="messagePos != null" >
-      and cm.message_pos > #{message_pos}
+      and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
     </if>
     order by cm.message_pos asc
     limit #{page_count}
+  </select>
 
-
+  <select id="findCourseMessageMaxPos" resultType="long" parameterType="string" >
+    select
+    cm.message_pos
+    from t_course_message
+    where 1 = 1
+    and
+    cm.course_id = #{course_id}
+    order by message_pos desc
+    limit 1
   </select>
 
 </mapper>
