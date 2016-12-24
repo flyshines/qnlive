@@ -103,7 +103,19 @@ public class ImMsgServiceImp implements ImMsgService {
 		//1.将聊天信息id插入到redis zsort列表中
 		jedis.zadd(messageListKey, createTime, messageId);
 
-		//2.将聊天信息放入redis的map中
+		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+		//2.如果该条信息为提问，则存入消息提问列表
+		if(information.get("send_type").equals("3")){
+			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+			jedis.zadd(messageQuestionListKey, createTime, messageId);
+
+			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
+		}else if(information.get("send_type").equals("0")){
+			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+			jedis.zadd(messageLecturerListKey, createTime, messageId);
+		}
+
+		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, messageId);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		Map<String,String> stringMap = new HashMap<>();

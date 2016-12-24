@@ -221,6 +221,7 @@ public class UserController extends AbstractController{
 			@PathVariable("course_id") String course_id,
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
+			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "messageList", accessToken, version);
@@ -228,6 +229,7 @@ public class UserController extends AbstractController{
 		parMap.put("course_id", course_id);
 		parMap.put("page_count", page_count);
 		parMap.put("message_pos", message_pos);
+		parMap.put("query_type", query_type);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

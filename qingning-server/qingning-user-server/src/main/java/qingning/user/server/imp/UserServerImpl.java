@@ -958,16 +958,27 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
 
+        String queryType = reqMap.get("query_type").toString();
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
 
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
+        Map<String, Object> queryMap = new HashMap<>();
+        String messageListKey;
+
+        //queryType为0则查询全部消息，为3则查询讲师发送消息
+        if(queryType.equals("0")){
+            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
+        }else {
+            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+            queryMap.put("send_type1", "0");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+            queryMap.put("send_type2", "1");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+        }
+
 
         //缓存不存在则读取数据库中的内容
         if(! jedis.exists(messageListKey)){
-            Map<String, Object> queryMap = new HashMap<>();
             queryMap.put("page_count", pageCount);
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
