@@ -687,6 +687,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(! CollectionUtils.isEmpty(courseResultList)){
             resultMap.put("course_list", courseResultList);
         }
+
+        //返回课程总数
+        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+        String course_num = jedis.hget(lecturerKey, "course_num");//TODO 目前仅查询讲师缓存的课程数，尚未完成查询直播间缓存的课程数
+        if(! MiscUtils.isEmpty(course_num)){
+            resultMap.put("course_num", Long.parseLong(course_num));
+        }else {
+            resultMap.put("course_num", 0);
+        }
         return resultMap;
     }
 
