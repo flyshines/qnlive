@@ -288,4 +288,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return courseMessageMapper.findCourseMessageMaxPos(course_id);
 	}
 
+	@Override
+	public List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap) {
+		return coursesStudentsMapper.findLatestStudentAvatarAddList(queryMap);
+	}
+
 }

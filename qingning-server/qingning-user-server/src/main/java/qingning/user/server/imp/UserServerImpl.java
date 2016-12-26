@@ -565,7 +565,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("start_time", Long.parseLong(courseMap.get("start_time")));
         resultMap.put("student_num", Long.parseLong(courseMap.get("student_num")));
         resultMap.put("course_remark", courseMap.get("course_remark"));
-        //TODO student_list 参与学生数组
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("size",10);
+        queryMap.put("course_id",reqMap.get("course_id").toString());
+        List<String> latestStudentAvatarAddList = userModuleServer.findLatestStudentAvatarAddList(queryMap);
+        if(! MiscUtils.isEmpty(latestStudentAvatarAddList)){
+            resultMap.put("student_list", latestStudentAvatarAddList);
+        }
 
         //从缓存中获取直播间信息
         Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
@@ -574,7 +580,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
         resultMap.put("room_id", liveRoomMap.get("room_id"));
 
-        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.clear();
         queryMap.put("user_id", userId);
         queryMap.put("room_id", room_id);
         queryMap.put("lecturer_id", courseMap.get("lecturer_id"));

@@ -186,6 +186,14 @@
     </foreach>
   </select>
 
-
+  <select id="findLatestStudentAvatarAddList" resultType="string" parameterType="hashmap" >
+    select
+    u.avatar_address
+    from t_courses_students cs join t_user u  on cs.user_id = u.user_id
+    where 1 = 1
+    and course_id = #{course_id}
+    order by cs.create_time DESC
+    limit #{size}
+  </select>
 
 </mapper>

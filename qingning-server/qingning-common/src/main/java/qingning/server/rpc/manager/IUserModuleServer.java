@@ -41,4 +41,6 @@ public interface IUserModuleServer {
 	Map<String,Object> findLoginInfoByUserId(String user_id);
 
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
+
+	List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
 }

@@ -409,7 +409,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("student_num", Long.parseLong(courseMap.get("student_num")));
         resultMap.put("course_remark", courseMap.get("course_remark"));
         resultMap.put("update_time", courseMap.get("update_time"));
-        //TODO student_list 参与学生数组
+        //参与学生数组
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("size",10);
+        queryMap.put("course_id",reqMap.get("course_id").toString());
+        List<String> latestStudentAvatarAddList = lectureModuleServer.findLatestStudentAvatarAddList(queryMap);
+        if(! MiscUtils.isEmpty(latestStudentAvatarAddList)){
+            resultMap.put("student_list", latestStudentAvatarAddList);
+        }
 
         //从缓存中获取直播间信息
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
