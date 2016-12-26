@@ -54,6 +54,19 @@ public final class MiscUtils {
 		return ret;
 	}
 	
+	public static boolean isEqual(Object value1, Object value2){
+		boolean ret =false;
+		if(value1==value2){
+			ret = true;
+		} else if(value1!= null && value2 !=null ){
+			if(value1.equals(value2)){
+				ret = true;
+			}
+		}
+		
+		return ret;
+	}
+	
 	 public static long getUnixTimeStamp(Date date) {
 	        return date.getTime() / 1000;
 	 }
@@ -81,6 +94,77 @@ public final class MiscUtils {
 			} catch(Exception e){
 				throw new QNLiveException("000101",fieldName);
 			}
+		} else if(isEmpty(obj) && !isEmpty(type)){
+			if(!Constants.SYSSTR.equalsIgnoreCase(type)){
+				obj=null;
+			}
+		}
+		return obj;
+	}
+	
+	public static double convertObjectToDouble(Object value){
+		double ret = 0d;
+		try{
+			if(MiscUtils.isEmpty(value)){
+				ret = 0d;
+			} else if(value instanceof Double){
+				ret = (Double)value;
+			} else if(value instanceof String){
+				ret = Double.parseDouble((String)value);
+			} else if(value instanceof Date){
+				ret = ((Date)value).getTime();
+			}
+		}catch(Exception e){
+			ret= 0d;
+		}
+		return ret;
+	}
+	
+	public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue) throws Exception{
+		try{
+			if(MiscUtils.isEmpty(obj)){
+				obj = defaultValue;
+			}
+			
+			if(Constants.SYSINT.equalsIgnoreCase(type)){
+				if(!(obj instanceof Integer)){
+					obj = Integer.parseInt(obj.toString());
+				}			
+			} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
+				if(!(obj instanceof Long)){
+					if(obj instanceof Date){
+						obj = ((Date)obj).getTime();
+					} else {
+						obj = Long.parseLong(obj.toString());
+					}				
+				}
+			} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
+				if(!(obj instanceof Double)){
+					if(obj instanceof Date){
+						Long timeStamp = ((Date)obj).getTime();
+						obj = Double.parseDouble(timeStamp.toString());
+					} else {
+						obj = Double.parseDouble(obj.toString());
+					}
+				}			
+			} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
+				if(MiscUtils.isEmpty(obj)){
+					obj=defaultValue;
+				} else if(!(obj instanceof String)){
+					obj=obj.toString();
+				}			
+			}
+			if(MiscUtils.isEmpty(obj)){
+				if(Constants.SYSMAP.equals(type)){
+					obj=new HashMap<Object,Object>();
+				} else if(Constants.SYSLIST.equals(type)){
+					obj=new ArrayList<Object>();
+				} else {
+					obj="";
+				}
+			}
+		} catch (Exception e){
+			throw new QNLiveException("000102",fieldName);
 		}
 		return obj;
 	}

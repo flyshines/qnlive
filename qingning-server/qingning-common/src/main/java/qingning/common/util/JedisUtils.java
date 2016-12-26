@@ -50,7 +50,15 @@ public final class JedisUtils {
 		}
 		return jedis;
 	}
-
+	
+	public String getConfigKeyValue(String key){
+		String value=null;
+		if(!MiscUtils.isEmpty(key) && !MiscUtils.isEmpty(config)){
+			value = MiscUtils.convertString(config.get(key));
+		}
+		return value;
+	}
+	
 	private JedisPool getJedisPool(){
 		if(jedisPool!=null){
 			if(!jedisPool.isClosed()){

@@ -121,27 +121,74 @@ public class ServiceManger {
 				Element outputs = functionElement.getChild(Constants.OUTPUTS);
 				if(outputs!=null){
 					List<Element> parameters = outputs.getChildren(Constants.PARAM);
-					if(!MiscUtils.isEmpty(parameters)){
-						for(Element parameter : parameters){						
+					if(!MiscUtils.isEmpty(parameters)){						
+						for(Element parameter : parameters){							
 							String parameterName = parameter.getAttributeValue(Constants.NAME);
-							if(MiscUtils.isEmpty(parameterName)){
-								continue;
+							boolean isSpecial = Constants.SPECIAL.equals(parameterName);
+							if(isSpecial){
+								if(parameters.size()>1){
+									log.warn("The setting of the outputparameter element is not right." +className);
+									return;
+								}
 							}
-							String fieldName = parameter.getAttributeValue(Constants.FIELDNAME);
-							fieldName=fieldName==null?"":fieldName.trim();
-							String type = parameter.getAttributeValue(Constants.TYPE);
-							String defaultStr = parameter.getAttributeValue(Constants.DEFAULT);
-							OutputParameter outputParamter = new OutputParameter();
-							functionInfo.addOutputParameter(outputParamter);
-							outputParamter.setFieldName(fieldName);
-							outputParamter.setName(parameterName);
-							outputParamter.setType(type);
-							outputParamter.setDefault(defaultStr==null?"":defaultStr);						
+							OutputParameter outputParameter = createOutputParameter(parameter, className, isSpecial);
+							if(!MiscUtils.isEmpty(outputParameter)){
+								functionInfo.addOutputParameter(outputParameter);
+							}
 						}
 					}
 				}
 			}			
 		}
+	}
+	
+	private OutputParameter createOutputParameter(Element parameter, String className, boolean isSpecial){
+		String parameterName = parameter.getAttributeValue(Constants.NAME);
+		if(MiscUtils.isEmpty(parameterName)){
+			return null;
+		}
+		if(!isSpecial){
+			if(Constants.SPECIAL.equals(parameterName)){
+				log.warn("The setting of the outputparameter element is not right." +className);
+				return null;
+			}
+		}
+		String fieldName = parameter.getAttributeValue(Constants.FIELDNAME);
+		fieldName=fieldName==null?"":fieldName.trim();
+		String type = parameter.getAttributeValue(Constants.TYPE);
+		String defaultStr = parameter.getAttributeValue(Constants.DEFAULT);
+		String convertStr = parameter.getAttributeValue(Constants.CONVERT);
+		OutputParameter outputParameter = new OutputParameter();		
+		outputParameter.setFieldName(fieldName);
+		outputParameter.setName(parameterName);
+		outputParameter.setType(type);
+		outputParameter.setDefault(defaultStr==null?"":defaultStr);
+		if(!MiscUtils.isEmpty(convertStr)){
+			outputParameter.setConvertFunction(convertStr);
+		}
+		if(isSpecial){
+			if(!Constants.SYSLIST.equals(type) && !Constants.SYSOBJECT.equals(type)){
+				log.warn("The setting of the outputparameter element is not right." +className);
+				return null;
+			}
+		}
+		if(Constants.SYSLIST.equals(type) || Constants.SYSMAP.equals(type)){
+			List<Element> list = parameter.getChildren(Constants.PARAM);			
+			boolean isList = Constants.SYSLIST.equals(type);
+			if(!MiscUtils.isEmpty(list)){
+				for(Element child : list){
+					OutputParameter childOutputParameter = createOutputParameter(child,className,false);
+					if(!MiscUtils.isEmpty(childOutputParameter)){
+						if(isList){
+							outputParameter.addOutputParameterForList(childOutputParameter);
+						} else {
+							outputParameter.addOutputParameterForMap(childOutputParameter);
+						}
+					}
+				}
+			}
+		}
+		return outputParameter;
 	}
 	
 	public void initSystem(String path) throws Exception{
