@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.lecturer.db.persistence.mybatis.DistributerMapper" >
+	<insert id="insertDistributer" parameterType="hashmap">
+		insert t_distributer into (distributer_id,create_time,update_time) values (#{distributer_id},#{current_time},#{current_time});
+	</insert>
+	<insert id="insertRoomDistributer" parameterType="hashmap">
+		insert t_room_distributer into (room_distributer_id,distributer_id,room_id,profit_share_rate,effective_time,end_date,rq_code,create_time,create_date,update_time) 
+		values (#{room_distributer_id},#{distributer_id},#{room_id},#{profit_share_rate},#{effective_time},#{end_date},#{rq_code},#{create_time},#{create_date},#{update_time});
+	</insert>
+</mapper>

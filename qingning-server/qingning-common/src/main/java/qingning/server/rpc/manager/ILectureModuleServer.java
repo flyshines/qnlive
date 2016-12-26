@@ -39,6 +39,14 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findBanUserListInfo(Set<String> banUserIdList);
 
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
+	
+	List<Map<String,Object>> findCourseProfitList(Map<String, Object> queryMap);
+	
+	List<Map<String,Object>> findRoomDistributerInfo(Map<String,Object> paramters);
+	
+	List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> paramters);
+	
+	void createRoomDistributer(Map<String, String> reqMap);
 
 	List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
 }

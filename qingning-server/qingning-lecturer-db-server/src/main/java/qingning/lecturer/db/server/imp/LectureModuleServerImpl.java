@@ -42,7 +42,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Autowired(required = true)
 	private CoursesStudentsMapper coursesStudentsMapper;
-
+	
+	@Autowired(required = true)
+	private DistributerMapper distributerMapper;
+	
 	@Override
 	/**
 	 * 创建直播间
@@ -289,8 +292,64 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findCourseProfitList(Map<String, Object> queryMap) {		
+		return coursesMapper.findCourseProfitList(queryMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributerInfo(Map<String, Object> paramters) {
+		return liveRoomMapper.findRoomDistributerInfo(paramters);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributerCourseInfo(Map<String, Object> paramters) {
+		return liveRoomMapper.findRoomDistributerCourseInfo(paramters);
+	}
+
+	@Override
+	public void createRoomDistributer(Map<String, String> reqMap) {
+		// TODO Auto-generated method stub
+		 //t_distributer
+		Map<String,Object> record = new HashMap<String,Object>();
+        Date date = new Date(System.currentTimeMillis());        
+        record.put("current_time", date);
+        record.put("distributer_id", reqMap.get("distributer_id"));
+        //1.插入t_distributer
+        distributerMapper.insert(record);
+        //2.插入t_room_distributer
+        record.put("room_distributer_id", MiscUtils.getUUId());
+        record.put("room_id", reqMap.get("room_id"));
+        record.put("profit_share_rate", Double.parseDouble(reqMap.get("profit_share_rate")));
+        String effective_time = reqMap.get("effective_time");
+        record.put("effective_time", reqMap.get("effective_time"));
+        record.put("rq_code", record.get("room_distributer_id"));
+        Calendar calEndDate = Calendar.getInstance();
+        calEndDate.setTime(date);
+        if("1".equals(effective_time)){
+        	calEndDate.add(Calendar.MONTH, 1);
+        } else if("2".equals(effective_time)){
+        	calEndDate.add(Calendar.MONTH, 3);
+        } else if("3".equals(effective_time)){
+        	calEndDate.add(Calendar.MONTH, 6);
+        } else if("4".equals(effective_time)){
+        	calEndDate.add(Calendar.MONTH, 9);
+        } else if("5".equals(effective_time)){
+        	calEndDate.add(Calendar.YEAR, 1);
+        } else if("6".equals(effective_time)){
+        	calEndDate.add(Calendar.YEAR, 2);
+        } else {
+        	calEndDate = null;
+        }
+        if(calEndDate!=null){
+        	record.put("end_date",calEndDate.getTime());
+        } else {
+        	record.put("end_date",null);
+        }                
+        distributerMapper.insertRoomDistributer(record);
+	}
+
+	@Override
 	public List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap) {
 		return coursesStudentsMapper.findLatestStudentAvatarAddList(queryMap);
 	}
-
 }

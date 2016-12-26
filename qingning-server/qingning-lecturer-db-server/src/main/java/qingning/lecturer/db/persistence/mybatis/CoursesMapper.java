@@ -22,4 +22,6 @@ public interface CoursesMapper {
     Map<String,Object> findCourseByCourseId(String courseId);
 
     List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
+    
+    List<Map<String,Object>> findCourseProfitList(Map<String, Object> queryMap);
 }

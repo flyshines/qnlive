@@ -14,7 +14,8 @@ public final class Constants {
 	public static final String SYSOBJECT= "object";
 	public static final String SYSDATE="date";
 	public static final String SYSSTR="string";
-	public static int COURSE_MAX_INTERVAL = 30;
+	public static final int COURSE_MAX_INTERVAL = 30;
+	public static final int MAX_QUERY_LIMIT = 1000;
 	
 	public static final String DEFAULT = "default";
 	public static final String SPECIAL = "_SPECIAL";
@@ -90,6 +91,10 @@ public final class Constants {
 	
 	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
+	
+	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES = "USER:{user_id}:LECTURER:{room_id}:COURSES:{distributer_id}";
+	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
+	
 	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
 	
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
@@ -106,6 +111,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
 
+	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:{lecturer_id}:ROOM_SHARE_CODE";
+	
 	public static final String MSG_TYPE_ATTR = "type";
 	public static final String MSG_NEWSTYPE_ATTR = "newstype";
 	public static final String MSG_IP_ATTR = "ip";

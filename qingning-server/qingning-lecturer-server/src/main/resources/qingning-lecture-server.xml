@@ -175,6 +175,257 @@
 				</outputs>
 			</function>
 
+			<function name="roomProfitList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int" require="N"/>
+					<param name="start_time" type="long" require="N"  
+					       validate="(start_time,course_id)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  start_time == null; 
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					<param name="course_id" type="string" require="N"  
+					       validate="(start_time,course_id)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  start_time == null; 
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					<param name="room_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+					<param name="total_amount" type="double" default="0"/>
+					<param name="course_list" type="list">
+						<param name="course_title" type="string"/>
+						<param name="start_time" type="long"/>
+						<param name="student_num" type="long"/>
+						<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
+							var ret = course_amount;
+							if(course_type=='0'){
+								ret='公开课程';
+							} else if(course_type=='1'){
+								ret='加密课程';
+							}
+							return ret;
+						}"/>
+						<param name="extra_amount" type="double" default="0"/>
+						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
+						    var ret = 0;						
+							if(course_type=='0' || course_type=='1'){
+								ret=utils.convertObjectToDouble(extra_amount);
+							} else if(course_type=='1'){
+								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+							}												
+							return ret;
+						}"/>
+						<param name="course_id" type="string"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="courseProfitList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"  />
+					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="page_count" type="int" require="N"  />
+					<param name="position" type="long" require="N"  />
+					<param name="profit_type" type="string" require="N"  />
+				</inputs>
+				<outputs>
+					<param name="course_title" type="string"/>
+					<param name="start_time" type="long"/>
+					<param name="student_num" type="long" default="0"/>
+					<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
+							var ret = course_amount;
+							if(course_type=='0'){
+								ret='公开课程';
+							} else if(course_type=='1'){
+								ret='加密课程';
+							}
+							return ret;
+					}"/>
+					<param name="extra_amount" type="double" default="0"/>
+					<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
+						    var ret = 0;						
+							if(course_type=='0' || course_type=='1'){
+								ret=utils.convertObjectToDouble(extra_amount);
+							} else if(course_type=='1'){
+								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+							}												
+							return ret;
+					}"/>
+					<param name="course_id" type="string"/>
+					<param name="profit_list" type="list">
+						<param name="profit_type" type="string"/>
+						<param name="profit_amount" type="double" default="0"/>
+						<param name="profit_desc" type="string" convert="(profit_type,student,distributer)=>{
+							var ret = student;
+							if(!utils.isEqual(profit_type,'1')){
+								if(!utils.isEmpty(distributer)){
+								   ret = student+'通过'+distributer+'的分销';
+								}
+							}
+						}"/>
+						<param name="record_time" type="long" fieldname="create_time"/>	
+						<param name="position" type="long"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="distributionInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>					
+				</inputs>
+				<outputs>
+					<param name="room_distributer_num" type="long"/>
+					<param name="room_recommend_num" type="long"/>
+					<param name="room_done_num" type="long"/>
+					<param name="course_num" type="long"/>
+					<param name="course_distributer_num" type="long"/>
+					<param name="course_recommend_num" type="long"/>
+					<param name="course_done_num" type="long"/>
+				</outputs>
+			</function>
+			<function name="roomDistributerInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long"/>
+					<param name="position" type="long" validate="(position,distributer_id)=>{
+					       		var isDistributerEmpty = distributer_id ==null || distributer_id.length == 0; 
+					       		var isPosition =  position == null; 
+					       		return (isDistributerEmpty &amp;&amp; isPosition) || (!isDistributerEmpty &amp;&amp; !isPosition);},000006"/>
+					<param name="distributer_id" type="string" validate="(position,distributer_id)=>{
+					       		var isDistributerEmpty = distributer_id ==null || distributer_id.length == 0; 
+					       		var isPosition =  position == null; 
+					       		return (isDistributerEmpty &amp;&amp; isPosition) || (!isDistributerEmpty &amp;&amp; !isPosition);},000006"/>
+					<param name="room_id" type="string"/>					
+				</inputs>
+				<outputs>
+					<param name="distributer_num" type="long"/>
+					<param name="distributer_list" type="list">
+						<param name="nick_name" type="string"/>
+						<param name="avatar_address" type="string"/>
+						<param name="room_id" type="string"/>
+						<param name="distributer_id" type="string"/>
+						<param name="total_amount" type="double"/>
+						<param name="recommend_num" type="long"/>
+						<param name="done_num" type="long"/>
+						<param name="profit_share_rate" type="double"/>
+						<param name="effective_time" type="string" convert="(effective_time)=>{
+						    var result='';
+							if(utils.isEmpty(effective_time)){
+								result = '已过期';
+							} else if(0==effective_time){
+								result = '永久有效';
+							} else if(1==effective_time){
+								result = '1个月内有效';
+							} else if(2==effective_time){
+								result = '3个月内有效';
+							} else if(3==effective_time){
+								result = '6个月内有效';
+							} else if(4==effective_time){
+								result = '9个月内有效';
+							} else if(5==effective_time){
+								result = '一年有效';
+							} else if(6==effective_time){
+								result = '两年有效';
+							}
+						}"/>
+						<param name="position" type="long"/>						
+					</param>
+				</outputs>
+			</function>
+			
+			<function name="roomDistributerCoursesInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string"/>
+					<param name="distributer_id" type="string"/>
+					<param name="page_count" type="int"/>
+					<param name="nick_name" type="string"/>					
+				</inputs>
+				<outputs>
+					<param name="course_num" type="long"/>
+					<param name="course_list" type="list">						
+						<param name="course_title" type="string"/>
+						<param name="start_time" type="long"/>
+						<param name="course_price" type="double" default="0"/>	
+						<param name="done_num" type="long" default="0"/>	
+						<param name="total_amount" type="double"/>	
+						<param name="course_id" type="string"/>
+					</param>
+				</outputs>
+			</function>
+			
+			<function name="createRoomShareCode">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="type" type="string" default="0"/>
+					<param name="profit_share_rate"  require="Y,000100" type="double" validate="(profit_share_rate)=>{
+						var value = utils.convertObjectToDouble(profit_share_rate);
+						return value>=0 &amp;&amp; value &lt;=50;
+					},100024"/>
+					<param name="effective_time" type="string" require="Y,000100"/>
+					<param name="room_id" type="string" require="Y,000100"/>		
+				</inputs>
+				<outputs>
+					<param name="room_share_code" type="string"/>
+				</outputs>
+			</function>
+			
+			<function name="createRoomDistributer">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_share_code" type="string" require="Y,000100"/>					
+				</inputs>
+				<outputs>					
+				</outputs>
+			</function>
+			
+			<function name="courseStatistics">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int"/>
+					<param name="start_time" type="long"/>					
+				</inputs>
+				<outputs>
+					<param name="total_amount" type="double" default="0"/>
+					<param name="course_num" type="long" default="0"/>
+					<param name="total_student_num" type="long" default="0"/>
+					<param name="course_list" type="list">
+						<param name="course_title" type="string"/>
+						<param name="total_amount" type="double" default="0"/>
+						<param name="course_amount" type="double" default="0"/>
+						<param name="extra_amount"  type="double" default="0"/>
+						<param name="start_time" type="long"/>
+						<param name="course_id" type="string"/>						
+					</param>
+				</outputs>
+			</function>
+			
 		</default>
 
 		<version num="1.0.0" class="">

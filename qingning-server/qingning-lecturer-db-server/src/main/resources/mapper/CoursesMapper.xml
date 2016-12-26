@@ -313,6 +313,9 @@
         and start_time <![CDATA[ < ]]> #{startIndex}
       </if>
     </if>
+    <if test="lecturer_id != null" >
+    	and lecturer_id = #{lecturer_id}
+    </if>
     and `status` = #{status}
     order by start_time
     <if test="orderType == 1" >
@@ -322,5 +325,16 @@
       desc
     </if>
     limit #{pageCount}
+  </select>
+  
+  <select id="findCourseProfitList" resultType="hashmap" parameterType="hashmap" >
+   	select a.*,ifnull(b.nick_name,b.name) student from t_lecturer_courses_profit a, t_user b where a.course_id=#{course_id} and a.user_id=b.user_id
+   	<if test="position != null">
+   		a.position <![CDATA[ < ]]> #{position}
+   	</if>
+   	<if test="profit_type != '2'">
+   		a.profit_type=#{profit_type} 
+   	</if>
+   	order by a.position desc limit #{page_count}
   </select>
 </mapper>

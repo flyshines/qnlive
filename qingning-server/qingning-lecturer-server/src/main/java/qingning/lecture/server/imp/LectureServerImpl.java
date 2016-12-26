@@ -3,6 +3,8 @@ package qingning.lecture.server.imp;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -25,12 +27,11 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class LectureServerImpl extends AbstractQNLiveServer {
-
+	private static Logger log = LoggerFactory.getLogger(LectureServerImpl.class);
     private ILectureModuleServer lectureModuleServer;
 
     private ReadCourseOperation readCourseOperation;
-    private ReadLiveRoomOperation readLiveRoomOperation;
-
+    private ReadLiveRoomOperation readLiveRoomOperation;   
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
@@ -1149,5 +1150,543 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
     }
 
+    @FunctionName("roomProfitList")
+    public Map<String, Object> getRoomProfitList(RequestEntity reqEntity) throws Exception {
+    	@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();    	
+    	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        String total_amount = jedis.hget(liveRoomKey, "total_amount");
+        if(MiscUtils.isEmpty(total_amount)){
+        	total_amount="0";
+        }
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("total_amount", total_amount);
+        
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        int pageCount = (int)reqMap.get("page_count");        
+        Long startTime = (Long)reqMap.get("start_time");        
+        List<Map<String,String>> courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, startTime, pageCount, true);
+        if(!MiscUtils.isEmpty(courseList)){
+        	pageCount=pageCount-courseList.size();
+        } else {
+        	courseList = new LinkedList<Map<String,String>>();
+        }
+        if(pageCount>0){
+        	String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+        	List<Map<String,String>> finishCourse = getCourseOnlyFromCached(jedis, lecturerCoursesFinishKey, startTime, pageCount+1, true);
+        	if(!MiscUtils.isEmpty(finishCourse)){
+        		Map<String,String> lastCourseMap = courseList.get(courseList.size()-1);
+        		Map<String,String> firstCourseMap = finishCourse.get(0);
+        		if(MiscUtils.isEqual(lastCourseMap.get("course_id"), firstCourseMap.get("course_id"))){
+        			courseList.remove(courseList.size()-1);
+        			pageCount=pageCount+1;
+        		} else {
+        			if(finishCourse.size() > pageCount){
+        				finishCourse.remove(courseList.size()-1);
+        			}
+        		}
+        		
+        		pageCount=pageCount-finishCourse.size();
+        		courseList.addAll(finishCourse);
+        	}
+        }
+        
+        if(pageCount>0){
+        	map.clear();
+        	map.put("pageCount", pageCount);
+        	map.put("lecturer_id", userId);
+        	if(!MiscUtils.isEmpty(courseList)){
+        		Map<String,String> lastCourse = courseList.get(courseList.size()-1);        		
+        		startTime = Long.parseLong(lastCourse.get("start_time"));
+        	}
+            if(startTime != null){
+                Date date = new Date(startTime);
+                map.put("startIndex", date);
+            }
+            List<Map<String,Object>> finishCourse = lectureModuleServer.findCourseListForLecturer(map);
+            if(!MiscUtils.isEmpty(finishCourse)){
+            	for(Map<String,Object> finish:finishCourse){
+            		Map<String,String> finishMap = new HashMap<String,String>();
+            		MiscUtils.converObjectMapToStringMap(finish, finishMap);
+            		courseList.add(finishMap);
+            	}
+            }
+        }
+        result.put("course_list", courseList);
+    	return result;
+    }
+    
+    @SuppressWarnings("unchecked")
+	@FunctionName("courseProfitList")
+    public Map<String, Object> getCourseProfitList(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();    	
+    	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();
+        String room_id = (String)reqMap.get("room_id");
+        String course_id = (String)reqMap.get("course_id");
+        
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedisUtils,false);
+        if(MiscUtils.isEmpty(courseInfoMap)){
+        	throw new QNLiveException("100013");
+        }
+        Map<String,Object> result = new HashMap<String,Object>();
+        for(String key:courseInfoMap.keySet()){
+        	result.put(key, courseInfoMap.get(key));
+        }
+        List<Map<String,Object>> list = lectureModuleServer.findCourseProfitList(reqMap);
+        result.put("profit_list", list);       
+        final Map<String, List<Map<String,Object>>> profitMap = new HashMap<String, List<Map<String,Object>>>();
+        for(Map<String,Object> profit:list){
+        	String distributer_id = (String)profit.get("distributer_id");
+        	if(!MiscUtils.isEmpty(distributer_id)){
+        		List<Map<String,Object>> profitList = profitMap.get(distributer_id);
+        		if(profitList==null){
+        			profitList = new LinkedList<Map<String,Object>>();
+        			profitMap.put(distributer_id, profitList);
+        		}
+        		profitList.add(profit);
+        	}
+        }
+        if(!profitMap.isEmpty()){        	       	
+        	((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+    			@Override
+    			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+    				Map<String, Object> keyMap = new HashMap<String, Object>();
+    				Map<String, Response<String>> distributerNameMap = new HashMap<String, Response<String>>();
+    				for(String key:profitMap.keySet()){
+    					keyMap.clear();
+    					keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, key);
+    			        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, map);
+    			        distributerNameMap.put(key, pipeline.hget(distributerKey, "nick_name"));
+    				}
+    				pipeline.sync();
+    				for(String key:profitMap.keySet()){
+    					List<Map<String,Object>> profitList = profitMap.get(key);
+    					Response<String> response = distributerNameMap.get(key);
+    					if(response!=null){
+    						String distributer = response.get();
+    						if(MiscUtils.isEmpty(distributer)){
+    							log.warn(key + " can't get the nick name of distributer.");
+    							continue;
+    						}
+	    					for(Map<String,Object> profit : profitList){
+	    						profit.put("distributer", distributer);
+	    					}
+    					} else {
+    						log.warn(key + " can't get the nick name of distributer.");
+    					}
+    				}
+    			}
+        	});
+        }
+        return result;
+    }
+    
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@FunctionName("distributionInfo")
+    public Map<String, String> getDistributionInfo(RequestEntity reqEntity) throws Exception {
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		Map keyMap = new HashMap();
+		keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, userId);
+        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, keyMap);
+        
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String,String> values = jedis.hgetAll(distributerKey);
+        return values;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FunctionName("roomDistributerInfo")
+    public Map<String, Object> getRoomDistributerInfo(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+		Jedis jedis = jedisUtils.getJedis();
+		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        
+        int page_count = (Integer)reqMap.get("page_count");
+        Long position = (Long)reqMap.get("position");
+        String distributer_id = (String)reqMap.get("distributer_id");
+        
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTERS_LEN, map);
+        String distributer_num_len = jedis.get(key);
+        Long distributer_num = null;
+        Long max_postion = null;
+        if(!MiscUtils.isEmpty(distributer_num_len)){
+        	String[] tmp = distributer_num_len.split(":");
+        	distributer_num = Long.parseLong(tmp[0]);
+        	max_postion = Long.parseLong(tmp[1]);
+        }
+        String distributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTERS, map);
+        List<String> distributerIdList = null;
+        if(position == null || max_postion == null || max_postion < position){
+        	if(distributer_num==null){
+        		String distributer_num_str = jedis.hget(liveRoomKey, "distributer_num");
+        		if(MiscUtils.isEmpty(distributer_num_str)){
+        			distributer_num=0l;
+        		} else {
+        			distributer_num = Long.parseLong(distributer_num_str);
+        		}
+        	}
+        	if(distributer_num>0){
+	        	distributerIdList = getDistributerListFromSys(room_id, distributer_id, distributeKey, key,position==null?0:position,page_count,distributer_num);
+	        	key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTERS_LEN, map);                       
+	            if(!MiscUtils.isEmpty(key)){
+	            	String[] tmp = key.split(":");
+	            	distributer_num = Long.parseLong(tmp[0]);            	
+	            }
+        	}
+        	if(distributerIdList==null){
+        		distributerIdList = new LinkedList<String>();
+        	}
+        } else {        	
+        	long pos = page_count+position+1;
+        	if(pos >= distributer_num){
+        		pos=-1;
+        	}        	
+        	distributerIdList = new LinkedList<String>();
+        	if(position<distributer_num){
+	        	Set<String> distributerIdSet = jedis.zrangeByScore(distributeKey, "("+position, "+inf", 0, (int)page_count);
+	        	if(!MiscUtils.isEmpty(distributerIdSet)){
+	        		for(String value:distributerIdSet){
+		        		distributerIdList.add(value);
+		        	}
+	        	}
+        	}
+        }
+        
+        Map<String, Object> result = new HashMap<String,Object>();
+        result.put("distributer_num", distributer_num);
+        List<Map<String,Object>>distributerList = new LinkedList<Map<String,Object>>();
+        result.put("distributer_list",distributerList);
+        for(String valueStr:distributerIdList){
+        	distributerList.add(CacheUtils.convertCachedStringToMap(valueStr));
+        }
+        return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FunctionName("roomDistributerCoursesInfo")
+    public Map<String, Object> getRoomDistributerCoursesInfo(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+		Jedis jedis = jedisUtils.getJedis();
+		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        
+        String distributer_id = (String)reqMap.get("distributer_id");
+        int page_count = (Integer)reqMap.get("page_count");
+        Long start_time = (Long)reqMap.get("start_time");
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        map.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributer_id);
+        String min_time_key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME, map);
+        String min_date_str = jedis.get(min_time_key);
+        Long min_date = null;
+        if(!MiscUtils.isEmpty(min_date_str)){
+        	min_date = Long.parseLong(min_date_str);
+        }  
+        List<String> courseList = null;
+        if(start_time == null || min_date == null || start_time <= min_date){
+        	courseList = getDistributerCourseListFromSys(room_id, distributer_id, 
+        			MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES, map), start_time, min_time_key, page_count);
+        	if(courseList==null){
+        		courseList = new LinkedList<String>();
+        	}
+        } else {
+        	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES, map);
+        	Set<String> courseSet = jedis.zrangeByScore(key, "("+start_time, "+inf", 0, (int)page_count);
+        	courseList = new LinkedList<String>();
+        	if(!MiscUtils.isEmpty(courseSet)){
+        		for(String value:courseSet){
+        			courseList.add(value);
+	        	}
+        	}
+        }
+        
+        List<Map<String,Object>>resultList = new LinkedList<Map<String,Object>>();        
+        for(String valueStr:courseList){
+        	resultList.add(CacheUtils.convertCachedStringToMap(valueStr));
+        }
+        Map<String,Object> result = new HashMap<String,Object>();
+        result.put("course_list", resultList);
+        result.put("course_num",resultList.size());//TODO to modified
+        return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FunctionName("createRoomShareCode")
+    public Map<String, Object> createRoomShareCode(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+		Jedis jedis = jedisUtils.getJedis();
+		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        String type = (String)reqMap.get("type");
+        if(MiscUtils.isEmpty(type)){
+        	type = "0";
+        }
+        reqMap.put(type, reqMap);
+        String room_share_code = MiscUtils.getUUId();
+        Map<String,String> values = new HashMap<String,String>();
+        reqMap.put("lecturer_id",userId);
+        MiscUtils.converObjectMapToStringMap(reqMap, values);        
+        reqMap.clear();        
+        reqMap.put("room_share_code", room_share_code);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);
+        jedis.hmset(key, values);
+        jedis.expire(key, 60*60*24);
+        return reqMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FunctionName("createRoomShareCode")
+    public void createRoomDistributer(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+		Jedis jedis = jedisUtils.getJedis();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("room_share_code", reqMap.get("room_share_code"));
+		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);		
+		Map<String, String> values = jedis.hgetAll(key);
+		
+		if(MiscUtils.isEmpty(values)){
+			throw new QNLiveException("100025");
+		}
+		String room_id = (String)values.get("room_id");        
+		map.clear();		
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        if (liveRoomOwner == null) {
+            throw new QNLiveException("100002");
+        } else if(liveRoomOwner.equals(userId)){
+        	throw new QNLiveException("100026");
+        }
+        values.put("distributer_id", userId);
+        lectureModuleServer.createRoomDistributer(values);
+        jedis.hincrBy(liveRoomKey, "distributer_num", 1);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@FunctionName("courseStatistics")
+    public Map<String, Object> getCourseStatistics(RequestEntity reqEntity) throws Exception {
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+		Jedis jedis = jedisUtils.getJedis();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		final Map<String,Object> map = new HashMap<String,Object>();
+		map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);		
+		final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER,map);
+		map.clear();
+		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+			@Override
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				Map<String,Response<String>> values = new HashMap<String,Response<String>>();
+				values.put("course_num", pipeline.hget(key, "course_num"));
+				values.put("total_student_num", pipeline.hget(key, "total_student_num"));
+				values.put("total_amount", pipeline.hget(key, "total_amount"));				
+				pipeline.sync();
+				for(String key:values.keySet()){
+					map.put(key, values.get(key).get());
+				}
+			}
+		});
+				
+		String total_amount_str = (String)map.get("total_amount");
+		String course_num_str =  (String)map.get("course_num");
+		String total_student_num_str =  (String)map.get("live_room_num");
+		Map<String,Object> result = new HashMap<String,Object>();
+		result.put("total_student_num", total_student_num_str);
+		result.put("course_num", course_num_str);
+		result.put("total_amount", total_amount_str);
 
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        int pageCount = (int)reqMap.get("page_count");        
+        Long startTime = (Long)reqMap.get("start_time");        
+        List<Map<String,String>> courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, startTime, pageCount, true);
+        if(!MiscUtils.isEmpty(courseList)){
+        	pageCount=pageCount-courseList.size();
+        } else {
+        	courseList = new LinkedList<Map<String,String>>();
+        }
+        if(pageCount>0){
+        	String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+        	List<Map<String,String>> finishCourse = getCourseOnlyFromCached(jedis, lecturerCoursesFinishKey, startTime, pageCount+1, true);
+        	if(!MiscUtils.isEmpty(finishCourse)){
+        		Map<String,String> lastCourseMap = courseList.get(courseList.size()-1);
+        		Map<String,String> firstCourseMap = finishCourse.get(0);
+        		if(MiscUtils.isEqual(lastCourseMap.get("course_id"), firstCourseMap.get("course_id"))){
+        			courseList.remove(courseList.size()-1);
+        			pageCount=pageCount+1;
+        		} else {
+        			if(finishCourse.size() > pageCount){
+        				finishCourse.remove(courseList.size()-1);
+        			}
+        		}
+        		
+        		pageCount=pageCount-finishCourse.size();
+        		courseList.addAll(finishCourse);
+        	}
+        }
+        
+        if(pageCount>0){
+        	map.clear();
+        	map.put("pageCount", pageCount);
+        	map.put("lecturer_id", userId);
+        	if(!MiscUtils.isEmpty(courseList)){
+        		Map<String,String> lastCourse = courseList.get(courseList.size()-1);        		
+        		startTime = Long.parseLong(lastCourse.get("start_time"));
+        	}
+            if(startTime != null){
+                Date date = new Date(startTime);
+                map.put("startIndex", date);
+            }
+            List<Map<String,Object>> finishCourse = lectureModuleServer.findCourseListForLecturer(map);
+            if(!MiscUtils.isEmpty(finishCourse)){
+            	for(Map<String,Object> finish:finishCourse){
+            		Map<String,String> finishMap = new HashMap<String,String>();
+            		MiscUtils.converObjectMapToStringMap(finish, finishMap);
+            		courseList.add(finishMap);
+            	}
+            }
+        }
+		
+		return result;
+	}
+
+	private List<String> getDistributerCourseListFromSys(String room_id, String distributer_id,String distributeCourseKey,
+			final Long start_time,String min_time_key, final int page_count){
+		final Map<String, Object> query = new HashMap<String,Object>();
+		query.put(Constants.FIELD_ROOM_ID, room_id);
+		if(start_time != null){
+			query.put("start_time", new Date(start_time));
+		}
+		query.put("CACHED_KEY_DISTRIBUTER_FIELD", distributer_id);
+		query.put("limit_count", Constants.MAX_QUERY_LIMIT);
+		final List<String> result = new LinkedList<String>();
+		Jedis jedis = this.jedisUtils.getJedis();
+		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+			@Override
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {				
+				List<Map<String,Object>> list = lectureModuleServer.findRoomDistributerCourseInfo(query);
+				Date start_time = null;
+				for(Map<String,Object> value : list){
+					String valueStr = CacheUtils.convertMaptoCachedString(value);
+					start_time = (Date)value.get("start_time");
+					pipeline.zadd(distributeCourseKey, start_time.getTime(), valueStr);
+					result.add(valueStr);					
+				}
+				if(start_time!=null){
+					pipeline.set(min_time_key,start_time.getTime()+"");
+					pipeline.expire(min_time_key, 60*60);
+				}
+				pipeline.expire(distributeCourseKey, 60*60);				
+				pipeline.sync();				
+			}
+		});
+		return result;
+	}
+	
+	private List<String> getDistributerListFromSys(String room_id, String distributer_id,String distributeKey,String distributeLenKey,final long start_pos,final int page_count, long distributer_num){
+		final Map<String, Object> query = new HashMap<String,Object>();
+		query.put(Constants.FIELD_ROOM_ID, room_id);
+		query.put("position", start_pos);
+		if(MiscUtils.isEmpty(distributer_id)){
+			distributer_id=null;
+		}
+		query.put("CACHED_KEY_DISTRIBUTER_FIELD", distributer_id);
+		query.put("limit_count", Constants.MAX_QUERY_LIMIT);
+		final boolean ajustPos = start_pos> 0;
+		final List<String> result = new LinkedList<String>();
+		Jedis jedis = this.jedisUtils.getJedis();
+		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+			@Override
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				Date curDate = new Date(System.currentTimeMillis());
+				List<Map<String,Object>> list = lectureModuleServer.findRoomDistributerInfo(query);
+				int count = 0;
+				for(Map<String,Object> value : list){
+					Date date = (Date)value.get("end_date");
+					if(date!=null && !date.after(curDate)){
+						value.put("effective_time", null);
+					}
+					String valueStr = CacheUtils.convertMaptoCachedString(value);
+					if(ajustPos){
+						pipeline.zadd(distributeKey, start_pos+1+(count++), valueStr);
+					} else {
+						pipeline.zadd(distributeKey, count++, valueStr);
+					}
+					if(count < page_count){
+						result.add(valueStr);
+					}
+				}
+				pipeline.set(distributeLenKey, distributer_num+":"+(start_pos+list.size()));
+				pipeline.expire(distributeLenKey, 60*60);
+				pipeline.expire(distributeLenKey, 60*60);
+				pipeline.sync();				
+			}
+		});
+		
+		return result;
+	}
+
+    private List<Map<String,String>> getCourseOnlyFromCached(Jedis jedis, String key, Long startTime, int pageCount, boolean desc){
+        String startIndex = null;
+        String endIndex = "+inf";      
+        if (startTime == null) {
+            startIndex = "0";
+        } else {
+            startIndex = "(" + startTime;
+        }
+       
+        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(key, startIndex, endIndex, 0, pageCount);
+        if(MiscUtils.isEmpty(courseList)){
+        	return null;
+        }
+        List<String> list = new LinkedList<String>();
+        for (Tuple tuple : courseList) {            
+        	list.add(tuple.getElement());
+        }
+        return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list);
+    }
 }
