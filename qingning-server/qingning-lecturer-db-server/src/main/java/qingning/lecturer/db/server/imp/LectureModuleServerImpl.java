@@ -284,7 +284,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public long findCourseMessageMaxPos(String course_id) {
+	public Map<String,Object> findCourseMessageMaxPos(String course_id) {
 		return courseMessageMapper.findCourseMessageMaxPos(course_id);
 	}
 

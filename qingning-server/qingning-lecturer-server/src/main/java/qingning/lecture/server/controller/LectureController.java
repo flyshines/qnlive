@@ -239,6 +239,7 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
 			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
+			@RequestParam(value = "message_id", defaultValue = "") String message_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version);
@@ -247,6 +248,7 @@ public class LectureController extends AbstractController {
 		parMap.put("page_count", page_count);
 		parMap.put("message_pos", message_pos);
 		parMap.put("query_type", query_type);
+		parMap.put("message_id", message_id);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

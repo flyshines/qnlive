@@ -40,5 +40,5 @@ public interface IUserModuleServer {
 
 	Map<String,Object> findLoginInfoByUserId(String user_id);
 
-	long findCourseMessageMaxPos(String course_id);
+	Map<String,Object> findCourseMessageMaxPos(String course_id);
 }

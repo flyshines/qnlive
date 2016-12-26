@@ -224,10 +224,10 @@
   </insert>
 
 
-  <select id="findCourseMessageMaxPos" resultType="long" parameterType="string" >
+  <select id="findCourseMessageMaxPos" resultType="hashmap" parameterType="string" >
     select
-    cm.message_pos
-    from t_course_message
+    <include refid="Base_Column_List" />
+    from t_course_message cm
     where 1 = 1
     and
     cm.course_id = #{course_id}

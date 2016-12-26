@@ -197,9 +197,9 @@
     limit #{page_count}
   </select>
 
-  <select id="findCourseMessageMaxPos" resultType="long" parameterType="string" >
+  <select id="findCourseMessageMaxPos" resultType="hashmap" parameterType="string" >
     select
-    cm.message_pos
+    <include refid="Base_Column_List" />
     from t_course_message
     where 1 = 1
     and

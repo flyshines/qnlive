@@ -958,24 +958,22 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
 
-        String queryType = reqMap.get("query_type").toString();
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        String queryType = reqMap.get("query_type").toString();
 
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-        Map<String, Object> queryMap = new HashMap<>();
         String messageListKey;
+        Map<String, Object> queryMap = new HashMap<>();
 
-        //queryType为0则查询全部消息，为3则查询讲师发送消息
+        //queryType为0则查询全部消息，为1则查询提问
         if(queryType.equals("0")){
             messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
         }else {
-            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-            queryMap.put("send_type1", "0");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
-            queryMap.put("send_type2", "1");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+            queryMap.put("send_type", "3");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
         }
-
 
         //缓存不存在则读取数据库中的内容
         if(! jedis.exists(messageListKey)){
@@ -983,7 +981,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
             }else {
-                long maxPos = userModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+                Map<String,Object> maxInfoMap = userModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+                if(MiscUtils.isEmpty(maxInfoMap)){
+                    return resultMap;
+                }
+                Long maxPos = (Long)maxInfoMap.get("message_pos");
                 queryMap.put("message_pos", maxPos);
             }
             queryMap.put("course_id", reqMap.get("course_id").toString());
@@ -1005,7 +1007,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_id") != null && StringUtils.isNotBlank(reqMap.get("message_id").toString())){
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_id").toString());
                 endIndex = endRank - 1;
-                startIndex = endRank - pageCount + 1;
+                startIndex = endIndex - pageCount + 1;
                 if(startIndex < 0){
                     startIndex = 0;
                 }
