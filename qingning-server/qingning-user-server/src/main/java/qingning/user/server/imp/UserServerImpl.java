@@ -574,7 +574,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
         resultMap.put("room_id", liveRoomMap.get("room_id"));
 
-        //TODO 查询加入课程状态
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("user_id", userId);
+        queryMap.put("room_id", room_id);
+        queryMap.put("lecturer_id", courseMap.get("lecturer_id"));
+        queryMap.put("course_id", courseMap.get("course_id"));
+        Map<String,Object> studentMap = userModuleServer.findStudentByKey(queryMap);
+        //加入课程状态 0未加入 1已加入
+        if(MiscUtils.isEmpty(studentMap)){
+            resultMap.put("join_status", "0");
+        }else {
+            resultMap.put("join_status", "1");
+        }
 
         //查询关注状态
         //关注状态 0未关注 1已关注
