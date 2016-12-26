@@ -49,6 +49,29 @@ public abstract class AbstractController {
 		if(servicer==null){
 			throw new QNLiveException("000001");
 		}
+		if(servicer.isReturnObject(reqEntity)){
+			throw new QNLiveException("000103");
+		}		
+		Object returnValue=process(reqEntity, servicer, serviceManger, message);		
+		ResponseEntity respEntity = new ResponseEntity();
+		respEntity.setCode("0");
+		respEntity.setMsg(message.getMessages("0"));
+		respEntity.setReturnData(returnValue);
+		return respEntity;
+	}
+
+	public Object processWithObjectReturn(RequestEntity reqEntity,ServiceManger serviceManger, MessageEntity message) throws Exception{
+		QNLiveServer servicer = serviceManger.getServer(reqEntity.getServerName(), reqEntity.getVersion());
+		if(servicer==null){
+			throw new QNLiveException("000001");
+		}
+		if(!servicer.isReturnObject(reqEntity)){
+			throw new QNLiveException("000103");
+		}
+		return process(reqEntity, servicer, serviceManger, message);
+	}
+	
+	private Object process(RequestEntity reqEntity, QNLiveServer servicer,ServiceManger serviceManger, MessageEntity message) throws Exception{
 		if(mqUtils==null){
 			mqUtils = new MqUtils(rabbitTemplate);
 		}
@@ -63,14 +86,9 @@ public abstract class AbstractController {
 		servicer.initRpcServer();
 		servicer.validateRequestParamters(reqEntity);
 		Object returnValue=servicer.invoke(reqEntity);
-		returnValue = servicer.processReturnValue(reqEntity, returnValue);
-		ResponseEntity respEntity = new ResponseEntity();
-		respEntity.setCode("0");
-		respEntity.setMsg(message.getMessages("0"));
-		respEntity.setReturnData(returnValue);
-		return respEntity;
+		return servicer.processReturnValue(reqEntity, returnValue);
 	}
-
+	
 	private void generateRewardConfigurationMap(){
 		IUserModuleServer userModuleServer = (IUserModuleServer)applicationContext.getBean("userModuleServer");
 		rewardConfigurationList = userModuleServer.findRewardConfigurationList();

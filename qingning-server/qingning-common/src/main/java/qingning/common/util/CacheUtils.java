@@ -7,13 +7,19 @@ import qingning.server.JedisBatchOperation;
 import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class CacheUtils {
+	private static Logger log = LoggerFactory.getLogger(CacheUtils.class);
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	@SuppressWarnings({"rawtypes" })
 	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
@@ -168,5 +174,49 @@ public final class CacheUtils {
 	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
 												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		return readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
+	}
+	
+	public static List<Map<String,String>> readCourseListInfoOnlyFromCached(JedisUtils jedisUtils, List<String> courseIdList){
+		final List<Map<String,String>> result = new ArrayList<Map<String,String>>();
+		if(MiscUtils.isEmpty(courseIdList)){
+			return result;
+		}
+		JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
+		
+		callBack.invoke(new JedisBatchOperation(){
+			@Override
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				Map<String, Response<Map<String,String>>> cachedMap = new HashMap<String, Response<Map<String,String>>>();
+				Map<String, String> keyMap = new HashMap<String, String>();				
+				for(String courseId:courseIdList){
+					keyMap.clear();
+					keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);					
+					cachedMap.put(courseId, pipeline.hgetAll(key));					
+				}
+				pipeline.sync();
+				if(!cachedMap.isEmpty()){
+					for(String courseId:courseIdList){
+						Response<Map<String,String>> value = cachedMap.get(courseId);
+						if(MiscUtils.isEmpty(value) || MiscUtils.isEmpty(value.get())) continue;
+						result.add(value.get());
+					}
+				}
+			}
+		});
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String,Object> convertCachedStringToMap(String valueStr){
+		if(MiscUtils.isEmptyString(valueStr)) return null;
+		Map<String, Object> value = null;
+		try {
+			value = objectMapper.readValue(valueStr, Map.class);
+		} catch (Exception e) {
+			log.warn(e.getMessage());
+			value = null;
+		}
+		return value;
 	}
 }

@@ -9,12 +9,16 @@ public final class Constants {
 	public static final String SYSINT="int";
 	public static final String SYSLONG="long";
 	public static final String SYSDOUBLE="double";
+	public static final String SYSMAP= "map";
+	public static final String SYSLIST= "list";
+	public static final String SYSOBJECT= "object";
 	public static final String SYSDATE="date";
-	public static int COURSE_MAX_INTERVAL = 10;
-	
-	public static final String QUEUE_NAME="GCW_DB_W";
+	public static final String SYSSTR="string";
+	public static int COURSE_MAX_INTERVAL = 30;
 	
 	public static final String DEFAULT = "default";
+	public static final String SPECIAL = "_SPECIAL";
+	public static final String CONVERT = "convert";
 	public static final String SERVER = "server";
 	public static final String NAME = "name";
 	public static final String FIELDNAME = "fieldname";
@@ -46,9 +50,21 @@ public final class Constants {
 	public static final String REDIS_PASS="redis.pass";
 	public static final String LAST_VISIT_FUN="LAST_VISIT_FUN";
 	public static final String LAST_VISIT_TIME="LAST_VISIT_TIME";
+
+	public static final String MONGODB_IP="mongodb.ip";
+	public static final String MONGODB_PORT="mongodb.port";
+	public static final String MONGODB_MAXCONNECTTIMEOUT="mongodb.maxConnectTimeout";
+	public static final String MONGODB_MAXCONNECTIONS="mongodb.maxConnections";
+	public static final String MONGODB_MAXWAITTIME="mongodb.maxWaitTime";
+	public static final String MONGODB_MAXWAITTHREADS="mongodb.maxWaitThreads";
+	public static final String MONGODB_MAXIDLETIME="mongodb.maxIdleTime";
+	public static final String MONGODB_MAXLIFETIME="mongodb.maxLifeTime";
+	public static final String MONGODB_SOKETTIMEOUT="mongodb.soketTimeout";
+	public static final String MONGODB_SOKETKEEPALIVE="mongodb.soketKeepAlive";
 	
 	public static final String FUNCTION = "function";
 	public static final String VALIDATION = "validation";
+	public static final String CONVERTVALUE = "convertValue";
 	public static final String JS_ENGINE = "nashorn";
 	
 	public static final String SYS_SINGLE_KEY = "SYS_SINGLE_KEY";
@@ -68,7 +84,14 @@ public final class Constants {
 	
 	public static final String FIELD_CREATE_TIME="create_time";
 	public static final String FIELD_ROOM_ID="room_id";
-		
+	
+	public static final String CACHED_KEY_DISTRIBUTER_FIELD = "distributer_id";
+	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";
+	
+	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
+	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
+	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
+	
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";
 	

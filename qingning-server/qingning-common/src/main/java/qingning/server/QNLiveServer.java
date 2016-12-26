@@ -17,4 +17,5 @@ public interface QNLiveServer {
 	Object invoke(RequestEntity reqEntity) throws Exception;
 	Object process(RequestEntity reqEntity) throws Exception;
 	Object processReturnValue(RequestEntity reqEntity, Object value) throws Exception;
+	boolean isReturnObject(RequestEntity reqEntity);
 }
