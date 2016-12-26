@@ -150,7 +150,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
 			String bandKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
 			double timeDouble = (double) System.currentTimeMillis();
-			jedis.zadd(bandKey, timeDouble, body.get("user_id").toString());
+			jedis.zadd(bandKey, timeDouble, information.get("user_id").toString());
 		}
 	}
 
