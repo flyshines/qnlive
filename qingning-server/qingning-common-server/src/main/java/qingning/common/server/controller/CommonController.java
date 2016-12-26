@@ -2,6 +2,7 @@ package qingning.common.server.controller;
 
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
 import java.util.HashMap;
@@ -155,5 +156,29 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+
+    @RequestMapping(value = "/common/user", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getUserInfo(
+            @RequestParam(value = "query_type", defaultValue = "") String query_type,
+            @RequestParam(value = "server_url_info_update_time", defaultValue = "") String server_url_info_update_time,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version
+    ) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userInfo", accessToken, version);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("query_type", query_type);
+        requestEntity.setParam(param);
+
+        //根据相关条件将server_url列表信息返回
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        if (MiscUtils.isEmpty(server_url_info_update_time) ||
+                !server_url_info_update_time.equals(serverUrlInfoUpdateTime.toString())) {
+            resultMap.put("server_url_info_list", serverUrlInfoMap);
+            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+        }
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
 
 }

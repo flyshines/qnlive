@@ -82,6 +82,18 @@
 				</outputs>
 			</function>
 
+			<function name="userInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="100" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100"  format="^[1-2]$,120011"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">

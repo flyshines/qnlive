@@ -331,6 +331,39 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//TODO
 
 
+		return resultMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("userInfo")
+	public Map<String,Object> getUserInfo (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		//1:个人中心信息 2：个人基本信息
+		String queryType = reqMap.get("query_type").toString();
+		if(queryType.equals("1")){
+			//TODO
+		}else if(queryType.equals("2")){
+			Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
+			if(MiscUtils.isEmpty(userMap)){
+				throw new QNLiveException("120002");
+			}
+
+			Map<String,Object> loginInfoMap = commonModuleServer.findLoginInfoByUserId(userId);
+			if(MiscUtils.isEmpty(loginInfoMap)){
+				throw new QNLiveException("120002");
+			}
+
+			resultMap.put("access_token", reqEntity.getAccessToken());
+			resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
+			resultMap.put("m_pwd", loginInfoMap.get("m_pwd"));
+			resultMap.put("user_id", userId);
+			resultMap.put("avatar_address", userMap.get("avatar_address"));
+			resultMap.put("nick_name", userMap.get("nick_name"));
+			return resultMap;
+		}
 
 		return resultMap;
 	}
