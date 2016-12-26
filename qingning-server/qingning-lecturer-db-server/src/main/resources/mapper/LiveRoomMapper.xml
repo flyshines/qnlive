@@ -205,5 +205,25 @@
     where room_id = #{room_id}
   </select>
 
-
+  <select id="findRoomDistributerInfo" resultType="hashmap" parameterType="hashmap" >
+    select * from t_room_distributer where room_id = #{room_id}
+    <if test="distributer_id != null">
+      and distributer_id !=#{distributer_id} 
+    </if>
+    order by total_amount desc, done_time desc limit
+    <if test="position != 0">
+    	#{position},
+    </if> 
+    #{limit_count}
+  </select>
+  
+  <select id="findRoomDistributerCourseInfo" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.course_title,b.b.start_time from t_room_distributer_courses a, t_courses b where room_id = #{room_id} and distributer_id =#{distributer_id}
+    and a.course_id=b.course_id 
+    <if test="start_time != null">
+       and b.start_time <![CDATA[ < ]]> #{start_time}
+    </if>
+    order by b.start_time desc #{limit_count}
+  </select>
+  
 </mapper>

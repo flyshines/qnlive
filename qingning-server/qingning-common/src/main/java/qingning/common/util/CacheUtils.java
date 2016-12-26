@@ -219,4 +219,15 @@ public final class CacheUtils {
 		}
 		return value;
 	}
+	public static String convertMaptoCachedString(Map<String,Object> values){
+		if(MiscUtils.isEmpty(values)) return "";		
+		try {
+			Map<String,String> valueStrMap = new HashMap<String,String>();
+			MiscUtils.converObjectMapToStringMap(values, valueStrMap);
+			return objectMapper.writeValueAsString(valueStrMap);
+		} catch (Exception e) {
+			log.warn(e.getMessage());
+			return "";
+		}
+	}
 }

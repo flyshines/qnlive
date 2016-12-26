@@ -282,4 +282,134 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 讲师查询自己的课程收益明细
+	 * @param room_id
+	 * @param page_count
+	 * @param course_id
+	 * @param start_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/lecturer/profits/{room_id}",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getRoomProfitList(
+			@PathVariable("room_id") String room_id,
+			@RequestParam(value ="page_count", defaultValue ="20") String page_count, 	
+			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestParam(value = "start_time", defaultValue = "") String start_time,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomProfitList", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("room_id", room_id);
+		parMap.put("page_count", page_count);
+		parMap.put("course_id", course_id);
+		parMap.put("start_time", start_time);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@RequestMapping(value="/lecturer/profits/{room_id}/{course_id}",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getCourseProfitList(
+			@PathVariable("room_id") String room_id,
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value ="page_count", defaultValue ="40") String page_count,
+			@RequestParam(value ="position", defaultValue ="") String position,
+			@RequestParam(value ="profit_type", defaultValue ="2") String profit_type,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseProfitList", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("room_id", room_id);
+		parMap.put("course_id", course_id);
+		parMap.put("page_count", page_count);
+		parMap.put("position", position);
+		parMap.put("profit_type", profit_type);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@RequestMapping(value="/lecturer/distribution",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getDistributionInfo(			
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "distributionInfo", access_token, version);		
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getRoomDistributerInfo(	
+			@PathVariable("room_id") String room_id,
+			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
+			@RequestParam(value ="position", defaultValue ="") String position,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerInfo", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("room_id", room_id);
+		parMap.put("page_count", page_count);
+		parMap.put("position", position);
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}/{distributer_id}/courses",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getRoomDistributerInfo(	
+			@PathVariable("room_id") String room_id,
+			@PathVariable("distributer_id") String distributer_id,
+			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
+			@RequestParam(value ="start_time", defaultValue ="") String start_time,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerCoursesInfo", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("room_id", room_id);
+		parMap.put("distributer_id", distributer_id);
+		parMap.put("page_count", page_count);
+		parMap.put("start_time", start_time);
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}/distributer/share",method=RequestMethod.POST)
+	public @ResponseBody ResponseEntity createRoomShareCode(	
+			@PathVariable("room_id") String room_id,
+			HttpEntity<Object> entity,			
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomShareCode", access_token, version);
+		Map<String, Object> parMap = (Map<String, Object>)entity.getBody();
+		parMap.put("room_id", room_id);
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/lecturer/distribution/rooms/distributer/new",method=RequestMethod.POST)
+	public @ResponseBody ResponseEntity createRoomDistributer(
+			HttpEntity<Object> entity,			
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomDistributer", access_token, version);
+		Map<String, Object> parMap = (Map<String, Object>)entity.getBody();		
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	@RequestMapping(value="/lecturer/courses/statistics",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getCourseStatistics(			
+			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
+			@RequestParam(value ="start_time", defaultValue ="") String start_time,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStatistics", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("start_time", start_time);
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}	
 }
