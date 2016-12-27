@@ -50,6 +50,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 */
 	@SuppressWarnings("unchecked")
 	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
+		log.debug("-----聊天消息------"+JSON.toJSONString(imMessage));
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 
@@ -132,6 +133,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 */
 	@SuppressWarnings("unchecked")
 	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
+		log.debug("-----禁言信息------"+JSON.toJSONString(imMessage));
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String banStatus = information.get("ban_status").toString();
@@ -162,6 +164,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param context
 	 */
 	private void processCourseAudio(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
+		log.debug("-----讲课音频信息------"+JSON.toJSONString(imMessage));
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 
