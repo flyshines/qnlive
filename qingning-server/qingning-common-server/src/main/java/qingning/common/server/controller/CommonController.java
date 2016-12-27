@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class CommonController extends AbstractController {
 
@@ -178,6 +180,29 @@ public class CommonController extends AbstractController {
             resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
         }
         responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
+
+    /**
+     * 生成微信支付单
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/payment/weixin/bill", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity generateWeixinPayBill(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version, HttpServletRequest request) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "generateWeixinPayBill", accessToken, version);
+        String remote_ip_address = MiscUtils.getIpAddr(request);
+        ((Map<String,Object>)entity.getBody()).put("remote_ip_address",remote_ip_address);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
 

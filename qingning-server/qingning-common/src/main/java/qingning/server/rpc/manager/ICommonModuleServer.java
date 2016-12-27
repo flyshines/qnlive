@@ -19,4 +19,10 @@ public interface ICommonModuleServer {
 	Map<String,Object> findCourseByCourseId(String courseId);
 
 	Map<String,Object> findRewardInfoByRewardId(String reward_id);
+
+	void insertTradeBill(Map<String, Object> insertMap);
+
+	void updateTradeBill(Map<String, Object> failUpdateMap);
+
+	void insertPaymentBill(Map<String, Object> insertPayMap);
 }

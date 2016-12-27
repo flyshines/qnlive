@@ -291,48 +291,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		return WeiXinUtil.sign(JSApiTIcket, reqMap.get("url").toString());
 	}
 
-	@SuppressWarnings("unchecked")
-	@FunctionName("generateWeixinPayBill")
-	public Map<String,Object> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
-		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-		Map<String,Object> resultMap = new HashMap<String, Object>();
-
-		//1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
-		String courseId = reqMap.get("course_id").toString();
-		Map<String, Object> map = new HashMap<>();
-		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-		Jedis jedis = jedisUtils.getJedis();
-
-		//1.1如果课程不在缓存中，则查询数据库
-		if(!jedis.exists(courseKey)){
-			Map<String,Object> courseMap = commonModuleServer.findCourseByCourseId(courseId);
-			if(courseMap == null){
-				throw new QNLiveException("120009");
-			}
-		}
-
-		//2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
-		String profit_type = reqMap.get("profit_type").toString();
-		String reward_id = null;
-		//0:课程收益 1:打赏
-		if(profit_type.equals("1")){
-			if(reqMap.get("reward_id") == null || StringUtils.isBlank(reqMap.get("reward_id").toString())){
-				throw new QNLiveException("000100");
-			}
-			reward_id = reqMap.get("reward_id").toString();
-			Map<String,Object> rewardInfoMap = commonModuleServer.findRewardInfoByRewardId(reward_id);
-			if(rewardInfoMap == null){
-				throw new QNLiveException("120010");
-			}
-		}
-
-		//3.插入t_trade_bill表和t_payment_bill表
-		//TODO
-
-
-		return resultMap;
-	}
 
 	@SuppressWarnings("unchecked")
 	@FunctionName("userInfo")
@@ -367,4 +325,113 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		return resultMap;
 	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("generateWeixinPayBill")
+	public Map<String,Object> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+
+		//1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
+		String courseId = reqMap.get("course_id").toString();
+		Map<String, Object> map = new HashMap<>();
+		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+		Jedis jedis = jedisUtils.getJedis();
+		Map<String,String> courseMap = jedis.hgetAll(courseKey);
+
+		//1.1如果课程不在缓存中，则查询数据库
+		if(MiscUtils.isEmpty(courseMap)){
+			Map<String,Object> courseObjectMap = commonModuleServer.findCourseByCourseId(courseId);
+			if(courseMap == null){
+				throw new QNLiveException("120009");
+			}
+			courseMap = new HashMap<>();
+			MiscUtils.converObjectMapToStringMap(courseObjectMap,courseMap);
+		}
+
+		//2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
+		String profit_type = reqMap.get("profit_type").toString();
+		String reward_id = null;
+		Map<String,Object> rewardInfoMap = null;
+		//0:课程收益 1:打赏
+		if(profit_type.equals("1")){
+			if(reqMap.get("reward_id") == null || StringUtils.isBlank(reqMap.get("reward_id").toString())){
+				throw new QNLiveException("000100");
+			}
+			reward_id = reqMap.get("reward_id").toString();
+			rewardInfoMap = commonModuleServer.findRewardInfoByRewardId(reward_id);
+			if(MiscUtils.isEmpty(rewardInfoMap)){
+				throw new QNLiveException("120010");
+			}
+		}
+
+		//3.插入t_trade_bill表 交易信息表
+		String goodName = null;
+		Integer totalFee = 0;
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		Map<String,Object> insertMap = new HashMap<>();
+		insertMap.put("user_id",userId);
+		insertMap.put("room_id",courseMap.get("room_id"));
+		insertMap.put("course_id",courseMap.get("course_id"));
+		//判断类型为 0:课程收益 1:打赏
+		if(profit_type.equals("1")){
+			insertMap.put("amount", rewardInfoMap.get("amount").toString());
+			totalFee = Integer.parseInt(rewardInfoMap.get("amount").toString());
+			goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name")+courseMap.get("course_id");
+		}else if(profit_type.equals("0")){
+			insertMap.put("amount", courseMap.get("course_price"));
+			totalFee = Integer.parseInt(courseMap.get("course_price"));
+			goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name")+courseMap.get("course_id");
+		}
+		insertMap.put("status",courseMap.get("0"));
+		String tradeId = MiscUtils.getUUId();
+		insertMap.put("trade_id",tradeId);
+		commonModuleServer.insertTradeBill(insertMap);
+
+		//4.调用微信生成预付单接口
+		String terminalIp = reqMap.get("remote_ip_address").toString();
+		String tradeType = "JSAPI";
+		String outTradeNo = tradeId;
+		Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo);
+
+		//5.处理生成微信预付单接口
+		if (payResultMap.get ("return_code").equals ("FAIL")) {
+			//更新交易表
+			Map<String,Object> failUpdateMap = new HashMap<>();
+			failUpdateMap.put("status","3");
+			failUpdateMap.put("close_reason","生成微信预付单失败 "+payResultMap.get("return_msg"));
+			failUpdateMap.put("trade_id",tradeId);
+			commonModuleServer.updateTradeBill(failUpdateMap);
+
+			throw new QNLiveException("120012");
+		} else if (payResultMap.get ("result_code").equals ("FAIL")) {
+			//更新交易表
+			Map<String,Object> failUpdateMap = new HashMap<>();
+			failUpdateMap.put("status","3");
+			failUpdateMap.put("close_reason","生成微信预付单失败 "+ payResultMap.get ("err_code_des"));
+			failUpdateMap.put("trade_id",tradeId);
+			commonModuleServer.updateTradeBill(failUpdateMap);
+
+			throw new QNLiveException("120012");
+		} else {
+			//成功，则需要插入支付表
+			Map<String,Object> insertPayMap = new HashMap<>();
+			insertPayMap.put("trade_id",tradeId);
+			insertPayMap.put("payment_id",userId);
+			insertPayMap.put("payment_type","0");
+			insertPayMap.put("status","1");
+			insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
+			commonModuleServer.insertPaymentBill(insertPayMap);
+
+			//返回相关参数给前端
+			resultMap.put("app_id",MiscUtils.getConfigByKey("appid"));
+			resultMap.put("prepay_id", payResultMap.get("prepay_id"));
+			resultMap.put("pay_sign", payResultMap.get("sign"));
+			resultMap.put("sign_type", "MD5");
+			//resultMap.put("nonce_str", payResultMap.get("nonce_str")); TODO
+			return resultMap;
+		}
+	}
+
 }

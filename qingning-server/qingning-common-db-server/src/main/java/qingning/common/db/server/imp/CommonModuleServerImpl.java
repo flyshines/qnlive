@@ -5,6 +5,8 @@ package qingning.common.db.server.imp;
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.db.persistence.mybatis.*;
 import qingning.common.db.persistence.mybatis.entity.LoginInfo;
+import qingning.common.db.persistence.mybatis.entity.PaymentBill;
+import qingning.common.db.persistence.mybatis.entity.TradeBill;
 import qingning.common.db.persistence.mybatis.entity.User;
 import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
@@ -27,6 +29,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RewardConfigurationMapper rewardConfigurationMapper;
+
+	@Autowired(required = true)
+	private TradeBillMapper tradeBillMapper;
+
+	@Autowired(required = true)
+	private PaymentBillMapper paymentBillMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -105,6 +113,46 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> findRewardInfoByRewardId(String reward_id) {
 		return rewardConfigurationMapper.findRewardInfoByRewardId(Long.parseLong(reward_id));
 	}
+
+	@Override
+	public void insertTradeBill(Map<String, Object> insertMap) {
+		//插入t_trade_bill表
+		Date now = new Date();
+		TradeBill tradeBill = new TradeBill();
+		tradeBill.setTradeId(insertMap.get("trade_id").toString());
+		tradeBill.setUserId(insertMap.get("user_id").toString());
+		tradeBill.setRoomId(insertMap.get("room_id").toString());
+		tradeBill.setCourseId(insertMap.get("course_id").toString());
+		tradeBill.setAmount(Double.valueOf(insertMap.get("amount").toString()));
+		tradeBill.setStatus(insertMap.get("status").toString());
+		tradeBill.setCreateTime(now);
+		tradeBill.setUpdateTime(now);
+		tradeBillMapper.insert(tradeBill);
+	}
+
+	@Override
+	public void updateTradeBill(Map<String, Object> failUpdateMap) {
+		Date now = new Date();
+		TradeBill tradeBill = new TradeBill();
+		tradeBill.setTradeId(failUpdateMap.get("trade_id").toString());
+		tradeBill.setStatus(failUpdateMap.get("status").toString());
+		tradeBill.setCloseReason(failUpdateMap.get("close_reason").toString());
+		tradeBill.setCloseTime(now);
+		tradeBill.setUpdateTime(now);
+		tradeBillMapper.updateByPrimaryKeySelective(tradeBill);
+	}
+
+	@Override
+	public void insertPaymentBill(Map<String, Object> insertPayMap) {
+		PaymentBill p = new PaymentBill();
+		p.setTradeId(insertPayMap.get("trade_id").toString());
+		p.setPaymentId(insertPayMap.get("payment_id").toString());
+		p.setPaymentType(insertPayMap.get("payment_type").toString());
+		p.setStatus(insertPayMap.get("status").toString());
+		p.setPrePayNo(insertPayMap.get("pre_pay_no").toString());
+		paymentBillMapper.insert(p);
+	}
+
 
 
 }

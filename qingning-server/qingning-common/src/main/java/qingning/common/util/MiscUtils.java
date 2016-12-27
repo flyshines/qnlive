@@ -23,6 +23,8 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 
 import qingning.common.entity.QNLiveException;
 
+import javax.servlet.http.HttpServletRequest;
+
 public final class MiscUtils {
 	private MiscUtils(){};
 	
@@ -459,5 +461,22 @@ public final class MiscUtils {
 		calendar.set(Calendar.SECOND, 59);
 		Date end = calendar.getTime();
 		return end;
+	}
+
+	public static String getIpAddr(HttpServletRequest request){
+		String ip = request.getHeader ("X-Real-IP");
+		if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) { return ip; }
+		ip = request.getHeader ("X-Forwarded-For");
+		if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) {
+			// 多次反向代理后会有多个IP值，第一个为真实IP。
+			int index = ip.indexOf (',');
+			if (index != -1) {
+				return ip.substring (0, index);
+			} else {
+				return ip;
+			}
+		} else {
+			return request.getRemoteAddr ();
+		}
 	}
 }

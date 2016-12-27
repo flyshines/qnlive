@@ -15,6 +15,8 @@ public class PaymentBill {
 
     private String tradeNo;
 
+    private String prePayNo;
+
     private Date createTime;
 
     private Date updateTime;
@@ -65,6 +67,14 @@ public class PaymentBill {
 
     public void setTradeNo(String tradeNo) {
         this.tradeNo = tradeNo == null ? null : tradeNo.trim();
+    }
+
+    public String getPrePayNo() {
+        return prePayNo;
+    }
+
+    public void setPrePayNo(String prePayNo) {
+        this.prePayNo = prePayNo == null ? null : prePayNo.trim();
     }
 
     public Date getCreateTime() {
