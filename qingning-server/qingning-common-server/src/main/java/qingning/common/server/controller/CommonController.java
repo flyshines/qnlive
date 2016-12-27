@@ -137,28 +137,6 @@ public class CommonController extends AbstractController {
     }
 
 
-    /**
-     * 生成微信支付单
-     * @param entity
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/payment/weixin/bill", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    ResponseEntity generateWeixinPayBill(
-            HttpEntity<Object> entity,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "generateWeixinPayBill", accessToken, version);
-        requestEntity.setParam(entity.getBody());
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-        return responseEntity;
-    }
-
-
     @RequestMapping(value = "/common/user", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getUserInfo(
             @RequestParam(value = "query_type", defaultValue = "") String query_type,
@@ -204,6 +182,18 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }
+
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    String handleWeixinPayResult(
+            HttpEntity<Object> entity, HttpServletRequest request) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "handleWeixinPayResult", null, null);
+        requestEntity.setParam(entity.getBody());
+        Object responseString = this.processWithObjectReturn(requestEntity, serviceManger, message);
+        return (String)responseString;
     }
 
 }

@@ -46,6 +46,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
+		
 
 		int login_type_input = Integer.parseInt(reqMap.get("login_type").toString());
 

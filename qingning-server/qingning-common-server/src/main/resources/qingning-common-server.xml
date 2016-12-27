@@ -71,7 +71,7 @@
 			<function name="generateWeixinPayBill">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="500" />
+					<timesLimit millisecond="200" />
 				</auth>
 				<inputs>
 					<param name="profit_type" type="string" require="Y,000100"  format="^[0-1]$,120011"/>
@@ -91,6 +91,17 @@
 					<param name="query_type" type="string" require="Y,000100"  format="^[1-2]$,120011"/>
 				</inputs>
 				<outputs>
+				</outputs>
+			</function>
+
+			<function name="handleWeixinPayResult">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param  type="object"/>
 				</outputs>
 			</function>
 

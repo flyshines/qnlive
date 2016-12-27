@@ -90,7 +90,7 @@ public class TenPayHttpClientUtil {
         //指定读取证书格式为PKCS12
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         //读取本机存放的PKCS12证书文件
-        FileInputStream instream = new FileInputStream(new File("D:/apiclient_cert.p12"));
+        FileInputStream instream = new FileInputStream(new File("D:/certs/gcw/apiclient_cert.p12"));
         try {
             //指定PKCS12的密码(商户ID)
             keyStore.load(instream, mch_id.toCharArray());

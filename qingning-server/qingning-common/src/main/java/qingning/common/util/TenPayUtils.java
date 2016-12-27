@@ -90,7 +90,7 @@ public class TenPayUtils {
         String outTradeNo = "201612230100015";
         String outRefundNo = MiscUtils.getUUId();
         Integer totalFee = 1001;
-        Integer refundFee=1000;
+        Integer refundFee=1001;
         sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null);
     }
 
