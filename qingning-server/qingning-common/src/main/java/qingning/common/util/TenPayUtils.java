@@ -55,20 +55,22 @@ public class TenPayUtils {
 
     }
 
-    public static Map<String, String> sendRefundApply(String outTradeNo, String outRefundNo, Integer totalFee,Integer refundFee,String opUserId) throws Exception {
-        Map<String, String> params = createRefundParams(outTradeNo, outRefundNo, totalFee, refundFee, opUserId);
+    public static Map<String, String> sendRefundApply(String outTradeNo, String outRefundNo, Integer totalFee,Integer refundFee,String opUserId, String refundAccount) throws Exception {
+        Map<String, String> params = createRefundParams(outTradeNo, outRefundNo, totalFee, refundFee, opUserId, refundAccount);
         params.put ("sign", getSign (params));
         String weixin_refund_url = MiscUtils.getConfigByKey("weixin_refund_url");
         CloseableHttpClient httpclient = TenPayHttpClientUtil.getWinxinRefundHttpClient(MiscUtils.getConfigByKey("weixin_pay_mch_id"));
         String sendContent = TenPayXmlUtil.doXMLCreate(params);
         logger.debug("------发起微信退款请求参数"+ params);
         String response = TenPayHttpClientUtil.doPost(weixin_refund_url, sendContent, httpclient);
-        Map<String, String> resultMap = TenPayXmlUtil.doXMLParse(response);
+        Map<String, String> resultMap;
+        resultMap = TenPayXmlUtil.doXMLParse(response);
         logger.debug("------发起微信退款结果"+ resultMap.toString());
         return resultMap;
     }
 
-    private static Map<String, String> createRefundParams(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee, String opUserId) {
+
+    private static Map<String, String> createRefundParams(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee, String opUserId, String refundAccount) {
         Map<String, String> params = new TreeMap<String, String> ();
         params.put ("appid", TenPayConstant.APP_ID);
         params.put ("mch_id", TenPayConstant.MCH_ID);
@@ -83,6 +85,11 @@ public class TenPayUtils {
         }else {
             params.put ("op_user_id", opUserId);
         }
+
+        if(StringUtils.isNotBlank(refundAccount)){
+            params.put ("op_user_id", refundAccount);
+        }
+
         return params;
     }
 
@@ -91,7 +98,7 @@ public class TenPayUtils {
         String outRefundNo = MiscUtils.getUUId();
         Integer totalFee = 1001;
         Integer refundFee=1001;
-        sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null);
+        sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null,null);
     }
 
 
