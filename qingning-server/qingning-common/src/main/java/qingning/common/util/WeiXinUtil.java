@@ -74,8 +74,10 @@ public class WeiXinUtil {
 
     public static JSONObject getUserInfoByCode(String code) {
         String requestUrl = get_user_info_by_code_url.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
+        log.debug("------微信--通过H5传递code获得access_token-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
+        log.debug("------微信--通过H5传递code获得access_token-返回参数  "+requestResult);
         return jsonObject;
     }
 
@@ -87,8 +89,10 @@ public class WeiXinUtil {
      */
     public static JSONObject getUserInfoByAccessToken(String accessToken, String unionId) {
         String requestUrl = get_user_info_by_access_token.replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
+        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
+        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestResult);
         return jsonObject;
     }
 
