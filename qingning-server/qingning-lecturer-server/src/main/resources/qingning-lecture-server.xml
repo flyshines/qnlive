@@ -98,7 +98,6 @@
 					       		isEmpty = isEmpty &amp;&amp; (course_password == null || course_password.length == 0);
 					       		isEmpty = isEmpty &amp;&amp; start_time == null;					       		
 					       		return status != 2 || isEmpty;},100023"/>
-					<param name="update_time" type="long" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>

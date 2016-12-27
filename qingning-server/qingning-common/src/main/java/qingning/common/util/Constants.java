@@ -14,7 +14,7 @@ public final class Constants {
 	public static final String SYSOBJECT= "object";
 	public static final String SYSDATE="date";
 	public static final String SYSSTR="string";
-	public static final int COURSE_MAX_INTERVAL = 30;
+	public static final int COURSE_MAX_INTERVAL = 10;
 	public static final int MAX_QUERY_LIMIT = 1000;
 	
 	public static final String DEFAULT = "default";

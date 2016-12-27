@@ -457,11 +457,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //0.检查课程是否存在并且状态是否正确。
         // （在缓存中的课程为未结束课程，缓存中有课程则代表课程存在且状态正确）
         if (jedis.exists(courseKey)) {
-            //0.1校验课程更新时间
-            String update_time_cache = jedis.hget(courseKey, "update_time");
-            if (update_time_cache == null || !reqMap.get("update_time").toString().equals(update_time_cache)) {
-                throw new QNLiveException("100011");
-            }
 
             //0.2进一步校验课程状态
             String statusFromCache = jedis.hget(courseKey, "status");
