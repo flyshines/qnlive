@@ -187,6 +187,9 @@
     <if test="messagePos != null" >
       and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
     </if>
+    <if test="send_type != null" >
+      and  cm.send_type = #{send_type}
+    </if>
     order by cm.message_pos asc
     limit #{page_count}
   </select>
