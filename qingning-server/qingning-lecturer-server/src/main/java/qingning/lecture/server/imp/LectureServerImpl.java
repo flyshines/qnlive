@@ -863,8 +863,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100013");
         }
 
+        Map<String,String> courseMap = new HashMap<>();
         //1.先检查该课程是否在缓存中
         if(jedis.exists(courseKey)){
+            courseMap = jedis.hgetAll(courseKey);
             JSONArray pptList = null;
             map.clear();
             map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
@@ -922,6 +924,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(courseInfoMap == null){
                 throw new QNLiveException("100004");
             }
+            courseMap = new HashMap<>();
+            MiscUtils.converObjectMapToStringMap(courseInfoMap,courseMap);
 
             //查询课程PPT列表
             List<Map<String,Object>> pptList = lectureModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
@@ -948,6 +952,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(banUserIdList != null && banUserIdList.size() > 0){
             resultMap.put("ban_user_id_list", banUserIdList);
         }
+
+        //增加返回课程相应信息
+        resultMap.put("student_num",courseMap.get("student_num"));
+        resultMap.put("start_time",courseMap.get("start_time"));
+        resultMap.put("status",courseMap.get("status"));
+        resultMap.put("course_type",courseMap.get("course_type"));
+        resultMap.put("course_password",courseMap.get("course_password"));
+        resultMap.put("invite_card_url",courseMap.get("invite_card_url"));
+        resultMap.put("course_update_time",courseMap.get("update_time"));
         return resultMap;
     }
 
