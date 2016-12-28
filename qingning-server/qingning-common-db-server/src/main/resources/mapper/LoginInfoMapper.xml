@@ -17,13 +17,14 @@
     <result column="district_id" property="districtId" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="web_openid" property="webOpenid" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    user_id, union_id, qq_id, phone_number, passwd, m_user_id, m_pwd, user_role, system_role, 
-    status, province_id, city_id, district_id, create_time, update_time
+    user_id, union_id, qq_id, phone_number, passwd, m_user_id, m_pwd, user_role, system_role,
+    status, province_id, city_id, district_id, create_time, update_time, web_openid
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_login_info
     where user_id = #{userId,jdbcType=VARCHAR}
@@ -33,18 +34,18 @@
     where user_id = #{userId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.LoginInfo" >
-    insert into t_login_info (user_id, union_id, qq_id, 
-      phone_number, passwd, m_user_id, 
-      m_pwd, user_role, system_role, 
-      status, province_id, city_id, 
-      district_id, create_time, update_time
-      )
-    values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR}, 
-      #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR}, 
-      #{mPwd,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{systemRole,jdbcType=VARCHAR}, 
-      #{status,jdbcType=CHAR}, #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR}, 
-      #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-      )
+    insert into t_login_info (user_id, union_id, qq_id,
+    phone_number, passwd, m_user_id,
+    m_pwd, user_role, system_role,
+    status, province_id, city_id,
+    district_id, create_time, update_time,
+    web_openid)
+    values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR},
+    #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR},
+    #{mPwd,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{systemRole,jdbcType=VARCHAR},
+    #{status,jdbcType=CHAR}, #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR},
+    #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+    #{webOpenid,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.LoginInfo" >
     insert into t_login_info
@@ -94,6 +95,9 @@
       <if test="updateTime != null" >
         update_time,
       </if>
+      <if test="webOpenid != null" >
+        web_openid,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="userId != null" >
@@ -140,6 +144,9 @@
       </if>
       <if test="updateTime != null" >
         #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="webOpenid != null" >
+        #{webOpenid,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -188,41 +195,48 @@
       <if test="updateTime != null" >
         update_time = #{updateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="webOpenid != null" >
+        web_openid = #{webOpenid,jdbcType=VARCHAR},
+      </if>
     </set>
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.LoginInfo" >
     update t_login_info
     set union_id = #{unionId,jdbcType=VARCHAR},
-      qq_id = #{qqId,jdbcType=VARCHAR},
-      phone_number = #{phoneNumber,jdbcType=VARCHAR},
-      passwd = #{passwd,jdbcType=VARCHAR},
-      m_user_id = #{mUserId,jdbcType=VARCHAR},
-      m_pwd = #{mPwd,jdbcType=VARCHAR},
-      user_role = #{userRole,jdbcType=VARCHAR},
-      system_role = #{systemRole,jdbcType=VARCHAR},
-      status = #{status,jdbcType=CHAR},
-      province_id = #{provinceId,jdbcType=VARCHAR},
-      city_id = #{cityId,jdbcType=VARCHAR},
-      district_id = #{districtId,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    qq_id = #{qqId,jdbcType=VARCHAR},
+    phone_number = #{phoneNumber,jdbcType=VARCHAR},
+    passwd = #{passwd,jdbcType=VARCHAR},
+    m_user_id = #{mUserId,jdbcType=VARCHAR},
+    m_pwd = #{mPwd,jdbcType=VARCHAR},
+    user_role = #{userRole,jdbcType=VARCHAR},
+    system_role = #{systemRole,jdbcType=VARCHAR},
+    status = #{status,jdbcType=CHAR},
+    province_id = #{provinceId,jdbcType=VARCHAR},
+    city_id = #{cityId,jdbcType=VARCHAR},
+    district_id = #{districtId,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    update_time = #{updateTime,jdbcType=TIMESTAMP},
+    web_openid = #{webOpenid,jdbcType=VARCHAR}
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
-
 
   <select id="getLoginInfoByLoginIdAndLoginType" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_login_info
     where
-      <if test='login_type != null and login_type == "0"'>
-        union_id = #{login_id}
-        <!--微信登录-->
+    <if test='login_type != null and login_type == "0"'>
+      union_id = #{login_id}
+      <!--微信登录-->
     </if>
     <if test='login_type != null and login_type == "2"'>
       <!--手机号登录-->
       phone_number = #{login_id}
+    </if>
+    <if test='login_type != null and login_type == "4"'>
+      <!--web openid登录-->
+      web_openid = #{web_openid}
     </if>
   </select>
 
@@ -234,4 +248,5 @@
     user_id = #{userId}
 
   </select>
+
 </mapper>

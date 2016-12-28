@@ -17,10 +17,11 @@
     <result column="district_id" property="districtId" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="web_openid" property="webOpenid" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     user_id, union_id, qq_id, phone_number, passwd, m_user_id, m_pwd, user_role, system_role,
-    status, province_id, city_id, district_id, create_time, update_time
+    status, province_id, city_id, district_id, create_time, update_time, web_openid
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
@@ -37,14 +38,14 @@
     phone_number, passwd, m_user_id,
     m_pwd, user_role, system_role,
     status, province_id, city_id,
-    district_id, create_time, update_time
-    )
+    district_id, create_time, update_time,
+    web_openid)
     values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR},
     #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR},
     #{mPwd,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{systemRole,jdbcType=VARCHAR},
     #{status,jdbcType=CHAR}, #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR},
-    #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-    )
+    #{districtId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+    #{webOpenid,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.LoginInfo" >
     insert into t_login_info
@@ -94,6 +95,9 @@
       <if test="updateTime != null" >
         update_time,
       </if>
+      <if test="webOpenid != null" >
+        web_openid,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="userId != null" >
@@ -140,6 +144,9 @@
       </if>
       <if test="updateTime != null" >
         #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="webOpenid != null" >
+        #{webOpenid,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -188,6 +195,9 @@
       <if test="updateTime != null" >
         update_time = #{updateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="webOpenid != null" >
+        web_openid = #{webOpenid,jdbcType=VARCHAR},
+      </if>
     </set>
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
@@ -206,7 +216,8 @@
     city_id = #{cityId,jdbcType=VARCHAR},
     district_id = #{districtId,jdbcType=VARCHAR},
     create_time = #{createTime,jdbcType=TIMESTAMP},
-    update_time = #{updateTime,jdbcType=TIMESTAMP}
+    update_time = #{updateTime,jdbcType=TIMESTAMP},
+    web_openid = #{webOpenid,jdbcType=VARCHAR}
     where user_id = #{userId,jdbcType=VARCHAR}
   </update>
 
@@ -218,4 +229,6 @@
     user_id = #{userId}
 
   </select>
+
+  
 </mapper>

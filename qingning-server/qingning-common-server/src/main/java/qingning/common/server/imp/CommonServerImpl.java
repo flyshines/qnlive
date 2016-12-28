@@ -12,6 +12,7 @@ import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +129,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String code = reqMap.get("login_id").toString();
 		//1.传递授权code及相关参数，调用微信验证code接口
 		JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-		if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null){
+		if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
 			throw new QNLiveException("120008");
 		}
 
@@ -136,19 +137,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//1.2.1根据 union_id查询数据库
 		String openid = getCodeResultJson.getString("openid");
 		Map<String,Object> queryMap = new HashMap<>();
-		queryMap.put("login_type","0");//0.微信登录
-		queryMap.put("union_id",openid);
+		queryMap.put("login_type","4");//4.微信code方式登录
+		queryMap.put("web_openid",openid);
 		Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
 		//1.2.1.1如果用户存在则进行登录流程
 		if(loginInfoMap != null){
 			processLoginSuccess(2, null, loginInfoMap, resultMap);
 		}else {
-			//1.2.1.2如果用户不存在，则根据用户的union_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
+			//1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
 			String userWeixinAccessToken = getCodeResultJson.getString("access_token");
 			JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
 			// 根据得到的相关用户信息注册用户，并且进行登录流程。
-			if(userJson == null || userJson.getInteger("errcode") != null){
+			if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
 				throw new QNLiveException("120008");
 			}
 
@@ -198,6 +199,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				reqMap.put("gender","2");//TODO
 			}
 
+			String unionid =  userJson.getString("unionid");
+			reqMap.put("unionid",unionid);
+			reqMap.put("web_openid",openid);
 			Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
 
 			//生成access_token，将相关信息放入缓存，构造返回参数
@@ -378,23 +382,28 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//判断类型为 0:课程收益 1:打赏
 		if(profit_type.equals("1")){
 			insertMap.put("amount", rewardInfoMap.get("amount").toString());
-			totalFee = Integer.parseInt(rewardInfoMap.get("amount").toString());
-			goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name")+courseMap.get("course_id");
+			BigDecimal rewardBigDecimal = new BigDecimal(rewardInfoMap.get("amount").toString());
+			totalFee = (rewardBigDecimal.multiply(new BigDecimal(100))).intValue();
+			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}else if(profit_type.equals("0")){
 			insertMap.put("amount", courseMap.get("course_price"));
-			totalFee = Integer.parseInt(courseMap.get("course_price"));
-			goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name")+courseMap.get("course_id");
+			BigDecimal coursePriceBigDecimal = new BigDecimal(courseMap.get("course_price"));
+			totalFee = (coursePriceBigDecimal.multiply(new BigDecimal(100))).intValue();
+			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}
-		insertMap.put("status",courseMap.get("0"));
+		insertMap.put("status","0");
 		String tradeId = MiscUtils.getUUId();
 		insertMap.put("trade_id",tradeId);
 		commonModuleServer.insertTradeBill(insertMap);
+
+		Map<String,Object> userMap = commonModuleServer.findLoginInfoByUserId(userId);
 
 		//4.调用微信生成预付单接口
 		String terminalIp = reqMap.get("remote_ip_address").toString();
 		String tradeType = "JSAPI";
 		String outTradeNo = tradeId;
-		Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo);
+		String openid = userMap.get("web_openid").toString();
+		Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
 
 		//5.处理生成微信预付单接口
 		if (payResultMap.get ("return_code").equals ("FAIL")) {
@@ -430,7 +439,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			resultMap.put("prepay_id", payResultMap.get("prepay_id"));
 			resultMap.put("pay_sign", payResultMap.get("sign"));
 			resultMap.put("sign_type", "MD5");
-			//resultMap.put("nonce_str", payResultMap.get("nonce_str")); TODO
+			resultMap.put("nonce_str", payResultMap.get("nonce_str"));
 			return resultMap;
 		}
 	}

@@ -65,6 +65,7 @@
 				<entry key="120009" value="课程不存在"/>
 				<entry key="120010" value="打赏类型不存在"/>
 				<entry key="120011" value="参数范围不正确"/>
+				<entry key="120012" value="微信支付失败"/>
 
 			</map>
 		</property>

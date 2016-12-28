@@ -74,6 +74,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(reqMap.get("login_type") != null && reqMap.get("login_type").toString().equals("3")){
 			loginInfo.setPasswd(reqMap.get("certification") == null ? null : reqMap.get("certification").toString());
 		}
+		if(reqMap.get("login_type") != null && reqMap.get("login_type").toString().equals("4")){
+			loginInfo.setUnionId(reqMap.get("unionid").toString());
+			loginInfo.setWebOpenid(reqMap.get("web_openid").toString());
+		}
 		if(reqMap.get("m_user_id") != null){
 			loginInfo.setmUserId(reqMap.get("m_user_id").toString());
 		}

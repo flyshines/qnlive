@@ -33,6 +33,8 @@ public class LoginInfo {
 
     private Date updateTime;
 
+    private String webOpenid;
+
     public String getUserId() {
         return userId;
     }
@@ -151,5 +153,13 @@ public class LoginInfo {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getWebOpenid() {
+        return webOpenid;
+    }
+
+    public void setWebOpenid(String webOpenid) {
+        this.webOpenid = webOpenid == null ? null : webOpenid.trim();
     }
 }

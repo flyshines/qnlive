@@ -112,7 +112,7 @@ public class ImMsgServiceImp implements ImMsgService {
 
 			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
 		}else if(information.get("send_type").equals("0")){
-			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
 		}
 

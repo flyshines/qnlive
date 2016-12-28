@@ -1,4 +1,4 @@
-package qingning.user.db.persistence.mybatis.entity;
+package qingning.common.db.persistence.mybatis.entity;
 
 import java.util.Date;
 
@@ -32,6 +32,8 @@ public class LoginInfo {
     private Date createTime;
 
     private Date updateTime;
+
+    private String webOpenid;
 
     public String getUserId() {
         return userId;
@@ -151,5 +153,13 @@ public class LoginInfo {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getWebOpenid() {
+        return webOpenid;
+    }
+
+    public void setWebOpenid(String webOpenid) {
+        this.webOpenid = webOpenid == null ? null : webOpenid.trim();
     }
 }

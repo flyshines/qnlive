@@ -44,8 +44,8 @@ public class TenPayUtils {
         return MD5Util.getMD5(sb.toString() + "key=" + TenPayConstant.APP_KEY).toUpperCase ();
     }
 
-    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo) throws IOException,ParserConfigurationException,SAXException{
-        Map<String, String> params = createParams (goodName, totalFee, terminalIp, tradeType, outTradeNo);
+    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid) throws IOException,ParserConfigurationException,SAXException{
+        Map<String, String> params = createParams (goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
         params.put ("sign", getSign (params));
         logger.debug("-----微信预支付请求参数"+ params);
         String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.PRE_PAY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
@@ -103,7 +103,7 @@ public class TenPayUtils {
 
 
 
-    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo){
+    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid){
         Map<String, String> params = new TreeMap<String, String> ();
         params.put ("appid", TenPayConstant.APP_ID);
         params.put ("body", goodName);
@@ -114,6 +114,7 @@ public class TenPayUtils {
         params.put ("spbill_create_ip", terminalIp);
         params.put ("total_fee", totalFee.toString ());
         params.put ("trade_type", tradeType);
+        params.put ("openid", openid);
         return params;
     }
 
