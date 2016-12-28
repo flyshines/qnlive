@@ -45,6 +45,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     public void processCourseNotStart(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        log.debug("---------------将课程加入未开播处理定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         long startTime = Long.parseLong(reqMap.get("start_time").toString());
         saveCourseMessageService = (SaveCourseMessageService)context.getBean("SaveCourseMessageServer");
@@ -52,7 +53,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                log.debug("课程未开播处理定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+                log.debug("-----------课程未开播处理定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                 processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis, saveCourseMessageService, saveCourseAudioService);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -90,6 +91,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     public void processCourseLiveOvertime(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context){
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        log.debug("---------------将课程加入直播超时处理定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         long realStartTime = Long.parseLong(reqMap.get("real_start_time").toString());
         saveCourseMessageService = (SaveCourseMessageService)context.getBean("SaveCourseMessageServer");
