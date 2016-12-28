@@ -536,6 +536,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     }
                 }
             } else {
+                reqMap.put("now",new Date());
                 //2.不为课程结束
                 //修改缓存，同时修改数据库
                 Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
