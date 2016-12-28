@@ -586,11 +586,27 @@ public class UserServerImpl extends AbstractQNLiveServer {
         queryMap.put("lecturer_id", courseMap.get("lecturer_id"));
         queryMap.put("course_id", courseMap.get("course_id"));
         Map<String,Object> studentMap = userModuleServer.findStudentByKey(queryMap);
+
+        //返回用户身份
+        //角色数组 1：普通用户、2：学员、3：讲师
+        List<String> role = new ArrayList<>();
         //加入课程状态 0未加入 1已加入
         if(MiscUtils.isEmpty(studentMap)){
+            role.add("2");
             resultMap.put("join_status", "0");
         }else {
             resultMap.put("join_status", "1");
+            role.add("1");
+        }
+
+        if(userId.equals(courseMap.get("lecturer_id"))){
+            role.add("3");
+        }else {
+            if(MiscUtils.isEmpty(studentMap)){
+                role.add("2");
+            }else {
+                role.add("1");
+            }
         }
 
         //查询关注状态
@@ -602,6 +618,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         } else {
             resultMap.put("follow_status", "1");
         }
+
+
+
+
 
         return resultMap;
     }
