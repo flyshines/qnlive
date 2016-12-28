@@ -589,25 +589,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //返回用户身份
         //角色数组 1：普通用户、2：学员、3：讲师
-        List<String> role = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
         //加入课程状态 0未加入 1已加入
         if(MiscUtils.isEmpty(studentMap)){
-            role.add("2");
             resultMap.put("join_status", "0");
         }else {
             resultMap.put("join_status", "1");
-            role.add("1");
         }
 
         if(userId.equals(courseMap.get("lecturer_id"))){
-            role.add("3");
+            roles.add("3");
         }else {
             if(MiscUtils.isEmpty(studentMap)){
-                role.add("2");
+                roles.add("2");
             }else {
-                role.add("1");
+                roles.add("1");
             }
         }
+        resultMap.put("roles",roles);
 
         //查询关注状态
         //关注状态 0未关注 1已关注
@@ -618,10 +617,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         } else {
             resultMap.put("follow_status", "1");
         }
-
-
-
-
 
         return resultMap;
     }
