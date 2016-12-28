@@ -959,7 +959,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("status",courseMap.get("status"));
         resultMap.put("course_type",courseMap.get("course_type"));
         resultMap.put("course_password",courseMap.get("course_password"));
-        resultMap.put("invite_card_url",courseMap.get("invite_card_url"));
+        resultMap.put("invite_card_url","http://7xt3lm.com1.z0.glb.clouddn.com/images/A837ede8bde2aa20d9b14dac068d342bc.png");//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         return resultMap;
     }
