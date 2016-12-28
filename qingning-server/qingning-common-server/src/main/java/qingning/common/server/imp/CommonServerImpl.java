@@ -333,9 +333,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 	@SuppressWarnings("unchecked")
 	@FunctionName("generateWeixinPayBill")
-	public Map<String,Object> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
+	public Map<String,String> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,String> resultMap = new HashMap<>();
 
 		//1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
 		String courseId = reqMap.get("course_id").toString();
@@ -428,18 +428,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			//成功，则需要插入支付表
 			Map<String,Object> insertPayMap = new HashMap<>();
 			insertPayMap.put("trade_id",tradeId);
-			insertPayMap.put("payment_id",userId);
+			insertPayMap.put("payment_id",MiscUtils.getUUId());
 			insertPayMap.put("payment_type","0");
 			insertPayMap.put("status","1");
 			insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
 			commonModuleServer.insertPaymentBill(insertPayMap);
 
 			//返回相关参数给前端
-			resultMap.put("app_id",MiscUtils.getConfigByKey("appid"));
-			resultMap.put("prepay_id", payResultMap.get("prepay_id"));
-			resultMap.put("pay_sign", payResultMap.get("sign"));
-			resultMap.put("sign_type", "MD5");
-			resultMap.put("nonce_str", payResultMap.get("nonce_str"));
+			resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
+			resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
+			resultMap.put("nonceStr", payResultMap.get("random_char"));
+			resultMap.put("package", "package="+payResultMap.get("prepay_id"));
+			resultMap.put("signType", "MD5");
+			String paySign  = TenPayUtils.getSign(resultMap);
+			resultMap.put ("sign", paySign);
+
 			return resultMap;
 		}
 	}
