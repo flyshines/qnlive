@@ -642,13 +642,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 startIndexDB = startIndex;
             }
 
-            finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, startIndexDB, endIndex, 0 , pageCount);
+            finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, startIndexDB, endIndex, 0 , pageCount,userId);
 
         } else {
             if (predictionList.size() < pageCount) {
                 startIndex = "+inf";
                 endIndex = "-inf";
-                finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, null, endIndex, 0 , pageCount - predictionList.size());
+                finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, null, endIndex, 0 , pageCount - predictionList.size(), userId);
             }
         }
 
@@ -713,7 +713,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
-                                                    String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count){
+                                                    String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count,String userId){
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
         Map<String,Object> queryMap = new HashMap<>();
         List<Map<String,Object>> dbList = null;
@@ -725,6 +725,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Date date = new Date(Long.parseLong(startIndexDB.substring(1)));
                 queryMap.put("startIndex", date);
             }
+            queryMap.put("lecturer_id", userId);
             dbList = lectureModuleServer.findCourseListForLecturer(queryMap);
         } else {
             //如果结束课程列表中的数量不够，则剩余需要查询数据库
@@ -735,6 +736,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     Date date = new Date(Long.parseLong(startIndexDB));
                     queryMap.put("startIndex", date);
                 }
+                queryMap.put("lecturer_id", userId);
                 dbList = lectureModuleServer.findCourseListForLecturer(queryMap);
             }
         }
