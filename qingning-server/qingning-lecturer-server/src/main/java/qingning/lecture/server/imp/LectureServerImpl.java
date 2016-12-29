@@ -427,6 +427,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
         resultMap.put("room_id", liveRoomMap.get("room_id"));
 
+        //分享URL
+        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
         return resultMap;
     }
 
@@ -536,8 +538,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         this.mqUtils.sendMessage(timerRequestEntity);
                     }
                 }
+
+                resultMap.put("update_time", courseEndTime.getTime());
             } else {
-                reqMap.put("now",new Date());
+                Date now = new Date();
+                reqMap.put("now",now);
                 //2.不为课程结束
                 //修改缓存，同时修改数据库
                 Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
@@ -592,6 +597,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
                 updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
                 jedis.hmset(courseKey, updateCacheMap);
+                resultMap.put("update_time", now.getTime());
             }
 
         } else {
