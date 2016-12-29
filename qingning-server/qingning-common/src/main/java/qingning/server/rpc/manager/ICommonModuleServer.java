@@ -29,4 +29,6 @@ public interface ICommonModuleServer {
 	boolean findTradebillStatus(String outTradeNo);
 
 	void updateUserWebOpenIdByUserId(Map<String, Object> updateMap);
+
+	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
 }

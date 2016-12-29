@@ -181,4 +181,12 @@
     from t_trade_bill
     where trade_id = #{outTradeNo}
   </select>
+
+  <select id="findMapByOutTradeNo" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_trade_bill
+    where trade_id = #{outTradeNo}
+  </select>
+
 </mapper>

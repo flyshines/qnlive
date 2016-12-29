@@ -218,6 +218,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			String unionid =  userJson.getString("unionid");
 			reqMap.put("unionid",unionid);
 			reqMap.put("web_openid",openid);
+			reqMap.put("login_type","4");
 			Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
 
 			//生成access_token，将相关信息放入缓存，构造返回参数
@@ -470,7 +471,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String resultStr = TenPayConstant.FAIL;
 		SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
 		String outTradeNo = requestMapData.get("out_trade_no");
-		if(commonModuleServer.findTradebillStatus(outTradeNo)){
+
+		Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
+		if(billMap != null && billMap.get("status").equals("2")){
 			System.out.println("====>　已经处理完成, 不需要继续。流水号是: "+outTradeNo );
 			return TenPayConstant.SUCCESS;
 		}
@@ -480,6 +483,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 			if("SUCCESS".equals(requestMapData.get("return_code")) &&
 					"SUCCESS".equals(requestMapData.get("result_code"))){
+
 //				if(courseManagerServer.updateWxPaySucessData(requestMapData)){
 //					resultStr = TenPayConstant.SUCCESS;
 //					System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");

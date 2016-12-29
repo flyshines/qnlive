@@ -178,4 +178,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 
+	@Override
+	public Map<String,Object> findTradebillByOutTradeNo(String outTradeNo) {
+		Map<String,Object> t = tradeBillMapper.findMapByOutTradeNo(outTradeNo);
+		return t;
+	}
 }

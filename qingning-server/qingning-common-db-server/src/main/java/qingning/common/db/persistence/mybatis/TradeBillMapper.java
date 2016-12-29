@@ -2,6 +2,8 @@ package qingning.common.db.persistence.mybatis;
 
 import qingning.common.db.persistence.mybatis.entity.TradeBill;
 
+import java.util.Map;
+
 public interface TradeBillMapper {
     int deleteByPrimaryKey(String tradeId);
 
@@ -16,4 +18,6 @@ public interface TradeBillMapper {
     int updateByPrimaryKey(TradeBill record);
 
     TradeBill findByOutTradeNo(String outTradeNo);
+
+    Map<String,Object> findMapByOutTradeNo(String outTradeNo);
 }
