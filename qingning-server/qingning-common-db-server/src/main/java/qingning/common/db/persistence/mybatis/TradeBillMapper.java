@@ -14,4 +14,6 @@ public interface TradeBillMapper {
     int updateByPrimaryKeySelective(TradeBill record);
 
     int updateByPrimaryKey(TradeBill record);
+
+    TradeBill findByOutTradeNo(String outTradeNo);
 }

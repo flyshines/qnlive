@@ -13,13 +13,14 @@
     <result column="close_time" property="closeTime" jdbcType="TIMESTAMP" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="profit_type" property="profitType" jdbcType="CHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    trade_id, user_id, room_id, course_id, amount, payment, status, close_reason, close_time, 
-    create_time, update_time
+    trade_id, user_id, room_id, course_id, amount, payment, status, close_reason, close_time,
+    create_time, update_time, profit_type
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_trade_bill
     where trade_id = #{tradeId,jdbcType=VARCHAR}
@@ -29,14 +30,16 @@
     where trade_id = #{tradeId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.TradeBill" >
-    insert into t_trade_bill (trade_id, user_id, room_id, 
-      course_id, amount, payment, 
-      status, close_reason, close_time, 
-      create_time, update_time)
-    values (#{tradeId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR}, 
-      #{courseId,jdbcType=VARCHAR}, #{amount,jdbcType=DOUBLE}, #{payment,jdbcType=DOUBLE}, 
-      #{status,jdbcType=CHAR}, #{closeReason,jdbcType=VARCHAR}, #{closeTime,jdbcType=TIMESTAMP}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    insert into t_trade_bill (trade_id, user_id, room_id,
+    course_id, amount, payment,
+    status, close_reason, close_time,
+    create_time, update_time, profit_type
+    )
+    values (#{tradeId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR},
+    #{courseId,jdbcType=VARCHAR}, #{amount,jdbcType=DOUBLE}, #{payment,jdbcType=DOUBLE},
+    #{status,jdbcType=CHAR}, #{closeReason,jdbcType=VARCHAR}, #{closeTime,jdbcType=TIMESTAMP},
+    #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{profitType,jdbcType=CHAR}
+    )
   </insert>
   <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.TradeBill" >
     insert into t_trade_bill
@@ -74,6 +77,9 @@
       <if test="updateTime != null" >
         update_time,
       </if>
+      <if test="profitType != null" >
+        profit_type,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="tradeId != null" >
@@ -108,6 +114,9 @@
       </if>
       <if test="updateTime != null" >
         #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="profitType != null" >
+        #{profitType,jdbcType=CHAR},
       </if>
     </trim>
   </insert>
@@ -144,21 +153,32 @@
       <if test="updateTime != null" >
         update_time = #{updateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="profitType != null" >
+        profit_type = #{profitType,jdbcType=CHAR},
+      </if>
     </set>
     where trade_id = #{tradeId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.TradeBill" >
     update t_trade_bill
     set user_id = #{userId,jdbcType=VARCHAR},
-      room_id = #{roomId,jdbcType=VARCHAR},
-      course_id = #{courseId,jdbcType=VARCHAR},
-      amount = #{amount,jdbcType=DOUBLE},
-      payment = #{payment,jdbcType=DOUBLE},
-      status = #{status,jdbcType=CHAR},
-      close_reason = #{closeReason,jdbcType=VARCHAR},
-      close_time = #{closeTime,jdbcType=TIMESTAMP},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    room_id = #{roomId,jdbcType=VARCHAR},
+    course_id = #{courseId,jdbcType=VARCHAR},
+    amount = #{amount,jdbcType=DOUBLE},
+    payment = #{payment,jdbcType=DOUBLE},
+    status = #{status,jdbcType=CHAR},
+    close_reason = #{closeReason,jdbcType=VARCHAR},
+    close_time = #{closeTime,jdbcType=TIMESTAMP},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    update_time = #{updateTime,jdbcType=TIMESTAMP},
+    profit_type = #{profitType,jdbcType=CHAR}
     where trade_id = #{tradeId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findByOutTradeNo" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_trade_bill
+    where trade_id = #{outTradeNo}
+  </select>
 </mapper>

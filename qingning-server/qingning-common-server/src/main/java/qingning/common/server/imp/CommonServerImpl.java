@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
 	
@@ -144,6 +145,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//1.2.1.1如果用户存在则进行登录流程
 		if(loginInfoMap != null){
 			processLoginSuccess(2, null, loginInfoMap, resultMap);
+			return resultMap;
 		}else {
 			//1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
 			String userWeixinAccessToken = getCodeResultJson.getString("access_token");
@@ -151,6 +153,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			// 根据得到的相关用户信息注册用户，并且进行登录流程。
 			if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
 				throw new QNLiveException("120008");
+			}
+
+			queryMap.clear();
+			queryMap.put("login_type","0");//0.微信方式登录
+			queryMap.put("login_id",userJson.getString("unionid"));
+			Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+			if(loginInfoMapFromUnionid != null){
+				//将open_id更新到login_info表中
+				Map<String,Object> updateMap = new HashMap<>();
+				updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+				updateMap.put("web_openid", openid);
+				commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
+				processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
+				return resultMap;
 			}
 
 			String nickname = userJson.getString("nickname");
@@ -207,9 +223,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			//生成access_token，将相关信息放入缓存，构造返回参数
 			processLoginSuccess(1, dbResultMap, null, resultMap);
 			//}
-		}
 
-		return resultMap;
+			return resultMap;
+		}
 	}
 
 	/**
@@ -394,6 +410,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		insertMap.put("status","0");
 		String tradeId = MiscUtils.getUUId();
 		insertMap.put("trade_id",tradeId);
+		insertMap.put("profit_type",profit_type);
 		commonModuleServer.insertTradeBill(insertMap);
 
 		Map<String,Object> userMap = commonModuleServer.findLoginInfoByUserId(userId);
@@ -445,6 +462,42 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 			return resultMap;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("handleWeixinPayResult")
+	public String handleWeixinPayResult (RequestEntity reqEntity) throws Exception{
+		String resultStr = TenPayConstant.FAIL;
+		SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
+		String outTradeNo = requestMapData.get("out_trade_no");
+		if(commonModuleServer.findTradebillStatus(outTradeNo)){
+			System.out.println("====>　已经处理完成, 不需要继续。流水号是: "+outTradeNo );
+			return TenPayConstant.SUCCESS;
+		}
+
+		if (TenPayUtils.isValidSign(requestMapData)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+			System.out.println(" ===> 微信notify Md5 验签成功 <=== ");
+
+			if("SUCCESS".equals(requestMapData.get("return_code")) &&
+					"SUCCESS".equals(requestMapData.get("result_code"))){
+//				if(courseManagerServer.updateWxPaySucessData(requestMapData)){
+//					resultStr = TenPayConstant.SUCCESS;
+//					System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");
+//					courseManagerServer.updateChoreographerWallet(outTradeNo);
+//				}else{
+//					resultStr = TenPayConstant.FAIL;
+//					System.out.println("====> 微信支付流水: "+outTradeNo+" 更新数据失败. return fail === ");
+//				}
+			}else{
+				System.out.println("==> 微信支付失败 ,流水 ：" + outTradeNo);
+				resultStr = TenPayConstant.FAIL;
+			}
+
+		}else {// MD5签名失败
+			System.out.println("==> fail -Md5 failed");
+			resultStr = TenPayConstant.FAIL;
+		}
+		return resultStr;
 	}
 
 }

@@ -25,4 +25,8 @@ public interface ICommonModuleServer {
 	void updateTradeBill(Map<String, Object> failUpdateMap);
 
 	void insertPaymentBill(Map<String, Object> insertPayMap);
+
+	boolean findTradebillStatus(String outTradeNo);
+
+	void updateUserWebOpenIdByUserId(Map<String, Object> updateMap);
 }

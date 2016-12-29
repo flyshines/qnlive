@@ -25,6 +25,8 @@ public class TradeBill {
 
     private Date updateTime;
 
+    private String profitType;
+
     public String getTradeId() {
         return tradeId;
     }
@@ -111,5 +113,13 @@ public class TradeBill {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getProfitType() {
+        return profitType;
+    }
+
+    public void setProfitType(String profitType) {
+        this.profitType = profitType == null ? null : profitType.trim();
     }
 }

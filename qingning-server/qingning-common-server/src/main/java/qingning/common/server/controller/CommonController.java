@@ -1,12 +1,16 @@
 package qingning.common.server.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,9 +21,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class CommonController extends AbstractController {
+
+    private static final Logger logger   = LoggerFactory.getLogger(CommonController.class);
 
     /**
      * 获取系统时间
@@ -189,11 +196,39 @@ public class CommonController extends AbstractController {
     public
     @ResponseBody
     String handleWeixinPayResult(
-            HttpEntity<Object> entity, HttpServletRequest request) throws Exception {
+            HttpEntity<Object> entity) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "handleWeixinPayResult", null, null);
         requestEntity.setParam(entity.getBody());
         Object responseString = this.processWithObjectReturn(requestEntity, serviceManger, message);
         return (String)responseString;
+    }
+
+    @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
+    public void handleWeixinPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        logger.info("================> 接收到 weixinNotify 通知。==================");
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = null;
+        try{
+            out =response.getWriter();
+            String resultData = MiscUtils.convertStreamToString(request.getInputStream());
+            SortedMap<String,String> requestMapData = MiscUtils.requestToMap(resultData);//notify请求数据
+            logger.info("===> weixinNotify 请求数据：" + requestMapData);
+            RequestEntity requestEntity = this.createResponseEntity("CourseManger", "paymentNotify", "", "");
+            requestEntity.setParam(requestMapData);
+            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+            String result = responseEntity.getReturnData().toString();
+            logger.info("===> result Data: " + result);
+            out.println(result);
+            out.flush();
+            out.close();
+        }catch(Exception e){
+            logger.error("====================>  weixinNotify 处理异常  ========");
+            logger.error(e.getMessage(), e);
+            out.flush();
+            out.close();
+        }
+        logger.info("==========================>  weixinNotify 处理完毕。 =======");
     }
 
 }

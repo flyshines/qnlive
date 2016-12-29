@@ -189,4 +189,24 @@ public class TenPayUtils {
         if (state.equals ("PAYERROR")) { return TradeState.PAYERROR; }
         return TradeState.OTHER_ERROR;
     }
+
+    /**
+     * 微信notify 验签方法验签方法。
+     * @param requestMapData
+     * @return
+     * @throws Exception
+     */
+    public static boolean isValidSign(SortedMap<String, String> requestMapData) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        for (Map.Entry<String, String> entry : requestMapData.entrySet()) {
+            if(!"sign".equalsIgnoreCase(entry.getKey())){
+                sb.append(entry.getKey() + "=" + entry.getValue());
+                sb.append("&");
+            }
+        }
+        sb.append("key=" + TenPayConstant.APP_KEY);
+        String sign = MD5Util.getMD5(sb.toString());
+        String ValidSign = requestMapData.get("sign").toUpperCase();
+        return ValidSign.equals(sign);
+    }
 }

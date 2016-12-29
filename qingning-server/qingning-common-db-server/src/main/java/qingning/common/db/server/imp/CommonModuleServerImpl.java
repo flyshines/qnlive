@@ -131,6 +131,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		tradeBill.setStatus(insertMap.get("status").toString());
 		tradeBill.setCreateTime(now);
 		tradeBill.setUpdateTime(now);
+		tradeBill.setProfitType(insertMap.get("profit_type").toString());
 		tradeBillMapper.insert(tradeBill);
 	}
 
@@ -157,6 +158,24 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		paymentBillMapper.insert(p);
 	}
 
+	@Override
+	public boolean findTradebillStatus(String outTradeNo) {
+		TradeBill t = tradeBillMapper.findByOutTradeNo(outTradeNo);
+		//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
+		if(t != null && t.getStatus().equals("2")){
+			return true;
+		}else {
+			return false;
+		}
+	}
+
+	@Override
+	public void updateUserWebOpenIdByUserId(Map<String, Object> updateMap) {
+		LoginInfo updateLoginInfo = new LoginInfo();
+		updateLoginInfo.setUserId(updateMap.get("user_id").toString());
+		updateLoginInfo.setWebOpenid(updateMap.get("web_openid").toString());
+		loginInfoMapper.updateByPrimaryKeySelective(updateLoginInfo);
+	}
 
 
 }

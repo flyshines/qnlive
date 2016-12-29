@@ -1,26 +1,21 @@
 package qingning.common.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.UUID;
+
 import com.alibaba.dubbo.common.utils.StringUtils;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import qingning.common.entity.QNLiveException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -478,5 +473,48 @@ public final class MiscUtils {
 		} else {
 			return request.getRemoteAddr ();
 		}
+	}
+
+	/**
+	 * 从inputstream 取数据。
+	 * @param is
+	 * @return
+	 * @throws Exception
+	 */
+	public static String convertStreamToString(InputStream is) throws Exception {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+		StringBuilder sb = new StringBuilder();
+		String line = null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+			}
+		} finally {
+			is.close();
+			reader.close();
+		}
+		return sb.toString();
+	}
+
+
+	/**
+	 * Xml To Map
+	 * @param resultData
+	 * @return
+	 * @throws org.dom4j.DocumentException
+	 */
+	public static SortedMap<String,String> requestToMap(String resultData) throws DocumentException {
+		SortedMap<String,String> map = new TreeMap<String, String>();
+
+		Document document = DocumentHelper.parseText(resultData);
+		// 得到xml根元素
+		Element root = document.getRootElement();
+		// 得到根元素的所有子节点
+		List<Element> elementList = root.elements();
+		// 遍历所有子节点
+		for (Element e : elementList){
+			map.put(e.getName().toLowerCase(), e.getText());
+		}
+		return map;
 	}
 }

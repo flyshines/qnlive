@@ -95,9 +95,7 @@
 			</function>
 
 			<function name="handleWeixinPayResult">
-				<auth>
-					<accessToken require="N" />
-				</auth>
+
 				<inputs>
 				</inputs>
 				<outputs>
