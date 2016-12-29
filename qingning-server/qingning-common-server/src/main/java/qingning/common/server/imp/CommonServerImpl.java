@@ -507,14 +507,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					Map<String,Object> payUserMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("pay_user_id").toString());
 					Map<String,Object> lecturerMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("lecturer_id").toString());
 					String message = payUserMap.get("user_name") + "打赏了" + lecturerMap.get("user_name") + handleResultMap.get("pay_amount") + "元";
+					long currentTime = System.currentTimeMillis();
 					String sender = "system";
 					Map<String,Object> infomation = new HashMap<>();
 					infomation.put("course_id", handleResultMap.get("course_id"));
+					infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
 					infomation.put("message", message);
 					infomation.put("send_type", "4");//4.打赏信息
+					infomation.put("message_type", "1");
+					infomation.put("create_time", currentTime);
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
-					messageMap.put("send_time",System.currentTimeMillis());
+					messageMap.put("send_time",currentTime);
 					messageMap.put("information",infomation);
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);

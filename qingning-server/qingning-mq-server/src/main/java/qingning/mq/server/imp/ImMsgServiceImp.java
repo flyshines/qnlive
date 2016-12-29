@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.IMMsgUtil;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.server.ImMsgService;
@@ -14,6 +15,7 @@ import redis.clients.jedis.Jedis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +70,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 		Map<String,String> courseMap = jedis.hgetAll(courseKey);
 		//课程为已结束
-		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("4")){
+		if(courseMap.get("status").equals("2") && (!information.get("send_type").equals("4") || !information.get("send_type").equals("5"))){
 			return;
 		}
 
@@ -93,6 +95,24 @@ public class ImMsgServiceImp implements ImMsgService {
 					timerMap.put("real_start_time", now+"");
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
+
+					//发送课程开始消息
+					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+					String str = sdf.format(now);
+					String courseStartMessage = "直播开始于"+str;
+					String mGroupId = courseMap.get("im_course_id");
+					String message = courseStartMessage;
+					String sender = "system";
+					Map<String,Object> infomation = new HashMap<>();
+					infomation.put("course_id", information.get("course_id").toString());
+					infomation.put("message", message);
+					infomation.put("send_type", "5");//5.开始/结束消息
+					Map<String,Object> messageMap = new HashMap<>();
+					messageMap.put("msg_type","1");
+					messageMap.put("send_time",System.currentTimeMillis());
+					messageMap.put("information",infomation);
+					String content = JSON.toJSONString(messageMap);
+					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 				}
 			}
 		}

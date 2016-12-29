@@ -1,5 +1,6 @@
 package qingning.lecture.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,7 @@ import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -540,6 +542,29 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
 
                 resultMap.put("update_time", courseEndTime.getTime());
+                SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+                String str = sdf.format(courseEndTime);
+                String courseEndMessage = "直播结束于"+str;
+                resultMap.put("course_end_message", courseEndMessage);
+                //发送结束推送消息
+                long currentTime = System.currentTimeMillis();
+                String mGroupId = jedis.hget(courseKey,"im_course_id");
+                String message = courseEndMessage;
+                String sender = "system";
+                Map<String,Object> infomation = new HashMap<>();
+                infomation.put("course_id", reqMap.get("course_id").toString());
+                infomation.put("creator_id", userId);
+                infomation.put("message", message);
+                infomation.put("message_type", "1");
+                infomation.put("send_type", "5");//5.结束消息
+                infomation.put("create_time", currentTime);
+                Map<String,Object> messageMap = new HashMap<>();
+                messageMap.put("msg_type","1");
+                messageMap.put("send_time",currentTime);
+                messageMap.put("information",infomation);
+                String content = JSON.toJSONString(messageMap);
+                IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
             } else {
                 Date now = new Date();
                 reqMap.put("now",now);
