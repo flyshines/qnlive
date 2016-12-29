@@ -68,14 +68,14 @@ public class ImMsgServiceImp implements ImMsgService {
 		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 		Map<String,String> courseMap = jedis.hgetAll(courseKey);
 		//课程为已结束
-		if(courseMap.get("status").equals("2")){
+		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("4")){
 			return;
 		}
 
 		//先判断是否有实际开播时间，没有则进行进一步判断
 		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间，则该课程存入实际开播时间
 		//并且进行直播超时定时任务检查
-		if(courseMap.get("real_start_time") == null){
+		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
 			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
 				long now = System.currentTimeMillis();
 				if(now > Long.parseLong(courseMap.get("start_time"))){

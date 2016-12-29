@@ -3,6 +3,7 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 public interface ICommonModuleServer {
 	public List<Map<String, Object>> getServerUrls();
@@ -31,4 +32,6 @@ public interface ICommonModuleServer {
 	void updateUserWebOpenIdByUserId(Map<String, Object> updateMap);
 
 	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
+
+	Map<String,Object> handleWeixinPayResult(SortedMap<String, String> requestMapData);
 }

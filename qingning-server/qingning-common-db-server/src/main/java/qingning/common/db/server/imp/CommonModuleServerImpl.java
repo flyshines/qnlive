@@ -4,11 +4,9 @@ package qingning.common.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.db.persistence.mybatis.*;
-import qingning.common.db.persistence.mybatis.entity.LoginInfo;
-import qingning.common.db.persistence.mybatis.entity.PaymentBill;
-import qingning.common.db.persistence.mybatis.entity.TradeBill;
-import qingning.common.db.persistence.mybatis.entity.User;
+import qingning.common.db.persistence.mybatis.entity.*;
 import qingning.common.util.MiscUtils;
+import qingning.common.util.TenPayUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
 import java.util.*;
@@ -35,6 +33,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private PaymentBillMapper paymentBillMapper;
+
+	@Autowired(required = true)
+	private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
+
+	@Autowired(required = true)
+	private CoursesStudentsMapper coursesStudentsMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -182,5 +186,73 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String,Object> findTradebillByOutTradeNo(String outTradeNo) {
 		Map<String,Object> t = tradeBillMapper.findMapByOutTradeNo(outTradeNo);
 		return t;
+	}
+
+	@Override
+	public Map<String,Object> handleWeixinPayResult(SortedMap<String, String> requestMapData) {
+		Map<String,Object> resultMap = new HashMap<>();
+		Date now = new Date();
+
+		TradeBill tradeBill = tradeBillMapper.findByOutTradeNo(requestMapData.get("out_trade_no"));
+		//更新交易表信息
+		TradeBill updateBill = new TradeBill();
+		updateBill.setTradeId(requestMapData.get("out_trade_no"));
+		updateBill.setStatus("2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
+		updateBill.setUpdateTime(now);
+		tradeBillMapper.updateByPrimaryKeySelective(updateBill);
+
+		//更新支付表信息
+		PaymentBill updatePayBill = new PaymentBill();
+		updatePayBill.setStatus("2");//支付状态，1：付款中 2：成功 3：失败
+		String realPayTimeString = requestMapData.get("time_end");
+		Date realPayTime = MiscUtils.parseDateWinxin(realPayTimeString);
+		updatePayBill.setUpdateTime(realPayTime);
+		paymentBillMapper.updateByTradeIdKeySelective(updatePayBill);
+
+		//更新收益表信息
+		Map<String,Object> courses = coursesMapper.findCourseByCourseId(tradeBill.getCourseId());
+		PaymentBill paymentBill = paymentBillMapper.selectByTradeId(tradeBill.getTradeId());
+		LecturerCoursesProfit lcp = new LecturerCoursesProfit();
+		lcp.setProfitId(MiscUtils.getUUId());
+		lcp.setCourseId(tradeBill.getCourseId());
+		lcp.setRoomId(tradeBill.getRoomId());
+		lcp.setLecturerId(courses.get("lecturer_id").toString());
+		lcp.setUserId(tradeBill.getUserId());
+		lcp.setProfitAmount(tradeBill.getAmount());
+		lcp.setProfitType(tradeBill.getProfitType());
+		lcp.setCourseTitle(courses.get("course_title").toString());
+		lcp.setCreateTime(now);
+		lcp.setCreateDate(now);
+		lcp.setPaymentId(paymentBill.getPaymentId());
+		lcp.setProfitType(paymentBill.getPaymentType());
+		lcp.setLecturerName("");//todo
+		lecturerCoursesProfitMapper.insert(lcp);
+
+		//0:课程收益 1:打赏
+		if(tradeBill.getProfitType().equals("0")){
+           //如果为购买课程，则插入学员表
+			CoursesStudents students = new CoursesStudents();
+			students.setUserId(tradeBill.getUserId());
+			students.setLecturerId(courses.get("lecturer_id").toString());
+			students.setRoomId(courses.get("room_id").toString());
+			students.setCourseId(courses.get("course_id").toString());
+			//students.setPaymentAmount();//todo
+			if(courses.get("course_password") != null){
+				students.setCoursePassword(courses.get("course_password").toString());
+			}
+            //		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
+            //			students.setCoursePassword(courseMap.get("course_password"));
+            //		}
+			students.setStudentType("0");//TODO
+			students.setCreateTime(now);
+			students.setCreateDate(now);
+			coursesStudentsMapper.insert(students);
+		}
+
+		resultMap.put("profit_type",tradeBill.getProfitType());
+		resultMap.put("pay_user_id",tradeBill.getUserId());
+		resultMap.put("pay_amount",tradeBill.getAmount());
+		resultMap.putAll(courses);
+		return resultMap;
 	}
 }

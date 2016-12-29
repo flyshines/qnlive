@@ -26,7 +26,8 @@ public final class MiscUtils {
 	private static Map<String, String> configProperty = null;
 	private static String configPropertyPath="classpath:application.properties";
 	private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+	private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
+
 	public static void setConfigPropertyPath(String configPropertyPath){
 		MiscUtils.configPropertyPath=configPropertyPath;
 	}
@@ -413,7 +414,11 @@ public final class MiscUtils {
 			if(entry.getValue() != null){
 				if(entry.getValue() instanceof Date){
 					stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
-				}else {
+				}else if(entry.getValue() instanceof Double){
+					BigDecimal doubleNum = new BigDecimal((Double)entry.getValue());
+					stringMap.put(entry.getKey(), doubleNum.multiply(new BigDecimal(100)).longValue()+"");
+				}
+				else {
 					stringMap.put(entry.getKey(), entry.getValue().toString());
 				}
 			}
@@ -516,5 +521,18 @@ public final class MiscUtils {
 			map.put(e.getName().toLowerCase(), e.getText());
 		}
 		return map;
+	}
+
+	public static Date parseDateWinxin(String realPayTimeString) {
+		if(com.alibaba.dubbo.common.utils.StringUtils.isBlank(realPayTimeString)){
+			return null;
+		}
+		Date date = null;
+		try {
+			date  = dateTimeFormatWinxin.parse(realPayTimeString);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
 	}
 }

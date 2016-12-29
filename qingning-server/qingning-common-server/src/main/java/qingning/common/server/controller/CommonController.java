@@ -203,7 +203,7 @@ public class CommonController extends AbstractController {
 //        return (String)responseString;
 //    }
 
-    @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
+    @RequestMapping(value = "/common/payment/weixin/result", method = RequestMethod.POST)
     public void handleWeixinPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception{
         logger.info("================> 接收到 weixinNotify 通知。==================");
         request.setCharacterEncoding("UTF-8");
@@ -214,7 +214,7 @@ public class CommonController extends AbstractController {
             String resultData = MiscUtils.convertStreamToString(request.getInputStream());
             SortedMap<String,String> requestMapData = MiscUtils.requestToMap(resultData);//notify请求数据
             logger.info("===> weixinNotify 请求数据：" + requestMapData);
-            RequestEntity requestEntity = this.createResponseEntity("CourseManger", "paymentNotify", "", "");
+            RequestEntity requestEntity = this.createResponseEntity("CommonServer", "handleWeixinPayResult", "", "");
             requestEntity.setParam(requestMapData);
             ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
             String result = responseEntity.getReturnData().toString();

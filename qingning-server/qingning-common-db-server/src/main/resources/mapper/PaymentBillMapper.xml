@@ -139,4 +139,44 @@
     update_time = #{updateTime,jdbcType=TIMESTAMP}
     where payment_id = #{paymentId,jdbcType=VARCHAR}
   </update>
+
+  <update id="updateByTradeIdKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.PaymentBill" >
+    update t_payment_bill
+    <set >
+      <if test="tradeId != null" >
+        trade_id = #{tradeId,jdbcType=VARCHAR},
+      </if>
+      <if test="paymentType != null" >
+        payment_type = #{paymentType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="payment != null" >
+        payment = #{payment,jdbcType=DOUBLE},
+      </if>
+      <if test="tradeNo != null" >
+        trade_no = #{tradeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="prePayNo != null" >
+        pre_pay_no = #{prePayNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where trade_id = #{tradeId,jdbcType=VARCHAR}
+  </update>
+
+
+  <select id="selectByTradeId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_payment_bill
+    where trade_id = #{tradeId,jdbcType=VARCHAR}
+  </select>
+
 </mapper>

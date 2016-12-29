@@ -1,5 +1,6 @@
 package qingning.common.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
@@ -479,19 +480,72 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		}
 
 		if (TenPayUtils.isValidSign(requestMapData)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+		//if(true){
 			System.out.println(" ===> 微信notify Md5 验签成功 <=== ");
 
 			if("SUCCESS".equals(requestMapData.get("return_code")) &&
 					"SUCCESS".equals(requestMapData.get("result_code"))){
+				//更新交易表信息
+				//更新支付表信息
+				//更新收益表信息
+				//如果为购买课程，则插入学员表
+				Map<String,Object> handleResultMap = commonModuleServer.handleWeixinPayResult(requestMapData);
 
-//				if(courseManagerServer.updateWxPaySucessData(requestMapData)){
-//					resultStr = TenPayConstant.SUCCESS;
-//					System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");
-//					courseManagerServer.updateChoreographerWallet(outTradeNo);
-//				}else{
-//					resultStr = TenPayConstant.FAIL;
-//					System.out.println("====> 微信支付流水: "+outTradeNo+" 更新数据失败. return fail === ");
-//				}
+				//如果为打赏，则需要发送推送
+				String profit_type = handleResultMap.get("profit_type").toString();
+				//0:课程收益 1:打赏
+				Jedis jedis = jedisUtils.getJedis();
+				Map<String,Object> map = new HashMap<>();
+				map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
+				String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+
+				map.put(Constants.CACHED_KEY_COURSE_FIELD, handleResultMap.get("course_id").toString());
+				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
+				if(profit_type.equals("1")){
+					String mGroupId = handleResultMap.get("im_course_id").toString();
+					Map<String,Object> payUserMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("pay_user_id").toString());
+					Map<String,Object> lecturerMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("lecturer_id").toString());
+					String message = payUserMap.get("user_name") + "打赏了" + lecturerMap.get("user_name") + handleResultMap.get("pay_amount") + "元";
+					String sender = "system";
+					Map<String,Object> infomation = new HashMap<>();
+					infomation.put("course_id", handleResultMap.get("course_id"));
+					infomation.put("message", message);
+					infomation.put("send_type", "4");//4.打赏信息
+					Map<String,Object> messageMap = new HashMap<>();
+					messageMap.put("msg_type","1");
+					messageMap.put("send_time",System.currentTimeMillis());
+					messageMap.put("information",infomation);
+					String content = JSON.toJSONString(messageMap);
+					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+				}else if(profit_type.equals("0")){
+					//增加课程人数
+					jedis.hincrBy(lecturerKey, "total_student_num", 1);
+					if(jedis.exists(courseKey)) {
+						jedis.hincrBy(courseKey, "student_num", 1);
+					}
+				}
+
+				//处理缓存中的收益
+				//讲师缓存中的收益
+				Double amount = (Double)handleResultMap.get("pay_amount");
+				Long amountLong = (long) amount.doubleValue();
+				jedis.hincrBy(lecturerKey, "total_amount", amountLong.longValue());
+
+				//直播间缓存中的收益
+				map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
+				map.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
+				String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, map);
+				jedis.hincrBy(liveRoomKey, "total_amount", amountLong.longValue());
+
+				//课程缓存中的收益
+				if(jedis.exists(courseKey)) {
+					jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
+				}
+
+				resultStr = TenPayConstant.SUCCESS;
+				System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");
+
 			}else{
 				System.out.println("==> 微信支付失败 ,流水 ：" + outTradeNo);
 				resultStr = TenPayConstant.FAIL;

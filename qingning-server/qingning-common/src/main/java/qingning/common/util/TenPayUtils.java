@@ -11,12 +11,36 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class TenPayUtils {
 
     public static final String  ALL_CHAR = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final Logger logger   = LoggerFactory.getLogger (TenPayUtils.class);
+    private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+
+    /**
+     * 格式化string为Date
+     *
+     * @param datestr
+     * @return date
+     */
+    public static Date parseDate(String datestr) {
+        if(com.alibaba.dubbo.common.utils.StringUtils.isBlank(datestr)){
+            return null;
+        }
+        Date date = null;
+        try {
+            date  = dateTimeFormat.parse(datestr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
 
     public static String getOrderNo(){
         return UUID.randomUUID ().toString ().replaceAll ("-", "");
@@ -209,4 +233,6 @@ public class TenPayUtils {
         String ValidSign = requestMapData.get("sign").toUpperCase();
         return ValidSign.equals(sign);
     }
+
+
 }

@@ -14,4 +14,8 @@ public interface PaymentBillMapper {
     int updateByPrimaryKeySelective(PaymentBill record);
 
     int updateByPrimaryKey(PaymentBill record);
+
+    int updateByTradeIdKeySelective(PaymentBill updatePayBill);
+
+    PaymentBill selectByTradeId(String tradeId);
 }
