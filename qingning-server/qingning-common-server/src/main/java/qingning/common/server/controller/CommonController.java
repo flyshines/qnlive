@@ -191,17 +191,17 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    String handleWeixinPayResult(
-            HttpEntity<Object> entity) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "handleWeixinPayResult", null, null);
-        requestEntity.setParam(entity.getBody());
-        Object responseString = this.processWithObjectReturn(requestEntity, serviceManger, message);
-        return (String)responseString;
-    }
+//    @SuppressWarnings("unchecked")
+//    @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
+//    public
+//    @ResponseBody
+//    String handleWeixinPayResult(
+//            HttpEntity<Object> entity) throws Exception {
+//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "handleWeixinPayResult", null, null);
+//        requestEntity.setParam(entity.getBody());
+//        Object responseString = this.processWithObjectReturn(requestEntity, serviceManger, message);
+//        return (String)responseString;
+//    }
 
     @RequestMapping(value = "/common/weixin/payment/result", method = RequestMethod.POST)
     public void handleWeixinPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception{
