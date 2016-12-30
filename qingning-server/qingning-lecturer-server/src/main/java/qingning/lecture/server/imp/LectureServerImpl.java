@@ -545,7 +545,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
                 String str = sdf.format(courseEndTime);
                 String courseEndMessage = "直播结束于"+str;
-                resultMap.put("course_end_message", courseEndMessage);
                 //发送结束推送消息
                 long currentTime = System.currentTimeMillis();
                 String mGroupId = jedis.hget(courseKey,"im_course_id");

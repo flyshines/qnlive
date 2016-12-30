@@ -37,7 +37,6 @@
 			<function name="liveRoom">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="50" />
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  />
