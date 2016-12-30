@@ -1093,4 +1093,31 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
 
     }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getUserConsumeRecords")
+    public Map<String, Object> getUserConsumeRecords(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+
+        //获得用户id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        queryMap.put("user_id", userId);
+        //根据page_count、position（如果有）查询数据库
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("position") != null && StringUtils.isNotBlank(reqMap.get("position").toString())){
+            queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
+        }
+
+        List<Map<String,Object>> records = userModuleServer.findUserConsumeRecords(queryMap);
+
+        if(! CollectionUtils.isEmpty(records)){
+
+            resultMap.put("record_list", records);
+        }
+
+        return resultMap;
+
+    }
 }

@@ -263,4 +263,20 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+
+
+	@RequestMapping(value = "/user/record/consume", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getUserConsumeRecords(
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "position", defaultValue = "") String position,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("student_pos", position);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
 }

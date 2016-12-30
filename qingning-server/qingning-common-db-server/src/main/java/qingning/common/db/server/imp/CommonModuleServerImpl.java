@@ -220,12 +220,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		lcp.setUserId(tradeBill.getUserId());
 		lcp.setProfitAmount(tradeBill.getAmount());
 		lcp.setProfitType(tradeBill.getProfitType());
-		lcp.setCourseTitle(courses.get("course_title").toString());
 		lcp.setCreateTime(now);
 		lcp.setCreateDate(now);
 		lcp.setPaymentId(paymentBill.getPaymentId());
 		lcp.setProfitType(paymentBill.getPaymentType());
-		lcp.setLecturerName("");//todo
 		lecturerCoursesProfitMapper.insert(lcp);
 
 		//0:课程收益 1:打赏

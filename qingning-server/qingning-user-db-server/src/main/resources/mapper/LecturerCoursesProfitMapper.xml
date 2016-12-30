@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.common.db.persistence.mybatis.LecturerCoursesProfitMapper" >
-  <resultMap id="BaseResultMap" type="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
+<mapper namespace="qingning.user.db.persistence.mybatis.LecturerCoursesProfitMapper" >
+  <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     <id column="profit_id" property="profitId" jdbcType="VARCHAR" />
     <result column="course_id" property="courseId" jdbcType="VARCHAR" />
     <result column="room_id" property="roomId" jdbcType="VARCHAR" />
@@ -30,7 +30,7 @@
     delete from t_lecturer_courses_profit
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
+  <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     insert into t_lecturer_courses_profit (profit_id, course_id, room_id,
     lecturer_id, user_id, distributer_id,
     profit_amount, profit_type, create_time,
@@ -42,7 +42,7 @@
     #{createDate,jdbcType=DATE}, #{paymentId,jdbcType=VARCHAR}, #{paymentType,jdbcType=CHAR},
     #{position,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
+  <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     insert into t_lecturer_courses_profit
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="profitId != null" >
@@ -127,7 +127,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.user.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     update t_lecturer_courses_profit
     <set >
       <if test="courseId != null" >
@@ -169,7 +169,7 @@
     </set>
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
-  <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
+  <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     update t_lecturer_courses_profit
     set course_id = #{courseId,jdbcType=VARCHAR},
     room_id = #{roomId,jdbcType=VARCHAR},
@@ -185,4 +185,19 @@
     `position` = #{position,jdbcType=BIGINT}
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findUserConsumeRecords" resultType="BaseResultMap" parameterType="hashmap" >
+    select
+    lcp.profit_type, lcp.course_id, lcp.profit_amount, lcp.profit_amount,
+    lcp.record_time, lcp.position, t_courses.course_title
+    from t_lecturer_courses_profit lcp left join t_courses  on t_courses.course_id = lcp.course_id
+    where 1=1
+    and user_id = #{user_id}
+    <if test="position != null" >
+     and  `position` <![CDATA[<]]> #{position}
+    </if>
+    order by `position` desc
+    limit #{page_count}
+  </select>
+
 </mapper>

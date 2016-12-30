@@ -117,6 +117,19 @@
 				</outputs>
 			</function>
 
+			<function name="getUserConsumeRecords">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N"  />
+					<param name="position" type="long" require="N"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">
