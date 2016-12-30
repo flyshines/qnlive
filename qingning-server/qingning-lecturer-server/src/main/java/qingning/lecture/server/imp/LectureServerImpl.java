@@ -625,7 +625,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
 
         } else {
-            throw new Exception("100010");
+            throw new QNLiveException("100010");
         }
 
         return resultMap;
