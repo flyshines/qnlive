@@ -186,7 +186,7 @@
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
 
-  <select id="findUserConsumeRecords" resultType="BaseResultMap" parameterType="hashmap" >
+  <select id="findUserConsumeRecords" resultType="hashmap" parameterType="hashmap" >
     select
     lcp.profit_type, lcp.course_id, lcp.profit_amount, lcp.profit_amount,
     lcp.record_time, lcp.position, t_courses.course_title
