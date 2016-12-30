@@ -311,6 +311,18 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
+	/**
+	 * 获取直播间的课程收益
+	 * @param room_id
+	 * @param course_id
+	 * @param page_count
+	 * @param position
+	 * @param profit_type 
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/profits/{room_id}/{course_id}",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getCourseProfitList(
 			@PathVariable("room_id") String room_id,
@@ -331,6 +343,13 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
+	/**
+	 * 获取讲师的分销信息
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/distribution",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getDistributionInfo(			
 			@RequestHeader("access_token") String access_token,
@@ -339,6 +358,16 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
+	/**
+	 * 获取直播间分销员信息
+	 * @param room_id
+	 * @param page_count 
+	 * @param position 
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getRoomDistributerInfo(	
 			@PathVariable("room_id") String room_id,
@@ -354,7 +383,17 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}
-	
+	/**
+	 * 获取直播间分销员的课程分销信息
+	 * @param room_id
+	 * @param distributer_id 
+	 * @param page_count
+	 * @param start_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}/{distributer_id}/courses",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getRoomDistributerInfo(	
 			@PathVariable("room_id") String room_id,
@@ -372,7 +411,17 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}
-
+	/**
+	 * 生成直播间分享链接的分享码
+	 * @param room_id
+	 * @param distributer_id 
+	 * @param page_count
+	 * @param start_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/lecturer/distribution/rooms/{room_id}/distributer/share",method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity createRoomShareCode(	
@@ -387,6 +436,14 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
+	/**
+	 * 创建直播间分销用户
+	 * @param entity
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/lecturer/distribution/rooms/distributer/new",method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity createRoomDistributer(
@@ -398,7 +455,15 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}
-	
+	/**
+	 * 创建直播间分销用户
+	 * @param page_count
+	 * @param start_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/courses/statistics",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getCourseStatistics(			
 			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
@@ -411,5 +476,30 @@ public class LectureController extends AbstractController {
 		parMap.put("start_time", start_time);
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
-	}	
+	}
+	/**
+	 * 获取直播间粉丝列表
+	 * @param page_count
+	 * @param room_id
+	 * @param position
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/lecturer/rooms/{room_id}/fans",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getFanList(
+			@PathVariable("room_id") String room_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "position", defaultValue = "") String position,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "fanList", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("room_id", room_id);
+		parMap.put("page_count", page_count);
+		parMap.put("position", position);
+		requestEntity.setParam(parMap);		
+		return this.process(requestEntity, serviceManger, message);
+	}
 }

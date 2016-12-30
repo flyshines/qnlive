@@ -191,5 +191,19 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
 	}
 
+	@Override
+	public List<Map<String, Object>> findFanInfoByUserId(Map<String, Object> queryMap) {		
+		return fansMapper.findFanInfoByUserId(queryMap);
+	}
 
+	@Override
+	public Map<String, Object> findUserInfoByUserId(String user_id) {		
+		return userMapper.findByUserId(user_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findStudentCourseList(Map<String, Object> queryMap) {		
+		return coursesStudentsMapper.findStudentCourseList(queryMap);
+	}
+	
 }

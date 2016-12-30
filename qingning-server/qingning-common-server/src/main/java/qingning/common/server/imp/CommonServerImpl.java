@@ -7,6 +7,8 @@ import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
+import qingning.common.server.other.ReadDistributerOperation;
+import qingning.common.server.other.ReadUserOperation;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
@@ -16,18 +18,23 @@ import redis.clients.jedis.Jedis;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
 	
 	private ICommonModuleServer commonModuleServer;
-
+	private ReadDistributerOperation readDistributerOperation;
+	private ReadUserOperation readUserOperation;
+	
 	@Override
 	public void initRpcServer() {
 		if(commonModuleServer == null){
 			commonModuleServer = this.getRpcService("commonModuleServer");
-		}
+			readDistributerOperation = new ReadDistributerOperation(commonModuleServer);
+			readUserOperation = new ReadUserOperation(commonModuleServer);
+		}		
 	}
 
 	private static Auth auth;
@@ -49,7 +56,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
-		
 
 		int login_type_input = Integer.parseInt(reqMap.get("login_type").toString());
 
@@ -325,7 +331,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//1:个人中心信息 2：个人基本信息
 		String queryType = reqMap.get("query_type").toString();
 		if(queryType.equals("1")){
-			//TODO
+			reqMap.put("user_id", userId);
+			Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+			resultMap.put("avatar_address", values.get("avatar_address"));
+			resultMap.put("nick_name", values.get("nick_name"));			
+			resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
+			resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
+			resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSDOUBLE, "today_distributer_amount", 0d));
+			resultMap.put("update_time", MiscUtils.convertObjToObject(values.get("update_time"),Constants.SYSLONG,"update_time", 0l));			
 		}else if(queryType.equals("2")){
 			Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
 			if(MiscUtils.isEmpty(userMap)){
@@ -561,5 +574,183 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		}
 		return resultStr;
 	}
-
+	
+	@FunctionName("commonDistribution")
+	public Map<String,Object> getCommonDistribution(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		//int page_count = (Integer)reqMap.get("page_count");
+		Date record_date = (Date)reqMap.get("record_date");
+		reqMap.put("create_time", record_date);
+		reqMap.put("distributer_id", userId);
+		Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
+		if(MiscUtils.isEmpty(distributer)){
+			throw new QNLiveException("120012");
+		}
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("total_amount", distributer.get("total_amount"));
+		List<Map<String,Object>> rooom_list = commonModuleServer.findDistributionInfoByDistributerId(reqMap);
+		if(!MiscUtils.isEmpty(rooom_list)){
+			Date currentDate = new Date(System.currentTimeMillis());
+			for(Map<String,Object> values:rooom_list){
+				Date endDate = (Date)values.get("end_date");
+				if(!MiscUtils.isEmpty(endDate) && endDate.before(currentDate)){
+					values.put("effective_time", null);
+				}
+			}
+		}
+		resultMap.put("room_list", rooom_list);
+		return resultMap;
+	}
+	
+	@FunctionName("roomDistributerRecommendInfo")
+	public Map<String,Object> getRoomDistributerRecommendInfo(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("room_id", room_id);
+		String distributer_id = (String)reqMap.get("distributer_id");
+		boolean isLecturer = false;
+		if(MiscUtils.isEmpty(distributer_id)){
+			distributer_id=userId;					
+		} else {
+			parameters.put("lecturer_id", userId);
+			isLecturer=true;
+		}
+		parameters.put("distributer_id", distributer_id);
+		List<Map<String,Object>> rooom_list = commonModuleServer.findDistributionInfoByDistributerId(parameters);
+		Map<String,Object> result = new HashMap<String,Object>();
+		long recommend_num = 0l;
+		if(MiscUtils.isEmpty(rooom_list)){
+			if(isLecturer){
+				throw new QNLiveException("100028");
+			}
+			result.put("recommend_num", 0l);
+		} else {
+			Object recommend_num_tmp = rooom_list.get(0).get("recommend_num");
+			if(recommend_num_tmp!=null){
+				recommend_num = Long.parseLong(recommend_num_tmp.toString());
+			}
+			result.put("recommend_num", recommend_num);
+		}
+		if(recommend_num>0){
+			parameters.clear();
+			parameters.put("room_id", room_id);
+			parameters.put("distributer_id", distributer_id);
+			parameters.put("page_count", reqMap.get("page_count"));
+			parameters.put("position", reqMap.get("position"));
+			List<Map<String,Object>> recommend_list = commonModuleServer.findRoomDistributerRecommendInfo(parameters);
+			result.put("recommend_list", recommend_list);
+		}
+		return result;
+	}
+	
+	@FunctionName("roomDistributionInfo")
+	public Map<String,Object> getRoomDistributionInfo(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");				
+		reqMap.put("distributer_id", userId);
+		Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
+		if(MiscUtils.isEmpty(distributer)){
+			throw new QNLiveException("120012");
+		}
+		Map<String,Object> result = new HashMap<String,Object>();
+		result.put("total_amount", distributer.get("total_amount"));
+		
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("room_id", room_id);
+		parameters.put("distributer_id", userId);
+		parameters.put("page_count", reqMap.get("page_count"));
+		parameters.put("start_time", reqMap.get("start_time"));
+		
+		List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(parameters);
+		if(!MiscUtils.isEmpty(course_list)){
+			Date currentDate = new Date(System.currentTimeMillis());
+			for(Map<String,Object> values:course_list){
+				Date endDate = (Date)values.get("end_date");
+				if(!MiscUtils.isEmpty(endDate) && endDate.before(currentDate)){
+					values.put("effective_time", null);
+				}
+			}
+		}
+		result.put("course_list", course_list);
+		return result;
+	}
+	
+	@FunctionName("courseDistributionInfo")
+	public Map<String,Object> getCourseDistributionInfo(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String course_id = (String)reqMap.get("course_id");
+		Long position = (Long)reqMap.get("position");
+		
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("course_id", course_id);
+		parameters.put("distributer_id", userId);		
+		List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(parameters);
+		if(MiscUtils.isEmpty(course_list)){
+			throw new QNLiveException("120013");
+		}
+		Map<String,Object> result = course_list.get(0);
+		
+		parameters.put("position", position);
+		parameters.put("page_count", reqMap.get("page_count"));
+		
+		List<Map<String,Object>> list = commonModuleServer.findRoomDistributerCourseDetailsInfo(parameters);
+		result.put("profit_list", list);
+		return result;
+	}
+	
+	@FunctionName("roomDistributionShareInfo")
+	public Map<String,Object> getRoomDistributionShareInfo(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		reqMap.put("distributer_id", userId);		
+		List<Map<String,Object>> list = commonModuleServer.findDistributionInfoByDistributerId(reqMap);
+		if(MiscUtils.isEmpty(list)){
+			throw new QNLiveException("120014");
+		}
+		return list.get(0);
+	}
+	
+	@FunctionName("updateUserInfo")
+	public Map<String,Object> updateUserInfo(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();		
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		
+		reqMap.put("user_id", userId);
+		Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+		String update_time_str = values.get("update_time");
+		Long update_time = (Long)reqMap.get("update_time");
+		if(!update_time.toString().equals(update_time_str)){
+			throw new QNLiveException("000104");
+		}
+		String nick_name = (String)reqMap.get("nick_name");
+		String avatar_address = (String)reqMap.get("avatar_address");
+		if(!MiscUtils.isEmpty(nick_name) || !MiscUtils.isEmpty(avatar_address)){
+			Map<String,Object> parameters = new HashMap<String,Object>();
+			parameters.put("nick_name", nick_name);
+			parameters.put("avatar_address", avatar_address);
+			parameters.put("updateTime", new Date(update_time));
+			parameters.put("userId", userId);
+			int count = commonModuleServer.updateUser(parameters);
+			if(count <1){
+				throw new QNLiveException("000104");
+			} else {
+				Map<String,Object> parameter = new HashMap<String,Object>();
+				parameter.put(Constants.CACHED_KEY_USER_FIELD, userId);
+				String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, parameter);
+				jedisUtils.getJedis().del(cachedKey);
+			}
+		}
+		return new HashMap<String,Object>();
+	}
 }

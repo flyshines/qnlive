@@ -205,8 +205,15 @@
     where room_id = #{room_id}
   </select>
 
+  <select id="findLiveRoomByLectureId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_live_room
+    where lecturer_id = #{lecturer_id}
+  </select>
+
   <select id="findRoomDistributerInfo" resultType="hashmap" parameterType="hashmap" >
-    select * from t_room_distributer where room_id = #{room_id}
+    select a.*,b.nick_name,b.avatar_address from t_room_distributer a, t_user b where a.distributer_id=b.user_id and room_id = #{room_id}
     <if test="distributer_id != null">
       and distributer_id !=#{distributer_id} 
     </if>
@@ -218,12 +225,21 @@
   </select>
   
   <select id="findRoomDistributerCourseInfo" resultType="hashmap" parameterType="hashmap" >
-    select a.*,b.course_title,b.b.start_time from t_room_distributer_courses a, t_courses b where room_id = #{room_id} and distributer_id =#{distributer_id}
-    and a.course_id=b.course_id 
+    select a.*,b.course_title,b.start_time from t_room_distributer_courses a, t_courses b where a.room_id = #{room_id} and a.distributer_id =#{distributer_id}
+    and a.course_id=b.course_id and b.course_type='2'
     <if test="start_time != null">
        and b.start_time <![CDATA[ < ]]> #{start_time}
     </if>
-    order by b.start_time desc #{limit_count}
+    order by b.start_time desc limit #{limit_count}
   </select>
-  
+    
+  <select id="findRoomFanList" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.fans_id=b.user_id and a.room_id=#{room_id}
+    and a.lecturer_id=#{lecturer_id}
+    <if test="position != null">
+       and a.position <![CDATA[ > ]]> #{position}
+    </if>
+    order by a.position limit #{page_count}
+  </select>    
+    
 </mapper>

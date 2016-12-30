@@ -1,15 +1,28 @@
 package qingning.common.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.UUID;
 import com.alibaba.dubbo.common.utils.StringUtils;
 
 import org.dom4j.Document;
@@ -124,34 +137,35 @@ public final class MiscUtils {
 				obj = defaultValue;
 			}
 			
-			if(Constants.SYSINT.equalsIgnoreCase(type)){
-				if(!(obj instanceof Integer)){
-					obj = Integer.parseInt(obj.toString());
-				}			
-			} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
-				if(!(obj instanceof Long)){
-					if(obj instanceof Date){
-						obj = ((Date)obj).getTime();
-					} else {
-						obj = Long.parseLong(obj.toString());
-					}				
-				}
-			} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
-				if(!(obj instanceof Double)){
-					if(obj instanceof Date){
-						Long timeStamp = ((Date)obj).getTime();
-						obj = Double.parseDouble(timeStamp.toString());
-					} else {
-						obj = Double.parseDouble(obj.toString());
+			if(!MiscUtils.isEmpty(obj)){
+				if(Constants.SYSINT.equalsIgnoreCase(type)){
+					if(!(obj instanceof Integer)){
+						obj = Integer.parseInt(obj.toString());
+					}			
+				} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
+					if(!(obj instanceof Long)){
+						if(obj instanceof Date){
+							obj = ((Date)obj).getTime();
+						} else {
+							obj = Long.parseLong(obj.toString());
+						}				
 					}
-				}			
-			} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
-				if(MiscUtils.isEmpty(obj)){
-					obj=defaultValue;
-				} else if(!(obj instanceof String)){
-					obj=obj.toString();
-				}			
+				} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
+					if(!(obj instanceof Double)){
+						if(obj instanceof Date){
+							Long timeStamp = ((Date)obj).getTime();
+							obj = Double.parseDouble(timeStamp.toString());
+						} else {
+							obj = Double.parseDouble(obj.toString());
+						}
+					}			
+				} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
+					if(!(obj instanceof String)){
+						obj=obj.toString();
+					}
+				}	
 			}
+			
 			if(MiscUtils.isEmpty(obj)){
 				if(Constants.SYSMAP.equals(type)){
 					obj=new HashMap<Object,Object>();

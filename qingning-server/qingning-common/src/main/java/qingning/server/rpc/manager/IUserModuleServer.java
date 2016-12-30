@@ -9,7 +9,7 @@ public interface IUserModuleServer {
 	Map<String,Object> userFollowRoom(Map<String, Object> reqMap);
 
 	void updateLiveRoomNumForUser(Map<String, Object> reqMap);
-
+	Map<String,Object> findUserInfoByUserId(String user_id);
 
 	Map<String,Object> findLiveRoomByRoomId(String room_id);
 
@@ -43,6 +43,10 @@ public interface IUserModuleServer {
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
 
 	List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
-
+	
+	List<Map<String,Object>> findFanInfoByUserId(Map<String, Object> queryMap);
+	
+    List<Map<String,Object>> findStudentCourseList(Map<String, Object> queryMap);
+	
 	List<Map<String,Object>> findUserConsumeRecords(Map<String, Object> queryMap);
 }

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -144,9 +145,10 @@ public class CommonController extends AbstractController {
     }
 
 
-    @RequestMapping(value = "/common/user", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/common/user", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getUserInfo(
-            @RequestParam(value = "query_type", defaultValue = "") String query_type,
+            @RequestParam(value = "query_type", defaultValue = "1") String query_type,
             @RequestParam(value = "server_url_info_update_time", defaultValue = "") String server_url_info_update_time,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version
@@ -159,10 +161,12 @@ public class CommonController extends AbstractController {
         //根据相关条件将server_url列表信息返回
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        if (MiscUtils.isEmpty(server_url_info_update_time) ||
-                !server_url_info_update_time.equals(serverUrlInfoUpdateTime.toString())) {
-            resultMap.put("server_url_info_list", serverUrlInfoMap);
-            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+        if("2".equals(query_type)){
+	        if (MiscUtils.isEmpty(server_url_info_update_time) ||
+	                !server_url_info_update_time.equals(serverUrlInfoUpdateTime.toString())) {
+	            resultMap.put("server_url_info_list", serverUrlInfoMap);
+	            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+	        }
         }
         responseEntity.setReturnData(resultMap);
         return responseEntity;
@@ -230,5 +234,152 @@ public class CommonController extends AbstractController {
         }
         logger.info("==========================>  weixinNotify 处理完毕。 =======");
     }
+	/**
+	 * 编辑个人信息
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/common/user", method = RequestMethod.PUT)
+    public @ResponseBody ResponseEntity updateUserInfo(
+    		HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version
+    ) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "updateUserInfo", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+	/**
+	 * 查询个人的分销信息
+	 * @param page_count
+	 * @param record_date
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/common/distribution",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getCommonDistribution(
+    		@RequestParam(value="page_count",defaultValue="10") String page_count,
+    		@RequestParam(value="record_date",defaultValue="") String record_date,
+    		@RequestHeader("access_token") String access_token,
+    		@RequestHeader("version") String version) throws Exception{
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "commonDistribution", access_token, version);
+    	Map<String, Object> param = new HashMap<String, Object>();
+        param.put("page_count", page_count);
+        param.put("record_date", record_date);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+	/**
+	 * 讲师查询分销员的推广用户/用户查询自己的推广用户
+	 * @param room_id
+	 * @param distributer_id
+	 * @param page_count
+	 * @param position
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/common/distribution/rooms/{room_id}/recommend",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getRoomDistributerRecommendInfo(
+    		@PathVariable("room_id") String room_id,
+    		@RequestParam(value="distributer_id",defaultValue="") String distributer_id,
+    		@RequestParam(value="page_count",defaultValue="20") String page_count,
+    		@RequestParam(value="position",defaultValue="") String position,
+    		@RequestHeader("access_token") String access_token,
+    		@RequestHeader("version") String version) throws Exception{
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributerRecommendInfo", access_token, version);
+    	Map<String, Object> param = new HashMap<String, Object>();
+        param.put("room_id", room_id);
+        param.put("distributer_id", distributer_id);
+        param.put("page_count", page_count);
+        param.put("position", position);        
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+	/**
+	 * 用户查询自己对应指定的直播间的分销信息
+	 * @param room_id
+	 * @param page_count
+	 * @param start_time
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/common/distribution/rooms/{room_id}",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getRoomDistributionInfo(
+    		@PathVariable("room_id") String room_id,
+    		@RequestParam(value="page_count",defaultValue="20") String page_count,
+    		@RequestParam(value="start_time",defaultValue="") String start_time,
+    		@RequestHeader("access_token") String access_token,
+    		@RequestHeader("version") String version) throws Exception{
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributionInfo", access_token, version);
+    	Map<String, Object> param = new HashMap<String, Object>();
+        param.put("room_id", room_id);
+        param.put("start_time", start_time);
+        param.put("page_count", page_count);        
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+	/**
+	 * 用户查询具体课程的分销信息
+	 * @param course_id
+	 * @param page_count
+	 * @param position
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/common/distribution/course/{course_id}",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getCourseDistributionInfo(
+    		@PathVariable("course_id") String course_id,
+    		@RequestParam(value="page_count",defaultValue="20") String page_count,
+    		@RequestParam(value="position",defaultValue="") String position,
+    		@RequestHeader("access_token") String access_token,
+    		@RequestHeader("version") String version) throws Exception{
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "courseDistributionInfo", access_token, version);
+    	Map<String, Object> param = new HashMap<String, Object>();
+        param.put("course_id", course_id);
+        param.put("page_count", page_count);
+        param.put("position", position);        
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+	/**
+	 * 分销员分销直播间链接
+	 * @param room_id
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/common/distribution/room/{room_id}/share",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getRoomDistributionShareInfo(
+    		@PathVariable("room_id") String room_id,
+    		@RequestHeader("access_token") String access_token,
+    		@RequestHeader("version") String version) throws Exception{
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributionShareInfo", access_token, version);
+    	Map<String, Object> param = new HashMap<String, Object>();
+        param.put("room_id", room_id);           
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }  
 
 }

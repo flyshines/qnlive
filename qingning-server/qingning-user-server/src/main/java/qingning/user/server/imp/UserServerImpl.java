@@ -15,6 +15,7 @@ import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.server.other.ReadCourseOperation;
 import qingning.user.server.other.ReadLiveRoomOperation;
+import qingning.user.server.other.ReadUserOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -29,7 +30,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     private ReadLiveRoomOperation readLiveRoomOperation;
     private ReadCourseOperation readCourseOperation;
-
+    private ReadUserOperation readUserOperation;
     @Override
     public void initRpcServer() {
         if (userModuleServer == null) {
@@ -37,6 +38,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             readLiveRoomOperation = new ReadLiveRoomOperation(userModuleServer);
             readCourseOperation = new ReadCourseOperation(userModuleServer);
+            
+            readUserOperation = new ReadUserOperation(userModuleServer);
         }
     }
 
@@ -128,7 +131,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param reqEntity
      * @return
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "unused" })
     private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -1144,5 +1147,150 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         return resultMap;
 
+    }
+	    
+    @FunctionName("noticeRooms")
+    public  Map<String, Object> getNoticeRooms(RequestEntity reqEntity) throws Exception{
+        @SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
+        final List<Map<String,Object>> list = userModuleServer.findFanInfoByUserId(reqMap);
+        resultMap.put("live_room_list", list);        
+        if(!MiscUtils.isEmpty(list)){
+    		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+    			@Override
+    			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+    				Map<String,Response<Set<Tuple>>> courseInfoMap = new HashMap<String,Response<Set<Tuple>>>();
+    				Map<String,Object> map = new HashMap<String,Object>();
+    				for(Map<String,Object> fansRoom:list){
+    					String lecturer_id = (String)fansRoom.get("lecturer_id");
+    					map.clear();
+    			        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+    			        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);    			        
+    			        Response<Set<Tuple>> response = pipeline.zrangeByScoreWithScores(lecturerCoursesPredictionKey, "-inf", "+inf", 0, 1);
+    			        courseInfoMap.put(lecturer_id, response);
+    				}
+    				pipeline.sync();
+    				for(String key:courseInfoMap.keySet()){
+    					Response<Set<Tuple>> response = courseInfoMap.get(key);
+    					boolean reQuery = false;
+    					if(response==null){
+    						reQuery = true;
+    					} else {
+    						Set<Tuple> set = response.get();
+    						if(set==null || set.isEmpty()){
+    							reQuery = true;
+    						} else if(MiscUtils.isEmpty(set.iterator().next().getElement())){
+    							reQuery = true;
+    						}
+    					}
+    					
+    					if(reQuery){
+    						map.clear();
+    						map.put(Constants.CACHED_KEY_LECTURER_FIELD, key);
+    						String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+    						response = pipeline.zrevrangeByScoreWithScores(lecturerCoursesFinishKey, "+inf", "-inf", 0, 1);
+    						courseInfoMap.put(key, response);
+    					}
+    				}
+    				pipeline.sync();
+    				Map<String,Response<Map<String,String>>> courseInfo = new HashMap<String,Response<Map<String,String>>>();
+    				for(String key:courseInfoMap.keySet()){
+    					Response<Set<Tuple>> response = courseInfoMap.get(key);
+    					String courseId = null;
+    					if(response!=null){
+    						Set<Tuple> set = response.get();
+    						if(set!=null && !set.isEmpty()){
+    							courseId = set.iterator().next().getElement();    						
+    						}    						
+    					}
+    					if(!MiscUtils.isEmpty(courseId)){
+    						map.clear();
+    						map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+    						String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+    						courseInfo.put(key, pipeline.hgetAll(cachedKey));
+    					}
+    				}
+    				pipeline.sync();
+    				long times = System.currentTimeMillis();
+    				for(Map<String,Object> fansRoom:list){
+    					String lecturer_id = (String)fansRoom.get("lecturer_id");
+    					Response<Map<String,String>> response = courseInfo.get(lecturer_id);
+    					Map<String,String> courseValue = null;
+    					if(response!=null){
+    						courseValue = response.get();
+    					}
+    					if(MiscUtils.isEmpty(courseValue)){
+    						continue;
+    					}
+    					MiscUtils.courseTranferState(times, courseValue);
+    					fansRoom.put("course_title", courseValue.get("course_title"));
+    					fansRoom.put("course_id", courseValue.get("course_id"));
+    					fansRoom.put("course_type", courseValue.get("course_type"));
+    					fansRoom.put("start_time", courseValue.get("start_time"));
+    					fansRoom.put("status", courseValue.get("status"));
+    				}
+    			}
+    		});
+        }
+        
+        return resultMap;
+    }
+    
+    @FunctionName("studyCourses")
+    public  Map<String, Object> getStudyCourses(RequestEntity reqEntity) throws Exception{
+    	@SuppressWarnings("unchecked")
+    	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();        
+    	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+    	reqMap.put("user_id", userId);
+    	Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+    	long course_num = 0;
+    	try{
+    		course_num = Long.parseLong(values.get("course_num").toString());
+    	}catch(Exception e){
+    		course_num = 0;
+    	}
+    	Map<String,Object> result = new HashMap<String,Object>();
+    	result.put("course_num", course_num);
+    	if(course_num>0){
+	    	Map<String,Object> queryMap = new HashMap<String,Object>();
+	    	queryMap.put("create_time", reqMap.get("record_time"));
+	    	queryMap.put("page_count", reqMap.get("page_count"));
+	    	queryMap.put("user_id", userId);
+	
+	    	final List<Map<String,Object>> list = userModuleServer.findStudentCourseList(queryMap);
+	    	result.put("course_list", list);
+	    	if(!MiscUtils.isEmpty(list)){
+	    		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+	    			@Override
+	    			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+	    	    		long currentTime= System.currentTimeMillis();
+	    	    		Map<String,Response<String>> nickeNameMap = new HashMap<String,Response<String>>();
+	    	    		for(Map<String,Object> course:list){
+	    	    			Map<String,String> course_map = new HashMap<String,String>();
+	    	    			MiscUtils.converObjectMapToStringMap(course, course_map);
+	    	    			MiscUtils.courseTranferState(currentTime, course_map);
+	    	    			course.put("status", course_map.get("status"));
+	    	    			String lecturer_id = course_map.get("lecturer_id");
+	    	    			if(!nickeNameMap.containsKey(lecturer_id)){
+	    	    				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, course_map);
+		    	    			nickeNameMap.put(lecturer_id, pipeline.hget(key, "nick_name"));
+	    	    			}	    	    			
+	    	    		}
+	    	    		pipeline.sync();
+	    	    		for(Map<String,Object> course:list){
+	    	    			String lecturer_id =(String) course.get("lecturer_id");
+	    	    			if(!MiscUtils.isEmpty(lecturer_id)){
+	    	    				Response<String> response = nickeNameMap.get(lecturer_id);
+	    	    				if(response != null)	course.put("nick_name", response.get());
+	    	    			}	    	    			
+	    	    		}
+	    			}
+	    		});
+	    	}
+    	}
+    	return result;
     }
 }

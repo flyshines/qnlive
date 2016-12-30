@@ -25,6 +25,7 @@
 				<entry key="000101" value="参数类型错误"/>
 				<entry key="000102" value="返回参数类型错误"/>
 				<entry key="000103" value="功能的返回参数定义错误"/>
+				<entry key="000104" value="信息已经被其他用户更新，请刷新重试"/>
 				
 				<entry key="100002" value="直播间不存在"/>
 				<entry key="100003" value="直播间信息已经被修改，请刷新同步"/>
@@ -50,6 +51,8 @@
 				<entry key="100024" value="课程分成比要大于等于0，小于等于50"/>
 				<entry key="100025" value="分享链接已经过期"/>
 				<entry key="100026" value="不可以成为自己直播间的分销员"/>
+				<entry key="100027" value="已经是直播间的分销员"/>
+				<entry key="100028" value="分销员不属于当前用户"/>
 				
 				<entry key="110003" value="关注直播间操作失败"/>
 
@@ -64,9 +67,11 @@
 				<entry key="120008" value="微信授权code方式登录失败"/>
 				<entry key="120009" value="课程不存在"/>
 				<entry key="120010" value="打赏类型不存在"/>
-				<entry key="120011" value="参数范围不正确"/>
-				<entry key="120012" value="微信支付失败"/>
-
+				<entry key="120011" value="参数范围不正确"/>				
+				<entry key="120012" value="用户不是分销员"/>
+				<entry key="120013" value="分销课程不存在"/>
+				<entry key="120014" value="用户不是直播间的分销员"/>
+				<entry key="120015" value="微信支付失败"/>
 			</map>
 		</property>
 	</bean>	

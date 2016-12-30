@@ -46,7 +46,12 @@ public interface ILectureModuleServer {
 	
 	List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> paramters);
 	
-	void createRoomDistributer(Map<String, String> reqMap);
+	void createRoomDistributer(Map<String, String> reqMap) throws Exception;
 
 	List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
+	
+	List<Map<String,Object>> findLiveRoomByLectureId(String lecture_id);
+	Map<String,Object> findDistributerInfo(Map<String,Object> paramters);
+	
+	List<Map<String,Object>> findRoomFanList(Map<String,Object> paramters);
 }

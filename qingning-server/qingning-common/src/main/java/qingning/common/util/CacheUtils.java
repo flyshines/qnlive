@@ -21,9 +21,15 @@ import org.slf4j.LoggerFactory;
 public final class CacheUtils {
 	private static Logger log = LoggerFactory.getLogger(CacheUtils.class);
 	private static ObjectMapper objectMapper = new ObjectMapper();
-	@SuppressWarnings({"rawtypes" })
+	
 	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
 			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue) throws Exception{
+		return readData(searchKey, keyFormat, keyField, requestEntity, operation, jedisUtils, cachedValue, -1);
+	}
+	
+	@SuppressWarnings({"rawtypes" })
+	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
+			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue, int lifeTime) throws Exception{
 		boolean useCached = jedisUtils!=null;
 		Map<String,String> dataValue = null;
 		Map<String, String> keyMap = new HashMap<String, String>();
@@ -44,6 +50,9 @@ public final class CacheUtils {
 				}
 				if(useCached){
 					jedis.hmset(key, dataValue);
+					if(lifeTime>0){
+						jedis.expire(key, lifeTime);
+					}
 				}
 			}
 		}
@@ -100,7 +109,8 @@ public final class CacheUtils {
 	
 	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
-		return readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true);
+		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*3);
+		return result;
 	}
 	
 	public static Map<String,String> readLecturer(String lecturerId, RequestEntity requestEntity, 
@@ -112,6 +122,7 @@ public final class CacheUtils {
 			keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, keyMap);
 			if(!jedis.exists(key)){
+				requestEntity.setFunctionName(Constants.LECTURER_ROOM_LOAD);				
 				readListFromDB(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, key, Constants.FIELD_CREATE_TIME, Constants.FIELD_ROOM_ID,requestEntity, operation, jedisUtils, true);				
 			}
 		}
@@ -174,6 +185,31 @@ public final class CacheUtils {
 	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
 												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		return readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
+	}
+	
+	public static String readLiveRoomInfoFromCached(String room_id, String fieldName,RequestEntity requestEntity,
+			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		if(MiscUtils.isEmpty(fieldName)){
+			return "";
+		}
+		
+		Map<String, String> keyMap = new HashMap<String, String>();
+		keyMap.put(Constants.FIELD_ROOM_ID, room_id);
+		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, keyMap);
+		Jedis jedis = jedisUtils.getJedis();
+		String result = jedis.hget(key, fieldName); 
+		if(MiscUtils.isEmpty(result) && !jedis.exists(key)){
+			Map<String,String> values = readLiveRoom(room_id,requestEntity,operation,jedisUtils,cachedValue);
+			if(!MiscUtils.isEmpty(values)){
+				result = values.get(fieldName);
+			}
+		}
+		return result;
+	}
+	
+	public static Map<String,String> readDistributer(String distributer_id, RequestEntity requestEntity,
+			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		return readData(distributer_id, Constants.CACHED_KEY_DISTRIBUTER, Constants.CACHED_KEY_DISTRIBUTER_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
 	
 	public static List<Map<String,String>> readCourseListInfoOnlyFromCached(JedisUtils jedisUtils, List<String> courseIdList){

@@ -103,6 +103,201 @@
 				</outputs>
 			</function>
 
+			<function name="commonDistribution">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int" require="N"/>
+					<param name="record_date" type="date" require="N"/>					
+				</inputs>
+				<outputs>
+					<param name="total_amount" type="double" />
+					<param name="room_list" type="list">
+						<param name="nick_name" type="string" />
+						<param name="avatar_address" type="string" />
+						<param name="course_num" type="long" />
+						<param name="recommend_num" type="long" />
+						<param name="done_num" type="long" />
+						<param name="profit_share_rate" type="double" />
+						<param name="total_amount" type="double" />
+						<param name="room_id" type="string" />
+						<param name="record_date" type="long" fieldname="create_time"/>
+						<param name="rq_code" type="string" />
+						<param name="effective_time" type="string" convert="(effective_time)=>{
+						    var result='';
+							if(utils.isEmpty(effective_time)){
+								result = '已过期';
+							} else if(utils.isEqual('0',effective_time)){
+								result = '永久有效';
+							} else if(utils.isEqual('1',effective_time)){
+								result = '1个月内有效';
+							} else if(utils.isEqual('2',effective_time)){
+								result = '3个月内有效';
+							} else if(utils.isEqual('3',effective_time)){
+								result = '6个月内有效';
+							} else if(utils.isEqual('4',effective_time)){
+								result = '9个月内有效';
+							} else if(utils.isEqual('5',effective_time)){
+								result = '一年有效';
+							} else if(utils.isEqual('6',effective_time)){
+								result = '两年有效';
+							}
+							return result;
+						}"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="roomDistributerRecommendInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="100" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int"/>
+					<param name="position" type="long"/>
+					<param name="room_id" type="string"/>
+					<param name="distributer_id" type="string"/>
+				</inputs>
+				<outputs>
+					<param name="recommend_num" type="long"/>
+					<param name="recommend_list" type="list">
+						<param name="avatar_address" type="string"/>
+						<param name="nick_name" type="string"/>
+						<param name="done_num" type="long"/>
+						<param name="record_time" type="long" fieldname="create_time"/>
+						<param name="position" type="long"/>
+						<param name="status" type="string"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="roomDistributionInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="100" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int"/>
+					<param name="start_time" type="Date"/>
+					<param name="room_id" type="string"/>
+				</inputs>
+				<outputs>
+					<param name="total_amount" type="double"/>
+					<param name="course_list" type="list">
+						<param name="course_id" type="string"/>
+						<param name="course_title" type="string"/>
+						<param name="start_time" type="long"/>
+						<param name="course_price" type="double"/>
+						<param name="recommend_num" type="long" default="0"/>
+						<param name="done_num" type="long" default="0"/>
+						<param name="profit_share_rate" type="double" default="0"/>
+						<param name="total_amount" type="double" default="0"/>
+						<param name="effective_time" type="string" convert="(effective_time)=>{
+						    var result='';
+							if(utils.isEmpty(effective_time)){
+								result = '已过期';
+							} else if(utils.isEqual('0',effective_time)){
+								result = '永久有效';
+							} else if(utils.isEqual('1',effective_time)){
+								result = '1个月内有效';
+							} else if(utils.isEqual('2',effective_time)){
+								result = '3个月内有效';
+							} else if(utils.isEqual('3',effective_time)){
+								result = '6个月内有效';
+							} else if(utils.isEqual('4',effective_time)){
+								result = '9个月内有效';
+							} else if(utils.isEqual('5',effective_time)){
+								result = '一年有效';
+							} else if(utils.isEqual('6',effective_time)){
+								result = '两年有效';
+							}
+							return result;
+						}"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="courseDistributionInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int"/>
+					<param name="position" type="long"/>
+					<param name="course_id" type="string"/>
+				</inputs>
+				<outputs>
+					<param name="course_id" type="string"/>
+					<param name="course_title" type="string"/>
+					<param name="start_time" type="long"/>
+					<param name="course_price" type="double"/>
+					<param name="recommend_num" type="long"/>
+					<param name="done_num" type="long"/>						
+					<param name="profit_share_rate" type="double"/>
+					<param name="total_amount" type="double"/>
+					<param name="effective_time" type="string" convert="(effective_time)=>{
+						    var result='';
+							if(utils.isEmpty(effective_time)){
+								result = '已过期';
+							} else if(utils.isEqual('0',effective_time)){
+								result = '永久有效';
+							} else if(utils.isEqual('1',effective_time)){
+								result = '1个月内有效';
+							} else if(utils.isEqual('2',effective_time)){
+								result = '3个月内有效';
+							} else if(utils.isEqual('3',effective_time)){
+								result = '6个月内有效';
+							} else if(utils.isEqual('4',effective_time)){
+								result = '9个月内有效';
+							} else if(utils.isEqual('5',effective_time)){
+								result = '一年有效';
+							} else if(utils.isEqual('6',effective_time)){
+								result = '两年有效';
+							}
+							return result;
+						}"/>
+					<param name="profit_list" type="list">
+						<param name="profit_amount" type="double" default="0"/>
+						<param name="nick_name" type="string"/>
+						<param name="record_time" type="long" fieldname="create_time"/>
+						<param name="position" type="long"/>
+					</param>
+				</outputs>
+			</function>
+
+			<function name="roomDistributionShareInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="nick_name" type="string"/>
+					<param name="avatar_address" type="string"/>
+					<param name="rq_code" type="string"/>
+					<param name="profit_share_rate" type="double"/>
+				</outputs>
+			</function>
+			
+			<function name="updateUserInfo">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="nick_name" type="string"/>
+					<param name="avatar_address" type="string"/>
+					<param name="update_time" type="long" require="Y,000100"/>					
+				</inputs>
+				<outputs>					
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

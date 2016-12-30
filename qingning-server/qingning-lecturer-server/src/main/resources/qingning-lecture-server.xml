@@ -97,7 +97,7 @@
 					       		isEmpty = isEmpty &amp;&amp; (course_password == null || course_password.length == 0);
 					       		isEmpty = isEmpty &amp;&amp; start_time == null;					       		
 					       		return status != 2 || isEmpty;},100023"/>
-					<param name="update_time" type="long" require="N"  />
+					<param name="update_time" type="long" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -109,7 +109,7 @@
 					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
-					<param name="page_count" type="long" require="N"  />
+					<param name="page_count" type="int" require="N"  />
 					<param name="room_id" type="string" require="N"  />
 					<param name="start_time" type="long" require="N"
 					       validate="(start_time,course_id)=>{
@@ -267,8 +267,11 @@
 							if(!utils.isEqual(profit_type,'1')){
 								if(!utils.isEmpty(distributer)){
 								   ret = student+'通过'+distributer+'的分销';
+								} else {
+								   ret = student+'通过分销';
 								}
 							}
+							return ret;
 						}"/>
 						<param name="record_time" type="long" fieldname="create_time"/>	
 						<param name="position" type="long"/>
@@ -284,13 +287,13 @@
 				<inputs>					
 				</inputs>
 				<outputs>
-					<param name="room_distributer_num" type="long"/>
-					<param name="room_recommend_num" type="long"/>
-					<param name="room_done_num" type="long"/>
-					<param name="course_num" type="long"/>
-					<param name="course_distributer_num" type="long"/>
-					<param name="course_recommend_num" type="long"/>
-					<param name="course_done_num" type="long"/>
+					<param name="room_distributer_num" type="long" default="0"/>
+					<param name="room_recommend_num" type="long" default="0"/>
+					<param name="room_done_num" type="long" default="0"/>
+					<param name="course_distribution_num" type="long" default="0"/>
+					<param name="course_distributer_num" type="long" default="0"/>
+					<param name="course_recommend_num" type="long" default="0"/>
+					<param name="course_done_num" type="long" default="0"/>
 				</outputs>
 			</function>
 			<function name="roomDistributerInfo">
@@ -299,15 +302,9 @@
 					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
-					<param name="page_count" type="long"/>
-					<param name="position" type="long" validate="(position,distributer_id)=>{
-					       		var isDistributerEmpty = distributer_id ==null || distributer_id.length == 0; 
-					       		var isPosition =  position == null; 
-					       		return (isDistributerEmpty &amp;&amp; isPosition) || (!isDistributerEmpty &amp;&amp; !isPosition);},000006"/>
-					<param name="distributer_id" type="string" validate="(position,distributer_id)=>{
-					       		var isDistributerEmpty = distributer_id ==null || distributer_id.length == 0; 
-					       		var isPosition =  position == null; 
-					       		return (isDistributerEmpty &amp;&amp; isPosition) || (!isDistributerEmpty &amp;&amp; !isPosition);},000006"/>
+					<param name="page_count" type="int"/>
+					<param name="position" type="long"/>
+					<param name="distributer_id" type="string"/>
 					<param name="room_id" type="string"/>					
 				</inputs>
 				<outputs>
@@ -325,21 +322,22 @@
 						    var result='';
 							if(utils.isEmpty(effective_time)){
 								result = '已过期';
-							} else if(0==effective_time){
+							} else if(utils.isEqual('0',effective_time)){
 								result = '永久有效';
-							} else if(1==effective_time){
+							} else if(utils.isEqual('1',effective_time)){
 								result = '1个月内有效';
-							} else if(2==effective_time){
+							} else if(utils.isEqual('2',effective_time)){
 								result = '3个月内有效';
-							} else if(3==effective_time){
+							} else if(utils.isEqual('3',effective_time)){
 								result = '6个月内有效';
-							} else if(4==effective_time){
+							} else if(utils.isEqual('4',effective_time)){
 								result = '9个月内有效';
-							} else if(5==effective_time){
+							} else if(utils.isEqual('5',effective_time)){
 								result = '一年有效';
-							} else if(6==effective_time){
+							} else if(utils.isEqual('6',effective_time)){
 								result = '两年有效';
 							}
+							return result;
 						}"/>
 						<param name="position" type="long"/>						
 					</param>
@@ -355,7 +353,7 @@
 					<param name="room_id" type="string"/>
 					<param name="distributer_id" type="string"/>
 					<param name="page_count" type="int"/>
-					<param name="nick_name" type="string"/>					
+					<param name="start_time" type="long"/>					
 				</inputs>
 				<outputs>
 					<param name="course_num" type="long"/>
@@ -416,11 +414,48 @@
 					<param name="total_student_num" type="long" default="0"/>
 					<param name="course_list" type="list">
 						<param name="course_title" type="string"/>
-						<param name="total_amount" type="double" default="0"/>
-						<param name="course_amount" type="double" default="0"/>
+						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
+						    var ret = 0;						
+							if(course_type=='0' || course_type=='1'){
+								ret=utils.convertObjectToDouble(extra_amount);
+							} else if(course_type=='1'){
+								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+							}												
+							return ret;
+						}"/>
+						<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
+							var ret = course_amount;
+							if(course_type=='0'){
+								ret='公开课程';
+							} else if(course_type=='1'){
+								ret='加密课程';
+							}
+							return ret;
+						}"/>
 						<param name="extra_amount"  type="double" default="0"/>
 						<param name="start_time" type="long"/>
 						<param name="course_id" type="string"/>						
+					</param>
+				</outputs>
+			</function>
+			
+			<function name="fanList">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="10" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="int" />
+					<param name="position" type="long" />
+					<param name="room_id" type="string" />										
+				</inputs>
+				<outputs>
+					<param name="fans_num" type="long" />
+					<param name="fan_list" type="list">
+						<param name="avatar_address" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="fans_id" type="string" />
+						<param name="position" type="long" />
 					</param>
 				</outputs>
 			</function>

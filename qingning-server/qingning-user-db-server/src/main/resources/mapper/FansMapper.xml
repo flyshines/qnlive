@@ -111,4 +111,14 @@
     where fans_id = #{fansId,jdbcType=VARCHAR}
     and room_id = #{roomId,jdbcType=VARCHAR}
   </select>
+  
+  <select id="findFanInfoByUserId" resultType="hashmap" parameterType="hashmap">
+    select a.*, b.room_name, b.avatar_address from t_fans a, t_live_room b 
+    where a.room_id=b.room_id and a.user_id = #{user_id} 
+    <if test="notice_create_time != null" >
+       and a.create_time <![CDATA[ < ]]> #{notice_create_time}
+    </if>
+    order by a.create_time desc limit #{page_count}
+  </select>
+  
 </mapper>

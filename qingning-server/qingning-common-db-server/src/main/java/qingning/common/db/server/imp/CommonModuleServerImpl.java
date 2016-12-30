@@ -4,9 +4,13 @@ package qingning.common.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.db.persistence.mybatis.*;
-import qingning.common.db.persistence.mybatis.entity.*;
+import qingning.common.db.persistence.mybatis.entity.CoursesStudents;
+import qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit;
+import qingning.common.db.persistence.mybatis.entity.LoginInfo;
+import qingning.common.db.persistence.mybatis.entity.PaymentBill;
+import qingning.common.db.persistence.mybatis.entity.TradeBill;
+import qingning.common.db.persistence.mybatis.entity.User;
 import qingning.common.util.MiscUtils;
-import qingning.common.util.TenPayUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
 import java.util.*;
@@ -40,6 +44,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private CoursesStudentsMapper coursesStudentsMapper;
 
+	@Autowired(required = true)
+	private DistributerMapper distributerMapper;
+	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -252,5 +259,40 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		resultMap.put("pay_amount",tradeBill.getAmount());
 		resultMap.putAll(courses);
 		return resultMap;
+	}
+	
+	@Override
+	public Map<String, Object> findByDistributerId(String distributer_id) {		
+		return distributerMapper.findByDistributerId(distributer_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> parameters) {		
+		return distributerMapper.findDistributionInfoByDistributerId(parameters);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributerRecommendInfo(Map<String, Object> parameters) {		
+		return distributerMapper.findRoomDistributerRecommendInfo(parameters);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributerCourseInfo(Map<String, Object> parameters) {
+		return distributerMapper.findRoomDistributerCourseInfo(parameters);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributerCourseDetailsInfo(Map<String, Object> parameters) {
+		return distributerMapper.findRoomDistributerCourseDetailsInfo(parameters);
+	}
+
+	@Override
+	public int updateUser(Map<String, Object> parameters) {
+		User user = new User();
+		user.setNickName((String)parameters.get("nick_name"));
+		user.setAvatarAddress((String)parameters.get("avatar_address"));
+		user.setUserId((String)parameters.get("userId"));
+		user.setUpdateTime((Date)parameters.get("updateTime"));
+		return userMapper.updateByPrimaryKeySelective(user);
 	}
 }

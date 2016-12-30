@@ -34,4 +34,13 @@ public interface ICommonModuleServer {
 	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
 
 	Map<String,Object> handleWeixinPayResult(SortedMap<String, String> requestMapData);
+	
+	Map<String,Object> findByDistributerId(String distributer_id);
+	
+	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String,Object> parameters);
+	List<Map<String,Object>> findRoomDistributerRecommendInfo(Map<String,Object> parameters);
+	List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> parameters);
+	List<Map<String,Object>> findRoomDistributerCourseDetailsInfo(Map<String,Object> parameters);
+	
+	int updateUser(Map<String,Object> parameters);
 }

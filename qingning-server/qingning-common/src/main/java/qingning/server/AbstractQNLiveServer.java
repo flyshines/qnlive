@@ -168,24 +168,32 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 				value = outputValue.get(name);
 			}
 			if(Constants.SYSLIST.equals(outputParameter.getType())){
-				if(!(value instanceof Collection)){
-					throw new QNLiveException("000103");
-				}
-				Collection outputValueCol = (Collection)value;			
-				if(!outputValueCol.isEmpty()){				
-					for(Object obj : outputValueCol){
-						if(!(obj instanceof Map)){
-							throw new QNLiveException("000103");
+				if(value == null){
+					value = new ArrayList<Map<String,Object>>();
+				} else {
+					if(!(value instanceof Collection)){
+						throw new QNLiveException("000103");
+					}
+					Collection outputValueCol = (Collection)value;			
+					if(!outputValueCol.isEmpty()){				
+						for(Object obj : outputValueCol){
+							if(!(obj instanceof Map)){
+								throw new QNLiveException("000103");
+							}
+							procRtnValue(outputParameter.getOutputParameterList(), (Map)obj);
 						}
-						procRtnValue(outputParameter.getOutputParameterList(), (Map)obj);
 					}
 				}
 			} else if(Constants.SYSMAP.equals(outputParameter.getType())){
-				if(!(value instanceof Map)){
-					throw new QNLiveException("000103");
+				if(value == null){
+					value = new HashMap<String,Object>();
+				} else {
+					if(!(value instanceof Map)){				
+						throw new QNLiveException("000103");
+					}
+					Map outputValueCol = (Map)value;
+					procRtnValue(outputParameter.getOutputParameterMap().values(), outputValueCol);
 				}
-				Map outputValueCol = (Map)value;
-				procRtnValue(outputParameter.getOutputParameterMap().values(), outputValueCol);
 			} else {				
 				if(outputParameter.canExecConvertFunction()){
 					value = outputParameter.execConvertFunction(value, (Map<String,Object>)outputValue);

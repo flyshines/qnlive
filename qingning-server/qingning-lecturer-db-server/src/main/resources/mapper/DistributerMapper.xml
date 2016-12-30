@@ -2,10 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.lecturer.db.persistence.mybatis.DistributerMapper" >
 	<insert id="insertDistributer" parameterType="hashmap">
-		insert t_distributer into (distributer_id,create_time,update_time) values (#{distributer_id},#{current_time},#{current_time});
+		insert into t_distributer (distributer_id,create_time,update_time) values (#{distributer_id},#{current_time},#{current_time});
 	</insert>
 	<insert id="insertRoomDistributer" parameterType="hashmap">
-		insert t_room_distributer into (room_distributer_id,distributer_id,room_id,profit_share_rate,effective_time,end_date,rq_code,create_time,create_date,update_time) 
-		values (#{room_distributer_id},#{distributer_id},#{room_id},#{profit_share_rate},#{effective_time},#{end_date},#{rq_code},#{create_time},#{create_date},#{update_time});
+		insert into t_room_distributer(room_distributer_id,distributer_id,lecturer_id,room_id,profit_share_rate,effective_time,end_date,rq_code,create_time,create_date,update_time) 
+		values (#{room_distributer_id},#{distributer_id},#{lecturer_id},#{room_id},#{profit_share_rate},#{effective_time},#{end_date},#{rq_code},#{current_time},#{current_time},#{current_time});
 	</insert>
+	
+	<update id="updateRoomDistributerbyPrimaryKey" parameterType="hashmap" >
+    update t_room_distributer
+	<set>
+		profit_share_rate = #{profit_share_rate},      
+        effective_time = #{effective_time},      
+        end_date = #{end_date},
+        rq_code = #{rq_code},       
+        update_time= #{current_time}
+	</set>
+    where room_distributer_id = #{room_distributer_id}
+	</update>
+	
+	<select id="findDistributerInfo" resultType="hashmap" parameterType="hashmap" >
+		select a.* from t_room_distributer a where a.distributer_id=#{distributer_id} and a.room_id = #{room_id}	
+	</select>
+  
 </mapper>

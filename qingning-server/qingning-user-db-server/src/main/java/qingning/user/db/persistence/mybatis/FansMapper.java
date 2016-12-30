@@ -4,6 +4,7 @@ package qingning.user.db.persistence.mybatis;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 import qingning.user.db.persistence.mybatis.entity.FansKey;
 
+import java.util.List;
 import java.util.Map;
 
 public interface FansMapper {
@@ -22,4 +23,6 @@ public interface FansMapper {
     Map<String,Object> findFansByFansId(String fans_id);
 
     Map<String,Object> findFansByFansKey(FansKey fansKey);
+    
+    List<Map<String,Object>> findFanInfoByUserId(Map<String, Object> queryMap);
 }

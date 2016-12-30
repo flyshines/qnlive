@@ -23,4 +23,6 @@ public interface LiveRoomMapper {
     
     List<Map<String,Object>> findRoomDistributerInfo(Map<String,Object> paramters);
     List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> paramters);
+    List<Map<String,Object>> findLiveRoomByLectureId(String lecture_id); 
+    List<Map<String,Object>> findRoomFanList(Map<String,Object> paramters);
 }

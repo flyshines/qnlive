@@ -183,5 +183,15 @@
     order by cs.create_time DESC
     limit #{size}
   </select>
-
+  
+  <select id="findStudentCourseList" resultType="hashmap" parameterType="hashmap">
+  	select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time 
+  	from t_courses_students a, t_courses b 
+  	where a.course_id=b.course_id and a.user_id=#{user_id}
+  	<if test="create_time != null">
+  		and a.create_time <![CDATA[<]]> #{create_time}
+  	</if>
+  	order by a.create_time desc limit #{page_count}
+  </select>
+  
 </mapper>

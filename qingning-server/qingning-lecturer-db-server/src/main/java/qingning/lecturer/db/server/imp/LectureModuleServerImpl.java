@@ -3,6 +3,8 @@ package qingning.lecturer.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import qingning.common.entity.QNLiveException;
 import qingning.common.util.MiscUtils;
 import qingning.lecturer.db.persistence.mybatis.*;
 import qingning.lecturer.db.persistence.mybatis.entity.Courses;
@@ -307,22 +309,44 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public void createRoomDistributer(Map<String, String> reqMap) {
-		// TODO Auto-generated method stub
-		 //t_distributer
-		Map<String,Object> record = new HashMap<String,Object>();
-        Date date = new Date(System.currentTimeMillis());        
-        record.put("current_time", date);
-        record.put("distributer_id", reqMap.get("distributer_id"));
-        //1.插入t_distributer
-        distributerMapper.insert(record);
-        //2.插入t_room_distributer
-        record.put("room_distributer_id", MiscUtils.getUUId());
-        record.put("room_id", reqMap.get("room_id"));
+	public void createRoomDistributer(Map<String, String> reqMap) throws Exception{		 
+		Map<String,Object> record = new HashMap<String,Object>();		
+		record.put("room_id", reqMap.get("room_id"));
+		record.put("distributer_id", reqMap.get("distributer_id"));
+		Map<String,Object> distributer = distributerMapper.findDistributerInfo(record);
+		boolean update =false;
+		Date date = new Date(System.currentTimeMillis());
+		if(!MiscUtils.isEmpty(distributer)){
+			if("0".equals(distributer.get("effective_time"))){
+				throw new QNLiveException("100027");
+			} else {
+				Date endDate = (Date)distributer.get("end_date");
+				if(endDate !=null && endDate.after(date)){
+					throw new QNLiveException("100027");
+				}
+			}
+			update =true;
+		}	
+		record.put("current_time", date);
+		//1.插入t_distributer
+		try{
+			if(!update){
+				distributerMapper.insertDistributer(record);
+			}
+		}catch(Exception e){			
+		}
+		if(!update){
+			record.put("room_distributer_id", MiscUtils.getUUId());
+	        record.put("room_id", reqMap.get("room_id"));
+	        record.put("lecturer_id", reqMap.get("lecturer_id"));
+		} else {
+			record.put("room_distributer_id", distributer.get("room_distributer_id"));
+		}
+        //2.插入t_room_distributer        
         record.put("profit_share_rate", Double.parseDouble(reqMap.get("profit_share_rate")));
         String effective_time = reqMap.get("effective_time");
         record.put("effective_time", reqMap.get("effective_time"));
-        record.put("rq_code", record.get("room_distributer_id"));
+        record.put("rq_code", MiscUtils.getUUId());
         Calendar calEndDate = Calendar.getInstance();
         calEndDate.setTime(date);
         if("1".equals(effective_time)){
@@ -344,12 +368,31 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
         	record.put("end_date",calEndDate.getTime());
         } else {
         	record.put("end_date",null);
-        }                
-        distributerMapper.insertRoomDistributer(record);
+        }   
+        if(!update){
+        	distributerMapper.insertRoomDistributer(record);
+        } else {
+        	distributerMapper.updateRoomDistributerbyPrimaryKey(record);
+        }
 	}
 
 	@Override
 	public List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap) {
 		return coursesStudentsMapper.findLatestStudentAvatarAddList(queryMap);
 	}
+
+	@Override
+	public List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id) {
+		return liveRoomMapper.findLiveRoomByLectureId(lecture_id);
+	}
+
+	@Override
+	public Map<String, Object> findDistributerInfo(Map<String, Object> paramters) {		
+		return distributerMapper.findDistributerInfo(paramters);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomFanList(Map<String, Object> paramters) {		
+		return liveRoomMapper.findRoomFanList(paramters);
+	}	
 }

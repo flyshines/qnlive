@@ -16,6 +16,7 @@ public final class Constants {
 	public static final String SYSSTR="string";
 	public static final int COURSE_MAX_INTERVAL = 10;
 	public static final int MAX_QUERY_LIMIT = 1000;
+	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";
 	
 	public static final String DEFAULT = "default";
 	public static final String SPECIAL = "_SPECIAL";
@@ -111,7 +112,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
 
-	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:{lecturer_id}:ROOM_SHARE_CODE";
+	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";
+	public static final String CACHED_KEY_USER_ROOM_SHARE_FIELD = "room_share_code";
 	
 	public static final String MSG_TYPE_ATTR = "type";
 	public static final String MSG_NEWSTYPE_ATTR = "newstype";

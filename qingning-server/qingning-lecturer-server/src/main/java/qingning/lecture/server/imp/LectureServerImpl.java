@@ -11,6 +11,7 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.lecture.server.other.ReadCourseOperation;
+import qingning.lecture.server.other.ReadLecturerOperation;
 import qingning.lecture.server.other.ReadLiveRoomOperation;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.JedisBatchCallback;
@@ -33,14 +34,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     private ILectureModuleServer lectureModuleServer;
 
     private ReadCourseOperation readCourseOperation;
-    private ReadLiveRoomOperation readLiveRoomOperation;   
+    private ReadLiveRoomOperation readLiveRoomOperation;
+    private ReadLecturerOperation readLecturerOperation;
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
             lectureModuleServer = this.getRpcService("lectureModuleServer");
+            readLiveRoomOperation = new ReadLiveRoomOperation(lectureModuleServer);
+            readCourseOperation = new ReadCourseOperation(lectureModuleServer);
+            readLecturerOperation = new ReadLecturerOperation(lectureModuleServer);
         }
-        readLiveRoomOperation = new ReadLiveRoomOperation(lectureModuleServer);
-        readCourseOperation = new ReadCourseOperation(lectureModuleServer);
     }
 
     @SuppressWarnings("unchecked")
@@ -1230,60 +1233,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	total_amount="0";
         }
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put("total_amount", total_amount);
-        
-        map.clear();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-        int pageCount = (int)reqMap.get("page_count");        
-        Long startTime = (Long)reqMap.get("start_time");        
-        List<Map<String,String>> courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, startTime, pageCount, true);
-        if(!MiscUtils.isEmpty(courseList)){
-        	pageCount=pageCount-courseList.size();
-        } else {
-        	courseList = new LinkedList<Map<String,String>>();
-        }
-        if(pageCount>0){
-        	String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-        	List<Map<String,String>> finishCourse = getCourseOnlyFromCached(jedis, lecturerCoursesFinishKey, startTime, pageCount+1, true);
-        	if(!MiscUtils.isEmpty(finishCourse)){
-        		Map<String,String> lastCourseMap = courseList.get(courseList.size()-1);
-        		Map<String,String> firstCourseMap = finishCourse.get(0);
-        		if(MiscUtils.isEqual(lastCourseMap.get("course_id"), firstCourseMap.get("course_id"))){
-        			courseList.remove(courseList.size()-1);
-        			pageCount=pageCount+1;
-        		} else {
-        			if(finishCourse.size() > pageCount){
-        				finishCourse.remove(courseList.size()-1);
-        			}
-        		}
-        		
-        		pageCount=pageCount-finishCourse.size();
-        		courseList.addAll(finishCourse);
-        	}
-        }
-        
-        if(pageCount>0){
-        	map.clear();
-        	map.put("pageCount", pageCount);
-        	map.put("lecturer_id", userId);
-        	if(!MiscUtils.isEmpty(courseList)){
-        		Map<String,String> lastCourse = courseList.get(courseList.size()-1);        		
-        		startTime = Long.parseLong(lastCourse.get("start_time"));
-        	}
-            if(startTime != null){
-                Date date = new Date(startTime);
-                map.put("startIndex", date);
-            }
-            List<Map<String,Object>> finishCourse = lectureModuleServer.findCourseListForLecturer(map);
-            if(!MiscUtils.isEmpty(finishCourse)){
-            	for(Map<String,Object> finish:finishCourse){
-            		Map<String,String> finishMap = new HashMap<String,String>();
-            		MiscUtils.converObjectMapToStringMap(finish, finishMap);
-            		courseList.add(finishMap);
-            	}
-            }
-        }
+        result.put("total_amount", total_amount);        
+        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(Long)reqMap.get("start_time"));
         result.put("course_list", courseList);
     	return result;
     }
@@ -1360,17 +1311,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return result;
     }
-    
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+
 	@FunctionName("distributionInfo")
     public Map<String, String> getDistributionInfo(RequestEntity reqEntity) throws Exception {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-		Map keyMap = new HashMap();
-		keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, userId);
-        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, keyMap);
-        
-        Jedis jedis = jedisUtils.getJedis();
-        Map<String,String> values = jedis.hgetAll(distributerKey);
+		//从讲师信息中加载，数据不存在需加载缓存
+		Map<String,String> keyMap = new HashMap<String,String>();
+		keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+		reqEntity.setParam(keyMap);
+		Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);		
         return values;
 	}
 	
@@ -1383,9 +1332,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		String room_id = (String)reqMap.get("room_id");
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, room_id);
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        map.put(Constants.FIELD_ROOM_ID, room_id);     
+        String liveRoomOwner =  CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
@@ -1408,7 +1356,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<String> distributerIdList = null;
         if(position == null || max_postion == null || max_postion < position){
         	if(distributer_num==null){
-        		String distributer_num_str = jedis.hget(liveRoomKey, "distributer_num");
+        		String distributer_num_str = CacheUtils.readLiveRoomInfoFromCached(room_id, "distributer_num", reqEntity, readLiveRoomOperation, jedisUtils,true);
         		if(MiscUtils.isEmpty(distributer_num_str)){
         			distributer_num=0l;
         		} else {
@@ -1417,9 +1365,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	}
         	if(distributer_num>0){
 	        	distributerIdList = getDistributerListFromSys(room_id, distributer_id, distributeKey, key,position==null?0:position,page_count,distributer_num);
-	        	key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTERS_LEN, map);                       
-	            if(!MiscUtils.isEmpty(key)){
-	            	String[] tmp = key.split(":");
+	        	distributer_num_len = jedis.get(key);                       
+	            if(!MiscUtils.isEmpty(distributer_num_len)){
+	            	String[] tmp = distributer_num_len.split(":");
 	            	distributer_num = Long.parseLong(tmp[0]);            	
 	            }
         	}
@@ -1475,16 +1423,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributer_id);
         String min_time_key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME, map);
         String min_date_str = jedis.get(min_time_key);
+        String course_num = null;
         Long min_date = null;
         if(!MiscUtils.isEmpty(min_date_str)){
-        	min_date = Long.parseLong(min_date_str);
-        }  
+        	String[] tmp = min_date_str.split(":");
+        	min_date = Long.parseLong(tmp[0]);
+        	course_num = tmp[1];
+        } else {
+        	start_time = null;
+        }
         List<String> courseList = null;
         if(start_time == null || min_date == null || start_time <= min_date){
         	courseList = getDistributerCourseListFromSys(room_id, distributer_id, 
         			MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES, map), start_time, min_time_key, page_count);
         	if(courseList==null){
         		courseList = new LinkedList<String>();
+        	}
+        	min_date_str = jedis.get(min_time_key);
+        	if(!MiscUtils.isEmpty(min_date_str)){
+        		course_num = min_date_str.split(":")[1];
         	}
         } else {
         	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_DISTRIBUTER_COURSES, map);
@@ -1503,7 +1460,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         Map<String,Object> result = new HashMap<String,Object>();
         result.put("course_list", resultList);
-        result.put("course_num",resultList.size());//TODO to modified
+        result.put("course_num", course_num);
         return result;
 	}
 	
@@ -1526,27 +1483,31 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(type)){
         	type = "0";
         }
-        reqMap.put(type, reqMap);
+        reqMap.put("type", type);
         String room_share_code = MiscUtils.getUUId();
         Map<String,String> values = new HashMap<String,String>();
         reqMap.put("lecturer_id",userId);
-        MiscUtils.converObjectMapToStringMap(reqMap, values);        
-        reqMap.clear();        
-        reqMap.put("room_share_code", room_share_code);
-        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);
+        MiscUtils.converObjectMapToStringMap(reqMap, values); 
+        
+        reqMap.clear();
+        reqMap.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD,room_share_code);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, reqMap);
         jedis.hmset(key, values);
         jedis.expire(key, 60*60*24);
+               
+        reqMap.clear();        
+        reqMap.put("room_share_code", room_share_code);       
         return reqMap;
 	}
 	
 	@SuppressWarnings("unchecked")
-	@FunctionName("createRoomShareCode")
+	@FunctionName("createRoomDistributer")
     public void createRoomDistributer(RequestEntity reqEntity) throws Exception {
 		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
 		Jedis jedis = jedisUtils.getJedis();		
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("room_share_code", reqMap.get("room_share_code"));
+		map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
 		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);		
 		Map<String, String> values = jedis.hgetAll(key);
 		
@@ -1557,7 +1518,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		map.clear();		
         map.put(Constants.FIELD_ROOM_ID, room_id);
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
         if (liveRoomOwner == null) {
             throw new QNLiveException("100002");
         } else if(liveRoomOwner.equals(userId)){
@@ -1571,40 +1532,62 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	@SuppressWarnings("unchecked")
 	@FunctionName("courseStatistics")
     public Map<String, Object> getCourseStatistics(RequestEntity reqEntity) throws Exception {
-		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
-		Jedis jedis = jedisUtils.getJedis();		
-		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-		final Map<String,Object> map = new HashMap<String,Object>();
-		map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);		
-		final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER,map);
-		map.clear();
-		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
-			@Override
-			public void batchOperation(Pipeline pipeline, Jedis jedis) {
-				Map<String,Response<String>> values = new HashMap<String,Response<String>>();
-				values.put("course_num", pipeline.hget(key, "course_num"));
-				values.put("total_student_num", pipeline.hget(key, "total_student_num"));
-				values.put("total_amount", pipeline.hget(key, "total_amount"));				
-				pipeline.sync();
-				for(String key:values.keySet()){
-					map.put(key, values.get(key).get());
-				}
-			}
-		});
-				
-		String total_amount_str = (String)map.get("total_amount");
-		String course_num_str =  (String)map.get("course_num");
-		String total_student_num_str =  (String)map.get("live_room_num");
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();				
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());				
+		//从讲师信息中加载，数据不存在需加载缓存
+		Map<String,String> keyMap = new HashMap<String,String>();
+		keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+		reqEntity.setParam(keyMap);
+		Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);
+		
+		String total_amount_str = (String)values.get("total_amount");
+		String course_num_str =  (String)values.get("course_num");
+		String total_student_num_str =  (String)values.get("live_room_num");
+		
 		Map<String,Object> result = new HashMap<String,Object>();
 		result.put("total_student_num", total_student_num_str);
 		result.put("course_num", course_num_str);
 		result.put("total_amount", total_amount_str);
 
-        map.clear();
+        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(Long)reqMap.get("start_time"));
+        result.put("course_list", courseList);		
+		return result;
+	}
+	
+	@FunctionName("fanList")
+	public Map<String,Object> getFanList(RequestEntity reqEntity) throws Exception{
+		@SuppressWarnings("unchecked")
+		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();				
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String room_id = (String)reqMap.get("room_id");
+		
+		Map<String,Object> map = new HashMap<String,Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);
+        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
+        String fans_num_str = CacheUtils.readLiveRoomInfoFromCached(room_id, "fans_num", reqEntity, readLiveRoomOperation, jedisUtils,true);
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+		
+        Map<String,Object> result = new HashMap<String,Object>();
+        result.put("fans_num", fans_num_str);
+        if(!MiscUtils.isEmpty(fans_num_str) && Long.parseLong(fans_num_str)>0){
+            map.put("lecturer_id", userId);       
+            map.put("position", reqMap.get("position"));
+            map.put("page_count", reqMap.get("page_count"));
+            
+            List<Map<String,Object>> list = lectureModuleServer.findRoomFanList(map);
+            result.put("fan_list", list);
+        }
+		return result;
+	}
+
+	private List<Map<String,String>> getCourseList(String userId,int pageCount,Long startTime){
+		Map<String,Object> map = new HashMap<String,Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-        int pageCount = (int)reqMap.get("page_count");        
-        Long startTime = (Long)reqMap.get("start_time");        
+        Jedis jedis = jedisUtils.getJedis();
+        
         List<Map<String,String>> courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, startTime, pageCount, true);
         if(!MiscUtils.isEmpty(courseList)){
         	pageCount=pageCount-courseList.size();
@@ -1652,24 +1635,41 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	}
             }
         }
-		
-		return result;
+        return courseList;
 	}
-
+	
 	private List<String> getDistributerCourseListFromSys(String room_id, String distributer_id,String distributeCourseKey,
 			final Long start_time,String min_time_key, final int page_count){
 		final Map<String, Object> query = new HashMap<String,Object>();
 		query.put(Constants.FIELD_ROOM_ID, room_id);
+		Jedis jedis = this.jedisUtils.getJedis();		
 		if(start_time != null){
 			query.put("start_time", new Date(start_time));
-		}
-		query.put("CACHED_KEY_DISTRIBUTER_FIELD", distributer_id);
+		} else {
+			jedis.del(min_time_key);
+			jedis.del(distributeCourseKey);
+		}		
+		query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributer_id);
 		query.put("limit_count", Constants.MAX_QUERY_LIMIT);
 		final List<String> result = new LinkedList<String>();
-		Jedis jedis = this.jedisUtils.getJedis();
+		
 		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 			@Override
-			public void batchOperation(Pipeline pipeline, Jedis jedis) {				
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				String course_num = jedis.get(min_time_key);
+				if(MiscUtils.isEmpty(course_num)){					
+					Map<String,Object> distributeInfo = lectureModuleServer.findDistributerInfo(query);
+					if(!MiscUtils.isEmpty(distributeInfo)){						
+						course_num= String.valueOf(distributeInfo.get("course_num"));
+					}
+					if(MiscUtils.isEmpty(course_num) || "0".equals(course_num)){
+						pipeline.set(min_time_key,0+":"+0);
+						pipeline.expire(min_time_key, 60*60);
+						return;
+					}
+				} else {
+					course_num=course_num.split(":")[1];
+				}
 				List<Map<String,Object>> list = lectureModuleServer.findRoomDistributerCourseInfo(query);
 				Date start_time = null;
 				for(Map<String,Object> value : list){
@@ -1679,10 +1679,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 					result.add(valueStr);					
 				}
 				if(start_time!=null){
-					pipeline.set(min_time_key,start_time.getTime()+"");
+					pipeline.set(min_time_key,start_time.getTime()+":"+course_num);
 					pipeline.expire(min_time_key, 60*60);
-				}
-				pipeline.expire(distributeCourseKey, 60*60);				
+					pipeline.expire(distributeCourseKey, 60*60);
+				}								
 				pipeline.sync();				
 			}
 		});
@@ -1696,11 +1696,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		if(MiscUtils.isEmpty(distributer_id)){
 			distributer_id=null;
 		}
-		query.put("CACHED_KEY_DISTRIBUTER_FIELD", distributer_id);
+		query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributer_id);
 		query.put("limit_count", Constants.MAX_QUERY_LIMIT);
 		final boolean ajustPos = start_pos> 0;
 		final List<String> result = new LinkedList<String>();
 		Jedis jedis = this.jedisUtils.getJedis();
+		if(start_pos==0){
+			jedis.del(distributeKey);
+			jedis.del(distributeLenKey);
+		}
 		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
@@ -1711,19 +1715,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 					Date date = (Date)value.get("end_date");
 					if(date!=null && !date.after(curDate)){
 						value.put("effective_time", null);
-					}
-					String valueStr = CacheUtils.convertMaptoCachedString(value);
+					}					
+					long position = 0;
 					if(ajustPos){
-						pipeline.zadd(distributeKey, start_pos+1+(count++), valueStr);
+						position= start_pos+1+(count++);						
 					} else {
-						pipeline.zadd(distributeKey, count++, valueStr);
+						position= count++;						
 					}
+					value.put("position", position);
+					String valueStr = CacheUtils.convertMaptoCachedString(value);
+					pipeline.zadd(distributeKey, position, valueStr);
 					if(count < page_count){
 						result.add(valueStr);
 					}
 				}
 				pipeline.set(distributeLenKey, distributer_num+":"+(start_pos+list.size()));
-				pipeline.expire(distributeLenKey, 60*60);
+				pipeline.expire(distributeKey, 60*60);
 				pipeline.expire(distributeLenKey, 60*60);
 				pipeline.sync();				
 			}
@@ -1733,18 +1740,26 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	}
 
     private List<Map<String,String>> getCourseOnlyFromCached(Jedis jedis, String key, Long startTime, int pageCount, boolean desc){
-        String startIndex = null;
-        String endIndex = "+inf";      
-        if (startTime == null) {
-            startIndex = "0";
-        } else {
-            startIndex = "(" + startTime;
-        }
-       
-        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(key, startIndex, endIndex, 0, pageCount);
-        if(MiscUtils.isEmpty(courseList)){
-        	return null;
-        }
+    	Set<Tuple> courseList = null;
+    	String startIndex = null;
+    	String endIndex = null;
+    	if(desc){
+    		if (MiscUtils.isEmpty(startTime)) {
+    			startIndex = "+inf";
+    		} else {
+    			startIndex = "(" + startTime;
+    		}
+    		endIndex = "-inf";
+    		courseList = jedis.zrevrangeByScoreWithScores(key, startIndex, endIndex, 0, pageCount);
+    	} else {
+    		if (MiscUtils.isEmpty(startTime)) {
+    			startIndex = "-inf";
+    		} else {
+    			startIndex = "(" + startTime;
+    		}
+    		endIndex = "+inf";
+    		courseList = jedis.zrangeByScoreWithScores(key, startIndex, endIndex, 0, pageCount);
+    	}    	
         List<String> list = new LinkedList<String>();
         for (Tuple tuple : courseList) {            
         	list.add(tuple.getElement());

@@ -128,10 +128,10 @@
   </update>
 
   <select id="findLectureByLectureId" resultType="hashmap" parameterType="java.lang.String" >
-    select
-    <include refid="Base_Column_List" />
-    from t_lecturer
-    where lecturer_id = #{lecturer_id}
+    select a.*,b.live_room_num,b.room_distributer_num,b.room_recommend_num,b.room_done_num,b.course_distribution_num,
+    b.course_distributer_num,b.course_recommend_num,b.course_done_num from t_lecturer a
+    left join t_lecturer_distribution_info b on a.lecturer_id = b.lecturer_id and b.lecturer_id=#{lecturer_id}
+    where a.lecturer_id = #{lecturer_id} 
   </select>
 
   <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.HashSet" >

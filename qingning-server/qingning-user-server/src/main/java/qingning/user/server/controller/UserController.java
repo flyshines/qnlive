@@ -279,4 +279,50 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
+	
+	 /**
+	 * 用户查询关注的直播间列表
+	 * @param page_count
+	 * @param notice_create_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/notice/live_rooms",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity  getNoticeRooms(
+			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "notice_create_time", defaultValue = "") String notice_create_time,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "noticeRooms", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("notice_create_time", notice_create_time);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+	/**
+	 * 查询用户加入的课程列表
+	 * @param page_count
+	 * @param notice_create_time
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/course/list",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity  getStudyCourseList(
+			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "record_time", defaultValue = "") String record_time,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("record_time", record_time);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
 }

@@ -143,7 +143,8 @@ public class InputParameter {
 		if(invoke==null){
 			ScriptEngineManager scriptEngineManager = new ScriptEngineManager();  
 			Compilable nashorn = (Compilable) scriptEngineManager.getEngineByName(Constants.JS_ENGINE);
-			CompiledScript script= nashorn.compile(this.validate);
+			String scriptStr = String.format("var utils = Java.type('%s');",MiscUtils.class.getName()) + this.validate;
+			CompiledScript script= nashorn.compile(scriptStr);
 			script.eval();
 			invoke = (Invocable)nashorn;
 		}
