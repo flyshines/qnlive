@@ -275,7 +275,7 @@ public class UserController extends AbstractController{
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
-		parMap.put("student_pos", position);
+		parMap.put("position", position);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

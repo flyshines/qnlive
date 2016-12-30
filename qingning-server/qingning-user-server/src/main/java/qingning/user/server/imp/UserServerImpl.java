@@ -1,5 +1,6 @@
 package qingning.user.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -1113,6 +1114,30 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<Map<String,Object>> records = userModuleServer.findUserConsumeRecords(queryMap);
 
         if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("lecturer_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
+                        recordMap.put("cacheLecturerName",cacheLecturerName);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
+                        recordMap.put("lecturer_name",cacheLecturerName.get());
+                        recordMap.remove("cacheLecturerName");
+                        Date recordTime = (Date)recordMap.get("create_time");
+                        recordMap.put("create_time", recordTime);
+                    }
+                }
+            });
 
             resultMap.put("record_list", records);
         }

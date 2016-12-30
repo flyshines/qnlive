@@ -189,7 +189,7 @@
   <select id="findUserConsumeRecords" resultType="hashmap" parameterType="hashmap" >
     select
     lcp.profit_type, lcp.course_id, lcp.profit_amount, lcp.profit_amount,
-    lcp.record_time, lcp.position, t_courses.course_title
+    lcp.create_time, lcp.position, t_courses.course_title, lcp.lecturer_id
     from t_lecturer_courses_profit lcp left join t_courses  on t_courses.course_id = lcp.course_id
     where 1=1
     and user_id = #{user_id}
