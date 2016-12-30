@@ -1103,6 +1103,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String bandKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        String studentNum = null;
+        studentNum = jedis.hget(courseKey, "student_num");
+        if(StringUtils.isBlank(studentNum)){
+            Map<String,Object> courseMap = lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            if(MiscUtils.isEmpty(courseMap)){
+                throw new QNLiveException("100004");
+            }
+            studentNum = courseMap.get("student_num").toString();
+        }
+        resultMap.put("student_num",studentNum);
 
         //1.数据来源为缓存
         if( StringUtils.isBlank(reqMap.get("data_source").toString()) || reqMap.get("data_source").toString().equals("1")){
