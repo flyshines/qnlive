@@ -9,7 +9,6 @@ import qingning.mq.persistence.entity.Courses;
 import qingning.mq.persistence.entity.LiveRoom;
 import qingning.mq.persistence.mybatis.*;
 import qingning.server.AbstractMsgService;
-import qingning.server.rabbitmq.MessageServer;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
@@ -77,6 +76,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
                                 liveRoom.setFansNum(Long.parseLong(fans_num));
                                 liveRoomMapper.updateByPrimaryKeySelective(liveRoom);
                             }
+
+                            //将直播间分享URL刷入缓存中
+                            jedis.hset(liveRoomKey,"room_address",MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+liveRoomId);
                         }
                     }
                 }

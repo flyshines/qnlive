@@ -446,7 +446,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			failUpdateMap.put("trade_id",tradeId);
 			commonModuleServer.updateTradeBill(failUpdateMap);
 
-			throw new QNLiveException("120012");
+			throw new QNLiveException("120015");
 		} else if (payResultMap.get ("result_code").equals ("FAIL")) {
 			//更新交易表
 			Map<String,Object> failUpdateMap = new HashMap<>();
@@ -455,7 +455,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			failUpdateMap.put("trade_id",tradeId);
 			commonModuleServer.updateTradeBill(failUpdateMap);
 
-			throw new QNLiveException("120012");
+			throw new QNLiveException("120015");
 		} else {
 			//成功，则需要插入支付表
 			Map<String,Object> insertPayMap = new HashMap<>();
@@ -473,7 +473,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
 			resultMap.put("signType", "MD5");
 			String paySign  = TenPayUtils.getSign(resultMap);
-			resultMap.put ("sign", paySign);
+			resultMap.put ("paySign", paySign);
 
 			return resultMap;
 		}
@@ -545,8 +545,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 				//处理缓存中的收益
 				//讲师缓存中的收益
-				Double amount = (Double)handleResultMap.get("pay_amount");
-				Long amountLong = (long) amount.doubleValue();
+				BigDecimal amount = new BigDecimal((Double)handleResultMap.get("pay_amount"));
+				Long amountLong = amount.multiply(new BigDecimal(100)).longValue();
 				jedis.hincrBy(lecturerKey, "total_amount", amountLong.longValue());
 
 				//直播间缓存中的收益

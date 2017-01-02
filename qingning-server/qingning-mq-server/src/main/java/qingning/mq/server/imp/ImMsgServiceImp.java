@@ -1,9 +1,9 @@
 package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
@@ -12,8 +12,6 @@ import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.server.ImMsgService;
 import redis.clients.jedis.Jedis;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -75,12 +73,13 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 
 		//先判断是否有实际开播时间，没有则进行进一步判断
-		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间，则该课程存入实际开播时间
+		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间的前十分钟，则该课程存入实际开播时间
 		//并且进行直播超时定时任务检查
 		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
 			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
 				long now = System.currentTimeMillis();
-				if(now > Long.parseLong(courseMap.get("start_time"))){
+				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigByKey("course_ready_start_msec"));
+				if(now > ready_start_time){
 					//向缓存中增加课程真实开播时间
 					jedis.hset(courseKey, "real_start_time", now+"");
 

@@ -98,6 +98,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.clear();
         map.put(Constants.FIELD_ROOM_ID, createResultMap.get("room_id").toString());
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+        liveRoomStringMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+room_id);
         jedis.hmset(liveRoomKey, liveRoomStringMap);
 
         //增加讲师直播间对应关系缓存(一对多关系)
@@ -242,6 +243,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("room_name", liveRoomMap.get("room_name"));
                 resultMap.put("room_remark", liveRoomMap.get("room_remark"));
                 resultMap.put("fans_num", Long.valueOf(liveRoomMap.get("fans_num").toString()));
+                resultMap.put("room_address", liveRoomMap.get("room_address"));
                 resultMap.put("update_time", Long.valueOf(liveRoomMap.get("update_time").toString()));
                 return resultMap;
             }
@@ -638,7 +640,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("courseList")
     public Map<String, Object> getCourseList(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         List<Map<String ,String>> courseResultList = new ArrayList<>();
 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -646,7 +648,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //TODO 目前只有查询讲师的课程列表，查询直播间的课程列表暂未实现
         //if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
@@ -1055,11 +1057,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_id") != null && StringUtils.isNotBlank(reqMap.get("message_id").toString())){
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_id").toString());
                 endIndex = endRank - 1;
-                startIndex = endIndex - pageCount + 1;
-                if(startIndex < 0){
+                //判断该列表向上再无信息，如果再无信息，则直接将查询结果列表设置为空
+                if(endIndex < 0){
                     startIndex = 0;
+                    messageIdList = null;
+                }else {
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                    messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
                 }
-                messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+
             }else {
                 endIndex = -1;
                 startIndex = jedis.zcard(messageListKey) - pageCount;

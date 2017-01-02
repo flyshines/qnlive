@@ -1,6 +1,8 @@
 package qingning.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import qingning.common.entity.RequestEntity;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -9,14 +11,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public final class CacheUtils {
 	private static Logger log = LoggerFactory.getLogger(CacheUtils.class);
@@ -43,12 +38,11 @@ public final class CacheUtils {
 		
 		if(MiscUtils.isEmpty(dataValue)){
 			Map result = (Map) operation.invokeProcess(requestEntity);
-			if(!MiscUtils.isEmpty(result) && cachedValue){
-				dataValue = new HashMap<String, String>();
-				for(Object curKey:result.keySet()){
-					dataValue.put((String)curKey,MiscUtils.convertString(result.get(curKey)));
-				}
-				if(useCached){
+			if(!MiscUtils.isEmpty(result)){
+				dataValue = new HashMap<String,String>();
+				MiscUtils.converObjectMapToStringMap(result, dataValue);
+
+				if(cachedValue){
 					jedis.hmset(key, dataValue);
 					if(lifeTime>0){
 						jedis.expire(key, lifeTime);

@@ -1,6 +1,5 @@
 package qingning.user.server.imp;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -1043,11 +1042,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_id") != null && StringUtils.isNotBlank(reqMap.get("message_id").toString())){
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_id").toString());
                 endIndex = endRank - 1;
-                startIndex = endIndex - pageCount + 1;
-                if(startIndex < 0){
+                //判断该列表向上再无信息，如果再无信息，则直接将查询结果列表设置为空
+                if(endIndex < 0){
                     startIndex = 0;
+                    messageIdList = null;
+                }else {
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                    messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
                 }
-                messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+
             }else {
                 endIndex = -1;
                 startIndex = jedis.zcard(messageListKey) - pageCount;
