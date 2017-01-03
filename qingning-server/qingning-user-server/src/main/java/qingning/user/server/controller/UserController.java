@@ -36,7 +36,7 @@ public class UserController extends AbstractController{
 	}
 
 	/**
-	 * 用户-查询课程列表（我加入的课程列表、正在直播（用户查看））
+	 * 用户-查询课程列表（正在直播（用户查看））
 	 * @param page_count
 	 * @param course_id
 	 * @param query_type
@@ -51,7 +51,6 @@ public class UserController extends AbstractController{
 	ResponseEntity getCourse(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "course_id", defaultValue = "") String   course_id,
-			@RequestParam(value = "query_type", defaultValue = "") String  query_type,
 			@RequestParam(value = "status", defaultValue = "") String  status,
 			@RequestParam(value = "data_source", defaultValue = "") String  data_source,
 			@RequestParam(value = "start_time", defaultValue = "") String  start_time,
@@ -61,7 +60,6 @@ public class UserController extends AbstractController{
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
-		param.put("query_type", query_type);
 		param.put("status", status);
 		param.put("data_source", data_source);
 		param.put("start_time", start_time);

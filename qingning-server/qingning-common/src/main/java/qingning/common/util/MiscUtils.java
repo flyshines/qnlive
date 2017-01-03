@@ -477,6 +477,17 @@ public final class MiscUtils {
 		return end;
 	}
 
+	public static Date getEndDateOfToday() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		Date end = calendar.getTime();
+		return end;
+	}
+
 	public static String getIpAddr(HttpServletRequest request){
 		String ip = request.getHeader ("X-Real-IP");
 		if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) { return ip; }

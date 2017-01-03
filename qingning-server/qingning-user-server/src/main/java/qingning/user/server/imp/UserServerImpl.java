@@ -104,23 +104,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
 
-        //查询类型 1 查询我加入的课程  2 查询平台所有的课程列表
-        if (reqMap.get("query_type").toString().equals("1")) {
-            return getUserJoinCourses(reqEntity);
-        } else if (reqMap.get("query_type").toString().equals("2")) {
-            return getPlatformCourses(reqEntity);
-        }
-        return null;
-    }
-
-    /**
-     * 查询用户加入的课程
-     *
-     * @param reqEntity
-     * @return
-     */
-    private Map<String, Object> getUserJoinCourses(RequestEntity reqEntity) {
-        return null;
+        return getPlatformCourses(reqEntity);
     }
 
 
@@ -511,6 +495,52 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", infoMap.get("room_remark"));
         resultMap.put("fans_num", infoMap.get("fans_num"));
 
+        //返回用户身份
+        List<String> roles = new ArrayList<>();
+        //1：普通用户、3：讲师 、4:分销员
+        //先查询是否为讲师
+        if(infoMap.get("lecturer_id").equals(userId)){
+            roles.add("3");
+
+            //不为讲师查询是否为分销员
+        }else {
+            Map<String,Object> queryMap = new HashMap<>();
+            queryMap.put("distributer_id", userId);
+            queryMap.put("room_id", reqMap.get("room_id").toString());
+            List<Map<String,Object>> roomDistributerList = userModuleServer.findRoomDistributionInfoByDistributerId(queryMap);
+
+            long now = MiscUtils.getEndDateOfToday().getTime();
+            if (! MiscUtils.isEmpty(roomDistributerList)) {
+                boolean isDistributer = false;
+                for(Map<String,Object> map : roomDistributerList){
+                    //0:永久有效 1: 1个月内有效 2: 3个月内有效 3: 6个月内有效 4: 9个月内有效 5:一年有效 6: 两年有效
+                    if(map.get("effective_time").toString().equals("0")){
+                        isDistributer = true;
+                        break;
+                    }else {
+                        if(map.get("end_date") != null){
+                            Date end_date = (Date)map.get("end_date");
+                            if(end_date.getTime() >= now){
+                                isDistributer = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(isDistributer){
+                    roles.add("4");
+                }else {
+                    roles.add("1");
+                }
+
+                //不为分销员则为普通用户
+            }else {
+                roles.add("1");
+            }
+        }
+
+        resultMap.put("roles",roles);
         return resultMap;
     }
 

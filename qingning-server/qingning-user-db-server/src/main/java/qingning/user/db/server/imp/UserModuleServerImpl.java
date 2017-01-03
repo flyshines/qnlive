@@ -51,6 +51,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Autowired(required = true)
 	private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
 
+	@Autowired(required = true)
+	private DistributerMapper distributerMapper;
 
 	@Override
 	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) {
@@ -189,6 +191,16 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public List<Map<String, Object>> findUserConsumeRecords(Map<String, Object> queryMap) {
 		return lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
+	}
+
+	@Override
+	public List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap) {
+		return distributerMapper.findDistributionInfoByDistributerId(queryMap) ;
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
+		return distributerMapper.findRoomDistributionInfoByDistributerId(queryMap) ;
 	}
 
 	@Override

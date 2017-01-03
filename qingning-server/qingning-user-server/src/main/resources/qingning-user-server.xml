@@ -25,7 +25,6 @@
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
 					<param name="course_id" type="string" require="N"  />
-					<param name="query_type" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
 				</outputs>

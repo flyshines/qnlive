@@ -49,4 +49,8 @@ public interface IUserModuleServer {
     List<Map<String,Object>> findStudentCourseList(Map<String, Object> queryMap);
 	
 	List<Map<String,Object>> findUserConsumeRecords(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 }
