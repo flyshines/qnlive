@@ -468,10 +468,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 			//返回相关参数给前端
 			resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
-			resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
 			resultMap.put("nonceStr", payResultMap.get("random_char"));
 			resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
 			resultMap.put("signType", "MD5");
+			resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
 			String paySign  = TenPayUtils.getSign(resultMap);
 			resultMap.put ("paySign", paySign);
 
