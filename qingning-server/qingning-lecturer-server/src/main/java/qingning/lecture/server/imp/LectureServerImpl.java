@@ -437,6 +437,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //分享URL
         resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
+
+        //
         return resultMap;
     }
 

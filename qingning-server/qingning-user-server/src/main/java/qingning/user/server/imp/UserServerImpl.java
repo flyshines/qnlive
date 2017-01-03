@@ -982,7 +982,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         studentQueryMap.put("room_id",courseMap.get("room_id"));
         studentQueryMap.put("course_id",courseMap.get("course_id"));
         Map<String,Object> studentMap = userModuleServer.findStudentByKey(studentQueryMap);
-        if(studentMap != null){
+        if(studentMap == null){
             throw new QNLiveException("120007");
         }
     }
