@@ -16,11 +16,7 @@ import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
 	
@@ -366,7 +362,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	@FunctionName("generateWeixinPayBill")
 	public Map<String,String> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-		Map<String,String> resultMap = new HashMap<>();
 
 		//1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
 		String courseId = reqMap.get("course_id").toString();
@@ -466,9 +461,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
 			commonModuleServer.insertPaymentBill(insertPayMap);
 
-			//返回相关参数给前端
+			//返回相关参数给前端.
+			SortedMap<String,String> resultMap = new TreeMap<>();
 			resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
 			resultMap.put("nonceStr", payResultMap.get("random_char"));
+			//resultMap.put("nonceStr", "5K8264ILTKCH16CQ2502SI8ZNMTM67VS");
 			resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
 			resultMap.put("signType", "MD5");
 			resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");

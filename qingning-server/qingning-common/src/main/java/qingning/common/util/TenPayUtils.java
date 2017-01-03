@@ -57,11 +57,12 @@ public class TenPayUtils {
 
     public static String getSign(Map<String, String> params){
         StringBuilder sb = new StringBuilder ();
-        Iterator<Map.Entry<String, String>> it = params.entrySet ().iterator ();
+        Set es = params.entrySet();//所有参与传参的参数按照accsii排序（升序）
+        Iterator it = es.iterator();
         while (it.hasNext ()) {
-            Map.Entry<String, String> entry = it.next ();
-            String k = entry.getKey ();
-            String v = entry.getValue ();
+            Map.Entry entry = (Map.Entry)it.next();
+            String k = (String)entry.getKey ();
+            Object v = entry.getValue ();
             sb.append (k + "=" + v + "&");
         }
         System.out.println (sb.toString () + "key=" + TenPayConstant.APP_KEY);

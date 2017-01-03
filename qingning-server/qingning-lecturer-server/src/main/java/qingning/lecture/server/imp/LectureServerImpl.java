@@ -163,6 +163,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
         jedis.hmset(liveRoomKey, updateCacheMap);
 
+        resultMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
         return resultMap;
     }
 
