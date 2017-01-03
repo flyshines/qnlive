@@ -870,6 +870,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
+        Map<String,String> courseMap = new HashMap<>();
         //1.先检查该课程是否在缓存中
         if(jedis.exists(courseKey)){
 
@@ -880,6 +881,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             queryStudentMap.put("room_id",jedis.hget(courseKey, "room_id"));
             queryStudentMap.put("course_id",reqMap.get("course_id").toString());
             findStudentByKey(queryStudentMap);
+
+            courseMap = jedis.hgetAll(courseKey);
 
             JSONArray pptList = null;
             map.clear();
@@ -934,6 +937,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }else{
             //2.如果不在缓存中，则查询数据库
             Map<String,Object> courseInfoMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            MiscUtils.converObjectMapToStringMap(courseInfoMap, courseMap);
             if(courseInfoMap == null){
                 throw new QNLiveException("100004");
             }
@@ -972,6 +976,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }else {
             resultMap.put("ban_status", "1");
         }
+
+        //增加返回课程相应信息
+        resultMap.put("student_num",courseMap.get("student_num"));
+        resultMap.put("start_time",courseMap.get("start_time"));
+        resultMap.put("status",courseMap.get("status"));
+        resultMap.put("course_type",courseMap.get("course_type"));
+        resultMap.put("course_password",courseMap.get("course_password"));
+        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
+        resultMap.put("course_update_time",courseMap.get("update_time"));
+        resultMap.put("course_title",courseMap.get("course_title"));
+
         return resultMap;
     }
 
