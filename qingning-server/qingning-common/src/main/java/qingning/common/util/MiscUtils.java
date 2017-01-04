@@ -82,7 +82,7 @@ public final class MiscUtils {
 	        return date.getTime() / 1000;
 	 }
 	 
-	public static Object convertStringToObject(Object obj , String type,String fieldName) throws Exception{
+	public static Object convertStringToObject(Object obj , String type,String fieldName, boolean adjust) throws Exception{
 		if(!isEmpty(obj) && !isEmpty(type)){
 			try{
 				if(!(obj instanceof String)){
@@ -97,8 +97,15 @@ public final class MiscUtils {
 					obj = Integer.parseInt((String)obj);
 				} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
 					obj = Long.parseLong((String)obj);
-				} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
-					obj = Double.parseDouble((String)obj);
+				} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){					
+					if(adjust){
+						BigDecimal bigDecimal = new BigDecimal((String)obj);
+						bigDecimal = bigDecimal.multiply(BigDecimal.valueOf(100));
+						bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
+						obj = bigDecimal.longValue();
+					} else {
+						obj = Double.parseDouble((String)obj);
+					}					
 				} else if(Constants.SYSDATE.equalsIgnoreCase(type)){
 					obj = new Date(Long.parseLong((String)obj));
 				}
@@ -155,6 +162,11 @@ public final class MiscUtils {
 						if(obj instanceof Date){
 							Long timeStamp = ((Date)obj).getTime();
 							obj = Double.parseDouble(timeStamp.toString());
+						} else if((obj instanceof Long)||(obj instanceof Integer)){
+							BigDecimal bigDecimal = new BigDecimal(obj.toString());
+							bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
+							bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), BigDecimal.ROUND_HALF_UP);
+							obj = bigDecimal.doubleValue();
 						} else {
 							obj = Double.parseDouble(obj.toString());
 						}
