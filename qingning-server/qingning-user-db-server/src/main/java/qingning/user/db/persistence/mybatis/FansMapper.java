@@ -2,27 +2,26 @@ package qingning.user.db.persistence.mybatis;
 
 
 import qingning.user.db.persistence.mybatis.entity.Fans;
-import qingning.user.db.persistence.mybatis.entity.FansKey;
 
 import java.util.List;
 import java.util.Map;
 
 public interface FansMapper {
-    int deleteByPrimaryKey(FansKey key);
+    int deleteByPrimaryKey(String fansId);
 
     int insert(Fans record);
 
     int insertSelective(Fans record);
 
-    Fans selectByPrimaryKey(FansKey key);
+    Fans selectByPrimaryKey(String fansId);
 
     int updateByPrimaryKeySelective(Fans record);
 
     int updateByPrimaryKey(Fans record);
 
-    Map<String,Object> findFansByFansId(String fans_id);
+    Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> fansKey);
 
-    Map<String,Object> findFansByFansKey(FansKey fansKey);
-    
+    Integer deleteByUserIdAndRoomId(Map<String, Object> updateMap);
+
     List<Map<String,Object>> findFanInfoByUserId(Map<String, Object> queryMap);
 }

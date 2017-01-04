@@ -12,18 +12,18 @@
     <result column="room_remark" property="roomRemark" jdbcType="VARCHAR" />
     <result column="rq_code" property="rqCode" jdbcType="VARCHAR" />
     <result column="room_address" property="roomAddress" jdbcType="VARCHAR" />
-    <result column="total_amount" property="totalAmount" jdbcType="DOUBLE" />
-    <result column="last_course_amount" property="lastCourseAmount" jdbcType="DOUBLE" />
+    <result column="total_amount" property="totalAmount" jdbcType="BIGINT" />
+    <result column="last_course_amount" property="lastCourseAmount" jdbcType="BIGINT" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    room_id, lecturer_id, course_num, fans_num, distributer_num, room_name, avatar_address, 
-    room_remark, rq_code, room_address, total_amount, last_course_amount, create_time, 
+    room_id, lecturer_id, course_num, fans_num, distributer_num, room_name, avatar_address,
+    room_remark, rq_code, room_address, total_amount, last_course_amount, create_time,
     update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from t_live_room
     where room_id = #{roomId,jdbcType=VARCHAR}
@@ -33,16 +33,16 @@
     where room_id = #{roomId,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.LiveRoom" >
-    insert into t_live_room (room_id, lecturer_id, course_num, 
-      fans_num, distributer_num, room_name, 
-      avatar_address, room_remark, rq_code, 
-      room_address, total_amount, last_course_amount, 
-      create_time, update_time)
-    values (#{roomId,jdbcType=VARCHAR}, #{lecturerId,jdbcType=VARCHAR}, #{courseNum,jdbcType=BIGINT}, 
-      #{fansNum,jdbcType=BIGINT}, #{distributerNum,jdbcType=BIGINT}, #{roomName,jdbcType=VARCHAR}, 
-      #{avatarAddress,jdbcType=VARCHAR}, #{roomRemark,jdbcType=VARCHAR}, #{rqCode,jdbcType=VARCHAR}, 
-      #{roomAddress,jdbcType=VARCHAR}, #{totalAmount,jdbcType=DOUBLE}, #{lastCourseAmount,jdbcType=DOUBLE}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    insert into t_live_room (room_id, lecturer_id, course_num,
+    fans_num, distributer_num, room_name,
+    avatar_address, room_remark, rq_code,
+    room_address, total_amount, last_course_amount,
+    create_time, update_time)
+    values (#{roomId,jdbcType=VARCHAR}, #{lecturerId,jdbcType=VARCHAR}, #{courseNum,jdbcType=BIGINT},
+    #{fansNum,jdbcType=BIGINT}, #{distributerNum,jdbcType=BIGINT}, #{roomName,jdbcType=VARCHAR},
+    #{avatarAddress,jdbcType=VARCHAR}, #{roomRemark,jdbcType=VARCHAR}, #{rqCode,jdbcType=VARCHAR},
+    #{roomAddress,jdbcType=VARCHAR}, #{totalAmount,jdbcType=BIGINT}, #{lastCourseAmount,jdbcType=BIGINT},
+    #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="qingning.user.db.persistence.mybatis.entity.LiveRoom" >
     insert into t_live_room
@@ -122,10 +122,10 @@
         #{roomAddress,jdbcType=VARCHAR},
       </if>
       <if test="totalAmount != null" >
-        #{totalAmount,jdbcType=DOUBLE},
+        #{totalAmount,jdbcType=BIGINT},
       </if>
       <if test="lastCourseAmount != null" >
-        #{lastCourseAmount,jdbcType=DOUBLE},
+        #{lastCourseAmount,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=TIMESTAMP},
@@ -166,10 +166,10 @@
         room_address = #{roomAddress,jdbcType=VARCHAR},
       </if>
       <if test="totalAmount != null" >
-        total_amount = #{totalAmount,jdbcType=DOUBLE},
+        total_amount = #{totalAmount,jdbcType=BIGINT},
       </if>
       <if test="lastCourseAmount != null" >
-        last_course_amount = #{lastCourseAmount,jdbcType=DOUBLE},
+        last_course_amount = #{lastCourseAmount,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -183,21 +183,20 @@
   <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.LiveRoom" >
     update t_live_room
     set lecturer_id = #{lecturerId,jdbcType=VARCHAR},
-      course_num = #{courseNum,jdbcType=BIGINT},
-      fans_num = #{fansNum,jdbcType=BIGINT},
-      distributer_num = #{distributerNum,jdbcType=BIGINT},
-      room_name = #{roomName,jdbcType=VARCHAR},
-      avatar_address = #{avatarAddress,jdbcType=VARCHAR},
-      room_remark = #{roomRemark,jdbcType=VARCHAR},
-      rq_code = #{rqCode,jdbcType=VARCHAR},
-      room_address = #{roomAddress,jdbcType=VARCHAR},
-      total_amount = #{totalAmount,jdbcType=DOUBLE},
-      last_course_amount = #{lastCourseAmount,jdbcType=DOUBLE},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    course_num = #{courseNum,jdbcType=BIGINT},
+    fans_num = #{fansNum,jdbcType=BIGINT},
+    distributer_num = #{distributerNum,jdbcType=BIGINT},
+    room_name = #{roomName,jdbcType=VARCHAR},
+    avatar_address = #{avatarAddress,jdbcType=VARCHAR},
+    room_remark = #{roomRemark,jdbcType=VARCHAR},
+    rq_code = #{rqCode,jdbcType=VARCHAR},
+    room_address = #{roomAddress,jdbcType=VARCHAR},
+    total_amount = #{totalAmount,jdbcType=BIGINT},
+    last_course_amount = #{lastCourseAmount,jdbcType=BIGINT},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    update_time = #{updateTime,jdbcType=TIMESTAMP}
     where room_id = #{roomId,jdbcType=VARCHAR}
   </update>
-
 
   <select id="findLiveRoomByRoomId" resultType="hashmap" parameterType="java.lang.String" >
     select

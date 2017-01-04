@@ -7,6 +7,8 @@ public class Courses {
 
     private String roomId;
 
+    private String imCourseId;
+
     private String lecturerId;
 
     private String courseTitle;
@@ -25,17 +27,17 @@ public class Courses {
 
     private String rqCode;
 
-    private Double coursePrice;
+    private Long coursePrice;
 
     private String coursePassword;
 
     private Long studentNum;
 
-    private Double courseAmount;
+    private Long courseAmount;
 
     private Long extraNum;
 
-    private Double extraAmount;
+    private Long extraAmount;
 
     private Date createTime;
 
@@ -45,7 +47,7 @@ public class Courses {
 
     private Date realStartTime;
 
-    private String imCourseId;
+    private Long realStudentNum;
 
     public String getCourseId() {
         return courseId;
@@ -61,6 +63,14 @@ public class Courses {
 
     public void setRoomId(String roomId) {
         this.roomId = roomId == null ? null : roomId.trim();
+    }
+
+    public String getImCourseId() {
+        return imCourseId;
+    }
+
+    public void setImCourseId(String imCourseId) {
+        this.imCourseId = imCourseId == null ? null : imCourseId.trim();
     }
 
     public String getLecturerId() {
@@ -135,11 +145,11 @@ public class Courses {
         this.rqCode = rqCode == null ? null : rqCode.trim();
     }
 
-    public Double getCoursePrice() {
+    public Long getCoursePrice() {
         return coursePrice;
     }
 
-    public void setCoursePrice(Double coursePrice) {
+    public void setCoursePrice(Long coursePrice) {
         this.coursePrice = coursePrice;
     }
 
@@ -159,11 +169,11 @@ public class Courses {
         this.studentNum = studentNum;
     }
 
-    public Double getCourseAmount() {
+    public Long getCourseAmount() {
         return courseAmount;
     }
 
-    public void setCourseAmount(Double courseAmount) {
+    public void setCourseAmount(Long courseAmount) {
         this.courseAmount = courseAmount;
     }
 
@@ -175,11 +185,11 @@ public class Courses {
         this.extraNum = extraNum;
     }
 
-    public Double getExtraAmount() {
+    public Long getExtraAmount() {
         return extraAmount;
     }
 
-    public void setExtraAmount(Double extraAmount) {
+    public void setExtraAmount(Long extraAmount) {
         this.extraAmount = extraAmount;
     }
 
@@ -215,11 +225,11 @@ public class Courses {
         this.realStartTime = realStartTime;
     }
 
-    public String getImCourseId() {
-        return imCourseId;
+    public Long getRealStudentNum() {
+        return realStudentNum;
     }
 
-    public void setImCourseId(String imCourseId) {
-        this.imCourseId = imCourseId == null ? null : imCourseId.trim();
+    public void setRealStudentNum(Long realStudentNum) {
+        this.realStudentNum = realStudentNum;
     }
 }

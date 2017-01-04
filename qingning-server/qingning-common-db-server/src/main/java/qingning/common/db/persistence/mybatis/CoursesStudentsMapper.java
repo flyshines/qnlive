@@ -1,26 +1,22 @@
 package qingning.common.db.persistence.mybatis;
 
-
 import qingning.common.db.persistence.mybatis.entity.CoursesStudents;
-import qingning.common.db.persistence.mybatis.entity.CoursesStudentsKey;
 
 import java.util.List;
 import java.util.Map;
 
 public interface CoursesStudentsMapper {
-    int deleteByPrimaryKey(CoursesStudentsKey key);
+    int deleteByPrimaryKey(String studentId);
 
     int insert(CoursesStudents record);
 
     int insertSelective(CoursesStudents record);
 
-    CoursesStudents selectByPrimaryKey(CoursesStudentsKey key);
+    CoursesStudents selectByPrimaryKey(String studentId);
 
     int updateByPrimaryKeySelective(CoursesStudents record);
 
     int updateByPrimaryKey(CoursesStudents record);
-
-    Map<String,Object> findStudentByKey(CoursesStudentsKey key);
 
     List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 

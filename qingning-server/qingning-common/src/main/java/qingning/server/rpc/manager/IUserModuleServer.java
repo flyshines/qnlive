@@ -14,14 +14,11 @@ public interface IUserModuleServer {
 	Map<String,Object> findLiveRoomByRoomId(String room_id);
 
 
-	Map<String,Object> findFansByFansKey(Map<String, Object> reqMap);
+	Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
 
 	Map<String,Object> findCourseByCourseId(String string);
 
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
-
-
-	Map<String,Object> findStudentByKey(Map<String, Object> studentQueryMap);
 
 	Map<String,Object> joinCourse(Map<String, String> courseMap);
 
@@ -53,4 +50,6 @@ public interface IUserModuleServer {
 	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
 	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
+
+	Map<String,Object> findStudentByCourseIdAndUserId(Map<String, Object> studentQueryMap);
 }

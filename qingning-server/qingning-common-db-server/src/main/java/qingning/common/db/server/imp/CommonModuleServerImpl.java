@@ -10,6 +10,7 @@ import qingning.common.db.persistence.mybatis.entity.LoginInfo;
 import qingning.common.db.persistence.mybatis.entity.PaymentBill;
 import qingning.common.db.persistence.mybatis.entity.TradeBill;
 import qingning.common.db.persistence.mybatis.entity.User;
+import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
@@ -96,8 +97,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			loginInfo.setmPwd(reqMap.get("m_pwd").toString());
 		}
 		
-		loginInfo.setUserRole("normal_user");
-		//loginInfo.setSystemRole("normal_user"); //TODO
+		loginInfo.setUserRole(Constants.USER_ROLE_LISTENER);
 		loginInfo.setStatus("1");
 		//TODO 位置信息未插入
 		loginInfo.setCreateTime(now);

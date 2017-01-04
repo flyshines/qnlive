@@ -4,12 +4,11 @@ package qingning.user.db.server.imp;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.db.persistence.mybatis.*;
 import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
-import qingning.user.db.persistence.mybatis.entity.CoursesStudentsKey;
 import qingning.user.db.persistence.mybatis.entity.Fans;
-import qingning.user.db.persistence.mybatis.entity.FansKey;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -56,13 +55,14 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) {
-		Map<String,Object> dbResultMap = new HashMap<String,Object>();
+		Map<String,Object> dbResultMap = new HashMap<>();
 
 		//follow_type 关注操作类型 0关注 1不关注
 		if(reqMap.get("follow_type").toString().equals("0")){
 			Date now = new Date();
 			Fans fans = new Fans();
-			fans.setFansId(reqMap.get("user_id").toString());
+			fans.setFansId(MiscUtils.getUUId());
+			fans.setUserId(reqMap.get("user_id").toString());
 			fans.setLecturerId(reqMap.get("lecturer_id").toString());
 			fans.setRoomId(reqMap.get("room_id").toString());
 			fans.setCreateTime(now);
@@ -71,11 +71,10 @@ public class UserModuleServerImpl implements IUserModuleServer {
 			dbResultMap.put("update_count", updateCount);
 			return dbResultMap;
 		}else {
-			FansKey fansKey = new FansKey();
-			fansKey.setRoomId(reqMap.get("room_id").toString());
-			fansKey.setFansId(reqMap.get("user_id").toString());
-			fansKey.setLecturerId(reqMap.get("lecturer_id").toString());
-			Integer updateCount = fansMapper.deleteByPrimaryKey(fansKey);
+			Map<String,Object> updateMap = new HashMap<>();
+			updateMap.put("user_id", reqMap.get("user_id").toString());
+			updateMap.put("room_id", reqMap.get("room_id").toString());
+			Integer updateCount = fansMapper.deleteByUserIdAndRoomId(updateMap);
 			dbResultMap.put("update_count", updateCount);
 			return dbResultMap;
 		}
@@ -92,11 +91,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findFansByFansKey(Map<String, Object> reqMap) {
-		FansKey fansKey = new FansKey();
-		fansKey.setFansId(reqMap.get("user_id").toString());
-		fansKey.setRoomId(reqMap.get("room_id").toString());
-		return fansMapper.findFansByFansKey(fansKey);
+	public Map<String, Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap) {
+		Map<String,Object> fansKey = new HashMap<>();
+		fansKey.put("user_id",reqMap.get("user_id").toString());
+		fansKey.put("room_id", reqMap.get("room_id").toString());
+		return fansMapper.findFansByUserIdAndRoomId(fansKey);
 	}
 
 	@Override
@@ -110,18 +109,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findStudentByKey(Map<String,Object> queryStudentMap) {
-		CoursesStudentsKey key = new CoursesStudentsKey();
-		key.setUserId(queryStudentMap.get("user_id").toString());
-		key.setRoomId(queryStudentMap.get("room_id").toString());
-		key.setLecturerId(queryStudentMap.get("lecturer_id").toString());
-		key.setCourseId(queryStudentMap.get("course_id").toString());
-		return coursesStudentsMapper.findStudentByKey(key);
-	}
-
-	@Override
 	public Map<String, Object> joinCourse(Map<String, String> courseMap) {
 		CoursesStudents students = new CoursesStudents();
+		students.setStudentId(MiscUtils.getUUId());
 		students.setUserId(courseMap.get("user_id"));
 		students.setLecturerId(courseMap.get("lecturer_id"));
 		students.setRoomId(courseMap.get("room_id"));
@@ -201,6 +191,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
 		return distributerMapper.findRoomDistributionInfoByDistributerId(queryMap) ;
+	}
+
+	@Override
+	public Map<String, Object> findStudentByCourseIdAndUserId(Map<String, Object> studentQueryMap) {
+		return coursesStudentsMapper.findStudentByCourseIdAndUserId(studentQueryMap);
 	}
 
 	@Override

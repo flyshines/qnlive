@@ -9,11 +9,19 @@ public class Lecturer {
 
     private Long totalStudentNum;
 
+    private Long payStudentNum;
+
+    private Long totalTime;
+
     private Long liveRoomNum;
 
     private Long fansNum;
 
-    private Double totalAmount;
+    private Long payCourseNum;
+
+    private Long privateCourseNum;
+
+    private Long totalAmount;
 
     private Date createTime;
 
@@ -43,6 +51,22 @@ public class Lecturer {
         this.totalStudentNum = totalStudentNum;
     }
 
+    public Long getPayStudentNum() {
+        return payStudentNum;
+    }
+
+    public void setPayStudentNum(Long payStudentNum) {
+        this.payStudentNum = payStudentNum;
+    }
+
+    public Long getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(Long totalTime) {
+        this.totalTime = totalTime;
+    }
+
     public Long getLiveRoomNum() {
         return liveRoomNum;
     }
@@ -59,11 +83,27 @@ public class Lecturer {
         this.fansNum = fansNum;
     }
 
-    public Double getTotalAmount() {
+    public Long getPayCourseNum() {
+        return payCourseNum;
+    }
+
+    public void setPayCourseNum(Long payCourseNum) {
+        this.payCourseNum = payCourseNum;
+    }
+
+    public Long getPrivateCourseNum() {
+        return privateCourseNum;
+    }
+
+    public void setPrivateCourseNum(Long privateCourseNum) {
+        this.privateCourseNum = privateCourseNum;
+    }
+
+    public Long getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(Double totalAmount) {
+    public void setTotalAmount(Long totalAmount) {
         this.totalAmount = totalAmount;
     }
 
