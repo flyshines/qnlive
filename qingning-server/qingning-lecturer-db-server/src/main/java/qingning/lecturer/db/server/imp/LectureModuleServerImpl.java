@@ -175,13 +175,13 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		if(reqMap.get("course_type").toString().equals("1")){
 			courses.setCoursePassword(reqMap.get("course_password").toString());
 		}else if(reqMap.get("course_type").toString().equals("2")){
-			courses.setCoursePrice((new BigDecimal(reqMap.get("course_price").toString())).doubleValue());
+			courses.setCoursePrice(Long.parseLong(reqMap.get("course_price").toString()));
 		}
 
 		courses.setStudentNum(0L);
-		courses.setCourseAmount(0.0);
+		courses.setCourseAmount(0L);
 		courses.setExtraNum(0L);
-		courses.setExtraAmount(0.0);
+		courses.setExtraAmount(0L);
 		Date now = new Date();
 		courses.setCreateTime(now);
 		courses.setCreateDate(now);

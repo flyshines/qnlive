@@ -25,17 +25,17 @@ public class Courses {
 
     private String rqCode;
 
-    private Double coursePrice;
+    private Long coursePrice;
 
     private String coursePassword;
 
     private Long studentNum;
 
-    private Double courseAmount;
+    private Long courseAmount;
 
     private Long extraNum;
 
-    private Double extraAmount;
+    private Long extraAmount;
 
     private Date createTime;
 
@@ -47,6 +47,8 @@ public class Courses {
 
     private String imCourseId;
 
+    private long realStudentNum;
+    
     public String getCourseId() {
         return courseId;
     }
@@ -135,11 +137,11 @@ public class Courses {
         this.rqCode = rqCode == null ? null : rqCode.trim();
     }
 
-    public Double getCoursePrice() {
+    public Long getCoursePrice() {
         return coursePrice;
     }
 
-    public void setCoursePrice(Double coursePrice) {
+    public void setCoursePrice(Long coursePrice) {
         this.coursePrice = coursePrice;
     }
 
@@ -159,11 +161,11 @@ public class Courses {
         this.studentNum = studentNum;
     }
 
-    public Double getCourseAmount() {
+    public Long getCourseAmount() {
         return courseAmount;
     }
 
-    public void setCourseAmount(Double courseAmount) {
+    public void setCourseAmount(Long courseAmount) {
         this.courseAmount = courseAmount;
     }
 
@@ -175,11 +177,11 @@ public class Courses {
         this.extraNum = extraNum;
     }
 
-    public Double getExtraAmount() {
+    public Long getExtraAmount() {
         return extraAmount;
     }
 
-    public void setExtraAmount(Double extraAmount) {
+    public void setExtraAmount(Long extraAmount) {
         this.extraAmount = extraAmount;
     }
 
@@ -222,4 +224,12 @@ public class Courses {
     public void setImCourseId(String imCourseId) {
         this.imCourseId = imCourseId == null ? null : imCourseId.trim();
     }
+
+	public long getRealStudentNum() {
+		return realStudentNum;
+	}
+
+	public void setRealStudentNum(long realStudentNum) {
+		this.realStudentNum = realStudentNum;
+	}    
 }

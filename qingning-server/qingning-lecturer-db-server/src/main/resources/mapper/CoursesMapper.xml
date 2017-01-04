@@ -13,23 +13,24 @@
     <result column="course_type" property="courseType" jdbcType="CHAR" />
     <result column="status" property="status" jdbcType="CHAR" />
     <result column="rq_code" property="rqCode" jdbcType="VARCHAR" />
-    <result column="course_price" property="coursePrice" jdbcType="DOUBLE" />
+    <result column="course_price" property="coursePrice" jdbcType="BIGINT" />
     <result column="course_password" property="coursePassword" jdbcType="VARCHAR" />
     <result column="student_num" property="studentNum" jdbcType="BIGINT" />
-    <result column="course_amount" property="courseAmount" jdbcType="DOUBLE" />
+    <result column="course_amount" property="courseAmount" jdbcType="BIGINT" />
     <result column="extra_num" property="extraNum" jdbcType="BIGINT" />
-    <result column="extra_amount" property="extraAmount" jdbcType="DOUBLE" />
+    <result column="extra_amount" property="extraAmount" jdbcType="BIGINT" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="create_date" property="createDate" jdbcType="DATE" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="real_start_time" property="realStartTime" jdbcType="TIMESTAMP" />
     <result column="im_course_id" property="imCourseId" jdbcType="VARCHAR" />
+    <result column="real_student_num" property="realStudentNum" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     course_id, room_id, lecturer_id, course_title, course_url, course_remark, start_time, 
     end_time, course_type, status, rq_code, course_price, course_password, student_num, 
     course_amount, extra_num, extra_amount, create_time, create_date, update_time, real_start_time, 
-    im_course_id
+    im_course_id,real_student_num
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -49,15 +50,15 @@
       course_password, student_num, course_amount, 
       extra_num, extra_amount, create_time, 
       create_date, update_time, real_start_time, 
-      im_course_id)
+      im_course_id,real_student_num)
     values (#{courseId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR}, #{lecturerId,jdbcType=VARCHAR}, 
       #{courseTitle,jdbcType=VARCHAR}, #{courseUrl,jdbcType=VARCHAR}, #{courseRemark,jdbcType=VARCHAR}, 
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{courseType,jdbcType=CHAR}, 
-      #{status,jdbcType=CHAR}, #{rqCode,jdbcType=VARCHAR}, #{coursePrice,jdbcType=DOUBLE}, 
-      #{coursePassword,jdbcType=VARCHAR}, #{studentNum,jdbcType=BIGINT}, #{courseAmount,jdbcType=DOUBLE}, 
-      #{extraNum,jdbcType=BIGINT}, #{extraAmount,jdbcType=DOUBLE}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=CHAR}, #{rqCode,jdbcType=VARCHAR}, #{coursePrice,jdbcType=BIGINT}, 
+      #{coursePassword,jdbcType=VARCHAR}, #{studentNum,jdbcType=BIGINT}, #{courseAmount,jdbcType=BIGINT}, 
+      #{extraNum,jdbcType=BIGINT}, #{extraAmount,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, 
       #{createDate,jdbcType=DATE}, #{updateTime,jdbcType=TIMESTAMP}, #{realStartTime,jdbcType=TIMESTAMP}, 
-      #{imCourseId,jdbcType=VARCHAR})
+      #{imCourseId,jdbcType=VARCHAR}, #{realStudentNum,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="qingning.lecturer.db.persistence.mybatis.entity.Courses" >
     insert into t_courses
@@ -128,6 +129,9 @@
       <if test="imCourseId != null" >
         im_course_id,
       </if>
+      <if test="realStudentNum != null" >
+        real_student_num,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="courseId != null" >
@@ -164,7 +168,7 @@
         #{rqCode,jdbcType=VARCHAR},
       </if>
       <if test="coursePrice != null" >
-        #{coursePrice,jdbcType=DOUBLE},
+        #{coursePrice,jdbcType=BIGINT},
       </if>
       <if test="coursePassword != null" >
         #{coursePassword,jdbcType=VARCHAR},
@@ -173,13 +177,13 @@
         #{studentNum,jdbcType=BIGINT},
       </if>
       <if test="courseAmount != null" >
-        #{courseAmount,jdbcType=DOUBLE},
+        #{courseAmount,jdbcType=BIGINT},
       </if>
       <if test="extraNum != null" >
         #{extraNum,jdbcType=BIGINT},
       </if>
       <if test="extraAmount != null" >
-        #{extraAmount,jdbcType=DOUBLE},
+        #{extraAmount,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         #{createTime,jdbcType=TIMESTAMP},
@@ -195,6 +199,9 @@
       </if>
       <if test="imCourseId != null" >
         #{imCourseId,jdbcType=VARCHAR},
+      </if>
+      <if test="realStudentNum != null" >
+        #{realStudentNum,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -232,7 +239,7 @@
         rq_code = #{rqCode,jdbcType=VARCHAR},
       </if>
       <if test="coursePrice != null" >
-        course_price = #{coursePrice,jdbcType=DOUBLE},
+        course_price = #{coursePrice,jdbcType=BIGINT},
       </if>
       <if test="coursePassword != null" >
         course_password = #{coursePassword,jdbcType=VARCHAR},
@@ -241,13 +248,13 @@
         student_num = #{studentNum,jdbcType=BIGINT},
       </if>
       <if test="courseAmount != null" >
-        course_amount = #{courseAmount,jdbcType=DOUBLE},
+        course_amount = #{courseAmount,jdbcType=BIGINT},
       </if>
       <if test="extraNum != null" >
         extra_num = #{extraNum,jdbcType=BIGINT},
       </if>
       <if test="extraAmount != null" >
-        extra_amount = #{extraAmount,jdbcType=DOUBLE},
+        extra_amount = #{extraAmount,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -264,6 +271,9 @@
       <if test="imCourseId != null" >
         im_course_id = #{imCourseId,jdbcType=VARCHAR},
       </if>
+      <if test="realStudentNum != null" >
+        real_student_num = #{realStudentNum,jdbcType=BIGINT},
+      </if>
     </set>
     where course_id = #{courseId,jdbcType=VARCHAR}
   </update>
@@ -279,17 +289,18 @@
       course_type = #{courseType,jdbcType=CHAR},
       status = #{status,jdbcType=CHAR},
       rq_code = #{rqCode,jdbcType=VARCHAR},
-      course_price = #{coursePrice,jdbcType=DOUBLE},
+      course_price = #{coursePrice,jdbcType=BIGINT},
       course_password = #{coursePassword,jdbcType=VARCHAR},
       student_num = #{studentNum,jdbcType=BIGINT},
-      course_amount = #{courseAmount,jdbcType=DOUBLE},
+      course_amount = #{courseAmount,jdbcType=BIGINT},
       extra_num = #{extraNum,jdbcType=BIGINT},
-      extra_amount = #{extraAmount,jdbcType=DOUBLE},
+      extra_amount = #{extraAmount,jdbcType=BIGINT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       create_date = #{createDate,jdbcType=DATE},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       real_start_time = #{realStartTime,jdbcType=TIMESTAMP},
-      im_course_id = #{imCourseId,jdbcType=VARCHAR}
+      im_course_id = #{imCourseId,jdbcType=VARCHAR},
+      real_student_num = #{realStudentNum,jdbcType=BIGINT}
     where course_id = #{courseId,jdbcType=VARCHAR}
   </update>
 

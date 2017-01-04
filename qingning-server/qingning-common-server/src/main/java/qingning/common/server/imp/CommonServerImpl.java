@@ -333,7 +333,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			resultMap.put("nick_name", values.get("nick_name"));			
 			resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
 			resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
-			resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSDOUBLE, "today_distributer_amount", 0d));
+			resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSLONG, "today_distributer_amount", 0l));
 			resultMap.put("update_time", MiscUtils.convertObjToObject(values.get("update_time"),Constants.SYSLONG,"update_time", 0l));			
 		}else if(queryType.equals("2")){
 			Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
