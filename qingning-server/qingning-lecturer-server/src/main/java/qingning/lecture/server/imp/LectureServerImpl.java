@@ -586,6 +586,38 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
             } else {
+            	if(reqMap.get("start_time") != null){
+	                //课程之间需要间隔三十分钟
+	        		Map<String,Object> query = new HashMap<String,Object>();
+	        		query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+	                String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
+	                Calendar cal = Calendar.getInstance();
+	                long startTime = (Long)reqMap.get("start_time");
+	                cal.setTimeInMillis(startTime);
+	                cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
+	                long preStartTime = cal.getTimeInMillis();
+	                cal.setTimeInMillis(startTime);
+	                cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
+	                long nextStartTime = cal.getTimeInMillis();
+	                Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
+	                String course_id = (String)reqMap.get("course_id");
+	                if(!MiscUtils.isEmpty(courseList)){
+	                	for(Tuple tuple:courseList){
+	                		if(!course_id.equals(tuple.getElement())){
+	                			throw new QNLiveException("100029");
+	                		}
+	                	}	                	
+	                }
+	                String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, query);
+	                courseList = jedis.zrangeByScoreWithScores(lecturerCoursesFinishKey, preStartTime+"", nextStartTime+"", 0, 1);
+	                if(!MiscUtils.isEmpty(courseList)){
+	                	for(Tuple tuple:courseList){
+	                		if(!course_id.equals(tuple.getElement())){
+	                			throw new QNLiveException("100029");
+	                		}
+	                	}
+	                }
+            	}            	
                 Date now = new Date();
                 reqMap.put("now",now);
                 //2.不为课程结束
@@ -784,7 +816,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
 
-    private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
+/*    private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
                                                     String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count,String userId){
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
         Map<String,Object> queryMap = new HashMap<>();
@@ -817,9 +849,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("finishList",finishList);
         resultMap.put("dbList",dbList);
         return resultMap;
-    }
+    }*/
 
-    private Map<String,String> findLastElementForRedisSet(Set<Tuple> redisSet){
+/*    private Map<String,String> findLastElementForRedisSet(Set<Tuple> redisSet){
         Map<String,String> resultMap = new HashMap<>();
         String startIndexCache = null;
         String startIndexDB = null;
@@ -831,7 +863,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("startIndexCache", startIndexCache);
         resultMap.put("startIndexDB", startIndexDB);
         return resultMap;
-    }
+    }*/
 
     @SuppressWarnings("unchecked")
     @FunctionName("processCoursePPTs")
