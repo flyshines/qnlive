@@ -303,4 +303,11 @@
     real_student_num = #{realStudentNum,jdbcType=BIGINT}
     where course_id = #{courseId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findCourseByCourseId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_courses
+    where course_id = #{courseId}
+  </select>
 </mapper>

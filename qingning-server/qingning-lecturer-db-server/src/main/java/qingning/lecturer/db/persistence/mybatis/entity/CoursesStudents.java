@@ -25,6 +25,8 @@ public class CoursesStudents {
 
     private Date createDate;
 
+    private Long studentPos;
+
     public String getStudentId() {
         return studentId;
     }
@@ -111,5 +113,13 @@ public class CoursesStudents {
 
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
+    }
+
+    public Long getStudentPos() {
+        return studentPos;
+    }
+
+    public void setStudentPos(Long studentPos) {
+        this.studentPos = studentPos;
     }
 }

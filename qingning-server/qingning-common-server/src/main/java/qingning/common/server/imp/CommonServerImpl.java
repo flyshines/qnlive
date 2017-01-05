@@ -374,7 +374,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//1.1如果课程不在缓存中，则查询数据库
 		if(MiscUtils.isEmpty(courseMap)){
 			Map<String,Object> courseObjectMap = commonModuleServer.findCourseByCourseId(courseId);
-			if(courseMap == null){
+			if(courseObjectMap == null){
 				throw new QNLiveException("120009");
 			}
 			courseMap = new HashMap<>();
@@ -407,14 +407,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		insertMap.put("course_id",courseMap.get("course_id"));
 		//判断类型为 0:课程收益 1:打赏
 		if(profit_type.equals("1")){
-			insertMap.put("amount", rewardInfoMap.get("amount").toString());
-			BigDecimal rewardBigDecimal = new BigDecimal(rewardInfoMap.get("amount").toString());
-			totalFee = (rewardBigDecimal.multiply(new BigDecimal(100))).intValue();
+			insertMap.put("amount", rewardInfoMap.get("amount"));
+			totalFee = ((Long)rewardInfoMap.get("amount")).intValue();
 			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}else if(profit_type.equals("0")){
 			insertMap.put("amount", courseMap.get("course_price"));
-			BigDecimal coursePriceBigDecimal = new BigDecimal(courseMap.get("course_price"));
-			totalFee = (coursePriceBigDecimal.multiply(new BigDecimal(100))).intValue();
+			totalFee = Integer.parseInt(courseMap.get("course_price"));
 			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}
 		insertMap.put("status","0");

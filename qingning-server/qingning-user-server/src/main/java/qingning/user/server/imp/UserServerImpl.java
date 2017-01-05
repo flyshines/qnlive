@@ -1145,7 +1145,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<Map<String,Object>> messageList = userModuleServer.findCourseStudentList(queryMap);
 
         if(! CollectionUtils.isEmpty(messageList)){
-            resultMap.put("message_list", messageList);
+            resultMap.put("student_list", messageList);
         }
 
         return resultMap;
