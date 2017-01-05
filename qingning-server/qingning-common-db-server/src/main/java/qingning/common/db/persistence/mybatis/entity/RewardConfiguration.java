@@ -7,7 +7,7 @@ public class RewardConfiguration {
 
     private String description;
 
-    private Double amount;
+    private Long amount;
 
     private Long rewardPos;
 
@@ -31,11 +31,11 @@ public class RewardConfiguration {
         this.description = description == null ? null : description.trim();
     }
 
-    public Double getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 

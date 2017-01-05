@@ -6,7 +6,7 @@
     <result column="trade_id" property="tradeId" jdbcType="VARCHAR" />
     <result column="payment_type" property="paymentType" jdbcType="VARCHAR" />
     <result column="status" property="status" jdbcType="VARCHAR" />
-    <result column="payment" property="payment" jdbcType="DOUBLE" />
+    <result column="payment" property="payment" jdbcType="BIGINT" />
     <result column="trade_no" property="tradeNo" jdbcType="VARCHAR" />
     <result column="pre_pay_no" property="prePayNo" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
@@ -32,7 +32,7 @@
     pre_pay_no, create_time, update_time
     )
     values (#{paymentId,jdbcType=VARCHAR}, #{tradeId,jdbcType=VARCHAR}, #{paymentType,jdbcType=VARCHAR},
-    #{status,jdbcType=VARCHAR}, #{payment,jdbcType=DOUBLE}, #{tradeNo,jdbcType=VARCHAR},
+    #{status,jdbcType=VARCHAR}, #{payment,jdbcType=BIGINT}, #{tradeNo,jdbcType=VARCHAR},
     #{prePayNo,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
     )
   </insert>
@@ -81,7 +81,7 @@
         #{status,jdbcType=VARCHAR},
       </if>
       <if test="payment != null" >
-        #{payment,jdbcType=DOUBLE},
+        #{payment,jdbcType=BIGINT},
       </if>
       <if test="tradeNo != null" >
         #{tradeNo,jdbcType=VARCHAR},
@@ -110,7 +110,7 @@
         status = #{status,jdbcType=VARCHAR},
       </if>
       <if test="payment != null" >
-        payment = #{payment,jdbcType=DOUBLE},
+        payment = #{payment,jdbcType=BIGINT},
       </if>
       <if test="tradeNo != null" >
         trade_no = #{tradeNo,jdbcType=VARCHAR},
@@ -132,7 +132,7 @@
     set trade_id = #{tradeId,jdbcType=VARCHAR},
     payment_type = #{paymentType,jdbcType=VARCHAR},
     status = #{status,jdbcType=VARCHAR},
-    payment = #{payment,jdbcType=DOUBLE},
+    payment = #{payment,jdbcType=BIGINT},
     trade_no = #{tradeNo,jdbcType=VARCHAR},
     pre_pay_no = #{prePayNo,jdbcType=VARCHAR},
     create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -153,7 +153,7 @@
         status = #{status,jdbcType=VARCHAR},
       </if>
       <if test="payment != null" >
-        payment = #{payment,jdbcType=DOUBLE},
+        payment = #{payment,jdbcType=BIGINT},
       </if>
       <if test="tradeNo != null" >
         trade_no = #{tradeNo,jdbcType=VARCHAR},

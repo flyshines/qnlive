@@ -138,7 +138,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		tradeBill.setUserId(insertMap.get("user_id").toString());
 		tradeBill.setRoomId(insertMap.get("room_id").toString());
 		tradeBill.setCourseId(insertMap.get("course_id").toString());
-		tradeBill.setAmount(Double.valueOf(insertMap.get("amount").toString()));
+		tradeBill.setAmount(Long.valueOf(insertMap.get("amount").toString()));
 		tradeBill.setStatus(insertMap.get("status").toString());
 		tradeBill.setCreateTime(now);
 		tradeBill.setUpdateTime(now);

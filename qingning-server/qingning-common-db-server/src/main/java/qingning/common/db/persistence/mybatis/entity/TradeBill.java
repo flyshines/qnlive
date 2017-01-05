@@ -11,11 +11,13 @@ public class TradeBill {
 
     private String courseId;
 
-    private Double amount;
+    private Long amount;
 
-    private Double payment;
+    private Long payment;
 
     private String status;
+
+    private String profitType;
 
     private String closeReason;
 
@@ -24,8 +26,6 @@ public class TradeBill {
     private Date createTime;
 
     private Date updateTime;
-
-    private String profitType;
 
     public String getTradeId() {
         return tradeId;
@@ -59,19 +59,19 @@ public class TradeBill {
         this.courseId = courseId == null ? null : courseId.trim();
     }
 
-    public Double getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
-    public Double getPayment() {
+    public Long getPayment() {
         return payment;
     }
 
-    public void setPayment(Double payment) {
+    public void setPayment(Long payment) {
         this.payment = payment;
     }
 
@@ -81,6 +81,14 @@ public class TradeBill {
 
     public void setStatus(String status) {
         this.status = status == null ? null : status.trim();
+    }
+
+    public String getProfitType() {
+        return profitType;
+    }
+
+    public void setProfitType(String profitType) {
+        this.profitType = profitType == null ? null : profitType.trim();
     }
 
     public String getCloseReason() {
@@ -113,13 +121,5 @@ public class TradeBill {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getProfitType() {
-        return profitType;
-    }
-
-    public void setProfitType(String profitType) {
-        this.profitType = profitType == null ? null : profitType.trim();
     }
 }

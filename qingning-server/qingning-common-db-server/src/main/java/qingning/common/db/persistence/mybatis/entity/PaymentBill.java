@@ -11,7 +11,7 @@ public class PaymentBill {
 
     private String status;
 
-    private Double payment;
+    private Long payment;
 
     private String tradeNo;
 
@@ -53,11 +53,11 @@ public class PaymentBill {
         this.status = status == null ? null : status.trim();
     }
 
-    public Double getPayment() {
+    public Long getPayment() {
         return payment;
     }
 
-    public void setPayment(Double payment) {
+    public void setPayment(Long payment) {
         this.payment = payment;
     }
 

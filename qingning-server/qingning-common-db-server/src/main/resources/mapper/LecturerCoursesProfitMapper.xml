@@ -8,7 +8,7 @@
     <result column="lecturer_id" property="lecturerId" jdbcType="VARCHAR" />
     <result column="user_id" property="userId" jdbcType="VARCHAR" />
     <result column="distributer_id" property="distributerId" jdbcType="VARCHAR" />
-    <result column="profit_amount" property="profitAmount" jdbcType="DOUBLE" />
+    <result column="profit_amount" property="profitAmount" jdbcType="BIGINT" />
     <result column="profit_type" property="profitType" jdbcType="CHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="create_date" property="createDate" jdbcType="DATE" />
@@ -38,7 +38,7 @@
     `position`)
     values (#{profitId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR},
     #{lecturerId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{distributerId,jdbcType=VARCHAR},
-    #{profitAmount,jdbcType=DOUBLE}, #{profitType,jdbcType=CHAR}, #{createTime,jdbcType=TIMESTAMP},
+    #{profitAmount,jdbcType=BIGINT}, #{profitType,jdbcType=CHAR}, #{createTime,jdbcType=TIMESTAMP},
     #{createDate,jdbcType=DATE}, #{paymentId,jdbcType=VARCHAR}, #{paymentType,jdbcType=CHAR},
     #{position,jdbcType=BIGINT})
   </insert>
@@ -105,7 +105,7 @@
         #{distributerId,jdbcType=VARCHAR},
       </if>
       <if test="profitAmount != null" >
-        #{profitAmount,jdbcType=DOUBLE},
+        #{profitAmount,jdbcType=BIGINT},
       </if>
       <if test="profitType != null" >
         #{profitType,jdbcType=CHAR},
@@ -146,7 +146,7 @@
         distributer_id = #{distributerId,jdbcType=VARCHAR},
       </if>
       <if test="profitAmount != null" >
-        profit_amount = #{profitAmount,jdbcType=DOUBLE},
+        profit_amount = #{profitAmount,jdbcType=BIGINT},
       </if>
       <if test="profitType != null" >
         profit_type = #{profitType,jdbcType=CHAR},
@@ -176,7 +176,7 @@
     lecturer_id = #{lecturerId,jdbcType=VARCHAR},
     user_id = #{userId,jdbcType=VARCHAR},
     distributer_id = #{distributerId,jdbcType=VARCHAR},
-    profit_amount = #{profitAmount,jdbcType=DOUBLE},
+    profit_amount = #{profitAmount,jdbcType=BIGINT},
     profit_type = #{profitType,jdbcType=CHAR},
     create_time = #{createTime,jdbcType=TIMESTAMP},
     create_date = #{createDate,jdbcType=DATE},

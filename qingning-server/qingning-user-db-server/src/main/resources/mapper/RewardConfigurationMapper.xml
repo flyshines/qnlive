@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="qingning.user.db.persistence.mybatis.entity.RewardConfiguration" >
     <id column="reward_id" property="rewardId" jdbcType="BIGINT" />
     <result column="description" property="description" jdbcType="VARCHAR" />
-    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="amount" property="amount" jdbcType="BIGINT" />
     <result column="reward_pos" property="rewardPos" jdbcType="BIGINT" />
     <result column="status" property="status" jdbcType="CHAR" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
@@ -26,7 +26,7 @@
     insert into t_reward_configuration (reward_id, description, amount, 
       reward_pos, status, update_time
       )
-    values (#{rewardId,jdbcType=BIGINT}, #{description,jdbcType=VARCHAR}, #{amount,jdbcType=DOUBLE}, 
+    values (#{rewardId,jdbcType=BIGINT}, #{description,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT},
       #{rewardPos,jdbcType=BIGINT}, #{status,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
@@ -60,7 +60,7 @@
         #{description,jdbcType=VARCHAR},
       </if>
       <if test="amount != null" >
-        #{amount,jdbcType=DOUBLE},
+        #{amount,jdbcType=BIGINT},
       </if>
       <if test="rewardPos != null" >
         #{rewardPos,jdbcType=BIGINT},
@@ -80,7 +80,7 @@
         description = #{description,jdbcType=VARCHAR},
       </if>
       <if test="amount != null" >
-        amount = #{amount,jdbcType=DOUBLE},
+        amount = #{amount,jdbcType=BIGINT},
       </if>
       <if test="rewardPos != null" >
         reward_pos = #{rewardPos,jdbcType=BIGINT},
@@ -97,7 +97,7 @@
   <update id="updateByPrimaryKey" parameterType="qingning.user.db.persistence.mybatis.entity.RewardConfiguration" >
     update t_reward_configuration
     set description = #{description,jdbcType=VARCHAR},
-      amount = #{amount,jdbcType=DOUBLE},
+      amount = #{amount,jdbcType=BIGINT},
       reward_pos = #{rewardPos,jdbcType=BIGINT},
       status = #{status,jdbcType=CHAR},
       update_time = #{updateTime,jdbcType=TIMESTAMP}
