@@ -119,19 +119,57 @@ public final class MiscUtils {
 		}
 		return obj;
 	}
+
+	public static long convertObjectToLong(Object value){
+		long ret = 0l;
+		try{
+			if(MiscUtils.isEmpty(value)){
+				ret = 0l;
+			} else {
+				if(value instanceof Long){
+					ret = (Long)value;					
+				} else {
+					if(value instanceof Date){
+						value = ((Date)value).getTime();
+					}
+					BigDecimal bigDecimal = new BigDecimal(value.toString());
+					bigDecimal.setScale(BigDecimal.ROUND_HALF_UP);
+					ret = bigDecimal.longValue();
+				}
+			}
+			
+		}catch(Exception e){
+			ret= 0l;
+		}
+		return ret;
+	}
 	
 	public static double convertObjectToDouble(Object value){
-		double ret = 0d;
+		return convertObjectToDouble(value, false);
+	}
+
+	public static double convertObjectToDouble(Object value, boolean adjust){
+		double ret = 0d;		
 		try{
 			if(MiscUtils.isEmpty(value)){
 				ret = 0d;
-			} else if(value instanceof Double){
-				ret = (Double)value;
-			} else if(value instanceof String){
-				ret = Double.parseDouble((String)value);
-			} else if(value instanceof Date){
-				ret = ((Date)value).getTime();
+			} else {
+				if(value instanceof Double){
+					ret = (Double)value;					
+				} else {
+					if(value instanceof Date){
+						value = ((Date)value).getTime();
+					}
+					if(adjust){
+						BigDecimal bigDecimal = new BigDecimal(value.toString());						
+						bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
+						ret = bigDecimal.doubleValue();
+					} else {
+						ret = Double.parseDouble(value.toString());
+					}
+				}
 			}
+			
 		}catch(Exception e){
 			ret= 0d;
 		}

@@ -98,6 +98,25 @@
 					<param name="course_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="course_type" type="string"/>
+					<param name="status" type="string"/>
+					<param name="course_url" type="string"/>
+					<param name="course_title" type="string"/>
+					<param name="course_price" type="double"/>
+					<param name="start_time" type="long"/>
+					<param name="student_num" type="long"/>
+					<param name="student_list" type="list">
+						<param name="avatar_address" type="string"/>
+					</param>
+					<param name="avatar_address" type="string"/>
+					<param name="room_name" type="string"/>
+					<param name="room_remark" type="string"/>
+					<param name="course_remark" type="string"/>
+					<param name="update_time" type="long"/>
+					<param name="room_id" type="string"/>
+					<param name="course_password" type="string"/>
+					<param name="share_url" type="string"/>
+					<param name="roles" type="string"/>
 				</outputs>
 			</function>
 
@@ -157,7 +176,26 @@
 						<param name="course_type" type="string"/>
 						<param name="update_time" type="long"/>
 						<param name="course_remark" type="string"/>
-						<param name="course_amount" type="double"/>
+						<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
+							var ret = course_amount;
+							if(course_type=='0'){
+								ret='公开课程';
+							} else if(course_type=='1'){
+								ret='加密课程';
+							} else {
+							   ret = utils.convertObjectToDouble(course_amount,true);
+							}
+							return ret;
+						}"/>
+						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
+						    var ret = 0;						
+							if(course_type=='0' || course_type=='1'){
+								ret=utils.convertObjectToLong(extra_amount);
+							} else if(course_type=='1'){
+								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
+							}												
+							return ret;
+						}"/>
 						<param name="course_password" type="string"/>									
 					</param>					
 				</outputs>
@@ -242,6 +280,8 @@
 								ret='公开课程';
 							} else if(course_type=='1'){
 								ret='加密课程';
+							} else {
+							   ret = utils.convertObjectToDouble(course_amount,true);
 							}
 							return ret;
 						}"/>
@@ -249,9 +289,9 @@
 						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
 						    var ret = 0;						
 							if(course_type=='0' || course_type=='1'){
-								ret=utils.convertObjectToDouble(extra_amount);
+								ret=utils.convertObjectToLong(extra_amount);
 							} else if(course_type=='1'){
-								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
 							}												
 							return ret;
 						}"/>
@@ -282,6 +322,8 @@
 								ret='公开课程';
 							} else if(course_type=='1'){
 								ret='加密课程';
+							} else {
+							   ret = utils.convertObjectToDouble(course_amount,true);
 							}
 							return ret;
 					}"/>
@@ -289,9 +331,9 @@
 					<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
 						    var ret = 0;						
 							if(course_type=='0' || course_type=='1'){
-								ret=utils.convertObjectToDouble(extra_amount);
+								ret=utils.convertObjectToLong(extra_amount);
 							} else if(course_type=='1'){
-								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
 							}												
 							return ret;
 					}"/>
@@ -413,8 +455,8 @@
 				<inputs>
 					<param name="type" type="string" default="0"/>
 					<param name="profit_share_rate"  require="Y,000100" type="double" validate="(profit_share_rate)=>{
-						var value = utils.convertObjectToDouble(profit_share_rate);
-						return value>=0 &amp;&amp; value &lt;=50;
+						var value = utils.convertObjectToLong(profit_share_rate);
+						return value>=0 &amp;&amp; value &lt;=5000;
 					},100024"/>
 					<param name="effective_time" type="string" require="Y,000100"/>
 					<param name="room_id" type="string" require="Y,000100"/>		
@@ -454,9 +496,9 @@
 						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
 						    var ret = 0;						
 							if(course_type=='0' || course_type=='1'){
-								ret=utils.convertObjectToDouble(extra_amount);
+								ret=utils.convertObjectToLong(extra_amount);
 							} else if(course_type=='1'){
-								ret=utils.convertObjectToDouble(course_amount)+utils.convertObjectToDouble(extra_amount);								
+								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
 							}												
 							return ret;
 						}"/>
@@ -466,6 +508,8 @@
 								ret='公开课程';
 							} else if(course_type=='1'){
 								ret='加密课程';
+							} else {
+							   ret = utils.convertObjectToDouble(course_amount,true);
 							}
 							return ret;
 						}"/>

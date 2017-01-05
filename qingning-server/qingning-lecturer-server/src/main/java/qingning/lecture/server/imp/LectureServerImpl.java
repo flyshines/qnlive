@@ -417,69 +417,41 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("courseDetail")
     public Map<String, Object> getCourseDetail(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        Map<String, String> courseMap = new HashMap<String, String>();
-        String room_id = null;
-
-        Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
-        if (jedis.exists(courseKey)) {
-            Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
-            courseMap = courseCacheMap;
-            room_id = courseCacheMap.get("room_id").toString();
-
-        } else {
-            //2.如果缓存中没有课程详情，则读取数据库
-            Map<String, Object> courseDBMap = lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
-
-            //3.如果缓存和数据库中都没有课程详情，则提示课程不存在
-            if (CollectionUtils.isEmpty(courseDBMap)) {
-                throw new QNLiveException("100004");
-            } else {
-                MiscUtils.converObjectMapToStringMap(courseDBMap, courseMap);
-                room_id = courseDBMap.get("room_id").toString();
-            }
+    	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+    	String course_id = (String)reqMap.get("course_id");
+    	
+        Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedisUtils,false);
+        if(MiscUtils.isEmpty(courseInfoMap)){
+        	throw new QNLiveException("100004");
         }
-        if(CollectionUtils.isEmpty(courseMap)){
-            throw new QNLiveException("100004");
+        MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);
+        Map<String ,Object> resultMap = new HashMap<String ,Object>();
+        for(String key:courseInfoMap.keySet()){
+        	resultMap.put(key, courseInfoMap.get(key));
         }
-
-        resultMap.put("course_type", courseMap.get("course_type"));
-        resultMap.put("status", courseMap.get("status"));
-        resultMap.put("course_url", courseMap.get("course_url"));
-        resultMap.put("course_title", courseMap.get("course_title"));
-        if (courseMap.get("course_price") != null) {
-            resultMap.put("course_price", Double.parseDouble(courseMap.get("course_price")));
-        }
-        resultMap.put("start_time", Long.parseLong(courseMap.get("start_time")));
-        resultMap.put("student_num", Long.parseLong(courseMap.get("student_num")));
-        resultMap.put("course_remark", courseMap.get("course_remark"));
-        resultMap.put("update_time", courseMap.get("update_time"));
-        //参与学生数组
+        
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("size",10);
         queryMap.put("course_id",reqMap.get("course_id").toString());
         List<String> latestStudentAvatarAddList = lectureModuleServer.findLatestStudentAvatarAddList(queryMap);
         if(! MiscUtils.isEmpty(latestStudentAvatarAddList)){
             resultMap.put("student_list", latestStudentAvatarAddList);
-        }
-        resultMap.put("course_password", courseMap.get("course_password"));
-
+        }        
+        String room_id = courseInfoMap.get("room_id");
+        reqMap.put("room_id", room_id);
         //从缓存中获取直播间信息
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
+        if(MiscUtils.isEmpty(liveRoomMap)){
+        	throw new QNLiveException("100031");
+        }
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
-        resultMap.put("room_id", liveRoomMap.get("room_id"));
-
+    	
         //分享URL
-        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
-
-        //
+        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO   	
+    	//TODO Roles 赋值
+  
         return resultMap;
     }
 
