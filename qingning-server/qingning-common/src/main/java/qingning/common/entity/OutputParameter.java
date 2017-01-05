@@ -125,6 +125,6 @@ public class OutputParameter {
 	}
 	
 	public Object convertValue(Object value) throws Exception{
-		return MiscUtils.convertObjToObject(value, type, fieldName, defaultValue);
+		return MiscUtils.convertObjToObject(value, type, fieldName, defaultValue, Constants.SYSDOUBLE.equalsIgnoreCase(type));
 	}
 }

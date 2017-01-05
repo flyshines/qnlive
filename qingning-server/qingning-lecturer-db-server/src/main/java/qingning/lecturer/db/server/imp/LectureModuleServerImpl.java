@@ -203,6 +203,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		courses.setExtraNum(0L);
 		courses.setExtraAmount(0L);
 		courses.setRealStudentNum(0L);
+
 		Date now = new Date();
 		courses.setCreateTime(now);
 		courses.setCreateDate(now);

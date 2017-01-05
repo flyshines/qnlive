@@ -139,6 +139,10 @@ public final class MiscUtils {
 	}
 	
 	public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue) throws Exception{
+		return convertObjToObject(obj , type, fieldName, defaultValue, false);
+	}
+	
+	public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue, boolean adjust) throws Exception{
 		try{
 			if(MiscUtils.isEmpty(obj)){
 				obj = defaultValue;
@@ -161,16 +165,16 @@ public final class MiscUtils {
 					if(!(obj instanceof Double)){
 						if(obj instanceof Date){
 							Long timeStamp = ((Date)obj).getTime();
-							obj = Double.parseDouble(timeStamp.toString());
-						} else if((obj instanceof Long)||(obj instanceof Integer)){
-							BigDecimal bigDecimal = new BigDecimal(obj.toString());
-							bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP);
-							bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), BigDecimal.ROUND_HALF_UP);
-							obj = bigDecimal.doubleValue();
-						} else {
-							obj = Double.parseDouble(obj.toString());
+							obj = timeStamp.toString();
 						}
-					}			
+					}					
+					if(adjust){
+						BigDecimal bigDecimal = new BigDecimal(obj.toString());						
+						bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
+						obj = bigDecimal.doubleValue();
+					} else {
+						obj = Double.parseDouble(obj.toString());
+					}
 				} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
 					if(!(obj instanceof String)){
 						obj=obj.toString();
