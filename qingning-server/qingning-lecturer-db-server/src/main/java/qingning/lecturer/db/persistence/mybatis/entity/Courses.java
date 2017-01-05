@@ -48,8 +48,6 @@ public class Courses {
     private Date realStartTime;
 
     private Long realStudentNum;
-
-    private long realStudentNum;
     
     public String getCourseId() {
         return courseId;
@@ -234,10 +232,6 @@ public class Courses {
     public void setRealStudentNum(Long realStudentNum) {
         this.realStudentNum = realStudentNum;
     }
-
-	public long getRealStudentNum() {
-		return realStudentNum;
-	}
 
 	public void setRealStudentNum(long realStudentNum) {
 		this.realStudentNum = realStudentNum;
