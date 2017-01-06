@@ -1,5 +1,7 @@
 package qingning.mq.persistence.mybatis;
 
+import qingning.mq.persistence.entity.Lecturer;
+
 import java.util.Map;
 
 public interface LecturerMapper {
