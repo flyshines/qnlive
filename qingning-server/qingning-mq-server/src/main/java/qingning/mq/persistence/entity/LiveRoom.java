@@ -1,4 +1,4 @@
-package qingning.common.db.persistence.mybatis.entity;
+package qingning.mq.persistence.entity;
 
 import java.util.Date;
 
