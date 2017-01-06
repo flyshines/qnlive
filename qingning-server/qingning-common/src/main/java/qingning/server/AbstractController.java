@@ -16,7 +16,7 @@ import qingning.server.rpc.manager.IUserModuleServer;
 import java.util.*;
 
 public abstract class AbstractController {
-	private MqUtils mqUtils; 
+	protected MqUtils mqUtils; 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;	
 	@Autowired
@@ -71,10 +71,14 @@ public abstract class AbstractController {
 		return process(reqEntity, servicer, serviceManger, message);
 	}
 	
-	private Object process(RequestEntity reqEntity, QNLiveServer servicer,ServiceManger serviceManger, MessageEntity message) throws Exception{
+	protected void initControlResource(){
 		if(mqUtils==null){
 			mqUtils = new MqUtils(rabbitTemplate);
 		}
+	}
+	
+	private Object process(RequestEntity reqEntity, QNLiveServer servicer,ServiceManger serviceManger, MessageEntity message) throws Exception{
+		initControlResource();
 		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(serverUrlInfoMap)){
 			generateServerUrlInfoMap();
 		}

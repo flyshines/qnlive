@@ -320,6 +320,35 @@
 				<outputs>
 				</outputs>
 			</function>
+						
+			<function name="logUserInfo">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="login_id" type="string"/>
+					<param name="login_type" type="string" default="0"/>
+					<param name="user_id" type="string"/>
+					<param name="phone_num" type="string"/>
+					<param name="device_id" type="string"/>
+					<param name="plateform" type="string" require="Y,000100"/>
+					<param name="device_model" type="string"/>
+					<param name="device_oem" type="string"/>
+					<param name="screen_size" type="string"/>
+					<param name="os_version" type="string"/>
+					<param name="longitude" type="double"/>
+					<param name="latitude" type="double"/>
+					<param name="download_channel" type="string"/>
+					<param name="version" type="string"/>
+					<param name="net_status" type="string"/>
+					<param name="network_operators" type="string"/>
+					<param name="webchat_authorization" type="string"/>
+					<param name="status" type="string" default="2"/>							
+				</inputs>
+				<outputs>
+					<param name="server_time" type="long"/>			
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

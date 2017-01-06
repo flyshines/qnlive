@@ -28,6 +28,7 @@ public class WeiXinUtil {
     public final static String access_token_url = IMMsgUtil.configMap.get("access_token_url");
     public final static String get_user_info_by_code_url = IMMsgUtil.configMap.get("get_user_info_by_code_url");
     public final static String get_user_info_by_access_token = IMMsgUtil.configMap.get("get_user_info_by_access_token");
+    public final static String get_base_user_info_by_access_token = IMMsgUtil.configMap.get("get_base_user_info_by_access_token");
     //获取JSAPI_Ticket
     public static String jsapi_ticket_url = IMMsgUtil.configMap.get("jsapi_ticket_url");
 
@@ -44,7 +45,11 @@ public class WeiXinUtil {
     public static AccessToken getAccessToken(String appid, String appsecret,Jedis jedis) {
         AccessToken accessToken = null;
         String token = jedis.get(Constants.CACHED_KEY_WEIXIN_TOKEN);
-
+        if(MiscUtils.isEmpty(appid) || MiscUtils.isEmpty(appsecret)){
+        	appid=WeiXinUtil.appid;
+        	appsecret=WeiXinUtil.appsecret;
+        }
+        
         if(token == null){
             String requestUrl = access_token_url.replace("APPID", appid).replace("APPSECRET", appsecret);
             String requestResult = HttpTookit.doGet(requestUrl);
@@ -96,7 +101,19 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
-
+    /**
+     * 获取用户基本信息
+     * @param accessToken
+     * @return
+     */
+    public static JSONObject getBaseUserInfoByAccessToken(String accessToken, String unionId) {
+        String requestUrl = get_base_user_info_by_access_token.replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
+        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestUrl);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestResult);
+        return jsonObject;
+    }
 
     /**
      * 获取jsapi_ticket
