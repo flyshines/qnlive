@@ -4,12 +4,7 @@ package qingning.common.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.db.persistence.mybatis.*;
-import qingning.common.db.persistence.mybatis.entity.CoursesStudents;
-import qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit;
-import qingning.common.db.persistence.mybatis.entity.LoginInfo;
-import qingning.common.db.persistence.mybatis.entity.PaymentBill;
-import qingning.common.db.persistence.mybatis.entity.TradeBill;
-import qingning.common.db.persistence.mybatis.entity.User;
+import qingning.common.db.persistence.mybatis.entity.*;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
@@ -47,6 +42,15 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private DistributerMapper distributerMapper;
+
+	@Autowired(required = true)
+	private RoomDistributerMapper roomDistributerMapper;
+
+	@Autowired(required = true)
+	private LiveRoomMapper liveRoomMapper;
+
+	@Autowired(required = true)
+	private RoomDistributerRecommendMapper roomDistributerRecommendMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -294,5 +298,31 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.setUserId((String)parameters.get("userId"));
 		user.setUpdateTime((Date)parameters.get("updateTime"));
 		return userMapper.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public Map<String, Object> findRoomDistributerInfoByRqCode(String rq_code) {
+		return roomDistributerMapper.findRoomDistributerInfoByRqCode(rq_code);
+	}
+
+	@Override
+	public Map<String, Object> findLiveRoomByRoomId(String room_id) {
+		return liveRoomMapper.findLiveRoomByRoomId(room_id);
+	}
+
+	@Override
+	public Map<String, Object> findRoomDistributerRecommendAllInfo(Map<String, Object> queryMap) {
+		return roomDistributerRecommendMapper.findRoomDistributerRecommendAllInfo(queryMap);
+	}
+
+	@Override
+	public void insertRoomDistributerRecommend(Map<String, Object> insertMap) {
+		RoomDistributerRecommend rdr = new RoomDistributerRecommend();
+
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
+		return roomDistributerMapper.findRoomDistributionInfoByDistributerId(queryMap);
 	}
 }

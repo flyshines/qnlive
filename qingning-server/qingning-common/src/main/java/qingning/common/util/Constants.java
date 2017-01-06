@@ -88,8 +88,10 @@ public final class Constants {
 	public static final String FIELD_ROOM_ID="room_id";
 	
 	public static final String CACHED_KEY_DISTRIBUTER_FIELD = "distributer_id";
+	public static final String CACHED_KEY_DISTRIBUTER_RECOMMEND_FIELD = "recommend_code";
 	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";
-	
+	public static final String CACHED_KEY_DISTRIBUTER_RECOMMEND_INFO = "SYS:DISTRIBUTER:RECOMMEND_INFO:{recommend_code}";
+
 	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
 	

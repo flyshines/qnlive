@@ -43,4 +43,14 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findRoomDistributerCourseDetailsInfo(Map<String,Object> parameters);
 	
 	int updateUser(Map<String,Object> parameters);
+
+	Map<String,Object> findRoomDistributerInfoByRqCode(String rqCode);
+
+	Map<String,Object> findLiveRoomByRoomId(String room_id);
+
+	Map<String,Object> findRoomDistributerRecommendAllInfo(Map<String, Object> queryMap);
+
+	void insertRoomDistributerRecommend(Map<String, Object> insertMap);
+
+	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 }
