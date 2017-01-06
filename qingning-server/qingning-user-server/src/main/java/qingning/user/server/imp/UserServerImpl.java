@@ -588,7 +588,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("course_type", courseMap.get("course_type"));
-        resultMap.put("course_status", courseMap.get("status"));
+        resultMap.put("status", courseMap.get("status"));
         resultMap.put("course_url", courseMap.get("course_url"));
         resultMap.put("course_title", courseMap.get("course_title"));
         if (courseMap.get("course_price") != null) {
@@ -607,7 +607,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //从缓存中获取直播间信息
         Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
-        resultMap.put("room_avatar_address", liveRoomMap.get("avatar_address"));
+        resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
         resultMap.put("room_id", liveRoomMap.get("room_id"));
