@@ -298,7 +298,29 @@
 				<outputs>					
 				</outputs>
 			</function>
-			
+
+			<function name="getCourseInviteCard">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="getRoomInviteCard">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="room_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+						
 			<function name="logUserInfo">
 				<auth>
 					<accessToken require="N" />
