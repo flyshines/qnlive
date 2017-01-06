@@ -35,7 +35,6 @@
 			<function name="qiNiuUploadToken">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
 					<param name="upload_type" type="string" require="Y,000100"  />
@@ -85,7 +84,6 @@
 			<function name="userInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  format="^[1-2]$,120011"/>
@@ -106,7 +104,6 @@
 			<function name="commonDistribution">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
@@ -153,7 +150,6 @@
 			<function name="roomDistributerRecommendInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -177,7 +173,6 @@
 			<function name="roomDistributionInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -223,7 +218,6 @@
 			<function name="courseDistributionInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -272,7 +266,6 @@
 			<function name="roomDistributionShareInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"/>
@@ -288,7 +281,7 @@
 			<function name="updateUserInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
+					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="nick_name" type="string"/>

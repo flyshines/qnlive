@@ -7,7 +7,7 @@
 			<function name="userFollowRoom">
 				<auth>
 					<access_token require="Y" />
-					<timesLimit millisecond="50" />
+					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -20,7 +20,6 @@
 			<function name="userCourses">
 				<auth>
 					<access_token require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
@@ -33,7 +32,6 @@
 			<function name="roomInfo">
 				<auth>
 					<access_token require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -45,7 +43,6 @@
 			<function name="courseDetailInfo">
 				<auth>
 					<access_token require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -74,7 +71,6 @@
 			<function name="roomCourses">
 				<auth>
 					<access_token require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -98,7 +94,6 @@
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -146,7 +141,6 @@
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -158,7 +152,6 @@
 			<function name="courseStudents">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -170,7 +163,6 @@
 			<function name="getUserConsumeRecords">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
@@ -202,7 +194,6 @@
 			<function name="noticeRooms">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="10" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
