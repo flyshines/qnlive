@@ -7,6 +7,8 @@ public class Courses {
 
     private String roomId;
 
+    private String imCourseId;
+
     private String lecturerId;
 
     private String courseTitle;
@@ -45,9 +47,7 @@ public class Courses {
 
     private Date realStartTime;
 
-    private String imCourseId;
-
-    private long realStudentNum;
+    private Long realStudentNum;
     
     public String getCourseId() {
         return courseId;
@@ -63,6 +63,14 @@ public class Courses {
 
     public void setRoomId(String roomId) {
         this.roomId = roomId == null ? null : roomId.trim();
+    }
+
+    public String getImCourseId() {
+        return imCourseId;
+    }
+
+    public void setImCourseId(String imCourseId) {
+        this.imCourseId = imCourseId == null ? null : imCourseId.trim();
     }
 
     public String getLecturerId() {
@@ -217,17 +225,13 @@ public class Courses {
         this.realStartTime = realStartTime;
     }
 
-    public String getImCourseId() {
-        return imCourseId;
+    public Long getRealStudentNum() {
+        return realStudentNum;
     }
 
-    public void setImCourseId(String imCourseId) {
-        this.imCourseId = imCourseId == null ? null : imCourseId.trim();
+    public void setRealStudentNum(Long realStudentNum) {
+        this.realStudentNum = realStudentNum;
     }
-
-	public long getRealStudentNum() {
-		return realStudentNum;
-	}
 
 	public void setRealStudentNum(long realStudentNum) {
 		this.realStudentNum = realStudentNum;

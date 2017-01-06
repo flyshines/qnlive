@@ -15,7 +15,7 @@ public class LecturerCoursesProfit {
 
     private String distributerId;
 
-    private Double profitAmount;
+    private Long profitAmount;
 
     private String profitType;
 
@@ -77,11 +77,11 @@ public class LecturerCoursesProfit {
         this.distributerId = distributerId == null ? null : distributerId.trim();
     }
 
-    public Double getProfitAmount() {
+    public Long getProfitAmount() {
         return profitAmount;
     }
 
-    public void setProfitAmount(Double profitAmount) {
+    public void setProfitAmount(Long profitAmount) {
         this.profitAmount = profitAmount;
     }
 

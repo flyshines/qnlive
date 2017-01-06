@@ -105,9 +105,7 @@
 					<param name="course_price" type="double"/>
 					<param name="start_time" type="long"/>
 					<param name="student_num" type="long"/>
-					<param name="student_list" type="list">
-						<param name="avatar_address" type="string"/>
-					</param>
+					<param name="student_list" type="list"/>
 					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="string"/>
 					<param name="room_remark" type="string"/>
@@ -116,7 +114,7 @@
 					<param name="room_id" type="string"/>
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
-					<param name="roles" type="string"/>
+					<param name="roles" type="list"/>
 				</outputs>
 			</function>
 

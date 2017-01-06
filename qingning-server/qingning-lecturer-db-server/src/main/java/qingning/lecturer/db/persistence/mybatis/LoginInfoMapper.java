@@ -19,4 +19,6 @@ public interface LoginInfoMapper {
     int updateByPrimaryKey(LoginInfo record);
 
     Map<String,Object> findLoginInfoByUserId(String user_id);
+
+    void updateUserRole(Map<String, Object> updateMap);
 }

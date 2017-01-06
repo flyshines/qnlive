@@ -7,7 +7,9 @@ import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
+import qingning.common.server.other.ReadCourseOperation;
 import qingning.common.server.other.ReadDistributerOperation;
+import qingning.common.server.other.ReadLiveRoomOperation;
 import qingning.common.server.other.ReadUserOperation;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
@@ -23,6 +25,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	private ICommonModuleServer commonModuleServer;
 	private ReadDistributerOperation readDistributerOperation;
 	private ReadUserOperation readUserOperation;
+	private ReadCourseOperation readCourseOperation;
+	private ReadLiveRoomOperation readLiveRoomOperation;
 	
 	@Override
 	public void initRpcServer() {
@@ -30,6 +34,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			commonModuleServer = this.getRpcService("commonModuleServer");
 			readDistributerOperation = new ReadDistributerOperation(commonModuleServer);
 			readUserOperation = new ReadUserOperation(commonModuleServer);
+			readCourseOperation = new ReadCourseOperation(commonModuleServer);
+			readLiveRoomOperation = new ReadLiveRoomOperation(commonModuleServer);
 		}		
 	}
 
@@ -50,7 +56,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	@FunctionName("userLogin")
 	public Map<String,Object> userLogin (RequestEntity reqEntity) throws Exception{
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-		Map<String,Object> resultMap = new HashMap<String, Object>();
+		Map<String,Object> resultMap = new HashMap<>();
 		Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
 
 		int login_type_input = Integer.parseInt(reqMap.get("login_type").toString());
@@ -374,7 +380,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		//1.1如果课程不在缓存中，则查询数据库
 		if(MiscUtils.isEmpty(courseMap)){
 			Map<String,Object> courseObjectMap = commonModuleServer.findCourseByCourseId(courseId);
-			if(courseMap == null){
+			if(courseObjectMap == null){
 				throw new QNLiveException("120009");
 			}
 			courseMap = new HashMap<>();
@@ -407,14 +413,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		insertMap.put("course_id",courseMap.get("course_id"));
 		//判断类型为 0:课程收益 1:打赏
 		if(profit_type.equals("1")){
-			insertMap.put("amount", rewardInfoMap.get("amount").toString());
-			BigDecimal rewardBigDecimal = new BigDecimal(rewardInfoMap.get("amount").toString());
-			totalFee = (rewardBigDecimal.multiply(new BigDecimal(100))).intValue();
+			insertMap.put("amount", rewardInfoMap.get("amount"));
+			totalFee = ((Long)rewardInfoMap.get("amount")).intValue();
 			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}else if(profit_type.equals("0")){
 			insertMap.put("amount", courseMap.get("course_price"));
-			BigDecimal coursePriceBigDecimal = new BigDecimal(courseMap.get("course_price"));
-			totalFee = (coursePriceBigDecimal.multiply(new BigDecimal(100))).intValue();
+			totalFee = Integer.parseInt(courseMap.get("course_price"));
 			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}
 		insertMap.put("status","0");
@@ -749,5 +753,128 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			}
 		}
 		return new HashMap<String,Object>();
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("getCourseInviteCard")
+	public Map<String,Object> getCourseInviteCard (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String courseId = reqMap.get("course_id").toString();
+		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
+		resultMap.put("avatar_address",userMap.get("userMap"));
+		resultMap.put("nick_name",userMap.get("nick_name"));
+
+		Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
+		resultMap.put("course_title",courseMap.get("course_title"));
+		resultMap.put("start_time",courseMap.get("start_time"));
+		resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId);
+
+		return resultMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("getRoomInviteCard")
+	public Map<String,Object> getRoomInviteCard (RequestEntity reqEntity) throws Exception{//TODO
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String roomId = reqMap.get("room_id").toString();
+		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
+		resultMap.put("avatar_address",userMap.get("userMap"));
+		resultMap.put("nick_name",userMap.get("nick_name"));
+
+		Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
+		resultMap.put("room_name",liveRoomMap.get("liveRoomMap"));
+
+		//查询该用户是否为该直播间的分销员
+		Map<String,Object> queryMap = new HashMap<>();
+		queryMap.put("distributer_id", userId);
+		queryMap.put("room_id", roomId);
+		List<Map<String,Object>> roomDistributerList = commonModuleServer.findRoomDistributionInfoByDistributerId(queryMap);
+
+		boolean isDistributer = false;
+		String recommend_code = null;
+		long now = MiscUtils.getEndDateOfToday().getTime();
+		if (! MiscUtils.isEmpty(roomDistributerList)) {
+			for(Map<String,Object> map : roomDistributerList){
+				//0:永久有效 1: 1个月内有效 2: 3个月内有效 3: 6个月内有效 4: 9个月内有效 5:一年有效 6: 两年有效
+				if(map.get("effective_time").toString().equals("0")){
+					isDistributer = true;
+					recommend_code = map.get("rq_code").toString();
+					break;
+				}else {
+					if(map.get("end_date") != null){
+						Date end_date = (Date)map.get("end_date");
+						if(end_date.getTime() >= now){
+							isDistributer = true;
+							recommend_code = map.get("rq_code").toString();
+							break;
+						}
+					}
+				}
+			}
+		}
+		String share_url = null;
+		//是分销员
+		if(isDistributer == true){
+			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
+		}else {
+			//不是分销员
+			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId;
+		}
+		resultMap.put("share_url",share_url);
+		return resultMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("distributorsRecommendUser")
+	public Map<String,Object> distributersRecommendUser (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		String rqCode = reqMap.get("recommend_code").toString();
+		//0.读取直播间分销员信息
+		Map<String,Object> roomDistributerMap = commonModuleServer.findRoomDistributerInfoByRqCode(rqCode);
+		if(! MiscUtils.isEmpty(roomDistributerMap)){
+			Date end_date = (Date)roomDistributerMap.get("end_date");
+			Date todayEnd = MiscUtils.getEndDateOfToday();
+			//判断该分销员是否有效，有效则进行下一步验证
+			if(end_date.getTime() >= todayEnd.getTime()){
+				String room_id = roomDistributerMap.get("room_id").toString();
+				((Map<String, Object>) reqEntity.getParam()).put("room_id",room_id);
+				Map<String,String> roomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedisUtils,true);
+				String lecturerId = roomMap.get("lecturer_id");
+				//如果访问该推广链接的用户不是讲师，则进行下一步验证
+				if(! userId.equals(lecturerId)){
+					Map<String,Object> queryMap = new HashMap<>();
+					queryMap.put("room_id", room_id);
+					queryMap.put("user_id", userId);
+					queryMap.put("distributer_id", roomDistributerMap.get("distributer_id").toString());
+					Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendAllInfo(queryMap);
+
+					if(MiscUtils.isEmpty(roomDistributerRecommendMap)){
+						Map<String,Object> insertMap = new HashMap<>();
+						insertMap.put("distributer_recommend_id", MiscUtils.getUUId());
+						insertMap.put("distributer_id", roomDistributerMap.get("distributer_id").toString());
+						insertMap.put("room_id", room_id);
+						insertMap.put("user_id", userId);
+						insertMap.put("end_date", end_date);
+						insertMap.put("rq_code", rqCode);
+						commonModuleServer.insertRoomDistributerRecommend(insertMap);
+
+						//TODO
+					}
+				}
+			}
+		}
+
+
+		return resultMap;
 	}
 }

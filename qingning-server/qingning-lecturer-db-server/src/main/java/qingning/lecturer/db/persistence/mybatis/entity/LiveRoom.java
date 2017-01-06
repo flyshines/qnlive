@@ -23,9 +23,9 @@ public class LiveRoom {
 
     private String roomAddress;
 
-    private Double totalAmount;
+    private Long totalAmount;
 
-    private Double lastCourseAmount;
+    private Long lastCourseAmount;
 
     private Date createTime;
 
@@ -111,19 +111,19 @@ public class LiveRoom {
         this.roomAddress = roomAddress == null ? null : roomAddress.trim();
     }
 
-    public Double getTotalAmount() {
+    public Long getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(Double totalAmount) {
+    public void setTotalAmount(Long totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public Double getLastCourseAmount() {
+    public Long getLastCourseAmount() {
         return lastCourseAmount;
     }
 
-    public void setLastCourseAmount(Double lastCourseAmount) {
+    public void setLastCourseAmount(Long lastCourseAmount) {
         this.lastCourseAmount = lastCourseAmount;
     }
 

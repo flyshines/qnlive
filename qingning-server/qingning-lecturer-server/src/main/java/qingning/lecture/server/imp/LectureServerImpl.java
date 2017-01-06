@@ -50,12 +50,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("createLiveRoom")
     public Map<String, Object> createLiveRoom(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("room_address", "");//TODO
+        String room_id = MiscUtils.getUUId();
+        reqMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix") + room_id);
+        reqMap.put("room_id", room_id);
         //0.目前校验每个讲师仅能创建一个直播间
         //1.缓存中读取直播间信息
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
 
@@ -70,8 +72,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
         String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
         String user_role = jedis.hget(accessTokenKey, "user_role");
-
-        reqMap.put("user_role", user_role);
+        boolean isLecturer = false;
+        if(MiscUtils.isEmpty(user_role)){
+            isLecturer = false;
+        }else {
+            String[] roleArray = user_role.split(",");
+            for(String role : roleArray){
+                if(role.equals(Constants.USER_ROLE_LECTURER)){
+                    isLecturer = true;
+                }
+            }
+        }
+        reqMap.put("isLecturer", isLecturer);
         reqMap.put("user_id", userId);
         Map<String, Object> createResultMap = lectureModuleServer.createLiveRoom(reqMap);
 
@@ -80,25 +92,34 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
         String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        if (reqMap.get("user_role") == null || reqMap.get("user_role").toString().split(",").length == 1) {
+        if (isLecturer == false) {
             Map<String, Object> lectureObjectMap = lectureModuleServer.findLectureByLectureId(reqMap.get("user_id").toString());
-            Map<String, String> lectureStringMap = new HashMap<String, String>();
+            Map<String, String> lectureStringMap = new HashMap<>();
             MiscUtils.converObjectMapToStringMap(lectureObjectMap, lectureStringMap);
+            lectureStringMap.put("nick_name",createResultMap.get("nick_name").toString());
 
+            Map<String, Object> lecturerDistributionObjectMap = lectureModuleServer.findLecturerDistributionByLectureId(reqMap.get("user_id").toString());
+            Map<String, String> lecturerDistributionStringMap = new HashMap<>();
+            MiscUtils.converObjectMapToStringMap(lecturerDistributionObjectMap, lecturerDistributionStringMap);
+            lecturerDistributionStringMap.remove("create_time");
+            lecturerDistributionStringMap.remove("update_time");
+            lectureStringMap.putAll(lecturerDistributionStringMap);
+
+            //3.1新增讲师缓存
             jedis.hmset(lectureKey, lectureStringMap);
 
-            jedis.hset(accessTokenKey, "user_role", "normal_user,lecture");
+            //3.2修改access_token中的缓存
+            jedis.hset(accessTokenKey, "user_role", user_role+","+Constants.USER_ROLE_LECTURER);
         }
 
-        //增加讲师直播间信息缓存
-        String room_id = createResultMap.get("room_id").toString();
+        //3.3增加讲师直播间信息缓存
         Map<String, Object> liveRoomObjectMap = lectureModuleServer.findLiveRoomByRoomId(room_id);
-        Map<String, String> liveRoomStringMap = new HashMap<String, String>();
+        Map<String, String> liveRoomStringMap = new HashMap<>();
         MiscUtils.converObjectMapToStringMap(liveRoomObjectMap, liveRoomStringMap);
+
         map.clear();
         map.put(Constants.FIELD_ROOM_ID, createResultMap.get("room_id").toString());
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        liveRoomStringMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+room_id);
         jedis.hmset(liveRoomKey, liveRoomStringMap);
 
         //增加讲师直播间对应关系缓存(一对多关系)

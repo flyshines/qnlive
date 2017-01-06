@@ -4,13 +4,12 @@ package qingning.lecturer.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 import qingning.common.entity.QNLiveException;
+import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.lecturer.db.persistence.mybatis.*;
-import qingning.lecturer.db.persistence.mybatis.entity.Courses;
-import qingning.lecturer.db.persistence.mybatis.entity.Lecturer;
-import qingning.lecturer.db.persistence.mybatis.entity.LiveRoom;
-import qingning.lecturer.db.persistence.mybatis.entity.LoginInfo;
+import qingning.lecturer.db.persistence.mybatis.entity.*;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
 import java.math.BigDecimal;
@@ -47,6 +46,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	
 	@Autowired(required = true)
 	private DistributerMapper distributerMapper;
+
+	@Autowired(required = true)
+	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
 	
 	@Override
 	/**
@@ -57,29 +59,26 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Date now = new Date();
 		//1.插入直播间表
 		LiveRoom liveRoom = new LiveRoom();
-		liveRoom.setRoomId(MiscUtils.getUUId());
+		liveRoom.setRoomId(reqMap.get("room_id").toString());
 		liveRoom.setLecturerId(reqMap.get("user_id").toString());
 		liveRoom.setCourseNum(0L);
 		liveRoom.setFansNum(0L);
 		liveRoom.setDistributerNum(0L);
 
 		liveRoom.setRqCode(liveRoom.getRoomId());
-		liveRoom.setRoomAddress(reqMap.get("room_address").toString() + liveRoom.getRoomId());//TODO
-		liveRoom.setTotalAmount(0.0);
-		liveRoom.setLastCourseAmount(0.0);
+		liveRoom.setRoomAddress(reqMap.get("room_address").toString());
+		liveRoom.setTotalAmount(0L);
+		liveRoom.setLastCourseAmount(0L);
 		liveRoom.setCreateTime(now);
 		liveRoom.setUpdateTime(now);
 
 		//直播间名字、直播间头像地址、直播间简介的相关设置。
 		//如果有输入的参数则使用输入的参数，否则使用t_user表中的数据
-		if(reqMap.get("room_name") == null || reqMap.get("avatar_address") == null
-				|| reqMap.get("room_remark") == null){
-			userMap = userMapper.findByUserId(reqMap.get("user_id").toString());
-		}
-		if(reqMap.get("room_name") == null){
+		userMap = userMapper.findByUserId(reqMap.get("user_id").toString());
+		if(reqMap.get("room_name") == null || MiscUtils.isEmpty(reqMap.get("room_name").toString())){
 			liveRoom.setRoomName(userMap.get("nick_name").toString() + "的直播间");
 		}else {
-			liveRoom.setRoomName(reqMap.get("room_name").toString() + "的直播间");
+			liveRoom.setRoomName(reqMap.get("room_name").toString());
 		}
 
 		if(reqMap.get("avatar_address") == null){
@@ -93,8 +92,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}
 		liveRoomMapper.insert(liveRoom);
 
-		//2.如果该用户为普通用户，则需要插入讲师表，并且修改登录信息表中的身份
-		if(reqMap.get("user_role") == null || reqMap.get("user_role").toString().split(",").length == 1){
+		//2.如果该用户为普通用户，则需要插入讲师表，并且修改登录信息表中的身份，
+		// 同时插入t_lecturer_distribution_info讲师分销信息表(统计冗余表)
+		boolean isLecturer = (Boolean)reqMap.get("isLecturer");
+		if(isLecturer == false){
 			//2.1插入讲师表
 			Lecturer lecturer = new Lecturer();
 			lecturer.setLecturerId(reqMap.get("user_id").toString());
@@ -102,21 +103,40 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			lecturer.setTotalStudentNum(0L);
 			lecturer.setLiveRoomNum(0L);
 			lecturer.setFansNum(0L);
-			lecturer.setTotalAmount(0.0);
+			lecturer.setTotalAmount(0L);
+			lecturer.setPayStudentNum(0L);
+			lecturer.setTotalTime(0L);
+			lecturer.setPayCourseNum(0L);
+			lecturer.setPrivateCourseNum(0L);
 			lecturer.setCreateTime(now);
 			lecturer.setUpdateTime(now);
 			lecturerMapper.insert(lecturer);
 
 			//2.2修改登录信息表 身份
-			LoginInfo updateLoginInfo = new LoginInfo();
-			updateLoginInfo.setUserId(reqMap.get("user_id").toString());
-			updateLoginInfo.setUserRole("normal_user,lecture");
-			updateLoginInfo.setUpdateTime(now);
-			loginInfoMapper.updateByPrimaryKeySelective(updateLoginInfo);
+			Map<String,Object> updateMap = new HashMap<>();
+			updateMap.put("user_id",reqMap.get("user_id").toString());
+			updateMap.put("add_role",","+ Constants.USER_ROLE_LECTURER);
+			loginInfoMapper.updateUserRole(updateMap);
+
+			//2.3插入讲师分销信息表(统计冗余表)
+			LecturerDistributionInfo ldbi = new LecturerDistributionInfo();
+			ldbi.setLecturerId(reqMap.get("user_id").toString());
+			ldbi.setLiveRoomNum(0L);
+			ldbi.setRoomDistributerNum(0L);
+			ldbi.setRoomRecommendNum(0L);
+			ldbi.setRoomDoneNum(0L);
+			ldbi.setCourseDistributionNum(0L);
+			ldbi.setCourseDistributerNum(0L);
+			ldbi.setCourseRecommendNum(0L);
+			ldbi.setCourseDoneNum(0L);
+			ldbi.setCreateTime(now);
+			ldbi.setUpdateTime(now);
+			lecturerDistributionInfoMapper.insert(ldbi);
 		}
 
-		Map<String,Object> resultMap = new HashMap<String,Object>();
+		Map<String,Object> resultMap = new HashMap<>();
 		resultMap.put("room_id", liveRoom.getRoomId());
+		resultMap.put("nick_name", userMap.get("nick_name").toString());
 		return resultMap;
 	}
 
@@ -175,13 +195,15 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		if(reqMap.get("course_type").toString().equals("1")){
 			courses.setCoursePassword(reqMap.get("course_password").toString());
 		}else if(reqMap.get("course_type").toString().equals("2")){
-			courses.setCoursePrice(Long.parseLong(reqMap.get("course_price").toString()));
+			courses.setCoursePrice((Long)reqMap.get("course_price"));
 		}
 
 		courses.setStudentNum(0L);
 		courses.setCourseAmount(0L);
 		courses.setExtraNum(0L);
 		courses.setExtraAmount(0L);
+		courses.setRealStudentNum(0L);
+
 		Date now = new Date();
 		courses.setCreateTime(now);
 		courses.setCreateDate(now);
@@ -394,5 +416,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public List<Map<String, Object>> findRoomFanList(Map<String, Object> paramters) {		
 		return liveRoomMapper.findRoomFanList(paramters);
-	}	
+	}
+
+	@Override
+	public Map<String, Object> findLecturerDistributionByLectureId(String user_id) {
+		return lecturerDistributionInfoMapper.findLecturerDistributionByLectureId(user_id);
+	}
 }

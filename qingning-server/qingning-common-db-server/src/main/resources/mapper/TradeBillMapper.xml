@@ -6,8 +6,8 @@
     <result column="user_id" property="userId" jdbcType="VARCHAR" />
     <result column="room_id" property="roomId" jdbcType="VARCHAR" />
     <result column="course_id" property="courseId" jdbcType="VARCHAR" />
-    <result column="amount" property="amount" jdbcType="DOUBLE" />
-    <result column="payment" property="payment" jdbcType="DOUBLE" />
+    <result column="amount" property="amount" jdbcType="BIGINT" />
+    <result column="payment" property="payment" jdbcType="BIGINT" />
     <result column="status" property="status" jdbcType="CHAR" />
     <result column="close_reason" property="closeReason" jdbcType="VARCHAR" />
     <result column="close_time" property="closeTime" jdbcType="TIMESTAMP" />
@@ -36,7 +36,7 @@
     create_time, update_time, profit_type
     )
     values (#{tradeId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR},
-    #{courseId,jdbcType=VARCHAR}, #{amount,jdbcType=DOUBLE}, #{payment,jdbcType=DOUBLE},
+    #{courseId,jdbcType=VARCHAR}, #{amount,jdbcType=BIGINT}, #{payment,jdbcType=BIGINT},
     #{status,jdbcType=CHAR}, #{closeReason,jdbcType=VARCHAR}, #{closeTime,jdbcType=TIMESTAMP},
     #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{profitType,jdbcType=CHAR}
     )
@@ -95,10 +95,10 @@
         #{courseId,jdbcType=VARCHAR},
       </if>
       <if test="amount != null" >
-        #{amount,jdbcType=DOUBLE},
+        #{amount,jdbcType=BIGINT},
       </if>
       <if test="payment != null" >
-        #{payment,jdbcType=DOUBLE},
+        #{payment,jdbcType=BIGINT},
       </if>
       <if test="status != null" >
         #{status,jdbcType=CHAR},
@@ -133,10 +133,10 @@
         course_id = #{courseId,jdbcType=VARCHAR},
       </if>
       <if test="amount != null" >
-        amount = #{amount,jdbcType=DOUBLE},
+        amount = #{amount,jdbcType=BIGINT},
       </if>
       <if test="payment != null" >
-        payment = #{payment,jdbcType=DOUBLE},
+        payment = #{payment,jdbcType=BIGINT},
       </if>
       <if test="status != null" >
         status = #{status,jdbcType=CHAR},
@@ -164,8 +164,8 @@
     set user_id = #{userId,jdbcType=VARCHAR},
     room_id = #{roomId,jdbcType=VARCHAR},
     course_id = #{courseId,jdbcType=VARCHAR},
-    amount = #{amount,jdbcType=DOUBLE},
-    payment = #{payment,jdbcType=DOUBLE},
+    amount = #{amount,jdbcType=BIGINT},
+    payment = #{payment,jdbcType=BIGINT},
     status = #{status,jdbcType=CHAR},
     close_reason = #{closeReason,jdbcType=VARCHAR},
     close_time = #{closeTime,jdbcType=TIMESTAMP},

@@ -88,8 +88,10 @@ public final class Constants {
 	public static final String FIELD_ROOM_ID="room_id";
 	
 	public static final String CACHED_KEY_DISTRIBUTER_FIELD = "distributer_id";
+	public static final String CACHED_KEY_DISTRIBUTER_RECOMMEND_FIELD = "recommend_code";
 	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";
-	
+	public static final String CACHED_KEY_DISTRIBUTER_RECOMMEND_INFO = "SYS:DISTRIBUTER:RECOMMEND_INFO:{recommend_code}";
+
 	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
 	
@@ -145,9 +147,12 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_id}";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION = "COURSE:{course_id}:MESSAGE_LIST:QUESTION";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER = "COURSE:{course_id}:MESSAGE_LIST:LECTURER";
+	public static final String CACHED_KEY_COURSE_REAL_STUDENT_NUM = "COURSE:{course_id}:REAL_STUDENT_NUM";
 
 
-	public static final String USER_ROLE_LECTURER="lecture";
+	public static final String USER_ROLE_LECTURER="lecturer";
+	public static final String USER_ROLE_LISTENER="listener";
+	public static final String USER_ROLE_ADMIN="admin";
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
 	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 500;
 	

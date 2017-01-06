@@ -117,7 +117,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
-		double createTime = Double.parseDouble(body.get("send_time").toString());
+		double createTime = Double.parseDouble(information.get("create_time").toString());
 		String messageId = MiscUtils.getUUId();
 
 		//1.将聊天信息id插入到redis zsort列表中
@@ -191,7 +191,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
 		String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
-		double createTime = Double.parseDouble(body.get("send_time").toString());
+		double createTime = Double.parseDouble(information.get("create_time").toString());
 		String audioId = MiscUtils.getUUId();
 
 		//1.将讲课音频信息id插入到redis zsort列表中

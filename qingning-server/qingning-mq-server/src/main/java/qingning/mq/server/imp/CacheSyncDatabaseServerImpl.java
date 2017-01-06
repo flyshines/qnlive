@@ -6,6 +6,7 @@ import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.mq.persistence.entity.Courses;
+import qingning.mq.persistence.entity.Lecturer;
 import qingning.mq.persistence.entity.LiveRoom;
 import qingning.mq.persistence.mybatis.*;
 import qingning.server.AbstractMsgService;

@@ -46,13 +46,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("userFollowRoom")
     public Map<String, Object> userFollowRoom(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
 
         //1.更新数据库中关注表的状态
         Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
         //查询直播间是否存在 //TODO 需要进一步优化
@@ -61,7 +61,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         String lecturerId = jedis.hget(roomKey, "lecturer_id");
         reqMap.put("lecturer_id", lecturerId);
-
 
         Map<String, Object> dbResultMap = userModuleServer.userFollowRoom(reqMap);
         if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
@@ -483,7 +482,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //查询关注信息 //TODO 先查询数据库，后续确认是否查询缓存
         //关注状态 0未关注 1已关注
-        Map<String, Object> fansMap = userModuleServer.findFansByFansKey(reqMap);
+        Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
         if (CollectionUtils.isEmpty(fansMap)) {
             resultMap.put("follow_status", "0");
         } else {
@@ -615,10 +614,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         queryMap.clear();
         queryMap.put("user_id", userId);
-        queryMap.put("room_id", room_id);
-        queryMap.put("lecturer_id", courseMap.get("lecturer_id"));
         queryMap.put("course_id", courseMap.get("course_id"));
-        Map<String,Object> studentMap = userModuleServer.findStudentByKey(queryMap);
+        Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryMap);
 
         //返回用户身份
         //角色数组 1：普通用户、2：学员、3：讲师
@@ -644,7 +641,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //查询关注状态
         //关注状态 0未关注 1已关注
         reqMap.put("room_id", liveRoomMap.get("room_id"));
-        Map<String, Object> fansMap = userModuleServer.findFansByFansKey(reqMap);
+        Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
         if (CollectionUtils.isEmpty(fansMap)) {
             resultMap.put("follow_status", "0");
         } else {
@@ -851,10 +848,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //3.检测学生是否参与了该课程
         Map<String,Object> studentQueryMap = new HashMap<>();
         studentQueryMap.put("user_id",userId);
-        studentQueryMap.put("lecturer_id",courseMap.get("lecturer_id"));
-        studentQueryMap.put("room_id",courseMap.get("room_id"));
         studentQueryMap.put("course_id",courseMap.get("course_id"));
-        Map<String,Object> studentMap = userModuleServer.findStudentByKey(studentQueryMap);
+        Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(studentQueryMap);
         if(studentMap != null){
             throw new QNLiveException("100004");
         }
@@ -907,10 +902,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //检测学员是否加入了该课程，加入课程才能查询相关信息，如果没加入课程则提示学员未加入该课程（120007）
             Map<String,Object> queryStudentMap = new HashMap<>();
             queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("lecturer_id", jedis.hget(courseKey, "lecturer_id"));
-            queryStudentMap.put("room_id",jedis.hget(courseKey, "room_id"));
             queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-            findStudentByKey(queryStudentMap);
+            Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryStudentMap);
+            if(MiscUtils.isEmpty(studentMap)){
+                throw new QNLiveException("120007");
+            }
 
             courseMap = jedis.hgetAll(courseKey);
 
@@ -964,6 +960,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
 
+            //判断该课程状态，如果为直播中，则检查开播时间是否存在，如果开播时间存在，
+            //则检查当前查询是否大于当前时间，如果大于，则查询用户是否存在于在线map中，
+            //如果不存在，则将该学员加入的在线map中，并且修改课程缓存real_student_num实际课程人数(默认课程人数)
+            String realStudentNum = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+            boolean hasStudent = jedis.hexists(realStudentNum, userId);
+            if(hasStudent){
+                if(courseMap.get("status").equals("4")){
+                    if(courseMap.get("real_start_time") != null){
+                        Long real_start_time = Long.parseLong(courseMap.get("real_start_time"));
+                        long now = System.currentTimeMillis();
+                        if(now > real_start_time){
+                            jedis.hset(realStudentNum, userId, "1");
+                            jedis.hincrBy(courseKey, "real_student_num", 1);
+                        }
+                    }
+                }
+            }
+
         }else{
             //2.如果不在缓存中，则查询数据库
             Map<String,Object> courseInfoMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
@@ -974,10 +988,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             Map<String,Object> queryStudentMap = new HashMap<>();
             queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("lecturer_id", courseInfoMap.get("lecturer_id"));
-            queryStudentMap.put("room_id",courseInfoMap.get("room_id"));
             queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-            findStudentByKey(queryStudentMap);
+            Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryStudentMap);
+            if(MiscUtils.isEmpty(studentMap)){
+                throw new QNLiveException("120007");
+            }
 
             //查询课程PPT列表
             List<Map<String,Object>> pptList = userModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
@@ -1013,23 +1028,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("status",courseMap.get("status"));
         resultMap.put("course_type",courseMap.get("course_type"));
         resultMap.put("course_password",courseMap.get("course_password"));
-        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
+        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
 
         return resultMap;
-    }
-
-    private void findStudentByKey(Map<String,Object> courseMap) throws Exception{
-        Map<String,Object> studentQueryMap = new HashMap<>();
-        studentQueryMap.put("user_id",courseMap.get("user_id"));
-        studentQueryMap.put("lecturer_id",courseMap.get("lecturer_id"));
-        studentQueryMap.put("room_id",courseMap.get("room_id"));
-        studentQueryMap.put("course_id",courseMap.get("course_id"));
-        Map<String,Object> studentMap = userModuleServer.findStudentByKey(studentQueryMap);
-        if(studentMap == null){
-            throw new QNLiveException("120007");
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -1142,7 +1145,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<Map<String,Object>> messageList = userModuleServer.findCourseStudentList(queryMap);
 
         if(! CollectionUtils.isEmpty(messageList)){
-            resultMap.put("message_list", messageList);
+            resultMap.put("student_list", messageList);
         }
 
         return resultMap;

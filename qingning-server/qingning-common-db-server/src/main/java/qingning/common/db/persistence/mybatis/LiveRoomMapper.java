@@ -1,9 +1,9 @@
-package qingning.user.db.persistence.mybatis;
+package qingning.common.db.persistence.mybatis;
 
 
+import qingning.common.db.persistence.mybatis.entity.LiveRoom;
 
-import qingning.user.db.persistence.mybatis.entity.LiveRoom;
-
+import java.util.List;
 import java.util.Map;
 
 public interface LiveRoomMapper {
@@ -20,4 +20,5 @@ public interface LiveRoomMapper {
     int updateByPrimaryKey(LiveRoom record);
 
     Map<String,Object> findLiveRoomByRoomId(String room_id);
+
 }

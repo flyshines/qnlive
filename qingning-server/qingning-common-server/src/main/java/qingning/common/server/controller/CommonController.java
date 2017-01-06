@@ -380,6 +380,63 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
-    }  
+    }
+
+
+    /**
+     * 查询课程邀请卡信息
+     * @param course_id
+     * @param access_token
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/courses/{course_id}/card",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getCourseInviteCard(
+            @PathVariable("course_id") String course_id,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseInviteCard", access_token, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("course_id", course_id);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 查询直播间邀请卡信息
+     * @param room_id
+     * @param access_token
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/rooms/{room_id}/card",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getRoomInviteCard(
+            @PathVariable("room_id") String room_id,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getRoomInviteCard", access_token, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("room_id", room_id);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+    @RequestMapping(value="/common/distributors/{recommend_code}/user",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity distributorsRecommendUser(
+            @PathVariable("recommend_code") String recommend_code,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "distributorsRecommendUser", access_token, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("recommend_code", recommend_code);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }

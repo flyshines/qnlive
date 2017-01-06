@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.common.db.persistence.mybatis.RoomDistributerMapper" >
+  <resultMap id="BaseResultMap" type="qingning.common.db.persistence.mybatis.entity.RoomDistributer" >
+    <id column="room_distributer_id" property="roomDistributerId" jdbcType="VARCHAR" />
+    <result column="distributer_id" property="distributerId" jdbcType="VARCHAR" />
+    <result column="lecturer_id" property="lecturerId" jdbcType="VARCHAR" />
+    <result column="room_id" property="roomId" jdbcType="VARCHAR" />
+    <result column="recommend_num" property="recommendNum" jdbcType="BIGINT" />
+    <result column="course_num" property="courseNum" jdbcType="BIGINT" />
+    <result column="done_num" property="doneNum" jdbcType="BIGINT" />
+    <result column="profit_share_rate" property="profitShareRate" jdbcType="BIGINT" />
+    <result column="total_amount" property="totalAmount" jdbcType="BIGINT" />
+    <result column="effective_time" property="effectiveTime" jdbcType="CHAR" />
+    <result column="end_date" property="endDate" jdbcType="DATE" />
+    <result column="rq_code" property="rqCode" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_date" property="createDate" jdbcType="DATE" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="done_time" property="doneTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    room_distributer_id, distributer_id, lecturer_id, room_id, recommend_num, course_num, 
+    done_num, profit_share_rate, total_amount, effective_time, end_date, rq_code, create_time, 
+    create_date, update_time, done_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_room_distributer
+    where room_distributer_id = #{roomDistributerId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_room_distributer
+    where room_distributer_id = #{roomDistributerId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.RoomDistributer" >
+    insert into t_room_distributer (room_distributer_id, distributer_id, 
+      lecturer_id, room_id, recommend_num, 
+      course_num, done_num, profit_share_rate, 
+      total_amount, effective_time, end_date, 
+      rq_code, create_time, create_date, 
+      update_time, done_time)
+    values (#{roomDistributerId,jdbcType=VARCHAR}, #{distributerId,jdbcType=VARCHAR}, 
+      #{lecturerId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR}, #{recommendNum,jdbcType=BIGINT}, 
+      #{courseNum,jdbcType=BIGINT}, #{doneNum,jdbcType=BIGINT}, #{profitShareRate,jdbcType=BIGINT}, 
+      #{totalAmount,jdbcType=BIGINT}, #{effectiveTime,jdbcType=CHAR}, #{endDate,jdbcType=DATE}, 
+      #{rqCode,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{createDate,jdbcType=DATE}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{doneTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.RoomDistributer" >
+    insert into t_room_distributer
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="roomDistributerId != null" >
+        room_distributer_id,
+      </if>
+      <if test="distributerId != null" >
+        distributer_id,
+      </if>
+      <if test="lecturerId != null" >
+        lecturer_id,
+      </if>
+      <if test="roomId != null" >
+        room_id,
+      </if>
+      <if test="recommendNum != null" >
+        recommend_num,
+      </if>
+      <if test="courseNum != null" >
+        course_num,
+      </if>
+      <if test="doneNum != null" >
+        done_num,
+      </if>
+      <if test="profitShareRate != null" >
+        profit_share_rate,
+      </if>
+      <if test="totalAmount != null" >
+        total_amount,
+      </if>
+      <if test="effectiveTime != null" >
+        effective_time,
+      </if>
+      <if test="endDate != null" >
+        end_date,
+      </if>
+      <if test="rqCode != null" >
+        rq_code,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="doneTime != null" >
+        done_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="roomDistributerId != null" >
+        #{roomDistributerId,jdbcType=VARCHAR},
+      </if>
+      <if test="distributerId != null" >
+        #{distributerId,jdbcType=VARCHAR},
+      </if>
+      <if test="lecturerId != null" >
+        #{lecturerId,jdbcType=VARCHAR},
+      </if>
+      <if test="roomId != null" >
+        #{roomId,jdbcType=VARCHAR},
+      </if>
+      <if test="recommendNum != null" >
+        #{recommendNum,jdbcType=BIGINT},
+      </if>
+      <if test="courseNum != null" >
+        #{courseNum,jdbcType=BIGINT},
+      </if>
+      <if test="doneNum != null" >
+        #{doneNum,jdbcType=BIGINT},
+      </if>
+      <if test="profitShareRate != null" >
+        #{profitShareRate,jdbcType=BIGINT},
+      </if>
+      <if test="totalAmount != null" >
+        #{totalAmount,jdbcType=BIGINT},
+      </if>
+      <if test="effectiveTime != null" >
+        #{effectiveTime,jdbcType=CHAR},
+      </if>
+      <if test="endDate != null" >
+        #{endDate,jdbcType=DATE},
+      </if>
+      <if test="rqCode != null" >
+        #{rqCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="doneTime != null" >
+        #{doneTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.RoomDistributer" >
+    update t_room_distributer
+    <set >
+      <if test="distributerId != null" >
+        distributer_id = #{distributerId,jdbcType=VARCHAR},
+      </if>
+      <if test="lecturerId != null" >
+        lecturer_id = #{lecturerId,jdbcType=VARCHAR},
+      </if>
+      <if test="roomId != null" >
+        room_id = #{roomId,jdbcType=VARCHAR},
+      </if>
+      <if test="recommendNum != null" >
+        recommend_num = #{recommendNum,jdbcType=BIGINT},
+      </if>
+      <if test="courseNum != null" >
+        course_num = #{courseNum,jdbcType=BIGINT},
+      </if>
+      <if test="doneNum != null" >
+        done_num = #{doneNum,jdbcType=BIGINT},
+      </if>
+      <if test="profitShareRate != null" >
+        profit_share_rate = #{profitShareRate,jdbcType=BIGINT},
+      </if>
+      <if test="totalAmount != null" >
+        total_amount = #{totalAmount,jdbcType=BIGINT},
+      </if>
+      <if test="effectiveTime != null" >
+        effective_time = #{effectiveTime,jdbcType=CHAR},
+      </if>
+      <if test="endDate != null" >
+        end_date = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="rqCode != null" >
+        rq_code = #{rqCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="doneTime != null" >
+        done_time = #{doneTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where room_distributer_id = #{roomDistributerId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.RoomDistributer" >
+    update t_room_distributer
+    set distributer_id = #{distributerId,jdbcType=VARCHAR},
+      lecturer_id = #{lecturerId,jdbcType=VARCHAR},
+      room_id = #{roomId,jdbcType=VARCHAR},
+      recommend_num = #{recommendNum,jdbcType=BIGINT},
+      course_num = #{courseNum,jdbcType=BIGINT},
+      done_num = #{doneNum,jdbcType=BIGINT},
+      profit_share_rate = #{profitShareRate,jdbcType=BIGINT},
+      total_amount = #{totalAmount,jdbcType=BIGINT},
+      effective_time = #{effectiveTime,jdbcType=CHAR},
+      end_date = #{endDate,jdbcType=DATE},
+      rq_code = #{rqCode,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      create_date = #{createDate,jdbcType=DATE},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      done_time = #{doneTime,jdbcType=TIMESTAMP}
+    where room_distributer_id = #{roomDistributerId,jdbcType=VARCHAR}
+  </update>
+
+  <select id="findRoomDistributerInfoByRqCode" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_room_distributer
+    where rq_code = #{rq_code}
+  </select>
+
+  <select id="findRoomDistributionInfoByDistributerId" resultType="hashmap" parameterType="hashmap" >
+    select end_date,effective_time,rq_code
+    from t_room_distributer
+    where room_id=#{room_id} and distributer_id=#{distributer_id}
+  </select>
+
+</mapper>

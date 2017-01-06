@@ -230,5 +230,12 @@
 
   </select>
 
+  <update id="updateUserRole" parameterType="hashmap" >
+    update t_login_info
+    <set >
+        user_role = CONCAT(user_role,#{add_role,jdbcType=VARCHAR})
+    </set>
+    where user_id = #{user_id,jdbcType=VARCHAR}
+  </update>
   
 </mapper>
