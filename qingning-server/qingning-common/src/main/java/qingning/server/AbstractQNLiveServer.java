@@ -177,6 +177,9 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 					Collection outputValueCol = (Collection)value;			
 					if(!outputValueCol.isEmpty()){				
 						for(Object obj : outputValueCol){
+							if(obj != null && (obj instanceof String || obj.getClass().isPrimitive())){
+								continue;
+							}							
 							if(!(obj instanceof Map)){
 								throw new QNLiveException("000103");
 							}
