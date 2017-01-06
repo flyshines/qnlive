@@ -105,7 +105,9 @@
 					<param name="course_price" type="double"/>
 					<param name="start_time" type="long"/>
 					<param name="student_num" type="long"/>
-					<param name="student_list" type="list"/>
+					<param name="student_list" type="list">
+						<param name="avatar_address" type="string"/>
+					</param>
 					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="string"/>
 					<param name="room_remark" type="string"/>
@@ -114,7 +116,7 @@
 					<param name="room_id" type="string"/>
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
-					<param name="roles" type="list"/>
+					<param name="roles" type="string"/>
 				</outputs>
 			</function>
 
@@ -163,7 +165,7 @@
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 				</inputs>
 				<outputs>
-					<param name="course_num" type="long"/>
+					<param name="course_num" type="long" default="0"/>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>
@@ -433,7 +435,7 @@
 					<param name="start_time" type="long"/>					
 				</inputs>
 				<outputs>
-					<param name="course_num" type="long"/>
+					<param name="course_num" type="long" default="0"/>
 					<param name="course_list" type="list">						
 						<param name="course_title" type="string"/>
 						<param name="start_time" type="long"/>

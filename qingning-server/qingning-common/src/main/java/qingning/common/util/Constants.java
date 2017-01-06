@@ -14,6 +14,8 @@ public final class Constants {
 	public static final String SYSOBJECT= "object";
 	public static final String SYSDATE="date";
 	public static final String SYSSTR="string";
+	public static final String SYS_CLASS_NAME  = "_SYS_CLASS_NAME";
+	public static final String SYS_CLASS_VALUE = "_SYS_CLASS_VALUE";
 	public static final int COURSE_MAX_INTERVAL = 10;
 	public static final int MAX_QUERY_LIMIT = 1000;
 	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";
@@ -156,4 +158,7 @@ public final class Constants {
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
 	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 500;
 	
+	
+	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";
+	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";
 }

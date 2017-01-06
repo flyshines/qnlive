@@ -75,6 +75,8 @@
 				<entry key="120013" value="分销课程不存在"/>
 				<entry key="120014" value="用户不是直播间的分销员"/>
 				<entry key="120015" value="微信支付失败"/>
+				
+				<entry key="120016" value="平台信息不能为空"/>
 			</map>
 		</property>
 	</bean>	
