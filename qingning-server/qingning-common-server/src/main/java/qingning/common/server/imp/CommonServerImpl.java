@@ -304,8 +304,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		} else if("2".equals (reqMap.get("upload_type"))){ //音频
 			url = IMMsgUtil.configMap.get("audio_space_domain_name");
-
-			token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, (StringMap)null);
+			StringMap putPolicy = new StringMap()
+					.put("persistentPipeline","qnlive-audio-convert")//设置私有队列处理
+					.put("persistentOps", "avthumb/mp3/ab/64k");//转码策略
+			token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, putPolicy);
 
 		}
 
