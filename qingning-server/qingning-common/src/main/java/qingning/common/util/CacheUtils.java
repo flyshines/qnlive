@@ -116,8 +116,10 @@ public final class CacheUtils {
 			keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, keyMap);
 			if(!jedis.exists(key)){
+				String functionName = requestEntity.getFunctionName();
 				requestEntity.setFunctionName(Constants.LECTURER_ROOM_LOAD);				
-				readListFromDB(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, key, Constants.FIELD_CREATE_TIME, Constants.FIELD_ROOM_ID,requestEntity, operation, jedisUtils, true);				
+				readListFromDB(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, key, Constants.FIELD_CREATE_TIME, Constants.FIELD_ROOM_ID,requestEntity, operation, jedisUtils, true);
+				requestEntity.setFunctionName(functionName);
 			}
 		}
 		return values;
