@@ -829,6 +829,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
             MiscUtils.converObjectMapToStringMap(courseObjectMap, courseMap);
         }
 
+        //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+        if(userId.equals(courseMap.get("lecturer_id"))){
+            throw new QNLiveException("100017");
+        }
         //2.检测课程验证信息是否正确
         //2.1如果课程为私密课程则检验密码
         if(courseMap.get("course_type").equals("1")){

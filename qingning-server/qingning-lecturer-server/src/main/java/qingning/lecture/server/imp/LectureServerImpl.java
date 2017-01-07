@@ -449,9 +449,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
     	
         //分享URL
-        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO   	
-    	//TODO Roles 赋值
-  
+        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
+    	List<String> roles = new ArrayList<>();
+        roles.add("3");//角色数组  1：普通用户、2：学员、3：讲师
+        resultMap.put("roles",roles);
+
         return resultMap;
     }
 

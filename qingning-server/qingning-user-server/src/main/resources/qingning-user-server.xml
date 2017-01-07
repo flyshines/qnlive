@@ -57,7 +57,7 @@
 					<param name="student_num" type="long"/>
 					<param name="student_list" type="list"/>
 					<param name="student_avatar_address" type="string"/>
-					<param name="room_avatar_address" type="string"/>
+					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="string"/>
 					<param name="room_remark" type="string"/>
 					<param name="course_remark" type="string"/>

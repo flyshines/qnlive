@@ -56,7 +56,7 @@
 				<entry key="100029" value="课程之间的开始时间要有三十分钟的间隔"/>
 				<entry key="100030" value="预告课程和非预告课程只能 降序 降序 或 升序 降序 排列"/>
 				<entry key="100031" value="直播间不存在，数据异常"/>
-				
+
 				<entry key="110003" value="关注直播间操作失败"/>
 
 
@@ -75,7 +75,8 @@
 				<entry key="120013" value="分销课程不存在"/>
 				<entry key="120014" value="用户不是直播间的分销员"/>
 				<entry key="120015" value="微信支付失败"/>
-				
+				<entry key="120017" value="微信支付失败"/>
+
 				<entry key="120016" value="平台信息不能为空"/>
 			</map>
 		</property>

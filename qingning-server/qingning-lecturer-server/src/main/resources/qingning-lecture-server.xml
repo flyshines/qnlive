@@ -115,7 +115,7 @@
 					<param name="room_id" type="string"/>
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
-					<param name="roles" type="string"/>
+					<param name="roles" type="list"/>
 				</outputs>
 			</function>
 
