@@ -53,4 +53,6 @@ public interface ICommonModuleServer {
 	void insertRoomDistributerRecommend(Map<String, Object> insertMap);
 
 	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
+
+	void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
 }

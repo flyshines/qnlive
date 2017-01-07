@@ -170,6 +170,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		p.setPaymentType(insertPayMap.get("payment_type").toString());
 		p.setStatus(insertPayMap.get("status").toString());
 		p.setPrePayNo(insertPayMap.get("pre_pay_no").toString());
+		p.setCreateTime((Date)insertPayMap.get("create_time"));
 		paymentBillMapper.insert(p);
 	}
 
@@ -318,11 +319,27 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void insertRoomDistributerRecommend(Map<String, Object> insertMap) {
 		RoomDistributerRecommend rdr = new RoomDistributerRecommend();
-
+		rdr.setDistributerRecommendId(insertMap.get("distributer_recommend_id").toString());
+		rdr.setDistributerId(insertMap.get("distributer_id").toString());
+		rdr.setRoomId(insertMap.get("room_id").toString());
+		rdr.setUserId(insertMap.get("user_id").toString());
+		rdr.setRecommendNum(0L);
+		rdr.setDoneNum(0L);
+		rdr.setCourseNum(0L);
+		rdr.setCreateTime((Date) insertMap.get("now"));
+		rdr.setUpdateTime((Date) insertMap.get("now"));
+		rdr.setEndDate((Date) insertMap.get("end_date"));
+		rdr.setRqCode(insertMap.get("rq_code").toString());
+		roomDistributerRecommendMapper.insert(rdr);
 	}
 
 	@Override
 	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
 		return roomDistributerMapper.findRoomDistributionInfoByDistributerId(queryMap);
+	}
+
+	@Override
+	public void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap) {
+		roomDistributerMapper.increteRecommendNumForRoomDistributer(updateMap);
 	}
 }

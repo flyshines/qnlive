@@ -422,4 +422,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String, Object> findLecturerDistributionByLectureId(String user_id) {
 		return lecturerDistributionInfoMapper.findLecturerDistributionByLectureId(user_id);
 	}
+
+	@Override
+	public Map<String, Object> findUserInfoByUserId(String userId) {
+		return userMapper.findByUserId(userId);
+	}
 }

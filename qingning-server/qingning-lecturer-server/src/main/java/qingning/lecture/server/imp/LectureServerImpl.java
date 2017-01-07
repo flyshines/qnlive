@@ -1553,6 +1553,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.FIELD_ROOM_ID, room_id);
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
         String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
+
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
@@ -1573,7 +1574,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.expire(key, 60*60*24);
                
         reqMap.clear();        
-        reqMap.put("room_share_code", room_share_code);       
+        reqMap.put("room_share_url", MiscUtils.getConfigByKey("be_distributer_url_pre_fix")+room_share_code);
+        Map<String,Object> userMap = lectureModuleServer.findUserInfoByUserId(userId);
+        reqMap.put("avatar_address", userMap.get("avatar_address"));
+        reqMap.put("nick_name", userMap.get("nick_name"));
+        reqMap.put("room_name", jedis.hget(liveRoomKey, "room_name"));
+        reqMap.put("profit_share_rate", values.get("profit_share_rate"));
         return reqMap;
 	}
 	

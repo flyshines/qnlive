@@ -452,7 +452,11 @@
 					<param name="room_id" type="string" require="Y,000100"/>		
 				</inputs>
 				<outputs>
-					<param name="room_share_code" type="string"/>
+					<param name="room_share_url" type="string"/>
+					<param name="avatar_address" type="string"/>
+					<param name="nick_name" type="string"/>
+					<param name="room_name" type="string"/>
+					<param name="profit_share_rate" type="double"/>
 				</outputs>
 			</function>
 			

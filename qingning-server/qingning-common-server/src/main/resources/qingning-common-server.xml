@@ -101,6 +101,15 @@
 				</outputs>
 			</function>
 
+			<function name="handleQiniuAudioResult">
+
+				<inputs>
+				</inputs>
+				<outputs>
+					<param  type="object"/>
+				</outputs>
+			</function>
+
 			<function name="commonDistribution">
 				<auth>
 					<accessToken require="Y" />
@@ -342,7 +351,22 @@
 					<param name="server_time" type="long"/>			
 				</outputs>
 			</function>
+
+			<function name="distributorsRecommendUser">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="recommend_code" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+
 		</default>
+
+
 
 		<version num="1.0.0" class="">
 		</version>

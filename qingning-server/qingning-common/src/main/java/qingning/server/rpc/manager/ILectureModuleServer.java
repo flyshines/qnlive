@@ -56,4 +56,6 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findRoomFanList(Map<String,Object> paramters);
 
 	Map<String,Object> findLecturerDistributionByLectureId(String user_id);
+
+	Map<String,Object> findUserInfoByUserId(String userId);
 }

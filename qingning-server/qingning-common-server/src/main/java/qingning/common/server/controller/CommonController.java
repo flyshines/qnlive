@@ -1,5 +1,6 @@
 package qingning.common.server.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qingning.common.entity.RequestEntity;
@@ -426,7 +427,7 @@ public class CommonController extends AbstractController {
     }
 
 
-    @RequestMapping(value="/common/distributors/{recommend_code}/user",method=RequestMethod.GET)
+    @RequestMapping(value="/common/distributors/{recommend_code}/user",method=RequestMethod.PUT)
     public @ResponseBody ResponseEntity distributorsRecommendUser(
             @PathVariable("recommend_code") String recommend_code,
             @RequestHeader("access_token") String access_token,
@@ -438,5 +439,7 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+
 
 }

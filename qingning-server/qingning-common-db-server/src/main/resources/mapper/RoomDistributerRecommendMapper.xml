@@ -17,7 +17,7 @@
   </resultMap>
   <sql id="Base_Column_List" >
     distributer_recommend_id, distributer_id, room_id, user_id, recommend_num, done_num,
-    course_num, position, create_time, update_time, end_date, rq_code
+    course_num, `position`, create_time, update_time, end_date, rq_code
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
@@ -32,7 +32,7 @@
   <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.RoomDistributerRecommend" >
     insert into t_room_distributer_recommend (distributer_recommend_id, distributer_id,
     room_id, user_id, recommend_num,
-    done_num, course_num, position,
+    done_num, course_num, `position`,
     create_time, update_time, end_date,
     rq_code)
     values (#{distributerRecommendId,jdbcType=VARCHAR}, #{distributerId,jdbcType=VARCHAR},
@@ -66,7 +66,7 @@
         course_num,
       </if>
       <if test="position != null" >
-        position,
+        `position`,
       </if>
       <if test="createTime != null" >
         create_time,
@@ -142,7 +142,7 @@
         course_num = #{courseNum,jdbcType=BIGINT},
       </if>
       <if test="position != null" >
-        position = #{position,jdbcType=BIGINT},
+        `position` = #{position,jdbcType=BIGINT},
       </if>
       <if test="createTime != null" >
         create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -167,7 +167,7 @@
     recommend_num = #{recommendNum,jdbcType=BIGINT},
     done_num = #{doneNum,jdbcType=BIGINT},
     course_num = #{courseNum,jdbcType=BIGINT},
-    position = #{position,jdbcType=BIGINT},
+    `position` = #{position,jdbcType=BIGINT},
     create_time = #{createTime,jdbcType=TIMESTAMP},
     update_time = #{updateTime,jdbcType=TIMESTAMP},
     end_date = #{endDate,jdbcType=DATE},
@@ -175,10 +175,10 @@
     where distributer_recommend_id = #{distributerRecommendId,jdbcType=VARCHAR}
   </update>
 
-  <select id="findRoomDistributerRecommendAllInfo" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findRoomDistributerRecommendAllInfo" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_room_distributer_recommend
-    where distributer_id = #{distributer_id} and room_id = #{room_id} and user_id = #{user_id} and rq_code = #{rq_code}
+    where room_id = #{room_id} and user_id = #{user_id} and end_date >= #{today_end_date,jdbcType=BIGINT}
   </select>
 </mapper>

@@ -207,6 +207,7 @@ public final class CacheUtils {
 			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		return readData(distributer_id, Constants.CACHED_KEY_DISTRIBUTER, Constants.CACHED_KEY_DISTRIBUTER_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
+
 	
 	public static List<Map<String,String>> readCourseListInfoOnlyFromCached(JedisUtils jedisUtils, List<String> courseIdList){
 		final List<Map<String,String>> result = new ArrayList<Map<String,String>>();
@@ -262,4 +263,6 @@ public final class CacheUtils {
 			return "";
 		}
 	}
+
+
 }

@@ -23,4 +23,6 @@ public interface RoomDistributerMapper {
     Map<String,Object> findRoomDistributerRecommendAllInfo(Map<String, Object> queryMap);
 
     List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
+
+    void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
 }

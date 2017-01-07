@@ -27,7 +27,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	private ReadUserOperation readUserOperation;
 	private ReadCourseOperation readCourseOperation;
 	private ReadLiveRoomOperation readLiveRoomOperation;
-	
+
 	@Override
 	public void initRpcServer() {
 		if(commonModuleServer == null){
@@ -306,7 +306,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			url = IMMsgUtil.configMap.get("audio_space_domain_name");
 			StringMap putPolicy = new StringMap()
 					.put("persistentPipeline","qnlive-audio-convert")//设置私有队列处理
-					.put("persistentOps", "avthumb/mp3/ab/64k");//转码策略
+					.put("persistentOps", "avthumb/mp3/ab/64k")
+					.put("persistentNotifyUrl",MiscUtils.getConfigByKey("qiniu-audio-transfer-persistent-notify-url"));//转码策略
+
 			token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, putPolicy);
 
 		}
@@ -465,6 +467,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			insertPayMap.put("payment_type","0");
 			insertPayMap.put("status","1");
 			insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
+			insertPayMap.put("create_time",new Date());
 			commonModuleServer.insertPaymentBill(insertPayMap);
 
 			//返回相关参数给前端.
@@ -787,11 +790,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		String roomId = reqMap.get("room_id").toString();
 		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
-		resultMap.put("avatar_address",userMap.get("userMap"));
+		resultMap.put("avatar_address",userMap.get("avatar_address"));
 		resultMap.put("nick_name",userMap.get("nick_name"));
 
 		Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
-		resultMap.put("room_name",liveRoomMap.get("liveRoomMap"));
+		resultMap.put("room_name",liveRoomMap.get("room_name"));
 
 		//查询该用户是否为该直播间的分销员
 		Map<String,Object> queryMap = new HashMap<>();
@@ -838,28 +841,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	public Map<String,Object> distributersRecommendUser (RequestEntity reqEntity) throws Exception{
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
 		Map<String,Object> resultMap = new HashMap<>();
+		Date now = new Date();
 
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		String rqCode = reqMap.get("recommend_code").toString();
 		//0.读取直播间分销员信息
 		Map<String,Object> roomDistributerMap = commonModuleServer.findRoomDistributerInfoByRqCode(rqCode);
 		if(! MiscUtils.isEmpty(roomDistributerMap)){
-			Date end_date = (Date)roomDistributerMap.get("end_date");
+			boolean isValidate =false;
 			Date todayEnd = MiscUtils.getEndDateOfToday();
-			//判断该分销员是否有效，有效则进行下一步验证
-			if(end_date.getTime() >= todayEnd.getTime()){
+			Date end_date = null;
+			if(roomDistributerMap.get("effective_time").equals("0")){
+				isValidate = true;
+			}else {
+				end_date = (Date)roomDistributerMap.get("end_date");
+
+				//1.判断该分销员是否有效，有效则进行下一步验证
+				if(end_date.getTime() >= todayEnd.getTime()){
+					isValidate = true;
+				}
+			}
+
+			if(isValidate == true){
 				String room_id = roomDistributerMap.get("room_id").toString();
-				((Map<String, Object>) reqEntity.getParam()).put("room_id",room_id);
 				Map<String,String> roomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedisUtils,true);
 				String lecturerId = roomMap.get("lecturer_id");
-				//如果访问该推广链接的用户不是讲师，则进行下一步验证
-				if(! userId.equals(lecturerId)){
+				//2.如果访问该推广链接的用户不是讲师,不是分销员，则进行下一步验证，验证用户目前是否已经属于了有效分销员
+				if((! userId.equals(lecturerId)) && (! userId.equals( roomDistributerMap.get("distributer_id").toString()))){
 					Map<String,Object> queryMap = new HashMap<>();
 					queryMap.put("room_id", room_id);
 					queryMap.put("user_id", userId);
-					queryMap.put("distributer_id", roomDistributerMap.get("distributer_id").toString());
+					queryMap.put("today_end_date", todayEnd.getTime());
 					Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendAllInfo(queryMap);
 
+					//3.如果该用户没有成为有效分销员的推荐用户，则该用户成为该分销员的推荐用户
 					if(MiscUtils.isEmpty(roomDistributerRecommendMap)){
 						Map<String,Object> insertMap = new HashMap<>();
 						insertMap.put("distributer_recommend_id", MiscUtils.getUUId());
@@ -868,9 +883,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						insertMap.put("user_id", userId);
 						insertMap.put("end_date", end_date);
 						insertMap.put("rq_code", rqCode);
+						insertMap.put("now", now);
 						commonModuleServer.insertRoomDistributerRecommend(insertMap);
 
-						//TODO
+						//4.直播间分销员的推荐人数增加一
+						Map<String,Object> updateMap = new HashMap<>();
+						updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
+						updateMap.put("room_id",room_id);
+						commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);
 					}
 				}
 			}
@@ -879,4 +899,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		return resultMap;
 	}
+
+
+
 }

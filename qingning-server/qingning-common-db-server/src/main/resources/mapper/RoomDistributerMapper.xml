@@ -235,4 +235,16 @@
     where room_id=#{room_id} and distributer_id=#{distributer_id}
   </select>
 
+
+  <update id="increteRecommendNumForRoomDistributer" parameterType="hashmap" >
+    update t_room_distributer
+    set
+    recommend_num = recommend_num + 1
+    where
+    distributer_id = #{distributer_id}
+    and
+    room_id = #{room_id}
+  </update>
+
+
 </mapper>
