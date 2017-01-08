@@ -122,7 +122,7 @@
 			<function name="updateCourse">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="500" />
+					<timesLimit millisecond="1500" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -138,7 +138,9 @@
 					       		isEmpty = isEmpty &amp;&amp; (course_password == null || course_password.length == 0);
 					       		isEmpty = isEmpty &amp;&amp; start_time == null;					       		
 					       		return status != 2 || isEmpty;},100023"/>
-					<param name="update_time" type="long" require="Y,000100"  />
+					<param name="update_time" type="long" require="N"  validate="(status)=>{
+					            var isEmpty= status==null || status.length == 0;
+					       		return isEmpty;},000100"/>
 				</inputs>
 				<outputs>
 				</outputs>

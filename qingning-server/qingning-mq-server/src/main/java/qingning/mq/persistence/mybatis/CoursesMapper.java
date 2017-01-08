@@ -26,4 +26,9 @@ public interface CoursesMapper {
     List<Map<String,Object>> findLecturerCourseList(Map<String, Object> queryMap);
 
     List<Map<String,Object>> findPlatformCourseList(Map<String, Object> queryMap);
+
+    List<Map<String,Object>> findCourseStartLongNoticeList();
+
+    List<Map<String,Object>> findCourseStartShortNoticeList();
+
 }

@@ -1,7 +1,7 @@
-package qingning.lecturer.db.persistence.mybatis;
+package qingning.mq.persistence.mybatis;
 
 
-import qingning.lecturer.db.persistence.mybatis.entity.CoursesStudents;
+import qingning.mq.persistence.entity.CoursesStudents;
 
 import java.util.List;
 import java.util.Map;
@@ -26,5 +26,5 @@ public interface CoursesStudentsMapper {
 
     List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
 
-    List<String> findUserIdsByCourseId(String course_id);
+    List<String> findStudentIdByCourseId(String course_id);
 }

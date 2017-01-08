@@ -225,6 +225,43 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> courses = coursesMapper.findCourseByCourseId(tradeBill.getCourseId());
 		PaymentBill paymentBill = paymentBillMapper.selectByTradeId(tradeBill.getTradeId());
 		LecturerCoursesProfit lcp = new LecturerCoursesProfit();
+		//如果为购买课程，则查询该学员是否属于某个分销员
+		if(tradeBill.getProfitType().equals("0")){
+			Map<String,Object> queryMap = new HashMap<>();
+			queryMap.put("room_id", tradeBill.getRoomId());
+			queryMap.put("user_id", tradeBill.getUserId());
+			queryMap.put("today_end_date", MiscUtils.getEndDateOfToday().getTime());
+			Map<String,Object> recommendMap = roomDistributerRecommendMapper.findRoomDistributerRecommendAllInfo(queryMap);
+
+			//设置相关收益
+			if(! MiscUtils.isEmpty(recommendMap)){
+				lcp.setDistributerId(recommendMap.get("distributer_id").toString());
+				Map<String,Object> distributerMap = roomDistributerMapper.findRoomDistributerInfoByRqCode(recommendMap.get("rq_code").toString());
+				long profit_share_rate = (Long)distributerMap.get("profit_share_rate");
+				long totalProfit = tradeBill.getAmount();
+				long shareAmount = profit_share_rate *  totalProfit / 10000;
+				lcp.setShareAmount(shareAmount);
+
+				//t_room_distributer更新 成交人数+1，分销总收益(分)增加，最后一次成交时间修改
+				Map<String,Object> roomDistributerUpdateMap = new HashMap<>();
+				roomDistributerUpdateMap.put("done_num",1);
+				roomDistributerUpdateMap.put("total_amount",shareAmount);
+				roomDistributerUpdateMap.put("done_time",now);
+				roomDistributerUpdateMap.put("rq_code",recommendMap.get("rq_code").toString());
+				roomDistributerMapper.studentBuyCourseUpdate(roomDistributerUpdateMap);
+
+				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新
+				Map<String,Object> roomDistributerRecommendUpdateMap = new HashMap<>();
+				roomDistributerRecommendUpdateMap.put("done_num",1);
+				roomDistributerRecommendUpdateMap.put("course_num",1);
+				roomDistributerRecommendUpdateMap.put("update_time",now);
+				roomDistributerRecommendUpdateMap.put("rq_code",recommendMap.get("rq_code").toString());
+				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
+
+			}
+		}
+
+
 		lcp.setProfitId(MiscUtils.getUUId());
 		lcp.setCourseId(tradeBill.getCourseId());
 		lcp.setRoomId(tradeBill.getRoomId());
@@ -257,6 +294,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			students.setCreateTime(now);
 			students.setCreateDate(now);
 			coursesStudentsMapper.insert(students);
+
+
 		}
 
 		resultMap.put("profit_type",tradeBill.getProfitType());

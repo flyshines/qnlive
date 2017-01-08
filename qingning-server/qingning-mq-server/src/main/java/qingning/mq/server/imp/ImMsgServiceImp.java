@@ -1,15 +1,13 @@
 package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.Constants;
-import qingning.common.util.IMMsgUtil;
-import qingning.common.util.JedisUtils;
-import qingning.common.util.MiscUtils;
+import qingning.common.util.*;
 import qingning.server.ImMsgService;
 import redis.clients.jedis.Jedis;
 
@@ -95,6 +93,9 @@ public class ImMsgServiceImp implements ImMsgService {
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 
+					//进行超时预先提醒定时任务
+					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+
 					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
 					String str = sdf.format(now);
@@ -133,6 +134,17 @@ public class ImMsgServiceImp implements ImMsgService {
 		}else if(information.get("send_type").equals("0")){
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
+
+			//如果为讲师回答，则需要进行极光推送
+		}else if(information.get("send_type").equals("1")){
+			JSONObject obj = new JSONObject();
+			map.put(Constants.CACHED_KEY_LECTURER_FIELD, information.get("creator_id").toString());
+			String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+			String lecturerName = jedis.hget(lecturerKey,"nick_name");
+			obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_question_answer"), lecturerName, courseMap.get("course_title")));
+			obj.put("to", information.get("student_id"));
+			obj.put("msg_type","12");
+			JPushHelper.push(obj);
 		}
 
 		//4.将聊天信息放入redis的map中

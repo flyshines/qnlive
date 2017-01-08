@@ -18,4 +18,6 @@ public interface RoomDistributerRecommendMapper {
     int updateByPrimaryKey(RoomDistributerRecommend record);
 
     Map<String,Object> findRoomDistributerRecommendAllInfo(Map<String, Object> queryMap);
+
+    void studentBuyCourseUpdate(Map<String, Object> roomDistributerRecommendUpdateMap);
 }

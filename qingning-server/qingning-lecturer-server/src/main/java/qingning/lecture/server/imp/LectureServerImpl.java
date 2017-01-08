@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class LectureServerImpl extends AbstractQNLiveServer {
 	private static Logger log = LoggerFactory.getLogger(LectureServerImpl.class);
@@ -411,6 +410,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             this.mqUtils.sendMessage(mqRequestEntity);
         }
 
+        //向关注者进行极光推送，使用标签进行推送
+        JSONObject obj = new JSONObject();
+        String roomId = jedis.hget(courseKey,"room_id");
+        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
+        String roomName = jedis.hget(liveRoomKey,"room_name");
+        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
+        obj.put("to", followUserIds);
+        obj.put("msg_type","11");
+        JPushHelper.push(obj);//TODO
+
         return resultMap;
     }
 
@@ -463,20 +472,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        boolean pass=true;
-        if(reqMap.get("start_time") != null){
-            Long startTime = (Long)reqMap.get("start_time");
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
-            if(cal.getTimeInMillis()>startTime){
-                pass=false;
-            }
-        }
 
-        if(!pass){
-            throw new QNLiveException("100019");
-        }
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<>();
@@ -673,6 +669,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     }
 
                     updateCacheMap.put("start_time", reqMap.get("start_time").toString());
+
+                    //发送极光推送,通知学员上课时间变更
+                    JSONObject obj = new JSONObject();
+                    Date newStartTimeDate = new Date(Long.parseLong(newStartTime));
+                    String courseTitle = jedis.hget(courseKey,"course_title");
+                    String startTimeFormat = MiscUtils.parseDateToFotmatString(newStartTimeDate,"MM月dd日HH:mm");
+                    List<String> studentIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(reqMap.get("course_id").toString());
+                    obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), courseTitle,startTimeFormat));
+                    obj.put("user_ids", studentIds);
+                    obj.put("msg_type", "13");
+                    JPushHelper.push(obj);
+
                 }
                 updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
                 jedis.hmset(courseKey, updateCacheMap);
@@ -1612,6 +1620,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         values.put("distributer_id", userId);
         lectureModuleServer.createRoomDistributer(values);
         jedis.hincrBy(liveRoomKey, "distributer_num", 1);
+
+        //发送成为新分销员极光推送
+        JSONObject obj = new JSONObject();
+        obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));
+        obj.put("to", values.get("lecturer_id"));
+        obj.put("msg_type", "9");
+        JPushHelper.push(obj);
 	}
 	
 	@SuppressWarnings("unchecked")

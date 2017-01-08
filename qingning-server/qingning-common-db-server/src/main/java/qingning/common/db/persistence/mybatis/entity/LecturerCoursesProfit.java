@@ -29,6 +29,8 @@ public class LecturerCoursesProfit {
 
     private Long position;
 
+    private Long shareAmount;
+
     public String getProfitId() {
         return profitId;
     }
@@ -131,5 +133,13 @@ public class LecturerCoursesProfit {
 
     public void setPosition(Long position) {
         this.position = position;
+    }
+
+    public Long getShareAmount() {
+        return shareAmount;
+    }
+
+    public void setShareAmount(Long shareAmount) {
+        this.shareAmount = shareAmount;
     }
 }

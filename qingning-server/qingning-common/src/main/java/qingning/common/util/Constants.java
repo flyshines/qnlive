@@ -161,4 +161,8 @@ public final class Constants {
 	
 	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";
 	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";
+
+	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
+	public static final String JPUSH_SEND_TYPE_ALIAS = "ALIAS";
+	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";
 }

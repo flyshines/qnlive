@@ -15,10 +15,11 @@
     <result column="payment_id" property="paymentId" jdbcType="VARCHAR" />
     <result column="payment_type" property="paymentType" jdbcType="CHAR" />
     <result column="position" property="position" jdbcType="BIGINT" />
+    <result column="share_amount" property="shareAmount" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     profit_id, course_id, room_id, lecturer_id, user_id, distributer_id, profit_amount,
-    profit_type, create_time, create_date, payment_id, payment_type, `position`
+    profit_type, create_time, create_date, payment_id, payment_type, `position`, share_amount
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
@@ -35,12 +36,12 @@
     lecturer_id, user_id, distributer_id,
     profit_amount, profit_type, create_time,
     create_date, payment_id, payment_type,
-    `position`)
+    `position`, share_amount)
     values (#{profitId,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR}, #{roomId,jdbcType=VARCHAR},
     #{lecturerId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{distributerId,jdbcType=VARCHAR},
     #{profitAmount,jdbcType=BIGINT}, #{profitType,jdbcType=CHAR}, #{createTime,jdbcType=TIMESTAMP},
     #{createDate,jdbcType=DATE}, #{paymentId,jdbcType=VARCHAR}, #{paymentType,jdbcType=CHAR},
-    #{position,jdbcType=BIGINT})
+    #{position,jdbcType=BIGINT}, #{shareAmount,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit" >
     insert into t_lecturer_courses_profit
@@ -84,6 +85,9 @@
       <if test="position != null" >
         `position`,
       </if>
+      <if test="shareAmount != null" >
+        share_amount,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="profitId != null" >
@@ -124,6 +128,9 @@
       </if>
       <if test="position != null" >
         #{position,jdbcType=BIGINT},
+      </if>
+      <if test="shareAmount != null" >
+        #{shareAmount,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -166,6 +173,9 @@
       <if test="position != null" >
         `position` = #{position,jdbcType=BIGINT},
       </if>
+      <if test="shareAmount != null" >
+        share_amount = #{shareAmount,jdbcType=BIGINT},
+      </if>
     </set>
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
@@ -182,7 +192,8 @@
     create_date = #{createDate,jdbcType=DATE},
     payment_id = #{paymentId,jdbcType=VARCHAR},
     payment_type = #{paymentType,jdbcType=CHAR},
-    `position` = #{position,jdbcType=BIGINT}
+    `position` = #{position,jdbcType=BIGINT},
+    share_amount = #{shareAmount,jdbcType=BIGINT}
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
 </mapper>

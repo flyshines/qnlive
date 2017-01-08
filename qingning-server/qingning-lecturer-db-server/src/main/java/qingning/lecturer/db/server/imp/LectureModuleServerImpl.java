@@ -3,19 +3,22 @@ package qingning.lecturer.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-
-
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.lecturer.db.persistence.mybatis.*;
-import qingning.lecturer.db.persistence.mybatis.entity.*;
+import qingning.lecturer.db.persistence.mybatis.entity.Courses;
+import qingning.lecturer.db.persistence.mybatis.entity.Lecturer;
+import qingning.lecturer.db.persistence.mybatis.entity.LecturerDistributionInfo;
+import qingning.lecturer.db.persistence.mybatis.entity.LiveRoom;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public class LectureModuleServerImpl implements ILectureModuleServer {
+
+	@Autowired(required = true)
+	private FansMapper fansMapper;
 
 	@Autowired(required = true)
 	private LecturerMapper lecturerMapper;
@@ -426,5 +429,15 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public Map<String, Object> findUserInfoByUserId(String userId) {
 		return userMapper.findByUserId(userId);
+	}
+
+	@Override
+	public List<String> findUserIdsFromStudentsByCourseId(String course_id) {
+		return coursesStudentsMapper.findUserIdsByCourseId(course_id);
+	}
+
+	@Override
+	public List<String> findFollowUserIdsByRoomId(String roomId) {
+		return fansMapper.findFollowUserIdsByRoomId(roomId);
 	}
 }

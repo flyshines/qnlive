@@ -356,4 +356,25 @@
       limit #{pageCount}
     </if>
   </select>
+
+
+  <select id="findCourseStartLongNoticeList" resultType="hashmap" >
+    select
+    course_id, lecturer_id, course_title,start_time
+    from t_courses
+    where
+    CURRENT_DATE =
+    DATE_SUB(start_time ,INTERVAL -2 day)
+  </select>
+
+  <select id="findCourseStartShortNoticeList" resultType="hashmap" >
+    select
+    course_id, lecturer_id, course_title,start_time
+    from t_courses
+    where
+    CURRENT_DATE =
+    DATE_SUB(start_time ,INTERVAL -1 day)
+  </select>
+
+
 </mapper>

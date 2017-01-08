@@ -8,12 +8,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import qingning.common.util.JedisUtils;
 import qingning.mq.persistence.mybatis.*;
-import qingning.mq.server.imp.CacheSyncDatabaseServerImpl;
-import qingning.mq.server.imp.LecturerCoursesServerImpl;
-import qingning.mq.server.imp.MessagePushServerImpl;
-import qingning.mq.server.imp.PlatformCoursesServerImpl;
+import qingning.mq.server.imp.*;
 import qingning.server.AbstractMsgService;
-import qingning.server.rabbitmq.MessageServer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +72,10 @@ public class MainBusinessTask {
 		platformCoursesServerimpl.setCourseAudioMapper(courseAudioMapper);
 		list.add(platformCoursesServerimpl);
 
+		//课程极光定时推送
+		CreateCourseNoticeTaskServerImpl createCourseNoticeTaskServerImpl = new CreateCourseNoticeTaskServerImpl();
+		createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
+		list.add(createCourseNoticeTaskServerImpl);
 	}
 
 	//本地测试 5秒执行一次，开发服30分钟执行一次，正式每天凌晨1点执行

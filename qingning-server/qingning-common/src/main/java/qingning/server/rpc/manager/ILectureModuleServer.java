@@ -58,4 +58,8 @@ public interface ILectureModuleServer {
 	Map<String,Object> findLecturerDistributionByLectureId(String user_id);
 
 	Map<String,Object> findUserInfoByUserId(String userId);
+
+	List<String> findUserIdsFromStudentsByCourseId(String course_id);
+
+	List<String> findFollowUserIdsByRoomId(String roomId);
 }

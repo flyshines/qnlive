@@ -525,7 +525,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					String mGroupId = handleResultMap.get("im_course_id").toString();
 					Map<String,Object> payUserMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("pay_user_id").toString());
 					Map<String,Object> lecturerMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("lecturer_id").toString());
-					String message = payUserMap.get("user_name") + "打赏了" + lecturerMap.get("user_name") + handleResultMap.get("pay_amount") + "元";
+					String message = payUserMap.get("nick_name") + "打赏了" + lecturerMap.get("nick_name") + handleResultMap.get("pay_amount") + "元";
 					long currentTime = System.currentTimeMillis();
 					String sender = "system";
 					Map<String,Object> infomation = new HashMap<>();

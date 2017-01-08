@@ -25,15 +25,15 @@ public class WeiXinUtil {
     private static Logger log = LoggerFactory.getLogger(WeiXinUtil.class);
 
     // 获取access_token的接口地址（GET） 限2000（次/天）
-    public final static String access_token_url = IMMsgUtil.configMap.get("access_token_url");
-    public final static String get_user_info_by_code_url = IMMsgUtil.configMap.get("get_user_info_by_code_url");
-    public final static String get_user_info_by_access_token = IMMsgUtil.configMap.get("get_user_info_by_access_token");
-    public final static String get_base_user_info_by_access_token = IMMsgUtil.configMap.get("get_base_user_info_by_access_token");
+    public final static String access_token_url = MiscUtils.getConfigByKey("access_token_url");
+    public final static String get_user_info_by_code_url = MiscUtils.getConfigByKey("get_user_info_by_code_url");
+    public final static String get_user_info_by_access_token = MiscUtils.getConfigByKey("get_user_info_by_access_token");
+    public final static String get_base_user_info_by_access_token = MiscUtils.getConfigByKey("get_base_user_info_by_access_token");
     //获取JSAPI_Ticket
-    public static String jsapi_ticket_url = IMMsgUtil.configMap.get("jsapi_ticket_url");
+    public static String jsapi_ticket_url = MiscUtils.getConfigByKey("jsapi_ticket_url");
 
-    private static final String appid = IMMsgUtil.configMap.get("appid");
-    private static final String appsecret = IMMsgUtil.configMap.get("appsecret");
+    private static final String appid = MiscUtils.getConfigByKey("appid");
+    private static final String appsecret = MiscUtils.getConfigByKey("appsecret");
 
 
     /**

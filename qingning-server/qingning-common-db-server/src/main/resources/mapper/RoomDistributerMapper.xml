@@ -247,4 +247,16 @@
   </update>
 
 
+  <update id="studentBuyCourseUpdate" parameterType="hashmap" >
+    update t_room_distributer
+    set
+    done_num = done_num + #{done_num},
+    total_amount = total_amount + #{total_amount},
+    done_time = #{done_time}
+    where
+    rq_code = #{rq_code}
+  </update>
+
+
+
 </mapper>

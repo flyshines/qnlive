@@ -25,4 +25,6 @@ public interface RoomDistributerMapper {
     List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
     void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
+
+    void studentBuyCourseUpdate(Map<String, Object> roomDistributerUpdateMap);
 }
