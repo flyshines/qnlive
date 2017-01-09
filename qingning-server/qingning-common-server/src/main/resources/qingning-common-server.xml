@@ -70,12 +70,19 @@
 			<function name="generateWeixinPayBill">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="200" />
+					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
 					<param name="profit_type" type="string" require="Y,000100"  format="^[0-1]$,120011"/>
 					<param name="course_id" type="string" require="Y,000100"/>
-					<param name="reward_id" type="string" require="N"/>
+					<param name="reward_amount" type="double" require="N" validate="(profit_type,reward_amount)=>{
+					       		var isEmpty= reward_amount==null || reward_amount == 0;
+					       		if(query_type == 1 &amp;&amp; isEmpty){
+					       		   return false;
+					       		}else{
+					       		   return true;
+					       		}
+					       		},000100"/>
 				</inputs>
 				<outputs>
 				</outputs>

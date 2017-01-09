@@ -396,16 +396,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String reward_id = null;
 		Map<String,Object> rewardInfoMap = null;
 		//0:课程收益 1:打赏
-		if(profit_type.equals("1")){
-			if(reqMap.get("reward_id") == null || StringUtils.isBlank(reqMap.get("reward_id").toString())){
-				throw new QNLiveException("000100");
-			}
-			reward_id = reqMap.get("reward_id").toString();
-			rewardInfoMap = commonModuleServer.findRewardInfoByRewardId(reward_id);
-			if(MiscUtils.isEmpty(rewardInfoMap)){
-				throw new QNLiveException("120010");
-			}
-		}
 
 		//3.插入t_trade_bill表 交易信息表
 		String goodName = null;
@@ -417,8 +407,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		insertMap.put("course_id",courseMap.get("course_id"));
 		//判断类型为 0:课程收益 1:打赏
 		if(profit_type.equals("1")){
-			insertMap.put("amount", rewardInfoMap.get("amount"));
-			totalFee = ((Long)rewardInfoMap.get("amount")).intValue();
+			insertMap.put("amount", reqMap.get("reward_amount"));
+			totalFee = ((Long)reqMap.get("reward_amount")).intValue();
 			goodName = new String(MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
 		}else if(profit_type.equals("0")){
 			insertMap.put("amount", courseMap.get("course_price"));
