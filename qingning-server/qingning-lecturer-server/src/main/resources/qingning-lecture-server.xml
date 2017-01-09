@@ -41,8 +41,12 @@
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  />
 					<param name="room_id" type="string" validate="(query_type,room_id)=>{
-					       		var isEmpty= room_id==null || room_id.length == 0;
-					       		return query_type == 0 || !isEmpty;},100016"/>
+					            var isEmpty= room_id==null || room_id.length == 0;
+					            if(query_type != 0 &amp;&amp; isEmpty){
+					               return false;
+					            }
+					       		return true;
+					       		},100016"/>
 				</inputs>
 				<outputs>
 				</outputs>
