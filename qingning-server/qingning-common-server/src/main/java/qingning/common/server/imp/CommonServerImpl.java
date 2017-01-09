@@ -13,6 +13,7 @@ import qingning.common.server.other.ReadCourseOperation;
 import qingning.common.server.other.ReadDistributerOperation;
 import qingning.common.server.other.ReadLiveRoomOperation;
 import qingning.common.server.other.ReadUserOperation;
+import qingning.common.server.util.DES;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
@@ -346,8 +347,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		//3.增加相关返回参数
 		resultMap.put("access_token", access_token);
+		resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
 		resultMap.put("m_user_id", m_user_id);
-		resultMap.put("m_pwd", m_pwd);
 		resultMap.put("user_id", user_id);
 		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(user_id);
 		resultMap.put("avatar_address", userMap.get("avatar_address"));
@@ -423,8 +424,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			}
 
 			resultMap.put("access_token", reqEntity.getAccessToken());
+			resultMap.put("im_account_info", encryptIMAccount(loginInfoMap.get("m_user_id").toString(), loginInfoMap.get("m_pwd").toString()));
 			resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
-			resultMap.put("m_pwd", loginInfoMap.get("m_pwd"));
 			resultMap.put("user_id", userId);
 			resultMap.put("avatar_address", userMap.get("avatar_address"));
 			resultMap.put("nick_name", userMap.get("nick_name"));
@@ -959,5 +960,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	}
 
 
+	private String encryptIMAccount(String mid, String mpwd){
+		String name='\0'+mid+'\0'+mpwd;
+		String keys= "l*c%@)c5";
+		String res = DES.encryptDES(name, keys);
+		return res;
+	}
 
 }
