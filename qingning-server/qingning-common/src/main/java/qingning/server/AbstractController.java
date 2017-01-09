@@ -110,7 +110,7 @@ public abstract class AbstractController {
 
 				Map<String,Object> innerMap = new HashMap<String,Object>();
 				innerMap.put("reward_id", infoMap.get("reward_id"));
-				innerMap.put("amount", infoMap.get("amount"));
+				innerMap.put("amount", (Long)infoMap.get("amount")/100.0);
 				innerMap.put("reward_pos", infoMap.get("reward_pos"));
 				processRewardConfigurationList.add(innerMap);
 			}

@@ -1035,6 +1035,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
+        Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
+        resultMap.put("lecturer_nick_name",userMap.get("nick_name"));
+        resultMap.put("lecturer_avatar_address",userMap.get("avatar_address"));
 
         return resultMap;
     }

@@ -279,6 +279,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(tradeBill.getProfitType().equals("0")){
            //如果为购买课程，则插入学员表
 			CoursesStudents students = new CoursesStudents();
+			students.setStudentId(MiscUtils.getUUId());
 			students.setUserId(tradeBill.getUserId());
 			students.setLecturerId(courses.get("lecturer_id").toString());
 			students.setRoomId(courses.get("room_id").toString());
@@ -380,5 +381,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap) {
 		roomDistributerMapper.increteRecommendNumForRoomDistributer(updateMap);
+	}
+
+	@Override
+	public void updateAfterPayCourse(Map<String, Object> updateCourseMap) {
+		coursesMapper.updateAfterPayCourse(updateCourseMap);
 	}
 }

@@ -414,9 +414,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         JSONObject obj = new JSONObject();
         String roomId = jedis.hget(courseKey,"room_id");
         List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
+        if(MiscUtils.isEmpty(followUserIds)){
+            return resultMap;
+        }
         String roomName = jedis.hget(liveRoomKey,"room_name");
         obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
-        obj.put("to", followUserIds);
+        obj.put("user_ids", followUserIds);
         obj.put("msg_type","11");
         JPushHelper.push(obj);//TODO
 

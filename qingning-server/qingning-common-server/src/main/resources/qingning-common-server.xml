@@ -77,7 +77,7 @@
 					<param name="course_id" type="string" require="Y,000100"/>
 					<param name="reward_amount" type="double" require="N" validate="(profit_type,reward_amount)=>{
 					       		var isEmpty= reward_amount==null || reward_amount == 0;
-					       		if(query_type == 1 &amp;&amp; isEmpty){
+					       		if(utils.isEqual(profit_type,'1') &amp;&amp; isEmpty){
 					       		   return false;
 					       		}else{
 					       		   return true;
