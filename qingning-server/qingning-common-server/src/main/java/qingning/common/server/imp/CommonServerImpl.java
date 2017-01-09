@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.server.other.ReadCourseOperation;
@@ -21,7 +23,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
-	
+
+	private static final Logger logger   = LoggerFactory.getLogger(CommonServerImpl.class);
 	private ICommonModuleServer commonModuleServer;
 	private ReadDistributerOperation readDistributerOperation;
 	private ReadUserOperation readUserOperation;
@@ -484,13 +487,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
 		if(billMap != null && billMap.get("status").equals("2")){
-			System.out.println("====>　已经处理完成, 不需要继续。流水号是: "+outTradeNo );
+			logger.debug("====>　已经处理完成, 不需要继续。流水号是: " + outTradeNo);
 			return TenPayConstant.SUCCESS;
 		}
 
 		//if (TenPayUtils.isValidSign(requestMapData)){// MD5签名成功，处理课程打赏\购买课程等相关业务
 		if(true){
-			System.out.println(" ===> 微信notify Md5 验签成功 <=== ");
+			logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
 			if("SUCCESS".equals(requestMapData.get("return_code")) &&
 					"SUCCESS".equals(requestMapData.get("result_code"))){
@@ -559,15 +562,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
 				resultStr = TenPayConstant.SUCCESS;
-				System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");
+				logger.debug("====> 微信支付流水: " + outTradeNo + " 更新成功, return success === ");
 
 			}else{
-				System.out.println("==> 微信支付失败 ,流水 ：" + outTradeNo);
+				logger.debug("==> 微信支付失败 ,流水 ：" + outTradeNo);
 				resultStr = TenPayConstant.FAIL;
 			}
 
 		}else {// MD5签名失败
-			System.out.println("==> fail -Md5 failed");
+			logger.debug("==> fail -Md5 failed");
 			resultStr = TenPayConstant.FAIL;
 		}
 		return resultStr;
