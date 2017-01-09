@@ -550,7 +550,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
 					}
 				}
-				
+
 				//直播间缓存中的收益
 				map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
 				map.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
