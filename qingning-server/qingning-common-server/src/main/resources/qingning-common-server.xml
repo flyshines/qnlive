@@ -345,8 +345,8 @@
 					<param name="device_oem" type="string"/>
 					<param name="screen_size" type="string"/>
 					<param name="os_version" type="string"/>
-					<param name="longitude" type="double"/>
-					<param name="latitude" type="double"/>
+					<param name="longitude" type="string"/>
+					<param name="latitude" type="string"/>
 					<param name="download_channel" type="string"/>
 					<param name="version" type="string"/>
 					<param name="net_status" type="string"/>

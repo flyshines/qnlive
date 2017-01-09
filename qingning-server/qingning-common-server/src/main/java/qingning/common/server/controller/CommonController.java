@@ -29,7 +29,29 @@ import javax.servlet.http.HttpServletResponse;
 public class CommonController extends AbstractController {
 
     private static final Logger logger   = LoggerFactory.getLogger(CommonController.class);
-
+    
+    /**
+     * 获取系统时间
+     *
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@RequestMapping(value = "/common/client/information", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity collectClientInformation(HttpEntity<Object> entity,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "logUserInfo", accessToken, null);
+		Map inputParameters = (Map)entity.getBody();
+        inputParameters.put("ip", ServerUtils.getRequestIP());
+        if(inputParameters.containsKey("login_id")){
+        	inputParameters.put("union_id", inputParameters.get("login_id"));
+        }
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
     /**
      * 获取系统时间
      *
