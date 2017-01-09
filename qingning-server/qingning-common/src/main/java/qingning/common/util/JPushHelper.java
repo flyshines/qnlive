@@ -28,11 +28,15 @@ public class JPushHelper {
 		// 推送人MID（个人）
 		String m_user_id = obj.getString("to");
 		// 推送人MID（多人）
-		List<String> userIds = JSON.parseObject(obj.getString("user_ids"), new TypeReference<List<String>>() {});
+		List<String> userIds = (List<String>)obj.get("user_ids");
 		// 推送类型
 		String msgType = obj.getString("msg_type");
 		// 推送人
-		String sendName = user.getString("nick");
+		String sendName = null;
+		if(user != null){
+			sendName = user.getString("nick");
+		}
+
 
 		//是标签推送还是别名推送
 		String sendType = obj.getString("send_type");
@@ -40,7 +44,7 @@ public class JPushHelper {
 		//	推送文本
 		String contents = null;
 		if (sendName == null || sendName == null) {
-			contents = "您收到一条新消息";
+			contents = content;
 		} else {
 			contents = sendName + ":" + content;
 		}

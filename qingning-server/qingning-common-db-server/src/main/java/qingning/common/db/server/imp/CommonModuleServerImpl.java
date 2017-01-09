@@ -381,4 +381,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap) {
 		roomDistributerMapper.increteRecommendNumForRoomDistributer(updateMap);
 	}
+
+	@Override
+	public void updateAfterPayCourse(Map<String, Object> updateCourseMap) {
+		coursesMapper.updateAfterPayCourse(updateCourseMap);
+	}
 }

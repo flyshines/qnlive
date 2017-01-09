@@ -55,4 +55,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
 	void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
+
+	void updateAfterPayCourse(Map<String, Object> updateCourseMap);
 }

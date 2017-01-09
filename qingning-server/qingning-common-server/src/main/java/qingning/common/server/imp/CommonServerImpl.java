@@ -511,6 +511,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				map.put(Constants.CACHED_KEY_COURSE_FIELD, handleResultMap.get("course_id").toString());
 				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
+				//处理缓存中的收益
+				//讲师缓存中的收益
+				Long amountLong = (Long)handleResultMap.get("pay_amount");
+				jedis.hincrBy(lecturerKey, "total_amount", amountLong.longValue());
+
 				if(profit_type.equals("1")){
 					String mGroupId = handleResultMap.get("im_course_id").toString();
 					Map<String,Object> payUserMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("pay_user_id").toString());
@@ -531,30 +536,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					messageMap.put("information",infomation);
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+					if(jedis.exists(courseKey)) {
+						jedis.hincrBy(courseKey, "extra_num", 1);
+						jedis.hincrBy(courseKey, "extra_amount", amountLong.longValue());
+					}
+
 				}else if(profit_type.equals("0")){
 					//增加课程人数
 					jedis.hincrBy(lecturerKey, "total_student_num", 1);
 					if(jedis.exists(courseKey)) {
 						jedis.hincrBy(courseKey, "student_num", 1);
+						jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
 					}
 				}
-
-				//处理缓存中的收益
-				//讲师缓存中的收益
-				BigDecimal amount = new BigDecimal((Double)handleResultMap.get("pay_amount"));
-				Long amountLong = amount.multiply(new BigDecimal(100)).longValue();
-				jedis.hincrBy(lecturerKey, "total_amount", amountLong.longValue());
-
+				
 				//直播间缓存中的收益
 				map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
 				map.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
 				String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, map);
 				jedis.hincrBy(liveRoomKey, "total_amount", amountLong.longValue());
 
-				//课程缓存中的收益
-				if(jedis.exists(courseKey)) {
-					jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
-				}
 
 				resultStr = TenPayConstant.SUCCESS;
 				System.out.println("====> 微信支付流水: "+outTradeNo+" 更新成功, return success === ");

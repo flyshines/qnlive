@@ -348,4 +348,12 @@
    	</if>
    	order by a.position desc limit #{page_count}
   </select>
+
+  <update id="updateAfterPayCourse" parameterType="hashmap" >
+    update t_courses
+    set room_id = #{roomId,jdbcType=VARCHAR},
+    student_num = #{student_num,jdbcType=BIGINT} + student_num,
+    where course_id = #{courseId,jdbcType=VARCHAR}
+  </update>
+
 </mapper>
