@@ -768,7 +768,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		String courseId = reqMap.get("course_id").toString();
 		Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
-		resultMap.put("avatar_address",userMap.get("userMap"));
+		resultMap.put("avatar_address",userMap.get("avatar_address"));
 		resultMap.put("nick_name",userMap.get("nick_name"));
 
 		Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
