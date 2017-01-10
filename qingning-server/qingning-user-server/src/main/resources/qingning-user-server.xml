@@ -49,7 +49,7 @@
 				</inputs>
 				<outputs>
 					<param name="course_type" type="string"/>
-					<param name="course_status" type="string"/>
+					<param name="status" type="string" fieldname="create_status"/>
 					<param name="course_url" type="string"/>
 					<param name="course_title" type="string"/>
 					<param name="course_price" type="double"/>

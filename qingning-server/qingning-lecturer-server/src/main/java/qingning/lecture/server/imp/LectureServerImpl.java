@@ -437,10 +437,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	throw new QNLiveException("100004");
         }
         MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);
-        Map<String ,Object> resultMap = new HashMap<String ,Object>();
-        for(String key:courseInfoMap.keySet()){
-        	resultMap.put(key, courseInfoMap.get(key));
-        }
+        Map<String ,Object> resultMap = new HashMap<>();
+        MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);
+        resultMap.putAll(courseInfoMap);
         
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("size",10);

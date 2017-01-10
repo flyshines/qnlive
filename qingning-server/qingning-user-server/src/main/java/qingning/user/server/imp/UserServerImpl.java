@@ -587,6 +587,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100004");
         }
 
+        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
         resultMap.put("course_type", courseMap.get("course_type"));
         resultMap.put("status", courseMap.get("status"));
         resultMap.put("course_url", courseMap.get("course_url"));
