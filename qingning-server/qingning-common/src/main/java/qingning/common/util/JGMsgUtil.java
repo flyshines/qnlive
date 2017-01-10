@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 public class JGMsgUtil {
 	private static final Logger logger = LoggerFactory.getLogger(JGMsgUtil.class);
@@ -31,7 +32,7 @@ public class JGMsgUtil {
 	}
 	
 	public static void sendMsg(String plat, List<String> audiences, String contents,  Integer count,
-			String msgType, String recipient) {
+			String msgType, String recipient, Map<String,String> extrasMap) {
 
 		JPushClient jpushClient = new JPushClient(masterSecret, appKey);
 		if (plat == null) {
@@ -70,7 +71,13 @@ public class JGMsgUtil {
 		}
 
 		Options options = Options.newBuilder().setApnsProduction(apnsProduction).build();
-		pushPayload = build(platform, audience, options, notification, contents);
+		Message message = null;
+		if(MiscUtils.isEmpty(extrasMap)){
+			message = Message.newBuilder().setMsgContent(contents).build();
+		}else {
+			message = Message.newBuilder().setMsgContent(contents).addExtras(extrasMap).build();
+		}
+		pushPayload = build(platform, audience, options, notification, contents, message);
 		try {
 			logger.info("开始远程消息推送");
 			PushResult result = jpushClient.sendPush(pushPayload);
@@ -86,9 +93,9 @@ public class JGMsgUtil {
 	}
 
 	private static PushPayload build(Platform platform, Audience audience, Options options, Notification notification,
-			String content) {
+			String content,Message message) {
 		return PushPayload.newBuilder().setPlatform(platform).setAudience(audience).setOptions(options)
-				.setNotification(notification).setMessage(Message.content(content)).build();
+				.setNotification(notification).setMessage(message).build();
 	}
 
 	public enum Platforms {

@@ -92,6 +92,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 obj.put("body",MiscUtils.getConfigByKey("jpush_course_live_overtime_per_notice"));
                 obj.put("to",courseMap.get("lecturer_id"));
                 obj.put("msg_type","4");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","4");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -125,6 +129,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_long_notice"), course_title,startTimeFormat));
                 obj.put("to",lecturer_id);
                 obj.put("msg_type","1");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","1");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -157,6 +165,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_short_notice"), course_title,"5"));
                 obj.put("to",lecturer_id);
                 obj.put("msg_type","2");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","2");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -189,6 +201,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 List<String> studentIds = coursesStudentsMapper.findStudentIdByCourseId(courseId);
                 obj.put("user_ids",studentIds);
                 obj.put("msg_type","10");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","10");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -232,6 +248,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_lecturer_not_show"), course_title));
                 obj.put("to",lecturer_id);
                 obj.put("msg_type","3");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","3");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
                 timerTask.cancel();
@@ -387,7 +407,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 JSONObject obj = new JSONObject();
                 obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_not_start_force_end"),courseMap.get("course_title")));
                 obj.put("to",courseMap.get("lecturer_id"));
-                obj.put("msg_type","7");
+                obj.put("msg_type","6");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","6");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
             }else if(type.equals("2")){
                 //课程直播超时结束
@@ -396,6 +420,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_live_overtime_force_end"),courseMap.get("course_title")));
                 obj.put("to",courseMap.get("lecturer_id"));
                 obj.put("msg_type","5");
+                Map<String,String> extrasMap = new HashMap<>();
+                extrasMap.put("msg_type","5");
+                extrasMap.put("course_id",courseId);
+                obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
             }
 

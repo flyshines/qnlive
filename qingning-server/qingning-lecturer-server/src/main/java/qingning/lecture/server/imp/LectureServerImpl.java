@@ -421,6 +421,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
         obj.put("user_ids", followUserIds);
         obj.put("msg_type","11");
+        Map<String,String> extrasMap = new HashMap<>();
+        extrasMap.put("msg_type","11");
+        extrasMap.put("course_id",dbResultMap.get("course_id").toString());
+        obj.put("extras_map", extrasMap);
         JPushHelper.push(obj);//TODO
 
         return resultMap;
@@ -681,6 +685,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), courseTitle,startTimeFormat));
                     obj.put("user_ids", studentIds);
                     obj.put("msg_type", "13");
+                    Map<String,String> extrasMap = new HashMap<>();
+                    extrasMap.put("msg_type","13");
+                    extrasMap.put("course_id",reqMap.get("course_id").toString());
+                    obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj);
 
                 }
@@ -1629,6 +1637,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));
         obj.put("to", values.get("lecturer_id"));
         obj.put("msg_type", "9");
+        Map<String,String> extrasMap = new HashMap<>();
+        extrasMap.put("msg_type","9");
+        extrasMap.put("course_id",room_id);
+        obj.put("extras_map", extrasMap);
         JPushHelper.push(obj);
 	}
 	

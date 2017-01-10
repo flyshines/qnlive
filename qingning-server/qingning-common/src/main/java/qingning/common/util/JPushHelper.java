@@ -37,6 +37,7 @@ public class JPushHelper {
 			sendName = user.getString("nick");
 		}
 
+		Map<String,String> extras_map = (Map<String,String>)obj.get("extras_map");
 
 		//是标签推送还是别名推送
 		String sendType = obj.getString("send_type");
@@ -67,7 +68,7 @@ public class JPushHelper {
 //				msgCount.remove(m_user_id);
 //			}
 			
-			JGMsgUtil.sendMsg("all", audiences, contents, count, msgType,sendType);
+			JGMsgUtil.sendMsg("all", audiences, contents, count, msgType,sendType,extras_map);
 			logger.info("====远程推送结束====");
 		} catch (Exception e) {
 			logger.error("远程推送发生错误：", e);

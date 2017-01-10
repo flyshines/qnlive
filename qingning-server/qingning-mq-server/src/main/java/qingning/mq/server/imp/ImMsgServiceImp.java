@@ -144,6 +144,10 @@ public class ImMsgServiceImp implements ImMsgService {
 			obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_question_answer"), lecturerName, courseMap.get("course_title")));
 			obj.put("to", information.get("student_id"));
 			obj.put("msg_type","12");
+			Map<String,String> extrasMap = new HashMap<>();
+			extrasMap.put("msg_type","12");
+			extrasMap.put("course_id",courseMap.get("course_id"));
+			obj.put("extras_map", extrasMap);
 			JPushHelper.push(obj);
 		}
 
