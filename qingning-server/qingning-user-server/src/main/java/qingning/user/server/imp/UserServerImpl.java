@@ -589,26 +589,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if (CollectionUtils.isEmpty(courseMap)) {
             throw new QNLiveException("100004");
         }
-
-        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
-        resultMap.put("course_type", courseMap.get("course_type"));
-        resultMap.put("status", courseMap.get("status"));
-        resultMap.put("course_url", courseMap.get("course_url"));
-        resultMap.put("course_title", courseMap.get("course_title"));
-        if (courseMap.get("course_price") != null) {
-            resultMap.put("course_price", Double.parseDouble(courseMap.get("course_price")));
+        for(String key:courseMap.keySet()){
+        	resultMap.put(key, courseMap.get(key));
         }
-        resultMap.put("start_time", Long.parseLong(courseMap.get("start_time")));
-        resultMap.put("student_num", Long.parseLong(courseMap.get("student_num")));
-        resultMap.put("course_remark", courseMap.get("course_remark"));
+
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("size",10);
-        queryMap.put("course_id",reqMap.get("course_id").toString());
-        List<String> latestStudentAvatarAddList = userModuleServer.findLatestStudentAvatarAddList(queryMap);
-        if(! MiscUtils.isEmpty(latestStudentAvatarAddList)){
-            resultMap.put("student_list", latestStudentAvatarAddList);
-        }
-
+        queryMap.put("course_id",reqMap.get("course_id").toString());        
+        resultMap.put("student_list", userModuleServer.findLatestStudentAvatarAddList(queryMap));
         //从缓存中获取直播间信息
         Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));

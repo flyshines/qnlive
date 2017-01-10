@@ -488,9 +488,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         // （在缓存中的课程为未结束课程，缓存中有课程则代表课程存在且状态正确）
         if (jedis.exists(courseKey)) {
             //0.1校验课程更新时间
-            if (reqMap.get("status") == null || !reqMap.get("status").toString().equals("2")){
+            if (!"2".equals(reqMap.get("status"))){
                 String update_time_cache = jedis.hget(courseKey, "update_time");
-                if (update_time_cache == null || !reqMap.get("update_time").toString().equals(update_time_cache)) {
+                if (!MiscUtils.isEqual(update_time_cache, String.valueOf(reqMap.get("update_time")))) {
                     throw new QNLiveException("100011");
                 }
             }
@@ -508,9 +508,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
 
             //1如果为课程结束
-            if (reqMap.get("status") != null && reqMap.get("status").toString().equals("2")) {
+            if ("2".equals(reqMap.get("status"))) {
                 //1.1如果为课程结束，则取当前时间为课程结束时间
                 //1.2更新课程详细信息(dubble服务)
+            	String start_time = jedis.hget(courseKey, "start_time");
+            	try{
+            		if(System.currentTimeMillis() <= Long.parseLong(start_time)){
+            			throw new QNLiveException("100032");
+            		}
+            	} catch(Exception e){
+            		if(e instanceof QNLiveException){
+            			throw e;
+            		}
+            	}
                 Date courseEndTime = new Date();
                 reqMap.put("now",courseEndTime);
                 Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
