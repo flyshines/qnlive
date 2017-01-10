@@ -118,6 +118,7 @@
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
 					<param name="roles" type="list"/>
+					<param name="im_course_id" type="string"/>
 				</outputs>
 			</function>
 
