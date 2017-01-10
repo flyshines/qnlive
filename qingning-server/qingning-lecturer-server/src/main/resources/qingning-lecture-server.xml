@@ -140,10 +140,10 @@
 					       		isEmpty = isEmpty &amp;&amp; (course_url == null || course_url.length == 0);
 					       		isEmpty = isEmpty &amp;&amp; (course_password == null || course_password.length == 0);
 					       		isEmpty = isEmpty &amp;&amp; start_time == null;					       		
-					       		return status != 2 || isEmpty;},100023"/>
-					<param name="update_time" type="long" require="N"  validate="(status)=>{
-					            var isEmpty= status==null || status.length == 0;
-					       		return isEmpty;},000100"/>
+					       		return !utils.isEqual(status,'2') || isEmpty;},100023"/>
+					<param name="update_time" type="long" require="N"  validate="(status,update_time)=>{
+					            var notChecked = utils.isEqual(status,'2') || !utils.isEmpty(update_time);
+					       		return notChecked;},000100"/>
 				</inputs>
 				<outputs>
 				</outputs>
