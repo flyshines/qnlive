@@ -177,6 +177,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 for (Tuple tuple : predictionList) {
                     ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
                     Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
+                    if(MiscUtils.isEmpty(courseInfoMap)){
+                        continue;
+                    }
                     courseInfoMap.put("data_source", "1");
                     MiscUtils.courseTranferState(currentTime, courseInfoMap);
                     courseResultList.add(courseInfoMap);
