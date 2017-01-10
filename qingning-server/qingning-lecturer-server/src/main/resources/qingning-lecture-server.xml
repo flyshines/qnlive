@@ -157,15 +157,15 @@
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
 					<param name="room_id" type="string" require="N"  />
-					<param name="start_time" type="long" require="N"
-					       validate="(start_time,course_id)=>{
+					<param name="query_time" type="long" require="N"
+					       validate="(query_time,course_id)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  start_time == null; 
+					       		var isTimeEmpty =  query_time == null; 
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 					<param name="course_id" type="string" require="N"  
-					       validate="(start_time,course_id)=>{
+					       validate="(query_time,course_id)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  start_time == null; 
+					       		var isTimeEmpty =  query_time == null; 
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 				</inputs>
 				<outputs>
@@ -200,7 +200,14 @@
 							}												
 							return ret;
 						}"/>
-						<param name="course_password" type="string"/>									
+						<param name="course_password" type="string"/>
+						<param name="query_time" type="long" convert="(start_time, end_time, status)=>{
+						    var ret = start_time;						
+							if(utils.isEqual(status,'2')){
+								ret=end_time;
+							}												
+							return ret;
+						}"/>
 					</param>					
 				</outputs>
 			</function>
@@ -256,15 +263,15 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
-					<param name="start_time" type="long" require="N"  
-					       validate="(start_time,course_id)=>{
+					<param name="query_time" type="long" require="N"  
+					       validate="(query_time,course_id)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  start_time == null; 
+					       		var isTimeEmpty =  query_time == null; 
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 					<param name="course_id" type="string" require="N"  
-					       validate="(start_time,course_id)=>{
+					       validate="(query_time,course_id)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  start_time == null; 
+					       		var isTimeEmpty =  query_time == null; 
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
 					<param name="room_id" type="string" require="Y,000100"  />
 				</inputs>
@@ -296,6 +303,13 @@
 							return ret;
 						}"/>
 						<param name="course_id" type="string"/>
+						<param name="query_time" type="long" convert="(start_time, end_time, status)=>{
+						    var ret = start_time;						
+							if(utils.isEqual(status,'2')){
+								ret=end_time;
+							}												
+							return ret;
+						}"/>
 					</param>
 				</outputs>
 			</function>
@@ -484,7 +498,7 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
-					<param name="start_time" type="long"/>					
+					<param name="query_time" type="long"/>					
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
@@ -514,7 +528,14 @@
 						}"/>
 						<param name="extra_amount"  type="double" default="0"/>
 						<param name="start_time" type="long"/>
-						<param name="course_id" type="string"/>						
+						<param name="course_id" type="string"/>	
+						<param name="query_time" type="long" convert="(start_time, end_time, status)=>{
+						    var ret = start_time;						
+							if(utils.isEqual(status,'2')){
+								ret=end_time;
+							}												
+							return ret;
+						}"/>					
 					</param>
 				</outputs>
 			</function>

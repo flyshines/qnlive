@@ -48,6 +48,69 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		auth = Auth.create (IMMsgUtil.configMap.get("AK"), IMMsgUtil.configMap.get("SK"));
 	}
 
+	@SuppressWarnings("unchecked")
+	@FunctionName("logUserInfo")
+	public Map<String,Object> collectClientInformation (RequestEntity reqEntity) throws Exception{
+		Jedis jedis = jedisUtils.getJedis();
+		Map<String,Object> reqMap = (Map<String,Object>)reqEntity.getParam();
+		long loginTime = System.currentTimeMillis();
+		/*		
+		if(!"2".equals(reqMap.get("status"))){
+			reqMap.put("create_time", loginTime);
+			reqMap.put("create_date", MiscUtils.getDate(loginTime));
+			if(!MiscUtils.isEmpty(reqEntity.getAccessToken())){
+				String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+				reqMap.put("user_id", user_id);				
+				Map<String,String> userInfo = CacheUtils.readUser(user_id, reqEntity, readUserOperation, jedisUtils);
+				reqMap.put("gender", userInfo.get("gender"));
+				Map<String,String> queryParam = new HashMap<>();				
+				queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+		        String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, queryParam);
+		        Map<String,String> accessTokenInfo = jedis.hgetAll(accessTokenKey);
+		        if(MiscUtils.isEmpty(accessTokenInfo)){
+		        	Map<String, Object> queryMap = new HashMap<String, Object>();		        	
+		        	String login_id = (String)reqMap.get("login_id");
+		        	String login_type = (String)reqMap.get("login_type");
+		        	queryMap.put("login_type", login_type);
+		        	queryMap.put("login_id", login_id);
+		        	accessTokenInfo = new HashMap<String,String>();
+		        	MiscUtils.converObjectMapToStringMap(commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap), accessTokenInfo);		        	
+		        }
+		        reqMap.put("record_time", userInfo.get("create_time"));
+		        reqMap.put("old_subscribe", accessTokenInfo.get("subscribe"));
+		        reqMap.put("country", userInfo.get("country"));
+		        reqMap.put("province", userInfo.get("province"));
+		        reqMap.put("city", userInfo.get("city"));
+		        reqMap.put("district", userInfo.get("district"));
+		        String web_openid = (String)accessTokenInfo.get("web_openid");
+		        reqMap.put("subscribe", null);		        
+		        reqMap.put("web_openid", null);
+		        if(MiscUtils.isEmpty(web_openid)){
+		        	reqMap.put("subscribe", "0");
+		        } else {
+		        	reqMap.put("web_openid", web_openid);
+		        }
+		        
+		        String user_role = MiscUtils.convertString(accessTokenInfo.get("user_role"));
+		        if(user_role.contains(Constants.USER_ROLE_LECTURER)){
+		        	reqMap.put("live_room_build", "1");
+		        } else {
+		        	reqMap.put("live_room_build", "0");
+		        }		        
+			}
+			
+
+			RequestEntity requestEntity = this.generateRequestEntity("LogServer",  Constants.MQ_METHOD_ASYNCHRONIZED, "logUserInfo", reqMap);
+			mqUtils.sendMessage(requestEntity);
+		}
+		*/
+		loginTime = System.currentTimeMillis();
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("server_time", System.currentTimeMillis());
+		return resultMap;
+	}
+	
+	
 	@FunctionName("serverTime")
 	public Map<String,Object> getServerTime (RequestEntity reqEntity) throws Exception{
 

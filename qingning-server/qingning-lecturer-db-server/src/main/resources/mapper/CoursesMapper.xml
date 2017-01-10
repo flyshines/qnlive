@@ -316,12 +316,24 @@
     <include refid="Base_Column_List" />
     from t_courses
     where 1 =1
-    <if test="orderType == 1" >
-      and start_time > #{startIndex}
+    <if test="orderType == 1" >     
+       <if test="startIndex != null" >
+      	<if test="status == 2" >
+        	and end_time > #{startIndex}
+        </if>
+        <if test="status != 2" >
+        	and start_time > #{startIndex}
+        </if>
+      </if>
     </if>
     <if test="orderType == 2" >
       <if test="startIndex != null" >
-        and start_time <![CDATA[ < ]]> #{startIndex}
+      	<if test="status == 2" >
+        	and end_time <![CDATA[ < ]]> #{startIndex}
+        </if>
+        <if test="status != 2" >
+        	and start_time <![CDATA[ < ]]> #{startIndex}
+        </if>
       </if>
     </if>
     <if test="lecturer_id != null" >
