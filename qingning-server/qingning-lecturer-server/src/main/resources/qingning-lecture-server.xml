@@ -207,7 +207,9 @@
 							}												
 							return ret;
 						}"/>
-					</param>					
+						<param name="im_course_id" type="string"/>
+					</param>
+
 				</outputs>
 			</function>
 
