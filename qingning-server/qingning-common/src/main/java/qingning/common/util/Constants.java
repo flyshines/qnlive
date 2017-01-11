@@ -165,4 +165,7 @@ public final class Constants {
 	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
 	public static final String JPUSH_SEND_TYPE_ALIAS = "ALIAS";
 	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";
+
+
+	public static final String CACHED_KEY_COURSE_MESSAGE_ID_INFO = "COURSE:{course_id}:MESSAGE_ID_INFO";
 }

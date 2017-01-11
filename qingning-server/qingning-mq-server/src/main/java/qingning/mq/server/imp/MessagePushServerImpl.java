@@ -415,8 +415,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
-            saveMessageIntoCache(infomation,jedisUtils);
-
             //1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
@@ -493,23 +491,4 @@ public class MessagePushServerImpl extends AbstractMsgService {
         this.saveCourseAudioService = saveCourseAudioService;
     }
 
-    private void saveMessageIntoCache(Map<String,Object> information, JedisUtils jedisUtils){
-        Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
-        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
-        double createTime = Double.parseDouble(information.get("create_time").toString());
-        String messageId = MiscUtils.getUUId();
-
-        //1.将聊天信息id插入到redis zsort列表中
-        jedis.zadd(messageListKey, createTime, messageId);
-
-        //2.将聊天信息放入redis的map中
-        map.put(Constants.FIELD_MESSAGE_ID, messageId);
-        String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-        Map<String,String> stringMap = new HashMap<>();
-        MiscUtils.converObjectMapToStringMap(information, stringMap);
-        stringMap.put("message_id", messageId);
-        jedis.hmset(messageKey, stringMap);
-    }
 }

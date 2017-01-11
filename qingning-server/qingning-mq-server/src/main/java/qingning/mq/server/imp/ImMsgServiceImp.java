@@ -2,6 +2,7 @@ package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -49,6 +50,10 @@ public class ImMsgServiceImp implements ImMsgService {
 	@SuppressWarnings("unchecked")
 	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----聊天消息------"+JSON.toJSONString(imMessage));
+		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
+			return;
+		}
+
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 
@@ -66,7 +71,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 		Map<String,String> courseMap = jedis.hgetAll(courseKey);
 		//课程为已结束
-		if(courseMap.get("status").equals("2") && (!information.get("send_type").equals("4") || !information.get("send_type").equals("5"))){
+		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("5")){
 			return;
 		}
 
@@ -123,6 +128,9 @@ public class ImMsgServiceImp implements ImMsgService {
 	@SuppressWarnings("unchecked")
 	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----禁言信息------"+JSON.toJSONString(imMessage));
+		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
+			return;
+		}
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String banStatus = information.get("ban_status").toString();
@@ -154,6 +162,9 @@ public class ImMsgServiceImp implements ImMsgService {
 	 */
 	private void processCourseAudio(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----讲课音频信息------"+JSON.toJSONString(imMessage));
+		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
+			return;
+		}
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 
@@ -209,9 +220,6 @@ public class ImMsgServiceImp implements ImMsgService {
 					messageMap.put("information",startInformation);
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
-
-
-					saveMessageIntoCache(startInformation, jedisUtils);
 				}
 			}
 		}
@@ -233,23 +241,21 @@ public class ImMsgServiceImp implements ImMsgService {
 		jedis.hmset(messageKey, stringMap);
 	}
 
-	private void saveMessageIntoCache(Map<String,Object> information, JedisUtils jedisUtils){
+
+	//根据course_id和消息id对重复消息进行过滤
+	private boolean duplicateMessageFilter(ImMessage imMessage, JedisUtils jedisUtils){
 		Jedis jedis = jedisUtils.getJedis();
+		Map<String,Object> body = imMessage.getBody();
+		Map<String,Object> information = (Map<String,Object>)body.get("information");
+		String courseId = information.get("course_id").toString();
+		String mid = information.get("mid").toString();
 		Map<String, Object> map = new HashMap<>();
-		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
-		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
-		double createTime = Double.parseDouble(information.get("create_time").toString());
-		String messageId = MiscUtils.getUUId();
-
-		//1.将聊天信息id插入到redis zsort列表中
-		jedis.zadd(messageListKey, createTime, messageId);
-
-		//2.将聊天信息放入redis的map中
-		map.put(Constants.FIELD_MESSAGE_ID, messageId);
-		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-		Map<String,String> stringMap = new HashMap<>();
-		MiscUtils.converObjectMapToStringMap(information, stringMap);
-		stringMap.put("message_id", messageId);
-		jedis.hmset(messageKey, stringMap);
+		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+		String courseMessageIdInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_ID_INFO, map);
+		boolean hasMessage = jedis.hexists(courseMessageIdInfoKey, mid);
+		if(hasMessage == false){
+			jedis.hset(courseMessageIdInfoKey, mid, "1");
+		}
+		return hasMessage;
 	}
 }
