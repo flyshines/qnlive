@@ -1,5 +1,6 @@
 package qingning.mq.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
 import redis.clients.jedis.Jedis;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -381,6 +383,30 @@ public class MessagePushServerImpl extends AbstractMsgService {
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
+            ////发送结束推送消息
+            SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+            String str = sdf.format(now);
+            String courseEndMessage = "直播结束于"+str;
+            long currentTime = System.currentTimeMillis();
+            String mGroupId = jedis.hget(courseKey,"im_course_id");
+            String message = courseEndMessage;
+            String sender = "system";
+            Map<String,Object> infomation = new HashMap<>();
+            infomation.put("course_id", courseId);
+            infomation.put("creator_id", courseMap.get("lecturer_id"));
+            infomation.put("message", message);
+            infomation.put("message_type", "1");
+            infomation.put("send_type", "5");//5.结束消息
+            infomation.put("create_time", currentTime);
+            Map<String,Object> messageMap = new HashMap<>();
+            messageMap.put("msg_type","1");
+            messageMap.put("send_time",currentTime);
+            messageMap.put("information",infomation);
+            String content = JSON.toJSONString(messageMap);
+            IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+            saveMessageIntoCache(infomation,jedisUtils);
+
             //1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
@@ -400,6 +426,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
             } catch (Exception e) {
                 //TODO 暂时不处理
             }
+
+
+
+
 
             //课程未开播强制结束
             if(type.equals("1")){
@@ -453,5 +483,25 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     public void setSaveCourseAudioService(SaveCourseAudioService saveCourseAudioService) {
         this.saveCourseAudioService = saveCourseAudioService;
+    }
+
+    private void saveMessageIntoCache(Map<String,Object> information, JedisUtils jedisUtils){
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
+        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
+        double createTime = Double.parseDouble(information.get("create_time").toString());
+        String messageId = MiscUtils.getUUId();
+
+        //1.将聊天信息id插入到redis zsort列表中
+        jedis.zadd(messageListKey, createTime, messageId);
+
+        //2.将聊天信息放入redis的map中
+        map.put(Constants.FIELD_MESSAGE_ID, messageId);
+        String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
+        Map<String,String> stringMap = new HashMap<>();
+        MiscUtils.converObjectMapToStringMap(information, stringMap);
+        stringMap.put("message_id", messageId);
+        jedis.hmset(messageKey, stringMap);
     }
 }
