@@ -959,9 +959,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //判断该课程状态，如果为直播中，则检查开播时间是否存在，如果开播时间存在，
             //则检查当前查询是否大于当前时间，如果大于，则查询用户是否存在于在线map中，
             //如果不存在，则将该学员加入的在线map中，并且修改课程缓存real_student_num实际课程人数(默认课程人数)
-            String realStudentNum = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+            String realStudentNum = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_REAL_STUDENT_NUM, map);
             boolean hasStudent = jedis.hexists(realStudentNum, userId);
-            if(hasStudent){
+            if(hasStudent == false){
                 if(courseMap.get("status").equals("4")){
                     if(courseMap.get("real_start_time") != null){
                         Long real_start_time = Long.parseLong(courseMap.get("real_start_time"));

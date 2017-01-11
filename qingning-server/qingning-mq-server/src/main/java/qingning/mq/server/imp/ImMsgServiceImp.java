@@ -196,20 +196,22 @@ public class ImMsgServiceImp implements ImMsgService {
 					String mGroupId = courseMap.get("im_course_id");
 					String message = courseStartMessage;
 					String sender = "system";
-					Map<String,Object> infomation = new HashMap<>();
-					infomation.put("course_id", information.get("course_id").toString());
-					infomation.put("message", message);
-					infomation.put("message_type", "1");
-					infomation.put("send_type", "5");//5.开始/结束消息
+					Map<String,Object> startInformation = new HashMap<>();
+					startInformation.put("course_id", information.get("course_id").toString());
+					startInformation.put("message", message);
+					startInformation.put("message_type", "1");
+					startInformation.put("send_type", "5");//5.开始/结束消息
+					startInformation.put("create_time", now);//5.开始/结束消息
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
 					messageMap.put("send_time",now);
 					messageMap.put("create_time",now);
-					messageMap.put("information",infomation);
+					messageMap.put("information",startInformation);
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
 
-					saveMessageIntoCache(information, jedisUtils);
+
+					saveMessageIntoCache(startInformation, jedisUtils);
 				}
 			}
 		}
