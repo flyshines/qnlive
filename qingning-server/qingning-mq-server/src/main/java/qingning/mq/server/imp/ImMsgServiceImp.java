@@ -70,53 +70,6 @@ public class ImMsgServiceImp implements ImMsgService {
 			return;
 		}
 
-		//先判断是否有实际开播时间，没有则进行进一步判断
-		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间的前十分钟，则该课程存入实际开播时间
-		//并且进行直播超时定时任务检查
-		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
-			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
-				long now = System.currentTimeMillis();
-				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigByKey("course_ready_start_msec"));
-				if(now > ready_start_time){
-					//向缓存中增加课程真实开播时间
-					jedis.hset(courseKey, "real_start_time", now+"");
-
-					//进行直播超时定时任务检查
-					MessagePushServerImpl messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
-					RequestEntity requestEntity = new RequestEntity();
-					requestEntity.setServerName("MessagePushServer");
-					requestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-					requestEntity.setFunctionName("processCourseLiveOvertime");
-					Map<String,Object> timerMap = new HashMap<>();
-					timerMap.put("course_id", courseMap.get("course_id"));
-					timerMap.put("real_start_time", now+"");
-					requestEntity.setParam(timerMap);
-					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
-
-					//进行超时预先提醒定时任务
-					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-
-					//发送课程开始消息
-					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-					String str = sdf.format(now);
-					String courseStartMessage = "直播开始于"+str;
-					String mGroupId = courseMap.get("im_course_id");
-					String message = courseStartMessage;
-					String sender = "system";
-					Map<String,Object> infomation = new HashMap<>();
-					infomation.put("course_id", information.get("course_id").toString());
-					infomation.put("message", message);
-					infomation.put("send_type", "5");//5.开始/结束消息
-					Map<String,Object> messageMap = new HashMap<>();
-					messageMap.put("msg_type","1");
-					messageMap.put("send_time",System.currentTimeMillis());
-					messageMap.put("information",infomation);
-					String content = JSON.toJSONString(messageMap);
-					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
-				}
-			}
-		}
-
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(information.get("create_time").toString());
 		String messageId = MiscUtils.getUUId();
@@ -206,6 +159,57 @@ public class ImMsgServiceImp implements ImMsgService {
 		Jedis jedis = jedisUtils.getJedis();
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
+		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+		Map<String,String> courseMap = jedis.hgetAll(courseKey);
+		//先判断是否有实际开播时间，没有则进行进一步判断
+		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间的前十分钟，则该课程存入实际开播时间
+		//并且进行直播超时定时任务检查
+		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
+			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
+				long now = System.currentTimeMillis();
+				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigByKey("course_ready_start_msec"));
+				if(now > ready_start_time){
+					//向缓存中增加课程真实开播时间
+					jedis.hset(courseKey, "real_start_time", now+"");
+
+					//进行直播超时定时任务检查
+					MessagePushServerImpl messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
+					RequestEntity requestEntity = new RequestEntity();
+					requestEntity.setServerName("MessagePushServer");
+					requestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+					requestEntity.setFunctionName("processCourseLiveOvertime");
+					Map<String,Object> timerMap = new HashMap<>();
+					timerMap.put("course_id", courseMap.get("course_id"));
+					timerMap.put("real_start_time", now+"");
+					requestEntity.setParam(timerMap);
+					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
+
+					//进行超时预先提醒定时任务
+					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+
+					//发送课程开始消息
+					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+					String str = sdf.format(now);
+					String courseStartMessage = "直播开始于"+str;
+					String mGroupId = courseMap.get("im_course_id");
+					String message = courseStartMessage;
+					String sender = "system";
+					Map<String,Object> infomation = new HashMap<>();
+					infomation.put("course_id", information.get("course_id").toString());
+					infomation.put("message", message);
+					infomation.put("message_type", "1");
+					infomation.put("send_type", "5");//5.开始/结束消息
+					Map<String,Object> messageMap = new HashMap<>();
+					messageMap.put("msg_type","1");
+					messageMap.put("send_time",System.currentTimeMillis());
+					messageMap.put("information",infomation);
+					String content = JSON.toJSONString(messageMap);
+					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
+				}
+			}
+		}
+
+
 		String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
 		double createTime = Double.parseDouble(information.get("create_time").toString());
 		String audioId = MiscUtils.getUUId();
