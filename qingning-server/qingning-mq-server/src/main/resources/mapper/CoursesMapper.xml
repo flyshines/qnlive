@@ -360,7 +360,7 @@
 
   <select id="findCourseStartLongNoticeList" resultType="hashmap" >
     select
-    course_id, lecturer_id, course_title,start_time
+    course_id, lecturer_id, course_title,start_time,im_course_id
     from t_courses
     where
     CURRENT_DATE =
@@ -369,7 +369,7 @@
 
   <select id="findCourseStartShortNoticeList" resultType="hashmap" >
     select
-    course_id, lecturer_id, course_title,start_time
+    course_id, lecturer_id, course_title,start_time,im_course_id
     from t_courses
     where
     CURRENT_DATE =

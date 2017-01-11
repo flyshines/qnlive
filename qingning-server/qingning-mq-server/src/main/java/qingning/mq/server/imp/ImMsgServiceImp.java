@@ -100,6 +100,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			Map<String,String> extrasMap = new HashMap<>();
 			extrasMap.put("msg_type","12");
 			extrasMap.put("course_id",courseMap.get("course_id"));
+			extrasMap.put("im_course_id",courseMap.get("im_course_id"));
 			obj.put("extras_map", extrasMap);
 			JPushHelper.push(obj);
 		}
@@ -181,6 +182,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					Map<String,Object> timerMap = new HashMap<>();
 					timerMap.put("course_id", courseMap.get("course_id"));
 					timerMap.put("real_start_time", now+"");
+					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 

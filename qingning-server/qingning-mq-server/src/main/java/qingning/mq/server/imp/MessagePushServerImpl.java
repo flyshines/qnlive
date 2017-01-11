@@ -76,6 +76,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         log.debug("---------------将课程加入直播超时预先提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         long real_start_time = Long.parseLong(reqMap.get("real_start_time").toString());
+        String im_course_id = reqMap.get("im_course_id").toString();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -97,6 +98,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","4");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",im_course_id);
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
@@ -120,6 +122,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long start_time = ((Date)(reqMap.get("start_time"))).getTime();
+        String im_course_id = reqMap.get("im_course_id").toString();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -134,6 +137,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","1");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",im_course_id);
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
@@ -158,6 +162,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long start_time = ((Date)(reqMap.get("start_time"))).getTime();
+        String im_course_id = reqMap.get("im_course_id").toString();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -170,6 +175,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","2");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",im_course_id);
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
@@ -193,6 +199,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long start_time = ((Date)(reqMap.get("start_time"))).getTime();
+        String im_course_id = reqMap.get("im_course_id").toString();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -206,6 +213,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","10");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",im_course_id);
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
@@ -229,6 +237,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String courseId = reqMap.get("course_id").toString();
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -253,6 +262,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","3");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",im_course_id);
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
                 TimerTask timerTask = processCourseNotStartMap.remove(courseId);
@@ -427,10 +437,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 //TODO 暂时不处理
             }
 
-
-
-
-
             //课程未开播强制结束
             if(type.equals("1")){
                 //1.9极光推送结束消息
@@ -441,6 +447,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","6");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",courseMap.get("im_course_id"));
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
             }else if(type.equals("2")){
@@ -453,6 +460,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 Map<String,String> extrasMap = new HashMap<>();
                 extrasMap.put("msg_type","5");
                 extrasMap.put("course_id",courseId);
+                extrasMap.put("im_course_id",courseMap.get("im_course_id"));
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
             }
