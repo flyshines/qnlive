@@ -248,7 +248,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String courseId = information.get("course_id").toString();
-		String mid = information.get("mid").toString();
+		String mid = body.get("mid").toString();
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
 		String courseMessageIdInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_ID_INFO, map);
