@@ -842,8 +842,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	}
 
 	@SuppressWarnings("unchecked")
-	@FunctionName("getRoomInviteCard")
-	public Map<String,Object> getRoomInviteCard (RequestEntity reqEntity) throws Exception{//TODO
+	 @FunctionName("getRoomInviteCard")
+	 public Map<String,Object> getRoomInviteCard (RequestEntity reqEntity) throws Exception{//TODO
 		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
 		Map<String,Object> resultMap = new HashMap<>();
 
@@ -960,6 +960,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		return resultMap;
 	}
 
+	@SuppressWarnings("unchecked")
+	@FunctionName("createFeedback")
+	public Map<String,Object> createFeedback (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		reqMap.put("user_id",userId);
+		reqMap.put("feedback_id",MiscUtils.getUUId());
+		reqMap.put("now",new Date());
+		commonModuleServer.insertFeedback(reqMap);
+		return resultMap;
+	}
 
 	private String encryptIMAccount(String mid, String mpwd){
 		String name='\0'+mid+'\0'+mpwd;

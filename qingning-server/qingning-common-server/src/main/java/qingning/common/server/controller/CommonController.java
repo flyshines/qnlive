@@ -464,5 +464,15 @@ public class CommonController extends AbstractController {
     }
 
 
+    @RequestMapping(value="/common/feedback",method=RequestMethod.POST)
+    public @ResponseBody ResponseEntity createFeedback(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "createFeedback", access_token, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }

@@ -57,4 +57,6 @@ public interface ICommonModuleServer {
 	void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
 
 	void updateAfterPayCourse(Map<String, Object> updateCourseMap);
+
+	void insertFeedback(Map<String, Object> reqMap);
 }

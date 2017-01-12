@@ -370,6 +370,18 @@
 				</outputs>
 			</function>
 
+			<function name="createFeedback">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="1000" />
+				</auth>
+				<inputs>
+					<param name="content" type="string" require="Y,000100"/>
+					<param name="phone_number" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 
 		</default>
 

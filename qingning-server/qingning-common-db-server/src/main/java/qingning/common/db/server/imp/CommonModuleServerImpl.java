@@ -51,6 +51,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RoomDistributerRecommendMapper roomDistributerRecommendMapper;
+
+	@Autowired(required = true)
+	private FeedbackMapper feedbackMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -386,5 +389,19 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void updateAfterPayCourse(Map<String, Object> updateCourseMap) {
 		coursesMapper.updateAfterPayCourse(updateCourseMap);
+	}
+
+	@Override
+	public void insertFeedback(Map<String, Object> reqMap) {
+		Date now = (Date)reqMap.get("now");
+		Feedback feedback = new Feedback();
+		feedback.setFeedbackId(reqMap.get("feedback_id").toString());
+		feedback.setUserId(reqMap.get("user_id").toString());
+		feedback.setContent(reqMap.get("content").toString());
+		feedback.setStatus("1");  //处理状态，1：未处理 2：已经处理
+		feedback.setPhoneNumber(reqMap.get("phone_number").toString());
+		feedback.setCreateTime(now);
+		feedback.setUpdateTime(now);
+		feedbackMapper.insert(feedback);
 	}
 }
