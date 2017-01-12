@@ -218,6 +218,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					messageMap.put("send_time",now);
 					messageMap.put("create_time",now);
 					messageMap.put("information",startInformation);
+					messageMap.put("mid",MiscUtils.getUUId());
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
 				}

@@ -596,6 +596,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 messageMap.put("msg_type","1");
                 messageMap.put("send_time",currentTime);
                 messageMap.put("information",infomation);
+                messageMap.put("mid",MiscUtils.getUUId());
                 String content = JSON.toJSONString(messageMap);
                 IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
