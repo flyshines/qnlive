@@ -32,6 +32,9 @@ public class WeiXinUtil {
     //获取JSAPI_Ticket
     public static String jsapi_ticket_url = MiscUtils.getConfigByKey("jsapi_ticket_url");
 
+    //获得微信素材多媒体URL
+    public static String get_media_url = MiscUtils.getConfigByKey("get_media_url");
+
     private static final String appid = MiscUtils.getConfigByKey("appid");
     private static final String appsecret = MiscUtils.getConfigByKey("appsecret");
 
@@ -84,6 +87,13 @@ public class WeiXinUtil {
         JSONObject jsonObject = JSON.parseObject(requestResult);
         log.debug("------微信--通过H5传递code获得access_token-返回参数  "+requestResult);
         return jsonObject;
+    }
+
+    public static String getMediaURL(String server_id, Jedis jedis) {
+        String accessToken = getAccessToken(appid, appsecret, jedis).getToken();
+        String requestUrl = get_media_url.replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", server_id);
+        log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
+        return requestUrl;
     }
 
 

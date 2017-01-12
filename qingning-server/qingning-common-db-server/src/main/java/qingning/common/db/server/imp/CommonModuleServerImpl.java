@@ -299,7 +299,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			students.setCreateDate(now);
 			coursesStudentsMapper.insert(students);
 
-
+			//如果缓存中没有课程，则直接更新数据库中的课程信息
+			//1 课程在缓存中  2课程不在缓存中
+			if(requestMapData.get("courseInCache").toString().equals("2")){
+				Map<String,Object> updateCourseMap = new HashMap<>();
+				//updateCourseMap.put("course_amount", tradeBill); TODO
+			}
 		}
 
 		resultMap.put("profit_type",tradeBill.getProfitType());

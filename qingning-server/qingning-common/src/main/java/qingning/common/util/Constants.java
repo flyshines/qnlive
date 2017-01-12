@@ -168,4 +168,6 @@ public final class Constants {
 
 
 	public static final String CACHED_KEY_COURSE_MESSAGE_ID_INFO = "COURSE:{course_id}:MESSAGE_ID_INFO";
+
+	public static final String WEB_FILE_PRE_FIX = "/WEB_FILE/";
 }

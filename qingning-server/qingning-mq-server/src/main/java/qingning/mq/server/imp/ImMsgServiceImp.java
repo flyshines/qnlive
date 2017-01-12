@@ -253,10 +253,15 @@ public class ImMsgServiceImp implements ImMsgService {
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
 		String courseMessageIdInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_ID_INFO, map);
-		boolean hasMessage = jedis.hexists(courseMessageIdInfoKey, mid);
-		if(hasMessage == false){
-			jedis.hset(courseMessageIdInfoKey, mid, "1");
+
+		String hasMessage = jedis.hget(courseMessageIdInfoKey, mid);
+		if(MiscUtils.isEmpty(hasMessage)){
+			jedis.hset(courseMessageIdInfoKey, mid, System.currentTimeMillis()+"");
 		}
-		return hasMessage;
+		if(MiscUtils.isEmpty(hasMessage) == true){
+			return false;
+		}else {
+			return true;
+		}
 	}
 }

@@ -464,12 +464,31 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**
+     * 用户反馈
+     * @param entity
+     * @param access_token
+     * @param version
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value="/common/feedback",method=RequestMethod.POST)
     public @ResponseBody ResponseEntity createFeedback(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version) throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "createFeedback", access_token, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    @RequestMapping(value="/common/weixin/resource/conversion",method=RequestMethod.POST)
+    public @ResponseBody ResponseEntity convertWeixinResource(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "convertWeixinResource", access_token, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;

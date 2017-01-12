@@ -383,6 +383,19 @@
 				</outputs>
 			</function>
 
+			<function name="convertWeixinResource">
+				<auth>
+					<accessToken require="Y" />
+					<timesLimit millisecond="300" />
+				</auth>
+				<inputs>
+					<param name="media_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="url" type="string"/>
+				</outputs>
+			</function>
+
 		</default>
 
 
