@@ -229,6 +229,15 @@
     user_id = #{userId}
 
   </select>
+  
+   <select id="findLoginInfoByUserIds" resultType="string" parameterType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_login_info  where web_openid is not null and  user_id in   
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item})
+    </foreach>
+  </select>
 
   <update id="updateUserRole" parameterType="hashmap" >
     update t_login_info

@@ -54,6 +54,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
 	
 	@Override
+	public List<String> findLoginInfoByUserIds(Map<String, Object> map) {
+		return loginInfoMapper.findLoginInfoByUserIds(map);
+	}
+	
+	
+	@Override
 	/**
 	 * 创建直播间
 	 */

@@ -62,4 +62,11 @@ public interface ILectureModuleServer {
 	List<String> findUserIdsFromStudentsByCourseId(String course_id);
 
 	List<String> findFollowUserIdsByRoomId(String roomId);
+	
+	/**
+	 * 根据userid 获取 openid
+	 * @param map
+	 * @return
+	 */
+	List<String> findLoginInfoByUserIds(Map<String, Object> map);
 }

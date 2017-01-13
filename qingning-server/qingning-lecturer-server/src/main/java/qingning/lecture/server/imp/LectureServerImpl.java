@@ -3,12 +3,15 @@ package qingning.lecture.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
+import qingning.common.entity.TemplateData;
 import qingning.common.util.*;
 import qingning.lecture.server.other.ReadCourseOperation;
 import qingning.lecture.server.other.ReadLecturerOperation;
@@ -126,11 +129,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //增加讲师缓存中的直播间数
         jedis.hincrBy(lectureKey, "live_room_num", 1L);
-
         resultMap.put("room_id", room_id);
         return resultMap;
     }
 
+ 
 
     @SuppressWarnings("unchecked")
     @FunctionName("updateLiveRoom")
@@ -426,10 +429,76 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         extrasMap.put("course_id",dbResultMap.get("course_id").toString());
         obj.put("extras_map", extrasMap);
         JPushHelper.push(obj);//TODO
+         
+        
+        Map<String, Object> user = lectureModuleServer.findUserInfoByUserId(userId);
+        String nickName="";
+        if (user!=null) {
+        	 nickName=user.get("nick_name").toString();
+		}
+        //取出粉丝列表
+        List<String> findFollowUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
+        //TODO  关注的直播间有新的课程，推送提醒
+        if (findFollowUserIds!=null&& findFollowUserIds.size()>0) {
+        Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+        TemplateData first = new TemplateData();
+		first.setColor("#000000");
+		first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first"));
+		templateMap.put("first", first);
+        
+        TemplateData name = new TemplateData();
+		name.setColor("#000000");
+		name.setValue(reqMap.get("course_title").toString());
+		templateMap.put("keyword1", name);
 
+		TemplateData wuliu = new TemplateData();
+		wuliu.setColor("#000000");
+		wuliu.setValue(reqMap.get("course_title").toString());
+		templateMap.put("keyword2", wuliu);	
+
+		TemplateData orderNo = new TemplateData();
+		orderNo.setColor("#000000");
+		orderNo.setValue(nickName);
+		templateMap.put("keyword3", orderNo);
+
+		Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+		TemplateData receiveAddr = new TemplateData();
+		receiveAddr.setColor("#000000");
+		receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm:ss"));
+		templateMap.put("keyword4", receiveAddr);
+
+		TemplateData remark = new TemplateData();
+		remark.setColor("#000000");
+		remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),nickName));
+		templateMap.put("remark", remark);
+		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"), templateMap);
+		}
         return resultMap;
     }
 
+    /**
+     * 微信推送
+     * @param findFollowUserIds
+     * @param templateId
+     * @param templateMap
+     */
+    public void weiPush(List<String> findFollowUserIds,String templateId,Map<String, TemplateData> templateMap){
+    	// 推送   关注的直播间有创建新的课程
+        Jedis jedis = jedisUtils.getJedis();
+     
+        	Map<String, Object> map = new HashMap<String, Object>();
+        	map.put("list", findFollowUserIds);
+			List<String> findOpenIds = lectureModuleServer.findLoginInfoByUserIds(map);
+			if (findOpenIds!=null && findOpenIds.size()>0) {
+				for (String openId : findOpenIds) {
+					//TODO
+					WeiXinUtil.send_template_message(openId, templateId, templateMap, jedis);
+				} 
+			} 
+    	
+    }
+    
+    
     @SuppressWarnings("unchecked")
     @FunctionName("courseDetail")
     public Map<String, Object> getCourseDetail(RequestEntity reqEntity) throws Exception {
@@ -596,11 +665,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 messageMap.put("msg_type","1");
                 messageMap.put("send_time",currentTime);
                 messageMap.put("information",infomation);
+                messageMap.put("mid",MiscUtils.getUUId());
                 String content = JSON.toJSONString(messageMap);
                 IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
-
-                //存储聊天消息
-                saveMessageIntoCache(infomation, jedisUtils);
 
             } else {
             	if(reqMap.get("start_time") != null){
@@ -1937,25 +2004,5 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	list.add(tuple.getElement());
         }
         return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list);
-    }
-
-    private void saveMessageIntoCache(Map<String,Object> information, JedisUtils jedisUtils){
-        Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
-        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
-        double createTime = Double.parseDouble(information.get("create_time").toString());
-        String messageId = MiscUtils.getUUId();
-
-        //1.将聊天信息id插入到redis zsort列表中
-        jedis.zadd(messageListKey, createTime, messageId);
-
-        //2.将聊天信息放入redis的map中
-        map.put(Constants.FIELD_MESSAGE_ID, messageId);
-        String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-        Map<String,String> stringMap = new HashMap<>();
-        MiscUtils.converObjectMapToStringMap(information, stringMap);
-        stringMap.put("message_id", messageId);
-        jedis.hmset(messageKey, stringMap);
     }
 }
