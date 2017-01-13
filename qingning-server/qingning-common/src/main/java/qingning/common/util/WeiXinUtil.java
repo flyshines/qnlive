@@ -55,7 +55,7 @@ public class WeiXinUtil {
 
     private static final String appid = MiscUtils.getConfigByKey("appid");
     private static final String appsecret = MiscUtils.getConfigByKey("appsecret");
-    private final static String URL = MiscUtils.getConfigByKey("appsecret");//"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
+    private final static String weixin_template_push_url = MiscUtils.getConfigByKey("weixin_template_push_url");//"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
     /**
      * 获取accessToekn
@@ -238,7 +238,7 @@ public class WeiXinUtil {
 	
 		AccessToken token = getAccessToken(appid, appsecret,jedis);
 		String access_token = token.getToken();
-		String accessUrl = URL.replace("ACCESS_TOKEN", access_token);
+		String accessUrl = weixin_template_push_url.replace("ACCESS_TOKEN", access_token);
 		WxTemplate temp = new WxTemplate();
 		temp.setUrl(accessUrl);
 		temp.setTouser(openId);

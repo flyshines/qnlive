@@ -232,7 +232,7 @@
   
    <select id="findLoginInfoByUserIds" resultType="string" parameterType="hashmap" >
     select
-    <include refid="Base_Column_List" />
+     web_openid
     from t_login_info  where web_openid is not null and  user_id in   
     <foreach collection="list" item="item" index="index" separator=",">
       (#{item})
