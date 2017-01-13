@@ -14,12 +14,14 @@ public class User {
     private String phoneNumber;
 
     private String gender;
+    
+    private String country;
+    
+    private String province;
 
-    private String provinceId;
+    private String city;
 
-    private String cityId;
-
-    private String districtId;
+    private String district;
 
     private String area;
 
@@ -79,31 +81,39 @@ public class User {
         this.gender = gender == null ? null : gender.trim();
     }
 
-    public String getProvinceId() {
-        return provinceId;
-    }
+    public String getCountry() {
+		return country;
+	}
 
-    public void setProvinceId(String provinceId) {
-        this.provinceId = provinceId == null ? null : provinceId.trim();
-    }
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-    public String getCityId() {
-        return cityId;
-    }
+	public String getProvince() {
+		return province;
+	}
 
-    public void setCityId(String cityId) {
-        this.cityId = cityId == null ? null : cityId.trim();
-    }
+	public void setProvince(String province) {
+		this.province = province;
+	}
 
-    public String getDistrictId() {
-        return districtId;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public void setDistrictId(String districtId) {
-        this.districtId = districtId == null ? null : districtId.trim();
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public String getArea() {
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
+	public String getArea() {
         return area;
     }
 

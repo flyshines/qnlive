@@ -1,6 +1,9 @@
 package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
@@ -17,14 +20,16 @@ import qingning.server.JedisBatchOperation;
 import qingning.server.rabbitmq.MessageServer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Tuple;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
  * Created by loovee on 2016/12/16.
  */
 public class LecturerCoursesServerImpl extends AbstractMsgService {
-
+	private static Logger log = LoggerFactory.getLogger(LecturerCoursesServerImpl.class);
     private CoursesMapper coursesMapper;
     private LoginInfoMapper loginInfoMapper;
     private CourseAudioMapper courseAudioMapper;
@@ -42,143 +47,144 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
     private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
 
-        //1.找出系统中的所有讲师，得到讲师用户id列表
-        List<String> lecturerIdList = loginInfoMapper.findRoleUserIds(Constants.USER_ROLE_LECTURER);
-        Date endDate = MiscUtils.getEndTimeOfToday();
-        //2.遍历讲师用户id列表，得到讲师相关课程信息列表
-        for(String lecturerId : lecturerIdList){
-
-            //2.3删除缓存中的旧的课程列表及课程信息实体
-            Map<String,Object> map = new HashMap<>();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-            String predictionListKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-            String finishListKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-
-            Set<String> predictionCourseIdList = jedis.zrange(predictionListKey, 0 , -1);
-            Set<String> finishCourseIdList = jedis.zrange(finishListKey, 0 , -1);
-
-            Map<String,Object> courseCacheMap = new HashMap<>();
-            JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
-            callBack.invoke(new JedisBatchOperation(){
-                @Override
-                public void batchOperation(Pipeline pipeline, Jedis jedis) {
-                    //2.1 从数据库查询出预告列表
-                    Map<String,Object> queryMap = new HashMap<>();
-                    queryMap.put("lecturerId", lecturerId);
-                    queryMap.put("status", "1");//已经发布（预告中）
-                    List<Map<String,Object>> lecturerCoursePredictionList = coursesMapper.findLecturerCourseList(queryMap);
-
-                    //2.2 如果预告列表不存在或者数量不出，则从数据库查询出结束列表
-                    List<Map<String,Object>>  lecturerCourseFinishList = null;
-                    if(MiscUtils.isEmpty(lecturerCoursePredictionList) || lecturerCoursePredictionList.size() < Constants.LECTURER_PREDICTION_COURSE_LIST_SIZE){
-                        queryMap.clear();
-                        queryMap.put("lecturerId", lecturerId);
-                        queryMap.put("status", "2");//已经结束
-                        int pageCount = Constants.LECTURER_PREDICTION_COURSE_LIST_SIZE;
-                        if(! MiscUtils.isEmpty(lecturerCoursePredictionList)){
-                            pageCount = pageCount - lecturerCoursePredictionList.size();
-                        }
-                        queryMap.put("pageCount",pageCount);
-                        lecturerCourseFinishList = coursesMapper.findLecturerCourseList(queryMap);
+        ((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+        	private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
+				for(String lecturerId : lecturerSet){
+		            //删除缓存中的旧的课程列表及课程信息实体
+		            Map<String,Object> map = new HashMap<>();
+		            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+		            String predictionListKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+		            String finishListKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+		            
+		            Set<Tuple> predictionCourseIdList = jedis.zrangeWithScores(predictionListKey, 0 , -1);
+		            Set<Tuple> finishCourseIdList = jedis.zrangeWithScores(finishListKey, 0 , -1);
+		            jedis.del(predictionListKey);
+		            jedis.del(finishListKey);
+                    
+                    Map<String,Object> queryMap = new HashMap<>();                   
+                    double last_start_date = -1d;
+                    double last_end_date = -1d;
+                                       
+                    int count = Constants.LECTURER_PREDICTION_COURSE_LIST_SIZE;
+                    Map<String,Tuple> predictionCourseIdMap = new HashMap<String,Tuple>();
+                    if(!MiscUtils.isEmpty(predictionCourseIdList)){                    	
+                    	count=count-predictionCourseIdList.size();
+                    	for(Tuple tuple : predictionCourseIdList){
+                    		predictionCourseIdMap.put(tuple.getElement(), tuple);
+                    		last_start_date = tuple.getScore();
+                    	}
                     }
-
-
-                    //删除课程实体、PPT实体、讲课音频实体
-                    if(! MiscUtils.isEmpty(predictionCourseIdList)){
-                        for(String courseId : predictionCourseIdList){
-                            courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
-                            pipeline.del(courseKey);
-
-                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
-                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
-                            pipeline.del(pptsKey);
-                            pipeline.del(audiosKey);
-                        }
+                    Map<String,Tuple> finishdictionCourseIdMap = new HashMap<String,Tuple>();
+                    if(!MiscUtils.isEmpty(finishCourseIdList)){                    	
+                    	for(Tuple tuple : finishCourseIdList){
+                    		if(count <= 0){
+                       		 	//删除课程实体、PPT实体、讲课音频实体
+                        		queryMap.clear();
+                        		queryMap.put(Constants.CACHED_KEY_COURSE_FIELD, tuple.getElement());
+                                String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryMap);
+                                String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, queryMap);
+                                String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, queryMap);
+                                pipeline.del(pptsKey);
+                                pipeline.del(audiosKey);
+                                pipeline.del(courseKey);
+                    			continue;
+                    		}
+                    		--count;
+                    		String key = tuple.getElement();
+                    		predictionCourseIdMap.remove(key);
+                    		finishdictionCourseIdMap.put(key, tuple);
+                    		last_end_date = tuple.getScore();
+                    	}
                     }
-
-                    if(! MiscUtils.isEmpty(finishCourseIdList)){
-                        for(String courseId : finishCourseIdList){
-                            courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
-                            pipeline.del(courseKey);
-
-                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
-                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
-                            pipeline.del(pptsKey);
-                            pipeline.del(audiosKey);
-                        }
+                    
+                    if(!MiscUtils.isEmpty(predictionCourseIdMap)){
+                    	for(String key:predictionCourseIdMap.keySet()){
+                    		Tuple tuple = predictionCourseIdMap.get(key);
+                    		pipeline.zadd(predictionListKey, tuple.getScore(), tuple.getElement());
+                    	}
                     }
-
-                    pipeline.del(predictionListKey);
-                    pipeline.del(finishListKey);
-
-                    Map<String,Object> timerMap = new HashMap<>();
-                    //2.4将新的课程列表及新的课程实体、PPT信息、讲课音频放入缓存中
-                    if(! MiscUtils.isEmpty(lecturerCoursePredictionList)){
-                        for(Map<String,Object> courseMap : lecturerCoursePredictionList){
-                            Date courseStartTime = (Date)courseMap.get("start_time");
-                            pipeline.zadd(predictionListKey, (double) courseStartTime.getTime(), courseMap.get("course_id").toString());
-                            courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseMap.get("course_id").toString());
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
-                            Map<String,String> courseStringMap = new HashMap<>();
-                            MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
-                            pipeline.hmset(courseKey,courseStringMap);
-
-                            //PPT信息
-                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
-                            List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
-                            if(! MiscUtils.isEmpty(pptList)){
-                                pipeline.set(pptsKey, JSON.toJSONString(pptList));
-                            }
-
-                            //讲课音频信息
-                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
-                            List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
-                            if(! MiscUtils.isEmpty(audioList)){
-                                pipeline.set(audiosKey, JSON.toJSONString(audioList));
-                            }
-
-                            //如果课程时间为今天，则需要将其加入定时任务
-                            if(courseStartTime.getTime() < endDate.getTime()){
-                                timerMap.put("course_id", courseMap.get("course_id").toString());
-                                timerMap.put("start_time", ((Date)courseMap.get("start_time")).getTime());
-                                RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", timerMap);
-                                messagePushServerimpl.processCourseNotStart(requestEntity, jedisUtils, context);
-                            }
-                        }
+                    if(!MiscUtils.isEmpty(finishdictionCourseIdMap)){
+                    	for(String key:finishdictionCourseIdMap.keySet()){
+                    		Tuple tuple = finishdictionCourseIdMap.get(key);
+                    		pipeline.zadd(finishListKey, tuple.getScore(), tuple.getElement());
+                    	}
                     }
-
-                    if(! MiscUtils.isEmpty(lecturerCourseFinishList)){
-                        for(Map<String,Object> courseMap : lecturerCourseFinishList){
-                            Date courseEndTime = (Date)courseMap.get("end_time");
-                            pipeline.zadd(finishListKey, (double) courseEndTime.getTime(), courseMap.get("course_id").toString());
-                            courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseMap.get("course_id").toString());
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
-                            Map<String,String> courseStringMap = new HashMap<>();
-                            MiscUtils.converObjectMapToStringMap(courseMap, courseStringMap);
-                            pipeline.hmset(courseKey,courseStringMap);
-
-                            //PPT信息
-                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
-                            List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId(courseMap.get("course_id").toString());
-                            if(! MiscUtils.isEmpty(pptList)){
-                                pipeline.set(pptsKey, JSON.toJSONString(pptList));
-                            }
-
-                            //讲课音频信息
-                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
-                            List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId(courseMap.get("course_id").toString());
-                            if(! MiscUtils.isEmpty(audioList)){
-                                pipeline.set(audiosKey, JSON.toJSONString(audioList));
-                            }
-                        }
+                    
+                    if(last_start_date>0 || last_end_date>0){
+                    	pipeline.sync();
                     }
+                    
+                    if(count>0){
+                    	queryMap.clear();
+                    	map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                    	if(last_end_date>0){
+                    		BigDecimal bigDecimal = new BigDecimal(last_end_date);
+                    		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);                    		
+                    		queryMap.put("end_time", new Date(bigDecimal.longValue()));
+                    	} else if(last_start_date>0){
+                    		BigDecimal bigDecimal = new BigDecimal(last_start_date);
+                    		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
+                    		queryMap.put("start_time", new Date(bigDecimal.longValue()));
+                    	}
+                    	
+                    	queryMap.put("pageCount",count);
+                    	List<Map<String,Object>> list = coursesMapper.findLecturerCourseList(queryMap);
+                    	if(!MiscUtils.isEmpty(list)){
+                    		for(Map<String,Object> value:list){
+                    			String key = null;
+                    			long score = -1;
+                    			if("2".equals(value.get("status"))){                    				
+                    				Date endDate = (Date)value.get("end_time");
+                    				if(endDate != null){
+                    					score = endDate.getTime();
+                    					key = finishListKey;
+                    				}                    				
+                    			} else if("1".equals(value.get("status"))){
+                    				Date startDate = (Date)value.get("start_time");
+                    				if(startDate != null){
+                    					score = startDate.getTime();
+                    					key = predictionListKey;
+                    				}   
+                    			}
+                    			if(!MiscUtils.isEmpty(key)){
+                    				pipeline.zadd(key, score, (String)value.get("course_id"));
+                    				
+                    				map.clear();
+                    				map.put(Constants.CACHED_KEY_COURSE_FIELD, (String)value.get("course_id"));
+                    				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+                                    Map<String,String> courseStringMap = new HashMap<>();
+                                    MiscUtils.converObjectMapToStringMap(value, courseStringMap);
+                                    pipeline.hmset(courseKey,courseStringMap);                                   
+                                    //PPT信息
+                                    String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, map);
+                                    List<Map<String,Object>> pptList = courseImageMapper.findPPTListByCourseId((String)value.get("course_id"));
+                                    if(! MiscUtils.isEmpty(pptList)){
+                                        pipeline.set(pptsKey, JSON.toJSONString(pptList));
+                                    }
 
-                    pipeline.sync();
-                }
-            });
-        }
+                                    //讲课音频信息
+                                    String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
+                                    List<Map<String,Object>> audioList = courseAudioMapper.findAudioListByCourseId((String)value.get("course_id"));
+                                    if(! MiscUtils.isEmpty(audioList)){
+                                        pipeline.set(audiosKey, JSON.toJSONString(audioList));
+                                    }                    				
+                    			} else {
+                    				log.warn("The course data ["+(String)value.get("course_id")+"] is abnormal");
+                    			}
+                    		}
+                    		pipeline.sync();
+                    	}
+                    }
+				}        		
+        	}        	        	
+			@Override
+			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+				if(!MiscUtils.isEmpty(lecturerSet)){
+					processCached(lecturerSet, pipeline, jedis);					
+				}
+			}
+        });  
     }
 
     public CoursesMapper getCoursesMapper() {

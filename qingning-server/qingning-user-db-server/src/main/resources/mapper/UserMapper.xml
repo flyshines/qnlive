@@ -8,9 +8,10 @@
     <result column="avatar_address" property="avatarAddress" jdbcType="VARCHAR" />
     <result column="phone_number" property="phoneNumber" jdbcType="VARCHAR" />
     <result column="gender" property="gender" jdbcType="CHAR" />
-    <result column="province_id" property="provinceId" jdbcType="VARCHAR" />
-    <result column="city_id" property="cityId" jdbcType="VARCHAR" />
-    <result column="district_id" property="districtId" jdbcType="VARCHAR" />
+    <result column="country" property="country" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="district" property="districtId" jdbcType="VARCHAR" />
     <result column="area" property="area" jdbcType="VARCHAR" />
     <result column="course_num" property="courseNum" jdbcType="BIGINT" />
     <result column="live_room_num" property="liveRoomNum" jdbcType="BIGINT" />
@@ -18,8 +19,8 @@
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    user_id, user_name, nick_name, avatar_address, phone_number, gender, province_id, 
-    city_id, district_id, area, course_num, live_room_num, create_time, update_time
+    user_id, user_name, nick_name, avatar_address, phone_number, gender, country, province, 
+    city, district, area, course_num, live_room_num, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select 
@@ -34,12 +35,13 @@
   <insert id="insert" parameterType="qingning.user.db.persistence.mybatis.entity.User" >
     insert into t_user (user_id, user_name, nick_name, 
       avatar_address, phone_number, gender, 
-      province_id, city_id, district_id, 
+      country, province, city, district, 
       area, course_num, live_room_num, 
       create_time, update_time)
     values (#{userId,jdbcType=VARCHAR}, #{userName,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, 
       #{avatarAddress,jdbcType=VARCHAR}, #{phoneNumber,jdbcType=VARCHAR}, #{gender,jdbcType=CHAR}, 
-      #{provinceId,jdbcType=VARCHAR}, #{cityId,jdbcType=VARCHAR}, #{districtId,jdbcType=VARCHAR}, 
+      #{country,jdbcType=VARCHAR},
+      #{province,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, #{district,jdbcType=VARCHAR}, 
       #{area,jdbcType=VARCHAR}, #{courseNum,jdbcType=BIGINT}, #{liveRoomNum,jdbcType=BIGINT}, 
       #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>
@@ -64,14 +66,17 @@
       <if test="gender != null" >
         gender,
       </if>
-      <if test="provinceId != null" >
-        province_id,
+      <if test="country != null" >
+        country,
       </if>
-      <if test="cityId != null" >
-        city_id,
+      <if test="province != null" >
+        province,
       </if>
-      <if test="districtId != null" >
-        district_id,
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="district != null" >
+        district,
       </if>
       <if test="area != null" >
         area,
@@ -108,14 +113,17 @@
       <if test="gender != null" >
         #{gender,jdbcType=CHAR},
       </if>
-      <if test="provinceId != null" >
-        #{provinceId,jdbcType=VARCHAR},
+      <if test="country != null" >
+        #{country,jdbcType=VARCHAR},
+      </if>      
+      <if test="province != null" >
+        #{province,jdbcType=VARCHAR},
       </if>
-      <if test="cityId != null" >
-        #{cityId,jdbcType=VARCHAR},
+      <if test="city != null" >
+        #{city,jdbcType=VARCHAR},
       </if>
-      <if test="districtId != null" >
-        #{districtId,jdbcType=VARCHAR},
+      <if test="district != null" >
+        #{district,jdbcType=VARCHAR},
       </if>
       <if test="area != null" >
         #{area,jdbcType=VARCHAR},
@@ -152,14 +160,17 @@
       <if test="gender != null" >
         gender = #{gender,jdbcType=CHAR},
       </if>
-      <if test="provinceId != null" >
-        province_id = #{provinceId,jdbcType=VARCHAR},
+      <if test="country != null" >
+        #{country,jdbcType=VARCHAR},
+      </if>      
+      <if test="province != null" >
+        province = #{province,jdbcType=VARCHAR},
       </if>
-      <if test="cityId != null" >
-        city_id = #{cityId,jdbcType=VARCHAR},
+      <if test="city != null" >
+        city = #{city,jdbcType=VARCHAR},
       </if>
-      <if test="districtId != null" >
-        district_id = #{districtId,jdbcType=VARCHAR},
+      <if test="district != null" >
+        district = #{district,jdbcType=VARCHAR},
       </if>
       <if test="area != null" >
         area = #{area,jdbcType=VARCHAR},
@@ -186,9 +197,10 @@
       avatar_address = #{avatarAddress,jdbcType=VARCHAR},
       phone_number = #{phoneNumber,jdbcType=VARCHAR},
       gender = #{gender,jdbcType=CHAR},
-      province_id = #{provinceId,jdbcType=VARCHAR},
-      city_id = #{cityId,jdbcType=VARCHAR},
-      district_id = #{districtId,jdbcType=VARCHAR},
+      country = #{country,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      city = #{city,jdbcType=VARCHAR},
+      district = #{district,jdbcType=VARCHAR},
       area = #{area,jdbcType=VARCHAR},
       course_num = #{courseNum,jdbcType=BIGINT},
       live_room_num = #{liveRoomNum,jdbcType=BIGINT},

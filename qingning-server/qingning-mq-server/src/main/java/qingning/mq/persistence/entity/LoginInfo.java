@@ -23,15 +23,21 @@ public class LoginInfo {
 
     private String status;
 
-    private String provinceId;
+    private String country;
+    
+    private String province;
 
-    private String cityId;
+    private String city;
 
-    private String districtId;
+    private String district;
 
     private Date createTime;
 
     private Date updateTime;
+
+    private String webOpenid;
+
+    private String subscribe;
 
     public String getUserId() {
         return userId;
@@ -113,28 +119,36 @@ public class LoginInfo {
         this.status = status == null ? null : status.trim();
     }
 
-    public String getProvinceId() {
-        return provinceId;
+    public String getCountry() {
+        return country;
     }
 
-    public void setProvinceId(String provinceId) {
-        this.provinceId = provinceId == null ? null : provinceId.trim();
+    public void setCountry(String country) {
+        this.country = country == null ? null : country.trim();
+    }
+    
+    public String getProvince() {
+        return province;
     }
 
-    public String getCityId() {
-        return cityId;
+    public void setProvince(String province) {
+        this.province = province == null ? null : province.trim();
     }
 
-    public void setCityId(String cityId) {
-        this.cityId = cityId == null ? null : cityId.trim();
+    public String getCity() {
+        return city;
     }
 
-    public String getDistrictId() {
-        return districtId;
+    public void setCity(String city) {
+        this.city = city == null ? null : city.trim();
     }
 
-    public void setDistrictId(String districtId) {
-        this.districtId = districtId == null ? null : districtId.trim();
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district == null ? null : district.trim();
     }
 
     public Date getCreateTime() {
@@ -151,5 +165,21 @@ public class LoginInfo {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getWebOpenid() {
+        return webOpenid;
+    }
+
+    public void setWebOpenid(String webOpenid) {
+        this.webOpenid = webOpenid == null ? null : webOpenid.trim();
+    }
+
+    public String getSubscribe() {
+        return subscribe;
+    }
+
+    public void setSubscribe(String subscribe) {
+        this.subscribe = subscribe == null ? null : subscribe.trim();
     }
 }

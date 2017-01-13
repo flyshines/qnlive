@@ -5,7 +5,13 @@ public final class Constants {
 
 
 	private Constants(){};
+	public static final String SYS_FIELD_COUNTRY="country";
+	public static final String SYS_FIELD_COUNTRY_SHORT="country_short";
+	public static final String SYS_FIELD_PROVINCE="province";
+	public static final String SYS_FIELD_CITY="city";
+	public static final String SYS_FIELD_DISTRICT="district";
 	
+	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
 	public static final String SYSLONG="long";
 	public static final String SYSDOUBLE="double";
@@ -17,6 +23,7 @@ public final class Constants {
 	public static final String SYS_CLASS_NAME  = "_SYS_CLASS_NAME";
 	public static final String SYS_CLASS_VALUE = "_SYS_CLASS_VALUE";
 	public static final int COURSE_MAX_INTERVAL = 10;
+	public static final int CACHED_MAX_COURSE_TIME_LIFE = 1000*60 *24 *7;
 	public static final int MAX_QUERY_LIMIT = 1000;
 	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";
 	
@@ -74,6 +81,12 @@ public final class Constants {
 	public static final String SYS_SINGLE_KEY = "SYS_SINGLE_KEY";
 	public static final String SYS_OUT_TRADE_NO_KEY = "SYS_OUT_TRADE_NO_KEY";
 	
+	public static final String CACHED_UPDATE_LECTURER_KEY="SYS:UPDATE:LECTURER:KEYS";
+	public static final String CACHED_UPDATE_DISTRIBUTER_KEY="SYS:UPDATE:DISTRIBUTER:KEYS";
+	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS"; 
+	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
+	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";
+		
 	public static final String CACHED_KEY_ACCESS_TOKEN_FIELD = "access_token";
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";
 	public static final String CACHED_KEY_USER_FIELD ="user_id";
@@ -156,12 +169,27 @@ public final class Constants {
 	public static final String USER_ROLE_LISTENER="listener";
 	public static final String USER_ROLE_ADMIN="admin";
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
-	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 500;
+	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 200;
 	
 	
 	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";
 	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";
-
+	public static final String MONGODB_ADDRESS_DATABASE = "CITY_ADDRESS";
+	public static final String MONGODB_USER_REGISTRY_COLLECTION_FORMAT = "USER_REGISTRY_COLL_%s";
+	public static final String MONGODB_USER_REGISTRY_DATABASE = "USER_REGISTRY_DB";
+	public static final String MONGODB_CITY_IP_COLL_FORMAT = "CITY_IP_COLL_%s";
+	public static final String MONGODB_DEVICE_ACTIVE_DATABASE = "DEVICE_ACTIVE_DB";
+	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_FORMAT = "DEVICE_ACTIVE_COLL_%s";
+	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_DETAILS_FORMAT = "DEVICE_ACTIVE_DETAILS_COLL_%s";
+	
+	public static final String MONGODB_LECTURER_COURSE_DATABASE_FORMAT =    "LECTURER_COURSE_%s";
+	public static final String MONGODB_ROOM_DISTRIBUTER_DATABASE_FORMAT =   "ROOM_DISTRIBUTER_%s";
+	public static final String MONGODB_COURSE_DISTRIBUTER_DATABASE_FORMAT = "COURSE_DISTRIBUTER_%s";
+	
+	public static final String MONGODB_LECTURER_COURSE_COLLECTION_FORMAT =    "LECTURER_COURSE_COLL_%s";
+	public static final String MONGODB_ROOM_DISTRIBUTER_COLLECTION_FORMAT =   "ROOM_DISTRIBUTER_COLL_%s";
+	public static final String MONGODB_COURSE_DISTRIBUTER_COLLECTION_FORMAT = "COURSE_DISTRIBUTER_COLL_%s";
+	
 	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
 	public static final String JPUSH_SEND_TYPE_ALIAS = "ALIAS";
 	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";

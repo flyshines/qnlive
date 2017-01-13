@@ -22,7 +22,7 @@ public final class CacheUtils {
 		return readData(searchKey, keyFormat, keyField, requestEntity, operation, jedisUtils, cachedValue, -1);
 	}
 	
-	@SuppressWarnings({"rawtypes" })
+	@SuppressWarnings({"rawtypes", "unchecked" })
 	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
 			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue, int lifeTime) throws Exception{
 		boolean useCached = jedisUtils!=null;

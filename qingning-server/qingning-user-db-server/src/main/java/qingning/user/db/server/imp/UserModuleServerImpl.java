@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.db.persistence.mybatis.*;
-import qingning.user.db.persistence.mybatis.entity.Courses;
 import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 

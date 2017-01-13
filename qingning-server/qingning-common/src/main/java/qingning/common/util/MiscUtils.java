@@ -332,6 +332,7 @@ public final class MiscUtils {
 	}
 
 	public static String getUUId() {
+		//return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
 		return UUID.randomUUID().toString().replace("-", "");
 	}
 		
@@ -462,16 +463,17 @@ public final class MiscUtils {
     }
 
 	public static void converObjectMapToStringMap(Map<String,Object> objectMap, Map<String,String> stringMap){
-
+		if(MiscUtils.isEmpty(objectMap)){
+			return;
+		}
 		for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
 			if(entry.getValue() != null){
 				if(entry.getValue() instanceof Date){
 					stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
-				}else if(entry.getValue() instanceof Double){
+/*				}else if(entry.getValue() instanceof Double){
 					BigDecimal doubleNum = new BigDecimal((Double)entry.getValue());
-					stringMap.put(entry.getKey(), doubleNum.multiply(new BigDecimal(100)).longValue()+"");
-				}
-				else {
+					stringMap.put(entry.getKey(), doubleNum.multiply(new BigDecimal(100)).longValue()+"");*/
+				} else {
 					stringMap.put(entry.getKey(), entry.getValue().toString());
 				}
 			}
@@ -608,7 +610,59 @@ public final class MiscUtils {
 			return sdf.format(date);
 		}
 	}
-
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void addValueToMap(Object key, Object value, Map map){
+		if(map ==null) return;
+		if(MiscUtils.isEmpty(value)){
+			return;
+		}
+		map.put(key, value);
+	}
+	
+	public static String convertUnicodeToChinese(String value){
+		if(isEmpty(value) || value.indexOf("\\u") == -1){
+			return value;
+		}
+		
+	    StringBuilder chinese = new StringBuilder();  
+	    int i = -1;  
+	    int pos = 0;  
+	      
+	    while((i=value.indexOf("\\u", pos)) != -1){  
+	    	chinese.append(value.substring(pos, i));  
+	        if(i+5 < value.length()){  
+	            pos = i+6;  
+	            chinese.append((char)Integer.parseInt(value.substring(i+2, i+6), 16));  
+	        }  
+	    }
+	    if(pos>0 && pos < value.length()){
+	    	chinese.append(value.substring(pos));
+	    }
+	    return chinese.toString();  
+	}
+	
+	public static int convertStringToDBNo(String value, int number){
+		if(isEmpty(value) || number<1){
+			return 0;
+		}
+    	int length = value.length();
+    	int sum = 0;
+    	for(int i = 0; i<length;++i){
+    		sum+= value.charAt(i);
+    	}
+    	return sum % number;
+	}
+	
+	public static long getDate(long time){
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(time);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.SECOND,0);
+		cal.set(Calendar.MILLISECOND,0);
+		return cal.getTimeInMillis();
+	}
+	
 	//0:公开课程 1:加密课程 2:收费课程
 	public static String convertCourseTypeToContent(String course_type) {
 		if(course_type.equals("0")){

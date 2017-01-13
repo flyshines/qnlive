@@ -55,8 +55,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	public Map<String,Object> collectClientInformation (RequestEntity reqEntity) throws Exception{
 		Jedis jedis = jedisUtils.getJedis();
 		Map<String,Object> reqMap = (Map<String,Object>)reqEntity.getParam();
-		long loginTime = System.currentTimeMillis();
-		/*		
+		long loginTime = System.currentTimeMillis();		
 		if(!"2".equals(reqMap.get("status"))){
 			reqMap.put("create_time", loginTime);
 			reqMap.put("create_date", MiscUtils.getDate(loginTime));
@@ -105,7 +104,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			RequestEntity requestEntity = this.generateRequestEntity("LogServer",  Constants.MQ_METHOD_ASYNCHRONIZED, "logUserInfo", reqMap);
 			mqUtils.sendMessage(requestEntity);
 		}
-		*/
 		loginTime = System.currentTimeMillis();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("server_time", System.currentTimeMillis());

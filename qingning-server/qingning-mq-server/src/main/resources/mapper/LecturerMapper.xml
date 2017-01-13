@@ -192,4 +192,16 @@
       #{item}
     </foreach>
   </select>
+  <select id="findLectureId" resultType="hashmap" parameterType="hashmap" >
+    select lecturer_id from t_lecturer 
+    <if test="start_pos != null" >
+        limit #{start_pos}
+    </if>
+    <if test="page_count != null and start_pos != null" >
+        , #{page_count}
+    </if>
+    <if test="page_count != null and start_pos == null" >
+    	limit #{page_count}
+    </if>
+  </select>
 </mapper>

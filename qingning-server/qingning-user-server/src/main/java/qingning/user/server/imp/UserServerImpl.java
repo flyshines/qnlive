@@ -893,6 +893,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             obj.put("extras_map", extrasMap);
             JPushHelper.push(obj);
         }
+		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id").toString());   
         return resultMap;
     }
 

@@ -23,12 +23,14 @@ public class LoginInfo {
 
     private String status;
 
-    private String provinceId;
+    private String province;
 
-    private String cityId;
+    private String city;
 
-    private String districtId;
+    private String district;
 
+    private String subscribe;
+    
     private Date createTime;
 
     private Date updateTime;
@@ -115,31 +117,39 @@ public class LoginInfo {
         this.status = status == null ? null : status.trim();
     }
 
-    public String getProvinceId() {
-        return provinceId;
-    }
+    public String getProvince() {
+		return province;
+	}
 
-    public void setProvinceId(String provinceId) {
-        this.provinceId = provinceId == null ? null : provinceId.trim();
-    }
+	public void setProvince(String province) {
+		this.province = province;
+	}
 
-    public String getCityId() {
-        return cityId;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public void setCityId(String cityId) {
-        this.cityId = cityId == null ? null : cityId.trim();
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public String getDistrictId() {
-        return districtId;
-    }
+	public String getDistrict() {
+		return district;
+	}
 
-    public void setDistrictId(String districtId) {
-        this.districtId = districtId == null ? null : districtId.trim();
-    }
+	public void setDistrict(String district) {
+		this.district = district;
+	}
 
-    public Date getCreateTime() {
+	public String getSubscribe() {
+		return subscribe;
+	}
+
+	public void setSubscribe(String subscribe) {
+		this.subscribe = subscribe;
+	}
+
+	public Date getCreateTime() {
         return createTime;
     }
 

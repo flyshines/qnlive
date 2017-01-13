@@ -36,12 +36,12 @@ public abstract class AbstractMsgService {
 			if(methodMap.isEmpty()){
 				methodMap=null;
 
-			}
-			if(methodMap!=null){
-				Method method = methodMap.get(requestEntity.getFunctionName());
-				method.invoke(this, requestEntity, jedisUtils,context);
-				processed=true;
-			}
+			}			
+		}
+		if(methodMap!=null){
+			Method method = methodMap.get(requestEntity.getFunctionName());
+			method.invoke(this, requestEntity, jedisUtils,context);
+			processed=true;
 		}
 		if(!processed){
 			process(requestEntity, jedisUtils, context);

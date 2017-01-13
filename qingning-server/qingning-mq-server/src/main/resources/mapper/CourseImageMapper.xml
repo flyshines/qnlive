@@ -104,7 +104,7 @@
     where image_id = #{imageId,jdbcType=VARCHAR}
   </update>
 
-  <insert id="batchInsertPPT" parameterType="hashmap" >
+  <insert id="batchInsertPPT" parameterType="list" >
     insert into t_course_image
     (image_id, course_id, image_url,image_pos, create_time, update_time)
     values
@@ -126,5 +126,12 @@
     from t_course_image
     where course_id = #{course_id}
     order by image_pos asc
+  </select>
+  <select id="findOnePPTByCourseId" resultType="hashmap" parameterType="java.lang.String" >
+  	select
+    <include refid="Base_Column_List" />
+    from t_course_image
+    where course_id = #{course_id}
+    limit 1
   </select>
 </mapper>

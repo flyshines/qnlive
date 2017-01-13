@@ -335,32 +335,51 @@
     limit #{pageCount}
   </select>
 
-  <select id="findLecturerCourseList" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findLecturerCourseList" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_courses
-    where lecturer_id = #{lecturerId}
-    and status = #{status}
+    where lecturer_id = #{lecturer_id}
+    <if test="status != null" >
+    	and status = #{status}
+    </if>
+    <if test="start_time != null" >
+    	and status <![CDATA[ < ]]> #{start_time}
+    </if>
+    <if test="end_time != null" >
+    	and end_time <![CDATA[ < ]]> #{end_time}
+    </if>
+    <if test="start_time != null and end_time == null" >
+    	order by start_time desc
+    </if>
+    <if test="start_time == null and end_time != null" >
+    	order by end_time desc
+    </if>
     <if test="pageCount != null" >
       limit #{pageCount}
     </if>
   </select>
 
-  <select id="findPlatformCourseList" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findPlatformCourseList" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_courses
     where
     status = #{status}
     <if test="pageCount != null" >
-      limit #{pageCount}
+      <if test='status == "2" '>
+      	order by end_time desc limit #{pageCount}
+      </if>
+      <if test='status == "1" '>
+      	order by start_time desc limit #{pageCount}
+      </if>
     </if>
   </select>
 
 
   <select id="findCourseStartLongNoticeList" resultType="hashmap" >
     select
-    course_id, lecturer_id, course_title,start_time,im_course_id
+    course_id, lecturer_id, course_title,start_time
     from t_courses
     where
     CURRENT_DATE =
@@ -369,7 +388,7 @@
 
   <select id="findCourseStartShortNoticeList" resultType="hashmap" >
     select
-    course_id, lecturer_id, course_title,start_time,im_course_id
+    course_id, lecturer_id, course_title,start_time
     from t_courses
     where
     CURRENT_DATE =

@@ -112,6 +112,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             //3.2修改access_token中的缓存
             jedis.hset(accessTokenKey, "user_role", user_role+","+Constants.USER_ROLE_LECTURER);
+            
+            //增加讲师ID到redis系统
+            jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
         }
 
         //3.3增加讲师直播间信息缓存
@@ -129,6 +132,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //增加讲师缓存中的直播间数
         jedis.hincrBy(lectureKey, "live_room_num", 1L);
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         resultMap.put("room_id", room_id);
         return resultMap;
     }
@@ -187,6 +191,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.hmset(liveRoomKey, updateCacheMap);
 
         resultMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
 
@@ -473,6 +478,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		templateMap.put("remark", remark);
 		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"), templateMap);
 		}
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
 
@@ -776,7 +782,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(courseKey, updateCacheMap);
                 resultMap.put("update_time", now.getTime());
             }
-
+            jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         } else {
             throw new QNLiveException("100010");
         }
@@ -1046,7 +1052,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 lectureModuleServer.createCoursePPTs(insertMap);
             }
         }
-
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
 
@@ -1711,7 +1717,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         values.put("distributer_id", userId);
         lectureModuleServer.createRoomDistributer(values);
         jedis.hincrBy(liveRoomKey, "distributer_num", 1);
-
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
         obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));

@@ -79,9 +79,36 @@
 	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl">
 	</bean>
 
+	<bean id="LogServer" class="qingning.mq.server.imp.LogServiceImpl"/>
 
-
-
+	<bean id="mongoDB" class="qingning.mq.persistence.mongo.MongoDB">
+		<property name="ip" value="${mongodb.ip}"/>
+		<property name="port" value="${mongodb.port}"/>
+		<property name="maxConnection" value="${mongodb.maxConnection}"/>
+		<property name="outTime" value="${mongodb.outTime}"/>
+		<property name="maxWait" value="${mongodb.maxWait}"/>
+		<property name="maxBlockThreads" value="${mongodb.maxBlockThreads}"/>
+		<property name="maxConnIdleTime" value="${mongodb.maxConnIdleTime}"/>
+		<property name="maxConnLifeTime" value="${mongodb.maxConnLifeTime}"/>
+		<property name="socketOutTime" value="${mongodb.socketOutTime}"/>
+		<property name="socketKeepAlive" value="${mongodb.socketKeepAlive}"/>
+	</bean>
+	
+	<bean id="lbsAmpsLocation" class="qingning.mq.utils.imp.LbsAmpsLocation">
+		<property name="accessKey" value="8a4301998a78a7e7cc8908fe68d80d95"/>
+	</bean>
+	<bean id="baiduLocationUtils" class="qingning.mq.utils.imp.BaiduLocationUtils">
+		<property name="accessKey" value="BZIutcMoyKGuZ2iHiISgoYumuwZ9aqUQ"/>
+	</bean>
+	<bean id="commonLocationUtils" class="qingning.mq.utils.CommonLocationUtils">
+		<property name="locationUtilsList">
+			<list>
+				<ref bean="lbsAmpsLocation"/>
+				<ref bean="baiduLocationUtils"/>
+			</list>
+		</property>
+	</bean>
+	
 	<bean id="MainBusinessTask" class="qingning.mq.server.scheduler.MainBusinessTask">
 	</bean>
 </beans>
