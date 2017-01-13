@@ -627,8 +627,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
 					if(jedis.exists(courseKey)) {
-						jedis.hincrBy(courseKey, "extra_num", 1);
-						jedis.hincrBy(courseKey, "extra_amount", amountLong.longValue());
+						Map<String,Object> rewardQueryMap = new HashMap<>();
+						rewardQueryMap.put("course_id",courseMap.get("course_id"));
+						rewardQueryMap.put("user_id",billMap.get("user_id"));
+						Map<String,Object> rewardMap = commonModuleServer.findRewardByUserIdAndCourseId(rewardQueryMap);
+
+						if(MiscUtils.isEmpty(rewardMap)){
+							jedis.hincrBy(courseKey, "extra_num", 1);
+							jedis.hincrBy(courseKey, "extra_amount", amountLong.longValue());
+						}
 					}
 
 				}else if(profit_type.equals("0")){

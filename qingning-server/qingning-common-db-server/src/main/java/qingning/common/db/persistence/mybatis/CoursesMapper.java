@@ -24,4 +24,8 @@ public interface CoursesMapper {
     List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
 
     void updateAfterPayCourse(Map<String, Object> updateCourseMap);
+
+    void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap);
+
+    void updateAfterStudentRewardCourse(Map<String, Object> updateCourseMap);
 }
