@@ -2,6 +2,8 @@ package qingning.common.db.persistence.mybatis;
 
 import qingning.common.db.persistence.mybatis.entity.LecturerCoursesProfit;
 
+import java.util.Map;
+
 public interface LecturerCoursesProfitMapper {
     int deleteByPrimaryKey(String profitId);
 
@@ -14,4 +16,6 @@ public interface LecturerCoursesProfitMapper {
     int updateByPrimaryKeySelective(LecturerCoursesProfit record);
 
     int updateByPrimaryKey(LecturerCoursesProfit record);
+
+    Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
 }

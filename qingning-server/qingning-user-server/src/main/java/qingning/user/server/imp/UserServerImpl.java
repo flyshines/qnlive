@@ -1,5 +1,6 @@
 package qingning.user.server.imp;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -869,14 +870,32 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "total_student_num", 1);
 
+        Long nowStudentNum = 0L;
         if(jedis.exists(courseKey)){
             jedis.hincrBy(courseKey, "student_num", 1);
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
         }
 
+        nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
+        String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
+        JSONArray levelJson = JSON.parseArray(levelString);
+        if(levelJson.contains(nowStudentNum+"")){
+            JSONObject obj = new JSONObject();
+            String course_type = courseMap.get("course_type");
+            String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, courseMap.get("course_title"), nowStudentNum+""));
+            obj.put("to", userId);
+            obj.put("msg_type","7");
+            Map<String,String> extrasMap = new HashMap<>();
+            extrasMap.put("msg_type","7");
+            extrasMap.put("course_id",courseMap.get("course_id"));
+            obj.put("extras_map", extrasMap);
+            JPushHelper.push(obj);
+        }
         return resultMap;
     }
+
 
 
     @SuppressWarnings("unchecked")

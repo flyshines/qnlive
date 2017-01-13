@@ -114,6 +114,13 @@ public class WeiXinUtil {
         return requestUrl;
     }
 
+    public static String getMediaURL(String server_id, Jedis jedis) {
+        String accessToken = getAccessToken(appid, appsecret, jedis).getToken();
+        String requestUrl = get_media_url.replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", server_id);
+        log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
+        return requestUrl;
+    }
+
 
     /**
      * 未关注公众号，已经授权，通过accessToken和union_id获得用户详细信息

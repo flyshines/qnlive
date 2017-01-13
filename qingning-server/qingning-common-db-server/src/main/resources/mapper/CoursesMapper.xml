@@ -310,4 +310,22 @@
     from t_courses
     where course_id = #{courseId}
   </select>
+
+
+  <update id="updateAfterStudentBuyCourse" parameterType="hashmap" >
+    update t_courses
+    set
+    student_num = #{student_num,jdbcType=BIGINT} + student_num,
+    course_amount = #{course_amount,jdbcType=BIGINT} + course_amount
+    where course_id = #{course_id,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updateAfterStudentRewardCourse" parameterType="hashmap" >
+    update t_courses
+    set
+    extra_num = #{extra_num,jdbcType=BIGINT} + extra_num,
+    extra_amount = #{extra_amount,jdbcType=BIGINT} + extra_amount
+    where course_id = #{course_id,jdbcType=VARCHAR}
+  </update>
+
 </mapper>

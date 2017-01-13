@@ -186,6 +186,7 @@ public class HttpTookit {
             if(pairs != null && pairs.size() > 0){
                 httpPost.setEntity(new UrlEncodedFormEntity(pairs,CHARSET));
             }
+
             CloseableHttpResponse response = httpClient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
@@ -216,6 +217,7 @@ public class HttpTookit {
      */
     public static String doPost(String url, Map<String,String> headerParams, Map<String,String> bodyParams, String charset){
 
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(3000).setConnectTimeout(3000).build();//设置请求和传输超时时间
         if(StringUtils.isBlank(url)){
             return null;
         }

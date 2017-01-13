@@ -51,6 +51,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RoomDistributerRecommendMapper roomDistributerRecommendMapper;
+
+	@Autowired(required = true)
+	private FeedbackMapper feedbackMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -261,6 +264,54 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			}
 		}
 
+		//0:课程收益 1:打赏
+		if(tradeBill.getProfitType().equals("0")){
+			//如果为购买课程，则插入学员表
+			CoursesStudents students = new CoursesStudents();
+			students.setStudentId(MiscUtils.getUUId());
+			students.setUserId(tradeBill.getUserId());
+			students.setLecturerId(courses.get("lecturer_id").toString());
+			students.setRoomId(courses.get("room_id").toString());
+			students.setCourseId(courses.get("course_id").toString());
+			//students.setPaymentAmount();//todo
+			if(courses.get("course_password") != null){
+				students.setCoursePassword(courses.get("course_password").toString());
+			}
+			//		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
+			//			students.setCoursePassword(courseMap.get("course_password"));
+			//		}
+			students.setStudentType("0");//TODO
+			students.setCreateTime(now);
+			students.setCreateDate(now);
+			coursesStudentsMapper.insert(students);
+
+			//如果缓存中没有课程，则直接更新数据库中的课程信息
+			//1 课程在缓存中  2课程不在缓存中
+			if(requestMapData.get("courseInCache").toString().equals("2")){
+				Map<String,Object> updateCourseMap = new HashMap<>();
+				updateCourseMap.put("course_amount", tradeBill.getAmount());
+				updateCourseMap.put("student_num", 1);
+				updateCourseMap.put("course_id", courses.get("course_id").toString());
+				coursesMapper.updateAfterStudentBuyCourse(updateCourseMap);
+			}
+		}else {
+			//1 课程在缓存中  2课程不在缓存中
+			if(requestMapData.get("courseInCache").toString().equals("2")){
+				//查询该用户是否打赏了该课程
+				Map<String,Object> rewardQueryMap = new HashMap<>();
+				rewardQueryMap.put("course_id",courses.get("course_id").toString());
+				rewardQueryMap.put("user_id",tradeBill.getUserId());
+				Map<String,Object> rewardMap = lecturerCoursesProfitMapper.findRewardByUserIdAndCourseId(rewardQueryMap);
+				if(MiscUtils.isEmpty(rewardMap)){
+					Map<String,Object> updateCourseMap = new HashMap<>();
+					updateCourseMap.put("extra_amount", tradeBill.getAmount());
+					updateCourseMap.put("extra_num", 1);
+					updateCourseMap.put("course_id", courses.get("course_id").toString());
+					coursesMapper.updateAfterStudentRewardCourse(updateCourseMap);
+				}
+			}
+		}
+
 
 		lcp.setProfitId(MiscUtils.getUUId());
 		lcp.setCourseId(tradeBill.getCourseId());
@@ -275,29 +326,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		lcp.setProfitType(paymentBill.getPaymentType());
 		lecturerCoursesProfitMapper.insert(lcp);
 
-		//0:课程收益 1:打赏
-		if(tradeBill.getProfitType().equals("0")){
-           //如果为购买课程，则插入学员表
-			CoursesStudents students = new CoursesStudents();
-			students.setStudentId(MiscUtils.getUUId());
-			students.setUserId(tradeBill.getUserId());
-			students.setLecturerId(courses.get("lecturer_id").toString());
-			students.setRoomId(courses.get("room_id").toString());
-			students.setCourseId(courses.get("course_id").toString());
-			//students.setPaymentAmount();//todo
-			if(courses.get("course_password") != null){
-				students.setCoursePassword(courses.get("course_password").toString());
-			}
-            //		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
-            //			students.setCoursePassword(courseMap.get("course_password"));
-            //		}
-			students.setStudentType("0");//TODO
-			students.setCreateTime(now);
-			students.setCreateDate(now);
-			coursesStudentsMapper.insert(students);
 
-
-		}
 
 		resultMap.put("profit_type",tradeBill.getProfitType());
 		resultMap.put("pay_user_id",tradeBill.getUserId());
@@ -386,5 +415,24 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void updateAfterPayCourse(Map<String, Object> updateCourseMap) {
 		coursesMapper.updateAfterPayCourse(updateCourseMap);
+	}
+
+	@Override
+	public void insertFeedback(Map<String, Object> reqMap) {
+		Date now = (Date)reqMap.get("now");
+		Feedback feedback = new Feedback();
+		feedback.setFeedbackId(reqMap.get("feedback_id").toString());
+		feedback.setUserId(reqMap.get("user_id").toString());
+		feedback.setContent(reqMap.get("content").toString());
+		feedback.setStatus("1");  //处理状态，1：未处理 2：已经处理
+		feedback.setPhoneNumber(reqMap.get("phone_number").toString());
+		feedback.setCreateTime(now);
+		feedback.setUpdateTime(now);
+		feedbackMapper.insert(feedback);
+	}
+
+	@Override
+	public Map<String, Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap) {
+		return lecturerCoursesProfitMapper.findRewardByUserIdAndCourseId(rewardQueryMap);
 	}
 }

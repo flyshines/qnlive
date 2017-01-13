@@ -196,4 +196,11 @@
     share_amount = #{shareAmount,jdbcType=BIGINT}
     where profit_id = #{profitId,jdbcType=VARCHAR}
   </update>
+
+  <select id="findRewardByUserIdAndCourseId" resultType="hashmap" parameterType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_lecturer_courses_profit
+    where course_id = #{course_id} and user_id = #{user_id} limit 1
+  </select>
 </mapper>

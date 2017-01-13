@@ -608,4 +608,17 @@ public final class MiscUtils {
 			return sdf.format(date);
 		}
 	}
+
+	//0:公开课程 1:加密课程 2:收费课程
+	public static String convertCourseTypeToContent(String course_type) {
+		if(course_type.equals("0")){
+			return "公开课程";
+		}else if(course_type.equals("1")){
+			return "加密课程";
+		}else if(course_type.equals("2")){
+			return "收费课程";
+		}else {
+			return null;
+		}
+	}
 }
