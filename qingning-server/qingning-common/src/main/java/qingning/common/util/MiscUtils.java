@@ -1,13 +1,16 @@
 package qingning.common.util;
 
 import com.alibaba.dubbo.common.utils.StringUtils;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+
 import qingning.common.entity.QNLiveException;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
@@ -377,6 +380,7 @@ public final class MiscUtils {
 	}
 	 
 	public static String getConfigByKey(String key) {
+		String value="";
 		if(isEmptyString(key)){
 			return null;
 		}
@@ -384,10 +388,12 @@ public final class MiscUtils {
 			if(configProperty==null){
 				configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
 			}
+			value = new String(configProperty.get(key).getBytes("ISO-8859-1"),"UTF-8");
 		} catch(Exception e){
 			//TODO add log info
 		}
-		return configProperty.get(key);
+		
+		return value;
 	}
 	
 	/**
