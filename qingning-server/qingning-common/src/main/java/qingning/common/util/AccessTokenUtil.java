@@ -149,7 +149,7 @@ public class AccessTokenUtil {
     		if (firstCharacter.equals('0') || firstCharacter.equals('1')) {
 
     			//取出被加密的userid
-    			String preAccessToken = accessToken.substring(1, 33);
+    			String preAccessToken = accessToken.substring(1, 37);
     			char[] tokenArray = preAccessToken.toCharArray();
 
 
