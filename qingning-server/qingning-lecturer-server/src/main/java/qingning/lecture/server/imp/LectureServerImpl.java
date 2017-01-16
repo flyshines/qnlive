@@ -546,13 +546,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-
-
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        //发送微信推送 TODO
+        
+        String	course_id = (String) reqMap.get("course_id");
+        Map<String, Object> course = lectureModuleServer.findCourseByCourseId(course_id);
+        
         //0.检查课程是否存在并且状态是否正确。
         // （在缓存中的课程为未结束课程，缓存中有课程则代表课程存在且状态正确）
         if (jedis.exists(courseKey)) {
@@ -684,7 +687,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	                cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
 	                long nextStartTime = cal.getTimeInMillis();
 	                Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
-	                String course_id = (String)reqMap.get("course_id");
+	                course_id = (String)reqMap.get("course_id");
 	                if(!MiscUtils.isEmpty(courseList)){
 	                	for(Tuple tuple:courseList){
 	                		if(!course_id.equals(tuple.getElement())){
@@ -756,6 +759,42 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                     updateCacheMap.put("start_time", reqMap.get("start_time").toString());
 
+            		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+            		TemplateData first = new TemplateData();
+            		first.setColor("#000000");
+            		first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first"));
+            		templateMap.put("first", first);
+            		
+            		TemplateData wuliu = new TemplateData();
+            		wuliu.setColor("#000000");
+            		wuliu.setValue(course.get("course_title").toString());
+            		templateMap.put("keyword1", wuliu);	
+
+            		TemplateData name = new TemplateData();
+            		name.setColor("#000000");
+            		name.setValue("修改部分课程信息！");
+            		templateMap.put("keyword2", name);
+            		
+            		TemplateData orderNo = new TemplateData();
+            		orderNo.setColor("#000000");
+            		orderNo.setValue(MiscUtils.parseDateToFotmatString((Date) course.get("start_time") , "yyyy-MM-dd hh:mm:ss"));
+            		templateMap.put("keyword3", orderNo);
+            		
+            		TemplateData nowDate = new TemplateData();
+            		nowDate.setColor("#000000");
+            		nowDate.setValue(MiscUtils.parseDateToFotmatString(now, "yyyy-MM-dd hh:mm:ss"));
+            		templateMap.put("keyword4", nowDate);
+            		
+            		TemplateData remark = new TemplateData();
+            		remark.setColor("#000000");
+            		remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark"));
+            		templateMap.put("remark", remark);
+            		//TODO 推送多人  报名的所有人
+            		List<String> userIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(course_id);
+            		if (userIds!=null && userIds.size()>0) {
+            			weiPush(userIds, MiscUtils.getConfigByKey("wpush_update_course"), templateMap);
+					}
+                    
                     //发送极光推送,通知学员上课时间变更
                     JSONObject obj = new JSONObject();
                     Date newStartTimeDate = new Date(Long.parseLong(newStartTime));

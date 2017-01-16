@@ -5,11 +5,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
+import qingning.common.entity.TemplateData;
 import qingning.common.server.other.ReadCourseOperation;
 import qingning.common.server.other.ReadDistributerOperation;
 import qingning.common.server.other.ReadLiveRoomOperation;
@@ -20,6 +23,7 @@ import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
+
 import org.apache.commons.codec.binary.Base64;
 
 import java.math.BigDecimal;
@@ -675,6 +679,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				resultStr = TenPayConstant.SUCCESS;
 				logger.debug("====> 微信支付流水: " + outTradeNo + " 更新成功, return success === ");
 
+				String user_id = (String) billMap.get("user_id");
+				String course_id = (String) billMap.get("course_id");
+				
+				
+				if (!StringUtils.isBlank(user_id)) {
+					Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
+					String openId=(String) loginInfoUser.get("web_openid");
+					
+					Map<String, Object> courseByCourseId = commonModuleServer.findCourseByCourseId(course_id);
+					//学员信息
+					Map<String, Object> user = commonModuleServer.findUserInfoByUserId(user_id);
+					//教师信息
+					Map<String, Object> lecturerUser = commonModuleServer.findUserInfoByUserId(courseByCourseId.get("lecturer_id").toString());
+					
+					//TODO 成员报名付费通知 老师
+				    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
+				    //TODO 付费报名成功通知学员
+				    wpushUser(jedis, openId, courseByCourseId, lecturerUser);
+				
+				}
 			}else{
 				logger.debug("==> 微信支付失败 ,流水 ：" + outTradeNo);
 				resultStr = TenPayConstant.FAIL;
@@ -685,6 +709,70 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			resultStr = TenPayConstant.FAIL;
 		}
 		return resultStr;
+	}
+
+
+	private void wpushUser(Jedis jedis, String openId,
+			Map<String, Object> courseByCourseId,
+			Map<String, Object> lecturerUser) {
+		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+		TemplateData first = new TemplateData();
+		first.setColor("#000000");
+		first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
+		templateMap.put("first", first);
+		
+		Date start_time = (Date) courseByCourseId.get("start_time");
+		TemplateData orderNo = new TemplateData();
+		orderNo.setColor("#000000");
+		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
+		templateMap.put("keyword1", orderNo);
+		
+		TemplateData wuliu = new TemplateData();
+		wuliu.setColor("#000000");
+		wuliu.setValue(lecturerUser.get("nick_name").toString());
+		templateMap.put("keyword2", wuliu);	
+
+		TemplateData name = new TemplateData();
+		name.setColor("#000000");
+		name.setValue((String) courseByCourseId.get("course_title"));
+		templateMap.put("keyword3", name);
+
+		TemplateData remark = new TemplateData();
+		remark.setColor("#000000");
+		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+		templateMap.put("remark", remark);
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"), templateMap, jedis);
+	}
+
+
+	private void wpushLecture(Map<String, Object> billMap, Jedis jedis, String openId,
+			Map<String, Object> courseByCourseId, Map<String, Object> user) {
+		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+		TemplateData first = new TemplateData();
+		first.setColor("#000000");
+		first.setValue(String.format(MiscUtils.getConfigByKey("wpush_shop_course_remark"),user.get("nick_name")));
+		templateMap.put("first", first);
+		
+		TemplateData name = new TemplateData();
+		name.setColor("#000000");
+		name.setValue((String) courseByCourseId.get("course_title"));
+		templateMap.put("keyword1", name);
+
+		TemplateData wuliu = new TemplateData();
+		wuliu.setColor("#000000");
+		wuliu.setValue(billMap.get("payment").toString());
+		templateMap.put("keyword2", wuliu);	
+
+		TemplateData orderNo = new TemplateData();
+		orderNo.setColor("#000000");
+		orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date(), "yyyy-MM-dd hh:mm:ss"));
+		templateMap.put("keyword3", orderNo);
+
+		TemplateData remark = new TemplateData();
+		remark.setColor("#000000");
+		remark.setValue(MiscUtils.getConfigByKey("wpush_lecture_shop_course_remark"));
+		templateMap.put("remark", remark);
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_lecture_shop_course"), templateMap, jedis);
 	}
 	
 	@FunctionName("commonDistribution")
