@@ -396,6 +396,31 @@
 				</outputs>
 			</function>
 
+			<function name="getShareInfo">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100"/>
+					<param name="id" type="string" require="N" validate="(query_type,id)=>{
+					       		var isEmpty= id==null || id.length == 0;
+					       		if(!utils.isEqual(query_type,'3') &amp;&amp; isEmpty){
+					       		   return false;
+					       		}else{
+					       		   return true;
+					       		}
+					       		},000100"/>
+				</inputs>
+				<outputs>
+					<param name="title" type="string"/>
+					<param name="content" type="string"/>
+					<param name="second_content" type="string"/>
+					<param name="icon_url" type="string"/>
+					<param name="simple_content" type="string"/>
+					<param name="share_url" type="string"/>
+				</outputs>
+			</function>
+
 		</default>
 
 

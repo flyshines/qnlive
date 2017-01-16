@@ -3,6 +3,8 @@ package qingning.common.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
@@ -47,7 +49,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 	private static Auth auth;
 	static {
-		auth = Auth.create (IMMsgUtil.configMap.get("AK"), IMMsgUtil.configMap.get("SK"));
+		auth = Auth.create (IMMsgUtil.configMap.get("qiniu_AK"), IMMsgUtil.configMap.get("qiniu_SK"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -150,6 +152,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						//设置默认用户头像
 						if(reqMap.get("avatar_address") == null || StringUtils.isBlank(reqMap.get("avatar_address").toString())){
 							reqMap.put("avatar_address",IMMsgUtil.configMap.get("default_avatar_address"));//TODO
+						}else {
+							String transferAvatarAddress = qiNiuFetchURL(reqMap.get("avatar_address").toString());
+							reqMap.put("avatar_address",transferAvatarAddress);
 						}
 						if(reqMap.get("nick_name") == null || StringUtils.isBlank(reqMap.get("nick_name").toString())){
 							reqMap.put("avatar_address","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
@@ -264,9 +269,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			reqMap.put("m_pwd", imResultMap.get("password"));
 			//设置默认用户头像
 			if(MiscUtils.isEmpty(headimgurl)){
-				reqMap.put("avatar_address",IMMsgUtil.configMap.get("default_avatar_address"));//TODO
+				reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address"));//TODO
 			}else {
-				reqMap.put("avatar_address", headimgurl);//TODO
+				String transferAvatarAddress = qiNiuFetchURL(headimgurl);
+				reqMap.put("avatar_address",transferAvatarAddress);
 			}
 
 			if(MiscUtils.isEmpty(nickname)){
@@ -901,6 +907,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		resultMap.put("room_name",liveRoomMap.get("room_name"));
 
 		//查询该用户是否为该直播间的分销员
+		String share_url = getLiveRoomShareURL(userId, roomId);
+
+		resultMap.put("share_url",share_url);
+		return resultMap;
+	}
+
+	private String getLiveRoomShareURL(String userId, String roomId) {
+		String share_url ;
 		Map<String,Object> queryMap = new HashMap<>();
 		queryMap.put("distributer_id", userId);
 		queryMap.put("room_id", roomId);
@@ -928,7 +942,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				}
 			}
 		}
-		String share_url = null;
+
 		//是分销员
 		if(isDistributer == true){
 			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
@@ -936,8 +950,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			//不是分销员
 			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId;
 		}
-		resultMap.put("share_url",share_url);
-		return resultMap;
+
+		return share_url;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1027,24 +1041,108 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		//1.将多媒体server_id通过微信接口，得到微信资源访问链接
 		String mediaUrl = WeiXinUtil.getMediaURL(reqMap.get("media_id").toString(),jedisUtils.getJedis());
-
 		//2.调用七牛fetch将微信资源访问链接转换为七牛图片链接
-		String encodedURL = new String(Base64.encodeBase64URLSafe(mediaUrl.getBytes()));
+		String fetchURL = qiNiuFetchURL(mediaUrl);
+
+		resultMap.put("url", fetchURL);
+		return resultMap;
+	}
+
+	private String qiNiuFetchURL(String mediaUrl) throws Exception{
+		BucketManager bucketManager = new BucketManager(auth);
 		String bucket = MiscUtils.getConfigByKey("image_space");
 		String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-		String encodedEntryURIPre = bucket + ":"+  key;
-		String encodedEntryURI = new String(Base64.encodeBase64URLSafe(encodedEntryURIPre.getBytes()));
-		String accessQiniuUrl = MiscUtils.getConfigByKey("fetch_url_prefix")+encodedURL+"/to/"+encodedEntryURI;
-		StringMap authorization = auth.authorization(accessQiniuUrl, null, "application/x-www-form-urlencoded");
-		Map<String,String> headerMap = new HashMap<>();
-		headerMap.put("Authorization", authorization.get("Authorization").toString());
-		String qiniuResult = HttpTookit.doPost(accessQiniuUrl, headerMap, null ,null);
-		JSONObject qiniuResultJson = JSONObject.parseObject(qiniuResult);
-		if(qiniuResultJson.getString("error") != null){
-			throw new QNLiveException("100033");
+		DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+		String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
+		return imageUrl;
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("getShareInfo")
+	public Map<String,Object> getShareInfo (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+		String query_type = reqMap.get("query_type").toString();
+		String id = reqMap.get("id").toString();
+
+		String title = null;
+		String content = null;
+		String icon_url = null;
+		String simple_content = null;
+		String share_url = null;
+
+		//1.课程分享 2.直播间分享 3.其他页面分享 4.成为直播间分销员分享
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		switch (query_type){
+			case "1":
+				Map<String,String> courseMap = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(courseMap)){
+					throw new QNLiveException("120009");
+				}
+				title = courseMap.get("course_title");
+				Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
+				if("2".equals(courseMap.get("status"))){
+					content = liveRoomMap.get("room_name") + "  " + MiscUtils.getConfigByKey("weixin_course_share_content");
+				}else if("1".equals(courseMap.get("status"))){
+					Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
+					if(MiscUtils.isEmpty(content)){
+						content  = MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+					}else {
+						content += "\n" + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+					}
+				}
+				icon_url = liveRoomMap.get("avatar_address");
+				simple_content = courseMap.get("course_title");
+				share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + id;
+				break;
+
+			case "2":
+				Map<String,String> liveRoomInfoMap =  CacheUtils.readLiveRoom(id, reqEntity, readLiveRoomOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(liveRoomInfoMap)){
+					throw new QNLiveException("120018");
+				}
+				title = liveRoomInfoMap.get("room_name");
+				content = liveRoomInfoMap.get("room_remark");
+				icon_url = liveRoomInfoMap.get("avatar_address");
+				share_url = getLiveRoomShareURL(userId, id);
+				simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content") + liveRoomInfoMap.get("room_name");
+				break;
+
+			case "3":
+				title = MiscUtils.getConfigByKey("weixin_other_page_share_title");
+				content = MiscUtils.getConfigByKey("weixin_other_page_share_content");
+				icon_url = MiscUtils.getConfigByKey("weixin_other_page_share_icon_url");
+				simple_content = MiscUtils.getConfigByKey("weixin_other_page_share_simple_content");
+				break;
+
+			case "4":
+				Jedis jedis = jedisUtils.getJedis();
+				Map<String, Object> map = new HashMap<>();
+				map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
+				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);
+				Map<String, String> values = jedis.hgetAll(key);
+
+				if(MiscUtils.isEmpty(values)){
+					throw new QNLiveException("120019");
+				}
+				title = MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_title");
+				Map<String,String> liveRoomInfo = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(liveRoomInfo)){
+					throw new QNLiveException("120018");
+				}
+				content = liveRoomInfo.get("room_name") + "\n"
+						+ String.format(MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content"), values.get("profit_share_rate")) + "\n"
+						+ MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
+				icon_url = liveRoomInfo.get("avatar_address");
+				share_url = MiscUtils.getConfigByKey("be_distributer_url_pre_fix") + id;
+				break;
 		}
-		String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + key;
-		resultMap.put("url", imageUrl);
+
+		resultMap.put("title",title);
+		resultMap.put("content",content);
+		resultMap.put("icon_url",icon_url);
+		resultMap.put("simple_content",simple_content);
+		resultMap.put("share_url",share_url);
 		return resultMap;
 	}
 
