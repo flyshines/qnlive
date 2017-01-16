@@ -1040,8 +1040,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		//1.将多媒体server_id通过微信接口，得到微信资源访问链接
-		//String mediaUrl = WeiXinUtil.getMediaURL(reqMap.get("media_id").toString(),jedisUtils.getJedis());
-		String mediaUrl = reqMap.get("media_id").toString();
+		String mediaUrl = WeiXinUtil.getMediaURL(reqMap.get("media_id").toString(),jedisUtils.getJedis());
 		//2.调用七牛fetch将微信资源访问链接转换为七牛图片链接
 		String fetchURL = qiNiuFetchURL(mediaUrl);
 
