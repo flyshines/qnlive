@@ -23,6 +23,8 @@ public class LoginInfo {
 
     private String status;
 
+    private String country;
+    
     private String province;
 
     private String city;
@@ -117,7 +119,15 @@ public class LoginInfo {
         this.status = status == null ? null : status.trim();
     }
 
-    public String getProvince() {
+    public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getProvince() {
 		return province;
 	}
 

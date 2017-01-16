@@ -3,6 +3,8 @@ package qingning.common.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import qingning.common.db.persistence.mybatis.*;
 import qingning.common.db.persistence.mybatis.entity.*;
 import qingning.common.util.Constants;
@@ -64,7 +66,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap) {
 		return loginInfoMapper.getLoginInfoByLoginIdAndLoginType(reqMap);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String,String> initializeRegisterUser(Map<String, Object> reqMap) {
 		//1.插入t_user
@@ -81,7 +83,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.setCreateTime(now);
 		user.setUpdateTime(now);
 		userMapper.insert(user);
-
 		//2.插入login_info
 		LoginInfo loginInfo = new LoginInfo();
 		loginInfo.setUserId(user.getUserId());
