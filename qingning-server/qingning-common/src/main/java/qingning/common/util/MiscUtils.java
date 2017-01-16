@@ -376,8 +376,9 @@ public final class MiscUtils {
 		}
 		return oddBuilder.reverse().toString()+evenbuilder.toString();
 	}
-	 
+
 	public static String getConfigByKey(String key) {
+		String value="";
 		if(isEmptyString(key)){
 			return null;
 		}
@@ -385,10 +386,12 @@ public final class MiscUtils {
 			if(configProperty==null){
 				configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
 			}
+			value = new String(configProperty.get(key).getBytes("ISO-8859-1"),"UTF-8");
 		} catch(Exception e){
 			//TODO add log info
 		}
-		return configProperty.get(key);
+
+		return value;
 	}
 	
 	/**
