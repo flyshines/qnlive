@@ -332,8 +332,8 @@ public final class MiscUtils {
 	}
 
 	public static String getUUId() {
-		//return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
-		return UUID.randomUUID().toString().replace("-", "");
+		return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
+		//return UUID.randomUUID().toString().replace("-", "");
 	}
 		
 	/**

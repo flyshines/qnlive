@@ -39,8 +39,8 @@
     insert into t_login_info (user_id, union_id, qq_id,
     phone_number, passwd, m_user_id,
     m_pwd, user_role, system_role,
-    status, province, province, city,
-    district, create_time, update_time,
+    status, country, province, city,
+    district, create_time, update_time,subscribe,
     web_openid)
     values (#{userId,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, #{qqId,jdbcType=VARCHAR},
     #{phoneNumber,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR}, #{mUserId,jdbcType=VARCHAR},
