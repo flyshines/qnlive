@@ -641,18 +641,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("follow_status", "1");
         }
 
-        //4.将学生加入该课程的IM群组
-        try {
-            //检查学生上次加入课程，如果加入课程不为空，则退出上次课程
-
-            //加入新课程IM群组，并且将加入的群组记录入缓存中
-            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
-            //Map<String,Object> lecturerUserMap = userModuleServer.findLoginInfoByUserId(courseMap.get("lecturer_id"));
-            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
-        }catch (Exception e){
-            //TODO 暂时不处理
-        }
-
         return resultMap;
     }
 
@@ -1028,6 +1016,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id",  courseInfoMap.get("im_course_id"));
 
+        }
+
+        //4.将学生加入该课程的IM群组
+        try {
+            //检查学生上次加入课程，如果加入课程不为空，则退出上次课程
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+            map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String courseIMKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO, map);
+            String imCourseId = jedis.get(courseIMKey);
+            if(! MiscUtils.isEmpty(imCourseId)){
+                IMMsgUtil.delGroupMember(imCourseId, studentUserMap.get("m_user_id").toString(), studentUserMap.get("m_user_id").toString());
+            }
+
+            //加入新课程IM群组，并且将加入的群组记录入缓存中
+            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
+            jedis.set(courseIMKey, courseMap.get("im_course_id"));
+        }catch (Exception e){
+            //TODO 暂时不处理
         }
 
         map.clear();
