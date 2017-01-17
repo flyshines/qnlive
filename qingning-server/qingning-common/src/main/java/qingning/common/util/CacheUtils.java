@@ -103,7 +103,7 @@ public final class CacheUtils {
 	
 	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
-		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*3);
+		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
 		return result;
 	}
 	
