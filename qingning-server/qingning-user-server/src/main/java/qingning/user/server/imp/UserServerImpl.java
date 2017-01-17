@@ -68,14 +68,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("110003");
         }
 
-        //2.更新用户表中的关注数
-        userModuleServer.updateLiveRoomNumForUser(reqMap);
 
-        //3.延长用户缓存时间
-        map.clear();
-        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
-        jedis.expire(userKey, 10800);
 
         //4.更新用户缓存中直播间的关注数
         //关注操作类型 0关注 1不关注
@@ -85,9 +78,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         } else {
             incrementNum = -1;
         }
-        jedis.hincrBy(userKey, "live_room_num", incrementNum);
 
-        //5.更新直播间缓存的粉丝数
+        //5.更新用户信息中的关注直播间数，更新直播间缓存的粉丝数
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+        if(jedis.exists(userCacheKey)){
+            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+        }else {
+            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
+            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+        }
+
         jedis.hincrBy(roomKey, "fans_num", incrementNum);
 
         //6.更新讲师缓存的粉丝数
@@ -865,6 +866,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
             jedis.hincrBy(courseKey, "student_num", 1);
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+        }
+
+        //7.修改用户缓存信息中的加入课程数
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+        if(jedis.exists(userCacheKey)){
+            jedis.hincrBy(userCacheKey, "course_num", 1L);
+        }else {
+            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
+            jedis.hincrBy(userCacheKey, "course_num", 1L);
         }
 
         nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
