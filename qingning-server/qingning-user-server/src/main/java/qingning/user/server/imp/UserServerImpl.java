@@ -641,6 +641,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("follow_status", "1");
         }
 
+        //4.将学生加入该课程的IM群组
+        try {
+            //检查学生上次加入课程，如果加入课程不为空，则退出上次课程
+
+            //加入新课程IM群组，并且将加入的群组记录入缓存中
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+            //Map<String,Object> lecturerUserMap = userModuleServer.findLoginInfoByUserId(courseMap.get("lecturer_id"));
+            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
+        }catch (Exception e){
+            //TODO 暂时不处理
+        }
+
         return resultMap;
     }
 
@@ -849,16 +861,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(studentQueryMap);
         if(studentMap != null){
             throw new QNLiveException("100004");
-        }
-
-
-        //4.将学生加入该课程的IM群组
-        try {
-            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
-            Map<String,Object> lecturerUserMap = userModuleServer.findLoginInfoByUserId(courseMap.get("lecturer_id"));
-            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),lecturerUserMap.get("m_user_id").toString());
-        }catch (Exception e){
-            //TODO 暂时不处理
         }
 
         //5.将学员信息插入到学员参与表中
