@@ -693,8 +693,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					//教师信息
 					Map<String, Object> lecturerUser = commonModuleServer.findUserInfoByUserId(courseByCourseId.get("lecturer_id").toString());
 					
-					//TODO 成员报名付费通知 老师
-				    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
+					//  成员报名付费通知 老师 暂时 不需要了
+//				    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
 				    //TODO 付费报名成功通知学员
 				    wpushUser(jedis, openId, courseByCourseId, lecturerUser);
 				

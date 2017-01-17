@@ -1,25 +1,41 @@
 package qingning.mq.server.imp;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.sun.corba.se.impl.naming.namingutil.CorbalocURL;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.*;
+import qingning.common.entity.TemplateData;
+import qingning.common.util.Constants;
+import qingning.common.util.IMMsgUtil;
+import qingning.common.util.JPushHelper;
+import qingning.common.util.JedisUtils;
+import qingning.common.util.MiscUtils;
+import qingning.common.util.WeiXinUtil;
+import qingning.mq.persistence.mybatis.CoursesStudentsMapper;
+import qingning.mq.persistence.mybatis.LoginInfoMapper;
 import qingning.server.ImMsgService;
 import redis.clients.jedis.Jedis;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 public class ImMsgServiceImp implements ImMsgService {
 
 	private static Logger log = LoggerFactory.getLogger(ImMsgServiceImp.class);
 
+	@Autowired(required = true)
+	private CoursesStudentsMapper coursesStudentsMapper;
+
+	@Autowired(required = true)
+	private LoginInfoMapper loginInfoMapper;
 
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
@@ -221,6 +237,36 @@ public class ImMsgServiceImp implements ImMsgService {
 					messageMap.put("mid",MiscUtils.getUUId());
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
+					
+				   	
+		    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+		    		TemplateData first = new TemplateData();
+		    		first.setColor("#000000");
+		    		first.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_first"));
+		    		templateMap.put("first", first);
+		    		
+		    		TemplateData orderNo = new TemplateData();
+		    		orderNo.setColor("#000000");
+		    		orderNo.setValue(courseMap.get("course_title"));
+		    		templateMap.put("keyword1", orderNo);
+		    		
+		    		TemplateData wuliu = new TemplateData();
+		    		wuliu.setColor("#000000");
+		    		wuliu.setValue(str);
+		    		templateMap.put("keyword2", wuliu);	
+
+
+		    		TemplateData remark = new TemplateData();
+		    		remark.setColor("#000000");
+		    		remark.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_remark"));
+		    		templateMap.put("remark", remark);
+		    		//查询报名了的用户id 
+		    		List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("room_id"));
+		    		
+		    		if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
+		    			weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson"), templateMap, jedis);
+					}
+			
 				}
 			}
 		}
@@ -242,6 +288,26 @@ public class ImMsgServiceImp implements ImMsgService {
 		jedis.hmset(messageKey, stringMap);
 	}
 
+
+    /**
+     * 微信推送
+     * @param findFollowUserIds
+     * @param templateId
+     * @param templateMap
+     */
+    public void weiPush(List<String> findFollowUserIds,String templateId,Map<String, TemplateData> templateMap,Jedis jedis){
+    	// 推送   关注的直播间有创建新的课程
+        	Map<String, Object> map = new HashMap<String, Object>();
+        	map.put("list", findFollowUserIds);
+			List<String> findOpenIds = loginInfoMapper.findLoginInfoByUserIds(map);
+			if (findOpenIds!=null && findOpenIds.size()>0) {
+				for (String openId : findOpenIds) {
+					//TODO
+					WeiXinUtil.send_template_message(openId, templateId, templateMap, jedis);
+				} 
+			} 
+    	
+    }
 
 	//根据course_id和消息id对重复消息进行过滤
 	private boolean duplicateMessageFilter(ImMessage imMessage, JedisUtils jedisUtils){

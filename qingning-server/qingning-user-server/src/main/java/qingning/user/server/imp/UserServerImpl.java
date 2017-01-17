@@ -900,7 +900,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //course_type 0:公开课程 1:加密课程 2:收费课程',
         //TODO 加入课程推送   收费课程支付成功才推送消息
         if (!"2".equals(courseMap.get("course_type"))) {
-
+        	//获取讲师的信息
+        	Map<String, Object> user = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
+        	
     		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
     		TemplateData first = new TemplateData();
     		first.setColor("#000000");
@@ -915,7 +917,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		
     		TemplateData wuliu = new TemplateData();
     		wuliu.setColor("#000000");
-    		wuliu.setValue(lecturerUserMap.get("nick_name").toString());
+    		wuliu.setValue(user.get("nick_name")==null?"":user.get("nick_name").toString());
     		templateMap.put("keyword2", wuliu);	
 
     		TemplateData name = new TemplateData();

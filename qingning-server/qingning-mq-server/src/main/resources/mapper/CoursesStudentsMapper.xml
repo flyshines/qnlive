@@ -29,6 +29,14 @@
     delete from t_courses_students
     where student_id = #{studentId,jdbcType=VARCHAR}
   </delete>
+    <select id="findUserIdsByCourseId" resultType="string" parameterType="string" >
+    select
+    user_id
+    from t_courses_students
+    where 1 = 1
+    and course_id = #{course_id}
+  </select>
+  
   <insert id="insert" parameterType="qingning.mq.persistence.entity.CoursesStudents" >
    insert into t_courses_students (student_id, user_id, distributer_id,
       lecturer_id, room_id, course_id,
