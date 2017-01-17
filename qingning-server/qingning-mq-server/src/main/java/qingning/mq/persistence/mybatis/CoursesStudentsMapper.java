@@ -27,4 +27,6 @@ public interface CoursesStudentsMapper {
     List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
 
     List<String> findStudentIdByCourseId(String course_id);
+
+	List<String> findUserIdsByCourseId(String string);
 }
