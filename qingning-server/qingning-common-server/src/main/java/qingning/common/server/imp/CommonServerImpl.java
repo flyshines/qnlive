@@ -1138,6 +1138,136 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		return resultMap;
 	}
 
+	private String getLiveRoomShareURL(String userId, String roomId) {
+		String share_url ;
+		Map<String,Object> queryMap = new HashMap<>();
+		queryMap.put("distributer_id", userId);
+		queryMap.put("room_id", roomId);
+		List<Map<String,Object>> roomDistributerList = commonModuleServer.findRoomDistributionInfoByDistributerId(queryMap);
+
+		boolean isDistributer = false;
+		String recommend_code = null;
+		long now = MiscUtils.getEndDateOfToday().getTime();
+		if (! MiscUtils.isEmpty(roomDistributerList)) {
+			for(Map<String,Object> map : roomDistributerList){
+				//0:永久有效 1: 1个月内有效 2: 3个月内有效 3: 6个月内有效 4: 9个月内有效 5:一年有效 6: 两年有效
+				if(map.get("effective_time").toString().equals("0")){
+					isDistributer = true;
+					recommend_code = map.get("rq_code").toString();
+					break;
+				}else {
+					if(map.get("end_date") != null){
+						Date end_date = (Date)map.get("end_date");
+						if(end_date.getTime() >= now){
+							isDistributer = true;
+							recommend_code = map.get("rq_code").toString();
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		//是分销员
+		if(isDistributer == true){
+			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
+		}else {
+			//不是分销员
+			share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId;
+		}
+
+		return share_url;
+	}
+
+	@SuppressWarnings("unchecked")
+	@FunctionName("getShareInfo")
+	public Map<String,Object> getShareInfo (RequestEntity reqEntity) throws Exception{
+		Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+		Map<String,Object> resultMap = new HashMap<>();
+		String query_type = reqMap.get("query_type").toString();
+		String id = reqMap.get("id").toString();
+
+		String title = null;
+		String content = null;
+		String icon_url = null;
+		String simple_content = null;
+		String share_url = null;
+
+		//1.课程分享 2.直播间分享 3.其他页面分享 4.成为直播间分销员分享
+		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+		switch (query_type){
+			case "1":
+				Map<String,String> courseMap = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(courseMap)){
+					throw new QNLiveException("120009");
+				}
+				title = courseMap.get("course_title");
+				Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
+				if("2".equals(courseMap.get("status"))){
+					content = liveRoomMap.get("room_name") + "  " + MiscUtils.getConfigByKey("weixin_course_share_content");
+				}else if("1".equals(courseMap.get("status"))){
+					Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
+					if(MiscUtils.isEmpty(content)){
+						content  = MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+					}else {
+						content += "\n" + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+					}
+				}
+				icon_url = liveRoomMap.get("avatar_address");
+				simple_content = courseMap.get("course_title");
+				share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + id;
+				break;
+
+			case "2":
+				Map<String,String> liveRoomInfoMap =  CacheUtils.readLiveRoom(id, reqEntity, readLiveRoomOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(liveRoomInfoMap)){
+					throw new QNLiveException("120018");
+				}
+				title = liveRoomInfoMap.get("room_name");
+				content = liveRoomInfoMap.get("room_remark");
+				icon_url = liveRoomInfoMap.get("avatar_address");
+				share_url = getLiveRoomShareURL(userId, id);
+				simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content") + liveRoomInfoMap.get("room_name");
+				break;
+
+			case "3":
+				title = MiscUtils.getConfigByKey("weixin_other_page_share_title");
+				content = MiscUtils.getConfigByKey("weixin_other_page_share_content");
+				icon_url = MiscUtils.getConfigByKey("weixin_other_page_share_icon_url");
+				simple_content = MiscUtils.getConfigByKey("weixin_other_page_share_simple_content");
+				break;
+
+			case "4":
+				Jedis jedis = jedisUtils.getJedis();
+				Map<String, Object> map = new HashMap<>();
+				map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
+				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);
+				Map<String, String> values = jedis.hgetAll(key);
+
+				if(MiscUtils.isEmpty(values)){
+					throw new QNLiveException("120019");
+				}
+				title = MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_title");
+				Map<String,String> liveRoomInfo = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
+				if(MiscUtils.isEmpty(liveRoomInfo)){
+					throw new QNLiveException("120018");
+				}
+				content = liveRoomInfo.get("room_name") + "\n"
+						+ String.format(MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content"), values.get("profit_share_rate")) + "\n"
+						+ MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
+				icon_url = liveRoomInfo.get("avatar_address");
+				share_url = MiscUtils.getConfigByKey("be_distributer_url_pre_fix") + id;
+				break;
+		}
+
+		resultMap.put("title",title);
+		resultMap.put("content",content);
+		resultMap.put("icon_url",icon_url);
+		resultMap.put("simple_content",simple_content);
+		resultMap.put("share_url",share_url);
+		return resultMap;
+	}
+
 	private String encryptIMAccount(String mid, String mpwd){
 		String name='\0'+mid+'\0'+mpwd;
 		String keys= "l*c%@)c5";
