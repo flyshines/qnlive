@@ -61,4 +61,6 @@ public interface ICommonModuleServer {
 	void insertFeedback(Map<String, Object> reqMap);
 
 	Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
+
+	Map<String,Object> findVersionInfoByOS(String plateform);
 }

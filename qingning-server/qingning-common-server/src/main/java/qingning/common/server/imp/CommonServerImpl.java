@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
-import qingning.common.server.other.ReadCourseOperation;
-import qingning.common.server.other.ReadDistributerOperation;
-import qingning.common.server.other.ReadLiveRoomOperation;
-import qingning.common.server.other.ReadUserOperation;
+import qingning.common.server.other.*;
 import qingning.common.server.util.DES;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
@@ -35,6 +32,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	private ReadUserOperation readUserOperation;
 	private ReadCourseOperation readCourseOperation;
 	private ReadLiveRoomOperation readLiveRoomOperation;
+	private ReadAppVersionOperation readAPPVersionOperation;
 
 	@Override
 	public void initRpcServer() {
@@ -44,6 +42,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			readUserOperation = new ReadUserOperation(commonModuleServer);
 			readCourseOperation = new ReadCourseOperation(commonModuleServer);
 			readLiveRoomOperation = new ReadLiveRoomOperation(commonModuleServer);
+			readAPPVersionOperation = new ReadAppVersionOperation(commonModuleServer);
 		}		
 	}
 
@@ -109,6 +108,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		loginTime = System.currentTimeMillis();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("server_time", System.currentTimeMillis());
+
+		Map<String,Object> versionReturnMap = new HashMap<>();
+		//增加下发版本号逻辑
+		//平台：0： 微信 1：andriod 2:IOS
+		if(! "0".equals(reqMap.get("plateform"))){
+			Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+			if(! MiscUtils.isEmpty(versionInfoMap)){
+				//状态 0：关闭 1：开启
+				if(versionInfoMap.get("status").equals("1")){
+					if(MiscUtils.isEmpty(reqMap.get("version")) || ! versionInfoMap.get("version_no").equals(reqMap.get("version"))){
+						versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
+						versionReturnMap.put("is_force",versionInfoMap.get("is_force"));
+						versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
+						resultMap.put("version_info", versionReturnMap);
+					}
+				}
+			}
+		}
+
+
 		return resultMap;
 	}
 	

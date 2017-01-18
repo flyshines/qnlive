@@ -56,6 +56,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private FeedbackMapper feedbackMapper;
+
+	@Autowired(required = true)
+	private VersionMapper versionMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -435,5 +438,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap) {
 		return lecturerCoursesProfitMapper.findRewardByUserIdAndCourseId(rewardQueryMap);
+	}
+
+	@Override
+	public Map<String, Object> findVersionInfoByOS(String plateform) {
+		return versionMapper.findVersionInfoByOS(plateform);
 	}
 }

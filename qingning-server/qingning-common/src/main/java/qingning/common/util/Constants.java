@@ -164,6 +164,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER = "COURSE:{course_id}:MESSAGE_LIST:LECTURER";
 	public static final String CACHED_KEY_COURSE_REAL_STUDENT_NUM = "COURSE:{course_id}:REAL_STUDENT_NUM";
 	public static final String CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO = "SYS:USER:{user_id}:LAST_JOIN_COURSE_IM_INFO";
+	public static final String CACHED_KEY_APP_VERSION_INFO_FIELD = "os";
+	public static final String CACHED_KEY_APP_VERSION_INFO = "SYS:APP_VERSION_INFO:{os}";
 
 
 	public static final String USER_ROLE_LECTURER="lecturer";
