@@ -883,7 +883,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				Map<String,Object> parameter = new HashMap<String,Object>();
 				parameter.put(Constants.CACHED_KEY_USER_FIELD, userId);
 				String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, parameter);
-				jedisUtils.getJedis().del(cachedKey);
+				Map<String, String> cachedValues = new HashMap<String,String>();
+				MiscUtils.converObjectMapToStringMap(parameters, cachedValues);
+				jedisUtils.getJedis().hmset(cachedKey, cachedValues);
 			}
 		}
 		return new HashMap<String,Object>();

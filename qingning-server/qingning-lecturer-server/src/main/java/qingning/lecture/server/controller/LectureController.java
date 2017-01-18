@@ -187,7 +187,7 @@ public class LectureController extends AbstractController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = RequestMethod.PUT)
+	@RequestMapping(value = "/lecturer/courses/{course_id}/ppts", method = {RequestMethod.PUT,RequestMethod.POST})
 	public
 	@ResponseBody ResponseEntity processCoursePPTs(
 			@PathVariable("course_id") String course_id,
