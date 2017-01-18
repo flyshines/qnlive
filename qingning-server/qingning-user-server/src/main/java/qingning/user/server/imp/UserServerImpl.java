@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
+import qingning.common.entity.TemplateData;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.JedisBatchCallback;
@@ -898,7 +899,42 @@ public class UserServerImpl extends AbstractQNLiveServer {
             obj.put("extras_map", extrasMap);
             JPushHelper.push(obj);
         }
-		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id").toString());   
+        //course_type 0:公开课程 1:加密课程 2:收费课程',
+        //TODO 加入课程推送   收费课程支付成功才推送消息
+        if (!"2".equals(courseMap.get("course_type"))) {
+        	//获取讲师的信息
+        	Map<String, Object> user = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
+        	
+    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+    		TemplateData first = new TemplateData();
+    		first.setColor("#000000");
+    		first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
+    		templateMap.put("first", first);
+    		
+    		Date start_time = new Date(Long.parseLong(courseMap.get("start_time")));
+    		TemplateData orderNo = new TemplateData();
+    		orderNo.setColor("#000000");
+    		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
+    		templateMap.put("keyword1", orderNo);
+    		
+    		TemplateData wuliu = new TemplateData();
+    		wuliu.setColor("#000000");
+    		wuliu.setValue(user.get("nick_name")==null?"":user.get("nick_name").toString());
+    		templateMap.put("keyword2", wuliu);	
+
+    		TemplateData name = new TemplateData();
+    		name.setColor("#000000");
+    		name.setValue((String) courseMap.get("course_title"));
+    		templateMap.put("keyword3", name);
+
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+    		TemplateData remark = new TemplateData();
+    		remark.setColor("#000000");
+    		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+    		templateMap.put("remark", remark);
+    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseMap.get("course_id");
+    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
+		}
         return resultMap;
     }
 

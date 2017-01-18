@@ -22,4 +22,6 @@ public interface LoginInfoMapper {
     Map<String,Object> findLoginInfoByUserId(String user_id);
 
     List<String> findRoleUserIds(String user_role);
+
+	List<String> findLoginInfoByUserIds(Map<String, Object> map);
 }
