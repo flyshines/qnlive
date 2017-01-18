@@ -63,6 +63,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String lecturerId = jedis.hget(roomKey, "lecturer_id");
         reqMap.put("lecturer_id", lecturerId);
 
+        if(MiscUtils.isEqual(lecturerId, userId)){
+        	throw new QNLiveException("110004");
+        }
+        
         Map<String, Object> dbResultMap = userModuleServer.userFollowRoom(reqMap);
         if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
             throw new QNLiveException("110003");
@@ -83,10 +87,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
         if(jedis.exists(userCacheKey)){
-            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
         }else {
             CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
-            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
         }
 
         jedis.hincrBy(roomKey, "fans_num", incrementNum);

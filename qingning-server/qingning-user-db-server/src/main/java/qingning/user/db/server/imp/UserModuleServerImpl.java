@@ -4,12 +4,15 @@ package qingning.user.db.server.imp;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import qingning.common.entity.QNLiveException;
 import qingning.common.util.MiscUtils;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.db.persistence.mybatis.*;
 import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,22 +57,30 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	private DistributerMapper distributerMapper;
 
 	@Override
-	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) {
+	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) throws Exception{
 		Map<String,Object> dbResultMap = new HashMap<>();
 
 		//follow_type 关注操作类型 0关注 1不关注
 		if(reqMap.get("follow_type").toString().equals("0")){
-			Date now = new Date();
-			Fans fans = new Fans();
-			fans.setFansId(MiscUtils.getUUId());
-			fans.setUserId(reqMap.get("user_id").toString());
-			fans.setLecturerId(reqMap.get("lecturer_id").toString());
-			fans.setRoomId(reqMap.get("room_id").toString());
-			fans.setCreateTime(now);
-			fans.setCreateDate(now);
-			Integer updateCount = fansMapper.insert(fans);
-			dbResultMap.put("update_count", updateCount);
-			return dbResultMap;
+			try{
+				Date now = new Date();
+				Fans fans = new Fans();
+				fans.setFansId(MiscUtils.getUUId());
+				fans.setUserId(reqMap.get("user_id").toString());
+				fans.setLecturerId(reqMap.get("lecturer_id").toString());
+				fans.setRoomId(reqMap.get("room_id").toString());
+				fans.setCreateTime(now);
+				fans.setCreateDate(now);
+				Integer updateCount = fansMapper.insert(fans);
+				dbResultMap.put("update_count", updateCount);
+				return dbResultMap;
+			} catch(Exception e){
+				if(e instanceof SQLException){
+					throw new QNLiveException("110005");
+				} else {
+					throw e;
+				}
+			}
 		}else {
 			Map<String,Object> updateMap = new HashMap<>();
 			updateMap.put("user_id", reqMap.get("user_id").toString());
