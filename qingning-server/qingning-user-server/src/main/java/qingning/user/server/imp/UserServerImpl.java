@@ -97,10 +97,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //6.更新讲师缓存的粉丝数
         map.clear();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "fans_num", incrementNum);
-
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
         return resultMap;
     }
 
