@@ -366,12 +366,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Override
 	public int updateUser(Map<String, Object> parameters) {
-		User user = new User();
-		user.setNickName((String)parameters.get("nick_name"));
-		user.setAvatarAddress((String)parameters.get("avatar_address"));
-		user.setUserId((String)parameters.get("userId"));
-		user.setUpdateTime((Date)parameters.get("updateTime"));
-		return userMapper.updateByPrimaryKeySelective(user);
+		return userMapper.updateUser(parameters);
 	}
 
 	@Override
