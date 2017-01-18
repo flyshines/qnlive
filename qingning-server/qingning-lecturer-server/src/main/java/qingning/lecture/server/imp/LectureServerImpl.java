@@ -111,7 +111,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.hmset(lectureKey, lectureStringMap);
 
             //3.2修改access_token中的缓存
-            jedis.hset(accessTokenKey, "user_role", user_role+","+Constants.USER_ROLE_LECTURER);
+            jedis.hset(accessTokenKey, "user_role", user_role + "," + Constants.USER_ROLE_LECTURER);
         }
 
         //3.3增加讲师直播间信息缓存
@@ -1806,8 +1806,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> result = new HashMap<String,Object>();
         result.put("fans_num", fans_num_str);
         if(!MiscUtils.isEmpty(fans_num_str) && Long.parseLong(fans_num_str)>0){
-            map.put("lecturer_id", userId);       
-            map.put("position", reqMap.get("position"));
+            map.put("lecturer_id", userId);
+            if(! MiscUtils.isEmpty(reqMap.get("position"))){
+                map.put("position", reqMap.get("position"));
+            }
             map.put("page_count", reqMap.get("page_count"));
             
             List<Map<String,Object>> list = lectureModuleServer.findRoomFanList(map);

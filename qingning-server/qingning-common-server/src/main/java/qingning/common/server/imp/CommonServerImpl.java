@@ -3,6 +3,8 @@ package qingning.common.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 
@@ -1117,25 +1119,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 		//1.将多媒体server_id通过微信接口，得到微信资源访问链接
 		String mediaUrl = WeiXinUtil.getMediaURL(reqMap.get("media_id").toString(),jedisUtils.getJedis());
-
 		//2.调用七牛fetch将微信资源访问链接转换为七牛图片链接
-		String encodedURL = new String(Base64.encodeBase64URLSafe(mediaUrl.getBytes()));
+		String fetchURL = qiNiuFetchURL(mediaUrl);
+
+		resultMap.put("url", fetchURL);
+		return resultMap;
+	}
+
+	private String qiNiuFetchURL(String mediaUrl) throws Exception{
+		BucketManager bucketManager = new BucketManager(auth);
 		String bucket = MiscUtils.getConfigByKey("image_space");
 		String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-		String encodedEntryURIPre = bucket + ":"+  key;
-		String encodedEntryURI = new String(Base64.encodeBase64URLSafe(encodedEntryURIPre.getBytes()));
-		String accessQiniuUrl = MiscUtils.getConfigByKey("fetch_url_prefix")+encodedURL+"/to/"+encodedEntryURI;
-		StringMap authorization = auth.authorization(accessQiniuUrl, null, "application/x-www-form-urlencoded");
-		Map<String,String> headerMap = new HashMap<>();
-		headerMap.put("Authorization", authorization.get("Authorization").toString());
-		String qiniuResult = HttpTookit.doPost(accessQiniuUrl, headerMap, null ,null);
-		JSONObject qiniuResultJson = JSONObject.parseObject(qiniuResult);
-		if(qiniuResultJson.getString("error") != null){
-			throw new QNLiveException("100033");
-		}
-		String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + key;
-		resultMap.put("url", imageUrl);
-		return resultMap;
+		DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+		String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
+		return imageUrl;
 	}
 
 	private String getLiveRoomShareURL(String userId, String roomId) {
