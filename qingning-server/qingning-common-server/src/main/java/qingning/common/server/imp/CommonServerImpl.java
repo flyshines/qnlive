@@ -872,20 +872,31 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		String avatar_address = (String)reqMap.get("avatar_address");
 		if(!MiscUtils.isEmpty(nick_name) || !MiscUtils.isEmpty(avatar_address)){
 			Map<String,Object> parameters = new HashMap<String,Object>();
-			parameters.put("nick_name", nick_name);
-			parameters.put("avatar_address", avatar_address);
-			parameters.put("updateTime", new Date(update_time));
-			parameters.put("userId", userId);
-			int count = commonModuleServer.updateUser(parameters);
-			if(count <1){
-				throw new QNLiveException("000104");
-			} else {
-				Map<String,Object> parameter = new HashMap<String,Object>();
-				parameter.put(Constants.CACHED_KEY_USER_FIELD, userId);
-				String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, parameter);
-				Map<String, String> cachedValues = new HashMap<String,String>();
-				MiscUtils.converObjectMapToStringMap(parameters, cachedValues);
-				jedisUtils.getJedis().hmset(cachedKey, cachedValues);
+			if(reqMap.containsKey("nick_name")){
+				parameters.put("nick_name", nick_name);
+			}
+			if(reqMap.containsKey("avatar_address")){
+				parameters.put("avatar_address", avatar_address);
+			}
+			if(!parameters.isEmpty()){
+				parameters.put("updateTime", new Date(update_time));
+				parameters.put("userId", userId);
+				int count = commonModuleServer.updateUser(parameters);
+				if(count <1){
+					throw new QNLiveException("000104");
+				} else {
+					Map<String,Object> parameter = new HashMap<String,Object>();
+					parameter.put(Constants.CACHED_KEY_USER_FIELD, userId);
+					String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, parameter);
+					Map<String, String> cachedValues = new HashMap<String,String>();
+					MiscUtils.converObjectMapToStringMap(parameters, cachedValues);
+					jedisUtils.getJedis().hmset(cachedKey, cachedValues);
+					
+					cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, parameter);
+					if(parameters.containsKey("nick_name") && jedisUtils.getJedis().exists(cachedKey)){
+						jedisUtils.getJedis().hset(cachedKey, "nick_name", (String)parameters.get("nick_name"));
+					}
+				}
 			}
 		}
 		return new HashMap<String,Object>();
