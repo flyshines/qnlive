@@ -24,4 +24,6 @@ public interface CoursesMapper {
     List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
     
     List<Map<String,Object>> findCourseProfitList(Map<String, Object> queryMap);
+    
+    int updateCourse(Map<String,Object> param);
 }

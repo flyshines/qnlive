@@ -567,7 +567,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if (!"2".equals(reqMap.get("status"))){
                 String update_time_cache = jedis.hget(courseKey, "update_time");
                 if (!MiscUtils.isEqual(update_time_cache, String.valueOf(reqMap.get("update_time")))) {
-                    throw new QNLiveException("100011");
+                    throw new QNLiveException("000104");
                 }
             }
 
@@ -719,16 +719,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
 
                 Map<String, String> updateCacheMap = new HashMap<String, String>();
-                if (reqMap.get("course_title") != null) {
+                if (!MiscUtils.isEmpty(reqMap.get("course_title"))) {
                     updateCacheMap.put("course_title", reqMap.get("course_title").toString());
                 }
                 if (reqMap.get("course_remark") != null) {
                     updateCacheMap.put("course_remark", reqMap.get("course_remark").toString());
                 }
-                if (reqMap.get("course_url") != null) {
+                if (!MiscUtils.isEmpty(reqMap.get("course_url"))) {
                     updateCacheMap.put("course_url", reqMap.get("course_url").toString());
                 }
-                if (reqMap.get("course_password") != null) {
+                if (!MiscUtils.isEmpty(reqMap.get("course_password"))) {
                     updateCacheMap.put("course_password", reqMap.get("course_password").toString());
                 }
                 if (reqMap.get("start_time") != null) {
@@ -995,7 +995,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //3 如果该课程信息在缓存中，则直接修改缓存中的信息，不修改数据库，每天凌晨由定时任务将该部分数据存入输入数据库
         if(jedis.exists(courseKey)){
             String status = jedis.hget(courseKey, "status");
-            if(StringUtils.isBlank(status) || !status.equals("1")){
+            if(StringUtils.isBlank(status) || !"1".equals(status)){
                 throw new QNLiveException("100012");
             }
 

@@ -233,6 +233,29 @@
 					<param name="course_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="ppt_list" type="list">
+						<param name="image_id" type="string"/>
+						<param name="image_url" type="string"/>
+						<param name="image_pos" type="long"/>
+					</param>
+					<param name="audio_list" type="list">
+						<param name="audio_id" type="string"/>
+						<param name="audio_url" type="string"/>
+						<param name="audio_pos" type="long"/>
+						<param name="audio_time" type="long"/>
+						<param name="create_time" type="long"/>
+						<param name="audio_image" type="string"/>
+					</param>
+					<param name="im_course_id" type="string"/>
+					<param name="ban_user_id_list" type="list"/>
+					<param name="student_num" type="long"/>
+					<param name="start_time" type="long"/>
+					<param name="status" type="string"/>
+					<param name="course_type" type="string"/>
+					<param name="course_password" type="string"/>
+					<param name="share_url" type="string"/>
+					<param name="course_update_time" type="long"/>	
+					<param name="course_title" type="string"/>				
 				</outputs>
 			</function>
 
@@ -244,6 +267,20 @@
 					<param name="course_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="message_list" type="list">
+						<param name="creator_avatar_address" type="string"/>
+						<param name="creator_nick_name" type="string"/>
+						<param name="message_pos" type="long"/>
+						<param name="message_id" type="string"/>
+						<param name="message_type" type="string"/>
+						<param name="send_type" type="string"/>
+						<param name="message" type="string"/>
+						<param name="message_url" type="string"/>
+						<param name="audio_time" type="long"/>
+						<param name="create_time" type="long"/>
+						<param name="creator_id" type="string"/>
+						<param name="message_question" type="string"/>
+					</param>
 				</outputs>
 			</function>
 

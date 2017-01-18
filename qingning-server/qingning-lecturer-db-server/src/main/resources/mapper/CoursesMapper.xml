@@ -367,5 +367,28 @@
     student_num = #{student_num,jdbcType=BIGINT} + student_num,
     where course_id = #{courseId,jdbcType=VARCHAR}
   </update>
-
+  <update id="updateCourse" parameterType="hashmap" >
+    update t_courses
+    <set >
+      <if test="course_title != null" >
+        course_title = #{course_title},
+      </if>
+      <if test="start_time != null" >
+        start_time = #{start_time},
+      </if>
+      <if test="course_remark != null" >
+        course_remark = #{course_remark},
+      </if>
+            <if test="course_url != null" >
+        course_url = #{course_url},
+      </if>
+      <if test="course_password != null" >
+        course_password = #{course_password},
+      </if>
+      <if test="new_update_time != null" >
+        update_time = #{new_update_time},
+      </if>
+    </set>
+     where course_id = #{course_id} and update_time=#{update_time}
+  </update>  
 </mapper>
