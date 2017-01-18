@@ -68,14 +68,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("110003");
         }
 
-        //2.更新用户表中的关注数
-        userModuleServer.updateLiveRoomNumForUser(reqMap);
 
-        //3.延长用户缓存时间
-        map.clear();
-        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
-        jedis.expire(userKey, 10800);
 
         //4.更新用户缓存中直播间的关注数
         //关注操作类型 0关注 1不关注
@@ -85,9 +78,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         } else {
             incrementNum = -1;
         }
-        jedis.hincrBy(userKey, "live_room_num", incrementNum);
 
-        //5.更新直播间缓存的粉丝数
+        //5.更新用户信息中的关注直播间数，更新直播间缓存的粉丝数
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+        if(jedis.exists(userCacheKey)){
+            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+        }else {
+            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
+            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+        }
+
         jedis.hincrBy(roomKey, "fans_num", incrementNum);
 
         //6.更新讲师缓存的粉丝数
@@ -851,16 +852,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100004");
         }
 
-
-        //4.将学生加入该课程的IM群组
-        try {
-            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
-            Map<String,Object> lecturerUserMap = userModuleServer.findLoginInfoByUserId(courseMap.get("lecturer_id"));
-            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),lecturerUserMap.get("m_user_id").toString());
-        }catch (Exception e){
-            //TODO 暂时不处理
-        }
-
         //5.将学员信息插入到学员参与表中
         courseMap.put("user_id",userId);
         Map<String,Object> insertResultMap = userModuleServer.joinCourse(courseMap);
@@ -875,6 +866,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
             jedis.hincrBy(courseKey, "student_num", 1);
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+        }
+
+        //7.修改用户缓存信息中的加入课程数
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+        if(jedis.exists(userCacheKey)){
+            jedis.hincrBy(userCacheKey, "course_num", 1L);
+        }else {
+            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
+            jedis.hincrBy(userCacheKey, "course_num", 1L);
         }
 
         nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
@@ -1026,6 +1027,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id",  courseInfoMap.get("im_course_id"));
 
+        }
+
+        //4.将学生加入该课程的IM群组
+        try {
+            //检查学生上次加入课程，如果加入课程不为空，则退出上次课程
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+            map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String courseIMKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO, map);
+            String imCourseId = jedis.get(courseIMKey);
+            if(! MiscUtils.isEmpty(imCourseId)){
+                IMMsgUtil.delGroupMember(imCourseId, studentUserMap.get("m_user_id").toString(), studentUserMap.get("m_user_id").toString());
+            }
+
+            //加入新课程IM群组，并且将加入的群组记录入缓存中
+            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
+            jedis.set(courseIMKey, courseMap.get("im_course_id"));
+        }catch (Exception e){
+            //TODO 暂时不处理
         }
 
         map.clear();

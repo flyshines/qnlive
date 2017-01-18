@@ -569,6 +569,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					"SUCCESS".equals(requestMapData.get("result_code"))){
 				Jedis jedis = jedisUtils.getJedis();
 
+				String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 				Map<String,Object> map = new HashMap<>();
 				map.put(Constants.CACHED_KEY_COURSE_FIELD, billMap.get("course_id").toString());
 				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -649,6 +650,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					if(jedis.exists(courseKey)) {
 						jedis.hincrBy(courseKey, "student_num", 1);
 						jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
+					}
+
+					//修改用户缓存信息中的加入课程数
+					map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+					String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+					if(jedis.exists(userCacheKey)){
+						jedis.hincrBy(userCacheKey, "course_num", 1L);
+					}else {
+						CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
+						jedis.hincrBy(userCacheKey, "course_num", 1L);
 					}
 
 					nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;

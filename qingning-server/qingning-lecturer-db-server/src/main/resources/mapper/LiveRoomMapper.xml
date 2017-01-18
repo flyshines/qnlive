@@ -234,7 +234,7 @@
   </select>
 
   <select id="findRoomFanList" resultType="hashmap" parameterType="hashmap" >
-    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.fans_id=b.user_id and a.room_id=#{room_id}
+    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.user_id=b.user_id and a.room_id=#{room_id}
     and a.lecturer_id=#{lecturer_id}
     <if test="position != null">
       and a.position <![CDATA[ > ]]> #{position}
