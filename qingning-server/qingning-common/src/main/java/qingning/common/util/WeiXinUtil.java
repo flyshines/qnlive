@@ -230,17 +230,18 @@ public class WeiXinUtil {
 
 	/**
 	 * @param openId openId 用户标识
+	 * @param url          详情链接地址
 	 * @param templateId   推送模板信息
 	 * @param templateMap  模板内容
 	 * @param jedis  
 	 */
-	public static void send_template_message(String openId, String templateId, Map<String, TemplateData> templateMap,Jedis jedis) {
+	public static void send_template_message(String openId, String templateId,String url, Map<String, TemplateData> templateMap,Jedis jedis) {
 	
 		AccessToken token = getAccessToken(appid, appsecret,jedis);
 		String access_token = token.getToken();
 		String accessUrl = weixin_template_push_url.replace("ACCESS_TOKEN", access_token);
 		WxTemplate temp = new WxTemplate();
-		temp.setUrl(accessUrl);
+		temp.setUrl(url);
 		temp.setTouser(openId);
 		temp.setTopcolor("#000000");
 		temp.setTemplate_id(templateId);
@@ -296,7 +297,7 @@ public class WeiXinUtil {
 
 			if ("GET".equalsIgnoreCase(requestMethod))
 				httpUrlConn.connect();
-
+			System.err.println(outputStr);
 			// 当有数据需要提交时
 			if (null != outputStr) {
 				OutputStream outputStream = httpUrlConn.getOutputStream();
@@ -322,6 +323,7 @@ public class WeiXinUtil {
 			httpUrlConn.disconnect();
 			//TODO 
 			jsonObject = JSONObject.parseObject(buffer.toString());
+			System.out.println(buffer.toString());
 		} catch (ConnectException ce) {
 			log.error("Weixin server connection timed out.");
 //			ce.printStackTrace();

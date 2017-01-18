@@ -446,40 +446,42 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<String> findFollowUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
         //TODO  关注的直播间有新的课程，推送提醒
         if (findFollowUserIds!=null&& findFollowUserIds.size()>0) {
-        	Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-        	TemplateData first = new TemplateData();
-        	first.setColor("#000000");
-        	first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first"));
-        	templateMap.put("first", first);
+        Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+        TemplateData first = new TemplateData();
+		first.setColor("#000000");
+		first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first"));
+		templateMap.put("first", first);
+        
+        TemplateData name = new TemplateData();
+		name.setColor("#000000");
+		name.setValue(reqMap.get("course_title").toString());
+		templateMap.put("keyword1", name);
 
-        	TemplateData name = new TemplateData();
-        	name.setColor("#000000");
-        	name.setValue(reqMap.get("course_title").toString());
-        	templateMap.put("keyword1", name);
+		TemplateData wuliu = new TemplateData();
+		wuliu.setColor("#000000");
+		wuliu.setValue(reqMap.get("course_title").toString());
+		templateMap.put("keyword2", wuliu);	
 
-        	TemplateData wuliu = new TemplateData();
-        	wuliu.setColor("#000000");
-        	wuliu.setValue(reqMap.get("course_title").toString());
-        	templateMap.put("keyword2", wuliu);	
+		TemplateData orderNo = new TemplateData();
+		orderNo.setColor("#000000");
+		orderNo.setValue(nickName);
+		templateMap.put("keyword3", orderNo);
 
-        	TemplateData orderNo = new TemplateData();
-        	orderNo.setColor("#000000");
-        	orderNo.setValue(nickName);
-        	templateMap.put("keyword3", orderNo);
+		Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+		TemplateData receiveAddr = new TemplateData();
+		receiveAddr.setColor("#000000");
+		receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm:ss"));
+		templateMap.put("keyword4", receiveAddr);
 
-        	Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-        	TemplateData receiveAddr = new TemplateData();
-        	receiveAddr.setColor("#000000");
-        	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm:ss"));
-        	templateMap.put("keyword4", receiveAddr);
-
-        	TemplateData remark = new TemplateData();
-        	remark.setColor("#000000");
-        	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),nickName));
-        	templateMap.put("remark", remark);
-        	weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"), templateMap);
-        }
-        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+		TemplateData remark = new TemplateData();
+		remark.setColor("#000000");
+		remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),nickName));
+		templateMap.put("remark", remark);
+		
+		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+dbResultMap.get("course_id").toString();
+		
+		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"),url, templateMap);
+		}
         return resultMap;
     }
 
@@ -489,7 +491,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
      * @param templateId
      * @param templateMap
      */
-    public void weiPush(List<String> findFollowUserIds,String templateId,Map<String, TemplateData> templateMap){
+    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap){
     	// 推送   关注的直播间有创建新的课程
         Jedis jedis = jedisUtils.getJedis();
      
@@ -499,7 +501,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 			if (findOpenIds!=null && findOpenIds.size()>0) {
 				for (String openId : findOpenIds) {
 					//TODO
-					WeiXinUtil.send_template_message(openId, templateId, templateMap, jedis);
+					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
 				} 
 			} 
     	
