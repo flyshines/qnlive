@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface IUserModuleServer {
 
-	Map<String,Object> userFollowRoom(Map<String, Object> reqMap);
+	Map<String,Object> userFollowRoom(Map<String, Object> reqMap) throws Exception;
 
 	void updateLiveRoomNumForUser(Map<String, Object> reqMap);
 	Map<String,Object> findUserInfoByUserId(String user_id);

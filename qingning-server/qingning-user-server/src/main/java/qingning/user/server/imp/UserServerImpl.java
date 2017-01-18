@@ -63,6 +63,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String lecturerId = jedis.hget(roomKey, "lecturer_id");
         reqMap.put("lecturer_id", lecturerId);
 
+        if(MiscUtils.isEqual(lecturerId, userId)){
+        	throw new QNLiveException("110004");
+        }
+        
         Map<String, Object> dbResultMap = userModuleServer.userFollowRoom(reqMap);
         if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
             throw new QNLiveException("110003");
@@ -83,20 +87,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
         if(jedis.exists(userCacheKey)){
-            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
         }else {
             CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
-            jedis.hincrBy(userCacheKey, "fans_num", incrementNum);
+            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
         }
 
         jedis.hincrBy(roomKey, "fans_num", incrementNum);
 
         //6.更新讲师缓存的粉丝数
         map.clear();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "fans_num", incrementNum);
-
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
         return resultMap;
     }
 

@@ -60,7 +60,8 @@
 				<entry key="100033" value="获取图片失败"/>
 
 				<entry key="110003" value="关注直播间操作失败"/>
-
+				<entry key="110004" value="直播间属于当前用户，不需要关注"/>
+				<entry key="110005" value="用户已经关注直播间"/>
 
 				<entry key="120001" value="用户名或者密码不正确"/>
 				<entry key="120002" value="用户不存在"/>

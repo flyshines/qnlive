@@ -3,6 +3,8 @@ package qingning.lecturer.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
@@ -58,7 +60,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return loginInfoMapper.findLoginInfoByUserIds(map);
 	}
 	
-	
+	@Transactional(rollbackFor=Exception.class)
 	@Override
 	/**
 	 * 创建直播间
@@ -110,7 +112,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			lecturer.setLecturerId(reqMap.get("user_id").toString());
 			lecturer.setCourseNum(0L);
 			lecturer.setTotalStudentNum(0L);
-			lecturer.setLiveRoomNum(0L);
+			lecturer.setLiveRoomNum(1L);
 			lecturer.setFansNum(0L);
 			lecturer.setTotalAmount(0L);
 			lecturer.setPayStudentNum(0L);
@@ -195,7 +197,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		courses.setCourseTitle(reqMap.get("course_title").toString());
 		courses.setCourseUrl(reqMap.get("course_url").toString());
 		//courses.setCourseRemark();
-		Date startTime = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+		Date startTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("start_time")));
 		courses.setStartTime(startTime);
 		courses.setCourseType(reqMap.get("course_type").toString());
 		courses.setStatus("1");
@@ -244,6 +246,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			courses.setStatus("2");
 			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
 		}else {
+			/*
+			//下面的代码有问题，
 			Courses courses = new Courses();
 			courses.setCourseId(reqMap.get("course_id").toString());
 			if(reqMap.get("course_title") != null){
@@ -263,6 +267,33 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			}
 			courses.setUpdateTime(now);
 			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
+			*/
+			Map<String,Object> values = new HashMap<String,Object>();
+			Object course_title = reqMap.get("course_title");
+			Object start_time = reqMap.get("start_time");
+			Object course_remark = reqMap.get("course_remark");
+			Object course_url = reqMap.get("course_url");
+			Object course_password = reqMap.get("course_password");
+			
+			if(!MiscUtils.isEmpty(course_title)){
+				values.put("course_title", course_title);
+			}
+			if(!MiscUtils.isEmpty(start_time)){
+				values.put("start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
+			}
+			if(course_remark!=null){
+				values.put("course_remark", course_remark);
+			}
+			if(!MiscUtils.isEmpty(course_url)){
+				values.put("course_url", course_url);
+			}
+			if(!MiscUtils.isEmpty(course_password)){
+				values.put("course_password", course_password);
+			}
+			values.put("new_update_time", now);
+			values.put("update_time", new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time"))));
+			values.put("course_id", reqMap.get("course_id"));
+			updateCount=coursesMapper.updateCourse(values);
 		}
 
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
