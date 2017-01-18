@@ -2,8 +2,8 @@
 package qingning.user.db.server.imp;
 
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.MiscUtils;
@@ -12,7 +12,6 @@ import qingning.user.db.persistence.mybatis.*;
 import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
 import qingning.user.db.persistence.mybatis.entity.Fans;
 
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +74,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 				dbResultMap.put("update_count", updateCount);
 				return dbResultMap;
 			} catch(Exception e){
-				if(e instanceof SQLException){
+				if(e instanceof DuplicateKeyException){
 					throw new QNLiveException("110005");
 				} else {
 					throw e;
