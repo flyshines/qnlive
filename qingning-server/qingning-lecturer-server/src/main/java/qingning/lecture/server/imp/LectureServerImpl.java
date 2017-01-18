@@ -492,7 +492,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 			if (findOpenIds!=null && findOpenIds.size()>0) {
 				for (String openId : findOpenIds) {
 					//TODO
-					WeiXinUtil.send_template_message(openId, templateId, templateMap, jedis);
+					WeiXinUtil.send_template_message(openId, templateId,"www.baidu.com", templateMap, jedis);
 				} 
 			} 
     	

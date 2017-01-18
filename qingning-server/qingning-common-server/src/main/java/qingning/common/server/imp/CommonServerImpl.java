@@ -741,7 +741,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		remark.setColor("#000000");
 		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
 		templateMap.put("remark", remark);
-		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"), templateMap, jedis);
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),"www.baidu.com", templateMap, jedis);
 	}
 
 
@@ -772,7 +772,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		remark.setColor("#000000");
 		remark.setValue(MiscUtils.getConfigByKey("wpush_lecture_shop_course_remark"));
 		templateMap.put("remark", remark);
-		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_lecture_shop_course"), templateMap, jedis);
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_lecture_shop_course"),"www.baidu.com", templateMap, jedis);
 	}
 	
 	@FunctionName("commonDistribution")
