@@ -898,19 +898,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				parameters.put("avatar_address", avatar_address);
 			}
 			if(!parameters.isEmpty()){
-				parameters.put("updateTime", new Date(update_time));
-				parameters.put("userId", userId);
+				Date curDate = new Date(System.currentTimeMillis());
+				parameters.put("update_time", curDate);
+				parameters.put("last_update_Time", new Date(update_time));
+				parameters.put("user_id", userId);
 				int count = commonModuleServer.updateUser(parameters);
 				if(count <1){
 					throw new QNLiveException("000104");
 				} else {
+					parameters.remove("last_update_Time");
 					Map<String,Object> parameter = new HashMap<String,Object>();
 					parameter.put(Constants.CACHED_KEY_USER_FIELD, userId);
 					String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, parameter);
 					Map<String, String> cachedValues = new HashMap<String,String>();
 					MiscUtils.converObjectMapToStringMap(parameters, cachedValues);
 					jedisUtils.getJedis().hmset(cachedKey, cachedValues);
-					
+					parameter.clear();
+					parameter.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
 					cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, parameter);
 					if(parameters.containsKey("nick_name") && jedisUtils.getJedis().exists(cachedKey)){
 						jedisUtils.getJedis().hset(cachedKey, "nick_name", (String)parameters.get("nick_name"));

@@ -191,6 +191,26 @@
            and update_time=#{updateTime,jdbcType=TIMESTAMP}
        </if>
   </update>
+  
+  <update id="updateUser" parameterType="hashmap" >
+  	update t_user
+  	<set >
+      <if test="nick_name != null" >
+        nick_name = #{nick_name},
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address = #{avatar_address},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+  	</set>
+  	where user_id = #{user_id}
+  	<if test="last_update_time != null" >
+    	and update_time=#{last_update_time}
+    </if>
+  </update>
+  
   <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.User" >
     update t_user
     set user_name = #{userName,jdbcType=VARCHAR},
