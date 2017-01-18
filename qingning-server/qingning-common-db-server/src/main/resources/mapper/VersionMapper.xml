@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.common.db.persistence.mybatis.VersionMapper" >
+  <resultMap id="BaseResultMap" type="qingning.common.db.persistence.mybatis.entity.Version" >
+    <id column="version_id" property="versionId" jdbcType="INTEGER" />
+    <result column="plateform" property="plateform" jdbcType="CHAR" />
+    <result column="version_no" property="versionNo" jdbcType="VARCHAR" />
+    <result column="version_url" property="versionUrl" jdbcType="VARCHAR" />
+    <result column="is_force" property="isForce" jdbcType="CHAR" />
+    <result column="update_desc" property="updateDesc" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    version_id, plateform, version_no, version_url, is_force, update_desc, remark, status,
+    update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from t_version
+    where version_id = #{versionId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_version
+    where version_id = #{versionId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="qingning.common.db.persistence.mybatis.entity.Version" >
+    insert into t_version (version_id, plateform, version_no,
+    version_url, is_force, update_desc,
+    remark, status, update_time
+    )
+    values (#{versionId,jdbcType=INTEGER}, #{plateform,jdbcType=CHAR}, #{versionNo,jdbcType=VARCHAR},
+    #{versionUrl,jdbcType=VARCHAR}, #{isForce,jdbcType=CHAR}, #{updateDesc,jdbcType=VARCHAR},
+    #{remark,jdbcType=VARCHAR}, #{status,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}
+    )
+  </insert>
+  <insert id="insertSelective" parameterType="qingning.common.db.persistence.mybatis.entity.Version" >
+    insert into t_version
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="versionId != null" >
+        version_id,
+      </if>
+      <if test="plateform != null" >
+        plateform,
+      </if>
+      <if test="versionNo != null" >
+        version_no,
+      </if>
+      <if test="versionUrl != null" >
+        version_url,
+      </if>
+      <if test="isForce != null" >
+        is_force,
+      </if>
+      <if test="updateDesc != null" >
+        update_desc,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="versionId != null" >
+        #{versionId,jdbcType=INTEGER},
+      </if>
+      <if test="plateform != null" >
+        #{plateform,jdbcType=CHAR},
+      </if>
+      <if test="versionNo != null" >
+        #{versionNo,jdbcType=VARCHAR},
+      </if>
+      <if test="versionUrl != null" >
+        #{versionUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="isForce != null" >
+        #{isForce,jdbcType=CHAR},
+      </if>
+      <if test="updateDesc != null" >
+        #{updateDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="qingning.common.db.persistence.mybatis.entity.Version" >
+    update t_version
+    <set >
+      <if test="plateform != null" >
+        plateform = #{plateform,jdbcType=CHAR},
+      </if>
+      <if test="versionNo != null" >
+        version_no = #{versionNo,jdbcType=VARCHAR},
+      </if>
+      <if test="versionUrl != null" >
+        version_url = #{versionUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="isForce != null" >
+        is_force = #{isForce,jdbcType=CHAR},
+      </if>
+      <if test="updateDesc != null" >
+        update_desc = #{updateDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where version_id = #{versionId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="qingning.common.db.persistence.mybatis.entity.Version" >
+    update t_version
+    set plateform = #{plateform,jdbcType=CHAR},
+    version_no = #{versionNo,jdbcType=VARCHAR},
+    version_url = #{versionUrl,jdbcType=VARCHAR},
+    is_force = #{isForce,jdbcType=CHAR},
+    update_desc = #{updateDesc,jdbcType=VARCHAR},
+    remark = #{remark,jdbcType=VARCHAR},
+    status = #{status,jdbcType=CHAR},
+    update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where version_id = #{versionId,jdbcType=INTEGER}
+  </update>
+
+  <select id="findVersionInfoByOS" resultType="hashmap" parameterType="string" >
+    select
+    <include refid="Base_Column_List" />
+    from t_version
+    where plateform = #{plateform}
+  </select>
+
+</mapper>
