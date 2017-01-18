@@ -698,7 +698,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					//  成员报名付费通知 老师 暂时 不需要了
 //				    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
 				    //TODO 付费报名成功通知学员
-				    wpushUser(jedis, openId, courseByCourseId, lecturerUser);
+				    wpushUser(jedis, openId, courseByCourseId, lecturerUser,course_id);
 				
 				}
 			}else{
@@ -716,7 +716,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 	private void wpushUser(Jedis jedis, String openId,
 			Map<String, Object> courseByCourseId,
-			Map<String, Object> lecturerUser) {
+			Map<String, Object> lecturerUser,String courseId) {
 		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 		TemplateData first = new TemplateData();
 		first.setColor("#000000");
@@ -743,7 +743,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		remark.setColor("#000000");
 		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
 		templateMap.put("remark", remark);
-		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),"www.baidu.com", templateMap, jedis);
+		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 	}
 
 
@@ -774,7 +775,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 		remark.setColor("#000000");
 		remark.setValue(MiscUtils.getConfigByKey("wpush_lecture_shop_course_remark"));
 		templateMap.put("remark", remark);
-		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_lecture_shop_course"),"www.baidu.com", templateMap, jedis);
+		WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_lecture_shop_course"),"#", templateMap, jedis);
 	}
 	
 	@FunctionName("commonDistribution")

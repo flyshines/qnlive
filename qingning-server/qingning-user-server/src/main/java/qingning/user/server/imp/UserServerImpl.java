@@ -929,7 +929,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		remark.setColor("#000000");
     		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
     		templateMap.put("remark", remark);
-    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),"www.baidu.com", templateMap, jedis);
+    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseMap.get("course_id");
+    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
         return resultMap;
     }

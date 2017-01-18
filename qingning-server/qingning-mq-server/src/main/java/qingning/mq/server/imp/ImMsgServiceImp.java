@@ -263,8 +263,10 @@ public class ImMsgServiceImp implements ImMsgService {
 		    		//查询报名了的用户id 
 		    		List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("room_id"));
 		    		
+		    		String url = MiscUtils.getConfigByKey("live_room_url_pre_fix");
+		    		url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
 		    		if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
-		    			weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson"), templateMap, jedis);
+		    			weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson"),url,templateMap, jedis);
 					}
 			
 				}
@@ -295,7 +297,7 @@ public class ImMsgServiceImp implements ImMsgService {
      * @param templateId
      * @param templateMap
      */
-    public void weiPush(List<String> findFollowUserIds,String templateId,Map<String, TemplateData> templateMap,Jedis jedis){
+    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap,Jedis jedis){
     	// 推送   关注的直播间有创建新的课程
         	Map<String, Object> map = new HashMap<String, Object>();
         	map.put("list", findFollowUserIds);
@@ -303,7 +305,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			if (findOpenIds!=null && findOpenIds.size()>0) {
 				for (String openId : findOpenIds) {
 					//TODO
-					WeiXinUtil.send_template_message(openId, templateId,"www.baidu.com", templateMap, jedis);
+					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
 				} 
 			} 
     	

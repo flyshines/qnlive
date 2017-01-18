@@ -471,7 +471,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		remark.setColor("#000000");
 		remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),nickName));
 		templateMap.put("remark", remark);
-		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"), templateMap);
+		
+		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+dbResultMap.get("course_id").toString();
+		
+		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"),url, templateMap);
 		}
         return resultMap;
     }
@@ -482,7 +485,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
      * @param templateId
      * @param templateMap
      */
-    public void weiPush(List<String> findFollowUserIds,String templateId,Map<String, TemplateData> templateMap){
+    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap){
     	// 推送   关注的直播间有创建新的课程
         Jedis jedis = jedisUtils.getJedis();
      
@@ -492,7 +495,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 			if (findOpenIds!=null && findOpenIds.size()>0) {
 				for (String openId : findOpenIds) {
 					//TODO
-					WeiXinUtil.send_template_message(openId, templateId,"www.baidu.com", templateMap, jedis);
+					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
 				} 
 			} 
     	
@@ -791,8 +794,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             		templateMap.put("remark", remark);
             		//TODO 推送多人  报名的所有人
             		List<String> userIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(course_id);
+            		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id");
             		if (userIds!=null && userIds.size()>0) {
-            			weiPush(userIds, MiscUtils.getConfigByKey("wpush_update_course"), templateMap);
+            			weiPush(userIds, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
 					}
                     
                     //发送极光推送,通知学员上课时间变更
