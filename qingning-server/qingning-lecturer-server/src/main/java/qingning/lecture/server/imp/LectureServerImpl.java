@@ -643,6 +643,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 this.mqUtils.sendMessage(mqAudioRequestEntity);
 
                 //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
+   
+                
                 if(jedis.hget(courseKey, "real_start_time") == null){
                     String courseStartTime = jedis.hget(courseKey, "start_time");
                     if(Long.parseLong(courseStartTime) < MiscUtils.getEndTimeOfToday().getTime()){
@@ -698,15 +700,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	                		}
 	                	}	                	
 	                }
-	                String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, query);
-	                courseList = jedis.zrangeByScoreWithScores(lecturerCoursesFinishKey, preStartTime+"", nextStartTime+"", 0, 1);
-	                if(!MiscUtils.isEmpty(courseList)){
-	                	for(Tuple tuple:courseList){
-	                		if(!course_id.equals(tuple.getElement())){
-	                			throw new QNLiveException("100029");
-	                		}
-	                	}
-	                }
+	                long start_time =Long.parseLong(reqMap.get("start_time").toString()) ;
+	                jedis.zadd(lecturerCoursesPredictionKey, start_time,  reqMap.get("course_id").toString());
+//	                String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, query);
+//	                courseList = jedis.zrangeByScoreWithScores(lecturerCoursesFinishKey, preStartTime+"", nextStartTime+"", 0, 1);
+//	                if(!MiscUtils.isEmpty(courseList)){
+//	                	for(Tuple tuple:courseList){
+//	                		if(!course_id.equals(tuple.getElement())){
+//	                			throw new QNLiveException("100029");
+//	                		}
+//	                	}
+//	                }
             	}            	
                 Date now = new Date();
                 reqMap.put("now",now);
