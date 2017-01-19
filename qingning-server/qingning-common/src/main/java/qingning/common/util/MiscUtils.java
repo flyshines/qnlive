@@ -1,12 +1,12 @@
 package qingning.common.util;
-
+ 
 import com.alibaba.dubbo.common.utils.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import qingning.common.entity.QNLiveException;
-
+ 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
@@ -17,412 +17,412 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
-
+ 
 public final class MiscUtils {
-	private MiscUtils(){};
-	
-	private static Map<String, String> configProperty = null;
-	private static String configPropertyPath="classpath:application.properties";
-	private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
-
-	public static void setConfigPropertyPath(String configPropertyPath){
-		MiscUtils.configPropertyPath=configPropertyPath;
-	}
-	public static boolean isEmptyString(String value){
-		return value==null?true:(value.trim().length()<1?true:false);
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public static boolean isEmpty(Object value){
-		boolean ret = value==null?true:false;
-		if(!ret){
-			if(value instanceof String){
-				ret = isEmptyString((String)value);
-			} else if(value instanceof Collection){
-				Collection list = (Collection)value;
-				ret = (list.size() < 1);				
-			} else if(value instanceof Map){
-				Map map = (Map) value;
-				ret = map.isEmpty();
-			}
-		}
-		return ret;
-	}
-	
-	public static boolean isEqual(Object value1, Object value2){
-		boolean ret =false;
-		if(value1==value2){
-			ret = true;
-		} else if(value1!= null && value2 !=null ){
-			if(value1.equals(value2)){
-				ret = true;
-			}
-		}
-		
-		return ret;
-	}
-	
-	 public static long getUnixTimeStamp(Date date) {
-	        return date.getTime() / 1000;
-	 }
-	 
-	public static Object convertStringToObject(Object obj , String type,String fieldName, boolean adjust) throws Exception{
-		if(!isEmpty(obj) && !isEmpty(type)){
-			try{
-				if(!(obj instanceof String)){
-					if(obj instanceof Date){
-						return obj;
-					} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
-						obj = String.valueOf(obj);
-					}
-				}
-				
-				if(Constants.SYSINT.equalsIgnoreCase(type)){
-					obj = Integer.parseInt((String)obj);
-				} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
-					obj = Long.parseLong((String)obj);
-				} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){					
-					if(adjust){
-						BigDecimal bigDecimal = new BigDecimal((String)obj);
-						bigDecimal = bigDecimal.multiply(BigDecimal.valueOf(100));
-						bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
-						obj = bigDecimal.longValue();
-					} else {
-						obj = Double.parseDouble((String)obj);
-					}					
-				} else if(Constants.SYSDATE.equalsIgnoreCase(type)){
-					obj = new Date(Long.parseLong((String)obj));
-				}
-			} catch(Exception e){
-				throw new QNLiveException("000101",fieldName);
-			}
-		} else if(isEmpty(obj) && !isEmpty(type)){
-			if(!Constants.SYSSTR.equalsIgnoreCase(type)){
-				obj=null;
-			}
-		}
-		return obj;
-	}
-
-	public static long convertObjectToLong(Object value){
-		long ret = 0l;
-		try{
-			if(MiscUtils.isEmpty(value)){
-				ret = 0l;
-			} else {
-				if(value instanceof Long){
-					ret = (Long)value;					
-				} else {
-					if(value instanceof Date){
-						value = ((Date)value).getTime();
-					}
-					BigDecimal bigDecimal = new BigDecimal(value.toString());
-					bigDecimal.setScale(BigDecimal.ROUND_HALF_UP);
-					ret = bigDecimal.longValue();
-				}
-			}
-			
-		}catch(Exception e){
-			ret= 0l;
-		}
-		return ret;
-	}
-	
-	public static double convertObjectToDouble(Object value){
-		return convertObjectToDouble(value, false);
-	}
-
-	public static double convertObjectToDouble(Object value, boolean adjust){
-		double ret = 0d;		
-		try{
-			if(MiscUtils.isEmpty(value)){
-				ret = 0d;
-			} else {
-				if(value instanceof Double){
-					ret = (Double)value;					
-				} else {
-					if(value instanceof Date){
-						value = ((Date)value).getTime();
-					}
-					if(adjust){
-						BigDecimal bigDecimal = new BigDecimal(value.toString());						
-						bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
-						ret = bigDecimal.doubleValue();
-					} else {
-						ret = Double.parseDouble(value.toString());
-					}
-				}
-			}
-			
-		}catch(Exception e){
-			ret= 0d;
-		}
-		return ret;
-	}
-	
-	public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue) throws Exception{
-		return convertObjToObject(obj , type, fieldName, defaultValue, false);
-	}
-	
-	public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue, boolean adjust) throws Exception{
-		try{
-			if(MiscUtils.isEmpty(obj)){
-				obj = defaultValue;
-			}
-			
-			if(!MiscUtils.isEmpty(obj)){
-				if(Constants.SYSINT.equalsIgnoreCase(type)){
-					if(!(obj instanceof Integer)){
-						obj = Integer.parseInt(obj.toString());
-					}			
-				} else if(Constants.SYSLONG.equalsIgnoreCase(type)){
-					if(!(obj instanceof Long)){
-						if(obj instanceof Date){
-							obj = ((Date)obj).getTime();
-						} else {
-							obj = Long.parseLong(obj.toString());
-						}				
-					}
-				} else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
-					if(!(obj instanceof Double)){
-						if(obj instanceof Date){
-							Long timeStamp = ((Date)obj).getTime();
-							obj = timeStamp.toString();
-						}
-					}					
-					if(adjust){
-						BigDecimal bigDecimal = new BigDecimal(obj.toString());						
-						bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
-						obj = bigDecimal.doubleValue();
-					} else {
-						obj = Double.parseDouble(obj.toString());
-					}
-				} else if(!(obj instanceof Map) && !(obj instanceof Collection)){
-					if(!(obj instanceof String)){
-						obj=obj.toString();
-					}
-				}	
-			}
-			
-			if(MiscUtils.isEmpty(obj)){
-				if(Constants.SYSMAP.equals(type)){
-					obj=new HashMap<Object,Object>();
-				} else if(Constants.SYSLIST.equals(type)){
-					obj=new ArrayList<Object>();
-				} else {
-					obj="";
-				}
-			}
-		} catch (Exception e){
-			throw new QNLiveException("000102",fieldName);
-		}
-		return obj;
-	}
-	
-	public static Map<String, String> convertPropertiesFileToMap(String path) throws Exception{
-		InputStream input = null;
-		Map<String,String> propertiesMap = null;
-		try{
-			if(path.toLowerCase().startsWith("classpath:")){
-				String fileName = path.substring("classpath:".length());
-				input = MiscUtils.class.getClassLoader().getResourceAsStream(fileName);
-				if(input==null){
-					path=MiscUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-					path=path.substring(0, path.lastIndexOf(File.separatorChar)+1)+fileName;
-				}
-			}
-			if(input==null){
-				input = new FileInputStream(path);
-			}
-			
-			Properties properties = new Properties();
-			properties.load(input);
-			propertiesMap = new HashMap<String,String>();			
-			for(String name : properties.stringPropertyNames()){
-				propertiesMap.put(name, properties.getProperty(name));
-			}			
-		}finally{
-			if(input!=null){
-				input.close();
-			}
-		}
-		return propertiesMap;
-	}
-	
-	public static Object convertObject(Object obj){
-		if(obj == null){
-			return null;
-		}
-		if(StringUtils.isBlank(obj.toString())){
-			return null;
-		}else{
-			return obj;
-		}
-	}
-	
-	public static String convertString(Object object){
-		Object obj=object;
-		if(obj == null){
-			return "";
-		} else if(obj instanceof Date){
-			obj = ((Date)obj).getTime();
-			return obj.toString();
-		}
-		String result = obj.toString().trim();
-		if(StringUtils.isBlank(result)){
-			return "";
-		}   
-		return result;
-	}
-	
-	/**
-	 * map中参数的值为null 时返回 false 有值时为true
-	 * @param map
-	 * @return
-	 */
-	public static Boolean compareMapIsNotBlank(Map<String, Object> map){
-		if (map==null) {
-			return false;
-		}
-		for(Entry<String, Object> entry:map.entrySet()){    
-			if (entry.getKey().equals("page_count")||entry.getKey().equals("page_num")) {
-				continue;
-			} 
-			Object obj=entry.getValue();
-			if(obj != null){
-				if(!StringUtils.isBlank(obj.toString())){
-					return true;
-				} 
-			} 
-		}    
-		return false;
-	}
-	
-	/**
-	 * 将map中的"" 转为null
-	 * @param map
-	 */
-	public static void mapConvertNull(Map<String, Object> map){
-		if (map==null) {
-		}
-		for(Entry<String, Object> entry:map.entrySet()){    
-			if (entry.getKey().equals("page_count")||entry.getKey().equals("page_num")) {
-				continue;
-			} 
-			Object obj=entry.getValue();
-			if(obj != null){
-				if(StringUtils.isBlank(obj.toString())){
-					map.put(entry.getKey(), null);
-				} 
-			} 
-		}    
-	}
-	
-	public static Date objectToDate(Object obj){
-		if(obj == null){
-			return null;
-		}
-		if(obj instanceof Date){
-			return (Date)obj;
-		}else{
-			return new Date();
-		}
-		
-	}
-
-	public static String getUUId() {
-		return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
-		//return UUID.randomUUID().toString().replace("-", "");
-	}
-		
-	/**
-	 * Generate the Random No. 
-	 * @return
-	 */
-	public static String generateNormalNo(){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());		
-		long maxLen=10000000000000000L;		
-		long currentTime = cal.getTimeInMillis()%maxLen;		
-		String tmpStr = String.valueOf(currentTime);
-		int len = 16 -tmpStr.length();
-		if(len>0){
-			maxLen=(long)Math.pow(10, len);
-			long rand=0;
-			try {
-				rand=Math.abs(SecureRandom.getInstanceStrong().nextInt())%maxLen;		
-			} catch (NoSuchAlgorithmException e) {			
-			}
-			tmpStr=tmpStr+String.format("%0"+len+"d", rand);			
-		} else {
-			long rand=0;
-			try {
-				rand=Math.abs(SecureRandom.getInstanceStrong().nextInt())%maxLen;		
-			} catch (NoSuchAlgorithmException e) {			
-			}
-			tmpStr=String.format("%0"+16+"d", rand);
-			
-		}
-		tmpStr=tmpStr.substring(0, 16);
-		StringBuilder oddBuilder = new StringBuilder();
-		StringBuilder evenbuilder = new StringBuilder();
-		for(int i=0;i<16;++i){
-			if(i%2==0){
-				evenbuilder.append(tmpStr.substring(i,i+1));
-			} else {
-				oddBuilder.append(tmpStr.substring(i,i+1));
-			}
-		}
-		return oddBuilder.reverse().toString()+evenbuilder.toString();
-	}
-
-	public static String getConfigByKey(String key) {
-		String value="";
-		if(isEmptyString(key)){
-			return null;
-		}
-		try{
-			if(configProperty==null){
-				configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
-			}
-			value = new String(configProperty.get(key).getBytes("ISO-8859-1"),"UTF-8");
-		} catch(Exception e){
-			//TODO add log info
-		}
-
-		return value;
-	}
-	
-	/**
-	 * 
-	 * @param inList
-	 * @return List<Map<String, Object>>
-	 */
-	public static List<Map<String, Object>> convertObjectForMap(List<Map<String, String>> inList){
-		if(inList == null){
-			return null;
-		}
-		List<Map<String,Object>> resData = new ArrayList<Map<String,Object>>();
-		Map<String, Object> resMap = null;
- 		for (Map<String, String> map : inList) {
- 			resMap = new HashMap<String, Object>();
- 			for(Map.Entry<String, String> entry:map.entrySet()){
- 				resMap.put(entry.getKey(), entry.getValue());
- 			}
- 			resData.add(resMap);
-		}
- 		return resData;
-	}
-	/**
+    private MiscUtils(){};
+    
+    private static Map<String, String> configProperty = null;
+    private static String configPropertyPath="classpath:application.properties";
+    private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
+ 
+    public static void setConfigPropertyPath(String configPropertyPath){
+        MiscUtils.configPropertyPath=configPropertyPath;
+    }
+    public static boolean isEmptyString(String value){
+        return value==null?true:(value.trim().length()<1?true:false);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static boolean isEmpty(Object value){
+        boolean ret = value==null?true:false;
+        if(!ret){
+            if(value instanceof String){
+                ret = isEmptyString((String)value);
+            } else if(value instanceof Collection){
+                Collection list = (Collection)value;
+                ret = (list.size() < 1);                
+            } else if(value instanceof Map){
+                Map map = (Map) value;
+                ret = map.isEmpty();
+            }
+        }
+        return ret;
+    }
+    
+    public static boolean isEqual(Object value1, Object value2){
+        boolean ret =false;
+        if(value1==value2){
+            ret = true;
+        } else if(value1!= null && value2 !=null ){
+            if(value1.equals(value2)){
+                ret = true;
+            }
+        }
+        
+        return ret;
+    }
+    
+     public static long getUnixTimeStamp(Date date) {
+            return date.getTime() / 1000;
+     }
+     
+    public static Object convertStringToObject(Object obj , String type,String fieldName, boolean adjust) throws Exception{
+        if(!isEmpty(obj) && !isEmpty(type)){
+            try{
+                if(!(obj instanceof String)){
+                    if(obj instanceof Date){
+                        return obj;
+                    } else if(!(obj instanceof Map) && !(obj instanceof Collection)){
+                        obj = String.valueOf(obj);
+                    }
+                }
+                
+                if(Constants.SYSINT.equalsIgnoreCase(type)){
+                    obj = Integer.parseInt((String)obj);
+                } else if(Constants.SYSLONG.equalsIgnoreCase(type)){
+                    obj = Long.parseLong((String)obj);
+                } else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){                    
+                    if(adjust){
+                        BigDecimal bigDecimal = new BigDecimal((String)obj);
+                        bigDecimal = bigDecimal.multiply(BigDecimal.valueOf(100));
+                        bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
+                        obj = bigDecimal.longValue();
+                    } else {
+                        obj = Double.parseDouble((String)obj);
+                    }                    
+                } else if(Constants.SYSDATE.equalsIgnoreCase(type)){
+                    obj = new Date(Long.parseLong((String)obj));
+                }
+            } catch(Exception e){
+                throw new QNLiveException("000101",fieldName);
+            }
+        } else if(isEmpty(obj) && !isEmpty(type)){
+            if(!Constants.SYSSTR.equalsIgnoreCase(type)){
+                obj=null;
+            }
+        }
+        return obj;
+    }
+ 
+    public static long convertObjectToLong(Object value){
+        long ret = 0l;
+        try{
+            if(MiscUtils.isEmpty(value)){
+                ret = 0l;
+            } else {
+                if(value instanceof Long){
+                    ret = (Long)value;                    
+                } else {
+                    if(value instanceof Date){
+                        value = ((Date)value).getTime();
+                    }
+                    BigDecimal bigDecimal = new BigDecimal(value.toString());
+                    bigDecimal.setScale(BigDecimal.ROUND_HALF_UP);
+                    ret = bigDecimal.longValue();
+                }
+            }
+            
+        }catch(Exception e){
+            ret= 0l;
+        }
+        return ret;
+    }
+    
+    public static double convertObjectToDouble(Object value){
+        return convertObjectToDouble(value, false);
+    }
+ 
+    public static double convertObjectToDouble(Object value, boolean adjust){
+        double ret = 0d;        
+        try{
+            if(MiscUtils.isEmpty(value)){
+                ret = 0d;
+            } else {
+                if(value instanceof Double){
+                    ret = (Double)value;                    
+                } else {
+                    if(value instanceof Date){
+                        value = ((Date)value).getTime();
+                    }
+                    if(adjust){
+                        BigDecimal bigDecimal = new BigDecimal(value.toString());                        
+                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
+                        ret = bigDecimal.doubleValue();
+                    } else {
+                        ret = Double.parseDouble(value.toString());
+                    }
+                }
+            }
+            
+        }catch(Exception e){
+            ret= 0d;
+        }
+        return ret;
+    }
+    
+    public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue) throws Exception{
+        return convertObjToObject(obj , type, fieldName, defaultValue, false);
+    }
+    
+    public static Object convertObjToObject(Object obj , String type,String fieldName, Object defaultValue, boolean adjust) throws Exception{
+        try{
+            if(MiscUtils.isEmpty(obj)){
+                obj = defaultValue;
+            }
+            
+            if(!MiscUtils.isEmpty(obj)){
+                if(Constants.SYSINT.equalsIgnoreCase(type)){
+                    if(!(obj instanceof Integer)){
+                        obj = Integer.parseInt(obj.toString());
+                    }            
+                } else if(Constants.SYSLONG.equalsIgnoreCase(type)){
+                    if(!(obj instanceof Long)){
+                        if(obj instanceof Date){
+                            obj = ((Date)obj).getTime();
+                        } else {
+                            obj = Long.parseLong(obj.toString());
+                        }                
+                    }
+                } else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
+                    if(!(obj instanceof Double)){
+                        if(obj instanceof Date){
+                            Long timeStamp = ((Date)obj).getTime();
+                            obj = timeStamp.toString();
+                        }
+                    }                    
+                    if(adjust){
+                        BigDecimal bigDecimal = new BigDecimal(obj.toString());                        
+                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
+                        obj = bigDecimal.doubleValue();
+                    } else {
+                        obj = Double.parseDouble(obj.toString());
+                    }
+                } else if(!(obj instanceof Map) && !(obj instanceof Collection)){
+                    if(!(obj instanceof String)){
+                        obj=obj.toString();
+                    }
+                }    
+            }
+            
+            if(MiscUtils.isEmpty(obj)){
+                if(Constants.SYSMAP.equals(type)){
+                    obj=new HashMap<Object,Object>();
+                } else if(Constants.SYSLIST.equals(type)){
+                    obj=new ArrayList<Object>();
+                } else {
+                    obj="";
+                }
+            }
+        } catch (Exception e){
+            throw new QNLiveException("000102",fieldName);
+        }
+        return obj;
+    }
+    
+    public static Map<String, String> convertPropertiesFileToMap(String path) throws Exception{
+        InputStream input = null;
+        Map<String,String> propertiesMap = null;
+        try{
+            if(path.toLowerCase().startsWith("classpath:")){
+                String fileName = path.substring("classpath:".length());
+                input = MiscUtils.class.getClassLoader().getResourceAsStream(fileName);
+                if(input==null){
+                    path=MiscUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+                    path=path.substring(0, path.lastIndexOf(File.separatorChar)+1)+fileName;
+                }
+            }
+            if(input==null){
+                input = new FileInputStream(path);
+            }
+            
+            Properties properties = new Properties();
+            properties.load(input);
+            propertiesMap = new HashMap<String,String>();            
+            for(String name : properties.stringPropertyNames()){
+                propertiesMap.put(name, properties.getProperty(name));
+            }            
+        }finally{
+            if(input!=null){
+                input.close();
+            }
+        }
+        return propertiesMap;
+    }
+    
+    public static Object convertObject(Object obj){
+        if(obj == null){
+            return null;
+        }
+        if(StringUtils.isBlank(obj.toString())){
+            return null;
+        }else{
+            return obj;
+        }
+    }
+    
+    public static String convertString(Object object){
+        Object obj=object;
+        if(obj == null){
+            return "";
+        } else if(obj instanceof Date){
+            obj = ((Date)obj).getTime();
+            return obj.toString();
+        }
+        String result = obj.toString().trim();
+        if(StringUtils.isBlank(result)){
+            return "";
+        }   
+        return result;
+    }
+    
+    /**
+     * map中参数的值为null 时返回 false 有值时为true
+     * @param map
+     * @return
+     */
+    public static Boolean compareMapIsNotBlank(Map<String, Object> map){
+        if (map==null) {
+            return false;
+        }
+        for(Entry<String, Object> entry:map.entrySet()){    
+            if (entry.getKey().equals("page_count")||entry.getKey().equals("page_num")) {
+                continue;
+            } 
+            Object obj=entry.getValue();
+            if(obj != null){
+                if(!StringUtils.isBlank(obj.toString())){
+                    return true;
+                } 
+            } 
+        }    
+        return false;
+    }
+    
+    /**
+     * 将map中的"" 转为null
+     * @param map
+     */
+    public static void mapConvertNull(Map<String, Object> map){
+        if (map==null) {
+        }
+        for(Entry<String, Object> entry:map.entrySet()){    
+            if (entry.getKey().equals("page_count")||entry.getKey().equals("page_num")) {
+                continue;
+            } 
+            Object obj=entry.getValue();
+            if(obj != null){
+                if(StringUtils.isBlank(obj.toString())){
+                    map.put(entry.getKey(), null);
+                } 
+            } 
+        }    
+    }
+    
+    public static Date objectToDate(Object obj){
+        if(obj == null){
+            return null;
+        }
+        if(obj instanceof Date){
+            return (Date)obj;
+        }else{
+            return new Date();
+        }
+        
+    }
+ 
+    public static String getUUId() {
+        return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
+        //return UUID.randomUUID().toString().replace("-", "");
+    }
+        
+    /**
+     * Generate the Random No. 
+     * @return
+     */
+    public static String generateNormalNo(){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());        
+        long maxLen=10000000000000000L;        
+        long currentTime = cal.getTimeInMillis()%maxLen;        
+        String tmpStr = String.valueOf(currentTime);
+        int len = 16 -tmpStr.length();
+        if(len>0){
+            maxLen=(long)Math.pow(10, len);
+            long rand=0;
+            try {
+                rand=Math.abs(SecureRandom.getInstanceStrong().nextInt())%maxLen;        
+            } catch (NoSuchAlgorithmException e) {            
+            }
+            tmpStr=tmpStr+String.format("%0"+len+"d", rand);            
+        } else {
+            long rand=0;
+            try {
+                rand=Math.abs(SecureRandom.getInstanceStrong().nextInt())%maxLen;        
+            } catch (NoSuchAlgorithmException e) {            
+            }
+            tmpStr=String.format("%0"+16+"d", rand);
+            
+        }
+        tmpStr=tmpStr.substring(0, 16);
+        StringBuilder oddBuilder = new StringBuilder();
+        StringBuilder evenbuilder = new StringBuilder();
+        for(int i=0;i<16;++i){
+            if(i%2==0){
+                evenbuilder.append(tmpStr.substring(i,i+1));
+            } else {
+                oddBuilder.append(tmpStr.substring(i,i+1));
+            }
+        }
+        return oddBuilder.reverse().toString()+evenbuilder.toString();
+    }
+ 
+    public static String getConfigByKey(String key) {
+        String value="";
+        if(isEmptyString(key)){
+            return null;
+        }
+        try{
+            if(configProperty==null){
+                configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
+            }
+            value = new String(configProperty.get(key).getBytes("ISO-8859-1"),"UTF-8");
+        } catch(Exception e){
+            //TODO add log info
+        }
+ 
+        return value;
+    }
+    
+    /**
+     * 
+     * @param inList
+     * @return List<Map<String, Object>>
+     */
+    public static List<Map<String, Object>> convertObjectForMap(List<Map<String, String>> inList){
+        if(inList == null){
+            return null;
+        }
+        List<Map<String,Object>> resData = new ArrayList<Map<String,Object>>();
+        Map<String, Object> resMap = null;
+         for (Map<String, String> map : inList) {
+             resMap = new HashMap<String, Object>();
+             for(Map.Entry<String, String> entry:map.entrySet()){
+                 resMap.put(entry.getKey(), entry.getValue());
+             }
+             resData.add(resMap);
+        }
+         return resData;
+    }
+    /**
      * 元转换成分
      * @param amount
      * @return
      */
     public static String yuanToFen(BigDecimal amount){
-    	BigDecimal bigDecimal=new BigDecimal(100);
-		String totalAmount = String.valueOf(bigDecimal.multiply(amount).longValue());//以分为单位.
-		return totalAmount;
+        BigDecimal bigDecimal=new BigDecimal(100);
+        String totalAmount = String.valueOf(bigDecimal.multiply(amount).longValue());//以分为单位.
+        return totalAmount;
     }
     
     /**
@@ -433,249 +433,249 @@ public final class MiscUtils {
      */
     public static Date parseDate(String datestr) {
        if(StringUtils.isBlank(datestr)){
-    	   return null;
+           return null;
        }
        Date date = null;
        try {
-    	   date  = dateTimeFormat.parse(datestr);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+           date  = dateTimeFormat.parse(datestr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
        return date;
     }
-	
+    
     @SuppressWarnings("rawtypes")
-	public static String getKeyOfCachedData(String keyTemplate, Map map){
-    	if(isEmpty(keyTemplate) || isEmpty(map)){
-    		return "";
-    	}
-    	String[] keySection = keyTemplate.split(":");
-    	StringBuilder build = new StringBuilder();
-    	for(int i=0; i < keySection.length; ++i){
-    		String section=keySection[i].trim();
-    		if(section.startsWith("{") && section.endsWith("}")){
-    			section = convertString(map.get(section.substring(1, section.length()-1)));
-    		}
-    		if(i==0){
-    			build.append(section);
-    		} else {
-    			build.append(":").append(section);
-    		}
-    	}
-    	return build.toString();
+    public static String getKeyOfCachedData(String keyTemplate, Map map){
+        if(isEmpty(keyTemplate) || isEmpty(map)){
+            return "";
+        }
+        String[] keySection = keyTemplate.split(":");
+        StringBuilder build = new StringBuilder();
+        for(int i=0; i < keySection.length; ++i){
+            String section=keySection[i].trim();
+            if(section.startsWith("{") && section.endsWith("}")){
+                section = convertString(map.get(section.substring(1, section.length()-1)));
+            }
+            if(i==0){
+                build.append(section);
+            } else {
+                build.append(":").append(section);
+            }
+        }
+        return build.toString();
     }
-
-	public static void converObjectMapToStringMap(Map<String,Object> objectMap, Map<String,String> stringMap){
-		if(MiscUtils.isEmpty(objectMap)){
-			return;
-		}
-		for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-			if(entry.getValue() != null){
-				if(entry.getValue() instanceof Date){
-					stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
-/*				}else if(entry.getValue() instanceof Double){
-					BigDecimal doubleNum = new BigDecimal((Double)entry.getValue());
-					stringMap.put(entry.getKey(), doubleNum.multiply(new BigDecimal(100)).longValue()+"");*/
-				} else {
-					stringMap.put(entry.getKey(), entry.getValue().toString());
-				}
-			}
-		}
-	}
-	
-	public static String specialCharReplace(String value){
-		if(isEmpty(value)){
-			return value;
-		}
-		String[] specailChar={"<",   "&",    "\"",    ">",   " "};
-		String[] specailCode={"&lt;","&amp;","&quot;","&gt;","&nbsp;"};
-		for(int i=0; i < specailChar.length; ++i){
-			value=value.replaceAll(specailCode[i], specailChar[i]);
-		}
-		return value;
-	}
-
-
-	/**
-	 * 转换课程状态
-	 * @param currentTime
-	 * @param courseInfoMap
-	 */
-	public static void courseTranferState(long currentTime, Map<String, String> courseInfoMap) {
-		//如果课程状不为结束，则判断其开始时间是否大于当前时间，如果大于当前时间，则修改其状态为直播中
-		if(! courseInfoMap.get("status").equals("2")){
-			long courseStartTime = Long.parseLong(courseInfoMap.get("start_time"));
-			if(currentTime > courseStartTime){
-				courseInfoMap.put("status", "4");
-			}
-		}
-	}
-
-	public static Date getEndTimeOfToday() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		calendar.set(Calendar.HOUR_OF_DAY, 23);
-		calendar.set(Calendar.MINUTE, 59);
-		calendar.set(Calendar.SECOND, 59);
-		Date end = calendar.getTime();
-		return end;
-	}
-
-	public static Date getEndDateOfToday() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		Date end = calendar.getTime();
-		return end;
-	}
-
-	public static String getIpAddr(HttpServletRequest request){
-		String ip = request.getHeader ("X-Real-IP");
-		if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) { return ip; }
-		ip = request.getHeader ("X-Forwarded-For");
-		if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) {
-			// 多次反向代理后会有多个IP值，第一个为真实IP。
-			int index = ip.indexOf (',');
-			if (index != -1) {
-				return ip.substring (0, index);
-			} else {
-				return ip;
-			}
-		} else {
-			return request.getRemoteAddr ();
-		}
-	}
-
-	/**
-	 * 从inputstream 取数据。
-	 * @param is
-	 * @return
-	 * @throws Exception
-	 */
-	public static String convertStreamToString(InputStream is) throws Exception {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8"));
-		StringBuilder sb = new StringBuilder();
-		String line = null;
-		try {
-			while ((line = reader.readLine()) != null) {
-				sb.append(line);
-			}
-		} finally {
-			is.close();
-			reader.close();
-		}
-		return sb.toString();
-	}
-
-
-	/**
-	 * Xml To Map
-	 * @param resultData
-	 * @return
-	 * @throws org.dom4j.DocumentException
-	 */
-	public static SortedMap<String,String> requestToMap(String resultData) throws DocumentException {
-		SortedMap<String,String> map = new TreeMap<String, String>();
-
-		Document document = DocumentHelper.parseText(resultData);
-		// 得到xml根元素
-		Element root = document.getRootElement();
-		// 得到根元素的所有子节点
-		List<Element> elementList = root.elements();
-		// 遍历所有子节点
-		for (Element e : elementList){
-			map.put(e.getName().toLowerCase(), e.getText());
-		}
-		return map;
-	}
-
-	public static Date parseDateWinxin(String realPayTimeString) {
-		if(com.alibaba.dubbo.common.utils.StringUtils.isBlank(realPayTimeString)){
-			return null;
-		}
-		Date date = null;
-		try {
-			date  = dateTimeFormatWinxin.parse(realPayTimeString);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return date;
-	}
-
-	public static String parseDateToFotmatString(Date date, String fotmatString) {
-		if(date == null || MiscUtils.isEmpty(fotmatString)){
-			return null;
-		}else {
-			SimpleDateFormat sdf = new SimpleDateFormat(fotmatString);
-			return sdf.format(date);
-		}
-	}
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void addValueToMap(Object key, Object value, Map map){
-		if(map ==null) return;
-		if(MiscUtils.isEmpty(value)){
-			return;
-		}
-		map.put(key, value);
-	}
-	
-	public static String convertUnicodeToChinese(String value){
-		if(isEmpty(value) || value.indexOf("\\u") == -1){
-			return value;
-		}
-		
-	    StringBuilder chinese = new StringBuilder();  
-	    int i = -1;  
-	    int pos = 0;  
-	      
-	    while((i=value.indexOf("\\u", pos)) != -1){  
-	    	chinese.append(value.substring(pos, i));  
-	        if(i+5 < value.length()){  
-	            pos = i+6;  
-	            chinese.append((char)Integer.parseInt(value.substring(i+2, i+6), 16));  
-	        }  
-	    }
-	    if(pos>0 && pos < value.length()){
-	    	chinese.append(value.substring(pos));
-	    }
-	    return chinese.toString();  
-	}
-	
-	public static int convertStringToDBNo(String value, int number){
-		if(isEmpty(value) || number<1){
-			return 0;
-		}
-    	int length = value.length();
-    	int sum = 0;
-    	for(int i = 0; i<length;++i){
-    		sum+= value.charAt(i);
-    	}
-    	return sum % number;
-	}
-	
-	public static long getDate(long time){
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(time);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.SECOND,0);
-		cal.set(Calendar.MILLISECOND,0);
-		return cal.getTimeInMillis();
-	}
-	
-	//0:公开课程 1:加密课程 2:收费课程
-	public static String convertCourseTypeToContent(String course_type) {
-		if(course_type.equals("0")){
-			return "公开课程";
-		}else if(course_type.equals("1")){
-			return "加密课程";
-		}else if(course_type.equals("2")){
-			return "收费课程";
-		}else {
-			return null;
-		}
-	}
+ 
+    public static void converObjectMapToStringMap(Map<String,Object> objectMap, Map<String,String> stringMap){
+        if(MiscUtils.isEmpty(objectMap)){
+            return;
+        }
+        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+            if(entry.getValue() != null){
+                if(entry.getValue() instanceof Date){
+                    stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
+/*                }else if(entry.getValue() instanceof Double){
+                    BigDecimal doubleNum = new BigDecimal((Double)entry.getValue());
+                    stringMap.put(entry.getKey(), doubleNum.multiply(new BigDecimal(100)).longValue()+"");*/
+                } else {
+                    stringMap.put(entry.getKey(), entry.getValue().toString());
+                }
+            }
+        }
+    }
+    
+    public static String specialCharReplace(String value){
+        if(isEmpty(value)){
+            return value;
+        }
+        String[] specailChar={"<",   "&",    "\"",    ">",   " "};
+        String[] specailCode={"&lt;","&amp;","&quot;","&gt;","&nbsp;"};
+        for(int i=0; i < specailChar.length; ++i){
+            value=value.replaceAll(specailCode[i], specailChar[i]);
+        }
+        return value;
+    }
+ 
+ 
+    /**
+     * 转换课程状态
+     * @param currentTime
+     * @param courseInfoMap
+     */
+    public static void courseTranferState(long currentTime, Map<String, String> courseInfoMap) {
+        //如果课程状不为结束，则判断其开始时间是否大于当前时间，如果大于当前时间，则修改其状态为直播中
+        if(! courseInfoMap.get("status").equals("2")){
+            long courseStartTime = Long.parseLong(courseInfoMap.get("start_time"));
+            if(currentTime > courseStartTime){
+                courseInfoMap.put("status", "4");
+            }
+        }
+    }
+ 
+    public static Date getEndTimeOfToday() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        Date end = calendar.getTime();
+        return end;
+    }
+ 
+    public static Date getEndDateOfToday() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date end = calendar.getTime();
+        return end;
+    }
+ 
+    public static String getIpAddr(HttpServletRequest request){
+        String ip = request.getHeader ("X-Real-IP");
+        if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) { return ip; }
+        ip = request.getHeader ("X-Forwarded-For");
+        if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) {
+            // 多次反向代理后会有多个IP值，第一个为真实IP。
+            int index = ip.indexOf (',');
+            if (index != -1) {
+                return ip.substring (0, index);
+            } else {
+                return ip;
+            }
+        } else {
+            return request.getRemoteAddr ();
+        }
+    }
+ 
+    /**
+     * 从inputstream 取数据。
+     * @param is
+     * @return
+     * @throws Exception
+     */
+    public static String convertStreamToString(InputStream is) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        } finally {
+            is.close();
+            reader.close();
+        }
+        return sb.toString();
+    }
+ 
+ 
+    /**
+     * Xml To Map
+     * @param resultData
+     * @return
+     * @throws org.dom4j.DocumentException
+     */
+    public static SortedMap<String,String> requestToMap(String resultData) throws DocumentException {
+        SortedMap<String,String> map = new TreeMap<String, String>();
+ 
+        Document document = DocumentHelper.parseText(resultData);
+        // 得到xml根元素
+        Element root = document.getRootElement();
+        // 得到根元素的所有子节点
+        List<Element> elementList = root.elements();
+        // 遍历所有子节点
+        for (Element e : elementList){
+            map.put(e.getName().toLowerCase(), e.getText());
+        }
+        return map;
+    }
+ 
+    public static Date parseDateWinxin(String realPayTimeString) {
+        if(com.alibaba.dubbo.common.utils.StringUtils.isBlank(realPayTimeString)){
+            return null;
+        }
+        Date date = null;
+        try {
+            date  = dateTimeFormatWinxin.parse(realPayTimeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+ 
+    public static String parseDateToFotmatString(Date date, String fotmatString) {
+        if(date == null || MiscUtils.isEmpty(fotmatString)){
+            return null;
+        }else {
+            SimpleDateFormat sdf = new SimpleDateFormat(fotmatString);
+            return sdf.format(date);
+        }
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void addValueToMap(Object key, Object value, Map map){
+        if(map ==null) return;
+        if(MiscUtils.isEmpty(value)){
+            return;
+        }
+        map.put(key, value);
+    }
+    
+    public static String convertUnicodeToChinese(String value){
+        if(isEmpty(value) || value.indexOf("\\u") == -1){
+            return value;
+        }
+        
+        StringBuilder chinese = new StringBuilder();  
+        int i = -1;  
+        int pos = 0;  
+          
+        while((i=value.indexOf("\\u", pos)) != -1){  
+            chinese.append(value.substring(pos, i));  
+            if(i+5 < value.length()){  
+                pos = i+6;  
+                chinese.append((char)Integer.parseInt(value.substring(i+2, i+6), 16));  
+            }  
+        }
+        if(pos>0 && pos < value.length()){
+            chinese.append(value.substring(pos));
+        }
+        return chinese.toString();  
+    }
+    
+    public static int convertStringToDBNo(String value, int number){
+        if(isEmpty(value) || number<1){
+            return 0;
+        }
+        int length = value.length();
+        int sum = 0;
+        for(int i = 0; i<length;++i){
+            sum+= value.charAt(i);
+        }
+        return sum % number;
+    }
+    
+    public static long getDate(long time){
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(time);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND,0);
+        cal.set(Calendar.MILLISECOND,0);
+        return cal.getTimeInMillis();
+    }
+    
+    //0:公开课程 1:加密课程 2:收费课程
+    public static String convertCourseTypeToContent(String course_type) {
+        if(course_type.equals("0")){
+            return "公开课程";
+        }else if(course_type.equals("1")){
+            return "加密课程";
+        }else if(course_type.equals("2")){
+            return "收费课程";
+        }else {
+            return null;
+        }
+    }
 }
