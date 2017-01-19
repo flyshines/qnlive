@@ -2,6 +2,7 @@ package qingning.mq.server.imp;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class ImMsgServiceImp implements ImMsgService {
 
 	@Autowired(required = true)
 	private LoginInfoMapper loginInfoMapper;
+
+	static Hashtable<String,Object> messageLockMap = new Hashtable<>();
 
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
@@ -317,19 +320,33 @@ public class ImMsgServiceImp implements ImMsgService {
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String courseId = information.get("course_id").toString();
-		String mid = body.get("mid").toString();
-		Map<String, Object> map = new HashMap<>();
-		map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-		String courseMessageIdInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_ID_INFO, map);
-
-		String hasMessage = jedis.hget(courseMessageIdInfoKey, mid);
-		if(MiscUtils.isEmpty(hasMessage)){
-			jedis.hset(courseMessageIdInfoKey, mid, System.currentTimeMillis()+"");
-		}
-		if(MiscUtils.isEmpty(hasMessage) == true){
-			return false;
+		Object lockObject;
+		if(messageLockMap.containsKey(courseId)){
+			lockObject = messageLockMap.get(courseId);
 		}else {
-			return true;
+			messageLockMap.put(courseId,courseId);
+			lockObject = courseId;
 		}
+
+		synchronized (lockObject){
+			String mid = body.get("mid").toString();
+			Map<String, Object> map = new HashMap<>();
+			map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+			String courseMessageIdInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_ID_INFO, map);
+
+			String hasMessage = jedis.hget(courseMessageIdInfoKey, mid);
+			if(MiscUtils.isEmpty(hasMessage)){
+				jedis.hset(courseMessageIdInfoKey, mid, System.currentTimeMillis()+"");
+			}
+			if(MiscUtils.isEmpty(hasMessage) == true){
+				return false;
+			}else {
+				return true;
+			}
+		}
+	}
+
+	public static void clearMessageLockMap(){
+		messageLockMap.clear();
 	}
 }

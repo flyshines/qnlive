@@ -111,4 +111,7 @@
 	
 	<bean id="MainBusinessTask" class="qingning.mq.server.scheduler.MainBusinessTask">
 	</bean>
+
+	<bean id="ImMsgServiceImp" class="qingning.mq.server.imp.ImMsgServiceImp">
+	</bean>
 </beans>

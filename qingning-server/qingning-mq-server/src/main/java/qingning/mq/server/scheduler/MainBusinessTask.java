@@ -100,6 +100,8 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			CreateCourseNoticeTaskServerImpl createCourseNoticeTaskServerImpl = new CreateCourseNoticeTaskServerImpl();
 			createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
 			list.add(createCourseNoticeTaskServerImpl);
+
+			clearMessageLock();
 		}
 	}
 
@@ -179,6 +181,11 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			backstageMethod();
 			loadLecturerID();
 		}
+	}
+
+	private void clearMessageLock() {
+		ImMsgServiceImp imMsgServiceImp = (ImMsgServiceImp)context.getBean("ImMsgServiceImp");
+		imMsgServiceImp.clearMessageLockMap();
 	}
 
 }
