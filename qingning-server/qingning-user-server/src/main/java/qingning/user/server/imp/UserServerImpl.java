@@ -834,14 +834,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         //2.检测课程验证信息是否正确
         //2.1如果课程为私密课程则检验密码
-        if(courseMap.get("course_type").equals("1")){
+        String course_type = courseMap.get("course_type"); 
+        if("1".equals(course_type)){
             if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
                 throw new QNLiveException("000100");
             }
             if(! reqMap.get("course_password").toString().equals(courseMap.get("course_password").toString())){
                 throw new QNLiveException("120006");
             }
-        }else if(courseMap.get("course_type").equals("2")){
+        }else if("2".equals(course_type)){
             //TODO 支付课程要验证支付信息
             if(reqMap.get("payment_id") == null){
                 throw new QNLiveException("000100");
@@ -888,7 +889,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         JSONArray levelJson = JSON.parseArray(levelString);
         if(levelJson.contains(nowStudentNum+"")){
             JSONObject obj = new JSONObject();
-            String course_type = courseMap.get("course_type");
+            //String course_type = courseMap.get("course_type");
             String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
             obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, courseMap.get("course_title"), nowStudentNum+""));
             obj.put("to", userId);
@@ -935,6 +936,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseMap.get("course_id");
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
+		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id").toString());
         return resultMap;
     }
 

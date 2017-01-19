@@ -589,8 +589,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			return TenPayConstant.SUCCESS;
 		}
 
-		//if (TenPayUtils.isValidSign(requestMapData)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-		if(true){
+		if (TenPayUtils.isValidSign(requestMapData)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+		//if(true){
 			logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
 			if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -674,7 +674,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				}else if(profit_type.equals("0")){
 					Long nowStudentNum = 0L;
 					//增加课程人数
-					jedis.hincrBy(lecturerKey, "total_student_num", 1);
+					jedis.hincrBy(lecturerKey, "total_student_num", 1);			        
+			        jedis.hincrBy(lecturerKey, "pay_student_num", 1);			        
 					if(jedis.exists(courseKey)) {
 						jedis.hincrBy(courseKey, "student_num", 1);
 						jedis.hincrBy(courseKey, "course_amount", amountLong.longValue());
@@ -713,7 +714,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				map.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
 				String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, map);
 				jedis.hincrBy(liveRoomKey, "total_amount", amountLong.longValue());
-
+				//TODO  last_course_amount
 
 				resultStr = TenPayConstant.SUCCESS;
 				logger.debug("====> 微信支付流水: " + outTradeNo + " 更新成功, return success === ");

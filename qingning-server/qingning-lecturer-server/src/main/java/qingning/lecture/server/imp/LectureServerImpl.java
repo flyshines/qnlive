@@ -344,11 +344,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(courseList)){
         	throw new QNLiveException("100029");
         }
+        /*
         String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, query);
         courseList = jedis.zrangeByScoreWithScores(lecturerCoursesFinishKey, preStartTime+"", nextStartTime+"", 0, 1);
         if(!MiscUtils.isEmpty(courseList)){
         	throw new QNLiveException("100029");
         }
+        */
         //2.将课程信息插入到数据库
         reqMap.put("user_id", userId);
 
@@ -382,7 +384,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //4.2 修改讲师直播间信息中的课程数  讲师直播间信息SYS: room:{room_id}
         jedis.hincrBy(liveRoomKey, "course_num", 1);
-
+        String course_type = (String)reqMap.get("course_type");
+        if("1".equals(course_type)){
+        	jedis.hincrBy(liveRoomKey, "private_course_num", 1);
+        } else if("2".equals(course_type)){
+        	jedis.hincrBy(liveRoomKey, "pay_course_num", 1);
+        }
         //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
         map.clear();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, dbResultMap.get("course_id").toString());
@@ -482,6 +489,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 		
 		weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_course"),url, templateMap);
 		}
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
 
@@ -698,7 +706,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	                cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
 	                long nextStartTime = cal.getTimeInMillis();
 	                Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
-
+	                course_id = (String)reqMap.get("course_id");
 	                if(!MiscUtils.isEmpty(courseList)){
 	                	for(Tuple tuple:courseList){
 	                		if(!course_id.equals(tuple.getElement())){
