@@ -3,8 +3,10 @@ package qingning.user.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.CollectionUtils;
+
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -815,13 +817,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 
         Map<String,String> courseMap = new HashMap<>();
+        //1.2如果课程在数据库中
+        Map<String,Object> courseObjectMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
         //1.先检测课程存在情况和状态
         //1.1如果课程在缓存中
         if(jedis.exists(courseKey)){
             courseMap = jedis.hgetAll(courseKey);
         }else {
-            //1.2如果课程在数据库中
-            Map<String,Object> courseObjectMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
             if(courseObjectMap == null){
                 throw new QNLiveException("100004");
             }
@@ -912,6 +914,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
     		templateMap.put("first", first);
     		
+//<<<<<<< HEAD
     		Date start_time = new Date(Long.parseLong(courseMap.get("start_time")));
     		TemplateData orderNo = new TemplateData();
     		orderNo.setColor("#000000");
@@ -937,6 +940,31 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id").toString());
+//=======
+//    		Date start_time = (Date) courseObjectMap.get("start_time");
+//    		TemplateData orderNo = new TemplateData();
+//    		orderNo.setColor("#000000");
+//    		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
+//    		templateMap.put("keyword1", orderNo);
+//    		
+//    		TemplateData wuliu = new TemplateData();
+//    		wuliu.setColor("#000000");
+//    		wuliu.setValue(user.get("nick_name")==null?"":user.get("nick_name").toString());
+//    		templateMap.put("keyword2", wuliu);	
+//
+//    		TemplateData name = new TemplateData();
+//    		name.setColor("#000000");
+//    		name.setValue((String) courseObjectMap.get("course_title"));
+//    		templateMap.put("keyword3", name);
+//
+//    		TemplateData remark = new TemplateData();
+//    		remark.setColor("#000000");
+//    		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+//    		templateMap.put("remark", remark);
+//    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseMap.get("course_id");
+//    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
+//		}
+//>>>>>>> refs/remotes/origin/test
         return resultMap;
     }
 

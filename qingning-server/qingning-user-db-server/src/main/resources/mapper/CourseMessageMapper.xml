@@ -203,7 +203,7 @@
     from t_course_message
     where 1 = 1
     and
-    cm.course_id = #{course_id}
+    course_id = #{course_id}
     order by message_pos desc
     limit 1
   </select>
