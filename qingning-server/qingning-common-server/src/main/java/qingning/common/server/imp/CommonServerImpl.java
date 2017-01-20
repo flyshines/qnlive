@@ -14,11 +14,7 @@ import org.slf4j.LoggerFactory;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
-import qingning.common.server.other.ReadAppVersionOperation;
-import qingning.common.server.other.ReadCourseOperation;
-import qingning.common.server.other.ReadDistributerOperation;
-import qingning.common.server.other.ReadLiveRoomOperation;
-import qingning.common.server.other.ReadUserOperation;
+import qingning.common.server.other.*;
 import qingning.common.server.util.DES;
 import qingning.common.util.AccessTokenUtil;
 import qingning.common.util.CacheUtils;
@@ -49,7 +45,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     private ReadCourseOperation readCourseOperation;
     private ReadLiveRoomOperation readLiveRoomOperation;
     private ReadAppVersionOperation readAPPVersionOperation;
- 
+    private ReadForceVersionOperation readForceVersionOperation;
+
     @Override
     public void initRpcServer() {
         if(commonModuleServer == null){
@@ -59,6 +56,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             readCourseOperation = new ReadCourseOperation(commonModuleServer);
             readLiveRoomOperation = new ReadLiveRoomOperation(commonModuleServer);
             readAPPVersionOperation = new ReadAppVersionOperation(commonModuleServer);
+            readForceVersionOperation = new ReadForceVersionOperation(commonModuleServer);
         }        
     }
  
@@ -133,21 +131,76 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(! MiscUtils.isEmpty(versionInfoMap)){
                 //状态 0：关闭 1：开启
                 if(versionInfoMap.get("status").equals("1")){
-                    if(MiscUtils.isEmpty(reqMap.get("version")) || ! versionInfoMap.get("version_no").equals(reqMap.get("version"))){
+                    boolean nonForceVersionResult = compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString());
+                    if(MiscUtils.isEmpty(reqMap.get("version")) || nonForceVersionResult){
+                        Map<String,Object> cacheMap = new HashMap<>();
+                        cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
+                        String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
+                        ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
+                        Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
+                        versionReturnMap.put("is_force","2");
+                        if(! MiscUtils.isEmpty(forceVersionInfoMap)){
+                            boolean forceVersionResult = compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString());
+                            if(MiscUtils.isEmpty(reqMap.get("version")) || forceVersionResult){
+                                versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
+                            }
+                        }
                         versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
-                        versionReturnMap.put("is_force",versionInfoMap.get("is_force"));
                         versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
+                        versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
                         resultMap.put("version_info", versionReturnMap);
                     }
                 }
             }
         }
- 
- 
+
         return resultMap;
     }
-    
-    
+
+    //客户版本号小于系统版本号 true， 否则为false
+    private boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
+        //1：andriod 2:IOS
+        if(plateform.equals("1")){
+            if(customerVersion.compareTo(systemVersion) < 0){
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            String[] systemVersionArray = systemVersion.split("\\.");
+            String[] customerVersionArray = customerVersion.split("\\.");
+
+            if(systemVersionArray.length >= customerVersionArray.length){
+
+                for(int i=0; i < systemVersionArray.length; i++){
+                    if(customerVersionArray.length - 1 >= i){
+                        Integer systemCode = Integer.parseInt(systemVersionArray[i]);
+                        Integer customerCode =  Integer.parseInt(customerVersionArray[i]);
+                        if(customerCode < systemCode){
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if(systemVersionArray.length < customerVersionArray.length){
+
+                for(int i=0; i < customerVersionArray.length; i++){
+                    if(systemVersionArray.length - 1 >= i){
+                        Integer systemCode = Integer.parseInt(systemVersionArray[i]);
+                        Integer customerCode =  Integer.parseInt(customerVersionArray[i]);
+                        if(customerCode < systemCode){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+
     @FunctionName("serverTime")
     public Map<String,Object> getServerTime (RequestEntity reqEntity) throws Exception{
  
@@ -509,9 +562,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         //2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
         String profit_type = reqMap.get("profit_type").toString();
-//        String reward_id = null;
-//        Map<String,Object> rewardInfoMap = null;
-        //0:课程收益 1:打赏
  
         //3.插入t_trade_bill表 交易信息表
         String goodName = null;
@@ -570,7 +620,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,Object> insertPayMap = new HashMap<>();
             insertPayMap.put("trade_id",tradeId);
             insertPayMap.put("payment_id",MiscUtils.getUUId());
-            insertPayMap.put("payment_type","0");
+            insertPayMap.put("payment_type",profit_type);
             insertPayMap.put("status","1");
             insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
             insertPayMap.put("create_time",new Date());
@@ -580,7 +630,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             SortedMap<String,String> resultMap = new TreeMap<>();
             resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
             resultMap.put("nonceStr", payResultMap.get("random_char"));
-            //resultMap.put("nonceStr", "5K8264ILTKCH16CQ2502SI8ZNMTM67VS");
             resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");

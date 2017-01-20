@@ -270,4 +270,8 @@ public final class CacheUtils {
 	}
 
 
+	public static Map<String,String> readAppForceVersion(String os, RequestEntity requestEntity,
+													CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		return readData(os, Constants.FORCE_UPDATE_VERSION, Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, requestEntity, operation, jedisUtils, cachedValue);
+	}
 }

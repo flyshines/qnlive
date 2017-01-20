@@ -18,4 +18,6 @@ public interface VersionMapper {
     int updateByPrimaryKey(Version record);
 
     Map<String,Object> findVersionInfoByOS(String plateform);
+
+    Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 }

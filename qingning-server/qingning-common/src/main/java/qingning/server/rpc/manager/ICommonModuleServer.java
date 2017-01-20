@@ -63,4 +63,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
 
 	Map<String,Object> findVersionInfoByOS(String plateform);
+
+	Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 }

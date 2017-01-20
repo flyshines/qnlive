@@ -360,6 +360,7 @@
 						<param name="version_no" type="string"/>
 						<param name="is_force" type="string"/>
 						<param name="update_desc" type="string"/>
+						<param name="version_url" type="string"/>
 					</param>
 				</outputs>
 			</function>

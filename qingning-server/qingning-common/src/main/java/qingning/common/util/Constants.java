@@ -202,4 +202,6 @@ public final class Constants {
 
 	public static final String WEB_FILE_PRE_FIX = "WEB_FILE/";
 
+	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
+
 }

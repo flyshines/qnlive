@@ -147,4 +147,11 @@
     where plateform = #{plateform}
   </select>
 
+  <select id="findForceVersionInfoByOS" resultType="hashmap" parameterType="string" >
+    select
+    config_id, config_name, config_key, config_value, config_description, create_time
+    from t_system_config
+    where config_key = #{config_key}
+  </select>
+
 </mapper>
