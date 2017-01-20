@@ -426,22 +426,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             this.mqUtils.sendMessage(mqRequestEntity);
         }
  
-        //向关注者进行极光推送，使用标签进行推送
-        JSONObject obj = new JSONObject();
-        String roomId = jedis.hget(courseKey,"room_id");
-        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
-        if(MiscUtils.isEmpty(followUserIds)){
-            return resultMap;
-        }
-        String roomName = jedis.hget(liveRoomKey,"room_name");
-        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
-        obj.put("user_ids", followUserIds);
-        obj.put("msg_type","11");
-        Map<String,String> extrasMap = new HashMap<>();
-        extrasMap.put("msg_type","11");
-        extrasMap.put("course_id",dbResultMap.get("course_id").toString());
-        obj.put("extras_map", extrasMap);
-        JPushHelper.push(obj);//TODO
+        //向关注者进行极光推送，使用标签进行推送 //TODO
+//        JSONObject obj = new JSONObject();
+//        String roomId = jedis.hget(courseKey,"room_id");
+//        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
+//        if(MiscUtils.isEmpty(followUserIds)){
+//            return resultMap;
+//        }
+//        String roomName = jedis.hget(liveRoomKey,"room_name");
+//        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
+//        obj.put("user_ids", followUserIds);
+//        obj.put("msg_type","11");
+//        Map<String,String> extrasMap = new HashMap<>();
+//        extrasMap.put("msg_type","11");
+//        extrasMap.put("course_id",dbResultMap.get("course_id").toString());
+//        obj.put("extras_map", extrasMap);
+//        JPushHelper.push(obj);//TODO
          
         
         Map<String, Object> user = lectureModuleServer.findUserInfoByUserId(userId);
@@ -815,20 +815,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         weiPush(userIds, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
                     }
                     
-                    //发送极光推送,通知学员上课时间变更
-                    JSONObject obj = new JSONObject();
-                    Date newStartTimeDate = new Date(Long.parseLong(newStartTime));
-                    String courseTitle = jedis.hget(courseKey,"course_title");
-                    String startTimeFormat = MiscUtils.parseDateToFotmatString(newStartTimeDate,"MM月dd日HH:mm");
-                    List<String> studentIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(reqMap.get("course_id").toString());
-                    obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), courseTitle,startTimeFormat));
-                    obj.put("user_ids", studentIds);
-                    obj.put("msg_type", "13");
-                    Map<String,String> extrasMap = new HashMap<>();
-                    extrasMap.put("msg_type","13");
-                    extrasMap.put("course_id",reqMap.get("course_id").toString());
-                    obj.put("extras_map", extrasMap);
-                    JPushHelper.push(obj);
+                    //发送极光推送,通知学员上课时间变更//todo
+//                    JSONObject obj = new JSONObject();
+//                    Date newStartTimeDate = new Date(Long.parseLong(newStartTime));
+//                    String courseTitle = jedis.hget(courseKey,"course_title");
+//                    String startTimeFormat = MiscUtils.parseDateToFotmatString(newStartTimeDate,"MM月dd日HH:mm");
+//                    List<String> studentIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(reqMap.get("course_id").toString());
+//                    obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), courseTitle,startTimeFormat));
+//                    obj.put("user_ids", studentIds);
+//                    obj.put("msg_type", "13");
+//                    Map<String,String> extrasMap = new HashMap<>();
+//                    extrasMap.put("msg_type","13");
+//                    extrasMap.put("course_id",reqMap.get("course_id").toString());
+//                    obj.put("extras_map", extrasMap);
+//                    JPushHelper.push(obj);
  
                 }
                 updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");

@@ -112,22 +112,22 @@ public class ImMsgServiceImp implements ImMsgService {
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
 
-			//如果为讲师回答，则需要进行极光推送
-		}else if(information.get("send_type").equals("1")){
-			JSONObject obj = new JSONObject();
-			map.put(Constants.CACHED_KEY_LECTURER_FIELD, information.get("creator_id").toString());
-			String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-			String lecturerName = jedis.hget(lecturerKey,"nick_name");
-			obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_question_answer"), lecturerName, courseMap.get("course_title")));
-			obj.put("to", information.get("student_id"));
-			obj.put("msg_type","12");
-			Map<String,String> extrasMap = new HashMap<>();
-			extrasMap.put("msg_type","12");
-			extrasMap.put("course_id",courseMap.get("course_id"));
-			extrasMap.put("im_course_id",courseMap.get("im_course_id"));
-			obj.put("extras_map", extrasMap);
-			JPushHelper.push(obj);
-		}
+			//如果为讲师回答，则需要进行极光推送//TODO
+//		}else if(information.get("send_type").equals("1")){
+//			JSONObject obj = new JSONObject();
+//			map.put(Constants.CACHED_KEY_LECTURER_FIELD, information.get("creator_id").toString());
+//			String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+//			String lecturerName = jedis.hget(lecturerKey,"nick_name");
+//			obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_question_answer"), lecturerName, courseMap.get("course_title")));
+//			obj.put("to", information.get("student_id"));
+//			obj.put("msg_type","12");
+//			Map<String,String> extrasMap = new HashMap<>();
+//			extrasMap.put("msg_type","12");
+//			extrasMap.put("course_id",courseMap.get("course_id"));
+//			extrasMap.put("im_course_id",courseMap.get("im_course_id"));
+//			obj.put("extras_map", extrasMap);
+//			JPushHelper.push(obj);
+//		}
 
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, messageId);
