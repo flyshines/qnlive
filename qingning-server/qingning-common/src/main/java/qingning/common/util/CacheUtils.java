@@ -21,14 +21,24 @@ public final class CacheUtils {
 			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue) throws Exception{
 		return readData(searchKey, keyFormat, keyField, requestEntity, operation, jedisUtils, cachedValue, -1);
 	}
+
+	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
+			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue, int lifeTime) throws Exception{
+		String[] searchKeys={searchKey};
+		String[] keyFields={keyField};
+		return readData(searchKeys, keyFormat, keyFields, requestEntity, operation, jedisUtils, cachedValue, lifeTime);
+	}
 	
 	@SuppressWarnings({"rawtypes", "unchecked" })
-	private static Map<String,String> readData(String searchKey, String keyFormat, String keyField, 
+	private static Map<String,String> readData(String[] searchKeys, String keyFormat, String[] keyFields, 
 			RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedValue, int lifeTime) throws Exception{
 		boolean useCached = jedisUtils!=null;
 		Map<String,String> dataValue = null;
 		Map<String, String> keyMap = new HashMap<String, String>();
-		keyMap.put(keyField, searchKey);
+		int length = searchKeys.length;
+		for(int i = 0; i < length; ++i){
+			keyMap.put(keyFields[i], searchKeys[i]);
+		}		
 		String key = MiscUtils.getKeyOfCachedData(keyFormat, keyMap);
 		Jedis jedis = null;
 		if(useCached){
@@ -208,13 +218,26 @@ public final class CacheUtils {
 		return readData(distributer_id, Constants.CACHED_KEY_DISTRIBUTER, Constants.CACHED_KEY_DISTRIBUTER_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
 
+	public static Map<String,String> readDistributerRoom(String distributer_id, String room_id, CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
+		String[] searchKeys={distributer_id,room_id};
+		String[] keyFields={Constants.CACHED_KEY_DISTRIBUTER_FIELD,Constants.FIELD_ROOM_ID};
+		RequestEntity requestEntity = new RequestEntity();
+		int len = searchKeys.length;
+		Map<String,String> query = new HashMap<String,String>();
+		for(int i=0; i<len; ++i){
+			query.put(keyFields[i], searchKeys[i]);
+		}
+		return readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
+	}
+	
 	public static Map<String,String> readAppVersion(String os, RequestEntity requestEntity,
 													 CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		return readData(os, Constants.CACHED_KEY_APP_VERSION_INFO, Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
 
 	
-	public static List<Map<String,String>> readCourseListInfoOnlyFromCached(JedisUtils jedisUtils, List<String> courseIdList){
+	public static List<Map<String,String>> readCourseListInfoOnlyFromCached(JedisUtils jedisUtils, List<String> courseIdList,
+			CommonReadOperation operation){
 		final List<Map<String,String>> result = new ArrayList<Map<String,String>>();
 		if(MiscUtils.isEmpty(courseIdList)){
 			return result;
@@ -222,6 +245,7 @@ public final class CacheUtils {
 		JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
 		
 		callBack.invoke(new JedisBatchOperation(){
+			@SuppressWarnings("unchecked")
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 				Map<String, Response<Map<String,String>>> cachedMap = new HashMap<String, Response<Map<String,String>>>();
@@ -234,10 +258,33 @@ public final class CacheUtils {
 				}
 				pipeline.sync();
 				if(!cachedMap.isEmpty()){
+					RequestEntity requestEntity = new RequestEntity();
 					for(String courseId:courseIdList){
 						Response<Map<String,String>> value = cachedMap.get(courseId);
-						if(MiscUtils.isEmpty(value) || MiscUtils.isEmpty(value.get())) continue;
-						result.add(value.get());
+						Map<String,String> courseValue = null;
+						if(MiscUtils.isEmpty(value) || MiscUtils.isEmpty(value.get())) {
+							Map<String,Object> param = new HashMap<String,Object>();
+							param.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+							requestEntity.setParam(param);
+							courseValue = new HashMap<String,String>();
+							try {
+								MiscUtils.converObjectMapToStringMap((Map<String,Object>)operation.invokeProcess(requestEntity), courseValue);
+								if(!MiscUtils.isEmpty(courseValue)){
+									keyMap.clear();
+									keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+									String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+									pipeline.hmset(key, courseValue);
+								}
+							} catch (Exception e) {
+								courseValue = null;
+							}
+						} else {
+							courseValue = value.get();
+						}
+						if(MiscUtils.isEmpty(courseValue)){
+							continue;
+						}
+						result.add(courseValue);
 					}
 				}
 			}

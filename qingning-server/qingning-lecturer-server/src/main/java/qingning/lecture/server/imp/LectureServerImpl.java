@@ -1844,8 +1844,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         Jedis jedis = jedisUtils.getJedis();
-        
-        List<Map<String,String>> courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, queryTime, pageCount, preDesc);
+        boolean checkPreList = true;
+        if(!MiscUtils.isEmpty(course_id)){
+    		if(jedis.zscore(lecturerCoursesPredictionKey, course_id)==null){
+    			checkPreList=false;
+    		}
+        }        
+        List<Map<String,String>> courseList = null;
+        if(checkPreList){
+        	courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, queryTime, pageCount, preDesc);
+        }
         if(!MiscUtils.isEmpty(courseList)){
             pageCount=pageCount-courseList.size();
             long currentTime = System.currentTimeMillis();
@@ -2064,6 +2072,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         for (Tuple tuple : courseList) {            
         	list.add(tuple.getElement());
         }
-        return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list);
+        return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list,readCourseOperation);
     }
 }
