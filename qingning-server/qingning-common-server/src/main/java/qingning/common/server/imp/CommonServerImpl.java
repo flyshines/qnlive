@@ -131,8 +131,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(! MiscUtils.isEmpty(versionInfoMap)){
                 //状态 0：关闭 1：开启
                 if(versionInfoMap.get("status").equals("1")){
-                    boolean nonForceVersionResult = compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString());
-                    if(MiscUtils.isEmpty(reqMap.get("version")) || nonForceVersionResult){
+                    if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
                         Map<String,Object> cacheMap = new HashMap<>();
                         cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
                         String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
@@ -140,8 +139,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
                         versionReturnMap.put("is_force","2");
                         if(! MiscUtils.isEmpty(forceVersionInfoMap)){
-                            boolean forceVersionResult = compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString());
-                            if(MiscUtils.isEmpty(reqMap.get("version")) || forceVersionResult){
+                            if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
                                 versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
                             }
                         }
