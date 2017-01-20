@@ -10,6 +10,7 @@ public final class Constants {
 	public static final String SYS_FIELD_PROVINCE="province";
 	public static final String SYS_FIELD_CITY="city";
 	public static final String SYS_FIELD_DISTRICT="district";
+	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
 	
 	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
@@ -86,7 +87,9 @@ public final class Constants {
 	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS"; 
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
 	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";
-		
+	
+	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}"; 
+	
 	public static final String CACHED_KEY_ACCESS_TOKEN_FIELD = "access_token";
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";
 	public static final String CACHED_KEY_USER_FIELD ="user_id";
