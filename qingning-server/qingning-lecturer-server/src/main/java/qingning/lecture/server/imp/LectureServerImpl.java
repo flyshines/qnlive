@@ -1216,6 +1216,23 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(banUserIdList != null && banUserIdList.size() > 0){
             resultMap.put("ban_user_id_list", banUserIdList);
         }
+
+        try {
+            //检查学生上次加入课程，如果加入课程不为空，则退出上次课程
+            Map<String,Object> studentUserMap = lectureModuleServer.findLoginInfoByUserId(userId);
+            map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String courseIMKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO, map);
+            String imCourseId = jedis.get(courseIMKey);
+            if(! MiscUtils.isEmpty(imCourseId)){
+                IMMsgUtil.delGroupMember(imCourseId, studentUserMap.get("m_user_id").toString(), studentUserMap.get("m_user_id").toString());
+            }
+
+            //加入新课程IM群组，并且将加入的群组记录入缓存中
+            IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
+            jedis.set(courseIMKey, courseMap.get("im_course_id"));
+        }catch (Exception e){
+            //TODO 暂时不处理
+        }
  
         //增加返回课程相应信息
         resultMap.put("student_num",courseMap.get("student_num"));
