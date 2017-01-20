@@ -196,16 +196,16 @@
     limit #{page_count}
   </select>
 
-  <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.HashSet" >
+  <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.Map" >
     select
     u.user_id, u.nick_name, u.avatar_address, cs.create_time
     from t_courses_students cs join t_user u on cs.user_id = u.user_id
     where
     cs.user_id in
-    <foreach collection="collection" item="item" index="index" open="("
+    <foreach collection="list" item="item" index="index" open="("
              separator="," close=")">
       #{item}
-    </foreach>
+    </foreach>  and cs.course_id = #{course_id}
   </select>
 
   <select id="findLatestStudentAvatarAddList" resultType="string" parameterType="hashmap" >

@@ -1371,7 +1371,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //1.1.1如果存在禁言列表，则根据禁言列表中的用户id从数据库中查询用户相应信息
             if(banUserIdList != null && banUserIdList.size() > 0){
                 Set<Tuple> banUserTupleList = jedis.zrevrangeByScoreWithScores(bandKey, startIndex, endIndex, 0, pageCount);
-                banUserList = lectureModuleServer.findBanUserListInfo(banUserIdList);
+                Map<String, Object> paraMap = new HashMap<String, Object>();
+	            paraMap.put("list", banUserIdList);
+	            paraMap.put("course_id", reqMap.get("course_id").toString());
+                banUserList = lectureModuleServer.findBanUserListInfo(paraMap);
  
                 DecimalFormat decimalFormat = new DecimalFormat("#");
                 for(Tuple tuple : banUserTupleList){
@@ -1837,22 +1840,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return result;
     }
- 
+
     private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime,
-            boolean preDesc, boolean finDesc) throws Exception{
+                                                   boolean preDesc, boolean finDesc) throws Exception{
         Map<String,Object> map = new HashMap<String,Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         Jedis jedis = jedisUtils.getJedis();
         boolean checkPreList = true;
         if(!MiscUtils.isEmpty(course_id)){
-    		if(jedis.zscore(lecturerCoursesPredictionKey, course_id)==null){
-    			checkPreList=false;
-    		}
-        }        
+            if(jedis.zscore(lecturerCoursesPredictionKey, course_id)==null){
+                checkPreList=false;
+            }
+        }
         List<Map<String,String>> courseList = null;
         if(checkPreList){
-        	courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, queryTime, pageCount, preDesc);
+            courseList = getCourseOnlyFromCached(jedis, lecturerCoursesPredictionKey, queryTime, pageCount, preDesc);
         }
         if(!MiscUtils.isEmpty(courseList)){
             pageCount=pageCount-courseList.size();
@@ -1907,7 +1910,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 finExist=true;
             }
         }
-        
+
         if(pageCount>0){
             map.clear();
             map.put("pageCount", pageCount);
@@ -1924,11 +1927,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 } else {
                     queryTime = Long.parseLong(lastCourse.get("start_time"));
                 }
-                
+
             }
             if(queryTime != null){
                 Date date = new Date(queryTime);
-                map.put("startIndex", date);               
+                map.put("startIndex", date);
             }
             List<Map<String,Object>> finishCourse = lectureModuleServer.findCourseListForLecturer(map);
             if(!MiscUtils.isEmpty(finishCourse)){
@@ -2033,7 +2036,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     value.put("position", position);
                     String valueStr = CacheUtils.convertMaptoCachedString(value);
                     pipeline.zadd(distributeKey, position, valueStr);
-                    if(count < page_count){
+                    if(count <= page_count){
                         result.add(valueStr);
                     }
                 }

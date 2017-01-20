@@ -345,7 +345,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findBanUserListInfo(Set<String> banUserIdList) {
+	public List<Map<String, Object>> findBanUserListInfo(Map<String, Object> banUserIdList) {
 
 		return coursesStudentsMapper.findBanUserListInfo(banUserIdList);
 	}

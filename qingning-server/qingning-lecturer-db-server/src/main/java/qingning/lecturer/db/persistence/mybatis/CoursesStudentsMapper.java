@@ -22,7 +22,7 @@ public interface CoursesStudentsMapper {
 
     List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 
-    List<Map<String,Object>> findBanUserListInfo(Set<String> banUserIdList);
+    List<Map<String,Object>> findBanUserListInfo(Map<String, Object> banUserIdList);
 
     List<String> findLatestStudentAvatarAddList(Map<String, Object> queryMap);
 

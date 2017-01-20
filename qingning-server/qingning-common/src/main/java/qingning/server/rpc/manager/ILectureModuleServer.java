@@ -36,7 +36,7 @@ public interface ILectureModuleServer {
 
 	Map<String,Object> findLoginInfoByUserId(String userId);
 
-	List<Map<String,Object>> findBanUserListInfo(Set<String> banUserIdList);
+	List<Map<String,Object>> findBanUserListInfo(Map<String, Object> banUserIdList);
 
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
 	
