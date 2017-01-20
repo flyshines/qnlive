@@ -247,7 +247,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             }
                         }
                         if(MiscUtils.isEmpty(transferAvatarAddress)){
-                            transferAvatarAddress = IMMsgUtil.configMap.get("default_avatar_address");
+                            transferAvatarAddress = MiscUtils.getConfigByKey("default_avatar_address");
                         }
                         
                         reqMap.put("avatar_address",transferAvatarAddress);

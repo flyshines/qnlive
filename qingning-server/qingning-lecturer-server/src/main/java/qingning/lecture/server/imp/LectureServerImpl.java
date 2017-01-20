@@ -369,7 +369,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
  
         if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
-            reqMap.put("course_url", "http://7xt3lm.com1.z0.glb.clouddn.com/images/A21c457d4bab7640bb5eeb9ee053cbdca.png");//TODO
+            reqMap.put("course_url", MiscUtils.getConfigByKey("default_course_cover_url"));//TODO
         }
         Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
  
