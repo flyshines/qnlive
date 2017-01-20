@@ -496,12 +496,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         } else if("2".equals (reqMap.get("upload_type"))){ //音频
             url = IMMsgUtil.configMap.get("audio_space_domain_name");
-            StringMap putPolicy = new StringMap()
-                    .put("persistentPipeline","qnlive-audio-convert")//设置私有队列处理
-                    .put("persistentOps", "avthumb/mp3/ab/64k")
-                    .put("persistentNotifyUrl",MiscUtils.getConfigByKey("qiniu-audio-transfer-persistent-notify-url"));//转码策略
+//            StringMap putPolicy = new StringMap()
+//                    .put("persistentPipeline","qnlive-audio-convert")//设置私有队列处理
+//                    .put("persistentOps", "avthumb/mp3/ab/64k")
+//                    .put("persistentNotifyUrl",MiscUtils.getConfigByKey("qiniu-audio-transfer-persistent-notify-url"));//转码策略
  
-            token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, putPolicy);
+            token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, (StringMap)null);
  
         }
  
