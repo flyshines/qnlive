@@ -432,6 +432,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //老用户
         }else if(type == 2){
             user_id = loginInfoMap.get("user_id").toString();
+            //如果发现IM账号为空，则重新尝试注册IM账号
+            if(loginInfoMap.get("m_user_id") == null){
+                Map<String,String> imResultMap = null;
+                try {
+                    imResultMap = IMMsgUtil.createIMAccount("supply");
+                }catch (Exception e){
+                    //TODO 暂不处理
+                }
+
+                if(! MiscUtils.isEmpty(imResultMap)){
+                    m_user_id = imResultMap.get("uid");
+                    m_pwd = imResultMap.get("password");
+
+                    if(!MiscUtils.isEmpty(m_user_id) && !MiscUtils.isEmpty(m_pwd)){
+                        //更新login_info表
+                        Map<String,Object> updateIMAccountMap = new HashMap<>();
+                        updateIMAccountMap.put("m_user_id",m_user_id);
+                        updateIMAccountMap.put("m_pwd",m_pwd);
+                        updateIMAccountMap.put("user_id",user_id);
+                        commonModuleServer.updateIMAccount(updateIMAccountMap);
+                    }
+                }
+            }
         }
  
         //1.将objectMap转为StringMap

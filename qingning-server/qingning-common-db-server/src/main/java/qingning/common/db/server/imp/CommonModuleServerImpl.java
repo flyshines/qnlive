@@ -444,4 +444,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> findForceVersionInfoByOS(String force_version_key) {
 		return versionMapper.findForceVersionInfoByOS(force_version_key);
 	}
+
+	@Override
+	public Integer updateIMAccount(Map<String, Object> updateIMAccountMap) {
+		LoginInfo loginInfo = new LoginInfo();
+		loginInfo.setUserId(updateIMAccountMap.get("user_id").toString());
+		loginInfo.setmUserId(updateIMAccountMap.get("m_user_id").toString());
+		loginInfo.setmPwd(updateIMAccountMap.get("m_pwd").toString());
+		return loginInfoMapper.updateByPrimaryKeySelective(loginInfo);
+	}
 }
