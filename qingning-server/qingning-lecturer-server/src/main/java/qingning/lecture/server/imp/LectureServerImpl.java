@@ -428,7 +428,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
         //向关注者进行极光推送，使用标签进行推送 //TODO
 //        JSONObject obj = new JSONObject();
-//        String roomId = jedis.hget(courseKey,"room_id");
+        String roomId = jedis.hget(courseKey,"room_id");
 //        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
 //        if(MiscUtils.isEmpty(followUserIds)){
 //            return resultMap;

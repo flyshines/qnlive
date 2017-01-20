@@ -113,7 +113,8 @@ public class ImMsgServiceImp implements ImMsgService {
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
 
 			//如果为讲师回答，则需要进行极光推送//TODO
-//		}else if(information.get("send_type").equals("1")){
+		}
+// else if(information.get("send_type").equals("1")){
 //			JSONObject obj = new JSONObject();
 //			map.put(Constants.CACHED_KEY_LECTURER_FIELD, information.get("creator_id").toString());
 //			String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
@@ -144,7 +145,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param jedisUtils
 	 * @param context
 	 */
-	@SuppressWarnings("unchecked")
+
 	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----禁言信息------"+JSON.toJSONString(imMessage));
 		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
