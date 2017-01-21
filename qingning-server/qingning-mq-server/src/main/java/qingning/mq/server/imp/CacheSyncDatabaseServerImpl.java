@@ -116,7 +116,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        		Map<String,Object> lecturerDistributionInfo = new HashMap<String,Object>();
 		        		lecturerDistributionInfo.put("lecturer_id", lecturerId);
 		        		
-		        		lecturerDistributionInfo.put("live_room_num", MiscUtils.convertObjectToLong(values.get("live_room_num")));
+		        		lecturerDistributionInfo.put("live_room_num", MiscUtils.convertObjectToLong(values.get("distribution_live_room_num")));
 		        		lecturerDistributionInfo.put("room_distributer_num", MiscUtils.convertObjectToLong(values.get("room_distributer_num")));
 		        		lecturerDistributionInfo.put("room_recommend_num", MiscUtils.convertObjectToLong(values.get("room_recommend_num")));		        		
 		        		lecturerDistributionInfo.put("room_done_num", MiscUtils.convertObjectToLong(values.get("room_done_num")));

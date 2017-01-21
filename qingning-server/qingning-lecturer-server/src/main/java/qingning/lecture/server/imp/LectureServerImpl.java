@@ -43,6 +43,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             readLiveRoomOperation = new ReadLiveRoomOperation(lectureModuleServer);
             readCourseOperation = new ReadCourseOperation(lectureModuleServer);
             readLecturerOperation = new ReadLecturerOperation(lectureModuleServer);
+            readUserOperation = new ReadUserOperation(lectureModuleServer);
         }
     }
 
@@ -103,18 +104,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
         String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         if (isLecturer == false) {
-            Map<String, Object> lectureObjectMap = lectureModuleServer.findLectureByLectureId(reqMap.get("user_id").toString());
-            Map<String, String> lectureStringMap = new HashMap<>();
-            MiscUtils.converObjectMapToStringMap(lectureObjectMap, lectureStringMap);
+        	queryOperation = this.generateRequestEntity(null,null, null, map);        	
+        	CacheUtils.readLecturer(userId, queryOperation, readLecturerOperation, jedisUtils);
+        	Map<String, String> lectureStringMap = new HashMap<String,String>();
             lectureStringMap.put("nick_name",(String)userInfo.get("nick_name"));
-
-            Map<String, Object> lecturerDistributionObjectMap = lectureModuleServer.findLecturerDistributionByLectureId(reqMap.get("user_id").toString());
-            Map<String, String> lecturerDistributionStringMap = new HashMap<>();
-            MiscUtils.converObjectMapToStringMap(lecturerDistributionObjectMap, lecturerDistributionStringMap);
-            lecturerDistributionStringMap.remove("create_time");
-            lecturerDistributionStringMap.remove("update_time");
-            lectureStringMap.putAll(lecturerDistributionStringMap);
-
+            lectureStringMap.put("avatar_address",(String)userInfo.get("avatar_address"));
             //3.1新增讲师缓存
             jedis.hmset(lectureKey, lectureStringMap);
 

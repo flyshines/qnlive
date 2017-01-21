@@ -2,15 +2,15 @@ package qingning.lecture.server.other;
 
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
-import qingning.server.rpc.manager.ICommonModuleServer;
+import qingning.server.rpc.manager.ILectureModuleServer;
 
 import java.util.Map;
 
 public class ReadUserOperation implements CommonReadOperation {
-    private ICommonModuleServer commonModuleServer;
+    private ILectureModuleServer lectureModuleServer;
 
-    public ReadUserOperation(ICommonModuleServer commonModuleServer) {
-        this.commonModuleServer = commonModuleServer;
+    public ReadUserOperation(ILectureModuleServer lectureModuleServer) {
+        this.lectureModuleServer = lectureModuleServer;
     }
 
 
@@ -18,6 +18,6 @@ public class ReadUserOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        return commonModuleServer.findUserInfoByUserId(reqMap.get("user_id").toString());
+        return lectureModuleServer.findUserInfoByUserId(reqMap.get("user_id").toString());
     }
 }

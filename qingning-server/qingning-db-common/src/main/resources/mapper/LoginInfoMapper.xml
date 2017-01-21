@@ -38,7 +38,7 @@
   </update>
 
   <insert id="insertLoginInfo" parameterType="hashmap" >
-    insert into t_user
+    insert into t_login_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="user_id != null" >
         user_id,

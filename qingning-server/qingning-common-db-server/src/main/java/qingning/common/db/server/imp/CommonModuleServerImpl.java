@@ -51,6 +51,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private LiveRoomMapper liveRoomMapper;
 
 	@Autowired(required = true)
+	private LecturerMapper lecturerMapper;
+	
+	@Autowired(required = true)
 	private RoomDistributerRecommendMapper roomDistributerRecommendMapper;
 
 	@Autowired(required = true)
@@ -462,5 +465,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("m_user_id", updateIMAccountMap.get("m_user_id"));
 		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));		
 		return loginInfoMapper.updateLoginInfo(loginInfo);
+	}
+	
+	@Override
+	public Map<String,Object> findLectureByLectureId(String lecture_id){
+		return lecturerMapper.findLectureByLectureId(lecture_id);
 	}
 }

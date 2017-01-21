@@ -3,10 +3,7 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.UserMapper" >
 
   <select id="findByUserId" resultType="hashmap" parameterType="java.lang.String" >
-    select
-    <include refid="Base_Column_List" />
-    from t_user
-    where user_id = #{user_id}
+    select * from t_user where user_id = #{user_id}
   </select>
   
   <update id="updateLiveRoomNumForUser" parameterType="hashmap" >

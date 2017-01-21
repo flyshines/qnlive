@@ -109,7 +109,11 @@ public final class CacheUtils {
 		return listValue;
 	}
 	
-	
+	public static Map<String,String> readUserNoCache(String userId, RequestEntity requestEntity, 
+			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
+		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, false, -1);
+		return result;
+	}
 	
 	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{

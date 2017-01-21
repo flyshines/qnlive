@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.RoomDistributerMapper" >
 
-  <select id="findAvailableRoomDistributer" resultMap="hashmap" parameterType="hashmap" >
+  <select id="findAvailableRoomDistributer" resultType="hashmap" parameterType="hashmap" >
     select * from t_room_distributer
     where room_id = #{room_id} and distributer_id = #{distributer_id} and (end_date is null or end_date >= #{current_date}) limit 1
   </select>

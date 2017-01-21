@@ -47,7 +47,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     private ReadAppVersionOperation readAPPVersionOperation;
 	private ReadRoomDistributer readRoomDistributer;	
     private ReadForceVersionOperation readForceVersionOperation;
-
+    private ReadLecturerOperation readLecturerOperation;
+    
     @Override
     public void initRpcServer() {
         if(commonModuleServer == null){
@@ -59,6 +60,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 			readRoomDistributer = new ReadRoomDistributer(commonModuleServer);
             readAPPVersionOperation = new ReadAppVersionOperation(commonModuleServer);
             readForceVersionOperation = new ReadForceVersionOperation(commonModuleServer);
+            readLecturerOperation = new ReadLecturerOperation(commonModuleServer);
         }        
     }
  
@@ -415,7 +417,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      * @param resultMap service要返回的map
      */
     private void processLoginSuccess(Integer type, Map<String,String> dbResultMap, Map<String,Object> loginInfoMap,
-                                     Map<String,Object> resultMap) {
+                                     Map<String,Object> resultMap) throws Exception{
  
         Jedis jedis = jedisUtils.getJedis();
         String last_login_date = (new Date()).getTime() + "";
@@ -469,13 +471,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
         jedis.hmset(process_access_token, cacheMap);
         jedis.expire(process_access_token, 10800);
- 
+        
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", user_id);        
+        Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+        
         //3.增加相关返回参数
         resultMap.put("access_token", access_token);
         resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
         resultMap.put("m_user_id", m_user_id);
         resultMap.put("user_id", user_id);
-        Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(user_id);
+                
         resultMap.put("avatar_address", userMap.get("avatar_address"));
         resultMap.put("nick_name", userMap.get("nick_name"));
     }
@@ -528,22 +534,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //1:个人中心信息 2：个人基本信息
         String queryType = reqMap.get("query_type").toString();
+        Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
         if(queryType.equals("1")){
             reqMap.put("user_id", userId);
-            Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+            
             resultMap.put("avatar_address", values.get("avatar_address"));
             resultMap.put("nick_name", values.get("nick_name"));            
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
             resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSLONG, "today_distributer_amount", 0l));
             resultMap.put("update_time", MiscUtils.convertObjToObject(values.get("update_time"),Constants.SYSLONG,"update_time", 0l));            
-        }else if(queryType.equals("2")){
-            Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
-            if(MiscUtils.isEmpty(userMap)){
+        }else if(queryType.equals("2")){            
+            if(MiscUtils.isEmpty(values)){
                 throw new QNLiveException("120002");
             }
- 
-            Map<String,Object> loginInfoMap = commonModuleServer.findLoginInfoByUserId(userId);
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, query);            
+            Map<String,String> loginInfoMap = jedisUtils.getJedis().hgetAll(key);
             if(MiscUtils.isEmpty(loginInfoMap)){
                 throw new QNLiveException("120002");
             }
@@ -552,8 +560,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("im_account_info", encryptIMAccount(loginInfoMap.get("m_user_id").toString(), loginInfoMap.get("m_pwd").toString()));
             resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
             resultMap.put("user_id", userId);
-            resultMap.put("avatar_address", userMap.get("avatar_address"));
-            resultMap.put("nick_name", userMap.get("nick_name"));
+            resultMap.put("avatar_address", values.get("avatar_address"));
+            resultMap.put("nick_name", values.get("nick_name"));
             return resultMap;
         }
  
@@ -566,23 +574,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
  
         //1.检测课程是否存在，课程不存在则给出提示（ 课程不存在，120009）
-        String courseId = reqMap.get("course_id").toString();
-        Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        Jedis jedis = jedisUtils.getJedis();
-        Map<String,String> courseMap = jedis.hgetAll(courseKey);
- 
-        //1.1如果课程不在缓存中，则查询数据库
-        if(MiscUtils.isEmpty(courseMap)){
-            Map<String,Object> courseObjectMap = commonModuleServer.findCourseByCourseId(courseId);
-            if(courseObjectMap == null){
-                throw new QNLiveException("120009");
-            }
-            courseMap = new HashMap<>();
-            MiscUtils.converObjectMapToStringMap(courseObjectMap,courseMap);
-        }
- 
+        String courseId = reqMap.get("course_id").toString();       
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("course_id", courseId);
+        Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, false);
+       
+        if(MiscUtils.isEmpty(courseMap)){            
+        	throw new QNLiveException("120009");
+        } 
         //2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
         String profit_type = reqMap.get("profit_type").toString();
  
@@ -609,14 +608,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         insertMap.put("trade_id",tradeId);
         insertMap.put("profit_type",profit_type);
         commonModuleServer.insertTradeBill(insertMap);
- 
-        Map<String,Object> userMap = commonModuleServer.findLoginInfoByUserId(userId);
+        
+        query.clear();        
+        query.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, query);
+        Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
  
         //4.调用微信生成预付单接口
         String terminalIp = reqMap.get("remote_ip_address").toString();
         String tradeType = "JSAPI";
         String outTradeNo = tradeId;
-        String openid = userMap.get("web_openid").toString();
+        String openid = userMap.get("web_openid");
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
  
         //5.处理生成微信预付单接口
@@ -684,27 +686,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     "SUCCESS".equals(requestMapData.get("result_code"))){
                 Jedis jedis = jedisUtils.getJedis();
  
-                String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-                Map<String,Object> map = new HashMap<>();
-                map.put(Constants.CACHED_KEY_COURSE_FIELD, billMap.get("course_id").toString());
-                String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-                Map<String,String> courseMap = new HashMap<>();
-                String courseInCache = null;//1 课程在缓存中  2课程不在缓存中
+                String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());                
                 //1.先检测课程存在情况和状态
-                //1.1如果课程在缓存中
-                if(jedis.exists(courseKey)){
-                    courseMap = jedis.hgetAll(courseKey);
-                    courseInCache = "1";
-                }else {
-                    //1.2如果课程在数据库中
-                    Map<String,Object> courseObjectMap = commonModuleServer.findCourseByCourseId(billMap.get("course_id").toString());
-                    if(courseObjectMap == null){
-                        throw new QNLiveException("100004");
-                    }
-                    MiscUtils.converObjectMapToStringMap(courseObjectMap, courseMap);
-                    courseInCache = "2";
+                String courseId = (String)billMap.get("course_id");       
+                Map<String,Object> query = new HashMap<String,Object>();
+                query.put("course_id", courseId);
+                Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, false);
+                if(MiscUtils.isEmpty(courseMap)){
+                	throw new QNLiveException("100004");
                 }
- 
+                String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                 //更新交易表信息
                 //更新支付表信息
                 //更新收益表信息
@@ -719,7 +710,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				Map<String,String> distributeRoom = null;
 				if("0".equals(profit_type)){
 					//t_room_distributer
-					Map<String,Object> query = new HashMap<String,Object>();
+					query.clear();
 					query.put("room_id", billMap.get("room_id"));
 					query.put("user_id", billMap.get("user_id"));
 					query.put("today_end_date", MiscUtils.getEndDateOfToday().getTime());
@@ -736,7 +727,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				Map<String,Object> handleResultMap = commonModuleServer.handleWeixinPayResult(requestValues);
 				
 				if(!MiscUtils.isEmpty(distributeRoom)){
-					Map<String,Object> query = new HashMap<String,Object>();
+					query.clear();
 					query.put("room_id", billMap.get("room_id"));
 					query.put("distributer_id", handleResultMap.get("distributer_id"));
 					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
@@ -748,25 +739,33 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				//如果为打赏，则需要发送推送
 			
                 //0:课程收益 1:打赏
- 
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
-                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+				query.clear();
+				query.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
+                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
  
                 //处理缓存中的收益
                 //讲师缓存中的收益
                 Long amountLong = (Long)handleResultMap.get("pay_amount");
                 jedis.hincrBy(lecturerKey, "total_amount", amountLong.longValue());
- 
+                
+                query.clear();
+                String lecturerId = courseMap.get("lecturer_id");
+                query.put("lecturer_id", lecturerId);
+                Map<String,String> lecturerMap = CacheUtils.readLecturer(lecturerId, this.generateRequestEntity(null, null, null, query), readLecturerOperation, jedisUtils);
+                
                 if(profit_type.equals("1")){
                     String mGroupId = handleResultMap.get("im_course_id").toString();
-                    Map<String,Object> payUserMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("user_id").toString());
-                    Map<String,Object> lecturerMap = commonModuleServer.findUserInfoByUserId(handleResultMap.get("lecturer_id").toString());
+                    query.clear();
+                    query.put("user_id", handleResultMap.get("user_id"));        
+                    Map<String, String> payUserMap = CacheUtils.readUserNoCache((String)handleResultMap.get("user_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+                    
                     String message = payUserMap.get("nick_name") + "打赏了" + lecturerMap.get("nick_name") + (Long)handleResultMap.get("profit_amount")/100.0 + "元";
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
                     infomation.put("course_id", handleResultMap.get("course_id"));
-                    infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
+					infomation.put("creator_id", lecturerId);
+                    //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
                     infomation.put("message", message);
                     infomation.put("send_type", "4");//4.打赏信息
                     infomation.put("message_type", "1");
@@ -802,8 +801,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
  
                     //修改用户缓存信息中的加入课程数
-                    map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-                    String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
+                    query.clear();
+                    query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+                    String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
                     if(jedis.exists(userCacheKey)){
                         jedis.hincrBy(userCacheKey, "course_num", 1L);
                     }else {
@@ -830,9 +830,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
  
                 //直播间缓存中的收益
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
-                map.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
-                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, map);
+                query.clear();
+                query.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
+                query.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
+                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, query);
                 jedis.hincrBy(liveRoomKey, "total_amount", amountLong.longValue());
                 //TODO  last_course_amount
  
@@ -846,17 +847,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
                     String openId=(String) loginInfoUser.get("web_openid");
-                    
-                    Map<String, Object> courseByCourseId = commonModuleServer.findCourseByCourseId(course_id);
-                    //学员信息
-                    Map<String, Object> user = commonModuleServer.findUserInfoByUserId(user_id);
-                    //教师信息
-                    Map<String, Object> lecturerUser = commonModuleServer.findUserInfoByUserId(courseByCourseId.get("lecturer_id").toString());
-                    
                     //  成员报名付费通知 老师 暂时 不需要了
 //                    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
                     //TODO 付费报名成功通知学员
-                    wpushUser(jedis, openId, courseByCourseId, lecturerUser,course_id);
+                    wpushUser(jedis, openId, courseMap, lecturerMap,course_id);
                 
                 }
             }else{
@@ -873,15 +867,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
  
     private void wpushUser(Jedis jedis, String openId,
-            Map<String, Object> courseByCourseId,
-            Map<String, Object> lecturerUser,String courseId) {
+            Map<String, String> courseByCourseId,
+            Map<String, String> lecturerUser,String courseId) {
         Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
         TemplateData first = new TemplateData();
         first.setColor("#000000");
         first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
         templateMap.put("first", first);
         
-        Date start_time = (Date) courseByCourseId.get("start_time");
+        Date start_time = new Date(MiscUtils.convertObjectToLong(courseByCourseId.get("start_time")));
         TemplateData orderNo = new TemplateData();
         orderNo.setColor("#000000");
         orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
@@ -889,12 +883,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         
         TemplateData wuliu = new TemplateData();
         wuliu.setColor("#000000");
-        wuliu.setValue(lecturerUser.get("nick_name").toString());
+        wuliu.setValue(lecturerUser.get("nick_name"));
         templateMap.put("keyword2", wuliu);    
  
         TemplateData name = new TemplateData();
         name.setColor("#000000");
-        name.setValue((String) courseByCourseId.get("course_title"));
+        name.setValue(courseByCourseId.get("course_title"));
         templateMap.put("keyword3", name);
  
         TemplateData remark = new TemplateData();
@@ -1123,8 +1117,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     parameter.clear();
                     parameter.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
                     cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, parameter);
-                    if(parameters.containsKey("nick_name") && jedisUtils.getJedis().exists(cachedKey)){
-                        jedisUtils.getJedis().hset(cachedKey, "nick_name", (String)parameters.get("nick_name"));
+                    if(jedisUtils.getJedis().exists(cachedKey)){
+                    	Map<String,String> updateCacedValue = new HashMap<String,String>();
+                    	if(reqMap.containsKey("nick_name")){
+                    		updateCacedValue.put("nick_name", nick_name);
+                    	}
+                    	if(reqMap.containsKey("avatar_address")){
+                    		updateCacedValue.put("avatar_address", avatar_address);
+                    	}
+                    	jedisUtils.getJedis().hmset(cachedKey, updateCacedValue);                        
                     }
                 }
             }
@@ -1141,7 +1142,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String courseId = reqMap.get("course_id").toString();
-        Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", userId);        
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
         resultMap.put("avatar_address",userMap.get("avatar_address"));
         resultMap.put("nick_name",userMap.get("nick_name"));
  
@@ -1160,8 +1163,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<>();
  
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", userId);        
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+        
         String roomId = reqMap.get("room_id").toString();
-        Map<String,Object> userMap = commonModuleServer.findUserInfoByUserId(userId);
+        
         resultMap.put("avatar_address",userMap.get("avatar_address"));
         resultMap.put("nick_name",userMap.get("nick_name"));
  
@@ -1184,7 +1192,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 		boolean isDistributer = false;
 		String recommend_code = null;
-		long now = MiscUtils.getEndDateOfToday().getTime();
+		//long now = MiscUtils.getEndDateOfToday().getTime();
 		if (! MiscUtils.isEmpty(roomDistributer)) {
 			isDistributer=true;
 		}

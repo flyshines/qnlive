@@ -88,7 +88,7 @@
     </if>
   </update>
 
-  <select id="findPaymentBillByTradeId" resultMap="hashmap" parameterType="java.lang.String" >
+  <select id="findPaymentBillByTradeId" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_payment_bill where trade_id = #{tradeId,jdbcType=VARCHAR}
   </select>
 

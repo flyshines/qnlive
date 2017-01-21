@@ -239,8 +239,8 @@ public final class MiscUtils {
             Properties properties = new Properties();
             properties.load(input);
             propertiesMap = new HashMap<String,String>();            
-            for(String name : properties.stringPropertyNames()){
-                propertiesMap.put(name, properties.getProperty(name));
+            for(String name : properties.stringPropertyNames()){            	
+                propertiesMap.put(name, MiscUtils.convertUnicodeToChinese(properties.getProperty(name)));
             }            
         }finally{
             if(input!=null){

@@ -97,7 +97,7 @@
     </if>
   </update>
 
-  <select id="findFeedbackById" resultMap="hashmap" parameterType="java.lang.String" >
+  <select id="findFeedbackById" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_feedback where feedback_id = #{feedback_id}
   </select>
 </mapper>
