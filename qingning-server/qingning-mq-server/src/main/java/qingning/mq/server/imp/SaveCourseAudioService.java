@@ -8,8 +8,7 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
-import qingning.mq.persistence.mybatis.CourseAudioMapper;
-import qingning.mq.persistence.mybatis.CourseMessageMapper;
+import qingning.db.common.mybatis.persistence.CourseAudioMapper;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -90,7 +89,7 @@ public class SaveCourseAudioService extends AbstractMsgService {
 		});
 
 		//3.批量插入到数据库中
-		Integer insertResult = courseAudioMapper.batchInsert(audioList);
+		Integer insertResult = courseAudioMapper.saveCourseAudio(audioList);
 
 		map.clear();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());

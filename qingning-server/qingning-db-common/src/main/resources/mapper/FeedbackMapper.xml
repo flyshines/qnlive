@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.FeedbackMapper" >
+  <insert id="insertFeedBack" parameterType="hashmap" >
+    insert into t_feedback
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="feedback_id != null" >
+        feedback_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="phone_number != null" >
+        phone_number,
+      </if>
+      <if test="admin_id != null" >
+        admin_id,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="feedback_id != null" >
+        #{feedback_id},
+      </if>
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="content != null" >
+        #{content},
+      </if>
+      <if test="status != null" >
+        #{status},
+      </if>
+      <if test="description != null" >
+        #{description},
+      </if>
+      <if test="phone_number != null" >
+        #{phone_number},
+      </if>
+      <if test="admin_id != null" >
+        #{admin_id},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateFeedBack" parameterType="hashmap" >
+    update t_feedback
+    <set >
+      <if test="user_id != null" >
+        user_id = #{user_id},
+      </if>
+      <if test="content != null" >
+        content = #{content},
+      </if>
+      <if test="status != null" >
+        status = #{status},
+      </if>
+      <if test="description != null" >
+        description = #{description},
+      </if>
+      <if test="phone_number != null" >
+        phone_number = #{phone_number},
+      </if>
+      <if test="admin_id != null" >
+        admin_id = #{admin_id},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+    </set>
+    where feedback_id = #{feedback_id}
+    <if test="last_update_time != null" >
+       and update_time = #{last_update_time}
+    </if>
+  </update>
+
+  <select id="findFeedbackById" resultMap="hashmap" parameterType="java.lang.String" >
+    select * from t_feedback where feedback_id = #{feedback_id}
+  </select>
+</mapper>

@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.CoursesMapper" >
+  <select id="findCourseByCourseId" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_courses where course_id = #{courseId}
+  </select>
+
+  <select id="findCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
+    select * from t_courses  where 1 =1
+    <if test="orderType == 1" >     
+       <if test="startIndex != null" >
+      	<if test="status == 2" >
+        	and end_time > #{startIndex}
+        </if>
+        <if test="status != 2" >
+        	and start_time > #{startIndex}
+        </if>
+      </if>
+    </if>
+    <if test="orderType == 2" >
+      <if test="startIndex != null" >
+      	<if test="status == 2" >
+        	and end_time <![CDATA[ < ]]> #{startIndex}
+        </if>
+        <if test="status != 2" >
+        	and start_time <![CDATA[ < ]]> #{startIndex}
+        </if>
+      </if>
+    </if>
+    <if test="lecturer_id != null" >
+      and lecturer_id = #{lecturer_id}
+    </if>
+    and `status` = #{status}
+    order by start_time
+    <if test="orderType == 1" >
+      asc
+    </if>
+    <if test="orderType == 2" >
+      desc
+    </if>
+    limit #{pageCount}
+  </select>
+  
+  <select id="findLecturerCourseList" resultType="hashmap" parameterType="hashmap" >
+    select * from t_courses where lecturer_id = #{lecturer_id}
+    <if test="status != null" >
+    	and status = #{status}
+    </if>
+    <if test="start_time != null" >
+    	and status <![CDATA[ < ]]> #{start_time}
+    </if>
+    <if test="end_time != null" >
+    	and end_time <![CDATA[ < ]]> #{end_time}
+    </if>
+    <if test="start_time != null and end_time == null" >
+    	order by start_time desc
+    </if>
+    <if test="start_time == null and end_time != null" >
+    	order by end_time desc
+    </if>
+    <if test="pageCount != null" >
+      limit #{pageCount}
+    </if>
+  </select>
+
+  <select id="findPlatformCourseList" resultType="hashmap" parameterType="hashmap" >
+    select * from t_courses where status = #{status}
+    <if test="pageCount != null" >
+      <if test='status == "2" '>
+      	order by end_time desc limit #{pageCount}
+      </if>
+      <if test='status == "1" '>
+      	order by start_time desc limit #{pageCount}
+      </if>
+    </if>
+  </select>
+
+  <insert id="insertCourse" parameterType="hashmap" >
+    insert into t_courses
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="course_id != null" >
+        course_id,
+      </if>
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="im_course_id != null" >
+        im_course_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="course_title != null" >
+        course_title,
+      </if>
+      <if test="course_url != null" >
+        course_url,
+      </if>
+      <if test="course_remark != null" >
+        course_remark,
+      </if>
+      <if test="start_time != null" >
+        start_time,
+      </if>
+      <if test="end_time != null" >
+        end_time,
+      </if>
+      <if test="course_type != null" >
+        course_type,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="rq_code != null" >
+        rq_code,
+      </if>
+      <if test="course_price != null" >
+        course_price,
+      </if>
+      <if test="course_password != null" >
+        course_password,
+      </if>
+      <if test="student_num != null" >
+        student_num,
+      </if>
+      <if test="course_amount != null" >
+        course_amount,
+      </if>
+      <if test="extra_num != null" >
+        extra_num,
+      </if>
+      <if test="extra_amount != null" >
+        extra_amount,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="create_date != null" >
+        create_date,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="real_start_time != null" >
+        real_start_time,
+      </if>
+      <if test="real_student_num != null" >
+        real_student_num,
+      </if>
+      <if test="click_num != null" >
+        click_num,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="course_id != null" >
+        #{course_id},
+      </if>
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="im_course_id != null" >
+        #{im_course_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="course_title != null" >
+        #{course_title},
+      </if>
+      <if test="course_url != null" >
+        #{course_url},
+      </if>
+      <if test="course_remark != null" >
+        #{course_remark},
+      </if>
+      <if test="start_time != null" >
+        #{start_time},
+      </if>
+      <if test="end_time != null" >
+        #{end_time},
+      </if>
+      <if test="course_type != null" >
+        #{course_type},
+      </if>
+      <if test="status != null" >
+        #{status},
+      </if>
+      <if test="rq_code != null" >
+        #{rq_code},
+      </if>
+      <if test="course_price != null" >
+        #{course_price},
+      </if>
+      <if test="course_password != null" >
+        #{course_password},
+      </if>
+      <if test="student_num != null" >
+        #{student_num},
+      </if>
+      <if test="course_amount != null" >
+        #{course_amount},
+      </if>
+      <if test="extra_num != null" >
+        #{extra_num},
+      </if>
+      <if test="extra_amount != null" >
+        #{extra_amount},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="create_date != null" >
+        #{create_date},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+      <if test="real_start_time != null" >
+        #{real_start_time},
+      </if>
+      <if test="real_student_num != null" >
+        #{real_student_num},
+      </if>
+      <if test="click_num != null" >
+        #{click_num},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateCourse" parameterType="hashmap" >
+    update t_courses
+    <set >
+      <if test="course_id != null" >
+        course_id=#{course_id},
+      </if>
+      <if test="room_id != null" >
+        room_id=#{room_id},
+      </if>
+      <if test="im_course_id != null" >
+        im_course_id=#{im_course_id},
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id=#{lecturer_id},
+      </if>
+      <if test="course_title != null" >
+        course_title=#{course_title},
+      </if>
+      <if test="course_url != null" >
+        course_url=#{course_url},
+      </if>
+      <if test="course_remark != null" >
+        course_remark=#{course_remark},
+      </if>
+      <if test="start_time != null" >
+        start_time=#{start_time},
+      </if>
+      <if test="end_time != null" >
+        end_time=#{end_time},
+      </if>
+      <if test="course_type != null" >
+        course_type=#{course_type},
+      </if>
+      <if test="status != null" >
+        status=#{status},
+      </if>
+      <if test="rq_code != null" >
+        rq_code=#{rq_code},
+      </if>
+      <if test="course_price != null" >
+        course_price=#{course_price},
+      </if>
+      <if test="course_password != null" >
+        course_password=#{course_password},
+      </if>
+      <if test="student_num != null" >
+        student_num=#{student_num},
+      </if>
+      <if test="course_amount != null" >
+        course_amount=#{course_amount},
+      </if>
+      <if test="extra_num != null" >
+        extra_num=#{extra_num},
+      </if>
+      <if test="extra_amount != null" >
+        extra_amount=#{extra_amount},
+      </if>
+      <if test="create_time != null" >
+        create_time=#{create_time},
+      </if>
+      <if test="create_date != null" >
+        create_date=#{create_date},
+      </if>
+      <if test="update_time != null" >
+        update_time=#{update_time},
+      </if>
+      <if test="real_start_time != null" >
+        real_start_time=#{real_start_time},
+      </if>
+      <if test="real_student_num != null" >
+        real_student_num=#{real_student_num},
+      </if>
+      <if test="click_num != null" >
+        click_num=#{click_num},
+      </if>
+    </set>
+    where course_id = #{course_id}
+    <if test="last_update_time != null" >
+    	and update_time=#{last_update_time}
+    </if>
+  </update>
+
+  <update id="updateAfterStudentBuyCourse" parameterType="hashmap" >
+    update t_courses
+    set
+    student_num = #{student_num,jdbcType=BIGINT} + student_num,
+    course_amount = #{course_amount,jdbcType=BIGINT} + course_amount
+    where course_id = #{course_id,jdbcType=VARCHAR} 
+    <if test="last_update_time != null" >
+    	and update_time=#{last_update_time}
+    </if>
+  </update>
+
+  <update id="updateAfterStudentRewardCourse" parameterType="hashmap" >
+    update t_courses
+    set
+    extra_num = #{extra_num,jdbcType=BIGINT} + extra_num,
+    extra_amount = #{extra_amount,jdbcType=BIGINT} + extra_amount
+    where course_id = #{course_id,jdbcType=VARCHAR}
+    <if test="last_update_time != null" >
+    	and update_time=#{last_update_time}
+    </if>
+  </update>
+  
+  <update id="increaseStudent" parameterType="string" >
+    update t_courses
+    set
+    student_num = student_num + 1
+    where course_id = #{course_id}
+  </update>
+  
+</mapper>

@@ -1,6 +1,5 @@
 package qingning.mq.server.entyity;
 
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;

@@ -18,6 +18,7 @@ import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.IUserModuleServer;
 import qingning.user.server.other.ReadCourseOperation;
 import qingning.user.server.other.ReadLiveRoomOperation;
+import qingning.user.server.other.ReadRoomDistributer;
 import qingning.user.server.other.ReadUserOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
@@ -34,15 +35,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private ReadLiveRoomOperation readLiveRoomOperation;
     private ReadCourseOperation readCourseOperation;
     private ReadUserOperation readUserOperation;
+    private ReadRoomDistributer readRoomDistributer;
     @Override
     public void initRpcServer() {
         if (userModuleServer == null) {
             userModuleServer = this.getRpcService("userModuleServer");
 
             readLiveRoomOperation = new ReadLiveRoomOperation(userModuleServer);
-            readCourseOperation = new ReadCourseOperation(userModuleServer);
-            
+            readCourseOperation = new ReadCourseOperation(userModuleServer);            
             readUserOperation = new ReadUserOperation(userModuleServer);
+            readRoomDistributer = new ReadRoomDistributer(userModuleServer);
         }
     }
 
@@ -512,42 +514,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //先查询是否为讲师
         if(infoMap.get("lecturer_id").equals(userId)){
             roles.add("3");
-
             //不为讲师查询是否为分销员
         }else {
             Map<String,Object> queryMap = new HashMap<>();
             queryMap.put("distributer_id", userId);
             queryMap.put("room_id", reqMap.get("room_id").toString());
-            List<Map<String,Object>> roomDistributerList = userModuleServer.findRoomDistributionInfoByDistributerId(queryMap);
-
-            long now = MiscUtils.getEndDateOfToday().getTime();
-            if (! MiscUtils.isEmpty(roomDistributerList)) {
-                boolean isDistributer = false;
-                for(Map<String,Object> map : roomDistributerList){
-                    //0:永久有效 1: 1个月内有效 2: 3个月内有效 3: 6个月内有效 4: 9个月内有效 5:一年有效 6: 两年有效
-                    if(map.get("effective_time").toString().equals("0")){
-                        isDistributer = true;
-                        break;
-                    }else {
-                        if(map.get("end_date") != null){
-                            Date end_date = (Date)map.get("end_date");
-                            if(end_date.getTime() >= now){
-                                isDistributer = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if(isDistributer){
-                    roles.add("4");
-                }else {
-                    roles.add("1");
-                }
-
-                //不为分销员则为普通用户
+            Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, (String)reqMap.get("room_id"), readRoomDistributer, jedisUtils);
+            
+            if (! MiscUtils.isEmpty(roomDistributer)) {
+               roles.add("4");
             }else {
-                roles.add("1");
+               roles.add("1");
             }
         }
 
@@ -616,13 +593,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         queryMap.clear();
         queryMap.put("user_id", userId);
         queryMap.put("course_id", courseMap.get("course_id"));
-        Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryMap);
+        boolean isStudent = userModuleServer.isStudentOfTheCourse(queryMap);
 
         //返回用户身份
         //角色数组 1：普通用户、2：学员、3：讲师
         List<String> roles = new ArrayList<>();
         //加入课程状态 0未加入 1已加入
-        if(MiscUtils.isEmpty(studentMap)){
+        if(isStudent){
             resultMap.put("join_status", "0");
         }else {
             resultMap.put("join_status", "1");
@@ -631,7 +608,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(userId.equals(courseMap.get("lecturer_id"))){
             roles.add("3");
         }else {
-            if(MiscUtils.isEmpty(studentMap)){
+            if(isStudent){
                 roles.add("2");
             }else {
                 roles.add("1");
@@ -855,8 +832,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,Object> studentQueryMap = new HashMap<>();
         studentQueryMap.put("user_id",userId);
         studentQueryMap.put("course_id",courseMap.get("course_id"));
-        Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(studentQueryMap);
-        if(studentMap != null){
+        if(userModuleServer.isStudentOfTheCourse(studentQueryMap)){
             throw new QNLiveException("100004");
         }
 
@@ -914,7 +890,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
     		templateMap.put("first", first);
     		
-//<<<<<<< HEAD
     		Date start_time = new Date(Long.parseLong(courseMap.get("start_time")));
     		TemplateData orderNo = new TemplateData();
     		orderNo.setColor("#000000");
@@ -940,31 +915,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id").toString());
-//=======
-//    		Date start_time = (Date) courseObjectMap.get("start_time");
-//    		TemplateData orderNo = new TemplateData();
-//    		orderNo.setColor("#000000");
-//    		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
-//    		templateMap.put("keyword1", orderNo);
-//    		
-//    		TemplateData wuliu = new TemplateData();
-//    		wuliu.setColor("#000000");
-//    		wuliu.setValue(user.get("nick_name")==null?"":user.get("nick_name").toString());
-//    		templateMap.put("keyword2", wuliu);	
-//
-//    		TemplateData name = new TemplateData();
-//    		name.setColor("#000000");
-//    		name.setValue((String) courseObjectMap.get("course_title"));
-//    		templateMap.put("keyword3", name);
-//
-//    		TemplateData remark = new TemplateData();
-//    		remark.setColor("#000000");
-//    		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
-//    		templateMap.put("remark", remark);
-//    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseMap.get("course_id");
-//    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
-//		}
-//>>>>>>> refs/remotes/origin/test
         return resultMap;
     }
 
@@ -989,9 +939,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //检测学员是否加入了该课程，加入课程才能查询相关信息，如果没加入课程则提示学员未加入该课程（120007）
             Map<String,Object> queryStudentMap = new HashMap<>();
             queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-            Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryStudentMap);
-            if(MiscUtils.isEmpty(studentMap)){
+            queryStudentMap.put("course_id",reqMap.get("course_id").toString());           
+            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
                 throw new QNLiveException("120007");
             }
 
@@ -1075,9 +1024,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             Map<String,Object> queryStudentMap = new HashMap<>();
             queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-            Map<String,Object> studentMap = userModuleServer.findStudentByCourseIdAndUserId(queryStudentMap);
-            if(MiscUtils.isEmpty(studentMap)){
+            queryStudentMap.put("course_id",reqMap.get("course_id").toString());            
+            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
                 throw new QNLiveException("120007");
             }
 
@@ -1422,7 +1370,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 	    	queryMap.put("page_count", reqMap.get("page_count"));
 	    	queryMap.put("user_id", userId);
 	
-	    	final List<Map<String,Object>> list = userModuleServer.findStudentCourseList(queryMap);
+	    	final List<Map<String,Object>> list = userModuleServer.findCourseListOfStudent(queryMap);
 	    	result.put("course_list", list);
 	    	if(!MiscUtils.isEmpty(list)){
 	    		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){

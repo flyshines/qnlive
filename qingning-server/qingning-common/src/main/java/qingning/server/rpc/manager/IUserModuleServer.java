@@ -24,9 +24,9 @@ public interface IUserModuleServer {
 
 	void increaseStudentNumByCourseId(String course_id);
 
-	List<Map<String,Object>> findPPTListByCourseId(String string);
+	List<Map<String,Object>> findPPTListByCourseId(String course_id);
 
-	List<Map<String,Object>> findAudioListByCourseId(String string);
+	List<Map<String,Object>> findAudioListByCourseId(String course_id);
 
 	List<Map<String,Object>> findRewardConfigurationList();
 
@@ -43,13 +43,13 @@ public interface IUserModuleServer {
 	
 	List<Map<String,Object>> findFanInfoByUserId(Map<String, Object> queryMap);
 	
-    List<Map<String,Object>> findStudentCourseList(Map<String, Object> queryMap);
+    List<Map<String,Object>> findCourseListOfStudent(Map<String, Object> queryMap);
 	
 	List<Map<String,Object>> findUserConsumeRecords(Map<String, Object> queryMap);
 
 	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
-	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
+	Map<String,Object> findAvailableRoomDistributer(Map<String, Object> queryMap);
 
-	Map<String,Object> findStudentByCourseIdAndUserId(Map<String, Object> studentQueryMap);
+	boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap);
 }

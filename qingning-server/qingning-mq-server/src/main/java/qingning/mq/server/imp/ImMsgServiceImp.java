@@ -16,17 +16,15 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
 import qingning.common.util.Constants;
 import qingning.common.util.IMMsgUtil;
-import qingning.common.util.JPushHelper;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
-import qingning.mq.persistence.mybatis.CoursesStudentsMapper;
-import qingning.mq.persistence.mybatis.LoginInfoMapper;
+import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
+import qingning.db.common.mybatis.persistence.LoginInfoMapper;
 import qingning.server.ImMsgService;
 import redis.clients.jedis.Jedis;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 public class ImMsgServiceImp implements ImMsgService {
 
@@ -38,7 +36,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	@Autowired(required = true)
 	private LoginInfoMapper loginInfoMapper;
 
-	static Hashtable<String,Object> messageLockMap = new Hashtable<>();
+	private static Hashtable<String,Object> messageLockMap = new Hashtable<>();
 
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {

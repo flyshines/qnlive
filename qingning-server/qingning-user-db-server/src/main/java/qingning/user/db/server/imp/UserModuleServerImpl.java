@@ -7,10 +7,8 @@ import org.springframework.dao.DuplicateKeyException;
 
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserModuleServer;
-import qingning.user.db.persistence.mybatis.*;
-import qingning.user.db.persistence.mybatis.entity.CoursesStudents;
-import qingning.user.db.persistence.mybatis.entity.Fans;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -54,23 +52,24 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Autowired(required = true)
 	private DistributerMapper distributerMapper;
-
+	@Autowired(required = true)
+	private RoomDistributerMapper roomDistributerMapper;
+	
 	@Override
-	public Map<String,Object> userFollowRoom(Map<String, Object> reqMap) throws Exception{
+	public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
 		Map<String,Object> dbResultMap = new HashMap<>();
-
 		//follow_type 关注操作类型 0关注 1不关注
-		if(reqMap.get("follow_type").toString().equals("0")){
+		Date now = new Date();
+		if("0".equals(reqMap.get("follow_type"))){
 			try{
-				Date now = new Date();
-				Fans fans = new Fans();
-				fans.setFansId(MiscUtils.getUUId());
-				fans.setUserId(reqMap.get("user_id").toString());
-				fans.setLecturerId(reqMap.get("lecturer_id").toString());
-				fans.setRoomId(reqMap.get("room_id").toString());
-				fans.setCreateTime(now);
-				fans.setCreateDate(now);
-				Integer updateCount = fansMapper.insert(fans);
+				Map<String,Object> fans = new HashMap<String,Object>();
+				fans.put("fans_id", MiscUtils.getUUId());
+				fans.put("user_id", reqMap.get("user_id"));
+				fans.put("lecturer_id", reqMap.get("lecturer_id"));
+				fans.put("room_id", reqMap.get("room_id"));
+				fans.put("create_time", now);
+				fans.put("create_date", now);				
+				Integer updateCount = fansMapper.insertFans(fans);
 				dbResultMap.put("update_count", updateCount);
 				return dbResultMap;
 			} catch(Exception e){
@@ -84,7 +83,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 			Map<String,Object> updateMap = new HashMap<>();
 			updateMap.put("user_id", reqMap.get("user_id").toString());
 			updateMap.put("room_id", reqMap.get("room_id").toString());
-			Integer updateCount = fansMapper.deleteByUserIdAndRoomId(updateMap);
+			Integer updateCount = fansMapper.deleteFans(updateMap);
 			dbResultMap.put("update_count", updateCount);
 			return dbResultMap;
 		}
@@ -93,6 +92,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public void updateLiveRoomNumForUser(Map<String, Object> reqMap) {
 		userMapper.updateLiveRoomNumForUser(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findUserInfoByUserId(String user_id) {
+		return userMapper.findByUserId(user_id);
 	}
 
 	@Override
@@ -120,24 +124,19 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public Map<String, Object> joinCourse(Map<String, String> courseMap) {
-		CoursesStudents students = new CoursesStudents();
-		students.setStudentId(MiscUtils.getUUId());
-		students.setUserId(courseMap.get("user_id"));
-		students.setLecturerId(courseMap.get("lecturer_id"));
-		students.setRoomId(courseMap.get("room_id"));
-		students.setCourseId(courseMap.get("course_id"));
-		//students.setPaymentAmount();//todo
-		if(courseMap.get("course_password") != null){
-			students.setCoursePassword(courseMap.get("course_password"));
-		}
-//		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
-//			students.setCoursePassword(courseMap.get("course_password"));
-//		}
-		students.setStudentType("0");//TODO
 		Date now = new Date();
-		students.setCreateTime(now);
-		students.setCreateDate(now);
-		Integer insertCount = coursesStudentsMapper.insert(students);
+		Map<String,Object> student = new HashMap<String,Object>();
+		student.put("student_id", MiscUtils.getUUId());
+		student.put("user_id", courseMap.get("user_id"));
+		student.put("lecturer_id", courseMap.get("lecturer_id"));
+		student.put("room_id", courseMap.get("room_id"));
+		student.put("course_id", courseMap.get("course_id"));
+		student.put("course_password", courseMap.get("course_password"));
+		student.put("student_type", "0"); //TODO distribution case
+		student.put("create_time", now);
+		student.put("create_date", now);		
+		//students.setPaymentAmount();//TODO
+		Integer insertCount = coursesStudentsMapper.insertStudent(student);
 		Map<String,Object> resultMap = new HashMap<>();
 		resultMap.put("insertCount", insertCount);
 		return resultMap;
@@ -145,7 +144,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public void increaseStudentNumByCourseId(String course_id) {
-		coursesMapper.increaseStudentNumByCourseId(course_id);
+		coursesMapper.increaseStudent(course_id);
 	}
 
 	@Override
@@ -174,8 +173,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findLoginInfoByUserId(String userId) {
-		return loginInfoMapper.findLoginInfoByUserId(userId);
+	public Map<String, Object> findLoginInfoByUserId(String user_id) {
+		return loginInfoMapper.findLoginInfoByUserId(user_id);
 	}
 
 	@Override
@@ -189,38 +188,33 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findFanInfoByUserId(Map<String, Object> queryMap) {
+		return fansMapper.findFanInfoByUserId(queryMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseListOfStudent(Map<String, Object> queryMap) {
+		return coursesStudentsMapper.findCourseListOfStudent(queryMap);
+	}
+
+	@Override
 	public List<Map<String, Object>> findUserConsumeRecords(Map<String, Object> queryMap) {
 		return lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
 	}
 
 	@Override
-	public List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap) {
-		return distributerMapper.findDistributionInfoByDistributerId(queryMap) ;
+	public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap) {
+		return distributerMapper.findDistributionInfoByDistributerId(queryMap);
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
-		return distributerMapper.findRoomDistributionInfoByDistributerId(queryMap) ;
+	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> queryMap) {
+		return roomDistributerMapper.findAvailableRoomDistributer(queryMap);
 	}
 
 	@Override
-	public Map<String, Object> findStudentByCourseIdAndUserId(Map<String, Object> studentQueryMap) {
-		return coursesStudentsMapper.findStudentByCourseIdAndUserId(studentQueryMap);
-	}
-
-	@Override
-	public List<Map<String, Object>> findFanInfoByUserId(Map<String, Object> queryMap) {		
-		return fansMapper.findFanInfoByUserId(queryMap);
-	}
-
-	@Override
-	public Map<String, Object> findUserInfoByUserId(String user_id) {		
-		return userMapper.findByUserId(user_id);
-	}
-
-	@Override
-	public List<Map<String, Object>> findStudentCourseList(Map<String, Object> queryMap) {		
-		return coursesStudentsMapper.findStudentCourseList(queryMap);
+	public boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap) {
+		return !MiscUtils.isEmpty(coursesStudentsMapper.isStudentOfTheCourse(studentQueryMap));
 	}
 	
 }

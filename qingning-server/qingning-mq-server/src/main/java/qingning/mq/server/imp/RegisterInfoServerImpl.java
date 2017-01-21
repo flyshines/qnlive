@@ -18,8 +18,8 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.RegisterInfoInfoMapper;
 import qingning.mq.persistence.mongo.MongoDB;
-import qingning.mq.persistence.mybatis.RegisterInfoInfoMapper;
 import qingning.server.AbstractMsgService;
 
 public class RegisterInfoServerImpl extends AbstractMsgService {
@@ -79,7 +79,7 @@ public class RegisterInfoServerImpl extends AbstractMsgService {
     	
     	//TODO change to list
     	for(Map<String,Object>value : map.values()){
-    		registerInfoInfoMapper.insert(value);
+    		registerInfoInfoMapper.insertRegisterInfoInfo(value);
     	}
     }
 }

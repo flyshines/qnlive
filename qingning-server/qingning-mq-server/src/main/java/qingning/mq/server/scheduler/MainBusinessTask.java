@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
-import qingning.mq.persistence.mybatis.*;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.mq.server.event.BackendEvent;
 import qingning.mq.server.imp.*;
 import qingning.server.AbstractMsgService;

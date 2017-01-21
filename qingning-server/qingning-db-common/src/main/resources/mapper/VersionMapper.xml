@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.VersionMapper" >
+  <select id="findVersionInfoByOS" resultType="hashmap" parameterType="string" >
+    select * from t_version where plateform = #{plateform}
+  </select>  
+
+  <select id="findForceVersionInfoByOS" resultType="hashmap" parameterType="string" >
+    select
+    config_id, config_name, config_key, config_value, config_description, create_time
+    from t_system_config
+    where config_key = #{config_key}
+  </select>
+  
+</mapper>

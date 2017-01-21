@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.LiveRoomMapper" >
+  <select id="findLiveRoomByRoomId" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_live_room where room_id = #{room_id}
+  </select>
+
+  <select id="findLiveRoomByLectureId" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_live_room where lecturer_id = #{lecturer_id}
+  </select>
+
+  <insert id="insertLiveRoom" parameterType="hashmap" >  
+    insert into t_live_room
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="course_num != null" >
+        course_num,
+      </if>
+      <if test="fans_num != null" >
+        fans_num,
+      </if>
+      <if test="distributer_num != null" >
+        distributer_num,
+      </if>
+      <if test="room_name != null" >
+        room_name,
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address,
+      </if>
+      <if test="room_remark != null" >
+        room_remark,
+      </if>
+      <if test="rq_code != null" >
+        rq_code,
+      </if>
+      <if test="room_address != null" >
+        room_address,
+      </if>
+      <if test="total_amount != null" >
+        total_amount,
+      </if>
+      <if test="last_course_amount != null" >
+        last_course_amount,
+      </if>
+      <if test="last_end_time != null" >
+        last_end_time,
+      </if>
+      <if test="last_live_time != null" >
+        last_live_time,
+      </if>
+      <if test="live_num != null" >
+        live_num,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="course_num != null" >
+        #{course_num},
+      </if>
+      <if test="fans_num != null" >
+        #{fans_num},
+      </if>
+      <if test="distributer_num != null" >
+        #{distributer_num},
+      </if>
+      <if test="room_name != null" >
+        #{room_name},
+      </if>
+      <if test="avatar_address != null" >
+        #{avatar_address},
+      </if>
+      <if test="room_remark != null" >
+        #{room_remark},
+      </if>
+      <if test="rq_code != null" >
+        #{rq_code},
+      </if>
+      <if test="room_address != null" >
+        #{room_address},
+      </if>
+      <if test="total_amount != null" >
+        #{total_amount},
+      </if>
+      <if test="last_course_amount != null" >
+        #{last_course_amount},
+      </if>
+      <if test="last_end_time != null" >
+        #{last_end_time},
+      </if>
+      <if test="last_live_time != null" >
+        #{last_live_time},
+      </if>
+      <if test="live_num != null" >
+        #{live_num},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+      <if test="status != null" >
+        #{status},
+      </if>
+    </trim>  
+  </insert>
+
+  <update id="updateLiveRoom" parameterType="hashmap" >
+    update t_live_room
+    <set >
+      <if test="course_num != null" >
+        course_num=#{course_num},
+      </if>
+      <if test="fans_num != null" >
+        fans_num=#{fans_num},
+      </if>
+      <if test="distributer_num != null" >
+        distributer_num=#{distributer_num},
+      </if>
+      <if test="room_name != null" >
+        room_name=#{room_name},
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address=#{avatar_address},
+      </if>
+      <if test="room_remark != null" >
+        room_remark=#{room_remark},
+      </if>
+      <if test="rq_code != null" >
+        rq_code=#{rq_code},
+      </if>
+      <if test="room_address != null" >
+        room_address=#{room_address},
+      </if>
+      <if test="total_amount != null" >
+        total_amount=#{total_amount},
+      </if>
+      <if test="last_course_amount != null" >
+        last_course_amount=#{last_course_amount},
+      </if>
+      <if test="last_end_time != null" >
+        last_end_time=#{last_end_time},
+      </if>
+      <if test="last_live_time != null" >
+        last_live_time=#{last_live_time},
+      </if>
+      <if test="live_num != null" >
+        live_num=#{live_num},
+      </if>
+      <if test="update_time != null" >
+        update_time=#{update_time},
+      </if>
+      <if test="status != null" >
+        status=#{status},
+      </if>
+    </set>
+    where room_id = #{roomId}
+    <if test="last_update_time != null" >
+    	and update_time = #{last_update_time},
+    </if>
+  </update>
+
+</mapper>

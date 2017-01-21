@@ -5,10 +5,9 @@ package qingning.common.db.server.imp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import qingning.common.db.persistence.mybatis.*;
-import qingning.common.db.persistence.mybatis.entity.*;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
 import java.util.*;
@@ -69,54 +68,51 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap) {
 		return loginInfoMapper.getLoginInfoByLoginIdAndLoginType(reqMap);
 	}
+	
 	@Transactional(rollbackFor=Exception.class)
 	@Override
-	public Map<String,String> initializeRegisterUser(Map<String, Object> reqMap) {
-		//1.插入t_user
-		User user = new User();
-		user.setUserId(MiscUtils.getUUId());
-		user.setNickName(reqMap.get("nick_name") == null ? null : reqMap.get("nick_name").toString());
-		user.setAvatarAddress(reqMap.get("avatar_address") == null ? null : reqMap.get("avatar_address").toString());
-		user.setPhoneNumber(reqMap.get("phone_number") == null ? null : reqMap.get("phone_number").toString());
-		user.setGender(reqMap.get("gender") == null ? null : reqMap.get("gender").toString());
-		//TODO 位置信息未插入
-		user.setCourseNum(0L);
-		user.setLiveRoomNum(0L);
+	public Map<String, String> initializeRegisterUser(Map<String, Object> reqMap) {
+		//1.插入t_user		
 		Date now = new Date();
-		user.setCreateTime(now);
-		user.setUpdateTime(now);
-		userMapper.insert(user);
+		Map<String,Object> user = new HashMap<String,Object>();
+		String uuid = MiscUtils.getUUId();
+		user.put("user_id", uuid);
+		user.put("user_name", reqMap.get("user_name"));
+		user.put("nick_name", reqMap.get("nick_name"));
+		user.put("avatar_address", reqMap.get("avatar_address"));
+		user.put("phone_number", reqMap.get("phone_number"));
+		user.put("gender", reqMap.get("gender"));
+		user.put("create_time", now);
+		user.put("update_time", now);
+		//位置信息未插入由消息服务处理
+		userMapper.insertUser(user);
 		//2.插入login_info
-		LoginInfo loginInfo = new LoginInfo();
-		loginInfo.setUserId(user.getUserId());
-		if(reqMap.get("login_type") != null && reqMap.get("login_type").toString().equals("0")){
-			loginInfo.setUnionId(reqMap.get("login_id").toString());
+		Map<String,Object> loginInfo = new HashMap<String,Object>();
+		loginInfo.put("user_id", uuid);
+		String login_type = (String)reqMap.get("login_type");
+		if("0".equals(login_type)){
+			loginInfo.put("union_id", reqMap.get("login_id"));
+		} else if("1".equals(login_type)){
+			
+		} else if("2".equals(login_type)){
+			
+		} else if("3".equals(login_type)){
+			loginInfo.put("passwd",reqMap.get("certification"));
+		} else if("4".equals(login_type)){
+			loginInfo.put("union_id",reqMap.get("unionid"));
+			loginInfo.put("web_openid",reqMap.get("web_openid"));
 		}
-		//loginInfo.setQqId(reqMap.get("qq_id").toString()); //TODO
-		loginInfo.setPhoneNumber(reqMap.get("phone_number") == null ? null : reqMap.get("phone_number").toString());
-		if(reqMap.get("login_type") != null && reqMap.get("login_type").toString().equals("3")){
-			loginInfo.setPasswd(reqMap.get("certification") == null ? null : reqMap.get("certification").toString());
-		}
-		if(reqMap.get("login_type") != null && reqMap.get("login_type").toString().equals("4")){
-			loginInfo.setUnionId(reqMap.get("unionid").toString());
-			loginInfo.setWebOpenid(reqMap.get("web_openid").toString());
-		}
-		if(reqMap.get("m_user_id") != null){
-			loginInfo.setmUserId(reqMap.get("m_user_id").toString());
-		}
-		if(reqMap.get("m_pwd") != null){
-			loginInfo.setmPwd(reqMap.get("m_pwd").toString());
-		}
-		
-		loginInfo.setUserRole(Constants.USER_ROLE_LISTENER);
-		loginInfo.setStatus("1");
-		//TODO 位置信息未插入
-		loginInfo.setCreateTime(now);
-		loginInfo.setUpdateTime(now);
-		loginInfoMapper.insert(loginInfo);
+		loginInfo.put("phone_number", reqMap.get("phone_number"));
+		loginInfo.put("m_user_id", reqMap.get("m_user_id"));
+		loginInfo.put("m_pwd", reqMap.get("m_pwd"));
+		loginInfo.put("user_role", Constants.USER_ROLE_LISTENER);
+		//位置信息未插入由消息服务处理
+		loginInfo.put("create_time", now);
+		loginInfo.put("update_time", now);
+		loginInfoMapper.insertLoginInfo(loginInfo);
 
 		Map<String,String> resultMap = new HashMap<String,String>();
-		resultMap.put("user_id", loginInfo.getUserId());
+		resultMap.put("user_id", uuid);
 		return resultMap;
 	}
 
@@ -137,55 +133,43 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Override
 	public Map<String, Object> findRewardInfoByRewardId(String reward_id) {
-		return rewardConfigurationMapper.findRewardInfoByRewardId(Long.parseLong(reward_id));
+		return rewardConfigurationMapper.findRewardInfoByRewardId(MiscUtils.convertObjectToLong(reward_id));
 	}
 
 	@Override
 	public void insertTradeBill(Map<String, Object> insertMap) {
 		//插入t_trade_bill表
 		Date now = new Date();
-		TradeBill tradeBill = new TradeBill();
-		tradeBill.setTradeId(insertMap.get("trade_id").toString());
-		tradeBill.setUserId(insertMap.get("user_id").toString());
-		tradeBill.setRoomId(insertMap.get("room_id").toString());
-		tradeBill.setCourseId(insertMap.get("course_id").toString());
-		tradeBill.setAmount(Long.valueOf(insertMap.get("amount").toString()));
-		tradeBill.setStatus(insertMap.get("status").toString());
-		tradeBill.setCreateTime(now);
-		tradeBill.setUpdateTime(now);
-		tradeBill.setProfitType(insertMap.get("profit_type").toString());
-		tradeBillMapper.insert(tradeBill);
+		insertMap.put("create_time", now);
+		insertMap.put("update_time", now);	
+		
+		tradeBillMapper.insertTradeBill(insertMap);
 	}
 
 	@Override
-	public void updateTradeBill(Map<String, Object> failUpdateMap) {
+	public void closeTradeBill(Map<String, Object> failUpdateMap) {
 		Date now = new Date();
-		TradeBill tradeBill = new TradeBill();
-		tradeBill.setTradeId(failUpdateMap.get("trade_id").toString());
-		tradeBill.setStatus(failUpdateMap.get("status").toString());
-		tradeBill.setCloseReason(failUpdateMap.get("close_reason").toString());
-		tradeBill.setCloseTime(now);
-		tradeBill.setUpdateTime(now);
-		tradeBillMapper.updateByPrimaryKeySelective(tradeBill);
+		Map<String,Object> record = new HashMap<String,Object>();
+		record.put("trade_id", failUpdateMap.get("trade_id"));
+		record.put("status", failUpdateMap.get("status"));
+		record.put("close_reason", failUpdateMap.get("close_reason"));
+		record.put("update_time", now);
+		record.put("close_time", now);
+		record.put("trade_id", failUpdateMap.get("trade_id"));
+	
+		tradeBillMapper.updateTradeBill(record);
 	}
 
 	@Override
 	public void insertPaymentBill(Map<String, Object> insertPayMap) {
-		PaymentBill p = new PaymentBill();
-		p.setTradeId(insertPayMap.get("trade_id").toString());
-		p.setPaymentId(insertPayMap.get("payment_id").toString());
-		p.setPaymentType(insertPayMap.get("payment_type").toString());
-		p.setStatus(insertPayMap.get("status").toString());
-		p.setPrePayNo(insertPayMap.get("pre_pay_no").toString());
-		p.setCreateTime((Date)insertPayMap.get("create_time"));
-		paymentBillMapper.insert(p);
+		paymentBillMapper.insertPaymentBill(insertPayMap);
 	}
 
 	@Override
-	public boolean findTradebillStatus(String outTradeNo) {
-		TradeBill t = tradeBillMapper.findByOutTradeNo(outTradeNo);
+	public boolean isTradebillFinish(String outTradeNo) {
+		Map<String,Object> value = tradeBillMapper.findByOutTradeNo(outTradeNo);
 		//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
-		if(t != null && t.getStatus().equals("2")){
+		if(value != null && "2".equals(value.get("status"))){
 			return true;
 		}else {
 			return false;
@@ -194,41 +178,97 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Override
 	public void updateUserWebOpenIdByUserId(Map<String, Object> updateMap) {
-		LoginInfo updateLoginInfo = new LoginInfo();
-		updateLoginInfo.setUserId(updateMap.get("user_id").toString());
-		updateLoginInfo.setWebOpenid(updateMap.get("web_openid").toString());
-		loginInfoMapper.updateByPrimaryKeySelective(updateLoginInfo);
+		Map<String,Object> record = new HashMap<String,Object>();
+		record.put("user_id", updateMap.get("user_id"));
+		record.put("web_openid",updateMap.get("web_openid"));
+		loginInfoMapper.updateLoginInfo(record);
 	}
-
 
 	@Override
 	public Map<String,Object> findTradebillByOutTradeNo(String outTradeNo) {
-		Map<String,Object> t = tradeBillMapper.findMapByOutTradeNo(outTradeNo);
-		return t;
+		Map<String,Object> tradeBill = tradeBillMapper.findByOutTradeNo(outTradeNo);
+		return tradeBill;
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	@Transactional(rollbackFor=Exception.class)
 	@Override
-	public Map<String,Object> handleWeixinPayResult(SortedMap<String, String> requestMapData) {
-		Map<String,Object> resultMap = new HashMap<>();
+	public Map<String, Object> handleWeixinPayResult(Map<String, Object> requestMapData) {
 		Date now = new Date();
+		Map<String,Object> tradeBill = (Map<String,Object>)requestMapData.get("tradeBillInCache");
+		Map<String,Object> updateTradeBill = new HashMap<String,Object>();
+		
+		updateTradeBill.put("trade_id", requestMapData.get("out_trade_no"));
+		updateTradeBill.put("status", "2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
+		updateTradeBill.put("update_time", now);
+		tradeBillMapper.updateTradeBill(updateTradeBill);
+		
+		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
+		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
+		updatePaymentBill.put("status", "2");
+		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
+		updatePaymentBill.put("update_time", realPayTime);
+		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
+		paymentBillMapper.updatePaymentBill(updatePaymentBill);
+		
+		Map<String,Object> profitRecord = new HashMap<String,Object>();
+		profitRecord.put("profit_id", MiscUtils.getUUId());
+		profitRecord.put("course_id", tradeBill.get("course_id"));
+		profitRecord.put("room_id", tradeBill.get("room_id"));
 
-		TradeBill tradeBill = tradeBillMapper.findByOutTradeNo(requestMapData.get("out_trade_no"));
-		//更新交易表信息
-		TradeBill updateBill = new TradeBill();
-		updateBill.setTradeId(requestMapData.get("out_trade_no"));
-		updateBill.setStatus("2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
-		updateBill.setUpdateTime(now);
-		tradeBillMapper.updateByPrimaryKeySelective(updateBill);
-
-		//更新支付表信息
-		PaymentBill updatePayBill = new PaymentBill();
-		updatePayBill.setStatus("2");//支付状态，1：付款中 2：成功 3：失败
-		String realPayTimeString = requestMapData.get("time_end");
-		Date realPayTime = MiscUtils.parseDateWinxin(realPayTimeString);
-		updatePayBill.setUpdateTime(realPayTime);
-		paymentBillMapper.updateByTradeIdKeySelective(updatePayBill);
-
-		//更新收益表信息
+		profitRecord.put("user_id", tradeBill.get("user_id"));
+		
+		profitRecord.put("profit_amount", tradeBill.get("payment"));
+		profitRecord.put("profit_type", tradeBill.get("profit_type"));
+		profitRecord.put("create_time", now);
+		profitRecord.put("create_date", now);
+		profitRecord.put("payment_id", paymentBill.get("payment_id"));
+		profitRecord.put("payment_type", paymentBill.get("payment_type"));
+		
+		Map<String,String> courseMap = (Map<String,String>)requestMapData.get("courseInCache");
+		if(!MiscUtils.isEmpty(courseMap)){
+			profitRecord.put("lecturer_id", courseMap.get("lecturer_id"));
+		}
+		Map<String,Object> roomDistributerCache = null;		
+		if("0".equals(tradeBill.get("profit_type"))){
+			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
+			if(!MiscUtils.isEmpty(roomDistributerCache)){
+				long shareAmount= MiscUtils.convertObjectToLong(tradeBill.get("payment")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"))/10000;
+				profitRecord.put("share_amount", shareAmount);
+			}
+		}
+		
+		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
+		
+		if("0".equals(tradeBill.get("profit_type"))){
+			String distributer_id = null;
+			if(!MiscUtils.isEmpty(roomDistributerCache)){
+				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新
+				Map<String,Object> roomDistributerRecommendUpdateMap = new HashMap<>();
+				roomDistributerRecommendUpdateMap.put("done_num",1);
+				roomDistributerRecommendUpdateMap.put("course_num",1);
+				roomDistributerRecommendUpdateMap.put("update_time",now);
+				roomDistributerRecommendUpdateMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
+				distributer_id=(String)roomDistributerCache.get("distributer_id");
+			}
+			//t_courses_students
+			Map<String,Object> student = new HashMap<String,Object>();
+			student.put("student_id", MiscUtils.getUUId());
+			student.put("user_id", tradeBill.get("user_id"));
+			student.put("distributer_id", distributer_id);
+			student.put("lecturer_id", distributer_id);
+			student.put("room_id", courseMap.get("room_id"));
+			student.put("course_id", courseMap.get("course_id"));
+			student.put("payment_amount", tradeBill.get("payment"));
+			student.put("course_password", courseMap.get("course_password"));
+			student.put("student_type", distributer_id==null? 0 : 1);  //TODO 课程学员待修改
+			student.put("create_time", now);
+			student.put("create_date", now);
+			coursesStudentsMapper.insertStudent(student);			
+		}
+//TODO 定时任务处理，需更新缓存
+/*		//更新收益表信息
 		Map<String,Object> courses = coursesMapper.findCourseByCourseId(tradeBill.getCourseId());
 		PaymentBill paymentBill = paymentBillMapper.selectByTradeId(tradeBill.getTradeId());
 		LecturerCoursesProfit lcp = new LecturerCoursesProfit();
@@ -266,9 +306,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 
 			}
-		}
-
-		//0:课程收益 1:打赏
+		}*/
+//TODO 定时任务处理，需更新缓存
+/*		//0:课程收益 1:打赏
 		if(tradeBill.getProfitType().equals("0")){
 			//如果为购买课程，则插入学员表
 			CoursesStudents students = new CoursesStudents();
@@ -314,43 +354,22 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 					coursesMapper.updateAfterStudentRewardCourse(updateCourseMap);
 				}
 			}
-		}
-
-
-		lcp.setProfitId(MiscUtils.getUUId());
-		lcp.setCourseId(tradeBill.getCourseId());
-		lcp.setRoomId(tradeBill.getRoomId());
-		lcp.setLecturerId(courses.get("lecturer_id").toString());
-		lcp.setUserId(tradeBill.getUserId());
-		lcp.setProfitAmount(tradeBill.getAmount());
-		lcp.setProfitType(tradeBill.getProfitType());
-		lcp.setCreateTime(now);
-		lcp.setCreateDate(now);
-		lcp.setPaymentId(paymentBill.getPaymentId());
-		lcp.setProfitType(paymentBill.getPaymentType());
-		lecturerCoursesProfitMapper.insert(lcp);
-
-
-
-		resultMap.put("profit_type",tradeBill.getProfitType());
-		resultMap.put("pay_user_id",tradeBill.getUserId());
-		resultMap.put("pay_amount",tradeBill.getAmount());
-		resultMap.putAll(courses);
-		return resultMap;
+		}*/
+		return profitRecord;
 	}
-	
+
 	@Override
-	public Map<String, Object> findByDistributerId(String distributer_id) {		
+	public Map<String, Object> findByDistributerId(String distributer_id) {
 		return distributerMapper.findByDistributerId(distributer_id);
 	}
 
 	@Override
-	public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> parameters) {		
+	public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> parameters) {
 		return distributerMapper.findDistributionInfoByDistributerId(parameters);
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomDistributerRecommendInfo(Map<String, Object> parameters) {		
+	public List<Map<String, Object>> findRoomDistributerRecommendInfo(Map<String, Object> parameters) {
 		return distributerMapper.findRoomDistributerRecommendInfo(parameters);
 	}
 
@@ -370,8 +389,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findRoomDistributerInfoByRqCode(String rq_code) {
-		return roomDistributerMapper.findRoomDistributerInfoByRqCode(rq_code);
+	public Map<String, Object> findRoomDistributerInfoByRqCode(String rqCode) {
+		return roomDistributerMapper.findRoomDistributerInfoByRqCode(rqCode);
 	}
 
 	@Override
@@ -386,24 +405,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Override
 	public void insertRoomDistributerRecommend(Map<String, Object> insertMap) {
-		RoomDistributerRecommend rdr = new RoomDistributerRecommend();
-		rdr.setDistributerRecommendId(insertMap.get("distributer_recommend_id").toString());
-		rdr.setDistributerId(insertMap.get("distributer_id").toString());
-		rdr.setRoomId(insertMap.get("room_id").toString());
-		rdr.setUserId(insertMap.get("user_id").toString());
-		rdr.setRecommendNum(0L);
-		rdr.setDoneNum(0L);
-		rdr.setCourseNum(0L);
-		rdr.setCreateTime((Date) insertMap.get("now"));
-		rdr.setUpdateTime((Date) insertMap.get("now"));
-		rdr.setEndDate((Date) insertMap.get("end_date"));
-		rdr.setRqCode(insertMap.get("rq_code").toString());
-		roomDistributerRecommendMapper.insert(rdr);
+		insertMap.put("create_time", insertMap.get("now"));
+		insertMap.put("update_time", insertMap.get("now"));
+		insertMap.put("end_date", insertMap.get("end_date"));
+		roomDistributerRecommendMapper.insertRoomDistributerRecommend(insertMap);
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
-		return roomDistributerMapper.findRoomDistributionInfoByDistributerId(queryMap);
+	public Map<String, Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
+		queryMap.put("current_date", MiscUtils.getEndTimeOfToday());
+		return roomDistributerMapper.findAvailableRoomDistributer(queryMap);
 	}
 
 	@Override
@@ -412,22 +423,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void updateAfterPayCourse(Map<String, Object> updateCourseMap) {
-		coursesMapper.updateAfterPayCourse(updateCourseMap);
+	public void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap) {
+		coursesMapper.updateAfterStudentBuyCourse(updateCourseMap);
 	}
 
 	@Override
 	public void insertFeedback(Map<String, Object> reqMap) {
 		Date now = (Date)reqMap.get("now");
-		Feedback feedback = new Feedback();
-		feedback.setFeedbackId(reqMap.get("feedback_id").toString());
-		feedback.setUserId(reqMap.get("user_id").toString());
-		feedback.setContent(reqMap.get("content").toString());
-		feedback.setStatus("1");  //处理状态，1：未处理 2：已经处理
-		feedback.setPhoneNumber(reqMap.get("phone_number").toString());
-		feedback.setCreateTime(now);
-		feedback.setUpdateTime(now);
-		feedbackMapper.insert(feedback);
+		reqMap.put("create_time", now);
+		reqMap.put("update_time", now);
+		reqMap.put("status", "1"); //处理状态，1：未处理 2：已经处理
+		feedbackMapper.insertFeedBack(reqMap);
+	    
 	}
 
 	@Override
@@ -439,7 +446,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> findVersionInfoByOS(String plateform) {
 		return versionMapper.findVersionInfoByOS(plateform);
 	}
-
+	@Override
+	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {		
+		return roomDistributerMapper.findAvailableRoomDistributer(record);
+	}
 	@Override
 	public Map<String, Object> findForceVersionInfoByOS(String force_version_key) {
 		return versionMapper.findForceVersionInfoByOS(force_version_key);
@@ -447,10 +457,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Override
 	public Integer updateIMAccount(Map<String, Object> updateIMAccountMap) {
-		LoginInfo loginInfo = new LoginInfo();
-		loginInfo.setUserId(updateIMAccountMap.get("user_id").toString());
-		loginInfo.setmUserId(updateIMAccountMap.get("m_user_id").toString());
-		loginInfo.setmPwd(updateIMAccountMap.get("m_pwd").toString());
-		return loginInfoMapper.updateByPrimaryKeySelective(loginInfo);
+		Map<String,Object> loginInfo = new HashMap<String,Object>();
+		loginInfo.put("user_id", updateIMAccountMap.get("user_id"));
+		loginInfo.put("m_user_id", updateIMAccountMap.get("m_user_id"));
+		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));		
+		return loginInfoMapper.updateLoginInfo(loginInfo);
 	}
 }

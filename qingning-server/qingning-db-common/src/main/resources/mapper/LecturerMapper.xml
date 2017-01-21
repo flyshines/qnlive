@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.LecturerMapper" >
+  <select id="findLectureByLectureId" resultType="hashmap" parameterType="java.lang.String" >
+    select a.*,b.live_room_num,b.room_distributer_num,b.room_recommend_num,b.room_done_num,b.course_distribution_num,
+    b.course_distributer_num,b.course_recommend_num,b.course_done_num from t_lecturer a
+    left join t_lecturer_distribution_info b on a.lecturer_id = b.lecturer_id and b.lecturer_id=#{lecturer_id}
+    where a.lecturer_id = #{lecturer_id}
+  </select>
+
+  <select id="findLectureId" resultType="hashmap" parameterType="hashmap" >
+    select lecturer_id from t_lecturer 
+    <if test="start_pos != null" >
+        limit #{start_pos}
+    </if>
+    <if test="page_count != null and start_pos != null" >
+        , #{page_count}
+    </if>
+    <if test="page_count != null and start_pos == null" >
+    	limit #{page_count}
+    </if>
+  </select>
+
+  <insert id="insertLecture" parameterType="hashmap" >
+    insert into t_lecturer
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="course_num != null" >
+        course_num,
+      </if>
+      <if test="total_student_num != null" >
+        total_student_num,
+      </if>
+      <if test="pay_student_num != null" >
+        pay_student_num,
+      </if>
+      <if test="total_time != null" >
+        total_time,
+      </if>
+      <if test="live_room_num != null" >
+        live_room_num,
+      </if>
+      <if test="fans_num != null" >
+        fans_num,
+      </if>
+      <if test="pay_course_num != null" >
+        pay_course_num,
+      </if>
+      <if test="private_course_num != null" >
+        private_course_num,
+      </if>
+      <if test="total_amount != null" >
+        total_amount,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="course_num != null" >
+        #{course_num},
+      </if>
+      <if test="total_student_num != null" >
+        #{total_student_num},
+      </if>
+      <if test="pay_student_num != null" >
+        #{pay_student_num},
+      </if>
+      <if test="total_time != null" >
+        #{total_time},
+      </if>
+      <if test="live_room_num != null" >
+        #{live_room_num},
+      </if>
+      <if test="fans_num != null" >
+        #{fans_num},
+      </if>
+      <if test="pay_course_num != null" >
+        #{pay_course_num},
+      </if>
+      <if test="private_course_num != null" >
+        #{private_course_num},
+      </if>
+      <if test="total_amount != null" >
+        #{total_amount},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateLecture" parameterType="hashmap" >
+    update t_lecturer
+    <set >
+      <if test="course_num != null" >
+        course_num = #{course_num},
+      </if>
+      <if test="total_student_num != null" >
+        total_student_num = #{total_student_num},
+      </if>
+      <if test="pay_student_num != null" >
+        pay_student_num = #{pay_student_num},
+      </if>
+      <if test="total_time != null" >
+        total_time = #{total_time},
+      </if>
+      <if test="live_room_num != null" >
+        live_room_num = #{live_room_num},
+      </if>
+      <if test="fans_num != null" >
+        fans_num = #{fans_num},
+      </if>
+      <if test="pay_course_num != null" >
+        pay_course_num = #{pay_course_num},
+      </if>
+      <if test="private_course_num != null" >
+        private_course_num = #{private_course_num},
+      </if>
+      <if test="total_amount != null" >
+        total_amount = #{total_amount},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+    </set>
+    where lecturer_id = #{lecturer_id}
+    <if test="last_update_time != null" >
+    	and update_time = #{last_update_time}
+    </if>   
+  </update>
+</mapper>

@@ -3,7 +3,6 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 public interface ICommonModuleServer {
 	public List<Map<String, Object>> getServerUrls();
@@ -23,17 +22,17 @@ public interface ICommonModuleServer {
 
 	void insertTradeBill(Map<String, Object> insertMap);
 
-	void updateTradeBill(Map<String, Object> failUpdateMap);
+	void closeTradeBill(Map<String, Object> failUpdateMap);
 
 	void insertPaymentBill(Map<String, Object> insertPayMap);
 
-	boolean findTradebillStatus(String outTradeNo);
+	boolean isTradebillFinish(String outTradeNo);
 
 	void updateUserWebOpenIdByUserId(Map<String, Object> updateMap);
 
 	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
 
-	Map<String,Object> handleWeixinPayResult(SortedMap<String, String> requestMapData);
+	Map<String,Object> handleWeixinPayResult(Map<String, Object> requestMapData);
 	
 	Map<String,Object> findByDistributerId(String distributer_id);
 	
@@ -52,18 +51,18 @@ public interface ICommonModuleServer {
 
 	void insertRoomDistributerRecommend(Map<String, Object> insertMap);
 
-	List<Map<String,Object>> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
+	Map<String,Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
 	void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
 
-	void updateAfterPayCourse(Map<String, Object> updateCourseMap);
+	void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap);
 
 	void insertFeedback(Map<String, Object> reqMap);
 
 	Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
 
 	Map<String,Object> findVersionInfoByOS(String plateform);
-
+	Map<String,Object> findAvailableRoomDistributer(Map<String,Object> record);
 	Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 
 	Integer updateIMAccount(Map<String, Object> updateIMAccountMap);

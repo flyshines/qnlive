@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.RoomDistributerCoursesMapper" >
+
+  <select id="findRoomDistributerCourseInfo" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.course_title,b.start_time from t_room_distributer_courses a, t_courses b where a.room_id = #{room_id} and a.distributer_id =#{distributer_id}
+    and a.course_id=b.course_id and b.course_type='2'
+    <if test="start_time != null">
+      and b.start_time <![CDATA[ < ]]> #{start_time}
+    </if>
+    order by b.start_time desc limit #{limit_count}
+  </select>
+
+  <insert id="insertRoomDistributerCourses" parameterType="hashmap" >
+    insert into t_room_distributer_courses
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="distributer_courses_id != null" >
+        distributer_courses_id,
+      </if>
+      <if test="distributer_id != null" >
+        distributer_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="course_id != null" >
+        course_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="recommend_num != null" >
+        recommend_num,
+      </if>
+      <if test="done_num != null" >
+        done_num,
+      </if>
+      <if test="profit_share_rate != null" >
+        profit_share_rate,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if> 
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="distributer_courses_id != null" >
+        #{distributer_courses_id},
+      </if>
+      <if test="distributer_id != null" >
+        #{distributer_id},
+      </if>
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="course_id != null" >
+        #{course_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="recommend_num != null" >
+        #{recommend_num},
+      </if>
+      <if test="done_num != null" >
+        #{done_num},
+      </if>
+      <if test="total_amount != null" >
+        #{total_amount},
+      </if>
+      <if test="effective_time != null" >
+        #{effective_time},
+      </if>
+      <if test="profit_share_rate != null" >
+        #{profit_share_rate},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+    </trim>
+  </insert>
+  
+</mapper>

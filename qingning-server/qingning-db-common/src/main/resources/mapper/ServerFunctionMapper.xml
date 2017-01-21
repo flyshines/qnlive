@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.ServerFunctionMapper" >
+  <sql id="Base_Column_List" >
+    `server_name`, server_url, method, update_time, protocol, domain_name
+  </sql>  
+  <select id="getServerUrls" resultType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_server_function
+  </select>
+</mapper>

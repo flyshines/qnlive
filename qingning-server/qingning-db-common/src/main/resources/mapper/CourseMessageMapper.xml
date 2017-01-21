@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.CourseMessageMapper" >
+
+  <select id="findCourseMessageList" resultType="hashmap" parameterType="hashmap" >
+    select
+    cm.message_pos, cm.message_id, cm.message_type, cm.send_type, cm.message, cm.message_url,
+    cm.audio_time, cm.create_time, cm.creator_id, cm.message_question,
+    u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
+    from t_course_message cm join t_user u on cm.creator_id = u.user_id
+    where 1 = 1
+    and
+    cm.course_id = #{course_id}
+    <if test="messagePos != null" >
+      and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
+    </if>
+    <if test="send_type != null" >
+      and  cm.send_type = #{send_type}
+    </if>
+    order by cm.message_pos asc
+    limit #{page_count}
+  </select>
+
+  <insert id="insertCourseMessageList" parameterType="list" >
+    insert into t_course_message (message_id, course_id, message,
+    message_url, message_question, audio_time,
+    message_pos, message_type, send_type,
+    creator_id, create_time
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+      #{item.message_id},#{item.course_id},
+      <if test="message != null" >
+        #{item.message},
+      </if>
+      <if test="message == null" >
+        null,
+      </if>
+      <if test="message_url != null" >
+        #{item.message_url},
+      </if>
+      <if test="message_url == null" >
+        null,
+      </if>
+      <if test="message_question != null" >
+        #{item.message_question},
+      </if>
+      <if test="message_question == null" >
+        null,
+      </if>
+      #{item.audio_time},#{item.message_pos},
+      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time}
+    </foreach>
+  </insert>
+
+  <select id="findCourseMessageMaxPos" resultType="hashmap" parameterType="string" >
+    select * from t_course_message cm where cm.course_id = #{course_id} order by message_pos desc limit 1
+  </select>
+  
+</mapper>

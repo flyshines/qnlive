@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.LecturerCoursesProfitMapper" >
+
+  <insert id="insertLecturerCoursesProfit" parameterType="hashmap" >
+    insert into t_lecturer_courses_profit
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="profit_id != null" >
+        profit_id,
+      </if>
+      <if test="course_id != null" >
+        course_id,
+      </if>
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="distributer_id != null" >
+        distributer_id,
+      </if>
+      <if test="profit_amount != null" >
+        profit_amount,
+      </if>
+      <if test="profit_type != null" >
+        profit_type,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="create_date != null" >
+        create_date,
+      </if>
+      <if test="payment_id != null" >
+        payment_id,
+      </if>
+      <if test="payment_type != null" >
+        payment_type,
+      </if>
+      <if test="position != null" >
+        `position`,
+      </if>
+      <if test="share_amount != null" >
+        share_amount,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="profit_id != null" >
+        #{profit_id},
+      </if>
+      <if test="courseId != null" >
+        #{course_id},
+      </if>
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="distributer_id != null" >
+        #{distributer_id},
+      </if>
+      <if test="profit_amount != null" >
+        #{profit_amount},
+      </if>
+      <if test="profit_type != null" >
+        #{profit_type},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="create_date != null" >
+        #{create_date},
+      </if>
+      <if test="payment_id != null" >
+        #{payment_id},
+      </if>
+      <if test="payment_type != null" >
+        #{payment_type},
+      </if>
+      <if test="position != null" >
+        #{position},
+      </if>
+      <if test="share_amount != null" >
+        #{share_amount},
+      </if>
+    </trim>
+  </insert>
+  
+  <select id="findRewardByUserIdAndCourseId" resultType="hashmap" parameterType="hashmap" >
+    select * from t_lecturer_courses_profit  where course_id = #{course_id} and user_id = #{user_id} limit 1
+  </select>
+  
+  <select id="findCourseProfitList" resultType="hashmap" parameterType="hashmap" >
+   	select a.*,ifnull(b.nick_name,b.user_name) student from t_lecturer_courses_profit a, t_user b where a.course_id=#{course_id} and a.user_id=b.user_id
+   	<if test="position != null">
+   		and a.position <![CDATA[ < ]]> #{position}
+   	</if>
+   	<if test='profit_type != "2"'>
+   		and a.profit_type=#{profit_type} 
+   	</if>
+   	order by a.position desc limit #{page_count}
+  </select>
+  
+  <select id="findUserConsumeRecords" resultType="hashmap" parameterType="hashmap" >
+    select
+    lcp.profit_type, lcp.course_id, lcp.profit_amount, lcp.profit_amount,
+    lcp.create_time, lcp.position, t_courses.course_title, lcp.lecturer_id
+    from t_lecturer_courses_profit lcp left join t_courses  on t_courses.course_id = lcp.course_id
+    where 1=1
+    and user_id = #{user_id}
+    <if test="position != null" >
+     and  `position` <![CDATA[<]]> #{position}
+    </if>
+    order by `position` desc
+    limit #{page_count}
+  </select>
+  
+</mapper>

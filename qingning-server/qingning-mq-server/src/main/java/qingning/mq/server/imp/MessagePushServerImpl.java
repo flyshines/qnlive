@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
-import qingning.mq.persistence.entity.Courses;
-import qingning.mq.persistence.mybatis.CoursesMapper;
-import qingning.mq.persistence.mybatis.CoursesStudentsMapper;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.mq.server.entyity.QNSchedule;
 import qingning.mq.server.entyity.ScheduleTask;
 import qingning.server.AbstractMsgService;
@@ -211,7 +209,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     log.debug("-----------加入学生上课3min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
                     obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_study_notice"), course_title));
-                    List<String> studentIds = coursesStudentsMapper.findStudentIdByCourseId(courseId);
+                    List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
                     obj.put("user_ids",studentIds);
                     obj.put("msg_type","10");
                     Map<String,String> extrasMap = new HashMap<>();
@@ -347,12 +345,12 @@ public class MessagePushServerImpl extends AbstractMsgService {
             //1.1如果为课程结束，则取当前时间为课程结束时间
             Date now = new Date();
             //1.2更新课程详细信息（变更课程为已经结束）
-            Courses courses = new Courses();
-            courses.setCourseId(courseId);
-            courses.setEndTime(now);
-            courses.setUpdateTime(now);
-            courses.setStatus("2");
-            processCoursesMapper.updateByPrimaryKeySelective(courses);
+            Map<String,Object> course = new HashMap<String,Object>();
+            course.put("course_id", courseId);
+            course.put("end_time", now);
+            course.put("update_time", now);
+            course.put("status", "2");           
+            processCoursesMapper.updateCourse(course);
 
             //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
             map.clear();
@@ -377,8 +375,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
             //1.6更新课程缓存信息
             Map<String, String> updateCacheMap = new HashMap<String, String>();
-            updateCacheMap.put("update_time", courses.getEndTime().getTime() + "");
-            updateCacheMap.put("end_time", courses.getEndTime().getTime() + "");
+            updateCacheMap.put("update_time", MiscUtils.convertObjectToLong(course.get("end_time")) + "");
+            updateCacheMap.put("end_time", MiscUtils.convertObjectToLong(course.get("end_time")) + "");
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 

@@ -11,13 +11,8 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.server.JedisBatchCallback;
-import qingning.mq.persistence.entity.Courses;
-import qingning.mq.persistence.entity.Lecturer;
-import qingning.mq.persistence.entity.LecturerDistributionInfo;
-import qingning.mq.persistence.entity.LiveRoom;
-import qingning.mq.persistence.entity.RoomDistributer;
-import qingning.mq.persistence.mybatis.*;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchOperation;
 import redis.clients.jedis.Jedis;
@@ -96,19 +91,17 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        		if(MiscUtils.isEmpty(values)){
 		        			continue;
 		        		}
-		        		Lecturer lecturer = new Lecturer();
-		        		lecturer.setLecturerId(lecturerId);
-		        		
-		        		lecturer.setFansNum(MiscUtils.convertObjectToLong(values.get("fans_num")));
-		        		lecturer.setLiveRoomNum(MiscUtils.convertObjectToLong(values.get("live_room_num")));
-		        		lecturer.setCourseNum(MiscUtils.convertObjectToLong(values.get("course_num")));
-		        		lecturer.setTotalStudentNum(MiscUtils.convertObjectToLong(values.get("total_student_num")));
-		        		lecturer.setPayCourseNum(MiscUtils.convertObjectToLong(values.get("pay_course_num")));
-		        		lecturer.setPrivateCourseNum(MiscUtils.convertObjectToLong(values.get("private_course_num")));
-		        		lecturer.setTotalAmount(MiscUtils.convertObjectToLong(values.get("total_amount")));
-		        		lecturer.setTotalTime(MiscUtils.convertObjectToLong(values.get("total_time")));
-		        		
-		        		lecturerMapper.updateByPrimaryKeySelective(lecturer);
+		        		Map<String,Object> lecturer = new HashMap<String,Object>();
+		        		lecturer.put("lecturer_id", lecturerId);
+		        		lecturer.put("fans_num", MiscUtils.convertObjectToLong(values.get("fans_num")));
+		        		lecturer.put("live_room_num", MiscUtils.convertObjectToLong(values.get("live_room_num")));
+		        		lecturer.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
+		        		lecturer.put("total_student_num", MiscUtils.convertObjectToLong(values.get("total_student_num")));
+		        		lecturer.put("pay_course_num", MiscUtils.convertObjectToLong(values.get("pay_course_num")));
+		        		lecturer.put("private_course_num", MiscUtils.convertObjectToLong(values.get("private_course_num")));
+		        		lecturer.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
+		        		lecturer.put("total_time", MiscUtils.convertObjectToLong(values.get("total_time")));
+		        		lecturerMapper.updateLecture(lecturer);
 		        	} catch (Exception e){
 		        		//TODO
 		        	}
@@ -120,19 +113,20 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        		if(MiscUtils.isEmpty(values)){
 		        			continue;
 		        		}
-		        		LecturerDistributionInfo lecturerDistributionInfo = new LecturerDistributionInfo();
-		        		lecturerDistributionInfo.setLecturerId(lecturerId);
+		        		Map<String,Object> lecturerDistributionInfo = new HashMap<String,Object>();
+		        		lecturerDistributionInfo.put("lecturer_id", lecturerId);
 		        		
-		        		lecturerDistributionInfo.setLiveRoomNum(MiscUtils.convertObjectToLong(values.get("live_room_num")));
-		        		lecturerDistributionInfo.setRoomDistributerNum(MiscUtils.convertObjectToLong(values.get("room_distributer_num")));
-		        		lecturerDistributionInfo.setRoomRecommendNum(MiscUtils.convertObjectToLong(values.get("room_recommend_num")));
-		        		lecturerDistributionInfo.setRoomDoneNum(MiscUtils.convertObjectToLong(values.get("room_done_num")));		        		
+		        		lecturerDistributionInfo.put("live_room_num", MiscUtils.convertObjectToLong(values.get("live_room_num")));
+		        		lecturerDistributionInfo.put("room_distributer_num", MiscUtils.convertObjectToLong(values.get("room_distributer_num")));
+		        		lecturerDistributionInfo.put("room_recommend_num", MiscUtils.convertObjectToLong(values.get("room_recommend_num")));		        		
+		        		lecturerDistributionInfo.put("room_done_num", MiscUtils.convertObjectToLong(values.get("room_done_num")));
 		        		
-		        		lecturerDistributionInfo.setCourseDistributerNum(MiscUtils.convertObjectToLong(values.get("course_distribution_num")));
-		        		lecturerDistributionInfo.setCourseDistributionNum(MiscUtils.convertObjectToLong(values.get("course_distributer_num")));
-		        		lecturerDistributionInfo.setCourseRecommendNum(MiscUtils.convertObjectToLong(values.get("course_recommend_num")));
-		        		lecturerDistributionInfo.setCourseDoneNum(MiscUtils.convertObjectToLong(values.get("course_done_num")));
-		        		lecturerDistributionInfoMapper.updateByPrimaryKey(lecturerDistributionInfo);
+		        		lecturerDistributionInfo.put("course_distribution_num", MiscUtils.convertObjectToLong(values.get("course_distribution_num")));
+		        		lecturerDistributionInfo.put("course_distributer_num", MiscUtils.convertObjectToLong(values.get("course_distributer_num")));
+		        		lecturerDistributionInfo.put("course_recommend_num", MiscUtils.convertObjectToLong(values.get("course_recommend_num")));
+		        		lecturerDistributionInfo.put("course_done_num", MiscUtils.convertObjectToLong(values.get("course_done_num")));
+		        	
+		        		lecturerDistributionInfoMapper.updateLecturerDistributionInfo(lecturerDistributionInfo);
 		        	} catch (Exception e){
 		        		//TODO
 		        	}
@@ -176,16 +170,16 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					if(MiscUtils.isEmpty(values)){
 						continue;
 					}
-					try{
-						LiveRoom liveRoom = new LiveRoom();
-	                    liveRoom.setRoomId(liveRoomId);
-	                    liveRoom.setFansNum(MiscUtils.convertObjectToLong(values.get("fans_num")));
-	                    liveRoom.setCourseNum(MiscUtils.convertObjectToLong(values.get("course_num")));
-	                    liveRoom.setDistributerNum(MiscUtils.convertObjectToLong(values.get("distributer_num")));
-	                    liveRoom.setTotalAmount(MiscUtils.convertObjectToLong(values.get("total_amount")));                    
-	                    liveRoom.setLastCourseAmount(MiscUtils.convertObjectToLong(values.get("last_course_amount")));
-	                    liveRoom.setRoomAddress(MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+liveRoomId);
-	                    liveRoomMapper.updateByPrimaryKeySelective(liveRoom);
+					try{						
+						Map<String,Object> liveRoom = new HashMap<String,Object>();
+						liveRoom.put("room_id", liveRoomId);
+						liveRoom.put("fans_num", MiscUtils.convertObjectToLong(values.get("fans_num")));
+						liveRoom.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
+						liveRoom.put("distributer_num", MiscUtils.convertObjectToLong(values.get("distributer_num")));
+						liveRoom.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
+						liveRoom.put("last_course_amount", MiscUtils.convertObjectToLong(values.get("last_course_amount")));
+						liveRoom.put("live_room_share_url_pre_fix", MiscUtils.convertObjectToLong(values.get("live_room_share_url_pre_fix")));						
+						liveRoomMapper.updateLiveRoom(liveRoom);						
 					} catch(Exception e){
 						//TODO
 					}
@@ -237,22 +231,22 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						continue;
 					}
 					try{
-						Courses courses = new Courses();
-                    	courses.setCourseId(courseId);
-                    	courses.setStudentNum(MiscUtils.convertObjectToLong(values.get("student_num")));
-                    	courses.setCourseAmount(MiscUtils.convertObjectToLong(values.get("course_amount")));
-                    	courses.setExtraNum(MiscUtils.convertObjectToLong(values.get("extra_num")));
-                    	courses.setExtraAmount(MiscUtils.convertObjectToLong(values.get("extra_amount")));
-                    	courses.setRealStudentNum(MiscUtils.convertObjectToLong(values.get("real_student_num")));
+						Map<String,Object> courses = new HashMap<String,Object>();
+						courses.put("course_id", courseId);
+						courses.put("student_num", MiscUtils.convertObjectToLong(values.get("student_num")));
+						courses.put("course_amount", MiscUtils.convertObjectToLong(values.get("course_amount")));
+						courses.put("extra_num", MiscUtils.convertObjectToLong(values.get("extra_num")));
+						courses.put("extra_amount", MiscUtils.convertObjectToLong(values.get("extra_amount")));
+						courses.put("real_student_num", MiscUtils.convertObjectToLong(values.get("real_student_num")));
                     	String real_start_time = values.get("real_start_time");
                     	if(!MiscUtils.isEmpty(real_start_time)){
-                    		courses.setRealStartTime(new Date(Long.parseLong(real_start_time)));
+                    		courses.put("real_start_time",new Date(Long.parseLong(real_start_time)));
                     	}
                     	String end_time = (String)values.get("end_time");
                     	if(!MiscUtils.isEmpty(end_time)){
-                    		courses.setEndTime(new Date(Long.parseLong(end_time)));
-                    	}                    	
-                    	coursesMapper.updateByPrimaryKeySelective(courses);
+                    		courses.put("end_time",new Date(Long.parseLong(end_time)));
+                    	}						
+                    	coursesMapper.updateAfterStudentBuyCourse(courses);						
 					}catch(Exception e){
 						//TODO
 					}
@@ -294,7 +288,11 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 	                    			list.add(values);
 	                    		}
 	                    	}
-	                    	courseImageMapper.batchInsertPPT(list);	                    	
+	                    	
+	                    	 Map<String,Object> insertMap = new HashMap<>();
+	                         insertMap.put("course_id",courseId);
+	                         insertMap.put("list",pptList);
+	                         courseImageMapper.createCoursePPTs(insertMap);	                    	
                     	}catch(Exception e){
                     		log.error(e.getMessage());
                     	}
@@ -324,7 +322,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						distributerValues.clear();
 						distributerValues.put("distributer_id", distributerId);
 						distributerValues.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
-						distributerMapper.updateDistributerbyPrimaryKey(distributerValues);
+						distributerMapper.updateDistributer(distributerValues);
 					}catch(Exception e){
 						//TODO
 					}
@@ -350,14 +348,15 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					}
 					try{
 						roomDistributerValues.clear();
-						RoomDistributer roomDistributer = new RoomDistributer();
-						roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("recommend_num")));
-						roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("course_num")));
-						roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("done_num")));
-						roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("profit_share_rate")));
-						roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("effective_time")));
-						//roomDistributer.setCourseNum(MiscUtils.convertObjectToLong(values.get("click_num")));
-						roomDistributerMapper.updateByPrimaryKey(roomDistributer);
+						Map<String,Object> roomDistributer = new HashMap<String,Object>();
+						roomDistributer.put("room_distributer_id", roomDistributerId);
+						roomDistributer.put("recommend_num", MiscUtils.convertObjectToLong(values.get("recommend_num")));
+						roomDistributer.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
+						roomDistributer.put("done_num", MiscUtils.convertObjectToLong(values.get("done_num")));
+						roomDistributer.put("profit_share_rate", MiscUtils.convertObjectToLong(values.get("profit_share_rate")));
+						roomDistributer.put("effective_time", MiscUtils.convertObjectToLong(values.get("effective_time")));
+						roomDistributer.put("click_num", MiscUtils.convertObjectToLong(values.get("click_num")));						
+						roomDistributerMapper.updateRoomDistributer(roomDistributer);
 					}catch(Exception e){
 						//TODO
 					}

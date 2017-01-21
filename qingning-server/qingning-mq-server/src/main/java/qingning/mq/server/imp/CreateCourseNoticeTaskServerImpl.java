@@ -5,7 +5,7 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
-import qingning.mq.persistence.mybatis.CoursesMapper;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;

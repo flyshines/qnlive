@@ -46,11 +46,7 @@
 	 -->
 	<dubbo:service interface="qingning.server.rpc.manager.ICommonModuleServer" ref="commonModuleServer"  timeout="1200000" delay="-1" retries="0"/>
 	<bean id="commonModuleServer"  class="qingning.common.db.server.imp.CommonModuleServerImpl"/>
-
 	<import resource="classpath:db-config.xml"/>
-		
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.common.db.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
-	
 </beans>
 
 

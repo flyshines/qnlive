@@ -21,11 +21,8 @@ import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
-import qingning.mq.persistence.entity.LoginInfo;
-import qingning.mq.persistence.entity.User;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.mq.persistence.mongo.MongoDB;
-import qingning.mq.persistence.mybatis.LoginInfoMapper;
-import qingning.mq.persistence.mybatis.UserMapper;
 import qingning.mq.utils.CommonLocationUtils;
 import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
@@ -220,27 +217,22 @@ public class LogServiceImpl extends AbstractMsgService {
 		List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
 		if(MiscUtils.isEmpty(list)){
 			MongoDB.insert(collection, values);
-			LoginInfo loginInfo = new LoginInfo();
-			loginInfo.setUserId(user_id);
-			loginInfo.setCountry(values.get("country"));
-			loginInfo.setProvince(values.get("province"));
-			loginInfo.setCity(values.get("city"));
-			loginInfo.setDistrict(values.get("district"));
-			loginInfoMapper.updateByPrimaryKeySelective(loginInfo);
-			
-			User user = new User();
-			user.setUserId(user_id);
-			user.setCountry(values.get("country"));
-			user.setProvince(values.get("province"));
-			user.setCity(values.get("city"));
-			user.setDistrict(values.get("district"));
-			userMapper.updateByPrimaryKeySelective(user);
+			Map<String,Object> info = new HashMap<String,Object>();
+			info.put("user_id", user_id);
+			info.put("country", values.get("country"));
+			info.put("province", values.get("province"));
+			info.put("city", values.get("city"));
+			info.put("district", values.get("district"));			
+			loginInfoMapper.updateLoginInfo(info);
+
+			userMapper.updateUser(info);
 		} else if(!MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){
 			collection.updateOne(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
-			LoginInfo loginInfo = new LoginInfo();
-			loginInfo.setSubscribe(values.get("subscribe"));
-			loginInfo.setUserId(user_id);
-			loginInfoMapper.updateByPrimaryKeySelective(loginInfo);
+			Map<String,Object> info = new HashMap<String,Object>();
+			info.put("user_id", user_id);
+			info.put("subscribe", values.get("subscribe"));
+			
+			loginInfoMapper.updateLoginInfo(info);
 		}
     }
     

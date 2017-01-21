@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.CoursesStudentsMapper" >
+
+  <select id="findCourseStudentList" resultType="hashmap" parameterType="hashmap" >
+    select
+    cs.user_id, cs.create_time, cs.student_pos, u.nick_name, u.avatar_address
+    from t_courses_students cs join t_user u on cs.user_id = u.user_id
+    where 1 = 1
+    and cs.course_id = #{course_id}
+    <if test="student_pos != null" >
+      and cs.student_pos <![CDATA[ < ]]> #{student_pos}
+    </if>
+    order by cs.student_pos desc
+    limit #{page_count}
+  </select>
+
+  <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
+    select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time
+    from t_courses_students a, t_courses b
+    where a.course_id=b.course_id and a.user_id=#{user_id}
+    <if test="create_time != null">
+      and a.create_time <![CDATA[<]]> #{create_time}
+    </if>
+    order by a.create_time desc limit #{page_count}
+  </select>
+
+  <select id="findLatestStudentAvatarAddList" resultType="string" parameterType="hashmap" >
+    select
+    u.avatar_address
+    from t_courses_students cs join t_user u  on cs.user_id = u.user_id
+    where 1 = 1
+    and course_id = #{course_id}
+    order by cs.create_time DESC
+    limit #{size}
+  </select>
+
+  <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.Map" >
+    select
+    u.user_id, u.nick_name, u.avatar_address, cs.create_time
+    from t_courses_students cs join t_user u on cs.user_id = u.user_id
+    where
+    cs.user_id in
+    <foreach collection="list" item="item" index="index" open="("
+             separator="," close=")">
+      #{item}
+    </foreach>  and cs.course_id = #{course_id}
+  </select>
+
+  <select id="findUserIdsByCourseId" resultType="string" parameterType="string" >
+    select user_id from t_courses_students where 1 = 1 and course_id = #{course_id}
+  </select>
+  
+  <select id="isStudentOfTheCourse" resultType="hashmap" parameterType="hashmap" >
+    select '1' from from t_courses_students
+    where course_id = #{course_id} and user_id = #{user_id} limit 1
+  </select>
+  
+  <insert id="insertStudent" parameterType="hashmap" >
+    insert into t_courses_students
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="student_id != null" >
+        student_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="distributer_id != null" >
+        distributer_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="course_id != null" >
+        course_id,
+      </if>
+      <if test="payment_amount != null" >
+        payment_amount,
+      </if>
+      <if test="course_password != null" >
+        course_password,
+      </if>
+      <if test="student_type != null" >
+        student_type,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="create_date != null" >
+        create_date,
+      </if>
+      <if test="student_pos != null">
+        student_pos,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="student_id != null" >
+        #{student_id},
+      </if>
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="distributer_id != null" >
+        #{distributer_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="course_id != null" >
+        #{course_id},
+      </if>
+      <if test="payment_amount != null" >
+        #{payment_amount},
+      </if>
+      <if test="course_password != null" >
+        #{course_password},
+      </if>
+      <if test="student_type != null" >
+        #{student_type},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="create_date != null" >
+        #{create_date},
+      </if>
+      <if test="student_pos != null">
+        #{student_pos},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

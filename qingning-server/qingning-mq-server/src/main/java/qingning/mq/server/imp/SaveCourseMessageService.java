@@ -7,7 +7,7 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
-import qingning.mq.persistence.mybatis.CourseMessageMapper;
+import qingning.db.common.mybatis.persistence.CourseMessageMapper;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -89,7 +89,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 		});
 
 		//3.批量插入到数据库中
-		Integer insertResult = courseMessageMapper.batchInsert(messageList);
+		Integer insertResult = courseMessageMapper.insertCourseMessageList(messageList);
 
 
 		//4.如果插入数据库正常，则删除缓存中的内容

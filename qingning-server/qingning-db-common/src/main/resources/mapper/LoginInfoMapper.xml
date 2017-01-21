@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.LoginInfoMapper" >
+  <select id="getLoginInfoByLoginIdAndLoginType" resultType="hashmap" parameterType="hashmap" >
+    select * from t_login_info
+    where
+    <if test='login_type != null and login_type == "0"'>
+      union_id = #{login_id}
+      <!--微信登录-->
+    </if>
+    <if test='login_type != null and login_type == "2"'>
+      <!--手机号登录-->
+      phone_number = #{login_id}
+    </if>
+    <if test='login_type != null and login_type == "4"'>
+      <!--web openid登录-->
+      web_openid = #{web_openid}
+    </if>
+  </select>
+
+  <select id="findLoginInfoByUserId" resultType="hashmap" parameterType="string" >
+    select * from t_login_info where user_id = #{userId}
+  </select>
+
+  <select id="findLoginInfoByUserIds" resultType="string" parameterType="hashmap" >
+    select web_openid from t_login_info  where web_openid is not null and  user_id in    (
+    <foreach collection="list" item="item" index="index" separator=",">
+     #{item}
+    </foreach>)
+  </select>
+
+  <update id="updateUserRole" parameterType="hashmap" >
+    update t_login_info
+    <set >
+        user_role = CONCAT(user_role,#{add_role,jdbcType=VARCHAR})
+    </set>
+    where user_id = #{user_id,jdbcType=VARCHAR}
+  </update>
+
+  <insert id="insertLoginInfo" parameterType="hashmap" >
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="union_id != null" >
+        union_id,
+      </if>
+      <if test="qq_id != null" >
+        qq_id,
+      </if>
+      <if test="phone_number != null" >
+        phone_number,
+      </if>
+      <if test="passwd != null" >
+        passwd,
+      </if>
+      <if test="m_user_id != null" >
+        m_user_id,
+      </if>
+      <if test="m_pwd != null" >
+        m_pwd,
+      </if>
+      <if test="user_role != null" >
+        user_role,
+      </if>
+      <if test="system_role != null" >
+        system_role,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="country != null" >
+        country,
+      </if>
+      <if test="province != null" >
+        province,
+      </if>
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="district != null" >
+        district,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="web_openid != null" >
+        web_openid,
+      </if>
+      <if test="subscribe != null" >
+        subscribe,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="union_id != null" >
+        #{union_id},
+      </if>
+      <if test="qq_id != null" >
+        #{qq_id},
+      </if>
+      <if test="phone_number != null" >
+        #{phone_number},
+      </if>
+      <if test="passwd != null" >
+        #{passwd},
+      </if>
+      <if test="m_user_id != null" >
+        #{m_user_id},
+      </if>
+      <if test="m_pwd != null" >
+        #{m_pwd},
+      </if>
+      <if test="user_role != null" >
+        #{user_role},
+      </if>
+      <if test="system_role != null" >
+        #{system_role},
+      </if>
+      <if test="status != null" >
+        #{status},
+      </if>
+      <if test="country != null" >
+        #{country},
+      </if>
+      <if test="province != null" >
+        #{province},
+      </if>
+      <if test="city != null" >
+        #{city},
+      </if>
+      <if test="district != null" >
+        #{district},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+      <if test="web_openid != null" >
+        #{web_openid},
+      </if>
+      <if test="subscribe != null" >
+        #{subscribe},
+      </if>      
+    </trim>
+  </insert>
+  
+  <update id="updateLoginInfo" parameterType="hashmap" >  
+    update t_login_info
+    <set >
+      <if test="union_id != null" >
+        union_id=#{union_id},
+      </if>
+      <if test="qq_id != null" >
+        qq_id=#{qq_id},
+      </if>
+      <if test="phone_number != null" >
+        phone_number=#{phone_number},
+      </if>
+      <if test="passwd != null" >
+        passwd=#{passwd},
+      </if>
+      <if test="m_user_id != null" >
+        m_user_id=#{m_user_id},
+      </if>
+      <if test="m_pwd != null" >
+        m_pwd=#{m_pwd},
+      </if>
+      <if test="user_role != null" >
+        user_role=#{user_role},
+      </if>
+      <if test="system_role != null" >
+        system_role=#{system_role},
+      </if>
+      <if test="status != null" >
+        status=#{status},
+      </if>
+      <if test="country != null" >
+        country=#{country},
+      </if>
+      <if test="province != null" >
+        province=#{province},
+      </if>
+      <if test="city != null" >
+        city=#{city},
+      </if>
+      <if test="district != null" >
+        district=#{district},
+      </if>
+      <if test="create_time != null" >
+        create_time=#{create_time},
+      </if>
+      <if test="update_time != null" >
+        update_time=#{update_time},
+      </if>
+      <if test="web_openid != null" >
+        web_openid=#{web_openid},
+      </if>
+      <if test="subscribe != null" >
+        subscribe=#{subscribe},
+      </if>
+    </set>
+    where user_id = #{user_id}
+    <if test="last_update_time != null" >
+       and update_time=#{last_update_time}
+    </if>  
+  </update>
+  
+</mapper>

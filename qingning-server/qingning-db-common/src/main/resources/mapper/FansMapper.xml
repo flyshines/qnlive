@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.FansMapper" >
+  <select id="findRoomFanList" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.user_id=b.user_id and a.room_id=#{room_id}
+    and a.lecturer_id=#{lecturer_id}
+    <if test="position != null">
+      and a.position <![CDATA[ > ]]> #{position}
+    </if>
+    order by a.position limit #{page_count}
+  </select>
+
+  <select id="findFansByUserIdAndRoomId" resultType="hashmap" parameterType="hashmap" >
+    select * from t_fans where user_id = #{user_id} and room_id = #{room_id}
+  </select>
+
+  <select id="findFollowUserIdsByRoomId" resultType="string" parameterType="string">
+    select user_id from t_fans where room_id = #{room_id}
+  </select>
+
+  <select id="findFanInfoByUserId" resultType="hashmap" parameterType="hashmap">
+    select a.*, b.room_name, b.avatar_address from t_fans a, t_live_room b
+    where a.room_id=b.room_id and a.user_id = #{user_id}
+    <if test="notice_create_time != null" >
+      and a.create_time <![CDATA[ < ]]> #{notice_create_time}
+    </if>
+    order by a.create_time desc limit #{page_count}
+  </select>
+
+  <delete id="deleteFans" parameterType="hashmap" >
+    delete from t_fans where 1 = 1 
+    <if test="user_id != null">
+    	and user_id = #{user_id}
+    </if>
+    <if test="room_id != null">
+    	and room_id = #{room_id}
+    </if>      
+  </delete>
+
+  <insert id="insertFans" parameterType="hashmap" >
+    insert into t_fans
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="fans_id != null" >
+        fans_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="room_id != null" >
+        room_id,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="create_date != null" >
+        create_date,
+      </if>
+      <if test="position != null" >
+        `position`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="fans_id != null" >
+        #{fans_id},
+      </if>
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="room_id != null" >
+        #{room_id},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="create_date != null" >
+        #{create_date},
+      </if>
+      <if test="position != null" >
+        #{position},
+      </if>
+    </trim>
+  </insert>
+</mapper>

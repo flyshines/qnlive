@@ -3,7 +3,6 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface ILectureModuleServer {
 	Map<String,Object> createLiveRoom(Map<String, Object> reqMap);
@@ -16,7 +15,7 @@ public interface ILectureModuleServer {
 
 	Map<String,Object> createCourse(Map<String, Object> reqMap);
 
-	Map<String,Object> findCourseByCourseId(String string);
+	Map<String,Object> findCourseByCourseId(String courseId);
 
 	Map<String,Object> updateCourse(Map<String, Object> reqMap);
 
@@ -24,7 +23,7 @@ public interface ILectureModuleServer {
 
 	void createCoursePPTs(Map<String, Object> reqMap);
 
-	void deletePPTByCourseId(String string);
+	void deletePPTByCourseId(String course_id);
 
 	List<Map<String,Object>> findPPTListByCourseId(String course_id);
 
@@ -36,7 +35,7 @@ public interface ILectureModuleServer {
 
 	Map<String,Object> findLoginInfoByUserId(String userId);
 
-	List<Map<String,Object>> findBanUserListInfo(Map<String, Object> banUserIdList);
+	List<Map<String,Object>> findBanUserListInfo(Map<String,Object> banUserIdList);
 
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
 	

@@ -1,4 +1,3 @@
-
 package qingning.common.entity;
 
 import java.util.Map;

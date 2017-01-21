@@ -1,6 +1,5 @@
 package qingning.common.server.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qingning.common.entity.RequestEntity;

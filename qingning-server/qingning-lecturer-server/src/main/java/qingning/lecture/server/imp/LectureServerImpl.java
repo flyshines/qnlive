@@ -13,9 +13,7 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
 import qingning.common.util.*;
-import qingning.lecture.server.other.ReadCourseOperation;
-import qingning.lecture.server.other.ReadLecturerOperation;
-import qingning.lecture.server.other.ReadLiveRoomOperation;
+import qingning.lecture.server.other.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -37,6 +35,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     private ReadCourseOperation readCourseOperation;
     private ReadLiveRoomOperation readLiveRoomOperation;
     private ReadLecturerOperation readLecturerOperation;
+	private ReadUserOperation readUserOperation;
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
@@ -86,6 +85,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         reqMap.put("isLecturer", isLecturer);
         reqMap.put("user_id", userId);
+        Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.put("user_id", userId);
+        RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
+        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+        if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
+        	reqMap.put("avatar_address",userInfo.get("avatar_address"));
+        }
+        if(MiscUtils.isEmpty(reqMap.get("room_name"))){        	
+        	reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name"), userInfo.get("nick_name")));
+        }
         Map<String, Object> createResultMap = lectureModuleServer.createLiveRoom(reqMap);
 
         //3.缓存修改
@@ -97,7 +106,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             Map<String, Object> lectureObjectMap = lectureModuleServer.findLectureByLectureId(reqMap.get("user_id").toString());
             Map<String, String> lectureStringMap = new HashMap<>();
             MiscUtils.converObjectMapToStringMap(lectureObjectMap, lectureStringMap);
-            lectureStringMap.put("nick_name",createResultMap.get("nick_name").toString());
+            lectureStringMap.put("nick_name",(String)userInfo.get("nick_name"));
 
             Map<String, Object> lecturerDistributionObjectMap = lectureModuleServer.findLecturerDistributionByLectureId(reqMap.get("user_id").toString());
             Map<String, String> lecturerDistributionStringMap = new HashMap<>();

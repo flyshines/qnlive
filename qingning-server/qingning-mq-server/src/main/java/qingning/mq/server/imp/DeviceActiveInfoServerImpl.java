@@ -18,8 +18,8 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.DeviceActiveInfoMapper;
 import qingning.mq.persistence.mongo.MongoDB;
-import qingning.mq.persistence.mybatis.DeviceActiveInfoMapper;
 import qingning.server.AbstractMsgService;
 
 public class DeviceActiveInfoServerImpl extends AbstractMsgService {
@@ -78,7 +78,7 @@ public class DeviceActiveInfoServerImpl extends AbstractMsgService {
     	
     	//TODO change to list
     	for(Map<String,Object>value : map.values()){
-    		deviceActiveInfoMapper.insert(value);
+    		deviceActiveInfoMapper.insertDeviceActiveInfo(value);
     	}
     }
 }

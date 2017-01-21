@@ -8,11 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
-import qingning.lecturer.db.persistence.mybatis.*;
-import qingning.lecturer.db.persistence.mybatis.entity.Courses;
-import qingning.lecturer.db.persistence.mybatis.entity.Lecturer;
-import qingning.lecturer.db.persistence.mybatis.entity.LecturerDistributionInfo;
-import qingning.lecturer.db.persistence.mybatis.entity.LiveRoom;
+import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
 import java.util.*;
@@ -55,10 +51,14 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
 	
-	@Override
-	public List<String> findLoginInfoByUserIds(Map<String, Object> map) {
-		return loginInfoMapper.findLoginInfoByUserIds(map);
-	}
+	@Autowired(required = true)
+	private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
+	
+	@Autowired(required = true)
+	private RoomDistributerMapper roomDistributerMapper;
+	
+	@Autowired(required = true)
+	private RoomDistributerCoursesMapper roomDistributerCoursesMapper;
 	
 	@Transactional(rollbackFor=Exception.class)
 	@Override
@@ -66,62 +66,31 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	 * 创建直播间
 	 */
 	public Map<String,Object> createLiveRoom(Map<String, Object> reqMap) {
-		Map<String,Object> userMap = null;
 		Date now = new Date();
 		//1.插入直播间表
-		LiveRoom liveRoom = new LiveRoom();
-		liveRoom.setRoomId(reqMap.get("room_id").toString());
-		liveRoom.setLecturerId(reqMap.get("user_id").toString());
-		liveRoom.setCourseNum(0L);
-		liveRoom.setFansNum(0L);
-		liveRoom.setDistributerNum(0L);
-
-		liveRoom.setRqCode(liveRoom.getRoomId());
-		liveRoom.setRoomAddress(reqMap.get("room_address").toString());
-		liveRoom.setTotalAmount(0L);
-		liveRoom.setLastCourseAmount(0L);
-		liveRoom.setCreateTime(now);
-		liveRoom.setUpdateTime(now);
-
-		//直播间名字、直播间头像地址、直播间简介的相关设置。
-		//如果有输入的参数则使用输入的参数，否则使用t_user表中的数据
-		userMap = userMapper.findByUserId(reqMap.get("user_id").toString());
-		if(reqMap.get("room_name") == null || MiscUtils.isEmpty(reqMap.get("room_name").toString())){
-			liveRoom.setRoomName(userMap.get("nick_name").toString() + "的直播间");
-		}else {
-			liveRoom.setRoomName(reqMap.get("room_name").toString());
-		}
-
-		if(reqMap.get("avatar_address") == null){
-			liveRoom.setAvatarAddress((userMap.get("avatar_address").toString()));
-		}else {
-			liveRoom.setAvatarAddress((reqMap.get("avatar_address").toString()));
-		}
-
-		if(reqMap.get("room_remark") != null){
-			liveRoom.setRoomRemark(reqMap.get("room_remark").toString());
-		}
-		liveRoomMapper.insert(liveRoom);
+		Map<String,Object> liveRoom = new HashMap<String,Object>();
+		liveRoom.put("room_id", reqMap.get("room_id"));
+		liveRoom.put("user_id", reqMap.get("user_id"));
+		liveRoom.put("rq_code", reqMap.get("room_id"));
+		liveRoom.put("room_address", reqMap.get("room_address"));
+		liveRoom.put("room_name", reqMap.get("room_name"));
+		liveRoom.put("avatar_address", reqMap.get("avatar_address"));
+		liveRoom.put("room_remark", reqMap.get("room_remark"));
+		liveRoom.put("create_time", now);		
+		liveRoom.put("update_time", now);
+		liveRoomMapper.insertLiveRoom(liveRoom);
 
 		//2.如果该用户为普通用户，则需要插入讲师表，并且修改登录信息表中的身份，
 		// 同时插入t_lecturer_distribution_info讲师分销信息表(统计冗余表)
 		boolean isLecturer = (Boolean)reqMap.get("isLecturer");
 		if(isLecturer == false){
 			//2.1插入讲师表
-			Lecturer lecturer = new Lecturer();
-			lecturer.setLecturerId(reqMap.get("user_id").toString());
-			lecturer.setCourseNum(0L);
-			lecturer.setTotalStudentNum(0L);
-			lecturer.setLiveRoomNum(1L);
-			lecturer.setFansNum(0L);
-			lecturer.setTotalAmount(0L);
-			lecturer.setPayStudentNum(0L);
-			lecturer.setTotalTime(0L);
-			lecturer.setPayCourseNum(0L);
-			lecturer.setPrivateCourseNum(0L);
-			lecturer.setCreateTime(now);
-			lecturer.setUpdateTime(now);
-			lecturerMapper.insert(lecturer);
+			Map<String,Object> lecturer = new HashMap<String,Object>();
+			lecturer.put("lecturer_id", reqMap.get("user_id"));
+			lecturer.put("live_room_num", 1L);
+			lecturer.put("create_time", now);
+			lecturer.put("update_time", now);
+			lecturerMapper.insertLecture(lecturer);
 
 			//2.2修改登录信息表 身份
 			Map<String,Object> updateMap = new HashMap<>();
@@ -130,30 +99,21 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			loginInfoMapper.updateUserRole(updateMap);
 
 			//2.3插入讲师分销信息表(统计冗余表)
-			LecturerDistributionInfo ldbi = new LecturerDistributionInfo();
-			ldbi.setLecturerId(reqMap.get("user_id").toString());
-			ldbi.setLiveRoomNum(0L);
-			ldbi.setRoomDistributerNum(0L);
-			ldbi.setRoomRecommendNum(0L);
-			ldbi.setRoomDoneNum(0L);
-			ldbi.setCourseDistributionNum(0L);
-			ldbi.setCourseDistributerNum(0L);
-			ldbi.setCourseRecommendNum(0L);
-			ldbi.setCourseDoneNum(0L);
-			ldbi.setCreateTime(now);
-			ldbi.setUpdateTime(now);
-			lecturerDistributionInfoMapper.insert(ldbi);
+			Map<String,Object> lecturerDistributionInfo = new HashMap<String,Object>();
+			lecturerDistributionInfo.put("lecturer_id", reqMap.get("user_id"));
+			lecturerDistributionInfo.put("create_time", now);
+			lecturerDistributionInfo.put("update_time", now);			
+			lecturerDistributionInfoMapper.insertLecturerDistributionInfo(lecturerDistributionInfo);
 		}
 
 		Map<String,Object> resultMap = new HashMap<>();
-		resultMap.put("room_id", liveRoom.getRoomId());
-		resultMap.put("nick_name", userMap.get("nick_name").toString());
+		resultMap.put("room_id", reqMap.get("room_id"));		
 		return resultMap;
 	}
 
 	@Override
-	public Map<String, Object> findLectureByLectureId(String user_id) {
-		return lecturerMapper.findLectureByLectureId(user_id);
+	public Map<String, Object> findLectureByLectureId(String lecture_id) {
+		return lecturerMapper.findLectureByLectureId(lecture_id);
 	}
 
 	@Override
@@ -166,66 +126,52 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	 * 更新直播间
 	 */
 	public Map<String, Object> updateLiveRoom(Map<String, Object> reqMap) {
-
-		LiveRoom updateLiveRoom = new LiveRoom();
-		updateLiveRoom.setRoomId(reqMap.get("room_id").toString());
-		updateLiveRoom.setUpdateTime(new Date());
-
-		if(reqMap.get("avatar_address") != null ){
-			updateLiveRoom.setAvatarAddress(reqMap.get("avatar_address").toString());
+		Date date = new Date(System.currentTimeMillis());
+		Date last_update_time = null;
+		if(!MiscUtils.isEmpty(reqMap.get("update_time"))){
+			last_update_time = new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time")));
 		}
-		if(reqMap.get("room_name") != null ){
-			updateLiveRoom.setRoomName(reqMap.get("room_name").toString());
-		}
-		if(reqMap.get("room_remark") != null ){
-			updateLiveRoom.setRoomRemark(reqMap.get("room_remark").toString());
-		}
-
-		Integer updateCount = liveRoomMapper.updateByPrimaryKeySelective(updateLiveRoom);
+		reqMap.put("update_time", date);
+		reqMap.put(Constants.SYS_FIELD_LAST_UPDATE_TIME, last_update_time);
+		
+		Integer updateCount = liveRoomMapper.insertLiveRoom(reqMap);
+		
 		Map<String,Object> dbResultMap = new HashMap<String,Object>();
 		dbResultMap.put("updateCount", updateCount);
-		dbResultMap.put("update_time", updateLiveRoom.getUpdateTime());
+		dbResultMap.put("update_time", date);
 		return dbResultMap;
 	}
 
 	@Override
 	public Map<String,Object> createCourse(Map<String, Object> reqMap) {
-		Courses courses = new Courses();
-		courses.setCourseId(MiscUtils.getUUId());
-		courses.setRoomId(reqMap.get("room_id").toString());
-		courses.setLecturerId(reqMap.get("user_id").toString());
-		courses.setCourseTitle(reqMap.get("course_title").toString());
-		courses.setCourseUrl(reqMap.get("course_url").toString());
-		//courses.setCourseRemark();
+		Map<String,Object> course = new HashMap<String,Object>();
+		course.put("course_id", MiscUtils.getUUId());
+		course.put("room_id", reqMap.get("room_id"));
+		course.put("user_id", reqMap.get("user_id"));
+		course.put("course_title", reqMap.get("course_title"));
+		course.put("course_url", reqMap.get("course_url"));
 		Date startTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("start_time")));
-		courses.setStartTime(startTime);
-		courses.setCourseType(reqMap.get("course_type").toString());
-		courses.setStatus("1");
-		courses.setRqCode(courses.getCourseId());
-
-		if(reqMap.get("course_type").toString().equals("1")){
-			courses.setCoursePassword(reqMap.get("course_password").toString());
-		}else if(reqMap.get("course_type").toString().equals("2")){
-			courses.setCoursePrice((Long)reqMap.get("course_price"));
+		course.put("start_time", startTime);
+		String course_type = (String)reqMap.get("course_type");
+		course.put("course_type", reqMap.get("course_type"));
+		course.put("status", "1");
+		course.put("rq_code", course.get("course_id"));
+		course.put("room_id", reqMap.get("room_id"));
+		if("1".equals(course_type)){
+			course.put("course_password",reqMap.get("course_password").toString());
+		}else if("2".equals(course_type)){
+			course.put("course_price", (Long)reqMap.get("course_price"));
 		}
-
-		courses.setStudentNum(0L);
-		courses.setCourseAmount(0L);
-		courses.setExtraNum(0L);
-		courses.setExtraAmount(0L);
-		courses.setRealStudentNum(0L);
-
 		Date now = new Date();
-		courses.setCreateTime(now);
-		courses.setCreateDate(now);
-		courses.setUpdateTime(now);
-		if(reqMap.get("im_course_id") != null){
-			courses.setImCourseId(reqMap.get("im_course_id").toString());
-		}
-		coursesMapper.insert(courses);
+		course.put("create_time", now);
+		course.put("create_date", now);
+		course.put("update_time", now);
+		course.put("im_course_id", reqMap.get("im_course_id"));
+
+		coursesMapper.insertCourse(course);
 
 		Map<String ,Object> dbResultMap = new HashMap<String,Object>();
-		dbResultMap.put("course_id",courses.getCourseId());
+		dbResultMap.put("course_id",course.get("course_id"));
 		return dbResultMap;
 	}
 
@@ -238,68 +184,35 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String, Object> updateCourse(Map<String, Object> reqMap) {
 		Integer updateCount = null;
 		Date now = (Date)reqMap.get("now");
-		if(reqMap.get("status") != null && reqMap.get("status").toString().equals("2")){
-			Courses courses = new Courses();
-			courses.setCourseId(reqMap.get("course_id").toString());
-			courses.setEndTime(now);
-			courses.setUpdateTime(now);
-			courses.setStatus("2");
-			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
+		Map<String,Object> course = new HashMap<String,Object>();
+		course.put("course_id", reqMap.get("course_id"));
+		
+		if("2".equals(reqMap.get("status"))){
+			course.put("end_time", now);
+			course.put("status", "2");			
 		}else {
-			/*
-			//下面的代码有问题，
-			Courses courses = new Courses();
-			courses.setCourseId(reqMap.get("course_id").toString());
-			if(reqMap.get("course_title") != null){
-				courses.setCourseTitle(reqMap.get("course_title").toString());
-			}
-			if(reqMap.get("start_time") != null){
-				courses.setStartTime(new Date(Long.parseLong(reqMap.get("start_time").toString())));
-			}
-			if(reqMap.get("course_remark") != null){
-				courses.setCourseRemark(reqMap.get("course_remark").toString());
-			}
-			if(reqMap.get("course_url") != null){
-				courses.setCourseUrl(reqMap.get("course_url").toString());
-			}
-			if(reqMap.get("course_password") != null){
-				courses.setCoursePassword(reqMap.get("course_password").toString());
-			}
-			courses.setUpdateTime(now);
-			updateCount = coursesMapper.updateByPrimaryKeySelective(courses);
-			*/
-			Map<String,Object> values = new HashMap<String,Object>();
 			Object course_title = reqMap.get("course_title");
 			Object start_time = reqMap.get("start_time");
-			Object course_remark = reqMap.get("course_remark");
-			Object course_url = reqMap.get("course_url");
-			Object course_password = reqMap.get("course_password");
-			
 			if(!MiscUtils.isEmpty(course_title)){
-				values.put("course_title", course_title);
+				course.put("course_title", course_title);
 			}
 			if(!MiscUtils.isEmpty(start_time)){
-				values.put("start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
+				course.put("start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
 			}
-			if(course_remark!=null){
-				values.put("course_remark", course_remark);
-			}
-			if(!MiscUtils.isEmpty(course_url)){
-				values.put("course_url", course_url);
-			}
-			if(!MiscUtils.isEmpty(course_password)){
-				values.put("course_password", course_password);
-			}
-			values.put("new_update_time", now);
-			values.put("update_time", new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time"))));
-			values.put("course_id", reqMap.get("course_id"));
-			updateCount=coursesMapper.updateCourse(values);
+			course.put("course_remark", reqMap.get("course_remark"));
+			course.put("course_url", reqMap.get("course_url"));
+			course.put("course_password", reqMap.get("course_password"));
+			if(!MiscUtils.isEmpty(reqMap.get("update_time"))){
+				course.put(Constants.SYS_FIELD_LAST_UPDATE_TIME, new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time"))));
+			}		
 		}
-
+		course.put("update_time", now);		
+		coursesMapper.updateCourse(course);
+		
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
 		dbResultMap.put("update_count", updateCount);
 		dbResultMap.put("update_time", now);
-		return dbResultMap;
+		return dbResultMap;		
 	}
 
 	@Override
@@ -311,7 +224,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Override
 	public void createCoursePPTs(Map<String, Object> reqMap) {
-		courseImageMapper.batchInsertPPT(reqMap);
+		courseImageMapper.createCoursePPTs(reqMap);
 	}
 
 	@Override
@@ -340,13 +253,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findLoginInfoByUserId(String user_id) {
-		return loginInfoMapper.findLoginInfoByUserId(user_id);
+	public Map<String, Object> findLoginInfoByUserId(String userId) {
+		return loginInfoMapper.findLoginInfoByUserId(userId);
 	}
 
 	@Override
-	public List<Map<String, Object>> findBanUserListInfo(Map<String, Object> banUserIdList) {
-
+	public List<Map<String, Object>> findBanUserListInfo(Map<String,Object> banUserIdList) {
 		return coursesStudentsMapper.findBanUserListInfo(banUserIdList);
 	}
 
@@ -356,54 +268,42 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findCourseProfitList(Map<String, Object> queryMap) {		
-		return coursesMapper.findCourseProfitList(queryMap);
+	public List<Map<String, Object>> findCourseProfitList(Map<String, Object> queryMap) {
+		return lecturerCoursesProfitMapper.findCourseProfitList(queryMap);
 	}
 
 	@Override
 	public List<Map<String, Object>> findRoomDistributerInfo(Map<String, Object> paramters) {
-		return liveRoomMapper.findRoomDistributerInfo(paramters);
+		return roomDistributerMapper.findRoomDistributerInfo(paramters);
 	}
 
 	@Override
 	public List<Map<String, Object>> findRoomDistributerCourseInfo(Map<String, Object> paramters) {
-		return liveRoomMapper.findRoomDistributerCourseInfo(paramters);
+		return roomDistributerCoursesMapper.findRoomDistributerCourseInfo(paramters);
 	}
 
 	@Override
-	public void createRoomDistributer(Map<String, String> reqMap) throws Exception{		 
+	public void createRoomDistributer(Map<String, String> reqMap) throws Exception {
 		Map<String,Object> record = new HashMap<String,Object>();		
 		record.put("room_id", reqMap.get("room_id"));
 		record.put("distributer_id", reqMap.get("distributer_id"));
-		Map<String,Object> distributer = distributerMapper.findDistributerInfo(record);
-		boolean update =false;
+		Map<String,Object> distributer = roomDistributerMapper.findAvailableRoomDistributer(record);		
 		Date date = new Date(System.currentTimeMillis());
 		if(!MiscUtils.isEmpty(distributer)){
-			if("0".equals(distributer.get("effective_time"))){
-				throw new QNLiveException("100027");
-			} else {
-				Date endDate = (Date)distributer.get("end_date");
-				if(endDate !=null && endDate.after(date)){
-					throw new QNLiveException("100027");
-				}
-			}
-			update =true;
+			throw new QNLiveException("100027");			
 		}	
 		record.put("current_time", date);
 		//1.插入t_distributer
 		try{
-			if(!update){
-				distributerMapper.insertDistributer(record);
-			}
+			distributerMapper.insertDistributer(record);
 		}catch(Exception e){			
 		}
-		if(!update){
-			record.put("room_distributer_id", MiscUtils.getUUId());
-	        record.put("room_id", reqMap.get("room_id"));
-	        record.put("lecturer_id", reqMap.get("lecturer_id"));
-		} else {
-			record.put("room_distributer_id", distributer.get("room_distributer_id"));
-		}
+		
+		Map<String,Object> roomDistributer = new HashMap<String,Object>();
+		roomDistributer.put("room_distributer_id", MiscUtils.getUUId());
+		roomDistributer.put("room_id", reqMap.get("room_id"));
+		roomDistributer.put("lecturer_id", reqMap.get("lecturer_id"));
+		roomDistributer.put("lecturer_distribution_id", reqMap.get("lecturer_distribution_id"));
         //2.插入t_room_distributer        
         record.put("profit_share_rate", Double.parseDouble(reqMap.get("profit_share_rate")));
         String effective_time = reqMap.get("effective_time");
@@ -431,11 +331,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
         } else {
         	record.put("end_date",null);
         }   
-        if(!update){
-        	distributerMapper.insertRoomDistributer(record);
-        } else {
-        	distributerMapper.updateRoomDistributerbyPrimaryKey(record);
-        }
+        roomDistributerMapper.insertRoomDistributer(record);
 	}
 
 	@Override
@@ -447,15 +343,15 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id) {
 		return liveRoomMapper.findLiveRoomByLectureId(lecture_id);
 	}
-
+    //TODO
 	@Override
-	public Map<String, Object> findDistributerInfo(Map<String, Object> paramters) {		
-		return distributerMapper.findDistributerInfo(paramters);
+	public Map<String, Object> findDistributerInfo(Map<String, Object> paramters) {
+		return null;
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomFanList(Map<String, Object> paramters) {		
-		return liveRoomMapper.findRoomFanList(paramters);
+	public List<Map<String, Object>> findRoomFanList(Map<String, Object> paramters) {
+		return fansMapper.findRoomFanList(paramters);
 	}
 
 	@Override
@@ -476,5 +372,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public List<String> findFollowUserIdsByRoomId(String roomId) {
 		return fansMapper.findFollowUserIdsByRoomId(roomId);
+	}
+
+	@Override
+	public List<String> findLoginInfoByUserIds(Map<String, Object> map) {
+		return loginInfoMapper.findLoginInfoByUserIds(map);
 	}
 }

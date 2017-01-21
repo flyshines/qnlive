@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.UserMapper" >
+
+  <select id="findByUserId" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_user
+    where user_id = #{user_id}
+  </select>
+  
+  <update id="updateLiveRoomNumForUser" parameterType="hashmap" >
+    update t_user
+    set
+    <!--关注操作类型 0关注 1不关注 -->
+    <if test="follow_type == 0" >
+      live_room_num = live_room_num + 1
+    </if>
+    <if test="follow_type == 1" >
+      live_room_num = live_room_num - 1
+    </if>
+    where user_id = #{user_id}
+  </update>
+  
+  <insert id="insertUser" parameterType="hashmap" >
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="user_name != null" >
+        user_name,
+      </if>
+      <if test="nick_name != null" >
+        nick_name,
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address,
+      </if>
+      <if test="phone_number != null" >
+        phone_number,
+      </if>
+      <if test="gender != null" >
+        gender,
+      </if>
+      <if test="country != null" >
+        country,
+      </if>
+      <if test="province != null" >
+        province,
+      </if>
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="district != null" >
+        district,
+      </if>
+      <if test="area != null" >
+        area,
+      </if>
+      <if test="course_num != null" >
+        course_num,
+      </if>
+      <if test="live_room_num != null" >
+        live_room_num,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="plateform != null" >
+        plateform,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="user_id != null" >
+        #{user_id},
+      </if>
+      <if test="user_name != null" >
+        #{user_name},
+      </if>
+      <if test="nick_name != null" >
+        #{nick_name},
+      </if>
+      <if test="avatar_address != null" >
+        #{avatar_address},
+      </if>
+      <if test="phone_number != null" >
+        #{phone_number},
+      </if>
+      <if test="gender != null" >
+        #{gender},
+      </if>
+      <if test="country != null" >
+        #{country},
+      </if>
+      <if test="province != null" >
+        #{province},
+      </if>
+      <if test="city != null" >
+        #{city},
+      </if>
+      <if test="district != null" >
+        #{district},
+      </if>
+      <if test="area != null" >
+        #{area},
+      </if>
+      <if test="course_num != null" >
+        #{course_num},
+      </if>
+      <if test="live_room_num != null" >
+        #{live_room_num},
+      </if>
+      <if test="status != null" >
+        #{status},
+      </if>
+      <if test="plateform != null" >
+        #{plateform},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateUser" parameterType="hashmap">
+    update t_user
+    <set >
+      <if test="user_name != null" >
+        user_name = #{user_name},
+      </if>
+      <if test="nick_name != null" >
+        nick_name = #{nick_name},
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address = #{avatar_address},
+      </if>
+      <if test="phone_number != null" >
+        phone_number = #{phone_number},
+      </if>
+      <if test="gender != null" >
+        gender = #{gender},
+      </if>
+      <if test="country != null" >
+        country = #{country},
+      </if>      
+      <if test="province != null" >
+        province = #{province},
+      </if>
+      <if test="city != null" >
+        city = #{city},
+      </if>
+      <if test="district != null" >
+        district = #{district},
+      </if>
+      <if test="area != null" >
+        area = #{area},
+      </if>
+      <if test="courseNum != null" >
+        course_num = #{course_num},
+      </if>
+      <if test="liveRoomNum != null" >
+        live_room_num = #{live_room_num},
+      </if>
+      <if test="status != null" >
+        status=#{status},
+      </if>
+      <if test="plateform != null" >
+        plateform = #{plateform},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{create_time},
+      </if> 
+      <if test="update_time != null" >     
+        update_time = #{update_time},
+      </if>      
+    </set>
+    where user_id = #{user_id}
+    <if test="last_update_time != null" >
+       and update_time=#{last_update_time}
+    </if>
+  </update>
+</mapper>
