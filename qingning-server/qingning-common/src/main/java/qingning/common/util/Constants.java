@@ -94,7 +94,7 @@ public final class Constants {
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";
 	public static final String CACHED_KEY_USER_FIELD ="user_id";
 	public static final String CACHED_KEY_USER = "SYS:USER:{user_id}";
-	
+	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";
 	
 	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";

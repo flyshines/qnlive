@@ -11,4 +11,5 @@ public interface FansMapper {
 	int deleteFans(Map<String,Object> record);
 	int insertFans(Map<String,Object> record);
 	List<String> findFollowUserIdsByRoomId(String room_id);
+	List<Map<String,Object>> findRoomFanListWithLoginInfo(Map<String,Object> record);
 }

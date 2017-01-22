@@ -58,9 +58,9 @@ public interface ILectureModuleServer {
 
 	Map<String,Object> findUserInfoByUserId(String userId);
 
-	List<String> findUserIdsFromStudentsByCourseId(String course_id);
+	List<Map<String, Object>> findCourseStudentListWithLoginInfo(String course_id);
 
-	List<String> findFollowUserIdsByRoomId(String roomId);
+	List<Map<String,Object>> findRoomFanListWithLoginInfo(String roomId);
 	
 	/**
 	 * 根据userid 获取 openid

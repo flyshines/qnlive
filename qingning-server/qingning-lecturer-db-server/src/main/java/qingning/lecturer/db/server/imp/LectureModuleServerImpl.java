@@ -365,13 +365,17 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public List<String> findUserIdsFromStudentsByCourseId(String course_id) {
-		return coursesStudentsMapper.findUserIdsByCourseId(course_id);
+	public List<Map<String, Object>> findCourseStudentListWithLoginInfo(String course_id){
+		Map<String,Object> query = new HashMap<String,Object>();
+		query.put("course_id", course_id);
+		return coursesStudentsMapper.findCourseStudentListWithLoginInfo(query);
 	}
 
 	@Override
-	public List<String> findFollowUserIdsByRoomId(String roomId) {
-		return fansMapper.findFollowUserIdsByRoomId(roomId);
+	public List<Map<String,Object>> findRoomFanListWithLoginInfo(String roomId) {
+		Map<String,Object> query = new HashMap<String,Object>();
+		query.put("room_id", roomId);
+		return fansMapper.findRoomFanListWithLoginInfo(query);
 	}
 
 	@Override

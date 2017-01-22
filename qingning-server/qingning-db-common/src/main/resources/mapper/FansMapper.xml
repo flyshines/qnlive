@@ -7,7 +7,20 @@
     <if test="position != null">
       and a.position <![CDATA[ > ]]> #{position}
     </if>
+    <if test="page_count != null">
     order by a.position limit #{page_count}
+    </if>
+  </select>
+
+  <select id="findRoomFanListWithLoginInfo" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.m_user_id,b.m_pwd,b.web_openid from t_fans a, t_login_info b where a.user_id=b.user_id and a.room_id=#{room_id}
+    and a.lecturer_id=#{lecturer_id}
+    <if test="position != null">
+      and a.position <![CDATA[ > ]]> #{position}
+    </if>
+    <if test="page_count != null">
+    order by a.position limit #{page_count}
+    </if>
   </select>
 
   <select id="findFansByUserIdAndRoomId" resultType="hashmap" parameterType="hashmap" >
@@ -60,7 +73,7 @@
       </if>
       <if test="position != null" >
         `position`,
-      </if>
+      </if>      
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="fans_id != null" >
@@ -83,7 +96,7 @@
       </if>
       <if test="position != null" >
         #{position},
-      </if>
+      </if>                
     </trim>
   </insert>
 </mapper>

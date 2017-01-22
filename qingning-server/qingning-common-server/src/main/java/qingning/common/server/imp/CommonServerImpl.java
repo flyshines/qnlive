@@ -116,7 +116,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     reqMap.put("live_room_build", "1");
                 } else {
                     reqMap.put("live_room_build", "0");
-                }                
+                }
+                String status = (String)reqMap.get("status");
+                if("1".equals(status) || "3".equals(status)){
+                	Map<String,String> updateValue = new HashMap<String,String>();
+                	updateValue.put("last_login_time", loginTime+"");
+                	updateValue.put("last_login_ip", (String)reqMap.get("ip"));
+                	String plateform = (String)userInfo.get("plateform");
+                	String newPalteForm = (String)reqMap.get("plateform");
+                	if(MiscUtils.isEmpty(plateform)){
+                		plateform = newPalteForm;
+                	} else if(!MiscUtils.isEmpty(newPalteForm) && plateform.indexOf(newPalteForm) == -1){
+                		plateform=plateform+","+newPalteForm;
+                	}
+                	updateValue.put("plateform", plateform);
+                	Map<String,Object> query = new HashMap<String,Object>();
+                	query.put("user_id", user_id);
+                	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+                	jedis.hmset(key, updateValue);
+                	jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, user_id);
+                }
             }
             
  

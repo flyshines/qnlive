@@ -15,6 +15,20 @@
     limit #{page_count}
   </select>
 
+  <select id="findCourseStudentListWithLoginInfo" resultType="hashmap" parameterType="hashmap" >
+    select
+    cs.user_id, cs.create_time, cs.student_pos, u.m_user_id, u.m_pwd, u.web_openid 
+    from t_courses_students cs join t_login_info u on cs.user_id = u.user_id
+    where 1 = 1
+    and cs.course_id = #{course_id}
+    <if test="student_pos != null" >
+      and cs.student_pos <![CDATA[ < ]]> #{student_pos}
+    </if>    
+    <if test="page_count != null" >
+      order by cs.student_pos desc limit #{page_count}
+    </if>
+  </select>
+
   <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
     select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time
     from t_courses_students a, t_courses b

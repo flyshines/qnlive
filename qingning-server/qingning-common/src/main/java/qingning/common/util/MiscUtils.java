@@ -240,7 +240,7 @@ public final class MiscUtils {
             properties.load(input);
             propertiesMap = new HashMap<String,String>();            
             for(String name : properties.stringPropertyNames()){            	
-                propertiesMap.put(name, MiscUtils.convertUnicodeToChinese(properties.getProperty(name)));
+                propertiesMap.put(name, properties.getProperty(name));
             }            
         }finally{
             if(input!=null){
@@ -386,7 +386,7 @@ public final class MiscUtils {
             if(configProperty==null){
                 configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
             }
-            value = new String(configProperty.get(key).getBytes("ISO-8859-1"),"UTF-8");
+            value = configProperty.get(key);
         } catch(Exception e){
             //TODO add log info
         }

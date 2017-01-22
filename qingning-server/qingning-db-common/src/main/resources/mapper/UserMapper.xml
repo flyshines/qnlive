@@ -120,6 +120,12 @@
       <if test="plateform != null" >
         #{plateform},
       </if>
+      <if test="last_login_time != null" >
+        #{last_login_time},
+      </if>
+      <if test="last_login_ip != null" >
+        #{last_login_ip},
+      </if>            
       <if test="create_time != null" >
         #{create_time},
       </if>
