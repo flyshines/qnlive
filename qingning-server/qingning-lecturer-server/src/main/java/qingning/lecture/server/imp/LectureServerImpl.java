@@ -36,6 +36,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     private ReadLiveRoomOperation readLiveRoomOperation;
     private ReadLecturerOperation readLecturerOperation;
 	private ReadUserOperation readUserOperation;
+	private ReadRoomDistributerOperation readRoomDistributerOperation;
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
@@ -44,6 +45,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             readCourseOperation = new ReadCourseOperation(lectureModuleServer);
             readLecturerOperation = new ReadLecturerOperation(lectureModuleServer);
             readUserOperation = new ReadUserOperation(lectureModuleServer);
+            readRoomDistributerOperation = new ReadRoomDistributerOperation(lectureModuleServer);
         }
     }
 
@@ -1766,6 +1768,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100002");
         } else if(liveRoomOwner.equals(userId)){
             throw new QNLiveException("100026");
+        }
+        
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
+        if(!MiscUtils.isEmpty(distributerRoom)){
+        	throw new QNLiveException("100027");
         }
         values.put("distributer_id", userId);
         lectureModuleServer.createRoomDistributer(values);

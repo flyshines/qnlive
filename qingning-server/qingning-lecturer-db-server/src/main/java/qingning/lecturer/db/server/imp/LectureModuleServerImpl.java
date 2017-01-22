@@ -60,6 +60,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private RoomDistributerCoursesMapper roomDistributerCoursesMapper;
 	
+	@Autowired(required = true)
+	private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
+	
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	/**
@@ -281,17 +284,14 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> findRoomDistributerCourseInfo(Map<String, Object> paramters) {
 		return roomDistributerCoursesMapper.findRoomDistributerCourseInfo(paramters);
 	}
-
+	
+	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public void createRoomDistributer(Map<String, String> reqMap) throws Exception {
 		Map<String,Object> record = new HashMap<String,Object>();		
 		record.put("room_id", reqMap.get("room_id"));
-		record.put("distributer_id", reqMap.get("distributer_id"));
-		Map<String,Object> distributer = roomDistributerMapper.findAvailableRoomDistributer(record);		
+		record.put("distributer_id", reqMap.get("distributer_id"));			
 		Date date = new Date(System.currentTimeMillis());
-		if(!MiscUtils.isEmpty(distributer)){
-			throw new QNLiveException("100027");			
-		}	
 		record.put("current_time", date);
 		//1.插入t_distributer
 		try{
@@ -299,16 +299,18 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}catch(Exception e){			
 		}
 		
+		 //2.插入t_room_distributer    
+		Map<String,Object> distributer = roomDistributerMapper.findRoomDistributer(record);
 		Map<String,Object> roomDistributer = new HashMap<String,Object>();
-		roomDistributer.put("room_distributer_id", MiscUtils.getUUId());
-		roomDistributer.put("room_id", reqMap.get("room_id"));
-		roomDistributer.put("lecturer_id", reqMap.get("lecturer_id"));
+		roomDistributer.put("done_time", date);
+		roomDistributer.put("click_num", 0l);
+		String room_distributer_details_id = MiscUtils.getUUId();
 		roomDistributer.put("lecturer_distribution_id", reqMap.get("lecturer_distribution_id"));
-        //2.插入t_room_distributer        
-        record.put("profit_share_rate", Double.parseDouble(reqMap.get("profit_share_rate")));
+		roomDistributer.put("room_distributer_details_id", room_distributer_details_id);
+		roomDistributer.put("profit_share_rate", MiscUtils.convertObjectToLong(reqMap.get("profit_share_rate")));		
         String effective_time = reqMap.get("effective_time");
-        record.put("effective_time", reqMap.get("effective_time"));
-        record.put("rq_code", MiscUtils.getUUId());
+        roomDistributer.put("effective_time", reqMap.get("effective_time"));
+        roomDistributer.put("rq_code", room_distributer_details_id);
         Calendar calEndDate = Calendar.getInstance();
         calEndDate.setTime(date);
         if("1".equals(effective_time)){
@@ -327,11 +329,43 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
         	calEndDate = null;
         }
         if(calEndDate!=null){
-        	record.put("end_date",calEndDate.getTime());
+        	roomDistributer.put("end_date",calEndDate.getTime());
         } else {
-        	record.put("end_date",null);
-        }   
-        roomDistributerMapper.insertRoomDistributer(record);
+        	roomDistributer.put("end_date",null);
+        } 
+		if(!MiscUtils.isEmpty(distributer)){
+			roomDistributer.put("room_distributer_id", distributer.get("room_distributer_id"));
+			roomDistributer.put("update_time", date);
+			roomDistributer.put("last_update_time", distributer.get("update_time"));
+			int count = roomDistributerMapper.updateRoomDistributer(roomDistributer);
+			if(count<1){
+				throw new QNLiveException("100027");
+			}
+			for(String key:roomDistributer.keySet()){
+				distributer.put(key, roomDistributer.get(key));
+			}
+		} else {
+			roomDistributer.put("room_distributer_id", MiscUtils.getUUId());
+			roomDistributer.put("room_id", reqMap.get("room_id"));
+			roomDistributer.put("lecturer_id", reqMap.get("lecturer_id"));
+			roomDistributer.put("distributer_id", reqMap.get("distributer_id"));
+			roomDistributer.put("update_time", date);
+			roomDistributer.put("create_time", date);
+			roomDistributerMapper.insertRoomDistributer(roomDistributer);
+			distributer=roomDistributer;
+		}
+		Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
+		roomDistributerDetails.put("lecturer_distribution_id", distributer.get("lecturer_distribution_id"));
+		roomDistributerDetails.put("room_distributer_details_id", room_distributer_details_id);
+		roomDistributerDetails.put("distributer_id", distributer.get("distributer_id"));
+		roomDistributerDetails.put("lecturer_id", distributer.get("lecturer_id"));
+		roomDistributerDetails.put("room_id", distributer.get("room_id"));
+		roomDistributerDetails.put("effective_time", distributer.get("effective_time"));
+		roomDistributerDetails.put("end_date", distributer.get("end_date"));
+		roomDistributerDetails.put("create_date", date);
+		roomDistributerDetails.put("update_time", date);
+		roomDistributerDetails.put("done_time", date);
+		roomDistributerDetailsMapper.insertRoomDistributerDetails(roomDistributerDetails);
 	}
 
 	@Override

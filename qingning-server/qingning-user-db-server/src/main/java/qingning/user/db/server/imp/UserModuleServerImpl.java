@@ -209,7 +209,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
 	@Override
 	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> queryMap) {
-		return roomDistributerMapper.findAvailableRoomDistributer(queryMap);
+		return roomDistributerMapper.findRoomDistributer(queryMap);
 	}
 
 	@Override

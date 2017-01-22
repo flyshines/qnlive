@@ -417,7 +417,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
 		queryMap.put("current_date", MiscUtils.getEndTimeOfToday());
-		return roomDistributerMapper.findAvailableRoomDistributer(queryMap);
+		return roomDistributerMapper.findRoomDistributer(queryMap);
 	}
 
 	@Override
@@ -451,7 +451,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 	@Override
 	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {		
-		return roomDistributerMapper.findAvailableRoomDistributer(record);
+		return roomDistributerMapper.findRoomDistributer(record);
 	}
 	@Override
 	public Map<String, Object> findForceVersionInfoByOS(String force_version_key) {
