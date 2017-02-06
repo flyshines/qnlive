@@ -79,6 +79,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		liveRoom.put("room_name", reqMap.get("room_name"));
 		liveRoom.put("avatar_address", reqMap.get("avatar_address"));
 		liveRoom.put("room_remark", reqMap.get("room_remark"));
+		liveRoom.put("lecturer_id", reqMap.get("user_id"));
 		liveRoom.put("create_time", now);		
 		liveRoom.put("update_time", now);
 		liveRoomMapper.insertLiveRoom(liveRoom);
