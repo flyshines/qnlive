@@ -62,7 +62,7 @@ public final class CacheUtils {
 		}
 		return dataValue;
 	}
-	
+	/*
 	@SuppressWarnings({"rawtypes" })
 	private static List<Map<String,String>> readListFromDB(String keyFormat, String listKey, String sortKey, String primaryKey, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils, boolean cachedList) throws Exception{
@@ -108,7 +108,7 @@ public final class CacheUtils {
 		}
 		return listValue;
 	}
-	
+	*/
 	public static Map<String,String> readUserNoCache(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
 		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, false, -1);
@@ -124,6 +124,7 @@ public final class CacheUtils {
 	public static Map<String,String> readLecturer(String lecturerId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{					
 		Map<String,String> values = readData(lecturerId, Constants.CACHED_KEY_LECTURER, Constants.CACHED_KEY_LECTURER_FIELD, requestEntity, operation, jedisUtils,true);
+		/*
 		if(jedisUtils != null){
 			Jedis jedis = jedisUtils.getJedis();			
 			Map<String, String> keyMap = new HashMap<String, String>();
@@ -136,6 +137,7 @@ public final class CacheUtils {
 				requestEntity.setFunctionName(functionName);
 			}
 		}
+		*/
 		return values;
 	}
 	
