@@ -88,6 +88,10 @@ public final class Constants {
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
 	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";
 	
+	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE="SYS:ROOM:DISTRIBUTER:RQCODE:{rq_code}";
+	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD="rq_code";
+	public static final String CACHED_UPDATE_RQ_CODE_KEY = "SYS:UPDATE:RQCODE:KEYS";
+	
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}"; 
 	
 	public static final String CACHED_KEY_ACCESS_TOKEN_FIELD = "access_token";
@@ -134,6 +138,7 @@ public final class Constants {
 
 	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";
 	public static final String CACHED_KEY_USER_ROOM_SHARE_FIELD = "room_share_code";
+	public static final String CACHED_KEY_USER_SHARE_CODES = "USER:SHARE_CODES:{lecturer_id}";
 	
 	public static final String MSG_TYPE_ATTR = "type";
 	public static final String MSG_NEWSTYPE_ATTR = "newstype";

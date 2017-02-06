@@ -54,7 +54,7 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
 
-	void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
+	//void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
 
 	void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap);
 

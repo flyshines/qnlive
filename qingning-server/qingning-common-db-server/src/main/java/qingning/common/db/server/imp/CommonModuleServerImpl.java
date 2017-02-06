@@ -420,10 +420,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return roomDistributerMapper.findRoomDistributer(queryMap);
 	}
 
-	@Override
+	/*@Override
 	public void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap) {
 		roomDistributerMapper.increteRecommendNumForRoomDistributer(updateMap);
-	}
+	}*/
 
 	@Override
 	public void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap) {

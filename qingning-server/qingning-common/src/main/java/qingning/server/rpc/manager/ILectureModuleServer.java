@@ -68,4 +68,6 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	List<String> findLoginInfoByUserIds(Map<String, Object> map);
+	
+	int insertLecturerDistributionLink(Map<String, Object> map);
 }

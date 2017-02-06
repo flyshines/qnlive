@@ -1239,28 +1239,61 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String rqCode = reqMap.get("recommend_code").toString();
         //0.读取直播间分销员信息
-        Map<String,Object> roomDistributerMap = commonModuleServer.findRoomDistributerInfoByRqCode(rqCode);
-        if(! MiscUtils.isEmpty(roomDistributerMap)){
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, rqCode);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);        
+        Map<String, String> info = jedis.hgetAll(key);
+        
+        Map<String, String> distributerRoom = null;
+        boolean find=false;
+        if(!MiscUtils.isEmpty(info)){
+        	String distributer_id = (String)info.get("distributer_id");
+        	String room_id = (String)info.get("room_id");
+        	if(!MiscUtils.isEmpty(distributer_id) && !MiscUtils.isEmpty(room_id)){
+            	find=true;
+        		distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributer, jedisUtils);
+        	}
+        }
+        if(!find){
+        	Map<String,Object> roomDistributerMap = commonModuleServer.findRoomDistributerInfoByRqCode(rqCode);
+        	if(!MiscUtils.isEmpty(roomDistributerMap)){
+        		MiscUtils.converObjectMapToStringMap(roomDistributerMap, distributerRoom);
+        		Map<String,String> query = new HashMap<String,String>();
+        		query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD,(String)roomDistributerMap.get(Constants.CACHED_KEY_DISTRIBUTER_FIELD));
+        		query.put(Constants.FIELD_ROOM_ID, (String)roomDistributerMap.get(Constants.FIELD_ROOM_ID));
+        		//TODO RQ_CODE失效需要删除
+        		jedis.hmset(key, query);
+        		key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);      
+        		jedis.hmset(key, distributerRoom);
+        	}
+        }
+        
+        if(!MiscUtils.isEmpty(distributerRoom)){
             boolean isValidate =false;
-            Date todayEnd = MiscUtils.getEndDateOfToday();
-            Date end_date = null;
-            if(roomDistributerMap.get("effective_time").equals("0")){
+            Date todayEnd = MiscUtils.getEndDateOfToday();  
+            long end_date = MiscUtils.convertObjectToLong(distributerRoom.get("end_date")); 
+            if("0".equals(distributerRoom.get("effective_time")) && end_date == 0){
                 isValidate = true;
-            }else {
-                end_date = (Date)roomDistributerMap.get("end_date");
- 
+            }else {                
                 //1.判断该分销员是否有效，有效则进行下一步验证
-                if(end_date.getTime() >= todayEnd.getTime()){
+                if(end_date >= todayEnd.getTime()){
                     isValidate = true;
                 }
             }
- 
+            
             if(isValidate == true){
-                String room_id = roomDistributerMap.get("room_id").toString();
-                Map<String,String> roomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedisUtils,true);
-                String lecturerId = roomMap.get("lecturer_id");
+                String lecturerId = distributerRoom.get("lecturer_id");
+                String room_id = (String)distributerRoom.get("room_id");
+                Map<String,Object> query = new HashMap<String,Object>();
+                query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, lecturerId);
+        		query.put(Constants.FIELD_ROOM_ID, room_id);
+                String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+                
+                		
+                		
                 //2.如果访问该推广链接的用户不是讲师,不是分销员，则进行下一步验证，验证用户目前是否已经属于了有效分销员
-                if((! userId.equals(lecturerId)) && (! userId.equals( roomDistributerMap.get("distributer_id").toString()))){
+                if((! userId.equals(lecturerId)) && (! userId.equals( distributerRoom.get("distributer_id").toString()))){
                     Map<String,Object> queryMap = new HashMap<>();
                     queryMap.put("room_id", room_id);
                     queryMap.put("user_id", userId);
@@ -1271,7 +1304,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(MiscUtils.isEmpty(roomDistributerRecommendMap)){
                         Map<String,Object> insertMap = new HashMap<>();
                         insertMap.put("distributer_recommend_id", MiscUtils.getUUId());
-                        insertMap.put("distributer_id", roomDistributerMap.get("distributer_id").toString());
+                        insertMap.put("distributer_id", distributerRoom.get("distributer_id"));
                         insertMap.put("room_id", room_id);
                         insertMap.put("user_id", userId);
                         insertMap.put("end_date", end_date);
@@ -1279,11 +1312,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         insertMap.put("now", now);
                         commonModuleServer.insertRoomDistributerRecommend(insertMap);
  
-                        //4.直播间分销员的推荐人数增加一
-                        Map<String,Object> updateMap = new HashMap<>();
+                        //4.直播间分销员的推荐人数增加一                        
+                        jedis.hincrBy(distributerKey, "click_num", 1);
+                        jedis.hincrBy(distributerKey, "recommend_num", 1);
+                        jedis.hincrBy(distributerKey, "last_recommend_num", 1);                        
+                        jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
+                       /* Map<String,Object> updateMap = new HashMap<>();
                         updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
                         updateMap.put("room_id",room_id);
-                        commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);
+                        commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
                     }
                 }
             }

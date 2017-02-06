@@ -182,7 +182,24 @@
       </if>
       <if test="room_distributer_details_id != null" >
         room_distributer_details_id=#{room_distributer_details_id},
-      </if>            
+      </if>
+      
+      <if test="last_recommend_num != null" >
+        last_recommend_num=#{last_recommend_num},
+      </if> 
+      
+      <if test="last_course_num != null" >
+        last_course_num=#{last_course_num},
+      </if> 
+      
+      <if test="last_done_num != null" >
+        last_done_num=#{last_done_num},
+      </if>
+      
+      <if test="last_total_amount != null" >
+        last_total_amount=#{last_total_amount},
+      </if>
+                      
     </set>
     where room_distributer_id = #{room_distributer_id}
     <if test="last_update_time != null" >

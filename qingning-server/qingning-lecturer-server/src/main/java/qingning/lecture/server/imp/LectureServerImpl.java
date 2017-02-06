@@ -1724,15 +1724,36 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String room_share_code = MiscUtils.getUUId();
         Map<String,String> values = new HashMap<String,String>();
         reqMap.put("lecturer_id",userId);
-        MiscUtils.converObjectMapToStringMap(reqMap, values); 
+        Date currentDate = new Date();        
+        reqMap.put("lecturer_distribution_id", room_share_code);
+        reqMap.put("create_date", currentDate);
+        reqMap.put("distributer_num", 0l);
+        reqMap.put("click_num", 0l);
+        reqMap.put("distributer_num", 0l);
+        reqMap.put("status", "0");
+        reqMap.put("link_type", "0");
+        lectureModuleServer.insertLecturerDistributionLink(map);
         
+        MiscUtils.converObjectMapToStringMap(reqMap, values);
         reqMap.clear();
         reqMap.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD,room_share_code);
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, reqMap);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(currentDate);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        values.put("end_date", cal.getTimeInMillis()+"");
         jedis.hmset(key, values);
-        jedis.expire(key, 60*60*24);
+        jedis.expire(key, 60*60*24*2);
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+        
+        
         
         Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SHARE_CODES, queryParam);
+        jedis.sadd(key, room_share_code);
+        
+        queryParam.clear();
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = generateRequestEntity(null,null, null, queryParam);
         Map<String,String> userMap = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);        
@@ -1755,10 +1776,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);        
         Map<String, String> values = jedis.hgetAll(key);
-        
+        jedis.hincrBy(key, "click_num", 1);
         if(MiscUtils.isEmpty(values)){
             throw new QNLiveException("100025");
         }
+        long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
+        if(System.currentTimeMillis() >= endDate){
+        	throw new QNLiveException("100025");
+        }
+        if("1".equals(values.get("status"))){
+        	throw new QNLiveException("100025");
+        }
+        
         String room_id = (String)values.get("room_id");        
         map.clear();        
         map.put(Constants.FIELD_ROOM_ID, room_id);
@@ -1774,10 +1803,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(distributerRoom)){
         	throw new QNLiveException("100027");
         }
+        jedis.hincrBy(key, "distributer_num", 1);
         values.put("distributer_id", userId);
         lectureModuleServer.createRoomDistributer(values);
         jedis.hincrBy(liveRoomKey, "distributer_num", 1);
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);
+        Map<String,String> query = new HashMap<String,String>();
+        query.put("distributer_id", userId);
+        query.put("room_id", room_id);
+		String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+        jedis.del(roomDistributeKey);
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
         obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));

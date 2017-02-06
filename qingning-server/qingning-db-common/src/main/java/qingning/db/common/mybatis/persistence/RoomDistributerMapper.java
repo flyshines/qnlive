@@ -6,7 +6,7 @@ import java.util.Map;
 public interface RoomDistributerMapper {
 	
 	Map<String,Object> findRoomDistributerInfoByRqCode(String rq_code);
-	int increteRecommendNumForRoomDistributer(Map<String,Object> record);	
+	//int increteRecommendNumForRoomDistributer(Map<String,Object> record);	
 	List<Map<String, Object>> findRoomDistributerInfo(Map<String, Object> paramters);
 	
 	

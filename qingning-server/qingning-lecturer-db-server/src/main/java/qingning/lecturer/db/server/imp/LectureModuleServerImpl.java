@@ -63,6 +63,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
 	
+	@Autowired(required = true)
+	private LecturerDistributionLinkMapper lecturerDistributionLinkMapper;
+	
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	/**
@@ -338,6 +341,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			roomDistributer.put("room_distributer_id", distributer.get("room_distributer_id"));
 			roomDistributer.put("update_time", date);
 			roomDistributer.put("last_update_time", distributer.get("update_time"));
+			roomDistributer.put("last_recommend_num", 0l);
+			roomDistributer.put("last_course_num", 0l);
+			roomDistributer.put("last_done_num", 0l);
+			roomDistributer.put("last_total_amount", 0l);
 			int count = roomDistributerMapper.updateRoomDistributer(roomDistributer);
 			if(count<1){
 				throw new QNLiveException("100027");
@@ -417,4 +424,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<String> findLoginInfoByUserIds(Map<String, Object> map) {
 		return loginInfoMapper.findLoginInfoByUserIds(map);
 	}
+
+	@Override
+	public int insertLecturerDistributionLink(Map<String, Object> map) {		
+		return lecturerDistributionLinkMapper.insertLecturerDistributionLink(map);
+	}	
 }

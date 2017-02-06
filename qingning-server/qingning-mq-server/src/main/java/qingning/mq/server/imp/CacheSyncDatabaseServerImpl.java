@@ -40,6 +40,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
     private RoomDistributerMapper roomDistributerMapper;
     private CourseImageMapper courseImageMapper;
+    private LecturerDistributionLinkMapper lecturerDistributionLinkMapper;
+    private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
     
     @Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
@@ -58,6 +60,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        updateLiveRoomData(lecturerSet,pipeline);
 			        //同步课程数据
 			        updateCourseData(lecturerSet,pipeline);
+			        
+			        updateLecturerDistributionLink(lecturerSet, jedis);
 				}
 				
 		        //查询出所有需要更新的分销员        
@@ -67,10 +71,10 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					updateDistributerData(distributerIdSet,pipeline);
 				}
 				//查询出所有需要更新的分销
-				Set<String> roomDistributerIdSet = jedis.hkeys(Constants.CACHED_UPDATE_ROOM_DISTRIBUTER_KEY);
-				jedis.del(Constants.CACHED_UPDATE_ROOM_DISTRIBUTER_KEY);
-				if(!MiscUtils.isEmpty(roomDistributerIdSet)){
-					updateRoomDistributerData(roomDistributerIdSet,pipeline);
+				Set<String> rqCodeSet = jedis.hkeys(Constants.CACHED_UPDATE_RQ_CODE_KEY);
+				jedis.del(Constants.CACHED_UPDATE_RQ_CODE_KEY);
+				if(!MiscUtils.isEmpty(rqCodeSet)){
+					updateRoomDistributerData(rqCodeSet,pipeline);
 				}
 			}
 			
@@ -184,6 +188,53 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						//TODO
 					}
 
+				}
+			}
+			
+			private void updateLecturerDistributionLink(Set<String> lecturerSet, Jedis jedis){
+				Map<String,Object> queryParam = new HashMap<String,Object>();
+				
+				Set<String> available = new HashSet<String>();				
+				for(String lecturerId : lecturerSet){
+					available.clear();
+					queryParam.clear();
+			        queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+			        String userShareCodesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SHARE_CODES, queryParam);
+			        Set<String> shareCodes = jedis.hkeys(userShareCodesKey);
+			        if(MiscUtils.isEmpty(shareCodes)){
+			        	continue;
+			        }
+			        jedis.del(userShareCodesKey);
+			        
+			        for(String shareCode : shareCodes){
+			        	queryParam.clear();
+						queryParam.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD,shareCode);
+				        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, queryParam);
+				        Map<String,String> cachedValues = jedis.hgetAll(key);
+				        if(!MiscUtils.isEmpty(cachedValues)){
+				        	 long end_date = MiscUtils.convertObjectToLong(cachedValues.get("end_date"));
+				        	 if(System.currentTimeMillis()>=end_date || "1".equals(cachedValues.get("status"))){
+				        		 jedis.del(key);
+				        		 Map<String,Object> lecturerDistributionLink = new HashMap<String,Object>();
+				        		 lecturerDistributionLink.put("lecturer_distribution_id", cachedValues.get("lecturer_distribution_id"));
+				        		 lecturerDistributionLink.put("distributer_num", MiscUtils.convertObjectToLong(cachedValues.get("distributer_num")));
+				        		 lecturerDistributionLink.put("click_num", MiscUtils.convertObjectToLong(cachedValues.get("click_num")));
+				        		 lecturerDistributionLink.put("status", "1");
+				        		 lecturerDistributionLinkMapper.updateLecturerDistributionLink(lecturerDistributionLink);
+				        	 } else {
+				        		 available.add(shareCode);
+				        	 }
+				        }
+			        }
+			        if(!available.isEmpty()){
+			        	String[] shareCodesArr = new String[available.size()];
+			        	int count = 0;
+			        	for(String shareCode : available){
+			        		shareCodesArr[count++]=shareCode;
+			        	}
+			        	jedis.sadd(userShareCodesKey, shareCodesArr);
+			        	jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
+			        }
 				}
 			}
 			
@@ -329,37 +380,66 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				}
 			}
 			
-			private void updateRoomDistributerData(Set<String> roomDistributerSet, Pipeline pipeline){
+			private void updateRoomDistributerData(Set<String> rqCodeSet, Pipeline pipeline){
 				Map<String,Object> queryParam = new HashMap<String,Object>();
-				Map<String,Response<Map<String,String>>> roomDistributerMap = new HashMap<String,Response<Map<String,String>>>();
-				for(String roomDistributerId:roomDistributerSet){
-					queryParam.clear();
-					queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_FIELD, roomDistributerId);
-					roomDistributerMap.put(roomDistributerId, roomDistributerMap.get(roomDistributerId));				
+				Map<String,Response<Map<String,String>>> rqCodeMap = new HashMap<String,Response<Map<String,String>>>();
+				for(String rqCode:rqCodeSet){
+					queryParam.clear();					
+					queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, rqCode);
+					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);					
+					rqCodeMap.put(rqCode, pipeline.hgetAll(key));				
 				}
 				pipeline.sync();
 				
+				Map<String,Response<Map<String,String>>> roomDistributerMap = new HashMap<String,Response<Map<String,String>>>();
+				for(String rqCode:rqCodeMap.keySet()){
+					Map<String,String> values = rqCodeMap.get(rqCode).get();
+					if(MiscUtils.isEmpty(values)){
+						continue;
+					}					
+					queryParam.clear();					
+					queryParam.put("distributer_id", values.get("distributer_id"));
+					queryParam.put("room_id", values.get("room_id"));
+					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);					
+					roomDistributerMap.put(rqCode, pipeline.hgetAll(key));
+				}
+				pipeline.sync();
 				//t_room_distributer
 				Map<String,Object> roomDistributerValues = new HashMap<String,Object>();
-				for(String roomDistributerId:roomDistributerMap.keySet()){
-					Map<String,String> values = roomDistributerMap.get(roomDistributerId).get();
+				Map<String,Map<String,String>> roomDistributerDetailsMap = new HashMap<String,Map<String,String>>();
+				for(String rqCode:roomDistributerMap.keySet()){
+					Map<String,String> values = roomDistributerMap.get(rqCode).get();
 					if(MiscUtils.isEmpty(values)){
 						continue;
 					}
 					try{
 						roomDistributerValues.clear();
 						Map<String,Object> roomDistributer = new HashMap<String,Object>();
-						roomDistributer.put("room_distributer_id", roomDistributerId);
+						roomDistributer.put("room_distributer_id", values.get("room_distributer_id"));
 						roomDistributer.put("recommend_num", MiscUtils.convertObjectToLong(values.get("recommend_num")));
 						roomDistributer.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
 						roomDistributer.put("done_num", MiscUtils.convertObjectToLong(values.get("done_num")));
 						roomDistributer.put("profit_share_rate", MiscUtils.convertObjectToLong(values.get("profit_share_rate")));
 						roomDistributer.put("effective_time", MiscUtils.convertObjectToLong(values.get("effective_time")));
-						roomDistributer.put("click_num", MiscUtils.convertObjectToLong(values.get("click_num")));						
+						roomDistributer.put("click_num", MiscUtils.convertObjectToLong(values.get("click_num")));
+						roomDistributerDetailsMap.put(values.get("room_distributer_details_id"), values);
 						roomDistributerMapper.updateRoomDistributer(roomDistributer);
 					}catch(Exception e){
 						//TODO
 					}
+				}
+				
+				for(String roomDistributerDetailsId : roomDistributerDetailsMap.keySet()){
+					Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
+					Map<String,String> values = roomDistributerDetailsMap.get("roomDistributerDetailsId");
+					roomDistributerDetails.put("done_time", values.get("done_time"));
+					roomDistributerDetails.put("click_num", values.get("click_num"));
+					roomDistributerDetails.put("recommend_num", values.get("last_recommend_num"));
+					roomDistributerDetails.put("course_num", values.get("last_course_num"));
+					roomDistributerDetails.put("done_num", values.get("last_done_num"));
+					roomDistributerDetails.put("total_amount", values.get("last_total_amount"));
+					roomDistributerDetails.put("room_distributer_details_id", roomDistributerDetailsId);
+					roomDistributerDetailsMapper.updateRoomDistributerDetails(roomDistributerDetails);
 				}
 			}
     	});
@@ -413,5 +493,13 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 
 	public void setCourseImageMapper(CourseImageMapper courseImageMapper) {
 		this.courseImageMapper = courseImageMapper;
+	}
+	
+	public void setLecturerDistributionLinkMapper(LecturerDistributionLinkMapper lecturerDistributionLinkMapper){
+		this.lecturerDistributionLinkMapper=lecturerDistributionLinkMapper;
+	}
+
+	public void setRoomDistributerDetailsMapper(RoomDistributerDetailsMapper roomDistributerDetailsMapper) {
+		this.roomDistributerDetailsMapper = roomDistributerDetailsMapper;
 	}	
 }
