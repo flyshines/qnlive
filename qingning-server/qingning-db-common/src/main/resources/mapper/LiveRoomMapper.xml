@@ -174,9 +174,9 @@
         status=#{status},
       </if>
     </set>
-    where room_id = #{roomId}
+    where room_id = #{room_id}
     <if test="last_update_time != null" >
-    	and update_time = #{last_update_time},
+    	and update_time = #{last_update_time}
     </if>
   </update>
 

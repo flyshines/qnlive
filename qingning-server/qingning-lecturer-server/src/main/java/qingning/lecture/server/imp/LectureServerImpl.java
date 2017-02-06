@@ -139,15 +139,23 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("updateLiveRoom")
     public Map<String, Object> updateLiveRoom(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> values = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
  
         //0.检测是否包含修改信息
-        if (reqMap.get("avatar_address") == null && reqMap.get("room_name") == null
-                && reqMap.get("room_remark") == null) {
+        if (values.get("avatar_address") == null && values.get("room_name") == null
+                && values.get("room_remark") == null) {
             throw new QNLiveException("100007");
         }
- 
+        Map<String, Object> reqMap = new HashMap<String, Object>();
+        
+        for(String key:values.keySet()){
+        	Object obj = values.get(key);
+        	if(obj != null){
+        		reqMap.put(key, obj);
+        	}
+        }
+        
         //1.检测该直播间是否属于修改人
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();

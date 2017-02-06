@@ -141,7 +141,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		reqMap.put("update_time", date);
 		reqMap.put(Constants.SYS_FIELD_LAST_UPDATE_TIME, last_update_time);
 		
-		Integer updateCount = liveRoomMapper.insertLiveRoom(reqMap);
+		Integer updateCount = liveRoomMapper.updateLiveRoom(reqMap);
 		
 		Map<String,Object> dbResultMap = new HashMap<String,Object>();
 		dbResultMap.put("updateCount", updateCount);
