@@ -154,7 +154,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Map<String,Object> course = new HashMap<String,Object>();
 		course.put("course_id", MiscUtils.getUUId());
 		course.put("room_id", reqMap.get("room_id"));
-		course.put("user_id", reqMap.get("user_id"));
+		course.put("lecturer_id", reqMap.get("user_id"));
 		course.put("course_title", reqMap.get("course_title"));
 		course.put("course_url", reqMap.get("course_url"));
 		Date startTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("start_time")));
