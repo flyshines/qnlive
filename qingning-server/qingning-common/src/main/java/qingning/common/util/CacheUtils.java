@@ -51,14 +51,13 @@ public final class CacheUtils {
 			if(!MiscUtils.isEmpty(result)){
 				dataValue = new HashMap<String,String>();
 				MiscUtils.converObjectMapToStringMap(result, dataValue);
-
 				if(cachedValue){
-					jedis.hmset(key, dataValue);
-					if(lifeTime>0){
-						jedis.expire(key, lifeTime);
-					}
+					jedis.hmset(key, dataValue);					
 				}
 			}
+		}
+		if(cachedValue && lifeTime > 0 && !MiscUtils.isEmpty(dataValue)){
+			jedis.expire(key, lifeTime);
 		}
 		return dataValue;
 	}
