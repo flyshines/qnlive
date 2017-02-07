@@ -214,7 +214,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			}		
 		}
 		course.put("update_time", now);		
-		coursesMapper.updateCourse(course);
+		updateCount=coursesMapper.updateCourse(course);
 		
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
 		dbResultMap.put("update_count", updateCount);
