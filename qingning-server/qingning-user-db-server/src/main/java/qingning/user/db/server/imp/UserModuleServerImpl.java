@@ -55,6 +55,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Autowired(required = true)
 	private RoomDistributerMapper roomDistributerMapper;
 	
+	@Autowired(required = true)
+	private LecturerMapper lecturerMapper;
+	
 	@Override
 	public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
 		Map<String,Object> dbResultMap = new HashMap<>();
@@ -216,5 +219,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	public boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap) {
 		return !MiscUtils.isEmpty(coursesStudentsMapper.isStudentOfTheCourse(studentQueryMap));
 	}
-	
+
+	@Override
+	public Map<String, Object> findLectureByLectureId(String lecture_id) {		
+		return lecturerMapper.findLectureByLectureId(lecture_id);
+	}
 }
