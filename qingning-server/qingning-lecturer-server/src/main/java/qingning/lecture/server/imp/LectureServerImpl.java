@@ -558,6 +558,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(courseKey)) {
             //0.1校验课程更新时间
             if (!"2".equals(reqMap.get("status"))){
+            	if(MiscUtils.isEmpty(reqMap.get("update_time"))){
+            		throw new QNLiveException("000100");
+            	}
                 String update_time_cache = jedis.hget(courseKey, "update_time");
                 if (!MiscUtils.isEqual(update_time_cache, String.valueOf(reqMap.get("update_time")))) {
                     throw new QNLiveException("000104");
