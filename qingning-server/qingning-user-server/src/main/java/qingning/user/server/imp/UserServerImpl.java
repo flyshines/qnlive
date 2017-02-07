@@ -635,9 +635,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<String> roles = new ArrayList<>();
         //加入课程状态 0未加入 1已加入
         if(isStudent){
-            resultMap.put("join_status", "0");
-        }else {
             resultMap.put("join_status", "1");
+        }else {
+            resultMap.put("join_status", "0");
         }
 
         if(userId.equals(courseMap.get("lecturer_id"))){
