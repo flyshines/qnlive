@@ -123,10 +123,33 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     @SuppressWarnings("unchecked")
     @FunctionName("userCourses")
-    public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-
-        return getPlatformCourses(reqEntity);
+    public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {        
+        Map<String, Object> values = getPlatformCourses(reqEntity);
+        if(!MiscUtils.isEmpty(values)){
+        	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
+        	if(!MiscUtils.isEmpty(courseList)){
+        		((JedisBatchCallback)(this.jedisUtils.getJedis())).invoke(new JedisBatchOperation(){
+					@Override
+					public void batchOperation(Pipeline pipeline, Jedis jedis) {
+						Map<String,Response<String>> nickNames = new HashMap<String,Response<String>>();
+						Map<String,String> query = new HashMap<String,String>();
+						for(Map<String,Object> course:courseList){
+							String lecturer_id = (String)course.get("lecturer_id");
+							if(!nickNames.containsKey(lecturer_id)){
+								query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+								String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+								nickNames.put(lecturer_id, pipeline.hget(key, "nick_name"));
+							}							
+						}
+						pipeline.sync();
+						for(Map<String,Object> course:courseList){
+							course.put("lecturer_nick_name", nickNames.get((String)course.get("lecturer_id")).get());
+						}
+					}
+        		});
+        	}
+        }
+        return values;
     }
 
 

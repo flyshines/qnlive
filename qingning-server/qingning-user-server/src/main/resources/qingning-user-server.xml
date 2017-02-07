@@ -26,6 +26,16 @@
 					<param name="course_id" type="string" require="N"  />
 				</inputs>
 				<outputs>
+					<param name="course_list" type="list">
+						<param name="course_id" type="string"/>
+						<param name="status" type="string"/>
+						<param name="course_url" type="string"/>
+						<param name="course_title" type="string"/>
+						<param name="start_time" type="long"/>
+						<param name="lecturer_nick_name" type="string"/>
+						<param name="course_type" type="string"/>
+						<param name="data_source" type="string"/>						
+					</param>
 				</outputs>
 			</function>
 
@@ -37,6 +47,12 @@
 					<param name="room_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="avatar_address" type="string" />
+					<param name="room_name" type="string" />
+					<param name="room_remark" type="string" />					
+					<param name="fans_num" type="long" />
+					<param name="follow_status" type="string" />
+					<param name="roles" type="list" />					
 				</outputs>
 			</function>
 

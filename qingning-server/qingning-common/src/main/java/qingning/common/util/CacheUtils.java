@@ -239,6 +239,7 @@ public final class CacheUtils {
 		for(int i=0; i<len; ++i){
 			query.put(keyFields[i], searchKeys[i]);
 		}
+		requestEntity.setParam(query);
 		return readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
 	}
 	
