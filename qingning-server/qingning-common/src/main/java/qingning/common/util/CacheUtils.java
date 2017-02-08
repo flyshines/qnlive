@@ -51,14 +51,13 @@ public final class CacheUtils {
 			if(!MiscUtils.isEmpty(result)){
 				dataValue = new HashMap<String,String>();
 				MiscUtils.converObjectMapToStringMap(result, dataValue);
-
 				if(cachedValue){
-					jedis.hmset(key, dataValue);
-					if(lifeTime>0){
-						jedis.expire(key, lifeTime);
-					}
+					jedis.hmset(key, dataValue);					
 				}
 			}
+		}
+		if(cachedValue && lifeTime > 0 && !MiscUtils.isEmpty(dataValue)){
+			jedis.expire(key, lifeTime);
 		}
 		return dataValue;
 	}
@@ -196,7 +195,14 @@ public final class CacheUtils {
 
 	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
 												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
-		return readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
+		Map<String,String> values =  readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
+		if(!MiscUtils.isEmpty(values) && cachedValue){
+	        Map<String, Object> map = new HashMap<String, Object>();
+	        map.put(Constants.CACHED_KEY_LECTURER_FIELD, values.get(Constants.CACHED_KEY_LECTURER_FIELD));
+	        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+	        jedisUtils.getJedis().hset(lectureLiveRoomKey, room_id, "1");
+		}
+		return values;
 	}
 	
 	public static String readLiveRoomInfoFromCached(String room_id, String fieldName,RequestEntity requestEntity,
