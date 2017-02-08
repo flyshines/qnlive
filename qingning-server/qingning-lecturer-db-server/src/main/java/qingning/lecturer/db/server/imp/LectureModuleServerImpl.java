@@ -364,7 +364,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}
 		Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
 		roomDistributerDetails.put("lecturer_distribution_id", distributer.get("lecturer_distribution_id"));
-
 		roomDistributerDetails.put("room_distributer_details_id", room_distributer_details_id);
 		roomDistributerDetails.put("distributer_id", distributer.get("distributer_id"));
 		roomDistributerDetails.put("lecturer_id", distributer.get("lecturer_id"));
