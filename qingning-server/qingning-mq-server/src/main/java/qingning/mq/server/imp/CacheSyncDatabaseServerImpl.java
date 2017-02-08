@@ -303,55 +303,57 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
                     	}						
                     	coursesMapper.updateAfterStudentBuyCourse(courses);						
 					}catch(Exception e){
-						//TODO
+						log.error("Sync courses ["+courseId+"]:"+e.getMessage());
 					}
 				}
 				//t_course_image// Constants.CACHED_KEY_COURSE_PPTS
-				for(String courseId:courseData.keySet()){
-					if(!finishCourseKeyMap.containsKey(courseId)){
-						continue;
-					}				
-					queryParam.clear();
-					queryParam.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-                    String pptKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, queryParam);
-                    String value = jedis.get(pptKey);                   
-                    if(!MiscUtils.isEmpty(value)){
-                    	Map<String,Object> checkValues = courseImageMapper.findOnePPTByCourseId(courseId);
-                    	if(MiscUtils.isEmpty(checkValues)){                    		
-                    		continue;
-                    	}
-                    	JSONArray pptList = JSONObject.parseArray(value);
-                    	if(MiscUtils.isEmpty(pptList) || pptList.size()< 1){                    		
-                    		continue;
-                    	}
-                    	List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
-                    	try{
-	                    	for(Object curValue: pptList){
-	                    		if(!(curValue instanceof Map)){
-	                    			log.warn("The ppt data["+curValue+"] is abnormal");
-	                    		} else {
-	                    			Map<String,Object> values = (Map<String,Object>)curValue;
-	                    			long create_time_lng = MiscUtils.convertObjectToLong(values.get("create_time"));
-	                    			long update_time_lng = MiscUtils.convertObjectToLong(values.get("update_time"));
-	                    			long image_pos_lng = MiscUtils.convertObjectToLong(values.get("image_pos"));
-	                    			if(update_time_lng < 1){
-	                    				update_time_lng=create_time_lng;
-	                    			}
-	                    			values.put("create_time", new Date(create_time_lng));
-	                    			values.put("update_time", new Date(update_time_lng));
-	                    			values.put("image_pos", image_pos_lng);
-	                    			list.add(values);
-	                    		}
-	                    	}
-	                    	
-	                    	 Map<String,Object> insertMap = new HashMap<>();
-	                         insertMap.put("course_id",courseId);
-	                         insertMap.put("list",pptList);
-	                         courseImageMapper.createCoursePPTs(insertMap);	                    	
-                    	}catch(Exception e){
-                    		log.error(e.getMessage());
-                    	}
-                    }
+				if(!MiscUtils.isEmpty(finishCourseKeyMap)){
+					for(String courseId:courseData.keySet()){
+						if(!finishCourseKeyMap.containsKey(courseId)){
+							continue;
+						}				
+						queryParam.clear();
+						queryParam.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+						String pptKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, queryParam);
+						String value = jedis.get(pptKey);                   
+						if(!MiscUtils.isEmpty(value)){
+							Map<String,Object> checkValues = courseImageMapper.findOnePPTByCourseId(courseId);
+							if(!MiscUtils.isEmpty(checkValues)){                    		
+								continue;
+							}
+							JSONArray pptList = JSONObject.parseArray(value);
+							if(MiscUtils.isEmpty(pptList) || pptList.size()< 1){                    		
+								continue;
+							}
+							List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
+							try{
+								for(Object curValue: pptList){
+									if(!(curValue instanceof Map)){
+										log.warn("The ppt data["+curValue+"] is abnormal");
+									} else {
+										Map<String,Object> values = (Map<String,Object>)curValue;
+										long create_time_lng = MiscUtils.convertObjectToLong(values.get("create_time"));
+										long update_time_lng = MiscUtils.convertObjectToLong(values.get("update_time"));
+										long image_pos_lng = MiscUtils.convertObjectToLong(values.get("image_pos"));
+										if(update_time_lng < 1){
+											update_time_lng=create_time_lng;
+										}
+										values.put("create_time", new Date(create_time_lng));
+										values.put("update_time", new Date(update_time_lng));
+										values.put("image_pos", image_pos_lng);
+										list.add(values);
+									}
+								}
+
+								Map<String,Object> insertMap = new HashMap<>();
+								insertMap.put("course_id",courseId);
+								insertMap.put("list",pptList);
+								courseImageMapper.createCoursePPTs(insertMap);	                    	
+							}catch(Exception e){
+								log.error("Sync courses ppt ["+courseId+"]:"+e.getMessage());
+							}
+						}
+					}
 				}
 				pipeline.sync();
 			}
