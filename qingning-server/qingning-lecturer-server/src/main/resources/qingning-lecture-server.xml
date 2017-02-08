@@ -256,6 +256,7 @@
 					<param name="share_url" type="string"/>
 					<param name="course_update_time" type="long"/>	
 					<param name="course_title" type="string"/>				
+					<param name="course_url" type="string"/>
 				</outputs>
 			</function>
 
