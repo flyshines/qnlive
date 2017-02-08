@@ -229,10 +229,12 @@ public final class CacheUtils {
 		String[] keyFields={Constants.CACHED_KEY_DISTRIBUTER_FIELD,Constants.FIELD_ROOM_ID};
 		RequestEntity requestEntity = new RequestEntity();
 		int len = searchKeys.length;
-		Map<String,String> query = new HashMap<String,String>();
+		Map<String,Object> query = new HashMap<>();
 		for(int i=0; i<len; ++i){
 			query.put(keyFields[i], searchKeys[i]);
 		}
+		query.put("current_date",new Date());
+		requestEntity.setParam(query);
 		return readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
 	}
 	

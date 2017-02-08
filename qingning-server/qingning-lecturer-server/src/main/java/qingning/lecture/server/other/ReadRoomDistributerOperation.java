@@ -18,6 +18,6 @@ public class ReadRoomDistributerOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        return lectureModuleServer.findRoomDistributerInfo(reqMap);
+        return lectureModuleServer.findAvailableRoomDistributer(reqMap);
     }
 }

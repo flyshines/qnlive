@@ -70,4 +70,6 @@ public interface ILectureModuleServer {
 	List<String> findLoginInfoByUserIds(Map<String, Object> map);
 	
 	int insertLecturerDistributionLink(Map<String, Object> map);
+
+	Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record);
 }

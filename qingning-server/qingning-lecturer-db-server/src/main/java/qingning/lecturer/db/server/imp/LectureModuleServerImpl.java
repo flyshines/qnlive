@@ -364,6 +364,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}
 		Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
 		roomDistributerDetails.put("lecturer_distribution_id", distributer.get("lecturer_distribution_id"));
+
 		roomDistributerDetails.put("room_distributer_details_id", room_distributer_details_id);
 		roomDistributerDetails.put("distributer_id", distributer.get("distributer_id"));
 		roomDistributerDetails.put("lecturer_id", distributer.get("lecturer_id"));
@@ -373,6 +374,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		roomDistributerDetails.put("create_date", date);
 		roomDistributerDetails.put("update_time", date);
 		roomDistributerDetails.put("done_time", date);
+		roomDistributerDetails.put("profit_share_rate", MiscUtils.convertObjectToLong(reqMap.get("profit_share_rate")));
+		roomDistributerDetails.put("rq_code", room_distributer_details_id);
+		roomDistributerDetails.put("create_time", date);
+		roomDistributerDetails.put("status", "0");
 		roomDistributerDetailsMapper.insertRoomDistributerDetails(roomDistributerDetails);
 	}
 
@@ -428,5 +433,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public int insertLecturerDistributionLink(Map<String, Object> map) {		
 		return lecturerDistributionLinkMapper.insertLecturerDistributionLink(map);
-	}	
+	}
+
+	@Override
+	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {
+		return roomDistributerMapper.findRoomDistributer(record);
+	}
 }

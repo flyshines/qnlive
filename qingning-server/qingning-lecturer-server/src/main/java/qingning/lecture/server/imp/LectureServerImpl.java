@@ -1743,7 +1743,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         reqMap.put("distributer_num", 0l);
         reqMap.put("status", "0");
         reqMap.put("link_type", "0");
-        lectureModuleServer.insertLecturerDistributionLink(map);
+        lectureModuleServer.insertLecturerDistributionLink(reqMap);
         
         MiscUtils.converObjectMapToStringMap(reqMap, values);
         reqMap.clear();
@@ -1787,10 +1787,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);        
         Map<String, String> values = jedis.hgetAll(key);
-        jedis.hincrBy(key, "click_num", 1);
+
         if(MiscUtils.isEmpty(values)){
             throw new QNLiveException("100025");
         }
+        jedis.hincrBy(key, "click_num", 1);
         long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
         if(System.currentTimeMillis() >= endDate){
         	throw new QNLiveException("100025");
@@ -1818,12 +1819,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         values.put("distributer_id", userId);
         lectureModuleServer.createRoomDistributer(values);
         jedis.hincrBy(liveRoomKey, "distributer_num", 1);
+
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+        if(! jedis.exists(lecturerKey)){
+            CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
+        }
+        jedis.hincrBy(lecturerKey, "room_distributer_num", 1L);
+
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);
         Map<String,String> query = new HashMap<String,String>();
         query.put("distributer_id", userId);
         query.put("room_id", room_id);
 		String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
         jedis.del(roomDistributeKey);
+
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
         obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));
