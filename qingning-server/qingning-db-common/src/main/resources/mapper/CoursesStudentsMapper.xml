@@ -65,8 +65,8 @@
     select user_id from t_courses_students where 1 = 1 and course_id = #{course_id}
   </select>
   
-  <select id="isStudentOfTheCourse" resultType="hashmap" parameterType="hashmap" >
-    select '1' from from t_courses_students
+  <select id="isStudentOfTheCourse" resultType="string" parameterType="hashmap" >
+    select '1' from t_courses_students
     where course_id = #{course_id} and user_id = #{user_id} limit 1
   </select>
   

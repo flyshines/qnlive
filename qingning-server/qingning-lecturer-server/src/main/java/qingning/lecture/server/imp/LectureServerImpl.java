@@ -108,11 +108,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (isLecturer == false) {
         	queryOperation = this.generateRequestEntity(null,null, null, map);        	
         	CacheUtils.readLecturer(userId, queryOperation, readLecturerOperation, jedisUtils);
-        	Map<String, String> lectureStringMap = new HashMap<String,String>();
-            lectureStringMap.put("nick_name",(String)userInfo.get("nick_name"));
-            lectureStringMap.put("avatar_address",(String)userInfo.get("avatar_address"));
+        	//Map<String, String> lectureStringMap = new HashMap<String,String>();
+            //lectureStringMap.put("nick_name",(String)userInfo.get("nick_name"));
+            //lectureStringMap.put("avatar_address",(String)userInfo.get("avatar_address"));
             //3.1新增讲师缓存
-            jedis.hmset(lectureKey, lectureStringMap);
+            //jedis.hmset(lectureKey, lectureStringMap);
 
             //3.2修改access_token中的缓存
             jedis.hset(accessTokenKey, "user_role", user_role+","+Constants.USER_ROLE_LECTURER);
@@ -124,7 +124,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             map.put("room_id", room_id);
             CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedisUtils, true);
             //增加讲师直播间对应关系缓存(一对多关系)
-            jedis.hset(lectureLiveRoomKey, createResultMap.get("room_id").toString(), "1");
+            //jedis.hset(lectureLiveRoomKey, createResultMap.get("room_id").toString(), "1");
         } else {
         	jedis.hincrBy(lectureKey, "live_room_num", 1L);
         }
@@ -1860,7 +1860,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         
         String total_amount_str = (String)values.get("total_amount");
         String course_num_str =  (String)values.get("course_num");
-        String total_student_num_str =  (String)values.get("live_room_num");
+        String total_student_num_str =  (String)values.get("total_student_num");
         
         Map<String,Object> result = new HashMap<String,Object>();
         result.put("total_student_num", total_student_num_str);

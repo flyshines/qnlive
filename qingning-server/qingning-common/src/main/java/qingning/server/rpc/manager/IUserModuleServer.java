@@ -52,4 +52,6 @@ public interface IUserModuleServer {
 	Map<String,Object> findAvailableRoomDistributer(Map<String, Object> queryMap);
 
 	boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap);
+	
+	Map<String,Object> findLectureByLectureId(String lecture_id);
 }
