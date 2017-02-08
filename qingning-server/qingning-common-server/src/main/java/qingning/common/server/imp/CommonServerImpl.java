@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.model.DefaultPutRet;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1361,10 +1363,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
  
     private String qiNiuFetchURL(String mediaUrl) throws Exception{
-//        BucketManager bucketManager = new BucketManager(auth);
-//        String bucket = MiscUtils.getConfigByKey("image_space");
+        BucketManager bucketManager = new BucketManager(auth);
+        String bucket = MiscUtils.getConfigByKey("image_space");
         String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-//        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
         String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
         return imageUrl;
     }

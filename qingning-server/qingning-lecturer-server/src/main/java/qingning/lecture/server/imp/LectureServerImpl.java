@@ -1233,6 +1233,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
+        resultMap.put("course_url",courseMap.get("course_url"));
  
         return resultMap;
     }
