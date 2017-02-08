@@ -122,7 +122,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             
             map.clear();
             map.put("room_id", room_id);
-            CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedisUtils, true);
+            CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedisUtils, true,true);
             //增加讲师直播间对应关系缓存(一对多关系)
             //jedis.hset(lectureLiveRoomKey, createResultMap.get("room_id").toString(), "1");
         } else {
@@ -377,8 +377,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String course_type = (String)reqMap.get("course_type");
         if("1".equals(course_type)){
             jedis.hincrBy(liveRoomKey, "private_course_num", 1);
+            jedis.hincrBy(lectureKey, "private_course_num", 1);
         } else if("2".equals(course_type)){
             jedis.hincrBy(liveRoomKey, "pay_course_num", 1);
+            jedis.hincrBy(lectureKey, "pay_course_num", 1);
         }
         //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
         Map<String, String> course = CacheUtils.readCourse((String)dbResultMap.get("course_id"), 

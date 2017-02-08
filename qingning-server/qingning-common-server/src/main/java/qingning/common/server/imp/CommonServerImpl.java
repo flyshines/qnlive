@@ -852,9 +852,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
                 //直播间缓存中的收益
                 query.clear();
-                query.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
+                //query.put(Constants.CACHED_KEY_LECTURER_FIELD, handleResultMap.get("lecturer_id").toString());
                 query.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
-                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, query);
+                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
                 jedis.hincrBy(liveRoomKey, "total_amount", amountLong.longValue());
                 //TODO  last_course_amount
  
@@ -1113,10 +1113,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String avatar_address = (String)reqMap.get("avatar_address");
         if(!MiscUtils.isEmpty(nick_name) || !MiscUtils.isEmpty(avatar_address)){
             Map<String,Object> parameters = new HashMap<String,Object>();
-            if(reqMap.containsKey("nick_name")){
+            if(nick_name != null){
                 parameters.put("nick_name", nick_name);
             }
-            if(reqMap.containsKey("avatar_address")){
+            if(avatar_address != null){
                 parameters.put("avatar_address", avatar_address);
             }
             if(!parameters.isEmpty()){
@@ -1140,13 +1140,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, parameter);
                     if(jedisUtils.getJedis().exists(cachedKey)){
                     	Map<String,String> updateCacedValue = new HashMap<String,String>();
-                    	if(reqMap.containsKey("nick_name")){
+                    	if(nick_name != null){
                     		updateCacedValue.put("nick_name", nick_name);
                     	}
-                    	if(reqMap.containsKey("avatar_address")){
+                    	if(avatar_address != null){
                     		updateCacedValue.put("avatar_address", avatar_address);
                     	}
-                    	jedisUtils.getJedis().hmset(cachedKey, updateCacedValue);                        
+                    	if(!MiscUtils.isEmpty(updateCacedValue)){
+                    		jedisUtils.getJedis().hmset(cachedKey, updateCacedValue);
+                    	}
                     }
                 }
             }

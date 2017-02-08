@@ -143,8 +143,29 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 					((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 						@Override
 						public void batchOperation(Pipeline pipeline, Jedis jedis) {
+							Map<String,String> query = new HashMap<String,String>();
 							for(Map<String,Object> value:valueList){
+								String lecture_id = (String)value.get("lecturer_id");
 								pipeline.sadd(Constants.CACHED_LECTURER_KEY, (String)value.get("lecturer_id"));
+								
+								Map<String,String> lectureValue = new HashMap<String,String>();
+								MiscUtils.converObjectMapToStringMap(lecturerMapper.findLectureByLectureId(lecture_id), lectureValue);
+								query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
+								String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+								pipeline.hmset(key, lectureValue);
+								String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, query);
+								List<Map<String,Object>> roomList = liveRoomMapper.findLiveRoomByLectureId("lecture_id");
+								if(!MiscUtils.isEmpty(roomList)){
+									for(Map<String,Object> room : roomList){
+										String roomid = (String) room.get(Constants.FIELD_ROOM_ID);
+										Map<String,String> roomValue = new HashMap<String,String>();
+										MiscUtils.converObjectMapToStringMap(room, roomValue);
+										query.put(Constants.FIELD_ROOM_ID, roomid);
+										key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
+										pipeline.hmset(key, roomValue);
+										pipeline.hset(lectureLiveRoomKey, roomid, "1");
+									}
+								}
 							}
 							pipeline.sync();
 						}					
@@ -188,8 +209,8 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	}
 
 	private void clearMessageLock() {
-		ImMsgServiceImp imMsgServiceImp = (ImMsgServiceImp)context.getBean("ImMsgServiceImp");
-		imMsgServiceImp.clearMessageLockMap();
+		//ImMsgServiceImp imMsgServiceImp = (ImMsgServiceImp)context.getBean("ImMsgServiceImp");
+		ImMsgServiceImp.clearMessageLockMap();
 	}
 
 }
