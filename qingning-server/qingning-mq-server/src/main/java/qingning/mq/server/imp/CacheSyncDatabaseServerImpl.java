@@ -51,7 +51,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 		        //查询出所有需要更新的讲师
-				Set<String> lecturerSet = jedis.hkeys(Constants.CACHED_UPDATE_LECTURER_KEY);
+				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_UPDATE_LECTURER_KEY);
 				jedis.del(Constants.CACHED_UPDATE_LECTURER_KEY);
 				if(!MiscUtils.isEmpty(lecturerSet)){
 			        //同步讲师数据
@@ -65,13 +65,13 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				}
 				
 		        //查询出所有需要更新的分销员        
-				Set<String> distributerIdSet = jedis.hkeys(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
+				Set<String> distributerIdSet = jedis.smembers(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
 				jedis.del(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
 				if(!MiscUtils.isEmpty(distributerIdSet)){
 					updateDistributerData(distributerIdSet,pipeline);
 				}
 				//查询出所有需要更新的分销
-				Set<String> rqCodeSet = jedis.hkeys(Constants.CACHED_UPDATE_RQ_CODE_KEY);
+				Set<String> rqCodeSet = jedis.smembers(Constants.CACHED_UPDATE_RQ_CODE_KEY);
 				jedis.del(Constants.CACHED_UPDATE_RQ_CODE_KEY);
 				if(!MiscUtils.isEmpty(rqCodeSet)){
 					updateRoomDistributerData(rqCodeSet,pipeline);
@@ -88,35 +88,28 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					lecturerDataMap.put(lecturerId, pipeline.hgetAll(lecturerKey));
 				}
 				
-		        pipeline.sync();		        
+		        pipeline.sync();
+		        Set<String> errorIds = new HashSet<String>();
 		        for(String lecturerId : lecturerDataMap.keySet()){
 		        	try{
 		        		Map<String,String> values = lecturerDataMap.get(lecturerId).get();
 		        		if(MiscUtils.isEmpty(values)){
 		        			continue;
 		        		}
+		        		//t_lecturer
 		        		Map<String,Object> lecturer = new HashMap<String,Object>();
 		        		lecturer.put("lecturer_id", lecturerId);
 		        		lecturer.put("fans_num", MiscUtils.convertObjectToLong(values.get("fans_num")));
 		        		lecturer.put("live_room_num", MiscUtils.convertObjectToLong(values.get("live_room_num")));
 		        		lecturer.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
 		        		lecturer.put("total_student_num", MiscUtils.convertObjectToLong(values.get("total_student_num")));
-		        		lecturer.put("pay_course_num", MiscUtils.convertObjectToLong(values.get("pay_course_num")));
+		        		lecturer.put("pay_course_num", MiscUtils.convertObjectToLong(values.get("pay_course_num")));		        		              
 		        		lecturer.put("private_course_num", MiscUtils.convertObjectToLong(values.get("private_course_num")));
 		        		lecturer.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
 		        		lecturer.put("total_time", MiscUtils.convertObjectToLong(values.get("total_time")));
 		        		lecturerMapper.updateLecture(lecturer);
-		        	} catch (Exception e){
-		        		//TODO
-		        	}
-		        }
-		        //t_lecturer_distribution_info
-		        for(String lecturerId : lecturerDataMap.keySet()){
-		        	try{
-		        		Map<String,String> values = lecturerDataMap.get(lecturerId).get();
-		        		if(MiscUtils.isEmpty(values)){
-		        			continue;
-		        		}
+		        		
+		        		//t_lecturer_distribution_info
 		        		Map<String,Object> lecturerDistributionInfo = new HashMap<String,Object>();
 		        		lecturerDistributionInfo.put("lecturer_id", lecturerId);
 		        		
@@ -132,8 +125,19 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        	
 		        		lecturerDistributionInfoMapper.updateLecturerDistributionInfo(lecturerDistributionInfo);
 		        	} catch (Exception e){
-		        		//TODO
+		        		errorIds.add(lecturerId);
+		        		log.error("Sync lecturer ["+lecturerId+"]:"+e.getMessage());
 		        	}
+		        }
+		        
+		        if(!MiscUtils.isEmpty(errorIds)){
+		        	String[] members = new String[errorIds.size()];
+		        	int count=0;
+		        	for(String lecturerId : errorIds){
+		        		lecturerSet.remove(lecturerId);
+		        		members[count++] = lecturerId;
+		        	}
+		        	jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, members);
 		        }
 			}
 
@@ -144,27 +148,23 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					queryParam.clear();
 					queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 					String lecturerRoomsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryParam);
-					if(!MiscUtils.isEmpty(lecturerRoomsKey)){
-						continue;
-					}
 					roomKeyMap.put(lecturerId, pipeline.hkeys(lecturerRoomsKey));
 				}
 				pipeline.sync();
 				
 				Map<String,Response<Map<String,String>>> roomDataMap = new HashMap<String,Response<Map<String,String>>>();
-				
+				Map<String,String> liveRoomKeyMap = new HashMap<String,String>();
 				for(String lecturerId : roomKeyMap.keySet()){
 					Set<String> liveRoomIdList = roomKeyMap.get(lecturerId).get();
 					if(MiscUtils.isEmpty(liveRoomIdList)){
 						continue;
 					}
 					for(String liveRoomId: liveRoomIdList){
-						queryParam.clear();
-						queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+						queryParam.clear();						
 						queryParam.put(Constants.FIELD_ROOM_ID, liveRoomId);
-                        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, queryParam);                        
-                        roomDataMap.put(liveRoomId, pipeline.hgetAll(liveRoomKey));                        
-                        pipeline.hset(liveRoomKey, "room_address",MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+liveRoomId);                        
+                        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);                        
+                        roomDataMap.put(liveRoomId, pipeline.hgetAll(liveRoomKey));
+                        liveRoomKeyMap.put(liveRoomId, liveRoomKey);                                      
 					}
 				}				
 				pipeline.sync();
@@ -174,7 +174,10 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					if(MiscUtils.isEmpty(values)){
 						continue;
 					}
-					try{						
+					try{
+						String liveRoomKey = liveRoomKeyMap.get(liveRoomId);
+						String roomAddress = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+liveRoomId;
+						
 						Map<String,Object> liveRoom = new HashMap<String,Object>();
 						liveRoom.put("room_id", liveRoomId);
 						liveRoom.put("fans_num", MiscUtils.convertObjectToLong(values.get("fans_num")));
@@ -182,13 +185,14 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						liveRoom.put("distributer_num", MiscUtils.convertObjectToLong(values.get("distributer_num")));
 						liveRoom.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
 						liveRoom.put("last_course_amount", MiscUtils.convertObjectToLong(values.get("last_course_amount")));
-						liveRoom.put("live_room_share_url_pre_fix", MiscUtils.convertObjectToLong(values.get("live_room_share_url_pre_fix")));						
-						liveRoomMapper.updateLiveRoom(liveRoom);						
+						liveRoom.put("room_address", roomAddress);						
+						liveRoomMapper.updateLiveRoom(liveRoom);
+						pipeline.hset(liveRoomKey, "room_address", roomAddress);
 					} catch(Exception e){
-						//TODO
+						log.error("Sync room ["+liveRoomId+"]:"+e.getMessage());
 					}
-
 				}
+				pipeline.sync();
 			}
 			
 			private void updateLecturerDistributionLink(Set<String> lecturerSet, Jedis jedis){
@@ -299,55 +303,57 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
                     	}						
                     	coursesMapper.updateAfterStudentBuyCourse(courses);						
 					}catch(Exception e){
-						//TODO
+						log.error("Sync courses ["+courseId+"]:"+e.getMessage());
 					}
 				}
 				//t_course_image// Constants.CACHED_KEY_COURSE_PPTS
-				for(String courseId:courseData.keySet()){
-					if(!finishCourseKeyMap.containsKey(courseId)){
-						continue;
-					}				
-					queryParam.clear();
-					queryParam.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
-                    String pptKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, queryParam);
-                    String value = jedis.get(pptKey);                   
-                    if(!MiscUtils.isEmpty(value)){
-                    	Map<String,Object> checkValues = courseImageMapper.findOnePPTByCourseId(courseId);
-                    	if(MiscUtils.isEmpty(checkValues)){                    		
-                    		continue;
-                    	}
-                    	JSONArray pptList = JSONObject.parseArray(value);
-                    	if(MiscUtils.isEmpty(pptList) || pptList.size()< 1){                    		
-                    		continue;
-                    	}
-                    	List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
-                    	try{
-	                    	for(Object curValue: pptList){
-	                    		if(!(curValue instanceof Map)){
-	                    			log.warn("The ppt data["+curValue+"] is abnormal");
-	                    		} else {
-	                    			Map<String,Object> values = (Map<String,Object>)curValue;
-	                    			long create_time_lng = MiscUtils.convertObjectToLong(values.get("create_time"));
-	                    			long update_time_lng = MiscUtils.convertObjectToLong(values.get("update_time"));
-	                    			long image_pos_lng = MiscUtils.convertObjectToLong(values.get("image_pos"));
-	                    			if(update_time_lng < 1){
-	                    				update_time_lng=create_time_lng;
-	                    			}
-	                    			values.put("create_time", new Date(create_time_lng));
-	                    			values.put("update_time", new Date(update_time_lng));
-	                    			values.put("image_pos", image_pos_lng);
-	                    			list.add(values);
-	                    		}
-	                    	}
-	                    	
-	                    	 Map<String,Object> insertMap = new HashMap<>();
-	                         insertMap.put("course_id",courseId);
-	                         insertMap.put("list",pptList);
-	                         courseImageMapper.createCoursePPTs(insertMap);	                    	
-                    	}catch(Exception e){
-                    		log.error(e.getMessage());
-                    	}
-                    }
+				if(!MiscUtils.isEmpty(finishCourseKeyMap)){
+					for(String courseId:courseData.keySet()){
+						if(!finishCourseKeyMap.containsKey(courseId)){
+							continue;
+						}				
+						queryParam.clear();
+						queryParam.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+						String pptKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, queryParam);
+						String value = jedis.get(pptKey);                   
+						if(!MiscUtils.isEmpty(value)){
+							Map<String,Object> checkValues = courseImageMapper.findOnePPTByCourseId(courseId);
+							if(!MiscUtils.isEmpty(checkValues)){                    		
+								continue;
+							}
+							JSONArray pptList = JSONObject.parseArray(value);
+							if(MiscUtils.isEmpty(pptList) || pptList.size()< 1){                    		
+								continue;
+							}
+							List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
+							try{
+								for(Object curValue: pptList){
+									if(!(curValue instanceof Map)){
+										log.warn("The ppt data["+curValue+"] is abnormal");
+									} else {
+										Map<String,Object> values = (Map<String,Object>)curValue;
+										long create_time_lng = MiscUtils.convertObjectToLong(values.get("create_time"));
+										long update_time_lng = MiscUtils.convertObjectToLong(values.get("update_time"));
+										long image_pos_lng = MiscUtils.convertObjectToLong(values.get("image_pos"));
+										if(update_time_lng < 1){
+											update_time_lng=create_time_lng;
+										}
+										values.put("create_time", new Date(create_time_lng));
+										values.put("update_time", new Date(update_time_lng));
+										values.put("image_pos", image_pos_lng);
+										list.add(values);
+									}
+								}
+
+								Map<String,Object> insertMap = new HashMap<>();
+								insertMap.put("course_id",courseId);
+								insertMap.put("list",pptList);
+								courseImageMapper.createCoursePPTs(insertMap);	                    	
+							}catch(Exception e){
+								log.error("Sync courses ppt ["+courseId+"]:"+e.getMessage());
+							}
+						}
+					}
 				}
 				pipeline.sync();
 			}

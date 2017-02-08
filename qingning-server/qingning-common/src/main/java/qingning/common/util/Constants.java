@@ -104,7 +104,7 @@ public final class Constants {
 	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";
 	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";
 	
-	public static final String CACHED_KEY_SPECIAL_LECTURER_ROOM = "SYS:LECTURER:{lecturer_id}:ROOM:{room_id}";
+	//public static final String CACHED_KEY_SPECIAL_LECTURER_ROOM = "SYS:LECTURER:{lecturer_id}:ROOM:{room_id}";
 	
 	public static final String FIELD_CREATE_TIME="create_time";
 	public static final String FIELD_ROOM_ID="room_id";

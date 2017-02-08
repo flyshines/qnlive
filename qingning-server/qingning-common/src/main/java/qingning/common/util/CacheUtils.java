@@ -192,11 +192,16 @@ public final class CacheUtils {
 		}
 		return values;
 	}
-
+	
 	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
-												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+		return readLiveRoom(room_id, requestEntity, operation, jedisUtils, cachedValue, false);
+	}
+	
+	public static Map<String,String> readLiveRoom(String room_id, RequestEntity requestEntity,
+												CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue,boolean init) throws Exception{
 		Map<String,String> values =  readData(room_id, Constants.CACHED_KEY_ROOM, Constants.FIELD_ROOM_ID, requestEntity, operation, jedisUtils, cachedValue);
-		if(!MiscUtils.isEmpty(values) && cachedValue){
+		if(init && !MiscUtils.isEmpty(values) && cachedValue){
 	        Map<String, Object> map = new HashMap<String, Object>();
 	        map.put(Constants.CACHED_KEY_LECTURER_FIELD, values.get(Constants.CACHED_KEY_LECTURER_FIELD));
 	        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
