@@ -1818,6 +1818,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         jedis.hincrBy(key, "distributer_num", 1);
         values.put("distributer_id", userId);
+        String newRqCode = MiscUtils.getUUId();
+        values.put("newRqCode",newRqCode);
         lectureModuleServer.createRoomDistributer(values);
         jedis.hincrBy(liveRoomKey, "distributer_num", 1);
 
@@ -1834,6 +1836,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         query.put("distributer_id", userId);
         query.put("room_id", room_id);
 		String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+
+        //在缓存中删除旧的RQCode，插入新的RQCode
+        String oldRQcode = distributerRoom.get("rq_code");
+        Map<String,Object> queryParam = new HashMap<>();
+        queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
+        String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
+        jedis.del(oldRQcodeKey);
+
+        queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, newRqCode);
+        String newRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
+        jedis.hmset(newRQcodeKey, query);
+
+        //因为之前更新了分销员，所以现在要删除该分销员缓存，起到强制更新的作用
         jedis.del(roomDistributeKey);
 
         //发送成为新分销员极光推送

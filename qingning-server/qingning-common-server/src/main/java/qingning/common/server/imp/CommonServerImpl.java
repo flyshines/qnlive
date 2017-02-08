@@ -1254,7 +1254,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         	String room_id = (String)info.get("room_id");
         	if(!MiscUtils.isEmpty(distributer_id) && !MiscUtils.isEmpty(room_id)){
             	find=true;
-        		distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributer, jedisUtils);
+        		distributerRoom = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributer, jedisUtils);
         	}
         }
         if(!find){
@@ -1266,7 +1266,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         		query.put(Constants.FIELD_ROOM_ID, (String)roomDistributerMap.get(Constants.FIELD_ROOM_ID));
         		//TODO RQ_CODE失效需要删除
         		jedis.hmset(key, query);
-        		key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);      
+        		key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
         		jedis.hmset(key, distributerRoom);
         	}
         }
@@ -1286,20 +1286,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             
             if(isValidate == true){
                 String lecturerId = distributerRoom.get("lecturer_id");
+                String distributer_id = distributerRoom.get("distributer_id");
                 String room_id = (String)distributerRoom.get("room_id");
                 Map<String,Object> query = new HashMap<String,Object>();
-                query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, lecturerId);
+                query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributer_id);
         		query.put(Constants.FIELD_ROOM_ID, room_id);
-                String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
-                
-                		
+                String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
                 		
                 //2.如果访问该推广链接的用户不是讲师,不是分销员，则进行下一步验证，验证用户目前是否已经属于了有效分销员
-                if((! userId.equals(lecturerId)) && (! userId.equals( distributerRoom.get("distributer_id").toString()))){
+                if((! userId.equals(lecturerId)) && (! userId.equals(distributer_id))){
                     Map<String,Object> queryMap = new HashMap<>();
                     queryMap.put("room_id", room_id);
                     queryMap.put("user_id", userId);
-                    queryMap.put("today_end_date", todayEnd.getTime());
+                    queryMap.put("today_end_date", todayEnd);
                     Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendAllInfo(queryMap);
  
                     //3.如果该用户没有成为有效分销员的推荐用户，则该用户成为该分销员的推荐用户
@@ -1309,7 +1308,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         insertMap.put("distributer_id", distributerRoom.get("distributer_id"));
                         insertMap.put("room_id", room_id);
                         insertMap.put("user_id", userId);
-                        insertMap.put("end_date", end_date);
+                        insertMap.put("end_date", new Date(end_date));
                         insertMap.put("rq_code", rqCode);
                         insertMap.put("now", now);
                         commonModuleServer.insertRoomDistributerRecommend(insertMap);
@@ -1319,6 +1318,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         jedis.hincrBy(distributerKey, "recommend_num", 1);
                         jedis.hincrBy(distributerKey, "last_recommend_num", 1);                        
                         jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
+
                        /* Map<String,Object> updateMap = new HashMap<>();
                         updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
                         updateMap.put("room_id",room_id);

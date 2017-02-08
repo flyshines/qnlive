@@ -308,7 +308,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Map<String,Object> roomDistributer = new HashMap<String,Object>();
 		roomDistributer.put("done_time", date);
 		roomDistributer.put("click_num", 0l);
-		String room_distributer_details_id = MiscUtils.getUUId();
+		String room_distributer_details_id = (String)reqMap.get("newRqCode");
 		roomDistributer.put("lecturer_distribution_id", reqMap.get("lecturer_distribution_id"));
 		roomDistributer.put("room_distributer_details_id", room_distributer_details_id);
 		roomDistributer.put("profit_share_rate", MiscUtils.convertObjectToLong(reqMap.get("profit_share_rate")));		

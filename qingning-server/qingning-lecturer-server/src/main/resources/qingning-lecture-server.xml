@@ -507,7 +507,7 @@
 						var value = utils.convertObjectToLong(profit_share_rate);
 						return value>=0 &amp;&amp; value &lt;=5000;
 					},100024"/>
-					<param name="effective_time" type="string" require="Y,000100" format="^[1-6]$,120020"/>
+					<param name="effective_time" type="string" require="Y,000100" format="^[0-6]$,120020"/>
 					<param name="room_id" type="string" require="Y,000100"/>		
 				</inputs>
 				<outputs>
