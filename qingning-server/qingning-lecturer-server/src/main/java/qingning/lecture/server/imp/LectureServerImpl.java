@@ -1758,11 +1758,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         values.put("end_date", cal.getTimeInMillis()+"");
         jedis.hmset(key, values);
         jedis.expire(key, 60*60*24*2);
+        Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.put("lecturer_id", userId);
+        key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
+        //目前只支持单直播间
+        jedis.hset(key, "distribution_live_room_num" ,"1");
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         
-        
-        
-        Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.clear();
         queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SHARE_CODES, queryParam);
         jedis.sadd(key, room_share_code);
@@ -1818,20 +1821,26 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(distributerRoom)){
         	throw new QNLiveException("100027");
         }
-        jedis.hincrBy(key, "distributer_num", 1);
+        
         values.put("distributer_id", userId);
         String newRqCode = MiscUtils.getUUId();
         values.put("newRqCode",newRqCode);
         lectureModuleServer.createRoomDistributer(values);
-        jedis.hincrBy(liveRoomKey, "distributer_num", 1);
+        
+        distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
+        boolean totaldistributerAdd = MiscUtils.convertObjectToLong(distributerRoom.get("create_time")) == MiscUtils.convertObjectToLong(distributerRoom.get("update_time"));
+        if(totaldistributerAdd){
+        	jedis.hincrBy(liveRoomKey, "distributer_num", 1);
+            map.clear();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+            if(! jedis.exists(lecturerKey)){
+                CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
+            }
+            jedis.hincrBy(lecturerKey, "room_distributer_num", 1L);
+        }        
+        jedis.hincrBy(key, "distributer_num", 1);
 
-        map.clear();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        if(! jedis.exists(lecturerKey)){
-            CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
-        }
-        jedis.hincrBy(lecturerKey, "room_distributer_num", 1L);
 
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);
         Map<String,String> query = new HashMap<String,String>();

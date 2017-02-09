@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by loovee on 2016/12/20.
- */
 public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 	private static Logger log = LoggerFactory.getLogger(CacheSyncDatabaseServerImpl.class);
     private CoursesMapper coursesMapper;
@@ -42,6 +39,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     private CourseImageMapper courseImageMapper;
     private LecturerDistributionLinkMapper lecturerDistributionLinkMapper;
     private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
+    private UserMapper userMapper;
     
     @Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
@@ -50,6 +48,13 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     	((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
+				//查询出所有需要更新的用户
+				Set<String> userSet = jedis.smembers(Constants.CACHED_UPDATE_USER_KEY);
+				jedis.del(Constants.CACHED_UPDATE_USER_KEY);
+				if(!MiscUtils.isEmpty(userSet)){
+					updateUserData(userSet,pipeline);
+				}
+				
 		        //查询出所有需要更新的讲师
 				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_UPDATE_LECTURER_KEY);
 				jedis.del(Constants.CACHED_UPDATE_LECTURER_KEY);
@@ -76,6 +81,60 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				if(!MiscUtils.isEmpty(rqCodeSet)){
 					updateRoomDistributerData(rqCodeSet,pipeline);
 				}
+			}
+			
+			private void updateUserData(Set<String> userSet, Pipeline pipeline){
+		    	Map<String,Object> queryParam = new HashMap<String,Object>();
+		    	Map<String,Response<Map<String,String>>> userDataMap = new HashMap<String,Response<Map<String,String>>>();
+				for(String userId:userSet){
+					queryParam.clear();
+					queryParam.put(Constants.CACHED_KEY_USER_FIELD, userId);
+					String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryParam);
+					userDataMap.put(userKey, pipeline.hgetAll(userKey));
+				}
+				pipeline.sync();
+				Set<String> errorIds = new HashSet<String>();
+				for(String userId:userDataMap.keySet()){
+					try{
+		        		Map<String,String> values = userDataMap.get(userId).get();
+		        		if(MiscUtils.isEmpty(values)){
+		        			continue;
+		        		}
+		        		Map<String,Object> user = new HashMap<String,Object>();
+		        		user.put("nick_name", values.get("nick_name"));
+		        		user.put("avatar_address", values.get("avatar_address"));
+		        		user.put("phone_number", values.get("phone_number"));
+		        		user.put("gender", values.get("gender"));
+		        		user.put("country", values.get("country"));
+		        		user.put("province", values.get("province"));
+		        		user.put("city", values.get("city"));
+		        		user.put("district", values.get("district"));
+		        		user.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
+		        		user.put("live_room_num", MiscUtils.convertObjectToLong(values.get("live_room_num")));
+		        		user.put("status", values.get("status"));
+		        		user.put("plateform", values.get("plateform"));
+		        		if(!MiscUtils.isEmpty(values.get("last_login_time"))){
+		        			user.put("last_login_time",  new Date(MiscUtils.convertObjectToLong(values.get("last_login_time"))));
+		        		}
+		        		user.put("last_login_ip", values.get("last_login_ip"));
+		        		user.put("user_id", userId);
+		        		
+		        		userMapper.updateUser(user);
+					}catch(Exception e){
+		        		errorIds.add(userId);
+		        		log.error("Sync user ["+userId+"]:"+e.getMessage());
+					}
+				}
+				
+		        if(!MiscUtils.isEmpty(errorIds)){
+		        	String[] members = new String[errorIds.size()];
+		        	int count=0;
+		        	for(String lecturerId : errorIds){
+		        		userSet.remove(lecturerId);
+		        		members[count++] = lecturerId;
+		        	}
+		        	jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, members);
+		        }
 			}
 			
 			private void updateLecturerData(Set<String> lecturerSet, Pipeline pipeline){
@@ -204,7 +263,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					queryParam.clear();
 			        queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 			        String userShareCodesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SHARE_CODES, queryParam);
-			        Set<String> shareCodes = jedis.hkeys(userShareCodesKey);
+			        Set<String> shareCodes = jedis.smembers(userShareCodesKey);
 			        if(MiscUtils.isEmpty(shareCodes)){
 			        	continue;
 			        }
@@ -507,5 +566,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 
 	public void setRoomDistributerDetailsMapper(RoomDistributerDetailsMapper roomDistributerDetailsMapper) {
 		this.roomDistributerDetailsMapper = roomDistributerDetailsMapper;
-	}	
+	}
+	
+	public void setUserMapper(UserMapper userMapper){
+		this.userMapper = userMapper;
+	}
 }

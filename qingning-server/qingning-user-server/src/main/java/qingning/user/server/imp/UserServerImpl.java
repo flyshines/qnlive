@@ -118,6 +118,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "fans_num", incrementNum);
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
+        jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
         return resultMap;
     }
 
