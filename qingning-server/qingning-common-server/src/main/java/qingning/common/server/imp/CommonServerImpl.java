@@ -1434,7 +1434,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             case "4":
                 Jedis jedis = jedisUtils.getJedis();
                 Map<String, Object> map = new HashMap<>();
-                map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("room_share_code"));
+                map.put(Constants.CACHED_KEY_USER_ROOM_SHARE_FIELD, reqMap.get("id"));
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_SHARE, map);
                 Map<String, String> values = jedis.hgetAll(key);
  
@@ -1442,12 +1442,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("120019");
                 }
                 title = MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_title");
-                Map<String,String> liveRoomInfo = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
+                Map<String,String> liveRoomInfo = CacheUtils.readLiveRoom(values.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
                 if(MiscUtils.isEmpty(liveRoomInfo)){
                     throw new QNLiveException("120018");
                 }
                 content = liveRoomInfo.get("room_name") + "\n"
-                        + String.format(MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content"), values.get("profit_share_rate")) + "\n"
+                        + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content").replace("%s", (Integer.parseInt(values.get("profit_share_rate")) / 100.0)+"") + "\n"
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
                 share_url = MiscUtils.getConfigByKey("be_distributer_url_pre_fix") + id;
