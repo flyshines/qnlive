@@ -1810,7 +1810,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.clear();        
         map.put(Constants.FIELD_ROOM_ID, room_id);
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
+        String liveRoomOwner = values.get("lecturer_id");//CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
         if (liveRoomOwner == null) {
             throw new QNLiveException("100002");
         } else if(liveRoomOwner.equals(userId)){
@@ -1832,9 +1832,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(totaldistributerAdd){
         	jedis.hincrBy(liveRoomKey, "distributer_num", 1);
             map.clear();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, liveRoomOwner);
             String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-            if(! jedis.exists(lecturerKey)){
+            if(!jedis.exists(lecturerKey)){
                 CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
             }
             jedis.hincrBy(lecturerKey, "room_distributer_num", 1L);
@@ -1842,11 +1842,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.hincrBy(key, "distributer_num", 1);
 
 
-        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);
-        Map<String,String> query = new HashMap<String,String>();
-        query.put("distributer_id", userId);
-        query.put("room_id", room_id);
-		String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, liveRoomOwner);		
 
         //在缓存中删除旧的RQCode，插入新的RQCode
         String oldRQcode = distributerRoom.get("rq_code");
@@ -1857,14 +1853,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, newRqCode);
         String newRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
+        Map<String,String> query = new HashMap<String,String>();
+        query.put("distributer_id", userId);
+        query.put("room_id", room_id);
         jedis.hmset(newRQcodeKey, query);
-
-        //因为之前更新了分销员，所以现在要删除该分销员缓存，起到强制更新的作用
-        jedis.del(roomDistributeKey);
 
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
-        obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), values.get("room_name")));
+        String roomName = CacheUtils.readLiveRoomInfoFromCached(room_id, "room_name", reqEntity, readLiveRoomOperation, jedisUtils,true);
+        obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), roomName));
         obj.put("to", values.get("lecturer_id"));
         obj.put("msg_type", "9");
         Map<String,String> extrasMap = new HashMap<>();
