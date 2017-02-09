@@ -47,7 +47,7 @@
     	and status = #{status}
     </if>
     <if test="start_time != null" >
-    	and status <![CDATA[ < ]]> #{start_time}
+    	and start_time <![CDATA[ < ]]> #{start_time}
     </if>
     <if test="end_time != null" >
     	and end_time <![CDATA[ < ]]> #{end_time}
