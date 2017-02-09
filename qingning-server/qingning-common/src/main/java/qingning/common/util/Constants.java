@@ -1,9 +1,6 @@
 package qingning.common.util;
 
 public final class Constants {
-	
-
-
 	private Constants(){};
 	public static final String SYS_FIELD_COUNTRY="country";
 	public static final String SYS_FIELD_COUNTRY_SHORT="country_short";
