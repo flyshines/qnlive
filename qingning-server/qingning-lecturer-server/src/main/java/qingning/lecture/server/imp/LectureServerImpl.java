@@ -675,11 +675,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
  
             } else {
-                if(reqMap.get("start_time") != null){
-                    //课程之间需要间隔三十分钟
-                    Map<String,Object> query = new HashMap<String,Object>();
-                    query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-                    String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
+                Map<String,Object> query = new HashMap<String,Object>();
+                query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+                String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
+                Date now = new Date();
+				if(reqMap.get("start_time") != null){
+                	//课程之间需要间隔三十分钟
                     Calendar cal = Calendar.getInstance();
                     long startTime = (Long)reqMap.get("start_time");
                     cal.setTimeInMillis(startTime);
@@ -706,9 +707,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             }
                         }
                     }*/
-                }                
-                Date now = new Date();
-                reqMap.put("now",now);
+                                        
+                    if(now.getTime() > startTime){
+                    	throw new QNLiveException("100034");
+                    }
+                }
+				reqMap.put("now",now);
                 //2.不为课程结束
                 //修改缓存，同时修改数据库
                 Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
@@ -736,7 +740,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(courseKey, updateCacheMap);
                 
                 if (reqMap.get("start_time") != null) {
-                    String newStartTime = reqMap.get("start_time").toString();
+                	String newStartTime = reqMap.get("start_time").toString();
+                	
+                	jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
+                    
                     Date end = MiscUtils.getEndTimeOfToday();
                     //如果原有的课程开播时间为今天，新的课程开播时间为今天，则需要先取消原有定时任务，再新增新的定时任务
                     String originalCourseStartTime = jedis.hget(courseKey, "start_time");
@@ -764,7 +771,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         mqRequestEntity.setParam(reqEntity.getParam());
                         this.mqUtils.sendMessage(mqRequestEntity);
                     }
-                    Map<String,Object> query = new HashMap<String,Object>();
+                    query.clear();
                     query.put("course_id", course_id);
                     Map<String,String> course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();

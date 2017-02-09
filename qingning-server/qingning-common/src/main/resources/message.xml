@@ -58,6 +58,7 @@
 				<entry key="100031" value="直播间不存在，数据异常"/>
 				<entry key="100032" value="课程没开始前，不可以结束"/>
 				<entry key="100033" value="获取图片失败"/>
+				<entry key="100034" value="修改的课程开始时间不能早于当前时间"/>
 
 				<entry key="110003" value="关注直播间操作失败"/>
 				<entry key="110004" value="直播间属于当前用户，不需要关注"/>
