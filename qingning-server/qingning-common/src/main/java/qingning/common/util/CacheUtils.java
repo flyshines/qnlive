@@ -245,9 +245,26 @@ public final class CacheUtils {
 		for(int i=0; i<len; ++i){
 			query.put(keyFields[i], searchKeys[i]);
 		}
-		query.put("current_date",new Date());
+		Date currentDate = new Date();
+		query.put("current_date", currentDate);
 		requestEntity.setParam(query);
-		return readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
+		Map<String,String> values =  readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
+		if(!MiscUtils.isEmpty(values)){
+			String end_date = values.get("end_date");
+			if(!MiscUtils.isEmpty(end_date)){
+				long endDate = MiscUtils.convertObjectToLong(end_date);
+				if(currentDate.getTime() > endDate){					
+					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+			        String oldRQcode = (String)values.get("rq_code");
+			        Map<String,Object> queryParam = new HashMap<>();
+			        queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
+			        String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);			        
+			        jedisUtils.getJedis().del(key,oldRQcodeKey);
+			        values=null;
+				}
+			}
+		}
+		return values;
 	}
 	
 	public static Map<String,String> readAppVersion(String os, RequestEntity requestEntity,
