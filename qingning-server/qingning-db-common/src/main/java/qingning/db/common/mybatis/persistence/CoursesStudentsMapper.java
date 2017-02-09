@@ -12,4 +12,6 @@ public interface CoursesStudentsMapper {
     List<Map<String, Object>> findCourseStudentListWithLoginInfo(Map<String, Object> queryMap);
     List<String> findUserIdsByCourseId(String course_id);
     String isStudentOfTheCourse(Map<String, Object> queryMap);
+
+    Map<String,Object> findUserDistributionInfoForDoneNum(Map<String, Object> queryuserDistribution);
 }

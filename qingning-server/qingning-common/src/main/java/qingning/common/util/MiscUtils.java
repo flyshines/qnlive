@@ -335,6 +335,11 @@ public final class MiscUtils {
         return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
         //return UUID.randomUUID().toString().replace("-", "");
     }
+
+    public static String getWeiXinId() {
+        //TODO
+        return UUID.randomUUID().toString().replace("-", "");
+    }
         
     /**
      * Generate the Random No. 

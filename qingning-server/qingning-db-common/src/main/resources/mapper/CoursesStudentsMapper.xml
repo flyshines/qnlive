@@ -150,4 +150,12 @@
     </trim>
   </insert>
 
+  <select id="findUserDistributionInfoForDoneNum" resultType="hashmap" parameterType="hashmap" >
+    select * from t_courses_students
+    where
+    user_id = #{user_id}
+    and distributer_id = #{distributer_id}
+    and room_id = #{room_id}
+    limit 1
+  </select>
 </mapper>

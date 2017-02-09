@@ -12,7 +12,7 @@
     set
     done_num = done_num + #{done_num},
     course_num = #{course_num} + course_num,
-    update_time = #{now}
+    update_time = #{update_time}
     where rq_code = #{rq_code,jdbcType=VARCHAR}
   </update>
 

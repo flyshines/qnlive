@@ -67,4 +67,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 
 	Integer updateIMAccount(Map<String, Object> updateIMAccountMap);
+
+	Map<String,Object> findUserDistributionInfo(Map<String, Object> queryuserDistribution);
 }
