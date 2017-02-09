@@ -245,7 +245,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
             case 0 : //微信登录
                 //如果登录信息为空，则进行注册
-                if(loginInfoMap == null){
+            	if(MiscUtils.isEmpty(loginInfoMap)){
                     //注册IM
                     Jedis jedis = jedisUtils.getJedis();
                     Map<String,String> imResultMap = null;
@@ -295,7 +295,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 break;
  
             case 2 : //手机号登录
-                if(loginInfoMap == null){
+            	if(MiscUtils.isEmpty(loginInfoMap)){
                     //抛出用户不存在
                     throw new QNLiveException("120002");
                 }else {
@@ -310,7 +310,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
                 break;
- 
+            case 4:
+            	if(MiscUtils.isEmpty(loginInfoMap)){
+            		throw new QNLiveException("120002");
+            	}
+            	break;
         }
  
         return resultMap;

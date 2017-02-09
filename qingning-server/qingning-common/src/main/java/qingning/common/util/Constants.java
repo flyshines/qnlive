@@ -9,6 +9,8 @@ public final class Constants {
 	public static final String SYS_FIELD_DISTRICT="district";
 	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
 	
+	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
+	
 	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
 	public static final String SYSLONG="long";

@@ -72,4 +72,6 @@ public interface ILectureModuleServer {
 	int insertLecturerDistributionLink(Map<String, Object> map);
 
 	Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record);
+	
+	Map<String,Object> findByDistributerId(String distributer_id);
 }

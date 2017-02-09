@@ -298,12 +298,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Date date = new Date(System.currentTimeMillis());
 		record.put("current_time", date);
 		//1.插入t_distributer
-		try{
+		if("1".equals(reqMap.get(Constants.SYS_INSERT_DISTRIBUTER))){
 			distributerMapper.insertDistributer(record);
-		}catch(Exception e){			
 		}
-		
-		 //2.插入t_room_distributer    
+		//2.插入t_room_distributer    
 		Map<String,Object> distributer = roomDistributerMapper.findRoomDistributer(record);
 		Map<String,Object> roomDistributer = new HashMap<String,Object>();
 		roomDistributer.put("done_time", date);
@@ -438,4 +436,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {
 		return roomDistributerMapper.findRoomDistributer(record);
 	}
+
+	@Override
+	public Map<String, Object> findByDistributerId(String distributer_id) {		
+		return distributerMapper.findByDistributerId(distributer_id);
+	}	
 }

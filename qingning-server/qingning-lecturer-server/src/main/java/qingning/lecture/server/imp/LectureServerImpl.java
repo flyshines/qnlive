@@ -37,6 +37,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     private ReadLecturerOperation readLecturerOperation;
 	private ReadUserOperation readUserOperation;
 	private ReadRoomDistributerOperation readRoomDistributerOperation;
+	private ReadDistributerOperation readDistributerOperation;
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
@@ -46,6 +47,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             readLecturerOperation = new ReadLecturerOperation(lectureModuleServer);
             readUserOperation = new ReadUserOperation(lectureModuleServer);
             readRoomDistributerOperation = new ReadRoomDistributerOperation(lectureModuleServer);
+            readDistributerOperation = new ReadDistributerOperation(lectureModuleServer);
         }
     }
 
@@ -1828,7 +1830,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(distributerRoom)){
         	throw new QNLiveException("100027");
         }
-        
+        Map<String,String> query = new HashMap<String,String>();
+        query.put("distributer_id", userId);
+        Map<String,String> distributer = CacheUtils.readDistributer(userId, generateRequestEntity(null, null, null, query), readDistributerOperation, jedisUtils, true);
+        if(MiscUtils.isEmpty(distributer)){
+        	values.put(Constants.SYS_INSERT_DISTRIBUTER, "1");
+        }
         values.put("distributer_id", userId);
         String newRqCode = MiscUtils.getUUId();
         values.put("newRqCode",newRqCode);
@@ -1853,14 +1860,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //在缓存中删除旧的RQCode，插入新的RQCode
         String oldRQcode = distributerRoom.get("rq_code");
-        Map<String,Object> queryParam = new HashMap<>();
+        Map<String,Object> queryParam = new HashMap<String,Object>();
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
         String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
         jedis.del(oldRQcodeKey);
 
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, newRqCode);
         String newRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
-        Map<String,String> query = new HashMap<String,String>();
+        query.clear();
         query.put("distributer_id", userId);
         query.put("room_id", room_id);
         jedis.hmset(newRQcodeKey, query);

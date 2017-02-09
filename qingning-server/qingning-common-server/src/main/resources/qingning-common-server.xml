@@ -19,7 +19,7 @@
 				</auth>
 				<inputs>
 					<param name="login_id" type="string" require="Y,000100"  />
-					<param name="login_type" type="string" require="Y,000100"  />
+					<param name="login_type" type="string" require="Y,000100"  format="^[024]$,000004"/>
 					<param name="certification" type="string" require="Y,000100"  />
 					<param name="refresh_token" type="string" require="N"  />
 					<param name="avatar_address" type="string" require="N"  />
