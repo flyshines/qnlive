@@ -618,14 +618,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(profit_type.equals("1")){
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
-            goodName = new String(MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
+            goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes()+courseMap.get("course_id");
         }else if(profit_type.equals("0")){
             insertMap.put("amount", courseMap.get("course_price"));
             totalFee = Integer.parseInt(courseMap.get("course_price"));
-            goodName = new String(MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes(), "UTF-8")+courseMap.get("course_id");
+            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes()+courseMap.get("course_id");
         }
         insertMap.put("status","0");
-        String tradeId = MiscUtils.getUUId();
+        String tradeId = MiscUtils.getWeiXinId();//TODO
         insertMap.put("trade_id",tradeId);
         insertMap.put("profit_type",profit_type);
         commonModuleServer.insertTradeBill(insertMap);
@@ -666,7 +666,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,Object> insertPayMap = new HashMap<>();
             insertPayMap.put("trade_id",tradeId);
             insertPayMap.put("payment_id",MiscUtils.getUUId());
-            insertPayMap.put("payment_type",profit_type);
+            insertPayMap.put("payment_type",0);
             insertPayMap.put("status","1");
             insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
             insertPayMap.put("create_time",new Date());
