@@ -50,6 +50,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 	private ReadRoomDistributer readRoomDistributer;	
     private ReadForceVersionOperation readForceVersionOperation;
     private ReadLecturerOperation readLecturerOperation;
+    private ReadRoomDistributerOperation readRoomDistributerOperation;
     
     @Override
     public void initRpcServer() {
@@ -63,6 +64,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             readAPPVersionOperation = new ReadAppVersionOperation(commonModuleServer);
             readForceVersionOperation = new ReadForceVersionOperation(commonModuleServer);
             readLecturerOperation = new ReadLecturerOperation(commonModuleServer);
+            readRoomDistributerOperation = new ReadRoomDistributerOperation(commonModuleServer);
         }        
     }
  
@@ -1253,22 +1255,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
  
-    private String getLiveRoomShareURL(String userId, String roomId) {
+    private String getLiveRoomShareURL(String userId, String roomId) throws Exception{
         String share_url ;
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
         queryMap.put("room_id", roomId);
-		Map<String, Object>  roomDistributer = commonModuleServer.findRoomDistributionInfoByDistributerId(queryMap);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
 
 		boolean isDistributer = false;
 		String recommend_code = null;
-		//long now = MiscUtils.getEndDateOfToday().getTime();
-		if (! MiscUtils.isEmpty(roomDistributer)) {
-			isDistributer=true;
+		if (! MiscUtils.isEmpty(distributerRoom)) {
+			isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
 		}
 
-
- 
         //是分销员
         if(isDistributer == true){
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
