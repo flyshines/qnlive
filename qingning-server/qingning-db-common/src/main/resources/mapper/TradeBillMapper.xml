@@ -119,7 +119,7 @@
         update_time = #{update_time},
       </if>
     </set>
-    where trade_id = #{tradeId,jdbcType=VARCHAR}
+    where trade_id = #{trade_id,jdbcType=VARCHAR}
     <if test="last_update_time != null" >
        and update_time=#{last_update_time}
     </if>

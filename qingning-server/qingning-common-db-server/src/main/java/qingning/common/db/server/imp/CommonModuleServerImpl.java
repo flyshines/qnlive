@@ -200,12 +200,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Date now = new Date();
 		Map<String,Object> tradeBill = (Map<String,Object>)requestMapData.get("tradeBillInCache");
 		Map<String,Object> updateTradeBill = new HashMap<String,Object>();
-		
+		//1.更新t_trade_bill 交易信息表
 		updateTradeBill.put("trade_id", requestMapData.get("out_trade_no"));
 		updateTradeBill.put("status", "2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
 		updateTradeBill.put("update_time", now);
 		tradeBillMapper.updateTradeBill(updateTradeBill);
-		
+
+		//2.更新t_payment_bill 支付信息表
 		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
 		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
 		updatePaymentBill.put("status", "2");
@@ -213,15 +214,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		updatePaymentBill.put("update_time", realPayTime);
 		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
 		paymentBillMapper.updatePaymentBill(updatePaymentBill);
-		
+
+		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", MiscUtils.getUUId());
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
-
 		profitRecord.put("user_id", tradeBill.get("user_id"));
-		
-		profitRecord.put("profit_amount", tradeBill.get("payment"));
+		profitRecord.put("profit_amount", tradeBill.get("amount"));
 		profitRecord.put("profit_type", tradeBill.get("profit_type"));
 		profitRecord.put("create_time", now);
 		profitRecord.put("create_date", now);
@@ -236,13 +236,15 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if("0".equals(tradeBill.get("profit_type"))){
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
+				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
 				long shareAmount= MiscUtils.convertObjectToLong(tradeBill.get("payment")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"))/10000;
 				profitRecord.put("share_amount", shareAmount);
 			}
 		}
 		
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
-		
+
+		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
 			String distributer_id = null;
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
@@ -260,10 +262,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("student_id", MiscUtils.getUUId());
 			student.put("user_id", tradeBill.get("user_id"));
 			student.put("distributer_id", distributer_id);
-			student.put("lecturer_id", distributer_id);
+			student.put("lecturer_id", courseMap.get("lecturer_id"));
 			student.put("room_id", courseMap.get("room_id"));
 			student.put("course_id", courseMap.get("course_id"));
-			student.put("payment_amount", tradeBill.get("payment"));
+			student.put("payment_amount", tradeBill.get("amount"));
 			student.put("course_password", courseMap.get("course_password"));
 			student.put("student_type", distributer_id==null? 0 : 1);  //TODO 课程学员待修改
 			student.put("create_time", now);
@@ -466,7 +468,27 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));		
 		return loginInfoMapper.updateLoginInfo(loginInfo);
 	}
-	
+
+	@Override
+	public Map<String, Object> findUserDistributionInfo(Map<String, Object> queryuserDistribution) {
+		Map<String,Object> userDistributionInfoForDoneNum = coursesStudentsMapper.findUserDistributionInfoForDoneNum(queryuserDistribution);
+		Map<String,Object> userDistributionInfoForLastDoneNum = lecturerCoursesProfitMapper.findUserDistributionInfoForLastDoneNum(queryuserDistribution);
+		Map<String,Object> resultMap = new HashMap<>();
+		if(MiscUtils.isEmpty(userDistributionInfoForDoneNum)){
+			resultMap.put("userDistributionInfoForDoneNum",false);
+		}else {
+			resultMap.put("userDistributionInfoForDoneNum",true);
+		}
+
+		if(MiscUtils.isEmpty(userDistributionInfoForLastDoneNum)){
+			resultMap.put("userDistributionInfoForLastDoneNum",false);
+		}else {
+			resultMap.put("userDistributionInfoForLastDoneNum",true);
+		}
+
+		return resultMap;
+	}
+
 	@Override
 	public Map<String,Object> findLectureByLectureId(String lecture_id){
 		return lecturerMapper.findLectureByLectureId(lecture_id);

@@ -47,12 +47,15 @@
       <if test="share_amount != null" >
         share_amount,
       </if>
+      <if test="rq_code != null" >
+        rq_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="profit_id != null" >
         #{profit_id},
       </if>
-      <if test="courseId != null" >
+      <if test="course_id != null" >
         #{course_id},
       </if>
       <if test="room_id != null" >
@@ -91,6 +94,9 @@
       <if test="share_amount != null" >
         #{share_amount},
       </if>
+      <if test="rq_code != null" >
+        #{rq_code},
+      </if>
     </trim>
   </insert>
   
@@ -122,5 +128,18 @@
     order by `position` desc
     limit #{page_count}
   </select>
+
+  <select id="findUserDistributionInfoForLastDoneNum" resultType="hashmap" parameterType="hashmap" >
+    select
+    *
+    from t_lecturer_courses_profit
+    where 1=1
+    and user_id = #{user_id}
+    and distributer_id = #{distributer_id}
+    and room_id = #{room_id}
+    and rq_code = #{rq_code}
+    limit 1
+  </select>
+
   
 </mapper>
