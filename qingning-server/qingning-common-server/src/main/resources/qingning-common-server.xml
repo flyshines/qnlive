@@ -443,6 +443,7 @@
 						<param name="nick_name" type="string" />
 						<param name="create_time" type="long" />
 						<param name="status" type="string" />
+						<param name="student_pos" type="long" />
 					</param>
 					<param name="recommend_num" type="long" />
 				</outputs>
