@@ -490,6 +490,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findcourseRecommendUsers(Map<String, Object> reqMap) {
+		return coursesStudentsMapper.findCourseRecommendUsers(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findCourseRecommendUserNum(Map<String, Object> reqMap) {
+		return coursesStudentsMapper.findCourseRecommendUserNum(reqMap);
+	}
+
+	@Override
 	public Map<String,Object> findLectureByLectureId(String lecture_id){
 		return lecturerMapper.findLectureByLectureId(lecture_id);
 	}

@@ -1515,5 +1515,51 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String res = DES.encryptDES(name, keys);
         return res;
     }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getCourseRecommendUsers")
+    public Map<String,Object> getCourseRecommendUsers (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        Map<String,Object> resultMap = new HashMap<>();
+
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //1.检测课程是否存在
+        Map<String,String> courseMap = CacheUtils.readCourse(reqMap.get("course_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
+        if(MiscUtils.isEmpty(courseMap)){
+            throw new QNLiveException("120009");
+        }
+
+        //2.查询数据库得到相关数据
+        reqMap.put("distributer_id", userId);
+        reqMap.put("current_date", MiscUtils.getEndDateOfToday());
+        if(MiscUtils.isEmpty(reqMap.get("student_pos"))){
+            reqMap.remove("student_pos");
+        }
+        List<Map<String,Object>> recommendUsers = commonModuleServer.findcourseRecommendUsers(reqMap);
+        Map<String,Object> recommendUserNum = commonModuleServer.findCourseRecommendUserNum(reqMap);
+        long todayDateEndTime = MiscUtils.getEndDateOfToday().getTime();
+
+        for(Map<String,Object> recommendUser : recommendUsers){
+            if(recommendUser.get("end_date") == null){
+                recommendUser.put("status", 0);
+            }else {
+                long endDateTime = ((Date)recommendUser.get("end_date")).getTime();
+
+                if(endDateTime >= todayDateEndTime){
+                    recommendUser.put("status", 0);
+                }else {
+                    recommendUser.put("status", 2);
+                }
+            }
+        }
+        resultMap.put("student_list", recommendUsers);
+        if((! MiscUtils.isEmpty(recommendUserNum)) && recommendUserNum.get("recommend_num") != null){
+            resultMap.put("recommend_num", recommendUserNum.get("recommend_num"));
+        }else {
+            resultMap.put("recommend_num", 0);
+        }
+
+        return resultMap;
+    }
  
 }

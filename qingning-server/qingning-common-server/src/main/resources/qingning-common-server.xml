@@ -426,6 +426,27 @@
                     <param name="share_url" type="string"/>
                 </outputs>
             </function>
+
+			<function name="getCourseRecommendUsers">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N"/>
+					<param name="position" type="long" require="N"/>
+					<param name="room_id" type="string" require="Y,000100"/>
+					<param name="course_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="student_list" type="list">
+						<param name="avatar_address" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="create_time" type="long" />
+						<param name="status" type="string" />
+					</param>
+					<param name="recommend_num" type="long" />
+				</outputs>
+			</function>
  
         </default>
  

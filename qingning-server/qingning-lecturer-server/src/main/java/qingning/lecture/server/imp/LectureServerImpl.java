@@ -666,7 +666,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 infomation.put("creator_id", userId);
                 infomation.put("message", message);
                 infomation.put("message_type", "1");
-                infomation.put("send_type", "5");//5.结束消息
+                infomation.put("send_type", "6");//5.结束消息
                 infomation.put("create_time", currentTime);
                 Map<String,Object> messageMap = new HashMap<>();
                 messageMap.put("msg_type","1");

@@ -88,7 +88,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 		Map<String,String> courseMap = jedis.hgetAll(courseKey);
 		//课程为已结束
-		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("5")){
+		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){
 			return;
 		}
 

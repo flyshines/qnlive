@@ -393,7 +393,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             infomation.put("creator_id", courseMap.get("lecturer_id"));
             infomation.put("message", message);
             infomation.put("message_type", "1");
-            infomation.put("send_type", "5");//5.结束消息
+            infomation.put("send_type", "6");//5.结束消息
             infomation.put("create_time", currentTime);
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");

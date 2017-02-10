@@ -14,4 +14,8 @@ public interface CoursesStudentsMapper {
     String isStudentOfTheCourse(Map<String, Object> queryMap);
 
     Map<String,Object> findUserDistributionInfoForDoneNum(Map<String, Object> queryuserDistribution);
+
+    List<Map<String,Object>> findCourseRecommendUsers(Map<String, Object> reqMap);
+
+    Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
 }

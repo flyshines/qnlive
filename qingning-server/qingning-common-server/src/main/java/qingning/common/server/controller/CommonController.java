@@ -496,4 +496,30 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+    /**
+     * 直播间中的分销课程的推荐用户列表
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "common/distribution/rooms/{room_id}/courses/{course_id}/recommend/users", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getCourseRecommendUsers(
+            @PathVariable("room_id") String room_id,
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value="page_count",defaultValue="20") String page_count,
+            @RequestParam(value="student_pos",defaultValue="") String student_pos,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version
+    ) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseRecommendUsers", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("room_id", room_id);
+        param.put("course_id", course_id);
+        param.put("page_count", page_count);
+        param.put("student_pos", student_pos);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 }

@@ -69,4 +69,8 @@ public interface ICommonModuleServer {
 	Integer updateIMAccount(Map<String, Object> updateIMAccountMap);
 
 	Map<String,Object> findUserDistributionInfo(Map<String, Object> queryuserDistribution);
+
+	List<Map<String,Object>> findcourseRecommendUsers(Map<String, Object> reqMap);
+
+	Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
 }
