@@ -512,7 +512,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);
         Map<String ,Object> resultMap = new HashMap<>();
-        MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);
         resultMap.putAll(courseInfoMap);
         
         Map<String,Object> queryMap = new HashMap<>();
@@ -1236,6 +1235,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
  
         //增加返回课程相应信息
+        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
         resultMap.put("student_num",courseMap.get("student_num"));
         resultMap.put("start_time",courseMap.get("start_time"));
         resultMap.put("status",courseMap.get("status"));
