@@ -15,6 +15,7 @@ import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 import java.util.*;
 
@@ -62,6 +63,16 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     				queryMap.put("pageCount", maxCount);
     				List<Map<String,Object>> courseFinishList = coursesMapper.findPlatformCourseList(queryMap);
     				if(!MiscUtils.isEmpty(courseFinishList)){
+    					Map<String,Response<Boolean>> checked = new HashMap<String,Response<Boolean>>();
+    					for(Map<String,Object> values : courseFinishList){                			
+    						String course_id =(String)values.get("course_id");
+    						Map<String,Object> courseCacheMap = new HashMap<>();
+							courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+							String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
+							checked.put(course_id, pipeline.exists(courseKey));
+    					}
+    					pipeline.sync();
+    					
     					for(Map<String,Object> values : courseFinishList){                			
     						String course_id =(String)values.get("course_id");
     						Date courseEndTime = (Date)values.get("end_time");
@@ -72,7 +83,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     							String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
     							String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseCacheMap);
     							String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseCacheMap);
-    							if(!jedis.exists(courseKey)){
+    							if(!checked.get(course_id).get()){
     								Map<String, String> strMap = new HashMap<String, String>();
     								MiscUtils.converObjectMapToStringMap(values, strMap);
     								pipeline.hmset(courseKey,strMap);
