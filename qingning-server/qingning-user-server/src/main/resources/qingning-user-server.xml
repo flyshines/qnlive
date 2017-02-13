@@ -76,10 +76,15 @@
 					<param name="room_name" type="string"/>
 					<param name="room_remark" type="string"/>
 					<param name="course_remark" type="string"/>
-					<param name="join_status" type="string"/>
-					<param name="follow_status" type="string"/>
 					<param name="room_id" type="string"/>
 					<param name="roles" type="list"/>
+					<param name="join_status" type="string"/>
+					<param name="follow_status" type="string"/>
+
+					<param name="course_password" type="string"/>
+					<param name="share_url" type="string"/>
+					<param name="update_time" type="long"/>
+					<param name="im_course_id" type="string"/>
 				</outputs>
 			</function>
 

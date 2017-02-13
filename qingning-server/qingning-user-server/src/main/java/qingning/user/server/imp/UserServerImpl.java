@@ -16,11 +16,7 @@ import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.IUserModuleServer;
-import qingning.user.server.other.ReadCourseOperation;
-import qingning.user.server.other.ReadLecturerOperation;
-import qingning.user.server.other.ReadLiveRoomOperation;
-import qingning.user.server.other.ReadRoomDistributer;
-import qingning.user.server.other.ReadUserOperation;
+import qingning.user.server.other.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -38,6 +34,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private ReadUserOperation readUserOperation;
     private ReadRoomDistributer readRoomDistributer;
     private ReadLecturerOperation readLecturerOperation;
+    private ReadRoomDistributerOperation readRoomDistributerOperation;
     
     @Override
     public void initRpcServer() {
@@ -49,6 +46,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             readUserOperation = new ReadUserOperation(userModuleServer);
             readRoomDistributer = new ReadRoomDistributer(userModuleServer);
             readLecturerOperation = new ReadLecturerOperation(userModuleServer);
+            readRoomDistributerOperation = new ReadRoomDistributerOperation(userModuleServer);
         }
     }
 
@@ -742,6 +740,32 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
+        String share_url ;
+        String roomId = courseMap.get("room_id");
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        queryMap.put("room_id", roomId);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+
+        boolean isDistributer = false;
+        String recommend_code = null;
+        if (! MiscUtils.isEmpty(distributerRoom)) {
+            isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
+        }
+
+        //是分销员
+        if(isDistributer == true){
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
+        }else {
+            //不是分销员
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId;
+        }
+
+        return share_url;
+    }
+
 
     /**
      * 查询课程详情
@@ -803,16 +827,38 @@ public class UserServerImpl extends AbstractQNLiveServer {
         queryMap.clear();
         queryMap.put("user_id", userId);
         queryMap.put("course_id", courseMap.get("course_id"));
-        boolean isStudent = userModuleServer.isStudentOfTheCourse(queryMap);
-
-        //返回用户身份
-        //角色数组 1：普通用户、2：学员、3：讲师
+        //判断访问者是普通用户还是讲师
+        //如果为讲师，则返回讲师部分特定信息
+        boolean isStudent = false;
         List<String> roles = new ArrayList<>();
-        //加入课程状态 0未加入 1已加入
-        if(isStudent){
-            resultMap.put("join_status", "1");
+        if(userId.equals(courseMap.get("lecturer_id"))){
+            resultMap.put("update_time", courseMap.get("update_time"));
+            resultMap.put("course_password", courseMap.get("course_password"));
+            resultMap.put("im_course_id", courseMap.get("im_course_id"));
+            resultMap.put("share_url",getCourseShareURL(userId, reqMap.get("course_id").toString(), courseMap));
         }else {
-            resultMap.put("join_status", "0");
+            //为用户，则返回用户部分信息
+            isStudent = userModuleServer.isStudentOfTheCourse(queryMap);
+
+            //返回用户身份
+            //角色数组 1：普通用户、2：学员、3：讲师
+            //加入课程状态 0未加入 1已加入
+            if(isStudent){
+                resultMap.put("join_status", "1");
+            }else {
+                resultMap.put("join_status", "0");
+            }
+
+            //查询关注状态
+            //关注状态 0未关注 1已关注
+            reqMap.put("room_id", liveRoomMap.get("room_id"));
+            Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
+            if (CollectionUtils.isEmpty(fansMap)) {
+                resultMap.put("follow_status", "0");
+            } else {
+                resultMap.put("follow_status", "1");
+            }
+
         }
 
         if(userId.equals(courseMap.get("lecturer_id"))){
@@ -825,16 +871,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         resultMap.put("roles",roles);
-
-        //查询关注状态
-        //关注状态 0未关注 1已关注
-        reqMap.put("room_id", liveRoomMap.get("room_id"));
-        Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
-        if (CollectionUtils.isEmpty(fansMap)) {
-            resultMap.put("follow_status", "0");
-        } else {
-            resultMap.put("follow_status", "1");
-        }
 
         return resultMap;
     }
