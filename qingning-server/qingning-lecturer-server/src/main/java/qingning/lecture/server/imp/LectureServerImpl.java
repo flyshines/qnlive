@@ -857,9 +857,143 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> result = new HashMap<String,Object>();        
         result.put("course_num", course_num_str);
         
- 
-        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(String)reqMap.get("course_id"), 
-                (Long)reqMap.get("query_time"), false, true);
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+        
+        String course_id = (String)reqMap.get("course_id");
+        int pageCount = (int)reqMap.get("page_count");
+        Long query_time = (Long)reqMap.get("query_time");
+        long currentTime = System.currentTimeMillis();
+        
+        List<Map<String,String>> courseList = new LinkedList<Map<String,String>>();        
+        String startIndexFinish = "+inf";
+        String endIndexPrediction = "-inf";
+        
+        Set<Tuple> dictionList = null;
+        boolean checkDiction = MiscUtils.isEmpty(course_id) || (jedis.zscore(lecturerCoursesPredictionKey, course_id) != null);
+        boolean checkPrediction = checkDiction;
+        if(query_time!=null && query_time>currentTime){
+        	checkDiction=false;
+        }
+        List<String> courseIdList = new LinkedList<String>();
+        Set<String> courseIdSet = new HashSet<String>();
+        if(checkDiction){        	
+        	if(MiscUtils.isEmpty(course_id)){
+        		startIndexFinish = currentTime+"";        		
+        	} else if(query_time <= currentTime){
+        		startIndexFinish = "("+query_time;
+        	}
+        	dictionList = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(dictionList != null){
+        		pageCount = pageCount - dictionList.size();
+        		for(Tuple tuple : dictionList){
+        			String courseId = tuple.getElement();
+        			courseIdList.add(courseId);
+        			courseIdSet.add(courseId);
+        		}
+        	}
+        }
+        
+        Map<String,Map<String,String>> cachedCourse = new HashMap<String,Map<String,String>>();
+        
+        Set<Tuple> preDictionSet = null;
+        List<String> preDictionList = new LinkedList<String>();
+        if(pageCount>0 && checkPrediction){
+        	startIndexFinish = "+inf";
+        	if(query_time>=currentTime){
+        		startIndexFinish="("+query_time;
+        	}
+        	preDictionSet = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(preDictionList != null){
+        		Map<String,String> queryParam = new HashMap<String,String>();
+        		RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+        		for(Tuple tuple : preDictionSet){
+        			String courseId = tuple.getElement();
+        			queryParam.put("course_id", courseId);
+        			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+        			MiscUtils.courseTranferState(currentTime, courseInfoMap);
+        			cachedCourse.put(courseId, courseInfoMap);
+        			if(!"4".equals(courseInfoMap.get("status"))){
+        				courseIdList.add(courseId);
+        				courseIdSet.add(courseId);
+        			}
+        		}
+        	}        	
+        }
+        boolean finExist = false;
+        Set<Tuple> finishDictionSet = null;
+        pageCount=((int)reqMap.get("page_count"))-courseIdList.size();
+        if(pageCount>0){
+        	if(MiscUtils.isEmpty(course_id)){
+        		startIndexFinish = "+inf";
+        	} else {        		
+        		startIndexFinish = "("+query_time;
+        	}
+        	finishDictionSet = jedis.zrevrangeByScoreWithScores(lecturerCoursesFinishKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(!MiscUtils.isEmpty(finishDictionSet)){
+        		for(Tuple tuple : finishDictionSet){
+        			String courseId = tuple.getElement();
+        			if(courseIdSet.contains(courseId)){
+        				courseIdList.remove(courseId);
+        			}
+        			courseIdList.add(courseId);
+        			finExist=true;
+        		}        		
+        	}
+        }
+        pageCount=((int)reqMap.get("page_count"))-courseIdList.size();
+        Map<String,String> lastCourse = null;
+        if(!MiscUtils.isEmpty(courseIdList)){
+			Map<String,String> queryParam = new HashMap<String,String>();
+			RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+            for(String courseId:courseIdList){
+            	Map<String,String> courseInfoMap = cachedCourse.get(courseId);
+            	queryParam.put("course_id", courseId);
+            	if(courseInfoMap==null){
+            		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+            	}
+            	courseList.add(courseInfoMap);
+            	lastCourse = courseInfoMap;
+            }
+        }
+
+        
+        if(pageCount > 0){
+        	map.clear();
+            map.put("pageCount", pageCount);
+            map.put("lecturer_id", userId);
+            Long queryTime = null; 
+            if(!MiscUtils.isEmpty(lastCourse)){
+                if(finExist){
+                    queryTime = Long.parseLong(lastCourse.get("end_time"));
+                } else {
+                    queryTime = Long.parseLong(lastCourse.get("start_time"));
+                }
+
+            }
+            if(queryTime != null){
+                Date date = new Date(queryTime);
+                map.put("startIndex", date);
+            }
+            List<Map<String,Object>> finishCourse = lectureModuleServer.findCourseListForLecturer(map);
+            if(!MiscUtils.isEmpty(finishCourse)){               
+                for(Map<String,Object> finish:finishCourse){
+                    if(MiscUtils.isEqual(course_id, finish.get("course_id"))){
+                        continue;
+                    }
+                    Map<String,String> finishMap = new HashMap<String,String>();
+                    MiscUtils.converObjectMapToStringMap(finish, finishMap);
+                    courseList.add(finishMap);
+                }
+            }
+        }
+        
+        
+/*        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(String)reqMap.get("course_id"), 
+                (Long)reqMap.get("query_time"), false, true);*/
         result.put("course_list", courseList);    
         
         return result;
