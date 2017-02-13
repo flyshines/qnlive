@@ -683,4 +683,16 @@ public final class MiscUtils {
             return null;
         }
     }
+
+    /**
+     * 生成[min, max]之间的随机数
+     * @param min
+     * @param value2
+     * @return
+     */
+    public static int getRandomIntNum(int min, int max){
+        Random random = new Random();
+        int resultNum = random.nextInt(max)%(max-min+1) + min;
+        return resultNum;
+    }
 }
