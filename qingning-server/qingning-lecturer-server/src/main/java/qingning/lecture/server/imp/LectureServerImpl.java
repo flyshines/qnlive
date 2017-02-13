@@ -508,7 +508,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getCourseDetail(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String course_id = (String)reqMap.get("course_id");
-        
+
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedisUtils,false);
         if(MiscUtils.isEmpty(courseInfoMap)){
             throw new QNLiveException("100004");
@@ -536,12 +537,38 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
         
         //分享URL
-        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
+        resultMap.put("share_url",getCourseShareURL(userId, course_id, courseInfoMap));
         List<String> roles = new ArrayList<>();
         roles.add("3");//角色数组  1：普通用户、2：学员、3：讲师
         resultMap.put("roles",roles);
  
         return resultMap;
+    }
+
+    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
+        String share_url ;
+        String roomId = courseMap.get("room_id");
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        queryMap.put("room_id", roomId);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+
+        boolean isDistributer = false;
+        String recommend_code = null;
+        if (! MiscUtils.isEmpty(distributerRoom)) {
+            isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
+        }
+
+        //是分销员
+        if(isDistributer == true){
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
+        }else {
+            //不是分销员
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId;
+        }
+
+        return share_url;
     }
  
     @SuppressWarnings("unchecked")

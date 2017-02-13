@@ -861,7 +861,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
                     infomation.put("course_id", handleResultMap.get("course_id"));
-					infomation.put("creator_id", lecturerId);
+					infomation.put("creator_id", (String)handleResultMap.get("user_id"));
                     //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
                     infomation.put("message", message);
                     infomation.put("send_type", "4");//4.打赏信息
@@ -1223,7 +1223,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
         resultMap.put("course_title",courseMap.get("course_title"));
         resultMap.put("start_time",courseMap.get("start_time"));
-        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId);
+        resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
  
         return resultMap;
     }
@@ -1277,6 +1277,32 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId;
         }
  
+        return share_url;
+    }
+
+    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
+        String share_url ;
+        String roomId = courseMap.get("room_id");
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        queryMap.put("room_id", roomId);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+
+        boolean isDistributer = false;
+        String recommend_code = null;
+        if (! MiscUtils.isEmpty(distributerRoom)) {
+            isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
+        }
+
+        //是分销员
+        if(isDistributer == true){
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
+        }else {
+            //不是分销员
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId;
+        }
+
         return share_url;
     }
  
@@ -1456,7 +1482,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
-                share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + id;
+                share_url = getCourseShareURL(userId, id, courseMap);
                 break;
  
             case "2":

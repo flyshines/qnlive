@@ -973,13 +973,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //1.先检查该课程是否在缓存中
         if(jedis.exists(courseKey)){
 
+            //任意课程都可以免费试听五分钟，不进行是否为该课程学生的校验
             //检测学员是否加入了该课程，加入课程才能查询相关信息，如果没加入课程则提示学员未加入该课程（120007）
-            Map<String,Object> queryStudentMap = new HashMap<>();
-            queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("course_id",reqMap.get("course_id").toString());           
-            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
-                throw new QNLiveException("120007");
-            }
+//            Map<String,Object> queryStudentMap = new HashMap<>();
+//            queryStudentMap.put("user_id", userId);
+//            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
+//            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
+//                throw new QNLiveException("120007");
+//            }
 
             courseMap = jedis.hgetAll(courseKey);
 
@@ -1059,12 +1060,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("100004");
             }
 
-            Map<String,Object> queryStudentMap = new HashMap<>();
-            queryStudentMap.put("user_id", userId);
-            queryStudentMap.put("course_id",reqMap.get("course_id").toString());            
-            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
-                throw new QNLiveException("120007");
-            }
+            //任意课程都可以免费试听五分钟，不进行是否为该课程学生的校验
+//            Map<String,Object> queryStudentMap = new HashMap<>();
+//            queryStudentMap.put("user_id", userId);
+//            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
+//            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
+//                throw new QNLiveException("120007");
+//            }
 
             //查询课程PPT列表
             List<Map<String,Object>> pptList = userModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
