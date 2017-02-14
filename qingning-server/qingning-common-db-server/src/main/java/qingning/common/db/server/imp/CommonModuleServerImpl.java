@@ -240,7 +240,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
 				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
-				long shareAmount= MiscUtils.convertObjectToLong(tradeBill.get("payment")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"))/10000;
+				long shareAmount= (MiscUtils.convertObjectToLong(tradeBill.get("amount")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate")))/10000L;
 				profitRecord.put("share_amount", shareAmount);
 			}
 		}
