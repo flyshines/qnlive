@@ -4,7 +4,10 @@
   <select id="findCourseByCourseId" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_courses where course_id = #{courseId}
   </select>
-
+  <select id="findFinishCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
+  	select * from t_courses where status='2' and ((UNIX_TIMESTAMP(end_time)-1487034414680) * 1000000 +position) <![CDATA[ < ]]> #{position} 
+  	 order by ((UNIX_TIMESTAMP(end_time)-1487034414680) * 1000000 +position) desc limit #{pageCount}
+  </select>
   <select id="findCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
     select * from t_courses  where 1 =1
     <if test="orderType == 1" >     
@@ -67,10 +70,10 @@
     select * from t_courses where status = #{status}
     <if test="pageCount != null" >
       <if test='status == "2" '>
-      	order by end_time desc limit #{pageCount}
+      	order by end_time desc,position limit #{pageCount}
       </if>
       <if test='status == "1" '>
-      	order by start_time desc limit #{pageCount}
+      	order by start_time desc,position limit #{pageCount}
       </if>
     </if>
   </select>

@@ -147,7 +147,15 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		if(inputParameterObj instanceof Map){
 			Map inputParameterMap = (Map)inputParameterObj;
 			for(InputParameter inputParamter : functionInfo.getInputParameterList()){
-				inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(inputParameterMap.get(inputParamter.getName()), inputParamter.getType(), inputParamter.getName(), true));
+				Object value = inputParameterMap.get(inputParamter.getName());
+				if(!Constants.SYSRICHSTR.equals(inputParamter.getType())){
+					inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(value, inputParamter.getType(), inputParamter.getName(), true));
+				} else {
+					if(!MiscUtils.isEmpty(value)){
+						inputParameterMap.put(inputParamter.getName(), MiscUtils.emojiConvertToNormalString((String)value));
+					}
+				}
+				
 			}
 		}
 	}

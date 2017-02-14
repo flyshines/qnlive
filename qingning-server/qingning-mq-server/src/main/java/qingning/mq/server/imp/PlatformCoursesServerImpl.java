@@ -54,7 +54,8 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     				maxCount=maxCount-coursePredictionList.size();
     				for(Map<String,Object> values : coursePredictionList){
     					Date courseStartTime = (Date)values.get("start_time");
-    					pipeline.zadd(predictionListKey, courseStartTime.getTime(),(String)values.get("course_id"));
+    					long position = MiscUtils.convertInfoToPostion(courseStartTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
+    					pipeline.zadd(predictionListKey, position,(String)values.get("course_id"));
     				}
     				pipeline.sync();
     			}
@@ -77,7 +78,8 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     						String course_id =(String)values.get("course_id");
     						Date courseEndTime = (Date)values.get("end_time");
     						try{
-    							pipeline.zadd(finishListKey, courseEndTime.getTime(),course_id);
+    							long position = MiscUtils.convertInfoToPostion(courseEndTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
+    							pipeline.zadd(finishListKey, position,course_id);
     							Map<String,Object> courseCacheMap = new HashMap<>();
     							courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
     							String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);

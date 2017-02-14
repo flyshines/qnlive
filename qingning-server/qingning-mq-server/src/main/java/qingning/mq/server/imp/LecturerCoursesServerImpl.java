@@ -121,7 +121,7 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
                     		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
                     		queryMap.put("start_time", new Date(bigDecimal.longValue()));
                     	}
-                    	
+                    	queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD,lecturerId);
                     	queryMap.put("pageCount",count);
                     	List<Map<String,Object>> list = coursesMapper.findLecturerCourseList(queryMap);
                     	if(!MiscUtils.isEmpty(list)){

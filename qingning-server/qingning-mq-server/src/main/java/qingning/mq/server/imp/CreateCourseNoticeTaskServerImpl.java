@@ -63,17 +63,20 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             long currentDate = MiscUtils.getDate(currentTime);
             for(String courseId : timeMap.keySet()){
             	long time = Long.parseLong(timeMap.get(courseId).get());
-            	long date = MiscUtils.getDate(currentDate);
+            	long date = MiscUtils.getDate(time);
             	String course_title =MiscUtils.convertString(titleMap.get(courseId).get());
             	map.clear();
             	map.put("course_id", courseId);
             	map.put("start_time", new Date(time));
             	map.put("lecturer_id", lecturerId);
             	map.put("course_title", course_title);
-            	if(currentDate==date && time>currentTime){
+            	
+            	if(time<=currentTime || currentDate==date){
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
                     messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
-                    
+            	}
+            	
+            	if(currentDate==date && time>currentTime){
                     RequestEntity requestEntityTask = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseStartShortNotice",map);
                     //提前五分钟开课提醒
                     messagePushServerImpl.processCourseStartShortNotice(requestEntityTask, jedisUtils, context);
