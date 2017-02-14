@@ -1042,15 +1042,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         reqMap.put("distributer_id",distributer_id);
-        //1.先检查该用户是否为该直播间讲师或者该直播间的分销员，不是则提示无权限进行查询
-        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
-        String lecturerId = liveRoomMap.get("lecturer_id");
         Map<String,String> roomDistributerMap = null;
-        if(! lecturerId.equals(userId)){
-            roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
-            if(MiscUtils.isEmpty(roomDistributerMap)){
-                throw new QNLiveException("100028");
-            }
+        roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
+        if(MiscUtils.isEmpty(roomDistributerMap)){
+            throw new QNLiveException("100028");
         }
 
         //2.查询直播间分销员的推荐用户数量

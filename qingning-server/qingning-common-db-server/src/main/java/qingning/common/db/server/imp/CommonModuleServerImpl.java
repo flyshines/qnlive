@@ -257,6 +257,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendUpdateMap.put("course_num",1);
 				roomDistributerRecommendUpdateMap.put("update_time",now);
 				roomDistributerRecommendUpdateMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+				roomDistributerRecommendUpdateMap.put("room_id", tradeBill.get("room_id"));
+				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 				distributer_id=(String)roomDistributerCache.get("distributer_id");
 			}
