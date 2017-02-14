@@ -12,7 +12,7 @@
   <select id="findRoomDistributerInfoByRqCode" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_room_distributer where rq_code = #{rq_code}
   </select>
-  
+
   <select id="findRoomDistributerInfo" resultType="hashmap" parameterType="hashmap" >
     select a.*,b.nick_name,b.avatar_address from t_room_distributer a, t_user b where a.distributer_id=b.user_id and room_id = #{room_id}
     <if test="distributer_id != null">
@@ -206,5 +206,7 @@
     	and update_time = #{last_update_time}
     </if>
   </update>
+
+
   
 </mapper>

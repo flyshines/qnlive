@@ -70,7 +70,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
     private static Auth auth;
     static {
-        auth = Auth.create (IMMsgUtil.configMap.get("qiniu_AK"), IMMsgUtil.configMap.get("qiniu_SK"));
+        auth = Auth.create (MiscUtils.getConfigByKey("qiniu_AK"), MiscUtils.getConfigByKey("qiniu_SK"));
     }
  
     @SuppressWarnings("unchecked")
@@ -1032,45 +1032,53 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("roomDistributerRecommendInfo")
     public Map<String,Object> getRoomDistributerRecommendInfo(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        Map<String,Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String room_id = (String)reqMap.get("room_id");
-        Map<String,Object> parameters = new HashMap<String,Object>();
-        parameters.put("room_id", room_id);
         String distributer_id = (String)reqMap.get("distributer_id");
-        boolean isLecturer = false;
         if(MiscUtils.isEmpty(distributer_id)){
-            distributer_id=userId;                    
-        } else {
-            parameters.put("lecturer_id", userId);
-            isLecturer=true;
+            distributer_id = userId;
         }
-        parameters.put("distributer_id", distributer_id);
-        List<Map<String,Object>> rooom_list = commonModuleServer.findDistributionInfoByDistributerId(parameters);
-        Map<String,Object> result = new HashMap<String,Object>();
-        long recommend_num = 0l;
-        if(MiscUtils.isEmpty(rooom_list)){
-            if(isLecturer){
+
+        //1.先检查该用户是否为该直播间讲师或者该直播间的分销员，不是则提示无权限进行查询
+        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
+        String lecturerId = liveRoomMap.get("lecturer_id");
+        Map<String,String> roomDistributerMap = null;
+        if(! lecturerId.equals(userId)){
+            roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
+            if(MiscUtils.isEmpty(roomDistributerMap)){
                 throw new QNLiveException("100028");
             }
-            result.put("recommend_num", 0l);
-        } else {
-            Object recommend_num_tmp = rooom_list.get(0).get("recommend_num");
-            if(recommend_num_tmp!=null){
-                recommend_num = Long.parseLong(recommend_num_tmp.toString());
+        }
+
+        //2.查询直播间分销员的推荐用户数量
+        long roomDistributerRecommendNum = Long.parseLong(roomDistributerMap.get("recommend_num"));
+        resultMap.put("recommend_num", roomDistributerRecommendNum);
+
+        //3.如果推荐用户数量大于0，则查询列表
+        if(roomDistributerRecommendNum > 0){
+            if(MiscUtils.isEmpty(reqMap.get("position"))){
+                reqMap.remove("position");
             }
-            result.put("recommend_num", recommend_num);
+            List<Map<String,Object>> recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
+            resultMap.put("recommend_list", recommendUserList);
+            for(Map<String,Object> map : recommendUserList){
+                if(map.get("end_date") == null){
+                    map.put("status", 0);
+                }else {
+                    Date endDate = (Date)map.get("end_date");
+                    Date todayEndDate = MiscUtils.getEndDateOfToday();
+                    if(endDate.getTime() >= todayEndDate.getTime()){
+                        map.put("status", 0);
+                    }else {
+                        map.put("status", 1);
+                    }
+                }
+            }
         }
-        if(recommend_num>0){
-            parameters.clear();
-            parameters.put("room_id", room_id);
-            parameters.put("distributer_id", distributer_id);
-            parameters.put("page_count", reqMap.get("page_count"));
-            parameters.put("position", reqMap.get("position"));
-            List<Map<String,Object>> recommend_list = commonModuleServer.findRoomDistributerRecommendInfo(parameters);
-            result.put("recommend_list", recommend_list);
-        }
-        return result;
+
+        return resultMap;
     }
     
     @FunctionName("roomDistributionInfo")
@@ -1373,13 +1381,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     Map<String,Object> queryMap = new HashMap<>();
                     queryMap.put("room_id", room_id);
                     queryMap.put("user_id", userId);
-                    queryMap.put("today_end_date", todayEnd);
-                    Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendAllInfo(queryMap);
+                    Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendItem(queryMap);
  
                     //3.如果该用户没有成为有效分销员的推荐用户，则该用户成为该分销员的推荐用户
                     if(MiscUtils.isEmpty(roomDistributerRecommendMap)){
                         Map<String,Object> insertMap = new HashMap<>();
                         insertMap.put("distributer_recommend_id", MiscUtils.getUUId());
+                        insertMap.put("distributer_recommend_detail_id", MiscUtils.getUUId());
                         insertMap.put("distributer_id", distributerRoom.get("distributer_id"));
                         insertMap.put("room_id", room_id);
                         insertMap.put("user_id", userId);
@@ -1398,6 +1406,36 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
                         updateMap.put("room_id",room_id);
                         commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
+                    }else {
+                        if(roomDistributerRecommendMap.get("end_date") != null){
+                            Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
+                            if(endDate.getTime() >= todayEnd.getTime()){
+                                Map<String,Object> insertMap = new HashMap<>();
+                                insertMap.put("distributer_recommend_id", roomDistributerRecommendMap.get("distributer_recommend_id"));
+                                insertMap.put("distributer_recommend_detail_id", MiscUtils.getUUId());
+                                insertMap.put("distributer_id", distributerRoom.get("distributer_id"));
+                                insertMap.put("room_id", room_id);
+                                insertMap.put("user_id", userId);
+                                insertMap.put("end_date", new Date(end_date));
+                                insertMap.put("rq_code", rqCode);
+                                insertMap.put("now", now);
+                                insertMap.put("recommend_num", 0);
+                                insertMap.put("done_num", 0);
+                                insertMap.put("course_num", 0);
+                                insertMap.put("old_recommend_num", roomDistributerRecommendMap.get("recommend_num"));
+                                insertMap.put("old_done_num", roomDistributerRecommendMap.get("done_num"));
+                                insertMap.put("old_course_num", roomDistributerRecommendMap.get("course_num"));
+                                insertMap.put("old_rq_code", roomDistributerRecommendMap.get("rq_code"));
+
+                                commonModuleServer.updateRoomDistributerRecommend(insertMap);
+
+                                //4.直播间分销员的推荐人数增加一
+                                jedis.hincrBy(distributerKey, "click_num", 1);
+                                jedis.hincrBy(distributerKey, "recommend_num", 1);
+                                jedis.hincrBy(distributerKey, "last_recommend_num", 1);
+                                jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
+                            }
+                        }
                     }
                 }
             }

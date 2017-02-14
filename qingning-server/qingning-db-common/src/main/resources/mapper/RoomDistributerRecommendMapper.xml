@@ -3,8 +3,12 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.RoomDistributerRecommendMapper" >
 
   <select id="findRoomDistributerRecommendAllInfo" resultType="hashmap" parameterType="hashmap" >
-    select a.* from t_room_distributer_recommend a where room_id = #{room_id} and user_id = #{user_id} 
+    select a.* from t_room_distributer_recommend a where room_id = #{room_id} and user_id = #{user_id}
     	and (a.end_date >= #{today_end_date} or a.end_date is null) limit 1
+  </select>
+
+  <select id="findRoomDistributerRecommendItem" resultType="hashmap" parameterType="hashmap" >
+    select a.* from t_room_distributer_recommend a where room_id = #{room_id} and user_id = #{user_id}
   </select>
 
   <update id="studentBuyCourseUpdate" parameterType="hashmap" >
@@ -128,12 +132,26 @@
       </if>
       <if test="rq_code != null" >
         rq_code = #{rq_code},
-      </if> 
+      </if>
+      `position` = (select max(`position`) from t_room_distributer_recommend + 1)
     </set>
     where distributer_recommend_id = #{distributer_recommend_id}
     <if test="last_update_time != null" >
         and update_time = #{last_update_time}
     </if>
   </update>
+
+  <select id="findRoomRecommendUserList" resultType="hashmap" parameterType="hashmap" >
+    select u.nick_name, u.avatar_address, rdr.done_num, rdr.create_time, rdr.end_date, rdr.position
+    from t_room_distributer_recommend rdr join t_user u on u.user_id = rdr.user_id
+    where
+    rdr.distributer_id = #{distributer_id}
+    and rdr.room_id = #{room_id}
+    <if test="position != null" >
+      and rdr.`position` = <![CDATA[ < ]]> #{position}
+    </if>
+    order by rdr.`position` desc
+    limit #{page_count}
+  </select>
 
 </mapper>

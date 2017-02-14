@@ -870,6 +870,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 roles.add("1");
             }
         }
+
+        Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedisUtils);
+        if(! MiscUtils.isEmpty(roomDistributer)){
+            if(roomDistributer.get("end_date") != null){
+                Date endDate = new Date(Long.parseLong(roomDistributer.get("end_date")));
+                Date todayEndDate = MiscUtils.getEndDateOfToday();
+                if(endDate.getTime() >= todayEndDate.getTime()){
+                    roles.add("4");
+                }
+            }
+        }
         resultMap.put("roles",roles);
 
         return resultMap;

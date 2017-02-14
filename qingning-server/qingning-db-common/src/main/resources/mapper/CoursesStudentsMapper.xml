@@ -160,20 +160,19 @@
   </select>
 
   <select id="findCourseRecommendUsers" resultType="hashmap" parameterType="hashmap" >
-    select u.nick_name, u.avatar_address, max(rdr.create_time) as create_time, cs.student_pos, rdr.end_date
+    select u.nick_name, u.avatar_address,  rdr.create_time, rdr.position, rdr.end_date
     from
     (t_courses_students cs join t_user u on cs.user_id = u.user_id)
-    left join t_room_distributer_recommend rdr on cs.user_id = rdr.user_id
+    join t_room_distributer_recommend rdr on cs.user_id = rdr.user_id
     where
     cs.course_id = #{course_id}
     and rdr.room_id = #{room_id}
     and rdr.distributer_id = #{distributer_id}
 
-    <if test="student_pos != null">
-      and student_pos<![CDATA[ < ]]> #{student_pos}
+    <if test="position != null">
+      and `position` <![CDATA[ < ]]> #{position}
     </if>
-    group by cs.user_id
-    order by cs.student_pos desc
+    order by rdr.position desc
     limit #{page_count}
   </select>
 

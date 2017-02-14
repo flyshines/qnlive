@@ -61,6 +61,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private VersionMapper versionMapper;
+
+	@Autowired(required = true)
+	private RoomDistributerRecommendDetailMapper roomDistributerRecommendDetailMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -409,11 +412,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class)
 	public void insertRoomDistributerRecommend(Map<String, Object> insertMap) {
 		insertMap.put("create_time", insertMap.get("now"));
 		insertMap.put("update_time", insertMap.get("now"));
 		insertMap.put("end_date", insertMap.get("end_date"));
 		roomDistributerRecommendMapper.insertRoomDistributerRecommend(insertMap);
+
+		roomDistributerRecommendDetailMapper.insertRoomDistributerRecommend(insertMap);
 	}
 
 	@Override
@@ -497,6 +503,28 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findCourseRecommendUserNum(Map<String, Object> reqMap) {
 		return coursesStudentsMapper.findCourseRecommendUserNum(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findRoomDistributerRecommendItem(Map<String, Object> queryMap) {
+		return roomDistributerRecommendMapper.findRoomDistributerRecommendItem(queryMap);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void updateRoomDistributerRecommend(Map<String, Object> insertMap) {
+		insertMap.put("update_time", insertMap.get("now"));
+		roomDistributerRecommendMapper.updateRoomDistributerRecommend(insertMap);
+
+		insertMap.put("create_time", insertMap.get("now"));
+		roomDistributerRecommendDetailMapper.insertRoomDistributerRecommend(insertMap);
+		roomDistributerRecommendDetailMapper.updateRoomDistributerRecommend(insertMap);
+
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomRecommendUserList(Map<String, Object> reqMap) {
+		return roomDistributerRecommendMapper.findRoomRecommendUserList(reqMap);
 	}
 
 	@Override

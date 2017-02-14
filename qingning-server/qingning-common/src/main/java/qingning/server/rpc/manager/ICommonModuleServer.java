@@ -73,4 +73,10 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findcourseRecommendUsers(Map<String, Object> reqMap);
 
 	Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
+
+	Map<String,Object> findRoomDistributerRecommendItem(Map<String, Object> queryMap);
+
+	void updateRoomDistributerRecommend(Map<String, Object> insertMap);
+
+	List<Map<String,Object>> findRoomRecommendUserList(Map<String, Object> reqMap);
 }

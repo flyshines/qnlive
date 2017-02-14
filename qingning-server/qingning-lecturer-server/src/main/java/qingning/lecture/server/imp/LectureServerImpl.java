@@ -1947,8 +1947,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = generateRequestEntity(null,null, null, queryParam);
         Map<String,String> userMap = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);        
-        reqMap.clear();        
-        reqMap.put("room_share_url", MiscUtils.getConfigByKey("be_distributer_url_pre_fix")+room_share_code);        
+        reqMap.clear();
+        double profit_share_rate = Long.parseLong(values.get("profit_share_rate")) / 100.0;
+        String room_share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), room_share_code, room_id, profit_share_rate, values.get("effective_time"));
+        reqMap.put("room_share_url", room_share_url);
         reqMap.put("avatar_address", userMap.get("avatar_address"));
         reqMap.put("nick_name", userMap.get("nick_name"));
         reqMap.put("room_name", jedis.hget(liveRoomKey, "room_name"));
