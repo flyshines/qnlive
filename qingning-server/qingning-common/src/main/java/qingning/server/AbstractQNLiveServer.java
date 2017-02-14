@@ -317,7 +317,7 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 			if(jedis != null){
 				if(jedis.exists(accessTokenKey)){
 					//将accessTokenKey有效期顺延3个小时
-					jedis.expire(accessTokenKey, 10800);
+					jedis.expire(accessTokenKey, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time")));
 				}else {
 					throw new QNLiveException("000003");
 				}
