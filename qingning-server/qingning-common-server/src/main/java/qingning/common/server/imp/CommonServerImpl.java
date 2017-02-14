@@ -1041,6 +1041,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             distributer_id = userId;
         }
 
+        reqMap.put("distributer_id",distributer_id);
         //1.先检查该用户是否为该直播间讲师或者该直播间的分销员，不是则提示无权限进行查询
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
         String lecturerId = liveRoomMap.get("lecturer_id");
@@ -1062,7 +1063,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.remove("position");
             }
             List<Map<String,Object>> recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
-            resultMap.put("recommend_list", recommendUserList);
+
             for(Map<String,Object> map : recommendUserList){
                 if(map.get("end_date") == null){
                     map.put("status", 0);
@@ -1076,6 +1077,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }
+            resultMap.put("recommend_list", recommendUserList);
         }
 
         return resultMap;
@@ -1407,9 +1409,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         updateMap.put("room_id",room_id);
                         commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
                     }else {
+                        //判断如果该推荐用户如果处于该直播间的无效分销状态，则需要重新成为推荐用户
                         if(roomDistributerRecommendMap.get("end_date") != null){
                             Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
-                            if(endDate.getTime() >= todayEnd.getTime()){
+                            if(endDate.getTime() < todayEnd.getTime()){
                                 Map<String,Object> insertMap = new HashMap<>();
                                 insertMap.put("distributer_recommend_id", roomDistributerRecommendMap.get("distributer_recommend_id"));
                                 insertMap.put("distributer_recommend_detail_id", MiscUtils.getUUId());
