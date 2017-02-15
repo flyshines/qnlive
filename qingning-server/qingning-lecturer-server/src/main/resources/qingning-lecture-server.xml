@@ -292,7 +292,7 @@
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
 					<param name="page_count" type="long"/>
-					<param name="student_pos" type="string"/>
+					<param name="student_pos" type="long"/>
 					<param name="data_source" type="string"/>
 				</inputs>
 				<outputs>

@@ -251,6 +251,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
     				cachedCourse.put(courseId, courseInfoMap);
     				if(removePrediction && "4".equals(courseInfoMap.get("status"))){
     					courseSet.add(courseId);
+    				} 
+    				long endDate = MiscUtils.convertObjectToLong(courseInfoMap.get("end_date"));
+    				if("2".equals(courseInfoMap.get("status")) && endDate> 0 ){
+    					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,courseId);
+    					if(jedis.zscore(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, course_id) == null){
+    						jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, MiscUtils.convertInfoToPostion(endDate, MiscUtils.convertObjectToLong(courseInfoMap.get("position"))), courseId);
+    					}
+    					courseSet.add(courseId);
     				}
     			}
 

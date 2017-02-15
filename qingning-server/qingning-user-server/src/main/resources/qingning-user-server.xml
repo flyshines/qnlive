@@ -187,11 +187,13 @@
 					<param name="student_pos" type="long"/>
 				</inputs>
 				<outputs>
-					<param name="avatar_address" type="string"/>
-					<param name="nick_name" type="rstring"/>
-					<param name="student_pos" type="string"/>
-					<param name="create_time" type="long"/>
-					<param name="student_pos" type="long"/>
+					<param name="student_list" type="list">
+						<param name="avatar_address" type="string"/>
+						<param name="nick_name" type="rstring"/>
+						<param name="student_pos" type="string"/>
+						<param name="create_time" type="long"/>
+						<param name="student_pos" type="long"/>					
+					</param>
 				</outputs>
 			</function>
 
