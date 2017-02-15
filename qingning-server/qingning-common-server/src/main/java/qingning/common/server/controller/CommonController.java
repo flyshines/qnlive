@@ -1,12 +1,15 @@
 package qingning.common.server.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpRequest;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
 import qingning.common.util.MiscUtils;
+import qingning.common.util.WeiXinUtil;
 import qingning.server.AbstractController;
 
 import java.io.PrintWriter;
@@ -146,8 +149,32 @@ public class CommonController extends AbstractController {
 
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
-        String[] a = params.get("code");//拿到的code的值
-        response.sendRedirect("http://test.qnlive.1758app.com/web/?code="+a[0]);
+        String[] codes = params.get("code");//拿到的code的值
+        String code = codes[0];
+        Map map = new HashMap();
+        map.put("code",code);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLogin", null, "");
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+
+        JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
+        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
+            throw new QNLiveException("120008");
+        }
+        String userWeixinAccessToken = getCodeResultJson.getString("access_token");
+        response.sendRedirect("http://test.qnlive.1758app.com/web/?access_token="+userWeixinAccessToken);
+
+
+        //根据相关条件将server_url列表信息返回
+//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+//        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
+//        if (bodyMap.get("server_url_update_time") == null ||
+//                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
+//            resultMap.put("server_url_info_list", serverUrlInfoMap);
+//            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+//        }
+//        responseEntity.setReturnData(resultMap);
+        //return responseEntity;
     }
 
 
@@ -291,7 +318,7 @@ public class CommonController extends AbstractController {
 	 * 查询个人的分销信息
 	 * @param page_count
 	 * @param record_date
-	 * @param accessToken
+	 * @param access_token
 	 * @param version
 	 * @return
 	 * @throws Exception
@@ -317,7 +344,7 @@ public class CommonController extends AbstractController {
 	 * @param distributer_id
 	 * @param page_count
 	 * @param position
-	 * @param accessToken
+	 * @param access_token
 	 * @param version
 	 * @return
 	 * @throws Exception
@@ -346,7 +373,7 @@ public class CommonController extends AbstractController {
 	 * @param room_id
 	 * @param page_count
 	 * @param start_time
-	 * @param accessToken
+	 * @param access_token
 	 * @param version
 	 * @return
 	 * @throws Exception
