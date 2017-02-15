@@ -150,7 +150,7 @@
     rdr.distributer_id = #{distributer_id}
     and rdr.room_id = #{room_id}
     <if test="position != null" >
-      and rdr.`position` = <![CDATA[ < ]]> #{position}
+      and rdr.`position`  <![CDATA[ < ]]> #{position}
     </if>
     order by rdr.`position` desc
     limit #{page_count}
