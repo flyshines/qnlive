@@ -36,7 +36,7 @@
 						<param name="course_url" type="string"/>
 						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
-						<param name="lecturer_nick_name" type="string"/>
+						<param name="lecturer_nick_name" type="rstring"/>
 						<param name="course_type" type="string"/>
 						<param name="data_source" type="string"/>
 						<param name="query_time" type="long"/>
@@ -183,8 +183,15 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="page_count" type="long"/>
+					<param name="student_pos" type="long"/>
 				</inputs>
 				<outputs>
+					<param name="avatar_address" type="string"/>
+					<param name="nick_name" type="rstring"/>
+					<param name="student_pos" type="string"/>
+					<param name="create_time" type="long"/>
+					<param name="student_pos" type="long"/>
 				</outputs>
 			</function>
 

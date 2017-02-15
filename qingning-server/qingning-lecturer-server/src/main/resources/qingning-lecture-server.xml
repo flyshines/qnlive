@@ -291,8 +291,21 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="page_count" type="long"/>
+					<param name="student_pos" type="string"/>
+					<param name="data_source" type="string"/>
 				</inputs>
 				<outputs>
+					<param name="student_num" type="long"/>
+					<param name="student_list" type="list">
+						<param name="avatar_address" type="string"/>
+						<param name="nick_name" type="rstring"/>
+						<param name="create_time" type="long"/>
+						<param name="ban_status" type="string"/>
+						<param name="user_id" type="string"/>
+						<param name="student_pos" type="long"/>
+						<param name="data_source" type="string"/>						
+					</param>
 				</outputs>
 			</function>
 
