@@ -291,7 +291,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	
 	@Transactional(rollbackFor=Exception.class)
 	@Override
-	public void createRoomDistributer(Map<String, String> reqMap) throws Exception {
+	public Map<String,Object> createRoomDistributer(Map<String, String> reqMap) throws Exception {
 		Map<String,Object> record = new HashMap<String,Object>();		
 		record.put("room_id", reqMap.get("room_id"));
 		record.put("distributer_id", reqMap.get("distributer_id"));			
@@ -376,6 +376,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		roomDistributerDetails.put("create_time", date);
 		roomDistributerDetails.put("status", "0");
 		roomDistributerDetailsMapper.insertRoomDistributerDetails(roomDistributerDetails);
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("now", date);
+		return resultMap;
 	}
 
 	@Override

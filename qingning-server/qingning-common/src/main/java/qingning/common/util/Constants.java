@@ -175,6 +175,7 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO = "SYS:USER:{user_id}:LAST_JOIN_COURSE_IM_INFO";
 	public static final String CACHED_KEY_APP_VERSION_INFO_FIELD = "os";
 	public static final String CACHED_KEY_APP_VERSION_INFO = "SYS:APP_VERSION_INFO:{os}";
+	public static final String CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO = "USER:{user_id}:ROOM:DISTRIBUTION:LIST:INFO";
 
 
 	public static final String USER_ROLE_LECTURER="lecturer";

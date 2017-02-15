@@ -2010,7 +2010,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         values.put("distributer_id", userId);
         String newRqCode = MiscUtils.getUUId();
         values.put("newRqCode",newRqCode);
-        lectureModuleServer.createRoomDistributer(values);
+        Map<String,Object> insertResultMap = lectureModuleServer.createRoomDistributer(values);
         
         distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
         boolean totaldistributerAdd = MiscUtils.convertObjectToLong(distributerRoom.get("create_time")) == MiscUtils.convertObjectToLong(distributerRoom.get("update_time"));
@@ -2042,6 +2042,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         query.put("distributer_id", userId);
         query.put("room_id", room_id);
         jedis.hmset(newRQcodeKey, query);
+
+        //将数据插入该用户的分销直播间列表中
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
+        queryMap.clear();
+        queryMap.put(Constants.FIELD_ROOM_ID, room_id);
+        queryMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, userId);
+        String roomDistributorKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryMap);
+        Date now = (Date)insertResultMap.get("now");
+        jedis.zadd(userRoomDistributionListInfoKey, now.getTime(), roomDistributorKey);
 
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
