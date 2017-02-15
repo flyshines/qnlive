@@ -2,6 +2,7 @@ package qingning.common.server.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpRequest;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
@@ -9,6 +10,7 @@ import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -29,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 public class CommonController extends AbstractController {
 
     private static final Logger logger   = LoggerFactory.getLogger(CommonController.class);
-    
+
     /**
      * 获取系统时间
      *
@@ -128,6 +130,27 @@ public class CommonController extends AbstractController {
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
+
+    /**
+     * 测试 微信公众号授权后的回调
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
+    public void weixinLogin(
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+//        String s =  String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb57d497bf6a3f4e5&redirect_uri=http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect",
+//                "wxb57d497bf6a3f4e5", "http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin", "snsapi_userinfo", "STATE");
+
+        StringBuffer url = request.getRequestURL();//获取路径
+        Map<String, String[]> params = request.getParameterMap();
+        String[] a = params.get("code");//拿到的code的值
+        response.sendRedirect("http://test.qnlive.1758app.com/web/?code="+a[0]);
+    }
+
+
 
     /**
      * 获得上传到七牛token
