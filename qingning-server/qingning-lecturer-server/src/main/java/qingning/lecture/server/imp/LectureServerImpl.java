@@ -1702,6 +1702,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     profitList = new LinkedList<Map<String,Object>>();
                     profitMap.put(distributer_id, profitList);
                 }
+                if(profit.get("share_amount") != null){
+                    Long trueProfit = (Long)profit.get("profit_amount") - (Long)profit.get("share_amount");
+                    profit.put("profit_amount", trueProfit);
+                }
                 profitList.add(profit);
             }
         }
