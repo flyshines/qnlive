@@ -18,6 +18,8 @@
     course_num = #{course_num} + course_num,
     update_time = #{update_time}
     where rq_code = #{rq_code,jdbcType=VARCHAR}
+    and room_id = #{room_id}
+    and user_id = #{user_id}
   </update>
 
   <insert id="insertRoomDistributerRecommend" parameterType="hashmap" >
@@ -133,7 +135,7 @@
       <if test="rq_code != null" >
         rq_code = #{rq_code},
       </if>
-      `position` = (select max(`position`) from t_room_distributer_recommend + 1)
+      `position` = ((select max(`position`) from t_room_distributer_recommend) + 1)
     </set>
     where distributer_recommend_id = #{distributer_recommend_id}
     <if test="last_update_time != null" >

@@ -123,6 +123,12 @@ public class OutputParameter {
 	}
 	
 	public Object convertValue(Object value) throws Exception{
-		return MiscUtils.convertObjToObject(value, type, fieldName, defaultValue, Constants.SYSDOUBLE.equalsIgnoreCase(type));
+		Object result = defaultValue;
+		if(!Constants.SYSRICHSTR.equals(type)){
+			result= MiscUtils.convertObjToObject(value, type, fieldName, defaultValue, Constants.SYSDOUBLE.equalsIgnoreCase(type));
+		} else if(!MiscUtils.isEmpty(value)){
+			result = MiscUtils.RecoveryEmoji((String)value);
+		}
+		return result;
 	}
 }

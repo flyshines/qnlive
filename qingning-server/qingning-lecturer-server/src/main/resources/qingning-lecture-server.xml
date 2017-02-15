@@ -11,8 +11,8 @@
 				</auth>
 				<inputs>
 					<param name="avatar_address" type="string" require="N"  />
-					<param name="room_name" type="string" require="N"  format=".{0,30},100017"/>
-					<param name="room_remark" type="string" require="N"  format=".{0,100},100018"/>
+					<param name="room_name" type="rstring" require="N"  format=".{0,30},100017"/>
+					<param name="room_remark" type="rstring" require="N"  format=".{0,100},100018"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -25,8 +25,8 @@
 				</auth>
 				<inputs>
 					<param name="avatar_address" type="string" require="N"  />
-					<param name="room_name" type="string" require="N"  />
-					<param name="room_remark" type="string" require="N"  />
+					<param name="room_name" type="rstring" require="N"  />
+					<param name="room_remark" type="rstring" require="N"  />
 					<param name="room_id" type="string" require="Y"  />
 					<param name="update_time" type="long" require="Y,000100"  />
 				</inputs>
@@ -58,7 +58,7 @@
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
-					<param name="course_title" type="string" require="Y,000100"  format=".{0,30},100020"/>
+					<param name="course_title" type="rstring" require="Y,000100"  format=".{0,30},100020"/>
 					<param name="start_time" type="long" require="Y,000100"  />
 					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -104,15 +104,15 @@
 					<param name="course_type" type="string"/>
 					<param name="status" type="string"/>
 					<param name="course_url" type="string"/>
-					<param name="course_title" type="string"/>
+					<param name="course_title" type="rstring"/>
 					<param name="course_price" type="double"/>
 					<param name="start_time" type="long"/>
 					<param name="student_num" type="long"/>
 					<param name="student_list" type="list"/>
 					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="string"/>
-					<param name="room_remark" type="string"/>
-					<param name="course_remark" type="string"/>
+					<param name="room_remark" type="rstring"/>
+					<param name="course_remark" type="rstring"/>
 					<param name="update_time" type="long"/>
 					<param name="room_id" type="string"/>
 					<param name="course_password" type="string"/>
@@ -129,9 +129,9 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
-					<param name="course_title" type="string" require="N" format=".{0,30},100020"/>
+					<param name="course_title" type="rstring" require="N" format=".{0,30},100020"/>
 					<param name="start_time" type="long" require="N"  />
-					<param name="course_remark" type="string" require="N" format=".{0,200},100021"/>
+					<param name="course_remark" type="rstring" require="N" format=".{0,200},100021"/>
 					<param name="course_url" type="string" require="N"  />
 					<param name="course_password" type="string" require="N"  />
 					<param name="status" type="string" require="N"  validate="(status,course_title,start_time,course_remark,course_url,course_password)=>{
@@ -173,12 +173,12 @@
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>
 						<param name="course_url" type="string"/>
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="student_num" type="long"/>						
 						<param name="course_type" type="string"/>
 						<param name="update_time" type="long"/>
-						<param name="course_remark" type="string"/>
+						<param name="course_remark" type="rstring"/>
 						<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
 							var ret = course_amount;
 							if(course_type=='0'){
@@ -255,7 +255,7 @@
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
 					<param name="course_update_time" type="long"/>	
-					<param name="course_title" type="string"/>				
+					<param name="course_title" type="rstring"/>				
 					<param name="course_url" type="string"/>
 				</outputs>
 			</function>
@@ -275,12 +275,12 @@
 						<param name="message_id" type="string"/>
 						<param name="message_type" type="string"/>
 						<param name="send_type" type="string"/>
-						<param name="message" type="string"/>
+						<param name="message" type="rstring"/>
 						<param name="message_url" type="string"/>
 						<param name="audio_time" type="long"/>
 						<param name="create_time" type="long"/>
 						<param name="creator_id" type="string"/>
-						<param name="message_question" type="string"/>
+						<param name="message_question" type="rstring"/>
 					</param>
 				</outputs>
 			</function>
@@ -317,7 +317,7 @@
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
 					<param name="course_list" type="list">
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="student_num" type="long"/>
 						<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
@@ -334,9 +334,9 @@
 						<param name="extra_amount" type="double" default="0"/>
 						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
 						    var ret = 0;						
-							if(course_type=='0' || course_type=='1'){
+							if(utils.isEqual(course_type,'0') || utils.isEqual(course_type,'1')){
 								ret=utils.convertObjectToLong(extra_amount);
-							} else if(course_type=='1'){
+							} else if(utils.isEqual(course_type,'2')){
 								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
 							}												
 							return ret;
@@ -365,7 +365,7 @@
 					<param name="profit_type" type="string" require="N"  />
 				</inputs>
 				<outputs>
-					<param name="course_title" type="string"/>
+					<param name="course_title" type="rstring"/>
 					<param name="start_time" type="long"/>
 					<param name="student_num" type="long" default="0"/>
 					<param name="course_amount" type="string" convert="(course_amount,course_type)=>{
@@ -486,7 +486,7 @@
 				<outputs>
 					<param name="course_num" type="long" default="0"/>
 					<param name="course_list" type="list">						
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="course_price" type="double" default="0"/>	
 						<param name="done_num" type="long" default="0"/>	
@@ -513,8 +513,8 @@
 				<outputs>
 					<param name="room_share_url" type="string"/>
 					<param name="avatar_address" type="string"/>
-					<param name="nick_name" type="string"/>
-					<param name="room_name" type="string"/>
+					<param name="nick_name" type="rstring"/>
+					<param name="room_name" type="rstring"/>
 					<param name="profit_share_rate" type="double"/>
 				</outputs>
 			</function>
@@ -544,7 +544,7 @@
 					<param name="course_num" type="long" default="0"/>
 					<param name="total_student_num" type="long" default="0"/>
 					<param name="course_list" type="list">
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
 						    var ret = 0;						
 							if(course_type=='0' || course_type=='1'){
@@ -592,7 +592,7 @@
 					<param name="fans_num" type="long" />
 					<param name="fan_list" type="list">
 						<param name="avatar_address" type="string" />
-						<param name="nick_name" type="string" />
+						<param name="nick_name" type="rstring" />
 						<param name="fans_id" type="string" />
 						<param name="position" type="long" />
 					</param>

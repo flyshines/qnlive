@@ -2,6 +2,7 @@ package qingning.common.util;
 
 public final class Constants {
 	private Constants(){};
+	public static final long SEQUENCE =1000000000l;
 	public static final String SYS_FIELD_COUNTRY="country";
 	public static final String SYS_FIELD_COUNTRY_SHORT="country_short";
 	public static final String SYS_FIELD_PROVINCE="province";
@@ -20,6 +21,7 @@ public final class Constants {
 	public static final String SYSOBJECT= "object";
 	public static final String SYSDATE="date";
 	public static final String SYSSTR="string";
+	public static final String SYSRICHSTR="rstring";
 	public static final String SYS_CLASS_NAME  = "_SYS_CLASS_NAME";
 	public static final String SYS_CLASS_VALUE = "_SYS_CLASS_VALUE";
 	public static final int COURSE_MAX_INTERVAL = 10;
@@ -173,6 +175,7 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO = "SYS:USER:{user_id}:LAST_JOIN_COURSE_IM_INFO";
 	public static final String CACHED_KEY_APP_VERSION_INFO_FIELD = "os";
 	public static final String CACHED_KEY_APP_VERSION_INFO = "SYS:APP_VERSION_INFO:{os}";
+	public static final String CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO = "USER:{user_id}:ROOM:DISTRIBUTION:LIST:INFO";
 
 
 	public static final String USER_ROLE_LECTURER="lecturer";

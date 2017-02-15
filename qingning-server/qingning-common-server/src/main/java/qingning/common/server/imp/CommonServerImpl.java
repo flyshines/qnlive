@@ -1,11 +1,6 @@
 package qingning.common.server.imp;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.model.DefaultPutRet;
@@ -13,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -510,6 +506,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("user_id", user_id);
                 
         resultMap.put("avatar_address", userMap.get("avatar_address"));
+        //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("nick_name", userMap.get("nick_name"));
     }
  
@@ -566,7 +563,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("user_id", userId);
             
             resultMap.put("avatar_address", values.get("avatar_address"));
-            resultMap.put("nick_name", values.get("nick_name"));            
+            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));            
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
             resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSLONG, "today_distributer_amount", 0l));
@@ -588,7 +585,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
             resultMap.put("user_id", userId);
             resultMap.put("avatar_address", values.get("avatar_address"));
-            resultMap.put("nick_name", values.get("nick_name"));
+            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             return resultMap;
         }
  
@@ -1005,27 +1002,58 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         @SuppressWarnings("unchecked")
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        //int page_count = (Integer)reqMap.get("page_count");
-        Date record_date = (Date)reqMap.get("record_date");
-        reqMap.put("create_time", record_date);
         reqMap.put("distributer_id", userId);
+        int pageCount = (Integer)reqMap.get("page_count");
+
         Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
         if(MiscUtils.isEmpty(distributer)){
             throw new QNLiveException("120012");
         }
         Map<String,Object> resultMap = new HashMap<String, Object>();
         resultMap.put("total_amount", distributer.get("total_amount"));
-        List<Map<String,Object>> rooom_list = commonModuleServer.findDistributionInfoByDistributerId(reqMap);
-        if(!MiscUtils.isEmpty(rooom_list)){
-            Date currentDate = new Date(System.currentTimeMillis());
-            for(Map<String,Object> values:rooom_list){
-                Date endDate = (Date)values.get("end_date");
-                if(!MiscUtils.isEmpty(endDate) && endDate.before(currentDate)){
-                    values.put("effective_time", null);
-                }
+
+        //查询用户的直播间分销列表
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
+        if(jedis.exists(userRoomDistributionListInfoKey)){
+            //缓存中存在，则读取缓存中的内容
+            //初始化下标
+            long startIndex;
+            long endIndex;
+            Set<String> roomIdList;
+            //如果分页的record_date不为空
+            if(reqMap.get("record_date") != null && StringUtils.isNotBlank(reqMap.get("record_date").toString())){
+                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "(" +reqMap.get("record_date").toString(), "-inf",  0, pageCount);
+            }else {
+                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "+inf","-inf", 0, pageCount);
             }
+
+            if(! CollectionUtils.isEmpty(roomIdList)){
+                //缓存中存在则读取缓存内容
+                List<Map<String,String>> roomDistributorListCache = new ArrayList<>();
+                for(String roomId : roomIdList){
+                    Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+                    if(! MiscUtils.isEmpty(roomDistributorMap)){
+                        RequestEntity requestEntity = new RequestEntity();
+                        Map<String,Object> innerMap = new HashMap<>();
+                        innerMap.put("room_id", roomId);
+                        requestEntity.setParam(innerMap);
+                        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId, requestEntity, readLiveRoomOperation, jedisUtils, true);
+                        if(! MiscUtils.isEmpty(liveRoomMap)){
+                            roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
+                        }
+                    }
+                    roomDistributorListCache.add(roomDistributorMap);
+                }
+
+                resultMap.put("room_list", roomDistributorListCache);
+            }
+
+            return resultMap;
         }
-        resultMap.put("room_list", rooom_list);
+
         return resultMap;
     }
     
@@ -1041,15 +1069,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             distributer_id = userId;
         }
 
-        //1.先检查该用户是否为该直播间讲师或者该直播间的分销员，不是则提示无权限进行查询
-        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
-        String lecturerId = liveRoomMap.get("lecturer_id");
+        reqMap.put("distributer_id",distributer_id);
         Map<String,String> roomDistributerMap = null;
-        if(! lecturerId.equals(userId)){
-            roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
-            if(MiscUtils.isEmpty(roomDistributerMap)){
-                throw new QNLiveException("100028");
-            }
+        roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
+        if(MiscUtils.isEmpty(roomDistributerMap)){
+            throw new QNLiveException("100028");
         }
 
         //2.查询直播间分销员的推荐用户数量
@@ -1062,7 +1086,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.remove("position");
             }
             List<Map<String,Object>> recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
-            resultMap.put("recommend_list", recommendUserList);
+
             for(Map<String,Object> map : recommendUserList){
                 if(map.get("end_date") == null){
                     map.put("status", 0);
@@ -1076,6 +1100,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }
+            resultMap.put("recommend_list", recommendUserList);
         }
 
         return resultMap;
@@ -1407,9 +1432,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         updateMap.put("room_id",room_id);
                         commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
                     }else {
+                        //判断如果该推荐用户如果处于该直播间的无效分销状态，则需要重新成为推荐用户
                         if(roomDistributerRecommendMap.get("end_date") != null){
                             Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
-                            if(endDate.getTime() >= todayEnd.getTime()){
+                            if(endDate.getTime() < todayEnd.getTime()){
                                 Map<String,Object> insertMap = new HashMap<>();
                                 insertMap.put("distributer_recommend_id", roomDistributerRecommendMap.get("distributer_recommend_id"));
                                 insertMap.put("distributer_recommend_detail_id", MiscUtils.getUUId());
@@ -1561,7 +1587,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content").replace("%s", (Integer.parseInt(values.get("profit_share_rate")) / 100.0)+"") + "\n"
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
-                share_url = MiscUtils.getConfigByKey("be_distributer_url_pre_fix") + id;
+                share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), values.get("profit_share_rate"), values.get("effective_time"));
                 break;
         }
  

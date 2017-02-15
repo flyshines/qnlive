@@ -5,7 +5,7 @@
 
 
   <insert id="insertRoomDistributerRecommend" parameterType="hashmap" >
-    insert into t_room_distributer_recommend
+    insert into t_room_distributer_recommend_detail
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="distributer_recommend_detail_id != null" >
         distributer_recommend_detail_id,
@@ -91,7 +91,7 @@
   </insert>
 
   <update id="updateRoomDistributerRecommend" parameterType="hashmap" >
-    update updateRoomDistributerRecommend set
+    update t_room_distributer_recommend_detail set
     recommend_num = #{old_recommend_num},
     done_num = #{old_done_num},
     course_num = #{old_course_num}

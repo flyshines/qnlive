@@ -133,6 +133,14 @@ public class ImMsgServiceImp implements ImMsgService {
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		Map<String,String> stringMap = new HashMap<>();
 		MiscUtils.converObjectMapToStringMap(information, stringMap);
+		String message = stringMap.get("message");
+		if(!MiscUtils.isEmpty(message)){
+			stringMap.put("message", MiscUtils.emojiConvertToNormalString(message));
+		}
+		String message_question = stringMap.get("message_question");
+		if(!MiscUtils.isEmpty(message_question)){
+			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message));
+		}
 		stringMap.put("message_id", messageId);
 		jedis.hmset(messageKey, stringMap);
 	}

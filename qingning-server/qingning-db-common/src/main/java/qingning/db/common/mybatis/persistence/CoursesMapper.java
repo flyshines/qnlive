@@ -12,4 +12,5 @@ public interface CoursesMapper {
 	List<Map<String,Object>> findCourseListForLecturer(Map<String,Object> record);
 	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
 	List<Map<String,Object>> findPlatformCourseList(Map<String,Object> record);
+	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 }

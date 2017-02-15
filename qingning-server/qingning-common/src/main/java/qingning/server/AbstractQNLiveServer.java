@@ -147,7 +147,15 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		if(inputParameterObj instanceof Map){
 			Map inputParameterMap = (Map)inputParameterObj;
 			for(InputParameter inputParamter : functionInfo.getInputParameterList()){
-				inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(inputParameterMap.get(inputParamter.getName()), inputParamter.getType(), inputParamter.getName(), true));
+				Object value = inputParameterMap.get(inputParamter.getName());
+				if(!Constants.SYSRICHSTR.equals(inputParamter.getType())){
+					inputParameterMap.put(inputParamter.getName(), MiscUtils.convertStringToObject(value, inputParamter.getType(), inputParamter.getName(), true));
+				} else {
+					if(!MiscUtils.isEmpty(value)){
+						inputParameterMap.put(inputParamter.getName(), MiscUtils.emojiConvertToNormalString((String)value));
+					}
+				}
+				
 			}
 		}
 	}
@@ -317,7 +325,7 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 			if(jedis != null){
 				if(jedis.exists(accessTokenKey)){
 					//将accessTokenKey有效期顺延3个小时
-					jedis.expire(accessTokenKey, 10800);
+					jedis.expire(accessTokenKey, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time")));
 				}else {
 					throw new QNLiveException("000003");
 				}

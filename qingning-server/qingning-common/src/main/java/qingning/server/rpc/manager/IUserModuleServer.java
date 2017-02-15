@@ -54,4 +54,6 @@ public interface IUserModuleServer {
 	boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap);
 	
 	Map<String,Object> findLectureByLectureId(String lecture_id);
+	
+	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 }

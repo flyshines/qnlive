@@ -240,7 +240,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
 				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
-				long shareAmount= MiscUtils.convertObjectToLong(tradeBill.get("payment")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"))/10000;
+				long shareAmount= (MiscUtils.convertObjectToLong(tradeBill.get("amount")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate")))/10000L;
 				profitRecord.put("share_amount", shareAmount);
 			}
 		}
@@ -257,6 +257,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendUpdateMap.put("course_num",1);
 				roomDistributerRecommendUpdateMap.put("update_time",now);
 				roomDistributerRecommendUpdateMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+				roomDistributerRecommendUpdateMap.put("room_id", tradeBill.get("room_id"));
+				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 				distributer_id=(String)roomDistributerCache.get("distributer_id");
 			}

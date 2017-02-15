@@ -23,12 +23,25 @@
 					<param name="certification" type="string" require="Y,000100"  />
 					<param name="refresh_token" type="string" require="N"  />
 					<param name="avatar_address" type="string" require="N"  />
-					<param name="nick_name" type="string" require="N"  />
+					<param name="nick_name" type="rstring" require="N"  />
 					<param name="server_url_update_time" type="long" require="N"  />
 					<param name="device_id" type="string" require="Y,000100"  />
 					<param name="gender" type="string" require="N"  />
 				</inputs>
 				<outputs>
+					<param name="access_token" type="string"/>
+					<param name="m_user_id" type="string"/>
+					<param name="user_id" type="string"/>
+					<param name="nick_name" type="rstring"/>
+					<param name="server_url_info_update_time" type="long"/>
+					<param name="avatar_address" type="string"/>
+					<param name="im_account_info" type="string"/>
+					<param name="server_url_info_list" type="map">
+						<param name="protocol" type="string"/>
+						<param name="domain_name" type="string"/>
+						<param name="method" type="string"/>
+						<param name="server_url" type="string"/>
+					</param>					
 				</outputs>
 			</function>
 
@@ -64,6 +77,20 @@
 					       		return !isEmpty;},000100"/>
 				</inputs>
 				<outputs>
+					<param name="access_token" type="string"/>
+					<param name="m_user_id" type="string"/>
+					<param name="user_id" type="string"/>
+					<param name="nick_name" type="rstring"/>
+					<param name="server_url_info_update_time" type="long"/>
+					<param name="avatar_address" type="string"/>
+					<param name="im_account_info" type="string"/>
+					<param name="web_im_url" type="string"/>
+					<param name="server_url_info_list" type="map">
+						<param name="protocol" type="string"/>
+						<param name="domain_name" type="string"/>
+						<param name="method" type="string"/>
+						<param name="server_url" type="string"/>
+					</param>					
 				</outputs>
 			</function>
 
@@ -123,12 +150,12 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
-					<param name="record_date" type="date" require="N"/>					
+					<param name="record_date" type="string" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" />
 					<param name="room_list" type="list">
-						<param name="nick_name" type="string" />
+						<param name="nick_name" type="rstring" />
 						<param name="avatar_address" type="string" />
 						<param name="course_num" type="long" />
 						<param name="recommend_num" type="long" />
@@ -138,6 +165,7 @@
 						<param name="room_id" type="string" />
 						<param name="record_date" type="long" fieldname="create_time"/>
 						<param name="rq_code" type="string" />
+						<param name="room_name" type="string" />
 						<param name="effective_time" type="string" convert="(effective_time)=>{
 						    var result='';
 							if(utils.isEmpty(effective_time)){
@@ -177,7 +205,7 @@
 					<param name="recommend_num" type="long"/>
 					<param name="recommend_list" type="list">
 						<param name="avatar_address" type="string"/>
-						<param name="nick_name" type="string"/>
+						<param name="nick_name" type="rstring"/>
 						<param name="done_num" type="long"/>
 						<param name="record_time" type="long" fieldname="create_time"/>
 						<param name="position" type="long"/>
@@ -199,7 +227,7 @@
 					<param name="total_amount" type="double"/>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="course_price" type="double"/>
 						<param name="recommend_num" type="long" default="0"/>
@@ -242,7 +270,7 @@
 				</inputs>
 				<outputs>
 					<param name="course_id" type="string"/>
-					<param name="course_title" type="string"/>
+					<param name="course_title" type="rstring"/>
 					<param name="start_time" type="long"/>
 					<param name="course_price" type="double"/>
 					<param name="recommend_num" type="long"/>
@@ -272,7 +300,7 @@
 						}"/>
 					<param name="profit_list" type="list">
 						<param name="profit_amount" type="double" default="0"/>
-						<param name="nick_name" type="string"/>
+						<param name="nick_name" type="rstring"/>
 						<param name="record_time" type="long" fieldname="create_time"/>
 						<param name="position" type="long"/>
 					</param>
@@ -287,7 +315,7 @@
 					<param name="room_id" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
-					<param name="nick_name" type="string"/>
+					<param name="nick_name" type="rstring"/>
 					<param name="avatar_address" type="string"/>
 					<param name="rq_code" type="string"/>
 					<param name="profit_share_rate" type="double"/>
@@ -300,7 +328,7 @@
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
-					<param name="nick_name" type="string"/>
+					<param name="nick_name" type="rstring"/>
 					<param name="avatar_address" type="string"/>
 					<param name="update_time" type="long" require="Y,000100"/>					
 				</inputs>
