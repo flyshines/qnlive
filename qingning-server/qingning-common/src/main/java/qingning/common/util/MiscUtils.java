@@ -739,8 +739,7 @@ public final class MiscUtils {
 	 * @param str 转换后的字符串 
 	 * @return 转换前的字符串 
 	 */  
-	public static String RecoveryEmoji(String str)  
-	        throws UnsupportedEncodingException {  
+	public static String RecoveryEmoji(String str) {  
 	    String patternString = "\\[\\[(.*?)\\]\\]";  
 	  
 	    Pattern pattern = Pattern.compile(patternString);  

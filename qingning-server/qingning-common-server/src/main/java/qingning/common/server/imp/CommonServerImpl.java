@@ -510,7 +510,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("user_id", user_id);
                 
         resultMap.put("avatar_address", userMap.get("avatar_address"));
-        resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+        //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+        resultMap.put("nick_name", userMap.get("nick_name"));
     }
  
     @SuppressWarnings("unchecked")
@@ -566,7 +567,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("user_id", userId);
             
             resultMap.put("avatar_address", values.get("avatar_address"));
-            resultMap.put("nick_name", values.get("nick_name"));            
+            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));            
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
             resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSLONG, "today_distributer_amount", 0l));
@@ -588,7 +589,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
             resultMap.put("user_id", userId);
             resultMap.put("avatar_address", values.get("avatar_address"));
-            resultMap.put("nick_name", values.get("nick_name"));
+            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             return resultMap;
         }
  
