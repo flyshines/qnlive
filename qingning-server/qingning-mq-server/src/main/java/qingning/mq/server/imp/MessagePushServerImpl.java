@@ -365,7 +365,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
             //1.4将该课程从平台的预告课程列表 SYS：courses  ：prediction移除。如果存在结束课程列表 SYS：courses ：finish，则增加到课程结束列表
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, courseId);
             if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){
-                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, (double) now.getTime(), courseId);
+            	long  position = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position"));
+                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);
             }
 
             //1.5如果课程标记为结束，则清除该课程的禁言缓存数据

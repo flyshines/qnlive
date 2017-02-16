@@ -398,10 +398,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         double pos = MiscUtils.convertObjectToDouble(course.get("start_time"));
         jedis.zadd(predictionKey, pos, courseId);
- 
+        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
         //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
         String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-        jedis.zadd(platformCourseList, pos, courseId);
+        jedis.zadd(platformCourseList, lpos, courseId);
  
         resultMap.put("course_id", courseId);
  
@@ -645,7 +645,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 //1.4将该课程从平台的预告课程列表 SYS：courses  ：prediction移除。如果存在结束课程列表 SYS：courses ：finish，则增加到课程结束列表
                 jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
                 if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){
-                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, (double)courseEndTime.getTime(), reqMap.get("course_id").toString());
+                	long lpos = MiscUtils.convertInfoToPostion(courseEndTime.getTime(), MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
+                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
                 }
  
                 //1.5如果课程标记为结束，则清除该课程的禁言缓存数据
@@ -805,6 +806,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     query.clear();
                     query.put("course_id", course_id);
                     Map<String,String> course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
+                    long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
+                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());                    
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
                     TemplateData first = new TemplateData();
                     first.setColor("#000000");
@@ -910,7 +913,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(checkDiction){        	
         	if(MiscUtils.isEmpty(course_id)){
         		startIndexFinish = currentTime+"";        		
-        	} else if(query_time <= currentTime){
+        	} else if(query_time!=null && query_time <= currentTime){
         		startIndexFinish = "("+query_time;
         	}
         	dictionList = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
@@ -930,7 +933,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<String> preDictionList = new LinkedList<String>();
         if(pageCount>0 && checkPrediction){
         	startIndexFinish = "+inf";
-        	if(query_time>=currentTime){
+        	if(query_time!=null && query_time>=currentTime){
         		startIndexFinish="("+query_time;
         	}
         	preDictionSet = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
@@ -954,7 +957,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Set<Tuple> finishDictionSet = null;
         pageCount=((int)reqMap.get("page_count"))-courseIdList.size();
         if(pageCount>0){
-        	if(MiscUtils.isEmpty(course_id)){
+        	if(MiscUtils.isEmpty(course_id) || query_time == null){
         		startIndexFinish = "+inf";
         	} else {        		
         		startIndexFinish = "("+query_time;
@@ -1000,6 +1003,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     queryTime = Long.parseLong(lastCourse.get("start_time"));
                 }
 
+            } else {
+            	queryTime=(Long)reqMap.get("query_time");
             }
             if(queryTime != null){
                 Date date = new Date(queryTime);

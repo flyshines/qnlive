@@ -22,19 +22,25 @@
 					<access_token require="Y" />
 				</auth>
 				<inputs>
-					<param name="page_count" type="long" require="N"  />
-					<param name="course_id" type="string" require="N"  />
+					<param name="page_count" type="long" require="N"/>
+					<param name="course_id" type="string" require="N"/>
+					<param name="status" type="string" require="N"/>
+					<param name="data_source" type="string" require="N"/>
+					<param name="query_time" type="long" require="N"/>
+					<param name="position" type="long" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>
 						<param name="course_url" type="string"/>
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="lecturer_nick_name" type="string"/>
 						<param name="course_type" type="string"/>
-						<param name="data_source" type="string"/>						
+						<param name="data_source" type="string"/>
+						<param name="query_time" type="long"/>
+						<param name="position" type="long"/>						
 					</param>
 				</outputs>
 			</function>
@@ -48,8 +54,8 @@
 				</inputs>
 				<outputs>
 					<param name="avatar_address" type="string" />
-					<param name="room_name" type="string" />
-					<param name="room_remark" type="string" />					
+					<param name="room_name" type="rstring" />
+					<param name="room_remark" type="rstring" />					
 					<param name="fans_num" type="long" />
 					<param name="follow_status" type="string" />
 					<param name="roles" type="list" />					
@@ -67,15 +73,15 @@
 					<param name="course_type" type="string"/>
 					<param name="status" type="string"/>
 					<param name="course_url" type="string"/>
-					<param name="course_title" type="string"/>
+					<param name="course_title" type="rstring"/>
 					<param name="course_price" type="double"/>
 					<param name="start_time" type="long"/>
 					<param name="student_num" type="long"/>
 					<param name="student_list" type="list"/>					
 					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="string"/>
-					<param name="room_remark" type="string"/>
-					<param name="course_remark" type="string"/>
+					<param name="room_remark" type="rstring"/>
+					<param name="course_remark" type="rstring"/>
 					<param name="room_id" type="string"/>
 					<param name="roles" type="list"/>
 					<param name="join_status" type="string"/>
@@ -224,9 +230,9 @@
 				<outputs>
 					<param name="live_room_list" type="list">
 						<param name="avatar_address" type="string"/>
-						<param name="room_name" type="string"/>
+						<param name="room_name" type="rstring"/>
 						<param name="status" type="string"/>
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="course_id" type="string"/>
 						<param name="course_type" type="string"/>
 						<param name="start_time" type="long"/>
@@ -249,11 +255,11 @@
 					<param name="course_num" type="long"/>
 					<param name="course_list" type="list">					
 						<param name="course_id" type="string"/>
-						<param name="course_title" type="string"/>
+						<param name="course_title" type="rstring"/>
 						<param name="course_type" type="string"/>
 						<param name="course_url" type="string"/>
 						<param name="lecturer_id" type="string"/>
-						<param name="nick_name" type="string"/>
+						<param name="nick_name" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="status" type="string"/>
 						<param name="room_id" type="string"/>

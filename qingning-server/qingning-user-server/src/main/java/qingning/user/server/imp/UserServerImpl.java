@@ -166,12 +166,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	String status = (String)reqMap.get("status");
     	String course_id = (String)reqMap.get("course_id");
     	String data_source = (String)reqMap.get("data_source");
-    	String start_time_str = (String)reqMap.get("start_time");
-    	long start_time= MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	//String start_time_str = (String)reqMap.get("start_time");
+    	//long start_time= MiscUtils.convertObjectToLong(reqMap.get("start_time")); 
+    	Long query_time = (Long)reqMap.get("query_time");
+    	Long position = (Long)reqMap.get("position");
     	long currentTime = System.currentTimeMillis();
     	//进一步参数校验，传递了分页使用的课程id，则需要同时传递课程状态和数据来源信息
     	if(StringUtils.isNotBlank(reqMap.get("course_id").toString())){
-    		if(MiscUtils.isEmpty(status) || MiscUtils.isEmpty(data_source) || start_time<=0){
+    		if(MiscUtils.isEmpty(status) || MiscUtils.isEmpty(data_source) || query_time==null || position==null){
     			throw new QNLiveException("120004");
     		}            
     	} else {
@@ -183,7 +185,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	Jedis jedis = jedisUtils.getJedis();
 
     	Set<Tuple> dictionList = null;
-    	String startIndexFinish = "("+start_time_str;
+    	String startIndexFinish = "+inf";//("+start_time_str;
+    	if(query_time!=null && position!=null){
+    		startIndexFinish="("+MiscUtils.convertInfoToPostion(query_time, position);
+    	}
     	String endIndexPrediction = "-inf";
     	List<String> courseList = new LinkedList<String>();
     	List<Map<String,String>> courseDetailsList = new LinkedList<Map<String,String>>();
@@ -194,8 +199,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		Set<String> courseSet = new HashSet<String>();        
     		boolean removePrediction=true;
     		if(MiscUtils.isEmpty(course_id) || "4".equals(status)){        	
-    			if(start_time<=0){ 
-    				startIndexFinish = currentTime+"";
+    			if(query_time == null){ 
+    				startIndexFinish = MiscUtils.convertInfoToPostion(currentTime, 0)+"";
     			}
     			dictionList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, startIndexFinish, endIndexPrediction, 0, pageCount);
 
@@ -210,13 +215,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		}
     		Set<Tuple> predictionList = null;
     		if(pageCount>0){
-    			if(start_time<=0){ 
+    			if(query_time == null){ 
     				startIndexFinish = "+inf";
     			} else {  
     				if("4".equals(status)){
     					startIndexFinish = "+inf";
     				} else {
-    					startIndexFinish="("+start_time_str;
+    					startIndexFinish="("+MiscUtils.convertInfoToPostion(query_time, position);
     				}
     				
     			}
@@ -262,10 +267,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		pageCount = Integer.parseInt(reqMap.get("page_count").toString()) - courseList.size();
     		Set<Tuple> finishList = null;
     		if(pageCount>0){
-    			if(start_time<=0){ 
+    			if(query_time==null){ 
     				startIndexFinish = "+inf";
     			} else {
-    				startIndexFinish = "("+start_time_str;
+    				startIndexFinish = "("+MiscUtils.convertInfoToPostion(query_time, position);
     			}
     			finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexPrediction, 0, pageCount);
     			if(!MiscUtils.isEmpty(finishList)){
@@ -302,15 +307,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		queryMap.put("pageCount", pageCount);
     		if(!MiscUtils.isEmpty(lastCourse)){
     			long lastCourseEnd = MiscUtils.convertObjectToLong(lastCourse.get("end_time"));
-    			if(lastCourseEnd<start_time){
-    				start_time=lastCourseEnd;
+    			if(query_time !=null && lastCourseEnd<query_time){
+    				query_time=lastCourseEnd;
+    				position = MiscUtils.convertObjectToLong(lastCourse.get("position"));
     			}
     		}
-    		if(start_time>0){
-    			queryMap.put("startIndex", new Date(start_time));
+    		if(query_time != null){
+    			queryMap.put("position", MiscUtils.convertInfoToPostion(query_time, position));    			
     		}
 
-    		List<Map<String, Object>> list = userModuleServer.findCourseListForLecturer(queryMap);
+    		List<Map<String, Object>> list = userModuleServer.findFinishCourseListForLecturer(queryMap);
     		if(!MiscUtils.isEmpty(list)){
     			for(Map<String, Object> course:list){
     				Map<String, String> courseStr = new HashMap<String,String>();
@@ -320,7 +326,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
     			}        		
     		}
     	}
-
+    	if(!MiscUtils.isEmpty(courseDetailsList)){
+    		for(Map<String,String> course:courseDetailsList){
+    			if("2".equals(course.get(course.get("status")))){
+    				course.put("query_time", course.get("end_time"));
+    			} else {
+    				course.put("query_time", course.get("start_time"));
+    			}
+    			
+    		}
+    	}
     	Map<String, Object> resultMap = new HashMap<String, Object>();        
     	resultMap.put("course_list", courseDetailsList);        
     	return resultMap;

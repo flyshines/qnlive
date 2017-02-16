@@ -10,6 +10,8 @@ import qingning.common.entity.QNLiveException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
@@ -17,6 +19,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
  
 public final class MiscUtils {
     private MiscUtils(){};
@@ -26,6 +30,9 @@ public final class MiscUtils {
     private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
  
+    private static Pattern emojiPattern = Pattern.compile("([\\x{10000}-\\x{10ffff}\ud800-\udfff])");
+    private static Pattern emojiRecoverPattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
+    
     public static void setConfigPropertyPath(String configPropertyPath){
         MiscUtils.configPropertyPath=configPropertyPath;
     }
@@ -449,6 +456,14 @@ public final class MiscUtils {
        return date;
     }
     
+    public static String convertDateToString(Date date){
+    	if(date != null){
+    		return dateTimeFormat.format(date);
+    	} else {
+    		return "";
+    	}
+    }
+    
     @SuppressWarnings("rawtypes")
     public static String getKeyOfCachedData(String keyTemplate, Map map){
         if(isEmpty(keyTemplate) || isEmpty(map)){
@@ -695,4 +710,63 @@ public final class MiscUtils {
         int resultNum = random.nextInt(max)%(max-min+1) + min;
         return resultNum;
     }
+    public static long convertInfoToPostion(long timeInMillis,long pos){
+    	long postion = (timeInMillis-1487034414680l)/1000;
+    	return postion*Constants.SEQUENCE+pos;
+    }
+    
+	/** 
+	 * @Description 将字符串中的emoji表情转换成可以在utf-8字符集数据库中保存的格式（表情占4个字节，需要utf8mb4字符集） 
+	 * @param str 待转换字符串 
+	 * @return 转换后字符串  
+	 */  
+	public static String emojiConvertToNormalString(String str) {
+	    Matcher matcher = emojiPattern.matcher(str);  
+	    StringBuffer sb = new StringBuffer();  
+	    while(matcher.find()) {  
+	        try {  
+	            matcher.appendReplacement(sb,"[["+ URLEncoder.encode(matcher.group(1),"UTF-8") + "]]");  
+	        } catch(UnsupportedEncodingException e) {
+	        	matcher.appendReplacement(sb,matcher.group(1));
+	        }  
+	    }  
+	    matcher.appendTail(sb);
+	    return sb.toString();  
+	}  
+	  
+	/** 
+	 * @Description 还原utf8数据库中保存的含转换后emoji表情的字符串 
+	 * @param str 转换后的字符串 
+	 * @return 转换前的字符串 
+	 */  
+	public static String RecoveryEmoji(String str)  
+	        throws UnsupportedEncodingException {  
+	    String patternString = "\\[\\[(.*?)\\]\\]";  
+	  
+	    Pattern pattern = Pattern.compile(patternString);  
+	    Matcher matcher = pattern.matcher(str);  
+	  
+	    StringBuffer sb = new StringBuffer();  
+	    while(matcher.find()) {  
+	        try {  
+	        	String emoji = URLDecoder.decode(matcher.group(1), "UTF-8");
+	        	
+	        	Matcher detailsMatch = emojiPattern.matcher(emoji);
+	        	boolean isEmoji = detailsMatch.find();
+	        	if(isEmoji && detailsMatch.find()){
+	        		isEmoji=false;
+	        	}	        	
+	        	if(isEmoji){
+	        		matcher.appendReplacement(sb, emoji);
+	        	} else {
+	        		matcher.appendReplacement(sb, matcher.group(1));
+	        	}
+	              
+	        } catch(UnsupportedEncodingException e) {  
+	        	matcher.appendReplacement(sb,matcher.group(1));
+	        }  
+	    }  
+	    matcher.appendTail(sb);
+	    return sb.toString();  
+	}
 }
