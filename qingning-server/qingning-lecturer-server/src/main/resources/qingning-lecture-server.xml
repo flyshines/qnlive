@@ -204,6 +204,9 @@
 						    var ret = start_time;						
 							if(utils.isEqual(status,'2')){
 								ret=end_time;
+								if(utils.isEmpty(ret)){
+									ret = start_time;
+								}
 							}												
 							return ret;
 						}"/>

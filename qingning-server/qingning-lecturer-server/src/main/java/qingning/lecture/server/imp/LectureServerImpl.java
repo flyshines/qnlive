@@ -235,7 +235,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         if(! CollectionUtils.isEmpty(liveRoomMap)){
                             peocessLiveRoomMap = new HashMap<>();
                             peocessLiveRoomMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
-                            peocessLiveRoomMap.put("room_name", MiscUtils.convertString(liveRoomMap.get("room_name")));
+                            peocessLiveRoomMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                             peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount"),true));
                             peocessLiveRoomMap.put("fans_num", MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
                             peocessLiveRoomMap.put("room_id", MiscUtils.convertString(liveRoomMap.get("room_id")));
@@ -269,8 +269,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
             if(queryType.equals("1")){
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
-                resultMap.put("room_name", MiscUtils.convertString(liveRoomMap.get("room_name")));
-                resultMap.put("room_remark",  MiscUtils.convertString(liveRoomMap.get("room_remark")));
+                resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
+                resultMap.put("room_remark",  MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
                 resultMap.put("rq_code",  MiscUtils.convertString(liveRoomMap.get("rq_code")));
                 resultMap.put("room_address",  MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(Long.valueOf(liveRoomMap.get("update_time"))));
@@ -278,8 +278,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
             }else {
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
-                resultMap.put("room_name", MiscUtils.convertString(liveRoomMap.get("room_name")));
-                resultMap.put("room_remark", MiscUtils.convertString(liveRoomMap.get("room_remark")));
+                resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
+                resultMap.put("room_remark", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
                 resultMap.put("fans_num",  MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
                 resultMap.put("room_address", MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
@@ -871,7 +871,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
         return resultMap;
     }
- 
+    /**
+     * 逻辑roomCourses,courseList类似，注意重构同步
+     * */
     @FunctionName("courseList")
     public Map<String, Object> getCourseList(RequestEntity reqEntity) throws Exception {
         
@@ -946,7 +948,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
         			MiscUtils.courseTranferState(currentTime, courseInfoMap);
         			cachedCourse.put(courseId, courseInfoMap);
-        			if(!"4".equals(courseInfoMap.get("status"))){
+        			String status = (String)courseInfoMap.get("status");
+        			if(!"4".equals(status)){
+        				if(courseIdSet.contains(courseId)){
+        					courseIdList.remove(courseId);
+        				}
+        				if("2".equals(status)){
+        					jedis.zrem(lecturerCoursesPredictionKey, courseId);
+        					if(courseInfoMap.get("end_time")==null){
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("start_time")),courseId);
+        					} else {
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("end_time")),courseId);
+        					}
+        					
+        					continue;
+        				}
         				courseIdList.add(courseId);
         				courseIdSet.add(courseId);
         			}
@@ -998,7 +1014,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             Long queryTime = null; 
             if(!MiscUtils.isEmpty(lastCourse)){
                 if(finExist){
-                    queryTime = Long.parseLong(lastCourse.get("end_time"));
+                	if(lastCourse.get("end_time")==null){
+                		queryTime = Long.parseLong(lastCourse.get("start_time"));
+                	} else {
+                		queryTime = Long.parseLong(lastCourse.get("end_time"));
+                	}
                 } else {
                     queryTime = Long.parseLong(lastCourse.get("start_time"));
                 }

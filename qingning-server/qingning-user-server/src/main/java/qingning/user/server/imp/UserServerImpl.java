@@ -916,108 +916,191 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
+    /**
+     * 逻辑roomCourses,courseList类似，注意重构同步
+     * */
     @SuppressWarnings("unchecked")
     @FunctionName("roomCourses")
     public Map<String, Object> getRoomCourses(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("user_id", userId);
-        List<Map<String, String>> courseResultList = new ArrayList<>();
-
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
         //目前一个讲师仅能创建一个直播间，所以查询的是该讲师发布的课程
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
         String lecturerId = jedis.hget(roomKey, "lecturer_id");
-
-        //TODO 目前只有查询讲师的课程列表，查询直播间的课程列表暂未实现
-        //if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
+        if(MiscUtils.isEmpty(lecturerId)){
+        	throw new QNLiveException("120018");
+        }
+    	
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-
-        String startIndex = null;
-        String endIndex = "+inf";
-        String startIndexDB = null;
-        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-        if (reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())) {
-            startIndex = "0";
-        } else {
-            startIndex = "(" + reqMap.get("start_time").toString();
+        
+        String course_id = (String)reqMap.get("course_id");
+        int pageCount = (int)reqMap.get("page_count");
+        Long query_time = (Long)reqMap.get("query_time");
+        long currentTime = System.currentTimeMillis();
+        
+        List<Map<String,String>> courseList = new LinkedList<Map<String,String>>();        
+        String startIndexFinish = "+inf";
+        String endIndexPrediction = "-inf";
+        
+        Set<Tuple> dictionList = null;
+        boolean checkDiction = MiscUtils.isEmpty(course_id) || (jedis.zscore(lecturerCoursesPredictionKey, course_id) != null);
+        boolean checkPrediction = checkDiction;
+        if(query_time!=null && query_time>currentTime){
+        	checkDiction=false;
+        }
+        List<String> courseIdList = new LinkedList<String>();
+        Set<String> courseIdSet = new HashSet<String>();
+        if(checkDiction){        	
+        	if(MiscUtils.isEmpty(course_id)){
+        		startIndexFinish = currentTime+"";        		
+        	} else if(query_time!=null && query_time <= currentTime){
+        		startIndexFinish = "("+query_time;
+        	}
+        	dictionList = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(dictionList != null){
+        		pageCount = pageCount - dictionList.size();
+        		for(Tuple tuple : dictionList){
+        			String courseId = tuple.getElement();
+        			courseIdList.add(courseId);
+        			courseIdSet.add(courseId);
+        		}
+        	}
+        }
+        
+        Map<String,Map<String,String>> cachedCourse = new HashMap<String,Map<String,String>>();
+        
+        Set<Tuple> preDictionSet = null;
+        List<String> preDictionList = new LinkedList<String>();
+        if(pageCount>0 && checkPrediction){
+        	startIndexFinish = "+inf";
+        	if(query_time!=null && query_time>=currentTime){
+        		startIndexFinish="("+query_time;
+        	}
+        	preDictionSet = jedis.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(preDictionList != null){
+        		Map<String,String> queryParam = new HashMap<String,String>();
+        		RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+        		for(Tuple tuple : preDictionSet){
+        			String courseId = tuple.getElement();
+        			queryParam.put("course_id", courseId);
+        			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+        			MiscUtils.courseTranferState(currentTime, courseInfoMap);
+        			cachedCourse.put(courseId, courseInfoMap);
+        			String status = (String)courseInfoMap.get("status");
+        			if(!"4".equals(status)){
+        				if(courseIdSet.contains(courseId)){
+        					courseIdList.remove(courseId);
+        				}
+        				if("2".equals(status)){
+        					jedis.zrem(lecturerCoursesPredictionKey, courseId);
+        					if(courseInfoMap.get("end_time")==null){
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("start_time")),courseId);
+        					} else {
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("end_time")),courseId);
+        					}
+        					continue;
+        				}
+        				courseIdList.add(courseId);
+        				courseIdSet.add(courseId);
+        			}
+        		}
+        	}        	
+        }
+        boolean finExist = false;
+        Set<Tuple> finishDictionSet = null;
+        pageCount=((int)reqMap.get("page_count"))-courseIdList.size();
+        if(pageCount>0){
+        	if(MiscUtils.isEmpty(course_id) || query_time == null){
+        		startIndexFinish = "+inf";
+        	} else {        		
+        		startIndexFinish = "("+query_time;
+        	}
+        	finishDictionSet = jedis.zrevrangeByScoreWithScores(lecturerCoursesFinishKey, startIndexFinish, endIndexPrediction, 0, pageCount);
+        	if(!MiscUtils.isEmpty(finishDictionSet)){
+        		for(Tuple tuple : finishDictionSet){
+        			String courseId = tuple.getElement();
+        			if(courseIdSet.contains(courseId)){
+        				courseIdList.remove(courseId);
+        			}
+        			courseIdList.add(courseId);
+        			finExist=true;
+        		}        		
+        	}
+        }
+        pageCount=((int)reqMap.get("page_count"))-courseIdList.size();
+        Map<String,String> lastCourse = null;
+        if(!MiscUtils.isEmpty(courseIdList)){
+			Map<String,String> queryParam = new HashMap<String,String>();
+			RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+            for(String courseId:courseIdList){
+            	Map<String,String> courseInfoMap = cachedCourse.get(courseId);
+            	queryParam.put("course_id", courseId);
+            	if(courseInfoMap==null){
+            		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+            	}
+            	courseList.add(courseInfoMap);
+            	lastCourse = courseInfoMap;
+            }
         }
 
-        Set<Tuple> predictionList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndex, endIndex, 0, pageCount);
-        Set<Tuple> finishList = null;
-        List<Map<String, Object>> dbList = null;
-        Map<String, Object> finishResultMap = new HashMap<>();
+        
+        if(pageCount > 0){
+        	map.clear();
+            map.put("pageCount", pageCount);
+            map.put("lecturer_id", lecturerId);
+            Long queryTime = null; 
+            if(!MiscUtils.isEmpty(lastCourse)){
+                if(finExist){
+                	if(lastCourse.get("end_time")==null){
+                		queryTime = Long.parseLong(lastCourse.get("start_time"));
+                	} else {
+                		queryTime = Long.parseLong(lastCourse.get("end_time"));
+                	}
+                    
+                } else {
+                    queryTime = Long.parseLong(lastCourse.get("start_time"));
+                }
 
-        if (predictionList == null || predictionList.isEmpty()) {
-            if (startIndex.equals("0")) {
-                endIndex = "-inf";
-                startIndex = "+inf";
-                startIndexDB = null;
             } else {
-                endIndex = "-inf";
-                startIndexDB = startIndex;
+            	queryTime=(Long)reqMap.get("query_time");
             }
-
-            finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, startIndexDB, endIndex, 0, pageCount);
-
-        } else {
-            if (predictionList.size() < pageCount) {
-                startIndex = "+inf";
-                endIndex = "-inf";
-                finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, null, endIndex, 0, pageCount - predictionList.size());
+            if(queryTime != null){
+                Date date = new Date(queryTime);
+                map.put("startIndex", date);
             }
-        }
-
-        //未结束课程列表，结束课程列表，数据库课程列表三者拼接到最终的课程结果列表，即可得到结果
-        //分别迭代这三个列表
-        if (!CollectionUtils.isEmpty(finishResultMap)) {
-            if (finishResultMap.get("finishList") != null) {
-                finishList = (Set<Tuple>) finishResultMap.get("finishList");
-            }
-
-            if (finishResultMap.get("dbList") != null) {
-                dbList = (List<Map<String, Object>>) finishResultMap.get("dbList");
+            List<Map<String,Object>> finishCourse = userModuleServer.findCourseListForLecturer(map);
+            if(!MiscUtils.isEmpty(finishCourse)){               
+                for(Map<String,Object> finish:finishCourse){
+                    if(MiscUtils.isEqual(course_id, finish.get("course_id"))){
+                        continue;
+                    }
+                    Map<String,String> finishMap = new HashMap<String,String>();
+                    MiscUtils.converObjectMapToStringMap(finish, finishMap);
+                    courseList.add(finishMap);
+                }
             }
         }
-
-
-        if (predictionList != null) {
-            for (Tuple tuple : predictionList) {
-                ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
-                Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
-                courseResultList.add(courseInfoMap);
-            }
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        
+        for(Map<String,String> course:courseList){
+        	if("2".equals(course.get("status"))){
+        		if(course.get("end_time")==null){
+        			course.put("query_time", course.get("start_time"));
+        		} else {
+        			course.put("query_time", course.get("end_time"));
+        		}
+        	} else {
+        		course.put("query_time", course.get("start_time"));
+        	}
         }
-
-        if (finishList != null) {
-            for (Tuple tuple : finishList) {
-                ((Map<String, Object>) reqEntity.getParam()).put("course_id", tuple.getElement());
-                Map<String, String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(), reqEntity, readCourseOperation, jedisUtils, true);
-                courseResultList.add(courseInfoMap);
-            }
-        }
-
-        if (dbList != null) {
-            for (Map<String, Object> courseDBMap : dbList) {
-                Map<String, String> courseDBMapString = new HashMap<>();
-                MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
-                courseResultList.add(courseDBMapString);
-            }
-        }
-
-        //}
-
-        if (!CollectionUtils.isEmpty(courseResultList)) {
-            resultMap.put("course_list", courseResultList);
-        }
-
+        
+        resultMap.put("course_list", courseList);
+        
         return resultMap;
     }
 
