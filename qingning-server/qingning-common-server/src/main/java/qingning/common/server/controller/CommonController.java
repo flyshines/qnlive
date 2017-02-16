@@ -141,9 +141,7 @@ public class CommonController extends AbstractController {
      * @throws Exception
      */
     @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
-    public void weixinLogin(
-            HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
 //        String s =  String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb57d497bf6a3f4e5&redirect_uri=http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect",
 //                "wxb57d497bf6a3f4e5", "http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin", "snsapi_userinfo", "STATE");
 
@@ -162,7 +160,8 @@ public class CommonController extends AbstractController {
             throw new QNLiveException("120008");
         }
         String userWeixinAccessToken = getCodeResultJson.getString("access_token");
-        response.sendRedirect("http://test.qnlive.1758app.com/web/?access_token="+userWeixinAccessToken);
+        logger.info("微信Access_token"+userWeixinAccessToken);
+        response.sendRedirect("http://test.qnlive.1758app.com/web?access_token="+userWeixinAccessToken);
 
 
         //根据相关条件将server_url列表信息返回
