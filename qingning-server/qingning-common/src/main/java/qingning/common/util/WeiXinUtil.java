@@ -47,6 +47,7 @@ public class WeiXinUtil {
     public final static String get_user_info_by_code_url = MiscUtils.getConfigByKey("get_user_info_by_code_url");
     public final static String get_user_info_by_access_token = MiscUtils.getConfigByKey("get_user_info_by_access_token");
     public final static String get_base_user_info_by_access_token = MiscUtils.getConfigByKey("get_base_user_info_by_access_token");
+    public final static String get_user_by_openid = MiscUtils.getConfigByKey("get_user_by_openid");
     //获取JSAPI_Ticket
     public static String jsapi_ticket_url = MiscUtils.getConfigByKey("jsapi_ticket_url");
 
@@ -104,6 +105,20 @@ public class WeiXinUtil {
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         log.debug("------微信--通过H5传递code获得access_token-返回参数  "+requestResult);
+        return jsonObject;
+    }
+
+
+    /**
+     * 通过微信openId 来判断是否关注公众号
+     * @param accessToken 调用接口凭证 公众号的通用凭证accesstoken
+     * @param openId 微信用户的openId
+     * @return
+     */
+    public static JSONObject getUserByOpenid(String accessToken,String openId){
+        String requestUrl = get_user_by_openid.replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
 

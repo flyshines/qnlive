@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpRequest;
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -125,8 +127,7 @@ public class CommonController extends AbstractController {
         //根据相关条件将server_url列表信息返回
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
         Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
-        if (bodyMap.get("server_url_update_time") == null ||
-                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
+        if (bodyMap.get("server_url_update_time") == null || !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
             resultMap.put("server_url_info_list", serverUrlInfoMap);
             resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
         }
@@ -136,24 +137,40 @@ public class CommonController extends AbstractController {
 
     /**
      * 测试 微信公众号授权后的回调
+     * 前端 默认进行 微信静默授权
+     *  授权回调进入后台在后台获取code进行判断时候获取 openid
+     *  如果有就进行正常跳转
+     *  如果没有就进行手动授权
+     *
+     *
      * @param request
      * @param response
      * @throws Exception
      */
     @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
     public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
         String code = codes[0];
-        JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
-            throw new QNLiveException("120008");
+        Map<String,String> map = new HashMap<>();
+        map.put("code",code);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinLogin", null, "");
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        String openId = (String) resultMap.get("openid");
+        if(openId == null || openId.equals("")){//如果没有openid 那么就跳到手动
+            response.sendRedirect(
+                    " https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + MiscUtils.getConfigByKey("appid")+
+                            "&redirect_uri=" +  MiscUtils.getConfigByKey("call_back_url")+
+                            "&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
+
+        }else{
+            String userWeixinAccessToken = (String) resultMap.get("access_token");
+            logger.info("微信Access_token"+userWeixinAccessToken);
+            response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
         }
-        String userWeixinAccessToken = getCodeResultJson.getString("access_token");
-        logger.info("微信Access_token"+userWeixinAccessToken);
-        response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
     }
 
     /**
@@ -310,11 +327,11 @@ public class CommonController extends AbstractController {
     }
 	/**
 	 * 查询个人的分销信息
-	 * @param page_count
-	 * @param record_date
-	 * @param access_token
-	 * @param version
-	 * @return
+	 * @param page_count 每页记录数（默认10）
+	 * @param record_date 用户加入直播间分销的时间（分页时使用）
+	 * @param access_token token 验证
+	 * @param version 版本号
+	 * @return ResponseEntity responseEntity
 	 * @throws Exception
 	 */
     @RequestMapping(value="/common/distribution",method=RequestMethod.GET)
