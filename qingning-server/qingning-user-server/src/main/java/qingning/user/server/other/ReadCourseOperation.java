@@ -24,6 +24,6 @@ public class ReadCourseOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
 
-        return userModuleServer.findLiveRoomByRoomId(reqMap.get("course_id").toString());
+        return userModuleServer.findCourseByCourseId((String)reqMap.get("course_id"));
     }
 }

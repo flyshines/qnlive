@@ -274,6 +274,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     		pageCount = Integer.parseInt(reqMap.get("page_count").toString()) - courseList.size();
     		Set<Tuple> finishList = null;
+    		Set<String> finishSet = new HashSet<String>();
     		if(pageCount>0){
     			if(query_time==null){ 
     				startIndexFinish = "+inf";
@@ -288,6 +289,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     						courseList.remove(courseId);
     					}
     					courseList.add(courseId);
+    					finishSet.add(courseId);
     				}
     			}
     		}        
@@ -300,6 +302,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
     				if(courseInfoMap == null){
     					queryParam.put("course_id", courseId);
     					courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);	
+    				}
+    				if(finishSet.contains(courseId) && !"2".equals(courseInfoMap.get("status"))){
+    					queryParam.put("course_id", courseId);
+    					String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryParam);
+    					jedis.hset(courseKey, "status", "2");
     				}
     				courseInfoMap.put("data_source", "1");
     				courseDetailsList.add(courseInfoMap);
