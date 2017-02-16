@@ -142,36 +142,20 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
     public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-//        String s =  String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb57d497bf6a3f4e5&redirect_uri=http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect",
-//                "wxb57d497bf6a3f4e5", "http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin", "snsapi_userinfo", "STATE");
-        //根据相关条件将server_url列表信息返回
-//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-//        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
-//        if (bodyMap.get("server_url_update_time") == null ||
-//                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
-//            resultMap.put("server_url_info_list", serverUrlInfoMap);
-//            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
-//        }
-//        responseEntity.setReturnData(resultMap);
-        //return responseEntity;
+
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
         String code = codes[0];
         Map map = new HashMap();
         map.put("code",code);
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLogin", null, "");
-        requestEntity.setParam(map);
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             throw new QNLiveException("120008");
         }
         String userWeixinAccessToken = getCodeResultJson.getString("access_token");
         logger.info("微信Access_token"+userWeixinAccessToken);
-        response.sendRedirect("http://test.qnlive.1758app.com/web?access_token="+userWeixinAccessToken);
-
+        response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
     }
 
     /**
