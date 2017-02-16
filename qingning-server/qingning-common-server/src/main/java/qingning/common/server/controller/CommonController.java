@@ -159,12 +159,9 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        String openId = (String) resultMap.get("openid");
-        if(openId == null || openId.equals("")){//如果没有openid 那么就跳到手动
-            response.sendRedirect(
-                    " https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + MiscUtils.getConfigByKey("appid")+
-                            "&redirect_uri=" +  MiscUtils.getConfigByKey("call_back_url")+
-                            "&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect");
+        Integer subscribe = (Integer)resultMap.get("subscribe");
+        if(subscribe == 0){//如果没有openid 那么就跳到手动
+            response.sendRedirect("https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzIyNTc1MDQ2Mw==&scene=110#wechat_redirect");
 
         }else{
             String userWeixinAccessToken = (String) resultMap.get("access_token");

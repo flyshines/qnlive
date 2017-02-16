@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.util.CollectionUtils;
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -333,13 +334,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String code = reqMap.get("login_id").toString();
         //1.传递授权code及相关参数，调用微信验证code接口
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
+
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             throw new QNLiveException("120008");
         }
+        String openid = getCodeResultJson.getString("openid");
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
         //1.2.1根据 union_id查询数据库
-        String openid = getCodeResultJson.getString("openid");
+
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","4");//4.微信code方式登录
         queryMap.put("web_openid",openid);
@@ -376,7 +379,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String sex = userJson.getString("sex");
             String headimgurl = userJson.getString("headimgurl");
 
-            Jedis jedis = jedisUtils.getJedis();
+
             Map<String,String> imResultMap = null;
             try {
                 imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");
@@ -448,15 +451,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String code = reqMap.get("code").toString();
         //1.传递授权code及相关参数，调用微信验证code接口
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-        String openid = getCodeResultJson.getString("openid");
-        resultMap.put("openid",openid);
-        if(openid == null || openid.equals("")){//如果没有openid 那么就直接返回
-            return resultMap;
-        }
-
-        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || openid == null) {
+        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null) {
             throw new QNLiveException("120008");
         }
+        String openid = getCodeResultJson.getString("openid");
+        Jedis jedis = jedisUtils.getJedis();
+        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//判断是否有关注公众号
+        Integer subscribe = user.getInteger("subscribe");
+        if(subscribe == 0){//没有关注我们公众号
+            resultMap.put("subscribe",subscribe);
+            return resultMap;
+        }else{//关注了
+            resultMap.put("subscribe",subscribe);
+        }
+
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
         //1.2.1根据 union_id查询数据库
@@ -496,7 +505,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String sex = userJson.getString("sex");
             String headimgurl = userJson.getString("headimgurl");
 
-            Jedis jedis = jedisUtils.getJedis();
             Map<String,String> imResultMap = null;
             try {
                 imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");
@@ -1124,9 +1132,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("commonDistribution")
     public Map<String,Object> getCommonDistribution(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-        Map<String,Object> resultMap = new HashMap<String, Object>();
+
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("distributer_id", userId);
+        int pageCount = (Integer)reqMap.get("page_count");
+
+        Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
+        if(MiscUtils.isEmpty(distributer)){
+            throw new QNLiveException("120012");
+        }
+        Map<String,Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("total_amount", distributer.get("total_amount"));
+
         //查询用户的直播间分销列表
         Jedis jedis = jedisUtils.getJedis();
         Map<String,Object> queryMap = new HashMap<>();
