@@ -144,7 +144,16 @@ public class CommonController extends AbstractController {
     public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
 //        String s =  String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxb57d497bf6a3f4e5&redirect_uri=http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect",
 //                "wxb57d497bf6a3f4e5", "http%3a%2f%2flocalhost%3a8080%2fqingning-common-server%2fcommon%2fweixi%2flogin", "snsapi_userinfo", "STATE");
-
+        //根据相关条件将server_url列表信息返回
+//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+//        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
+//        if (bodyMap.get("server_url_update_time") == null ||
+//                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
+//            resultMap.put("server_url_info_list", serverUrlInfoMap);
+//            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+//        }
+//        responseEntity.setReturnData(resultMap);
+        //return responseEntity;
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
@@ -163,20 +172,18 @@ public class CommonController extends AbstractController {
         logger.info("微信Access_token"+userWeixinAccessToken);
         response.sendRedirect("http://test.qnlive.1758app.com/web?access_token="+userWeixinAccessToken);
 
-
-        //根据相关条件将server_url列表信息返回
-//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-//        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
-//        if (bodyMap.get("server_url_update_time") == null ||
-//                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
-//            resultMap.put("server_url_info_list", serverUrlInfoMap);
-//            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
-//        }
-//        responseEntity.setReturnData(resultMap);
-        //return responseEntity;
     }
 
+    /**
+     * 微信 开放平台 公众号消息与事件接受
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/weixin/weiXinSystemMsg", method = RequestMethod.GET)
+    public void weiXinSystemMsg(HttpServletRequest request,HttpServletResponse response) throws Exception {
 
+    }
 
     /**
      * 获得上传到七牛token
@@ -267,6 +274,12 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+    /**
+     * 处理微信支付回调
+     * @param request
+     * @param response
+     * @throws Exception
+     */
     @RequestMapping(value = "/common/payment/weixin/result", method = RequestMethod.POST)
     public void handleWeixinPayResult(HttpServletRequest request, HttpServletResponse response) throws Exception{
         logger.info("================> 接收到 weixinNotify 通知。==================");
