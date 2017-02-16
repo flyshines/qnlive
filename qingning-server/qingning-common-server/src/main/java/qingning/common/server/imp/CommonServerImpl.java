@@ -510,7 +510,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("user_id", user_id);
                 
         resultMap.put("avatar_address", userMap.get("avatar_address"));
-        resultMap.put("nick_name", userMap.get("nick_name"));
+        resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
     }
  
     @SuppressWarnings("unchecked")
