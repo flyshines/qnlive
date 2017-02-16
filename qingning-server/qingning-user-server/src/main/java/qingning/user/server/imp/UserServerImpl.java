@@ -916,7 +916,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
+    /**
+     * 逻辑roomCourses,courseList类似，注意重构同步
+     * */
     @SuppressWarnings("unchecked")
     @FunctionName("roomCourses")
     public Map<String, Object> getRoomCourses(RequestEntity reqEntity) throws Exception {
