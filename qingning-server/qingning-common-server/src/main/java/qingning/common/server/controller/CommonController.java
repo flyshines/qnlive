@@ -147,8 +147,6 @@ public class CommonController extends AbstractController {
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
         String code = codes[0];
-        Map map = new HashMap();
-        map.put("code",code);
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             throw new QNLiveException("120008");
