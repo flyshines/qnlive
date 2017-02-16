@@ -721,6 +721,9 @@ public final class MiscUtils {
 	 * @return 转换后字符串  
 	 */  
 	public static String emojiConvertToNormalString(String str) {
+		if(MiscUtils.isEmpty(str)){
+			return "";
+		}
 	    Matcher matcher = emojiPattern.matcher(str);  
 	    StringBuffer sb = new StringBuffer();  
 	    while(matcher.find()) {  
@@ -740,6 +743,9 @@ public final class MiscUtils {
 	 * @return 转换前的字符串 
 	 */  
 	public static String RecoveryEmoji(String str) {  
+		if(MiscUtils.isEmpty(str)){
+			return "";
+		}
 	    String patternString = "\\[\\[(.*?)\\]\\]";  
 	  
 	    Pattern pattern = Pattern.compile(patternString);  

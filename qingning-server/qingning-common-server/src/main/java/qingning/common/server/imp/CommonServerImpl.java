@@ -33,7 +33,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
- 
+import sun.security.x509.OIDMap;
+
 public class CommonServerImpl extends AbstractQNLiveServer {
  
     private static final Logger logger   = LoggerFactory.getLogger(CommonServerImpl.class);
@@ -943,6 +944,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if("0".equals(profit_type)){
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
+                    jedis.hincrBy(lecturerKey,"room_done_num",1);
                 }
                 jedis.hincrBy(lecturerKey, "total_amount", lecturerProfit);
 
@@ -1122,18 +1124,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("commonDistribution")
     public Map<String,Object> getCommonDistribution(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("distributer_id", userId);
-        int pageCount = (Integer)reqMap.get("page_count");
-
-        Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
-        if(MiscUtils.isEmpty(distributer)){
-            throw new QNLiveException("120012");
-        }
         Map<String,Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("total_amount", distributer.get("total_amount"));
-
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //查询用户的直播间分销列表
         Jedis jedis = jedisUtils.getJedis();
         Map<String,Object> queryMap = new HashMap<>();
@@ -1373,10 +1366,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.put("user_id", userId);        
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
         resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",userMap.get("nick_name"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
-        resultMap.put("course_title",courseMap.get("course_title"));
+        resultMap.put("course_title",MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
         resultMap.put("start_time",courseMap.get("start_time"));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
  
@@ -1398,10 +1391,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String roomId = reqMap.get("room_id").toString();
         
         resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",userMap.get("nick_name"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
-        resultMap.put("room_name",liveRoomMap.get("room_name"));
+        resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
  
         //查询该用户是否为该直播间的分销员
         String share_url = getLiveRoomShareURL(userId, roomId);
@@ -1549,6 +1542,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         jedis.hincrBy(distributerKey, "last_recommend_num", 1);                        
                         jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
 
+                        //5.修改讲师缓存中的推荐用户数
+                        Map<String,Object> cacheKeyMap = new HashMap<>();
+                        cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+                        jedis.hincrBy(lecturerKey, "room_recommend_num", 1);
+
                        /* Map<String,Object> updateMap = new HashMap<>();
                         updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
                         updateMap.put("room_id",room_id);
@@ -1579,8 +1578,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                                 //4.直播间分销员的推荐人数增加一
                                 jedis.hincrBy(distributerKey, "click_num", 1);
-                                jedis.hincrBy(distributerKey, "recommend_num", 1);
-                                jedis.hincrBy(distributerKey, "last_recommend_num", 1);
                                 jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
                             }
                         }
@@ -1713,7 +1710,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 break;
         }
  
-        resultMap.put("title",title);
+        resultMap.put("title",MiscUtils.RecoveryEmoji(title));
         resultMap.put("content",content);
         resultMap.put("icon_url",icon_url);
         resultMap.put("simple_content",simple_content);

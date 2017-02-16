@@ -64,6 +64,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RoomDistributerRecommendDetailMapper roomDistributerRecommendDetailMapper;
+
+	@Autowired(required = true)
+	private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -527,6 +530,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findRoomRecommendUserList(Map<String, Object> reqMap) {
 		return roomDistributerRecommendMapper.findRoomRecommendUserList(reqMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findDistributionRoomDetailList(Map<String, Object> reqMap) {
+		return roomDistributerDetailsMapper.findDistributionRoomDetailList(reqMap);
 	}
 
 	@Override
