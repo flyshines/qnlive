@@ -1002,85 +1002,50 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("commonDistribution")
     public Map<String,Object> getCommonDistribution(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("distributer_id", userId);
-        int pageCount = (Integer)reqMap.get("page_count");
-
-        Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
-        if(MiscUtils.isEmpty(distributer)){
-            throw new QNLiveException("120012");
-        }
         Map<String,Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("total_amount", distributer.get("total_amount"));
-
-        //查询直播间分销员明细表
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //查询用户的直播间分销列表
+        Jedis jedis = jedisUtils.getJedis();
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("page_count", pageCount);
-        queryMap.put("distributer_id", userId);
-        if(reqMap.get("record_date") != null){
-            queryMap.put("record_date", reqMap.get("record_date"));
-        }
-        List<Map<String,Object>> roomInfoList = commonModuleServer.findDistributionRoomDetailList(queryMap);
-        for(Map<String,Object> map : roomInfoList){
-            Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, map.get("room_id").toString(), readRoomDistributerOperation, jedisUtils);
-            if(! MiscUtils.isEmpty(roomDistributorMap)){
-                map.put("recommend_num", roomDistributorMap.get("recommend_num"));
-                map.put("recommend_num", roomDistributorMap.get("recommend_num"));
-                RequestEntity requestEntity = new RequestEntity();
-                Map<String,Object> innerMap = new HashMap<>();
-                innerMap.put("room_id", map.get("room_id").toString());
-                requestEntity.setParam(innerMap);
-                Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(map.get("room_id").toString(), requestEntity, readLiveRoomOperation, jedisUtils, true);
-                if(! MiscUtils.isEmpty(liveRoomMap)){
-                    roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
-                }
+        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
+        if(jedis.exists(userRoomDistributionListInfoKey)){
+            //缓存中存在，则读取缓存中的内容
+            //初始化下标
+            long startIndex;
+            long endIndex;
+            Set<String> roomIdList;
+            //如果分页的record_date不为空
+            if(reqMap.get("record_date") != null && StringUtils.isNotBlank(reqMap.get("record_date").toString())){
+                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "(" +reqMap.get("record_date").toString(), "-inf",  0, pageCount);
+            }else {
+                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "+inf","-inf", 0, pageCount);
             }
-        }
 
-//
-//
-//        //查询用户的直播间分销列表
-//        Jedis jedis = jedisUtils.getJedis();
-//        Map<String,Object> queryMap = new HashMap<>();
-//        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
-//        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
-//        if(jedis.exists(userRoomDistributionListInfoKey)){
-//            //缓存中存在，则读取缓存中的内容
-//            //初始化下标
-//            long startIndex;
-//            long endIndex;
-//            Set<String> roomIdList;
-//            //如果分页的record_date不为空
-//            if(reqMap.get("record_date") != null && StringUtils.isNotBlank(reqMap.get("record_date").toString())){
-//                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "(" +reqMap.get("record_date").toString(), "-inf",  0, pageCount);
-//            }else {
-//                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "+inf","-inf", 0, pageCount);
-//            }
-//
-//            if(! CollectionUtils.isEmpty(roomIdList)){
-//                //缓存中存在则读取缓存内容
-//                List<Map<String,String>> roomDistributorListCache = new ArrayList<>();
-//                for(String roomId : roomIdList){
-//                    Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
-//                    if(! MiscUtils.isEmpty(roomDistributorMap)){
-//                        RequestEntity requestEntity = new RequestEntity();
-//                        Map<String,Object> innerMap = new HashMap<>();
-//                        innerMap.put("room_id", roomId);
-//                        requestEntity.setParam(innerMap);
-//                        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId, requestEntity, readLiveRoomOperation, jedisUtils, true);
-//                        if(! MiscUtils.isEmpty(liveRoomMap)){
-//                            roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
-//                        }
-//                    }
-//                    roomDistributorListCache.add(roomDistributorMap);
-//                }
-//
-//                resultMap.put("room_list", roomDistributorListCache);
-//            }
-//
-//            return resultMap;
-//        }
+            if(! CollectionUtils.isEmpty(roomIdList)){
+                //缓存中存在则读取缓存内容
+                List<Map<String,String>> roomDistributorListCache = new ArrayList<>();
+                for(String roomId : roomIdList){
+                    Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+                    if(! MiscUtils.isEmpty(roomDistributorMap)){
+                        RequestEntity requestEntity = new RequestEntity();
+                        Map<String,Object> innerMap = new HashMap<>();
+                        innerMap.put("room_id", roomId);
+                        requestEntity.setParam(innerMap);
+                        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId, requestEntity, readLiveRoomOperation, jedisUtils, true);
+                        if(! MiscUtils.isEmpty(liveRoomMap)){
+                            roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
+                        }
+                    }
+                    roomDistributorListCache.add(roomDistributorMap);
+                }
+
+                resultMap.put("room_list", roomDistributorListCache);
+            }
+
+            return resultMap;
+        }
 
         return resultMap;
     }
