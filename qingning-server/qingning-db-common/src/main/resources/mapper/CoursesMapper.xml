@@ -7,9 +7,9 @@
   <select id="findFinishCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
   	select * from t_courses where status='2'
   	<if test="position != null"> 
-  		and ((UNIX_TIMESTAMP(end_time)-1487034414680) * 1000000 +position) <![CDATA[ < ]]> #{position}
+  		and ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) <![CDATA[ < ]]> #{position}
   	</if> 
-  	 order by ((UNIX_TIMESTAMP(end_time)-1487034414680) * 1000000 +position) desc limit #{pageCount}
+  	 order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit #{pageCount}
   </select>
   <select id="findCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
     select * from t_courses  where 1 =1
