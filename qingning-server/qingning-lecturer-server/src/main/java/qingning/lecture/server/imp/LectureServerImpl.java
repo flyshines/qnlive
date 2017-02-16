@@ -1656,20 +1656,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         for(String key:courseInfoMap.keySet()){
             result.put(key, courseInfoMap.get(key));
         }
+
         List<Map<String,Object>> list = lectureModuleServer.findCourseProfitList(reqMap);
         result.put("profit_list", list);       
         final Map<String, List<Map<String,Object>>> profitMap = new HashMap<String, List<Map<String,Object>>>();
         for(Map<String,Object> profit:list){
             String distributer_id = (String)profit.get("distributer_id");
+            if(profit.get("share_amount") != null){
+                Long trueProfit = (Long)profit.get("profit_amount") - (Long)profit.get("share_amount");
+                profit.put("profit_amount", trueProfit);
+            }
             if(!MiscUtils.isEmpty(distributer_id)){
                 List<Map<String,Object>> profitList = profitMap.get(distributer_id);
                 if(profitList==null){
                     profitList = new LinkedList<Map<String,Object>>();
                     profitMap.put(distributer_id, profitList);
-                }
-                if(profit.get("share_amount") != null){
-                    Long trueProfit = (Long)profit.get("profit_amount") - (Long)profit.get("share_amount");
-                    profit.put("profit_amount", trueProfit);
                 }
                 profitList.add(profit);
             }
@@ -2011,17 +2012,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         query.put("distributer_id", userId);
         query.put("room_id", room_id);
         jedis.hmset(newRQcodeKey, query);
-
-        //将数据插入该用户的分销直播间列表中
-        Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
-        queryMap.clear();
-        queryMap.put(Constants.FIELD_ROOM_ID, room_id);
-        queryMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, userId);
-        String roomDistributorKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryMap);
-        Date now = (Date)insertResultMap.get("now");
-        jedis.zadd(userRoomDistributionListInfoKey, now.getTime(), roomDistributorKey);
 
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();

@@ -79,4 +79,6 @@ public interface ICommonModuleServer {
 	void updateRoomDistributerRecommend(Map<String, Object> insertMap);
 
 	List<Map<String,Object>> findRoomRecommendUserList(Map<String, Object> reqMap);
+
+	List<Map<String,Object>> findDistributionRoomDetailList(Map<String, Object> reqMap);
 }

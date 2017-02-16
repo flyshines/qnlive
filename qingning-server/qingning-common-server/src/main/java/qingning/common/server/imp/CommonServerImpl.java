@@ -33,7 +33,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
- 
+import sun.security.x509.OIDMap;
+
 public class CommonServerImpl extends AbstractQNLiveServer {
  
     private static final Logger logger   = LoggerFactory.getLogger(CommonServerImpl.class);
@@ -821,6 +822,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if("0".equals(profit_type)){
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
+                    jedis.hincrBy(lecturerKey,"room_done_num",1);
                 }
                 jedis.hincrBy(lecturerKey, "total_amount", lecturerProfit);
 
@@ -1012,47 +1014,73 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<String, Object>();
         resultMap.put("total_amount", distributer.get("total_amount"));
 
-        //查询用户的直播间分销列表
-        Jedis jedis = jedisUtils.getJedis();
+        //查询直播间分销员明细表
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
-        if(jedis.exists(userRoomDistributionListInfoKey)){
-            //缓存中存在，则读取缓存中的内容
-            //初始化下标
-            long startIndex;
-            long endIndex;
-            Set<String> roomIdList;
-            //如果分页的record_date不为空
-            if(reqMap.get("record_date") != null && StringUtils.isNotBlank(reqMap.get("record_date").toString())){
-                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "(" +reqMap.get("record_date").toString(), "-inf",  0, pageCount);
-            }else {
-                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "+inf","-inf", 0, pageCount);
-            }
-
-            if(! CollectionUtils.isEmpty(roomIdList)){
-                //缓存中存在则读取缓存内容
-                List<Map<String,String>> roomDistributorListCache = new ArrayList<>();
-                for(String roomId : roomIdList){
-                    Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
-                    if(! MiscUtils.isEmpty(roomDistributorMap)){
-                        RequestEntity requestEntity = new RequestEntity();
-                        Map<String,Object> innerMap = new HashMap<>();
-                        innerMap.put("room_id", roomId);
-                        requestEntity.setParam(innerMap);
-                        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId, requestEntity, readLiveRoomOperation, jedisUtils, true);
-                        if(! MiscUtils.isEmpty(liveRoomMap)){
-                            roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
-                        }
-                    }
-                    roomDistributorListCache.add(roomDistributorMap);
-                }
-
-                resultMap.put("room_list", roomDistributorListCache);
-            }
-
-            return resultMap;
+        queryMap.put("page_count", pageCount);
+        queryMap.put("distributer_id", userId);
+        if(reqMap.get("record_date") != null){
+            queryMap.put("record_date", reqMap.get("record_date"));
         }
+        List<Map<String,Object>> roomInfoList = commonModuleServer.findDistributionRoomDetailList(queryMap);
+        for(Map<String,Object> map : roomInfoList){
+            Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, map.get("room_id").toString(), readRoomDistributerOperation, jedisUtils);
+            if(! MiscUtils.isEmpty(roomDistributorMap)){
+                map.put("recommend_num", roomDistributorMap.get("recommend_num"));
+                map.put("recommend_num", roomDistributorMap.get("recommend_num"));
+                RequestEntity requestEntity = new RequestEntity();
+                Map<String,Object> innerMap = new HashMap<>();
+                innerMap.put("room_id", map.get("room_id").toString());
+                requestEntity.setParam(innerMap);
+                Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(map.get("room_id").toString(), requestEntity, readLiveRoomOperation, jedisUtils, true);
+                if(! MiscUtils.isEmpty(liveRoomMap)){
+                    roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
+                }
+            }
+        }
+
+//
+//
+//        //查询用户的直播间分销列表
+//        Jedis jedis = jedisUtils.getJedis();
+//        Map<String,Object> queryMap = new HashMap<>();
+//        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+//        String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
+//        if(jedis.exists(userRoomDistributionListInfoKey)){
+//            //缓存中存在，则读取缓存中的内容
+//            //初始化下标
+//            long startIndex;
+//            long endIndex;
+//            Set<String> roomIdList;
+//            //如果分页的record_date不为空
+//            if(reqMap.get("record_date") != null && StringUtils.isNotBlank(reqMap.get("record_date").toString())){
+//                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "(" +reqMap.get("record_date").toString(), "-inf",  0, pageCount);
+//            }else {
+//                roomIdList = jedis.zrevrangeByScore(userRoomDistributionListInfoKey, "+inf","-inf", 0, pageCount);
+//            }
+//
+//            if(! CollectionUtils.isEmpty(roomIdList)){
+//                //缓存中存在则读取缓存内容
+//                List<Map<String,String>> roomDistributorListCache = new ArrayList<>();
+//                for(String roomId : roomIdList){
+//                    Map<String,String>  roomDistributorMap = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+//                    if(! MiscUtils.isEmpty(roomDistributorMap)){
+//                        RequestEntity requestEntity = new RequestEntity();
+//                        Map<String,Object> innerMap = new HashMap<>();
+//                        innerMap.put("room_id", roomId);
+//                        requestEntity.setParam(innerMap);
+//                        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId, requestEntity, readLiveRoomOperation, jedisUtils, true);
+//                        if(! MiscUtils.isEmpty(liveRoomMap)){
+//                            roomDistributorMap.put("room_name", liveRoomMap.get("room_name"));
+//                        }
+//                    }
+//                    roomDistributorListCache.add(roomDistributorMap);
+//                }
+//
+//                resultMap.put("room_list", roomDistributorListCache);
+//            }
+//
+//            return resultMap;
+//        }
 
         return resultMap;
     }
@@ -1427,6 +1455,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         jedis.hincrBy(distributerKey, "last_recommend_num", 1);                        
                         jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
 
+                        //5.修改讲师缓存中的推荐用户数
+                        Map<String,Object> cacheKeyMap = new HashMap<>();
+                        cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+                        jedis.hincrBy(lecturerKey, "room_recommend_num", 1);
+
                        /* Map<String,Object> updateMap = new HashMap<>();
                         updateMap.put("distributer_id",roomDistributerMap.get("distributer_id").toString());
                         updateMap.put("room_id",room_id);
@@ -1457,8 +1491,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                                 //4.直播间分销员的推荐人数增加一
                                 jedis.hincrBy(distributerKey, "click_num", 1);
-                                jedis.hincrBy(distributerKey, "recommend_num", 1);
-                                jedis.hincrBy(distributerKey, "last_recommend_num", 1);
                                 jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
                             }
                         }
