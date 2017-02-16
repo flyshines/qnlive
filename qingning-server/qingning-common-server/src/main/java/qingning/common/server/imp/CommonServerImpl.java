@@ -401,6 +401,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             if(MiscUtils.isEmpty(nickname)){
+                Jedis jedis = jedisUtils.getJedis();
                 reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);
@@ -507,7 +508,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             Map<String,String> imResultMap = null;
             try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");
+                imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
             }catch (Exception e){
                 //TODO 暂不处理
             }
@@ -557,7 +558,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             processLoginSuccess(1, dbResultMap, null, resultMap);
             //}
 
-            resultMap.put("access_token",userWeixinAccessToken);//把用户权限带回
 
             return resultMap;
         }
