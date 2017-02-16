@@ -1244,10 +1244,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.put("user_id", userId);        
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
         resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",userMap.get("nick_name"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
-        resultMap.put("course_title",courseMap.get("course_title"));
+        resultMap.put("course_title",MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
         resultMap.put("start_time",courseMap.get("start_time"));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
  
@@ -1269,10 +1269,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String roomId = reqMap.get("room_id").toString();
         
         resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",userMap.get("nick_name"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
-        resultMap.put("room_name",liveRoomMap.get("room_name"));
+        resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
  
         //查询该用户是否为该直播间的分销员
         String share_url = getLiveRoomShareURL(userId, roomId);
@@ -1588,7 +1588,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 break;
         }
  
-        resultMap.put("title",title);
+        resultMap.put("title",MiscUtils.RecoveryEmoji(title));
         resultMap.put("content",content);
         resultMap.put("icon_url",icon_url);
         resultMap.put("simple_content",simple_content);

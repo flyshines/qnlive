@@ -89,7 +89,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
                     //requestEntityTask.setFunctionName("processCourseStartStudentStudyNotice");//TODO
                     //messagePushServerImpl.processCourseStartStudentStudyNotice(requestEntityTask, jedisUtils, context);
                     
-            	} else if((date-currentDate)/(1000*60*24) == 1){
+            	} else if((date-currentDate)/(1000*60*60*24) == 1){
                     RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
                     messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
             	}

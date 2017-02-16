@@ -439,7 +439,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.clear();
         map.put("lecturer_id", userId);        
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
-        String nickName = lecturer.get("nick_name");
+        String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
+        String courseTitle = MiscUtils.RecoveryEmoji(lecturer.get("course_title"));
         //取出粉丝列表
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
         //TODO  关注的直播间有新的课程，推送提醒
@@ -452,12 +453,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData name = new TemplateData();
         	name.setColor("#000000");
-        	name.setValue(reqMap.get("course_title").toString());
+        	name.setValue(courseTitle);
         	templateMap.put("keyword1", name);
 
         	TemplateData wuliu = new TemplateData();
         	wuliu.setColor("#000000");
-        	wuliu.setValue(reqMap.get("course_title").toString());
+        	wuliu.setValue(courseTitle);
         	templateMap.put("keyword2", wuliu);    
 
         	TemplateData orderNo = new TemplateData();
