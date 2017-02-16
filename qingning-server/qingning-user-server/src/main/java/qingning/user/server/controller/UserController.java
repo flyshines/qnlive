@@ -130,7 +130,7 @@ public class UserController extends AbstractController{
 			@PathVariable("room_id") String room_id,
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-			@RequestParam(value = "start_time", defaultValue = "") String start_time,
+			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version);
@@ -138,7 +138,7 @@ public class UserController extends AbstractController{
 		param.put("room_id", room_id);
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
-		param.put("start_time", start_time);
+		param.put("query_time", start_time);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}

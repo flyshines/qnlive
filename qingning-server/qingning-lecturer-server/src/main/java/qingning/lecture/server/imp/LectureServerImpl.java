@@ -946,7 +946,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
         			MiscUtils.courseTranferState(currentTime, courseInfoMap);
         			cachedCourse.put(courseId, courseInfoMap);
-        			if(!"4".equals(courseInfoMap.get("status"))){
+        			String status = (String)courseInfoMap.get("status");
+        			if(!"4".equals(status)){
+        				if(courseIdSet.contains(courseId)){
+        					courseIdList.remove(courseId);
+        				}
+        				if("2".equals(status)){
+        					jedis.zrem(lecturerCoursesPredictionKey, courseId);
+        					if(courseInfoMap.get("end_time")==null){
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("start_time")),courseId);
+        					} else {
+        						jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertObjectToLong(courseInfoMap.get("end_time")),courseId);
+        					}
+        					
+        					continue;
+        				}
         				courseIdList.add(courseId);
         				courseIdSet.add(courseId);
         			}
@@ -998,7 +1012,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             Long queryTime = null; 
             if(!MiscUtils.isEmpty(lastCourse)){
                 if(finExist){
-                    queryTime = Long.parseLong(lastCourse.get("end_time"));
+                	if(lastCourse.get("end_time")==null){
+                		queryTime = Long.parseLong(lastCourse.get("start_time"));
+                	} else {
+                		queryTime = Long.parseLong(lastCourse.get("end_time"));
+                	}
                 } else {
                     queryTime = Long.parseLong(lastCourse.get("start_time"));
                 }
