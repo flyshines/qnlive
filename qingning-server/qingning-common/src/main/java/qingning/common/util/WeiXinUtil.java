@@ -98,6 +98,33 @@ public class WeiXinUtil {
         return accessToken;
     }
 
+    /**
+     * 刷新accessToekn
+     * @return
+     */
+    public static AccessToken updAccessToken(Jedis jedis) {
+        String appid=WeiXinUtil.appid;
+        String appsecret=WeiXinUtil.appsecret;
+        String requestUrl = access_token_url.replace("APPID", appid).replace("APPSECRET", appsecret);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        // 如果请求成功
+        if (null != jsonObject) {
+            try {
+                AccessToken accessToken = new AccessToken();
+                accessToken.setToken(jsonObject.getString("access_token"));
+                accessToken.setExpiresIn(jsonObject.getInteger("expires_in"));
+                jedis.setex(Constants.CACHED_KEY_WEIXIN_TOKEN, 7000,jsonObject.getString("access_token"));
+                return accessToken;
+            } catch (JSONException e) {
+                // 获取token失败
+                log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getInteger("errcode"), jsonObject.getString("errmsg"));
+            }
+        }
+        return null;
+    }
+
+
 
     public static JSONObject getUserInfoByCode(String code) {
         String requestUrl = get_user_info_by_code_url.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
