@@ -61,7 +61,8 @@ public class IMMsgUtil {
             // 自定义参数
             String beforeCustom = custom;
             //custom = new BASE64Encoder().encode(custom.getBytes()).replaceAll("\r|\n", "");
-            AESEncryptString = CryptAES.AES_Encrypt(custom, aesKey, aesIV);
+            //AESEncryptString = CryptAES.AES_Encrypt(custom, aesKey, aesIV);
+            AESEncryptString = custom;
             // 签名参数
             String sign = "appid=" + appId + "custom=<mytype>" + AESEncryptString + "</mytype>groupid=" + mGroupId + "sender=" + sender + configMap.get("app_key");
             // 请求地址
