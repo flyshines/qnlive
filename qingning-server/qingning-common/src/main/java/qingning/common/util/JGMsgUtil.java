@@ -46,8 +46,15 @@ public class JGMsgUtil {
 			platform = Platform.all();
 			// 消息推送
 			//不做累加角标的消息
-			notification = Notification.alert(contents);
-
+			if(MiscUtils.isEmpty(extrasMap)){
+				notification = Notification.newBuilder()
+						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).disableBadge().build())
+						.addPlatformNotification(AndroidNotification.newBuilder().setAlert(contents).build()).build();
+			}else {
+				notification = Notification.newBuilder()
+						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).addExtras(extrasMap).disableBadge().build())
+						.addPlatformNotification(AndroidNotification.newBuilder().setAlert(contents).addExtras(extrasMap).build()).build();
+			}
 		}
 		if (plat.equals(Platforms.ios.getName())) {
 			platform = Platform.ios();
