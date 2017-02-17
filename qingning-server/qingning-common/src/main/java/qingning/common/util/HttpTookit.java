@@ -109,7 +109,7 @@ public class HttpTookit {
     
     
     public static String doGet(String url){
-        if(StringUtils.isBlank(url)){
+        if(MiscUtils.isEmpty(url)){
             return null;
         }
         try {
