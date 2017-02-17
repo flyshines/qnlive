@@ -100,7 +100,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 			jedisObject.del(messageKeyArray);
 			jedisObject.del(messageListKey);
 			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
-			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedisObject.del(messageQuestionListKey);
 			jedisObject.del(messageLecturerListKey);
 		}
