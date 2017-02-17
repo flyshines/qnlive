@@ -1668,11 +1668,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         switch (query_type){
             case "1":
+                ((Map<String, Object>) reqEntity.getParam()).put("course_id",id);//如果type==1 那么出入的id就是course_id
                 Map<String,String> courseMap = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedisUtils, true);
                 if(MiscUtils.isEmpty(courseMap)){
                     throw new QNLiveException("120009");
                 }
                 title = courseMap.get("course_title");
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//把roomid 放进参数中 传到后面
                 Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
                 if("2".equals(courseMap.get("status"))){
                     content = liveRoomMap.get("room_name") + "  " + MiscUtils.getConfigByKey("weixin_course_share_content");
@@ -1690,6 +1692,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 break;
  
             case "2":
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",id);//如果是2 那么就是直播间分享 把roomid存入
                 Map<String,String> liveRoomInfoMap =  CacheUtils.readLiveRoom(id, reqEntity, readLiveRoomOperation, jedisUtils, true);
                 if(MiscUtils.isEmpty(liveRoomInfoMap)){
                     throw new QNLiveException("120018");
