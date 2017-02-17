@@ -208,7 +208,7 @@ public class ImMsgServiceImp implements ImMsgService {
 				long now = System.currentTimeMillis();
 				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigByKey("course_ready_start_msec"));
 				long dealine =  Long.parseLong(courseMap.get("start_time")) + 15*60*1000;
-				if(now > ready_start_time ||  now <= dealine){
+				if(now > ready_start_time &&  now <= dealine){
 					//向缓存中增加课程真实开播时间
 					jedis.hset(courseKey, "real_start_time", now+"");
 
