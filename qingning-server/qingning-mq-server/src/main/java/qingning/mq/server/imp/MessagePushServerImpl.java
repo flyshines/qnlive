@@ -58,6 +58,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入未开播处理定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
+        	return;
+        }
+        
         long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
         
         String processCourseNotStartTime = IMMsgUtil.configMap.get("course_not_start_time_msec");
@@ -84,6 +89,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入直播超时预先提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_OVER_TIME_NOTICE)){
+        	return;
+        }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
     	String courseOvertime = MiscUtils.getConfigByKey("course_live_overtime_msec");
     	long taskStartTime =MiscUtils.convertObjectToLong(courseOvertime) + real_start_time - 10*60*1000;
@@ -124,6 +132,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入开播预先24H提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_24H_NOTICE)){
+        	return;
+        }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
@@ -161,6 +172,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入开播预先5min提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE)){
+        	return;
+        }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
@@ -197,7 +211,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------加入学生上课3min提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
-        //String lecturer_id = reqMap.get("lecturer_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE)){
+        	return;
+        }
         String course_title = reqMap.get("course_title").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
         long noticeTime= 3*60*1000;
@@ -222,7 +238,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         	scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
             scheduleTask.setStartTime(taskStartTime);
-            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_3MIN_NOTICE);
+            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_15MIN_NOTICE);
             qnSchedule.add(scheduleTask); 
         }
     }
@@ -234,6 +250,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入直播开始但是讲师未出现提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
+        	return;
+        }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
@@ -278,6 +297,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入直播超时处理定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
+        	return;
+        }
         long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
         long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));
         long taskStartTime = courseLiveOvertimeMsec + realStartTime;
@@ -317,10 +339,73 @@ public class MessagePushServerImpl extends AbstractMsgService {
     }
 
     //课程未开播处理定时任务取消
-    @FunctionName("processCourseNotStartUpdate")
+    @SuppressWarnings("unchecked")
+	@FunctionName("processCourseNotStartUpdate")
     public void processCourseNotStartUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         processCourseNotStartCancel(requestEntity,jedisUtils,context);
-        processForceEndCourse(requestEntity,jedisUtils,context);
+        
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+    	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+    		processForceEndCourse(requestEntity,jedisUtils,context);
+    	}
+    }
+    
+    @SuppressWarnings("unchecked")
+	@FunctionName("processCourseStartShortNoticeUpdate")
+    public void processCourseStartShortNoticeUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+    	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	String courseId = (String)reqMap.get("course_id");
+    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
+    	
+    	if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+    		if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+    			this.processCourseStartShortNotice(requestEntity, jedisUtils, context);
+    		}
+    	}
+    }
+    
+    @SuppressWarnings("unchecked")
+	@FunctionName("processCourseStartLongNoticeUpdate")
+    public void processCourseStartLongNoticeUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+    	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	String courseId = (String)reqMap.get("course_id");
+    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_24H_NOTICE);
+    	
+    	if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+    		processCourseStartLongNotice(requestEntity, jedisUtils, context);
+    	}
+    }
+    @SuppressWarnings("unchecked")
+    @FunctionName("processCourseStartStudentStudyNoticeUpdate")
+    public void processCourseStartStudentStudyNoticeUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+    	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	String courseId = (String)reqMap.get("course_id");
+    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE);
+    	
+    	if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+    		if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+    			processCourseStartStudentStudyNotice(requestEntity, jedisUtils, context);
+    		}
+    	}
+    }
+    
+    @SuppressWarnings("unchecked")
+    @FunctionName("processCourseStartLecturerNotShowUpdate")
+    public void processCourseStartLecturerNotShowUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+    	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+    	String courseId = (String)reqMap.get("course_id");
+    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_LECTURER_NOTICE);
+    	
+    	if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+    		if(startTime > System.currentTimeMillis()){
+    			processCourseStartLecturerNotShow(requestEntity, jedisUtils, context);
+    		}
+    	}
     }
     
     //type 为1则为课程未开播强制结束，type为2则为课程直播超时强制结束

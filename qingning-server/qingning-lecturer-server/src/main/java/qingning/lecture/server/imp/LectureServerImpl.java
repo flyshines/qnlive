@@ -404,17 +404,48 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.zadd(platformCourseList, lpos, courseId);
  
         resultMap.put("course_id", courseId);
- 
-        //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中
-        Date end = MiscUtils.getEndTimeOfToday();
-        if(startTime < end.getTime()){
+        
+        Map<String,Object> timerMap = new HashMap<>();
+        timerMap.put("course_id", courseId);
+        //timerMap.put("start_time", new Date(startTime));
+        timerMap.put("lecturer_id", userId);
+        timerMap.put("course_title", course.get("course_title"));        
+        //timerMap.put("course_id", dbResultMap.get("course_id").toString());
+        timerMap.put("start_time", startTime + "");
+        
+        
+        if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+        	//提前五分钟开课提醒        
+        	if(startTime-System.currentTimeMillis()> 5 * 60 *1000){        
+        		RequestEntity mqRequestEntity = new RequestEntity();
+        		mqRequestEntity.setServerName("MessagePushServer");
+        		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+        		mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+        		mqRequestEntity.setParam(timerMap);
+        		this.mqUtils.sendMessage(mqRequestEntity);
+        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
+            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
+            		this.mqUtils.sendMessage(mqRequestEntity);
+        		}
+        	}
+        	//如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中
             RequestEntity mqRequestEntity = new RequestEntity();
             mqRequestEntity.setServerName("MessagePushServer");
-            //mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqRequestEntity.setFunctionName("processCourseNotStart");
-            Map<String,Object> timerMap = new HashMap<>();
-            timerMap.put("course_id", dbResultMap.get("course_id").toString());
-            timerMap.put("start_time", startTime + "");
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            mqRequestEntity.setFunctionName("processCourseNotStart");           
+            mqRequestEntity.setParam(timerMap);
+            this.mqUtils.sendMessage(mqRequestEntity);
+            
+            //开课时间到但是讲师未出现提醒
+            mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+            this.mqUtils.sendMessage(mqRequestEntity);
+        }
+        //提前24小时开课提醒
+        if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("MessagePushServer");
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            mqRequestEntity.setFunctionName("processCourseStartLongNotice");           
             mqRequestEntity.setParam(timerMap);
             this.mqUtils.sendMessage(mqRequestEntity);
         }
@@ -776,37 +807,39 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 	String newStartTime = reqMap.get("start_time").toString();
                 	
                 	jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
-                    
-                    Date end = MiscUtils.getEndTimeOfToday();
-                    //如果原有的课程开播时间为今天，新的课程开播时间为今天，则需要先取消原有定时任务，再新增新的定时任务
-                    String originalCourseStartTime = jedis.hget(courseKey, "start_time");
-                    if(Long.parseLong(originalCourseStartTime) < end.getTime() && Long.parseLong(newStartTime) < end.getTime()){
-                        RequestEntity timerRequestEntity = new RequestEntity();
-                        timerRequestEntity.setServerName("MessagePushServer");
-                        timerRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                        timerRequestEntity.setFunctionName("processCourseNotStartUpdate");
-                        timerRequestEntity.setParam(reqEntity.getParam());
-                        this.mqUtils.sendMessage(timerRequestEntity);
-                        //如果旧课程时间为今天，新的课程时间为今天之后，则需要取消原有定时任务
-                    }else if(Long.parseLong(originalCourseStartTime) < end.getTime() && Long.parseLong(newStartTime) > end.getTime()){
-                        RequestEntity timerRequestEntity = new RequestEntity();
-                        timerRequestEntity.setServerName("MessagePushServer");
-                        timerRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                        timerRequestEntity.setFunctionName("processCourseNotStartCancel");
-                        timerRequestEntity.setParam(reqEntity.getParam());
-                        this.mqUtils.sendMessage(timerRequestEntity);
-                        //如果旧课程时间为今天之后，新课程时间在今天之内，则需要新增定时任务
-                    }else if(Long.parseLong(originalCourseStartTime) > end.getTime() && Long.parseLong(newStartTime) < end.getTime()){
-                        RequestEntity mqRequestEntity = new RequestEntity();
-                        mqRequestEntity.setServerName("MessagePushServer");
-                        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                        mqRequestEntity.setFunctionName("processCourseNotStart");
-                        mqRequestEntity.setParam(reqEntity.getParam());
-                        this.mqUtils.sendMessage(mqRequestEntity);
-                    }
+                	
                     query.clear();
                     query.put("course_id", course_id);
                     Map<String,String> course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
+                	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+                    Map<String,Object> timerMap = new HashMap<>();
+                    timerMap.put("course_id", course_id);
+                    timerMap.put("start_time", new Date(startTime));
+                    timerMap.put("lecturer_id", userId);
+                    timerMap.put("course_title", course.get("course_title"));        
+                    timerMap.put("course_id", course.get("course_id"));
+                    timerMap.put("start_time", startTime + "");
+                    
+            		RequestEntity mqRequestEntity = new RequestEntity();
+            		mqRequestEntity.setServerName("MessagePushServer");
+            		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            		mqRequestEntity.setParam(timerMap);
+            		
+            		mqRequestEntity.setFunctionName("processCourseStartShortNoticeUpdate");
+            		this.mqUtils.sendMessage(mqRequestEntity);
+            		
+            		mqRequestEntity.setFunctionName("processCourseNotStartUpdate");
+            		this.mqUtils.sendMessage(mqRequestEntity);
+            		
+            		mqRequestEntity.setFunctionName("processCourseStartLongNoticeUpdate");
+            		this.mqUtils.sendMessage(mqRequestEntity);
+
+            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNoticeUpdate");
+            		this.mqUtils.sendMessage(mqRequestEntity);
+            		
+                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShowUpdate");
+                    mqUtils.sendMessage(mqRequestEntity);
+            		
                     long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
                     jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());                    
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
