@@ -17,6 +17,9 @@
     <if test="send_type != null" >
       and  cm.send_type = #{send_type}
     </if>
+    <if test="send_type_query != null" >
+      and  cm.send_type = 0 or cm.send_type = 1
+    </if>
     order by cm.message_pos asc
     limit #{page_count}
   </select>
