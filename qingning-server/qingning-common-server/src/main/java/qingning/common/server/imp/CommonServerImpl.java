@@ -467,7 +467,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
             user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//再次刷新获取是否有关注我们公众号
         }
-        
+
         Integer subscribe = user.getInteger("subscribe");//是否有关注我们公众号
         if(subscribe == 0){//没有关注我们公众号
             resultMap.put("subscribe",subscribe);
