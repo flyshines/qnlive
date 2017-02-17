@@ -155,8 +155,6 @@ public class CommonController extends AbstractController {
         String code = codes[0];
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
-
-
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinLogin", null, "");
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
