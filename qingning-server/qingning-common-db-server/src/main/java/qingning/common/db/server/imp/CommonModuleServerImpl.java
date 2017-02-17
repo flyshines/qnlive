@@ -67,6 +67,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
+
+	@Autowired(required = true)
+	private RoomDistributerCoursesMapper roomDistributerCoursesMapper;
 	
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -264,6 +267,35 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 				distributer_id=(String)roomDistributerCache.get("distributer_id");
+
+				//查询是否有t_room_distributer_courses表，如果没有，则插入数据
+				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
+				roomDistributerCourseMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+				roomDistributerCourseMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+				Map<String,Object> roomDistributerCourse = roomDistributerCoursesMapper.findRoomDistributerCourse(roomDistributerCourseMap);
+
+				if(MiscUtils.isEmpty(roomDistributerCourse)){
+					Map<String,Object> roomDistributerCourseInsertMap = new HashMap<>();
+					roomDistributerCourseInsertMap.put("distributer_courses_id", MiscUtils.getUUId());
+					roomDistributerCourseInsertMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+					roomDistributerCourseInsertMap.put("room_id", tradeBill.get("room_id"));
+					roomDistributerCourseInsertMap.put("course_id", tradeBill.get("course_id"));
+					roomDistributerCourseInsertMap.put("lecturer_id", courseMap.get("lecturer_id"));
+					roomDistributerCourseInsertMap.put("recommend_num", 1);
+					roomDistributerCourseInsertMap.put("done_num", 1);
+					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
+					roomDistributerCourseInsertMap.put("effective_time", roomDistributerCache.get("effective_time"));
+					roomDistributerCourseInsertMap.put("profit_share_rate", roomDistributerCache.get("profit_share_rate"));
+					roomDistributerCourseInsertMap.put("create_time", now);
+					roomDistributerCourseInsertMap.put("update_time", now);
+					roomDistributerCourseInsertMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+					roomDistributerCoursesMapper.insertRoomDistributerCourses(roomDistributerCourseInsertMap);
+				}else {
+					Map<String,Object> roomDistributerCourseInsertMap = new HashMap<>();
+					roomDistributerCourseInsertMap.put("distributer_courses_id", roomDistributerCourse.get("distributer_courses_id"));
+					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
+					roomDistributerCoursesMapper.afterStudentBuyCourse(roomDistributerCourseInsertMap);
+				}
 			}
 			//t_courses_students
 			Map<String,Object> student = new HashMap<String,Object>();
