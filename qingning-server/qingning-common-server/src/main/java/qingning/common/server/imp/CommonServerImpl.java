@@ -455,11 +455,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null) {
             throw new QNLiveException("120008");
         }
-        String openid = getCodeResultJson.getString("openid");
-        Jedis jedis = jedisUtils.getJedis();
+        String openid = getCodeResultJson.getString("openid");//拿到openid
+
+        Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
         AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//判断是否有关注公众号
-        Integer subscribe = user.getInteger("subscribe");
+        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);
+        Integer subscribe = user.getInteger("subscribe");//是否有关注我们公众号
         if(subscribe == 0){//没有关注我们公众号
             resultMap.put("subscribe",subscribe);
             return resultMap;
@@ -481,7 +482,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }else {
             //1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
-            String userWeixinAccessToken = getCodeResultJson.getString("access_token");
+            String userWeixinAccessToken = getCodeResultJson.getString("access_token");//获取用户token
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
@@ -502,9 +503,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 return resultMap;
             }
 
-            String nickname = userJson.getString("nickname");
-            String sex = userJson.getString("sex");
-            String headimgurl = userJson.getString("headimgurl");
+            String nickname = userJson.getString("nickname");//用户名称
+            String sex = userJson.getString("sex");//性别
+            String headimgurl = userJson.getString("headimgurl");//头像地址
 
             Map<String,String> imResultMap = null;
             try {
@@ -512,9 +513,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }catch (Exception e){
                 //TODO 暂不处理
             }
-            //if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
-            //throw new QNLiveException("120003");
-            //}else {
             //初始化数据库相关表
             reqMap.put("m_user_id", imResultMap.get("uid"));
             reqMap.put("m_pwd", imResultMap.get("password"));
@@ -525,13 +523,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String transferAvatarAddress = qiNiuFetchURL(headimgurl);
                 reqMap.put("avatar_address",transferAvatarAddress);
             }
-
+            //设置用户名
             if(MiscUtils.isEmpty(nickname)){
                 reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);
             }
-
+            //判断性别
             if(MiscUtils.isEmpty(sex)){
                 reqMap.put("gender","2");//TODO
             }
@@ -556,7 +554,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);
-            //}
+
 
 
             return resultMap;
