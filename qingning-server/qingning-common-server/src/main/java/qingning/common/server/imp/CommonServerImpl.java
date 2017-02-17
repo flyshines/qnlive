@@ -459,7 +459,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
         AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);
+        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
+        if(user == null || user.getInteger("errcode") != null ) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
+            wei_xin_access_token = WeiXinUtil.updAccessToken(jedis);
+            if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
+                throw new QNLiveException("120008");
+            }
+            user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//再次刷新获取是否有关注我们公众号
+        }
+        
         Integer subscribe = user.getInteger("subscribe");//是否有关注我们公众号
         if(subscribe == 0){//没有关注我们公众号
             resultMap.put("subscribe",subscribe);
