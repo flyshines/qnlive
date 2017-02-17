@@ -70,31 +70,30 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	map.put("start_time", new Date(time));
             	map.put("lecturer_id", lecturerId);
             	map.put("course_title", course_title);
-            	
-            	if(time<=currentTime || currentDate==date){
+            	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
+            	if(time<=currentTime || isTheSameDate){
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
                     messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
             	}
-            	
-            	if(currentDate==date && time>currentTime){
-                    RequestEntity requestEntityTask = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseStartShortNotice",map);
-                    //提前五分钟开课提醒
-                    messagePushServerImpl.processCourseStartShortNotice(requestEntityTask, jedisUtils, context);
-
-                    //开课时间到但是讲师未出现提醒
-                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
-                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
-
-                    //提醒学生参加课程定时任务
-                    //requestEntityTask.setFunctionName("processCourseStartStudentStudyNotice");//TODO
-                    //messagePushServerImpl.processCourseStartStudentStudyNotice(requestEntityTask, jedisUtils, context);
-                    
-            	} else if((date-currentDate)/(1000*60*60*24) == 1){
-                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
-                    messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
+            	if(time>currentTime){
+	            	if(isTheSameDate){
+	                    RequestEntity requestEntityTask = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseStartShortNotice",map);
+	                    //提前五分钟开课提醒
+	                    messagePushServerImpl.processCourseStartShortNotice(requestEntityTask, jedisUtils, context);
+	                    
+	                    //提醒学生参加课程定时任务
+	                    requestEntityTask.setFunctionName("processCourseStartStudentStudyNotice");
+	                    messagePushServerImpl.processCourseStartStudentStudyNotice(requestEntityTask, jedisUtils, context);
+	                    
+	                    //开课时间到但是讲师未出现提醒
+	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
+	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
+	                   
+	            	} else if((date-currentDate)/(1000*60*60*24) == 1){
+	                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
+	                    messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
+	            	}
             	}
-            	
-            	
             }
     	}
     }
