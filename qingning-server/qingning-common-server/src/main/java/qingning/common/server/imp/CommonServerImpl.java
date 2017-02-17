@@ -485,7 +485,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");//获取用户token
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
-            if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
+            if(userJson == null || userJson.getInteger("errcode") != null){
                 throw new QNLiveException("120008");
             }
 
