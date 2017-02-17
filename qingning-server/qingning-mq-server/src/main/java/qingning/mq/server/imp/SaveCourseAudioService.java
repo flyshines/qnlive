@@ -81,7 +81,7 @@ public class SaveCourseAudioService extends AbstractMsgService {
 						messageObjectMap.put("create_time", createTime);
 					}
 					messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
-					messageObjectMap.put("audioPos", audioPos);
+					messageObjectMap.put("audio_pos", audioPos);
 					audioList.add(messageObjectMap);
 					audioPos++;
 				}

@@ -10,10 +10,10 @@
     (audio_id, course_id, audio_url,
     audio_pos, audio_time, audio_image, create_time)
     values
-    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
-      #{item.audio_id}, #{item.course_id}, #{item.audio_url},
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.audio_id}, #{item.course_id}, #{item.audio_url},
       #{item.audio_pos}, #{item.audio_time}, #{item.audio_image},
-      #{item.create_time}
+      #{item.create_time})
     </foreach>
   </insert>
   
