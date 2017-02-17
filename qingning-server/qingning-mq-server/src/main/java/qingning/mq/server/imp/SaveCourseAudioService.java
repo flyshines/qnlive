@@ -70,13 +70,13 @@ public class SaveCourseAudioService extends AbstractMsgService {
 					messageObjectMap.put("audio_id", messageStringMap.get("audio_id"));
 					messageObjectMap.put("course_id", messageStringMap.get("course_id"));
 					messageObjectMap.put("audio_url", messageStringMap.get("audio_url"));
-					if(StringUtils.isNotBlank(messageStringMap.get("audio_time"))){
+					if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
 						messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));
 					}else {
 						messageObjectMap.put("audio_time", 0);
 					}
 					messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
-					if(StringUtils.isNotBlank(messageStringMap.get("create_time"))){
+					if(!MiscUtils.isEmpty(messageStringMap.get("create_time"))){
 						Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
 						messageObjectMap.put("create_time", createTime);
 					}
