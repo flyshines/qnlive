@@ -1483,8 +1483,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(queryType.equals("0")){
             messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
         }else {
-            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
-            queryMap.put("send_type", "3");//send_type 类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+            messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+            queryMap.put("send_type_query", "0");//send_type_query 查询出 类型:0:讲师讲解 1：讲师回答 两种类型的聊天记录
         }
 
         //缓存不存在则读取数据库中的内容
