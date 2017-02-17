@@ -70,7 +70,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					messageObjectMap.put("course_id", messageStringMap.get("course_id"));
 					messageObjectMap.put("message_url", messageStringMap.get("message_url"));
 					messageObjectMap.put("message_question", messageStringMap.get("message_question"));
-					if(StringUtils.isNotBlank(messageStringMap.get("audio_time"))){
+					if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
 						messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));
 					}else {
 						messageObjectMap.put("audio_time", 0);
@@ -79,7 +79,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					messageObjectMap.put("message_type", messageStringMap.get("message_type"));
 					messageObjectMap.put("send_type", messageStringMap.get("send_type"));
 					messageObjectMap.put("creator_id", messageStringMap.get("creator_id"));
-					if(StringUtils.isNotBlank(messageStringMap.get("create_time"))){
+					if(!MiscUtils.isEmpty(messageStringMap.get("create_time"))){
 						Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
 						messageObjectMap.put("create_time", createTime);
 					}
