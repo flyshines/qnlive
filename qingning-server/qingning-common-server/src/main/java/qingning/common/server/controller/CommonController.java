@@ -173,9 +173,7 @@ public class CommonController extends AbstractController {
             logger.info("微信Access_token"+userWeixinAccessToken);
             Map<String, String> param = new HashMap<String, String>();
             param.put("token",userWeixinAccessToken);
-          //  Cookie c1 = new Cookie("username","LXH") ;
             response.sendRedirect("http://m.qnlive.com/web?token="+userWeixinAccessToken);
-            //HttpTookit.doPost("http://test.qnlive.1758app.com/web",param,301);
         }
     }
 
