@@ -1,6 +1,7 @@
 package qingning.common.server.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpRequest;
@@ -32,6 +33,7 @@ import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @RestController
 public class CommonController extends AbstractController {
@@ -171,7 +173,8 @@ public class CommonController extends AbstractController {
             logger.info("微信Access_token"+userWeixinAccessToken);
             Map<String, String> param = new HashMap<String, String>();
             param.put("token",userWeixinAccessToken);
-            response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
+          //  Cookie c1 = new Cookie("username","LXH") ;
+            response.sendRedirect("http://m.qnlive.com/web?token="+userWeixinAccessToken);
             //HttpTookit.doPost("http://test.qnlive.1758app.com/web",param,301);
         }
     }
