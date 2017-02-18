@@ -56,6 +56,10 @@ public class HttpTookit {
     public static String doPost(String url, Map<String, String> params){
         return doPost(url, params,CHARSET);
     }
+
+    public static String doPost(String url, Map<String, String> params,int httpStateCode){
+        return doPost(url, params,CHARSET,httpStateCode);
+    }
     /**
      * HTTP Get 获取内容
      * @param url  请求的url地址 ?之前的地址
@@ -190,6 +194,54 @@ public class HttpTookit {
             CloseableHttpResponse response = httpClient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != 200) {
+                httpPost.abort();
+                throw new RuntimeException("HttpClient,error status code :" + statusCode);
+            }
+            HttpEntity entity = response.getEntity();
+            String result = null;
+            if (entity != null){
+                result = EntityUtils.toString(entity, "utf-8");
+            }
+            EntityUtils.consume(entity);
+            response.close();
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * HTTP Post 获取内容
+     * @param url 请求的url地址 ?之前的地址
+     * @param params 请求的参数
+     * @param charset 编码格式
+     * @param httpStateCode 状态吗
+     * @return
+     */
+    public static String doPost(String url,Map<String,String> params,String charset,int httpStateCode){
+        if(StringUtils.isBlank(url)){
+            return null;
+        }
+        try {
+            List<NameValuePair> pairs = null;
+            if(params != null && !params.isEmpty()){
+                pairs = new ArrayList<NameValuePair>(params.size());
+                for(Map.Entry<String,String> entry : params.entrySet()){
+                    String value = entry.getValue();
+                    if(value != null){
+                        pairs.add(new BasicNameValuePair(entry.getKey(),value));
+                    }
+                }
+            }
+            HttpPost httpPost = new HttpPost(url);
+            if(pairs != null && pairs.size() > 0){
+                httpPost.setEntity(new UrlEncodedFormEntity(pairs,CHARSET));
+            }
+
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > httpStateCode) {
                 httpPost.abort();
                 throw new RuntimeException("HttpClient,error status code :" + statusCode);
             }
