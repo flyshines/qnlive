@@ -490,16 +490,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }else {
             //1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
-            String userWeixinAccessToken = getCodeResultJson.getString("access_token");//获取用户token
-            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
+//            String userWeixinAccessToken = getCodeResultJson.getString("access_token");//获取用户token
+//            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
-            if(userJson == null || userJson.getInteger("errcode") != null){
-                throw new QNLiveException("120008");
-            }
+//            if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
+//                throw new QNLiveException("120008");
+//            }
 
             queryMap.clear();
             queryMap.put("login_type","0");//0.微信方式登录
-            queryMap.put("login_id",userJson.getString("unionid"));
+            queryMap.put("login_id",openid);
             Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
             if(loginInfoMapFromUnionid != null){
                 //将open_id更新到login_info表中
@@ -511,9 +511,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 return resultMap;
             }
 
-            String nickname = userJson.getString("nickname");//用户名称
-            String sex = userJson.getString("sex");//性别
-            String headimgurl = userJson.getString("headimgurl");//头像地址
+            String nickname = user.getString("nickname");//用户名称
+            String sex = user.getString("sex");//性别
+            String headimgurl = user.getString("headimgurl");//头像地址
 
             Map<String,String> imResultMap = null;
             try {
@@ -554,7 +554,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
-            String unionid =  userJson.getString("unionid");
+            String unionid =  user.getString("unionid");
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");

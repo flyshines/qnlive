@@ -9,6 +9,7 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
+import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
 import qingning.server.AbstractController;
@@ -168,7 +169,9 @@ public class CommonController extends AbstractController {
         }else{
             String userWeixinAccessToken = (String) resultMap.get("access_token");
             logger.info("微信Access_token"+userWeixinAccessToken);
-            response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
+            Map<String, String> param = new HashMap<String, String>();
+            param.put("token",userWeixinAccessToken);
+            HttpTookit.doPost("http://test.qnlive.1758app.com/web",param);
         }
     }
 
