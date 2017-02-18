@@ -160,28 +160,24 @@ public class CommonController extends AbstractController {
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
 
-        try{
-            RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinLogin", null, "");
-            requestEntity.setParam(map);
-            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinLogin", null, "");
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-            Integer subscribe = Integer.valueOf((String)resultMap.get("subscribe"));
-            if(subscribe == 0){//如果没有关注公众号
-                logger.info("没有关注我们微信,跳转至关注页面");
-                response.sendRedirect("https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzIyNTc1MDQ2Mw==&scene=110#wechat_redirect");
-            }else{
-                String userWeixinAccessToken = (String) resultMap.get("access_token");
-                logger.info("微信Access_token"+userWeixinAccessToken);
-                Map<String, String> param = new HashMap<String, String>();
-                param.put("token",userWeixinAccessToken);
-                response.sendRedirect("http://m.qnlive.com/web?token="+userWeixinAccessToken);
-            }
-        }catch(Exception e){
-            logger.debug(e.getMessage());
+        Integer subscribe = Integer.valueOf((String)resultMap.get("subscribe"));
+        if(subscribe == 0){//如果没有关注公众号
+            logger.info("没有关注我们微信,跳转至关注页面");
+            response.sendRedirect("https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzIyNTc1MDQ2Mw==&scene=110#wechat_redirect");
+            return ;
         }
-//        throw new QNLiveException("120008");
 
+        String userWeixinAccessToken = (String) resultMap.get("access_token");
+        logger.info("微信Access_token"+userWeixinAccessToken);
+        Map<String, String> param = new HashMap<String, String>();
+        param.put("token",userWeixinAccessToken);
+        response.sendRedirect("http://m.qnlive.com/web?token="+userWeixinAccessToken);
+        return ;
     }
 
     /**
