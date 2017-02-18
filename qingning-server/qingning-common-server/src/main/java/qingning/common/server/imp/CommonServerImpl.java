@@ -478,7 +478,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
-        //1.2.1根据 union_id查询数据库
+        //1.2.1根据 openid查询数据库
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","4");//4.微信code方式登录
         queryMap.put("web_openid",openid);
@@ -496,20 +496,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
 //                throw new QNLiveException("120008");
 //            }
-
-            queryMap.clear();
-            queryMap.put("login_type","0");//0.微信方式登录
-            queryMap.put("login_id",openid);
-            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-            if(loginInfoMapFromUnionid != null){
-                //将open_id更新到login_info表中
-                Map<String,Object> updateMap = new HashMap<>();
-                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
-                updateMap.put("web_openid", openid);
-                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
-                return resultMap;
-            }
+//
+//            queryMap.clear();
+//            queryMap.put("login_type","0");//0.微信方式登录
+//            queryMap.put("web_openid",openid);
+//            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+//            if(loginInfoMapFromUnionid != null){
+//                //将open_id更新到login_info表中
+//                Map<String,Object> updateMap = new HashMap<>();
+//                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+//                updateMap.put("web_openid", openid);
+//                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
+//                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
+//                return resultMap;
+//            }
 
             String nickname = user.getString("nickname");//用户名称
             String sex = user.getString("sex");//性别
