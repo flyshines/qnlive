@@ -553,9 +553,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(sex.equals("0")){
                 reqMap.put("gender","2");//TODO
             }
-
-            String unionid =  user.getString("unionid");
-            reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
