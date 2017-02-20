@@ -1045,16 +1045,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
                 String user_id = (String) billMap.get("user_id");
                 String course_id = (String) billMap.get("course_id");
-                
-                
+
                 if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
                     String openId=(String) loginInfoUser.get("web_openid");
                     //  成员报名付费通知 老师 暂时 不需要了
-//                    wpushLecture(billMap, jedis, openId, courseByCourseId, user);
-                    //TODO 付费报名成功通知学员
-                    wpushUser(jedis, openId, courseMap, lecturerMap,course_id);
-                
+                    //wpushLecture(billMap, jedis, openId, courseByCourseId, user);
+                    //成功购买课程则通知学生
+                    if(profit_type.equals("0")){
+                        wpushUser(jedis, openId, courseMap, lecturerMap,course_id);
+                    }
                 }
             }else{
                 logger.debug("==> 微信支付失败 ,流水 ：" + outTradeNo);
