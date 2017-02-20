@@ -624,7 +624,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put("access_token", access_token);
         String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
         jedis.hmset(process_access_token, cacheMap);
-        jedis.expire(process_access_token, 10800);
+        jedis.expire(process_access_token, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time")));
         
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id", user_id);        
