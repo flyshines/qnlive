@@ -40,8 +40,7 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
 
 
     private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        Jedis jedis = jedisUtils.getJedis();
-
+    	
         ((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
         	private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
 				for(String lecturerId : lecturerSet){
@@ -110,40 +109,64 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
                     }
                     
                     if(count>0){
+                    	List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
+                    	
                     	queryMap.clear();
-                    	map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                    	if(last_end_date>0){
-                    		BigDecimal bigDecimal = new BigDecimal(last_end_date);
-                    		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);                    		
-                    		queryMap.put("end_time", new Date(bigDecimal.longValue()));
-                    	} else if(last_start_date>0){
-                    		BigDecimal bigDecimal = new BigDecimal(last_start_date);
-                    		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
-                    		queryMap.put("start_time", new Date(bigDecimal.longValue()));
+                    	queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                    	if(last_end_date<0){
+                    		if(last_start_date>0){
+                        		BigDecimal bigDecimal = new BigDecimal(last_start_date);
+                        		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);
+                        		queryMap.put("start_time", new Date(bigDecimal.longValue()));
+                    		}
+                    		queryMap.put("status", "1");
+                    		queryMap.put("pageCount", count);
+                    		List<Map<String,Object>> preCourseList = coursesMapper.findLecturerCourseListByStatus(queryMap);
+                    		if(!MiscUtils.isEmpty(preCourseList)){
+                    			list.addAll(preCourseList);
+                    			count = count-preCourseList.size();
+                    		}
                     	}
-                    	queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD,lecturerId);
-                    	queryMap.put("pageCount",count);
-                    	List<Map<String,Object>> list = coursesMapper.findLecturerCourseList(queryMap);
+                    	
+                    	if(count>0){
+                    		queryMap.clear();
+                        	queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                    		queryMap.put("status", "2");
+                    		queryMap.put("pageCount", count);
+                        	if(last_end_date>0){
+                        		BigDecimal bigDecimal = new BigDecimal(last_end_date);
+                        		bigDecimal.setScale(0, BigDecimal.ROUND_HALF_UP);                    		
+                        		queryMap.put("position", new Date(bigDecimal.longValue()));
+                        	}
+                    		List<Map<String,Object>> finshCourseList = coursesMapper.findLecturerCourseListByStatus(queryMap);
+                    		if(!MiscUtils.isEmpty(finshCourseList)){
+                    			list.addAll(finshCourseList);
+                    			count = count-finshCourseList.size();
+                    		}
+                    	}                    	
+                    	
                     	if(!MiscUtils.isEmpty(list)){
                     		for(Map<String,Object> value:list){
                     			String key = null;
                     			long score = -1;
+                    			Date startDate = (Date)value.get("start_time");
                     			if("2".equals(value.get("status"))){                    				
                     				Date endDate = (Date)value.get("end_time");
+                    				key = finishListKey;
                     				if(endDate != null){
-                    					score = endDate.getTime();
-                    					key = finishListKey;
-                    				}                    				
-                    			} else if("1".equals(value.get("status"))){
-                    				Date startDate = (Date)value.get("start_time");
+                    					score = MiscUtils.convertInfoToPostion(endDate.getTime(), MiscUtils.convertObjectToLong(value.get("position")));                    					
+                    				} else {
+                    					endDate = (Date)value.get("start_time");
+                    					score = MiscUtils.convertInfoToPostion(endDate.getTime(), MiscUtils.convertObjectToLong(value.get("position"))); 
+                    				}                   				
+                    			} else if("1".equals(value.get("status"))){                    				
                     				if(startDate != null){
                     					score = startDate.getTime();
                     					key = predictionListKey;
                     				}   
                     			}
                     			if(!MiscUtils.isEmpty(key)){
-                    				pipeline.zadd(key, score, (String)value.get("course_id"));
-                    				
+                    				pipeline.zadd(key, score, (String)value.get("course_id"));                    				
                     				map.clear();
                     				map.put(Constants.CACHED_KEY_COURSE_FIELD, (String)value.get("course_id"));
                     				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);

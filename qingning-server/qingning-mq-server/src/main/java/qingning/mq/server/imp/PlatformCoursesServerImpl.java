@@ -51,12 +51,17 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			queryMap.put("pageCount", maxCount);
     			List<Map<String,Object>> coursePredictionList = coursesMapper.findPlatformCourseList(queryMap);
     			if(!MiscUtils.isEmpty(coursePredictionList)){
-    				maxCount=maxCount-coursePredictionList.size();
+    				maxCount=maxCount-coursePredictionList.size();    				
     				for(Map<String,Object> values : coursePredictionList){
-    					Date courseStartTime = (Date)values.get("start_time");
-    					long position = MiscUtils.convertInfoToPostion(courseStartTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
-    					pipeline.zadd(predictionListKey, position,(String)values.get("course_id"));
-    				}
+    					String course_id = (String)values.get("course_id");
+    					try{
+    						Date courseStartTime = (Date)values.get("start_time");
+    						long position = MiscUtils.convertInfoToPostion(courseStartTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
+    						pipeline.zadd(predictionListKey, position,(String)values.get("course_id"));
+    					} catch(Exception e){
+    						log.error("course[id:"+course_id+"]"+e.getMessage());
+        				}
+    				}    				
     				pipeline.sync();
     			}
     			if(maxCount>0){

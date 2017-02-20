@@ -443,5 +443,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public Map<String, Object> findByDistributerId(String distributer_id) {		
 		return distributerMapper.findByDistributerId(distributer_id);
-	}	
+	}
+
+	@Override
+	public List<Map<String, Object>> findFinishCourseListForLecturer(Map<String, Object> record) {
+		return coursesMapper.findFinishCourseListForLecturer(record);
+	}
 }

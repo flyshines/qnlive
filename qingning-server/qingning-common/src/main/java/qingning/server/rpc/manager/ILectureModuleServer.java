@@ -74,4 +74,6 @@ public interface ILectureModuleServer {
 	Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record);
 	
 	Map<String,Object> findByDistributerId(String distributer_id);
+	
+	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 }

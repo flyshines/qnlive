@@ -118,6 +118,9 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
 	
+	public static final String CACHED_KEY_USER_DISTRIBUTERS_ROOM_RQ = "USER:{distributer_id}:ROOM:{room_id}:RQ:{rq_code}";
+	public static final String FUNCTION_DISTRIBUTERS_ROOM_RQ = "FUNCTION_DISTRIBUTERS_ROOM_RQ";
+	
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES = "USER:{user_id}:LECTURER:{room_id}:COURSES:{distributer_id}";
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
 	

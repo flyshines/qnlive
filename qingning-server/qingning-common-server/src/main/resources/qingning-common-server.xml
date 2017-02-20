@@ -178,7 +178,7 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
-					<param name="record_date" type="string" require="N"/>
+					<param name="position" type="long" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" />
@@ -192,6 +192,7 @@
 						<param name="total_amount" type="double" />
 						<param name="room_id" type="string" />
 						<param name="record_date" type="long" fieldname="create_time"/>
+						<param name="position" type="long"/>
 						<param name="rq_code" type="string" />
 						<param name="room_name" type="string" />
 						<param name="effective_time" type="string" convert="(effective_time)=>{
