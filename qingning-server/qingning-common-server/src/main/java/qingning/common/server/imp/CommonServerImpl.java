@@ -921,6 +921,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributeRoom.get("distributer_id"));
                     String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, query);
                     jedis.hincrBy(distributerKey, "total_amount", share_amount);
+                    jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("distributer_id"));
 
                     //3.4.2 直播间分销员 更新t_room_distributer缓存
                     query.put("distributer_id", distributeRoom.get("distributer_id"));

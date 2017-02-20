@@ -423,7 +423,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				for(String distributerId:distributerSet){
 					queryParam.clear();
 					queryParam.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributerId);
-					distributerMap.put(distributerId, distributerMap.get(distributerId));				
+					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER,queryParam);
+					distributerMap.put(distributerId, pipeline.hgetAll(key));
 				}
 				pipeline.sync();
 				
