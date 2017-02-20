@@ -628,7 +628,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put("access_token", access_token);
         String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
         jedis.hmset(process_access_token, cacheMap);
-        jedis.expire(process_access_token, 10800);
+        jedis.expire(process_access_token, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time")));
         
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id", user_id);        
@@ -1780,9 +1780,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }else if("1".equals(courseMap.get("status"))){
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
-                        content  = liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+                        content  = liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 yyyy:HH:mm");
                     }else {
-                        content += "\n" + liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "MM月dd日 HH:mm");
+                        content += "\n" + liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 yyyy:HH:mm");
                     }
                 }else if("4".equals(courseMap.get("status"))){
                     content  = liveRoomMap.get("room_name") + " " + MiscUtils.getConfigByKey("weixin_course_share_content");
