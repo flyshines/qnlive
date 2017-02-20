@@ -155,17 +155,25 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
-					<param name="room_id" type="string" require="N"  />
+					<param name="room_id"  type="string" require="N"  />
+					<param name="position" type="long" require="N"
+					        validate="(query_time,course_id, position)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 					<param name="query_time" type="long" require="N"
-					       validate="(query_time,course_id)=>{
+					        validate="(query_time,course_id, position)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null; 
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 					<param name="course_id" type="string" require="N"  
-					       validate="(query_time,course_id)=>{
+					       validate="(query_time,course_id, position)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null; 
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 				</inputs>
 				<outputs>
 					<param name="course_num" type="long" default="0"/>
@@ -211,6 +219,7 @@
 							return ret;
 						}"/>
 						<param name="im_course_id" type="string"/>
+						<param name="position" type="long"/>
 					</param>
 
 				</outputs>
@@ -319,16 +328,24 @@
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
 					<param name="query_time" type="long" require="N"  
-					       validate="(query_time,course_id)=>{
+					        validate="(query_time,course_id, position)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null; 
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 					<param name="course_id" type="string" require="N"  
-					       validate="(query_time,course_id)=>{
+					        validate="(query_time,course_id, position)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null; 
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty);},000006"/>
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 					<param name="room_id" type="string" require="Y,000100"  />
+					<param name="position" type="long"  require="N"
+					        validate="(query_time,course_id, position)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
@@ -365,6 +382,7 @@
 							}												
 							return ret;
 						}"/>
+						<param name="position" type="long"/>
 					</param>
 				</outputs>
 			</function>
@@ -553,7 +571,24 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
-					<param name="query_time" type="long"/>					
+					<param name="query_time" type="long"  require="N"
+							validate="(query_time,course_id, position)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
+					<param name="course_id" type="course_id"  require="N"
+							validate="(query_time,course_id, position)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>		
+					<param name="position" type="long"  require="N"
+							validate="(query_time,course_id, position)=>{
+					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
+					       		var isTimeEmpty =  query_time == null;
+					       		var isPositionEmpty =  position == null || position == 0;					       		
+					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>					
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
@@ -590,7 +625,8 @@
 								ret=end_time;
 							}												
 							return ret;
-						}"/>					
+						}"/>
+						<param name="position" type="long"/>					
 					</param>
 				</outputs>
 			</function>

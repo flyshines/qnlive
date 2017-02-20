@@ -165,6 +165,7 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseList", accessToken, version);
@@ -173,6 +174,7 @@ public class LectureController extends AbstractController {
 		parMap.put("room_id", room_id);
 		parMap.put("query_time", start_time);
 		parMap.put("course_id", course_id);
+		parMap.put("position", position);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
@@ -299,6 +301,7 @@ public class LectureController extends AbstractController {
 			@RequestParam(value ="page_count", defaultValue ="20") String page_count, 	
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
 			@RequestParam(value = "query_time", defaultValue = "") String start_time,
+			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader("version") String version) throws Exception{
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomProfitList", access_token, version);
@@ -307,6 +310,7 @@ public class LectureController extends AbstractController {
 		parMap.put("page_count", page_count);
 		parMap.put("course_id", course_id);
 		parMap.put("query_time", start_time);
+		parMap.put("position", position);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
@@ -468,12 +472,16 @@ public class LectureController extends AbstractController {
 	public @ResponseBody ResponseEntity getCourseStatistics(			
 			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
 			@RequestParam(value ="query_time", defaultValue ="") String start_time,
+			@RequestParam(value ="course_id", defaultValue ="") String course_id,
+			@RequestParam(value ="position", defaultValue ="") String position,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader("version") String version) throws Exception{
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStatistics", access_token, version);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("query_time", start_time);
+		parMap.put("course_id", course_id);
+		parMap.put("position", position);
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}

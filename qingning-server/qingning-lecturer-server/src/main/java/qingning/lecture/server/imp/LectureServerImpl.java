@@ -2106,7 +2106,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         result.put("course_num", course_num_str);
         result.put("total_amount", total_amount_str);
  
-        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),null, (Long)reqMap.get("query_time"), (Long)reqMap.get("position"),true,true);
+        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(String)reqMap.get("course_id"), (Long)reqMap.get("query_time"), (Long)reqMap.get("position"),true,true);
         result.put("course_list", courseList);        
         return result;
     }
