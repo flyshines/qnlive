@@ -81,4 +81,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findRoomRecommendUserList(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findDistributionRoomDetailList(Map<String, Object> reqMap);
+	
+	Map<String,Object> findDistributionRoomDetail(Map<String, Object> reqMap);
 }

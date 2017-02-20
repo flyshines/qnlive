@@ -50,6 +50,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             }
             Map<String, Response<String>> timeMap = new HashMap<>();
             Map<String, Response<String>> titleMap = new HashMap<>();
+            Map<String, Response<String>> positionMap = new HashMap<>();
             for(Tuple tuple : predictionCourseIdList){
             	String courseId = tuple.getElement();
 				map.clear();
@@ -57,6 +58,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 				timeMap.put(courseId, pipeline.hget(courseKey, "start_time"));
 				titleMap.put(courseId, pipeline.hget(courseKey, "course_title"));
+				positionMap.put(courseId, pipeline.hget(courseKey, "position"));
             }
             pipeline.sync();
             long currentTime = System.currentTimeMillis();
@@ -65,11 +67,13 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	long time = Long.parseLong(timeMap.get(courseId).get());
             	long date = MiscUtils.getDate(time);
             	String course_title =MiscUtils.convertString(titleMap.get(courseId).get());
+            	long position = MiscUtils.convertObjectToLong(positionMap.get(courseId).get());
             	map.clear();
             	map.put("course_id", courseId);
             	map.put("start_time", new Date(time));
             	map.put("lecturer_id", lecturerId);
             	map.put("course_title", course_title);
+            	map.put("position", position);
             	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
             	if(time<=currentTime || isTheSameDate){
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);

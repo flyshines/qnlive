@@ -170,14 +170,19 @@
   </update>
 
   <select id="findDistributionRoomDetailList" resultType="hashmap" parameterType="hashmap" >
-    select *
-    from t_room_distributer_details
-    where distributer_id = #{distributer_id}
+    select * from t_room_distributer_details where distributer_id = #{distributer_id}
     <if test="record_date != null">
       and create_date <![CDATA[ < ]]> #{record_date}
     </if>
-   order by create_date DESC
+    <if test="position != null">
+      and position <![CDATA[ < ]]> #{position}
+    </if>
+   order by position DESC
     limit #{page_count}
+  </select>
+  
+  <select id="findDistributionRoomDetail" resultType="hashmap" parameterType="hashmap" >
+  	select * from t_room_distributer_details where distributer_id = #{distributer_id} and rq_code=#{rq_code}
   </select>
   
 </mapper>
