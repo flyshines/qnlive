@@ -344,13 +344,13 @@ public class CommonController extends AbstractController {
     @RequestMapping(value="/common/distribution",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getCommonDistribution(
     		@RequestParam(value="page_count",defaultValue="10") String page_count,
-    		@RequestParam(value="record_date",defaultValue="") String record_date,
+    		@RequestParam(value="position",defaultValue="") String position,
     		@RequestHeader("access_token") String access_token,
     		@RequestHeader("version") String version) throws Exception{
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "commonDistribution", access_token, version);
     	Map<String, Object> param = new HashMap<String, Object>();
         param.put("page_count", page_count);
-        param.put("record_date", record_date);
+        param.put("position", position);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -396,9 +396,10 @@ public class CommonController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-    @RequestMapping(value="/common/distribution/rooms/{room_id}",method=RequestMethod.GET)
+    @RequestMapping(value="/common/distribution/rooms/{room_id}/{rq_code}",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getRoomDistributionInfo(
     		@PathVariable("room_id") String room_id,
+    		@PathVariable("rq_code") String rq_code,
     		@RequestParam(value="page_count",defaultValue="20") String page_count,
     		@RequestParam(value="start_time",defaultValue="") String start_time,
     		@RequestHeader("access_token") String access_token,
@@ -406,6 +407,7 @@ public class CommonController extends AbstractController {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributionInfo", access_token, version);
     	Map<String, Object> param = new HashMap<String, Object>();
         param.put("room_id", room_id);
+        param.put("rq_code", rq_code);
         param.put("start_time", start_time);
         param.put("page_count", page_count);        
         requestEntity.setParam(param);

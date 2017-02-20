@@ -25,9 +25,13 @@ import qingning.common.util.TenPayConstant;
 import qingning.common.util.TenPayUtils;
 import qingning.common.util.WeiXinUtil;
 import qingning.server.AbstractQNLiveServer;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -1132,8 +1136,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("commonDistribution")
     public Map<String,Object> getCommonDistribution(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        Long position = (Long)reqMap.get("position");
+        
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("distributer_id", userId);
         int pageCount = (Integer)reqMap.get("page_count");
@@ -1144,10 +1149,68 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         Map<String,Object> resultMap = new HashMap<String, Object>();
         resultMap.put("total_amount", distributer.get("total_amount"));
-
+        
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        if(position != null){
+        	queryMap.put("position", position);
+        }
+        
+        queryMap.put("page_count", pageCount);
+        
+        List<Map<String,Object>> list = commonModuleServer.findDistributionRoomDetailList(queryMap);
+        
+        if(MiscUtils.isEmpty(list)){
+        	list = new LinkedList<Map<String,Object>>();
+        } else {
+        	final List<Map<String,Object>>  detailsList = list;        	     	
+        	((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+				@Override
+				public void batchOperation(Pipeline pipeline, Jedis jedis) {
+					Map<String,Object> queryParam = new HashMap<String,Object>();
+					Map<String,Response<String>> roomNameMap = new HashMap<String,Response<String>>();
+					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
+					long currentTime = MiscUtils.getEndDateOfToday().getTime();
+					for(Map<String,Object> values: detailsList){
+						String roomid = (String)values.get("room_id");
+						if(!roomNameMap.containsKey(roomid)){
+							queryParam.put(Constants.FIELD_ROOM_ID, roomid);
+							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);
+							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));
+						}
+						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
+						if(endDate == 0 || endDate >= currentTime){
+							queryParam.put("distributer_id", values.get("distributer_id"));
+							queryParam.put(Constants.FIELD_ROOM_ID, roomid);							
+							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+							latestInfo.put((String)values.get("room_distributer_details_id"), pipeline.hgetAll(roomKey));
+						}
+					}
+					pipeline.sync();
+					for(Map<String,Object> values: detailsList){
+						String roomid = (String)values.get("room_id");
+						Response<String> roomName = roomNameMap.get(roomid);
+						if(roomName!=null){
+							values.put("room_name", roomName.get());
+						}
+						Response<Map<String,String>> lastInfoDetails = latestInfo.get("room_distributer_details_id");
+						if(lastInfoDetails!=null){
+							Map<String,String> details = lastInfoDetails.get();
+							values.put("course_num", details.get("last_course_num"));
+							values.put("recommend_num", details.get("last_recommend_num"));
+							values.put("done_num", details.get("last_done_num"));
+							values.put("total_amount", details.get("last_total_amount"));
+						}
+					}
+				}
+        	});        	
+        }
+        resultMap.put("room_list",list);
+        return resultMap;
+/*
         //查询用户的直播间分销列表
         Jedis jedis = jedisUtils.getJedis();
-        Map<String,Object> queryMap = new HashMap<>();
+        
         queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String userRoomDistributionListInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO, queryMap);
         if(jedis.exists(userRoomDistributionListInfoKey)){
@@ -1187,7 +1250,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }
 
-        return resultMap;
+        return resultMap;*/
     }
     
     @FunctionName("roomDistributerRecommendInfo")
@@ -1244,13 +1307,51 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         @SuppressWarnings("unchecked")
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        String room_id = (String)reqMap.get("room_id");                
+        String room_id = (String)reqMap.get("room_id");
+        String rq_code = (String)reqMap.get("rq_code");
         reqMap.put("distributer_id", userId);
         Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
         if(MiscUtils.isEmpty(distributer)){
             throw new QNLiveException("120012");
-        }
+        }         
         Map<String,Object> result = new HashMap<String,Object>();
+        Jedis jedis = this.jedisUtils.getJedis();
+        RequestEntity queryOperation = this.generateRequestEntity(null, null, Constants.FUNCTION_DISTRIBUTERS_ROOM_RQ, reqMap);
+        Map<String,String> totalInfo = CacheUtils.readRoomDistributerDetails(room_id, userId, rq_code, queryOperation, readDistributerOperation, jedisUtils);
+        if(MiscUtils.isEmpty(totalInfo)){
+        	result.put("total_amount", 0l);
+        	result.put("course_list", new LinkedList<Map<String,Object>>());
+        } else {
+			long endDate = MiscUtils.convertObjectToLong(totalInfo.get("end_date"));
+			long currentTime = MiscUtils.getEndDateOfToday().getTime();
+			String total_amount = totalInfo.get("total_amount");
+			if(endDate == 0 || endDate >= currentTime){
+				Map<String,Object> queryParam = new HashMap<String,Object>();
+				queryParam.put("distributer_id", totalInfo.get("distributer_id"));
+				queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
+				String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+				total_amount=jedis.hget(roomKey, "last_total_amount");				
+			}
+			result.put("total_amount",MiscUtils.convertObjectToLong(total_amount));
+			List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(reqMap);
+			if(!MiscUtils.isEmpty(course_list)){
+				Date currentDate=MiscUtils.getEndDateOfToday();
+				for(Map<String,Object> values:course_list){
+					Date end_Date = (Date)values.get("end_date");
+					if(!MiscUtils.isEmpty(endDate) && end_Date.before(currentDate)){
+						values.put("effective_time", null);
+					}
+				}
+			} else {
+				course_list = new LinkedList<Map<String,Object>>(); 
+			}
+			result.put("course_list", course_list);
+        }
+        
+        return result;
+        
+        
+/*        Map<String,Object> result = new HashMap<String,Object>();
         result.put("total_amount", distributer.get("total_amount"));
         
         Map<String,Object> parameters = new HashMap<String,Object>();
@@ -1270,7 +1371,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         result.put("course_list", course_list);
-        return result;
+        return result;*/
     }
     
     @FunctionName("courseDistributionInfo")

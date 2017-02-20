@@ -38,6 +38,9 @@
 	<if test="course_id != null" >
 		and a.course_id=#{course_id}
 	</if>
+	<if test="rq_code != null" >
+		and a.rq_code=#{rq_code}
+	</if>
 	<if test="start_time != null" >
 		and b.start_time<![CDATA[<]]>#{start_time} 
 	</if>

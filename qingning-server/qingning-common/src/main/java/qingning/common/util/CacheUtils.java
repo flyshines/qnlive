@@ -210,6 +210,13 @@ public final class CacheUtils {
 		return values;
 	}
 	
+	public static Map<String,String> readRoomDistributerDetails(String room_id, String distributer_id, String rq_code, RequestEntity requestEntity,
+			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
+		String[] searchKeys={room_id,distributer_id,rq_code};
+		String[] keyFields={"room_id","distributer_id","rq_code"};
+		return readData(searchKeys, Constants.CACHED_KEY_USER_DISTRIBUTERS_ROOM_RQ, keyFields, requestEntity, operation, jedisUtils, true, 60*1000);
+	}
+	
 	public static String readLiveRoomInfoFromCached(String room_id, String fieldName,RequestEntity requestEntity,
 			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		if(MiscUtils.isEmpty(fieldName)){

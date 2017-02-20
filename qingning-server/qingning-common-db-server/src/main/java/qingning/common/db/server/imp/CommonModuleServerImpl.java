@@ -573,4 +573,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String,Object> findLectureByLectureId(String lecture_id){
 		return lecturerMapper.findLectureByLectureId(lecture_id);
 	}
+
+	@Override
+	public Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap) {		
+		return roomDistributerDetailsMapper.findDistributionRoomDetail(reqMap);
+	}	
 }

@@ -8,4 +8,6 @@ public interface RoomDistributerDetailsMapper {
 	int updateRoomDistributerDetails(Map<String,Object> record);
 
 	List<Map<String,Object>> findDistributionRoomDetailList(Map<String, Object> reqMap);
+	
+	Map<String,Object> findDistributionRoomDetail(Map<String, Object> reqMap);
 }

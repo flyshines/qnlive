@@ -6,6 +6,9 @@
   </select>
   <select id="findFinishCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
   	select * from t_courses where status='2'
+  	<if test="lecturer_id != null" >
+  		and lecturer_id = #{lecturer_id}
+  	</if>
   	<if test="position != null"> 
   		and ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) <![CDATA[ < ]]> #{position}
   	</if> 
@@ -47,6 +50,30 @@
     limit #{pageCount}
   </select>
   
+  <select id="findLecturerCourseListByStatus" resultType="hashmap" parameterType="hashmap" >
+     select * from t_courses where lecturer_id = #{lecturer_id} and status = #{status}
+     <if test='status =="1"' >
+     	<if test="start_time != null" >
+    		and start_time <![CDATA[ < ]]> #{start_time} 
+    	</if>
+    	order by start_time desc
+     </if>
+     <if test='status =="2"' >
+     	 <if test="end_time != null" >
+    		and end_time <![CDATA[ < ]]> #{end_time} 
+    	</if>
+    	<if test="position != null">
+    		and ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) <![CDATA[ < ]]> #{position} order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc
+    	</if>
+    	<if test="position == null" >
+    		order by end_time desc, position
+    	</if>   	
+     </if>
+     <if test="pageCount != null" >
+      limit #{pageCount}
+     </if>
+  </select>
+  
   <select id="findLecturerCourseList" resultType="hashmap" parameterType="hashmap" >
     select * from t_courses where lecturer_id = #{lecturer_id}
     <if test="status != null" >
@@ -55,14 +82,23 @@
     <if test="start_time != null" >
     	and start_time <![CDATA[ < ]]> #{start_time}
     </if>
+    <if test="position != null">
+        and ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) <![CDATA[ < ]]> #{position}
+    </if>
     <if test="end_time != null" >
     	and end_time <![CDATA[ < ]]> #{end_time}
     </if>
-    <if test="start_time != null and end_time == null" >
+    <if test="start_time != null and end_time == null and position == null" >
     	order by start_time desc
     </if>
-    <if test="start_time == null and end_time != null" >
-    	order by end_time desc
+    <if test="start_time == null and end_time == null and position == null" >
+    	order by start_time desc
+    </if>    
+    <if test="position != null and start_time == null and end_time == null">
+    	order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit #{pageCount}
+    </if>
+    <if test="start_time == null and end_time != null and position == null" >
+    	order by end_time desc,position
     </if>
     <if test="pageCount != null" >
       limit #{pageCount}
