@@ -945,14 +945,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
-
+                    jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
                 }else {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
 
                 //3.1 t_lecturer  缓存
                 query.clear();
-                query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("room_id"));
+                query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
                 if("0".equals(profit_type)){
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
@@ -960,6 +960,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(lecturerKey,"room_done_num",1);
                 }
                 jedis.hincrBy(lecturerKey, "total_amount", lecturerProfit);
+                jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id"));
 
                 //3.2 直播间缓存 t_live_room
                 query.clear();
