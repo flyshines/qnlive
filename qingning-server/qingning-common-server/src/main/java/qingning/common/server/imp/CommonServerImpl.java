@@ -1780,9 +1780,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }else if("1".equals(courseMap.get("status"))){
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
-                        content  = liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 yyyy:HH:mm");
+                        content  = liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }else {
-                        content += "\n" + liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 yyyy:HH:mm");
+                        content += "\n" + liveRoomMap.get("room_name") + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }
                 }else if("4".equals(courseMap.get("status"))){
                     content  = liveRoomMap.get("room_name") + " " + MiscUtils.getConfigByKey("weixin_course_share_content");
