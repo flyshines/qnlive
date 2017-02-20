@@ -1776,7 +1776,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//把roomid 放进参数中 传到后面
                 Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
                 if("2".equals(courseMap.get("status"))){
-                    content = liveRoomMap.get("room_name") + "  " + MiscUtils.getConfigByKey("weixin_course_share_content");
+                    content = liveRoomMap.get("room_name");
                 }else if("1".equals(courseMap.get("status"))){
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
