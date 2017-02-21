@@ -1527,6 +1527,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
  
             if(! CollectionUtils.isEmpty(messageList)){
+                for(Map<String,Object> messageMap : messageList){
+                    if(! MiscUtils.isEmpty(messageMap.get("message"))){
+                        messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageMap.get("message").toString()));
+                    }
+                }
                 resultMap.put("message_list", messageList);
             }
  
@@ -1589,6 +1594,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         }
                     }
 
+                    String messageContent = messageMap.get("message");
+                    if(! MiscUtils.isEmpty(messageContent)){
+                        messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageContent));
+                    }
                     messageListCache.add(messageMap);
                     startIndex++;
                 }
