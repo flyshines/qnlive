@@ -646,6 +646,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
  
             //1如果为课程结束
+            String original_start_time = null;
+            Map<String,String> originalCourseMap = CacheUtils.readCourse(course_id, reqEntity, readCourseOperation, jedisUtils, false);
+            original_start_time = originalCourseMap.get("start_time");
             if ("2".equals(reqMap.get("status"))) {
                 //1.1如果为课程结束，则取当前时间为课程结束时间
                 //1.2更新课程详细信息(dubble服务)
@@ -864,12 +867,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     
                     TemplateData orderNo = new TemplateData();
                     orderNo.setColor("#000000");
-                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(course.get("start_time"))) , "yyyy-MM-dd HH:mm:ss"));
+                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(original_start_time)) , "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword3", orderNo);
                     
                     TemplateData nowDate = new TemplateData();
                     nowDate.setColor("#000000");
-                    nowDate.setValue(MiscUtils.parseDateToFotmatString(now, "yyyy-MM-dd HH:mm:ss"));
+                    nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword4", nowDate);
                     
                     TemplateData remark = new TemplateData();
