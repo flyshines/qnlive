@@ -954,6 +954,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
+                    
+                    query.clear();
+                    query.put(Constants.CACHED_KEY_USER_FIELD, distributeRoom.get("distributer_id"));
+                    String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+                    jedis.hincrBy(userCacheKey, "today_distributer_amount", share_amount);
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id"));
                 }else {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
@@ -1031,7 +1037,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
                         jedis.hincrBy(userCacheKey, "course_num", 1L);
                     }
- 
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
                     nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
                     String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
                     JSONArray levelJson = JSON.parseArray(levelString);
