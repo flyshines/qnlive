@@ -864,12 +864,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     
                     TemplateData orderNo = new TemplateData();
                     orderNo.setColor("#000000");
-                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(course.get("start_time"))) , "yyyy-MM-dd hh:mm:ss"));
+                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(course.get("start_time"))) , "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword3", orderNo);
                     
                     TemplateData nowDate = new TemplateData();
                     nowDate.setColor("#000000");
-                    nowDate.setValue(MiscUtils.parseDateToFotmatString(now, "yyyy-MM-dd hh:mm:ss"));
+                    nowDate.setValue(MiscUtils.parseDateToFotmatString(now, "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword4", nowDate);
                     
                     TemplateData remark = new TemplateData();
