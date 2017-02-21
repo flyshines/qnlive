@@ -1571,6 +1571,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
                     messageMap.put("message_pos", startIndex+"");
+
                     messageListCache.add(messageMap);
                     startIndex++;
                 }
