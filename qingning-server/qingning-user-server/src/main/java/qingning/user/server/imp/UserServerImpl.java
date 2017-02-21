@@ -1265,7 +1265,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
     		TemplateData first = new TemplateData();
     		first.setColor("#000000");
-    		first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
+			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseInfoMap.get("course_title"));
+    		first.setValue(firstContent);
     		templateMap.put("first", first);
     		
     		Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
@@ -1281,7 +1282,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     		TemplateData name = new TemplateData();
     		name.setColor("#000000");
-    		name.setValue(courseInfoMap.get("course_title"));
+			String thirdContent = courseInfoMap.get("course_remark");
+			if(MiscUtils.isEmpty(thirdContent)){
+				thirdContent = "";
+			}
+    		name.setValue(thirdContent);
     		templateMap.put("keyword3", name);
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);

@@ -472,7 +472,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("lecturer_id", userId);        
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
         String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
-        String courseTitle = MiscUtils.RecoveryEmoji(lecturer.get("course_title"));
+        String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
         //取出粉丝列表
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
         //TODO  关注的直播间有新的课程，推送提醒
@@ -490,7 +490,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData wuliu = new TemplateData();
         	wuliu.setColor("#000000");
-        	wuliu.setValue("");
+            String content = course.get("course_remark");
+            if(MiscUtils.isEmpty(content)){
+                content = "";
+            }
+            wuliu.setValue(content);
+
         	templateMap.put("keyword2", wuliu);    
 
         	TemplateData orderNo = new TemplateData();
@@ -501,7 +506,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
         	TemplateData receiveAddr = new TemplateData();
         	receiveAddr.setColor("#000000");
-        	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm"));
+        	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
         	templateMap.put("keyword4", receiveAddr);
 
         	TemplateData remark = new TemplateData();
@@ -1566,6 +1571,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
                     messageMap.put("message_pos", startIndex+"");
+
                     messageListCache.add(messageMap);
                     startIndex++;
                 }

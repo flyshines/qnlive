@@ -52,6 +52,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             Map<String, Response<String>> titleMap = new HashMap<>();
             Map<String, Response<String>> positionMap = new HashMap<>();
             Map<String, Response<String>> IMCourseIdMap = new HashMap<>();
+			Map<String, Response<String>> realStartTimeMap = new HashMap<String, Response<String>>();
             for(Tuple tuple : predictionCourseIdList){
             	String courseId = tuple.getElement();
 				map.clear();
@@ -61,6 +62,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 				titleMap.put(courseId, pipeline.hget(courseKey, "course_title"));
 				positionMap.put(courseId, pipeline.hget(courseKey, "position"));
 				IMCourseIdMap.put(courseId, pipeline.hget(courseKey, "im_course_id"));
+				realStartTimeMap.put(courseId, pipeline.hget(courseKey, "real_start_time"));
             }
             pipeline.sync();
             long currentTime = System.currentTimeMillis();
@@ -71,6 +73,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	String course_title =MiscUtils.convertString(titleMap.get(courseId).get());
             	long position = MiscUtils.convertObjectToLong(positionMap.get(courseId).get());
 				String im_course_id = IMCourseIdMap.get(courseId).get();
+				long realStartTime = MiscUtils.convertObjectToLong(realStartTimeMap.get(courseId).get());
             	map.clear();
             	map.put("course_id", courseId);
             	map.put("start_time", new Date(time));
@@ -78,10 +81,19 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	map.put("course_title", course_title);
             	map.put("position", position);
             	map.put("im_course_id", im_course_id);
+            	if(realStartTime>0){
+            		map.put("real_start_time", realStartTime);
+            	}
             	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
             	if(time<=currentTime || isTheSameDate){
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
-                    messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
+                    if(realStartTime>0){
+                    	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+                    } else {
+                    	messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
+                    }
             	}
             	if(time>currentTime){
 	            	if(isTheSameDate){
