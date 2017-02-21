@@ -164,8 +164,8 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-        boolean key = (boolean)resultMap.get("key");
-        if(key){
+        Integer key = (Integer)resultMap.get("key");
+        if(key == 1){
             //正常跳转到首页
             String userWeixinAccessToken = (String) resultMap.get("access_token");
             response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);

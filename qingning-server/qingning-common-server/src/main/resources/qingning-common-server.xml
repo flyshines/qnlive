@@ -78,7 +78,7 @@
 				</inputs>
 				<outputs>
 					<param name="access_token" type="string"/>
-					<param name="key" type="boolean"/>
+					<param name="key" type="Integer"/>
 					<param name="m_user_id" type="string"/>
 					<param name="user_id" type="string"/>
 					<param name="nick_name" type="rstring"/>
