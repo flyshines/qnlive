@@ -248,6 +248,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
 				long shareAmount= (MiscUtils.convertObjectToLong(tradeBill.get("amount")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate")))/10000L;
 				profitRecord.put("share_amount", shareAmount);
+				profitRecord.put("distributer_id", roomDistributerCache.get("distributer_id"));
 			}
 		}
 		
