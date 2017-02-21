@@ -464,12 +464,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
         AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
         JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
-        if(user == null || user.getInteger("errcode") != null ) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
+        if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
             wei_xin_access_token = WeiXinUtil.updAccessToken(jedis);
             if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
                 throw new QNLiveException("120008");
             }
             user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//再次刷新获取是否有关注我们公众号
+            if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) {
+                throw new QNLiveException("120008");
+            }
         }
 
         Integer subscribe = user.getInteger("subscribe");//是否有关注我们公众号
@@ -493,32 +496,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             processLoginSuccess(2, null, loginInfoMap, resultMap);
             return resultMap;
         }else {
-            //1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
-//            String userWeixinAccessToken = getCodeResultJson.getString("access_token");//获取用户token
-//            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
-            // 根据得到的相关用户信息注册用户，并且进行登录流程。
-//            if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
-//                throw new QNLiveException("120008");
-//            }
-//
-//            queryMap.clear();
-//            queryMap.put("login_type","0");//0.微信方式登录
-//            queryMap.put("web_openid",openid);
-//            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-//            if(loginInfoMapFromUnionid != null){
-//                //将open_id更新到login_info表中
-//                Map<String,Object> updateMap = new HashMap<>();
-//                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
-//                updateMap.put("web_openid", openid);
-//                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-//                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
-//                return resultMap;
-//            }
-
             String nickname = user.getString("nickname");//用户名称
             String sex = user.getString("sex");//性别
             String headimgurl = user.getString("headimgurl");//头像地址
+            String unionid = user.getString("unionid");//获取unionid
 
+            queryMap.clear();
+            queryMap.put("login_type","0");//0.微信方式登录
+            queryMap.put("login_id",unionid);
+            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+            if(loginInfoMapFromUnionid != null){
+                //将open_id更新到login_info表中
+                Map<String,Object> updateMap = new HashMap<>();
+                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+                updateMap.put("web_openid", openid);
+                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
+                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
+                return resultMap;
+            }
             Map<String,String> imResultMap = null;
             try {
                 imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
@@ -541,22 +536,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }else {
                 reqMap.put("nick_name", nickname);
             }
-            //判断性别
-            if(MiscUtils.isEmpty(sex)){
-                reqMap.put("gender","2");//TODO
-            }
 
+            //判断性别
             //微信性别与本系统性别转换
             //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-            if(sex.equals("1")){
+            if(MiscUtils.isEmpty(sex)){
+                reqMap.put("gender","2");//TODO
+            }else if(sex.equals("1")){
                 reqMap.put("gender","1");//TODO
-            }
-            if(sex.equals("2")){
+            }else if(sex.equals("2")){
                 reqMap.put("gender","0");//TODO
-            }
-            if(sex.equals("0")){
+            }else{
                 reqMap.put("gender","2");//TODO
             }
+            reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);

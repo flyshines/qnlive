@@ -223,6 +223,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					timerMap.put("real_start_time", now+"");
 					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
+					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 
 					//进行超时预先提醒定时任务

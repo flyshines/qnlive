@@ -361,15 +361,23 @@ public class MessagePushServerImpl extends AbstractMsgService {
     	}
     }
     
-    @SuppressWarnings("unchecked")
+    
 	@FunctionName("processCourseStartShortNoticeUpdate")
     public void processCourseStartShortNoticeUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	processCourseStartShortNoticeUpdate(requestEntity, jedisUtils, context, true);
+    }
+	@FunctionName("processCourseStartShortNoticeCancel")
+    public void processCourseStartShortNoticeCancel(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	processCourseStartShortNoticeUpdate(requestEntity, jedisUtils, context, false);
+    }
+	
+	@SuppressWarnings("unchecked")
+    private void processCourseStartShortNoticeUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context, boolean update) {	
     	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
     	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
     	String courseId = (String)reqMap.get("course_id");
-    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
-    	
-    	if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+    	qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);    	
+    	if(update && MiscUtils.isTheSameDate(new Date(startTime), new Date())){
     		if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
     			this.processCourseStartShortNotice(requestEntity, jedisUtils, context);
     		}
