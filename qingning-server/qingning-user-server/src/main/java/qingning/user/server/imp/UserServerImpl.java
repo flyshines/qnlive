@@ -1271,7 +1271,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
     		TemplateData orderNo = new TemplateData();
     		orderNo.setColor("#000000");
-    		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
+    		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
     		templateMap.put("keyword1", orderNo);
     		
     		TemplateData wuliu = new TemplateData();

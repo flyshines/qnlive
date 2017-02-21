@@ -89,6 +89,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入直播超时预先提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_OVER_TIME_NOTICE)){
         	return;
         }
@@ -114,6 +115,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         			Map<String,String> extrasMap = new HashMap<>();
         			extrasMap.put("msg_type","4");
         			extrasMap.put("course_id",courseId);
+        			extrasMap.put("im_course_id",im_course_id);
         			obj.put("extras_map", extrasMap);
         			JPushHelper.push(obj);                
         		}
@@ -137,6 +139,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
         long noticeTime= 24*60*60*1000;
         long taskStartTime = start_time - noticeTime;
@@ -154,6 +157,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     Map<String,String> extrasMap = new HashMap<>();
                     extrasMap.put("msg_type","1");
                     extrasMap.put("course_id",courseId);
+                    extrasMap.put("im_course_id",im_course_id);
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj);               
         		}
@@ -177,6 +181,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
         long noticeTime= 5*60*1000;
         long taskStartTime = start_time - noticeTime;
@@ -192,6 +197,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     Map<String,String> extrasMap = new HashMap<>();
                     extrasMap.put("msg_type","2");
                     extrasMap.put("course_id",courseId);
+                    extrasMap.put("im_course_id",im_course_id);
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj);
         		}
@@ -211,6 +217,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------加入学生上课3min提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE)){
         	return;
         }
@@ -231,6 +238,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     Map<String,String> extrasMap = new HashMap<>();
                     extrasMap.put("msg_type","10");
                     extrasMap.put("course_id",courseId);
+                    extrasMap.put("im_course_id", im_course_id);
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj);
         		}
@@ -255,6 +263,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
+        String im_course_id = reqMap.get("im_course_id").toString();
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
         if(taskStartTime > 0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -276,6 +285,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     Map<String,String> extrasMap = new HashMap<>();
                     extrasMap.put("msg_type","3");
                     extrasMap.put("course_id",courseId);
+                    extrasMap.put("im_course_id",im_course_id);
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj);
         		}
