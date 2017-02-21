@@ -160,23 +160,24 @@ public class CommonController extends AbstractController {
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
 
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinLogin", null, "");
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "");
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-        Integer subscribe = Integer.valueOf((String)resultMap.get("subscribe"));
-        if(subscribe == 0){//如果没有关注公众号
-            logger.info("没有关注我们微信,跳转至关注页面");
-            response.sendRedirect(MiscUtils.getConfigByKey("weixin_auth_redirect_url"));
+        boolean key = (boolean)resultMap.get("key");
+        if(key){
+            //正常跳转到首页
+            String userWeixinAccessToken = (String) resultMap.get("access_token");
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
             return ;
         }
 
-        String userWeixinAccessToken = (String) resultMap.get("access_token");
-        logger.info("微信Access_token"+userWeixinAccessToken);
-        Map<String, String> param = new HashMap<String, String>();
-        param.put("token",userWeixinAccessToken);
-        response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
+        //如果没有拿到
+        logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
+        String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
+        authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
+        response.sendRedirect(authorization_url);
         return ;
     }
 
@@ -259,8 +260,9 @@ public class CommonController extends AbstractController {
 
     /**
      * 生成微信支付单
-     * @param entity
-     * @param version
+     * @param accessToken 安全证书
+     * @param entity post参数
+     * @param version 版本号
      * @return
      * @throws Exception
      */
