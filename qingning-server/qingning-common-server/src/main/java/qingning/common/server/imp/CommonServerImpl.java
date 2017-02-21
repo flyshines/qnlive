@@ -339,7 +339,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //1.传递授权code及相关参数，调用微信验证code接口
         String code = reqMap.get("code").toString();
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             if(getCodeResultJson.getString("openid") == null){
                 resultMap.put("key",false);
