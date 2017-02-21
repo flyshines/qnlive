@@ -1571,6 +1571,23 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
                     messageMap.put("message_pos", startIndex+"");
+                    //更改用户名和昵称
+                    if(MiscUtils.isEmpty(messageMap)){
+                        continue;
+                    }
+                    if(messageMap.get("creator_id") != null){
+                        Map<String,Object> innerMap = new HashMap<>();
+                        innerMap.put("user_id", messageMap.get("creator_id"));
+                        Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
+                        if(! MiscUtils.isEmpty(userMap)){
+                            if(userMap.get("nick_name") != null){
+                                messageMap.put("creator_nick_name", userMap.get("nick_name"));
+                            }
+                            if(userMap.get("avatar_address") != null){
+                                messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+                            }
+                        }
+                    }
 
                     messageListCache.add(messageMap);
                     startIndex++;
