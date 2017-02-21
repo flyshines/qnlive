@@ -490,7 +490,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData wuliu = new TemplateData();
         	wuliu.setColor("#000000");
-        	wuliu.setValue(courseTitle);
+        	wuliu.setValue("");
         	templateMap.put("keyword2", wuliu);    
 
         	TemplateData orderNo = new TemplateData();
@@ -501,7 +501,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
         	TemplateData receiveAddr = new TemplateData();
         	receiveAddr.setColor("#000000");
-        	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm:ss"));
+        	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd hh:mm"));
         	templateMap.put("keyword4", receiveAddr);
 
         	TemplateData remark = new TemplateData();
