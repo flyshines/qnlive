@@ -335,11 +335,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("key",true);//钥匙 用于在controller判断跳转的页面
         String code = reqMap.get("login_id").toString();
         //1.传递授权code及相关参数，调用微信验证code接口
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
 
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
+            if(getCodeResultJson.getString("openid") == null){
+                resultMap.put("key",false);
+                return resultMap;
+            }
             throw new QNLiveException("120008");
         }
         String openid = getCodeResultJson.getString("openid");
@@ -362,6 +367,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
+                if(userJson.getString("unionid") == null){
+                    resultMap.put("key",false);
+                    return resultMap;
+                }
                 throw new QNLiveException("120008");
             }
 
@@ -390,9 +399,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }catch (Exception e){
                 //TODO 暂不处理
             }
-            //if(imResultMap == null || imResultMap.get("uid") == null || imResultMap.get("password") == null){
-            //throw new QNLiveException("120003");
-            //}else {
+
             //初始化数据库相关表
             reqMap.put("m_user_id", imResultMap.get("uid"));
             reqMap.put("m_pwd", imResultMap.get("password"));
@@ -469,20 +476,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
                 throw new QNLiveException("120008");
             }
-            user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//再次刷新获取是否有关注我们公众号
-            if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) {
-                throw new QNLiveException("120008");
-            }
         }
-
-        Integer subscribe = user.getInteger("subscribe");//是否有关注我们公众号
-        if(subscribe == 0){//没有关注我们公众号
-            resultMap.put("subscribe",subscribe);
-            return resultMap;
-        }else{//关注了
-            resultMap.put("subscribe",subscribe);
-        }
-
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
         //1.2.1根据 openid查询数据库
@@ -719,7 +713,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         return resultMap;
     }
- 
+
+    /**
+     * 生成具体微信订单
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("generateWeixinPayBill")
     public Map<String,String> generateWeixinPayBill (RequestEntity reqEntity) throws Exception{
@@ -731,7 +731,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.put("course_id", courseId);
         Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, false);
        
-        if(MiscUtils.isEmpty(courseMap)){            
+        if(MiscUtils.isEmpty(courseMap)){    //如果课程不存在
         	throw new QNLiveException("120009");
         } 
         //2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
@@ -816,11 +816,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }
     }
- 
+
+    /**
+     * 微信支付成功后回调的方法
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("handleWeixinPayResult")
     public String handleWeixinPayResult (RequestEntity reqEntity) throws Exception{
-        String resultStr = TenPayConstant.FAIL;
+        String resultStr = TenPayConstant.FAIL;//静态
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
  
