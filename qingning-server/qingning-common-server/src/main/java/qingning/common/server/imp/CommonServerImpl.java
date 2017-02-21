@@ -1060,13 +1060,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
         TemplateData first = new TemplateData();
         first.setColor("#000000");
-        first.setValue(MiscUtils.getConfigByKey("wpush_shop_course_first"));
+        String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseByCourseId.get("course_title"));
+        first.setValue(firstContent);
         templateMap.put("first", first);
         
         Date start_time = new Date(MiscUtils.convertObjectToLong(courseByCourseId.get("start_time")));
         TemplateData orderNo = new TemplateData();
         orderNo.setColor("#000000");
-        orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd hh:mm:ss"));
+        orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
         templateMap.put("keyword1", orderNo);
         
         TemplateData wuliu = new TemplateData();
@@ -1076,7 +1077,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         TemplateData name = new TemplateData();
         name.setColor("#000000");
-        name.setValue(courseByCourseId.get("course_title"));
+        String thirdContent;
+        if(MiscUtils.isEmpty(courseByCourseId.get("course_remark"))){
+            thirdContent = "";
+        }else {
+            thirdContent = courseByCourseId.get("course_remark");
+        }
+        name.setValue(thirdContent);
         templateMap.put("keyword3", name);
  
         TemplateData remark = new TemplateData();
