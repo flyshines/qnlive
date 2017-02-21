@@ -472,7 +472,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("lecturer_id", userId);        
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
         String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
-        String courseTitle = MiscUtils.RecoveryEmoji(lecturer.get("course_title"));
+        String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
         //取出粉丝列表
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
         //TODO  关注的直播间有新的课程，推送提醒
