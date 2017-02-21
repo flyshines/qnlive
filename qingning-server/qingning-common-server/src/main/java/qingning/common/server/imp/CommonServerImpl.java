@@ -335,13 +335,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("key",1);//钥匙 用于在controller判断跳转的页面
+        resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
         //1.传递授权code及相关参数，调用微信验证code接口
         String code = reqMap.get("code").toString();
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             if(getCodeResultJson.getString("openid") == null){
-                resultMap.put("key",0);
+                resultMap.put("key","0");
                 return resultMap;
             }
             throw new QNLiveException("120008");
@@ -367,7 +367,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
                 if(userJson.getString("unionid") == null){
-                    resultMap.put("key",0);
+                    resultMap.put("key","0");
                     return resultMap;
                 }
                 throw new QNLiveException("120008");
