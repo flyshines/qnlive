@@ -488,7 +488,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //1.2.1根据 openid查询数据库
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","4");//4.微信code方式登录
-        queryMap.put("unionid",user.getString("unionid"));
+        queryMap.put("web_openid",openid);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
         //1.2.1.1如果用户存在则进行登录流程
@@ -501,6 +501,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String headimgurl = user.getString("headimgurl");//头像地址
             String unionid = user.getString("unionid");//获取unionid
 
+            queryMap.clear();
+            queryMap.put("login_type","0");//0.微信方式登录
+            queryMap.put("login_id",unionid);
+            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+            if(loginInfoMapFromUnionid != null){
+                //将open_id更新到login_info表中
+                Map<String,Object> updateMap = new HashMap<>();
+                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+                updateMap.put("web_openid", openid);
+                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
+                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
+                return resultMap;
+            }
             Map<String,String> imResultMap = null;
             try {
                 imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
@@ -523,20 +536,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }else {
                 reqMap.put("nick_name", nickname);
             }
-            //判断性别
-            if(MiscUtils.isEmpty(sex)){
-                reqMap.put("gender","2");//TODO
-            }
 
+            //判断性别
             //微信性别与本系统性别转换
             //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-            if(sex.equals("1")){
+            if(MiscUtils.isEmpty(sex)){
+                reqMap.put("gender","2");//TODO
+            }else if(sex.equals("1")){
                 reqMap.put("gender","1");//TODO
-            }
-            if(sex.equals("2")){
+            }else if(sex.equals("2")){
                 reqMap.put("gender","0");//TODO
-            }
-            if(sex.equals("0")){
+            }else{
                 reqMap.put("gender","2");//TODO
             }
             reqMap.put("unionid",unionid);
