@@ -1395,7 +1395,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					values.put("profit_share_rate", totalInfo.get("profit_share_rate"));
 					values.put("effective_time", totalInfo.get("effective_time"));
 					values.put("end_date", totalInfo.get("end_date"));
-					Date end_Date = (Date)values.get("end_date");
+					Date end_Date = null;
+					if(!MiscUtils.isEmpty(values.get("end_date"))){
+						end_Date = new Date(MiscUtils.convertObjectToLong(values.get("end_date")));
+					}					
 					if(!MiscUtils.isEmpty(end_Date) && end_Date.before(currentDate)){
 						values.put("effective_time", null);
 					}
