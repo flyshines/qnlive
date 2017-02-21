@@ -301,7 +301,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     				Map<String, String> courseInfoMap = cachedCourse.get(courseId);
     				if(courseInfoMap == null){
     					queryParam.put("course_id", courseId);
-    					courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);	
+    					courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
     				}
     				if(finishSet.contains(courseId) && !"2".equals(courseInfoMap.get("status"))){
     					queryParam.put("course_id", courseId);
@@ -322,7 +322,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		queryMap.put("pageCount", pageCount);
     		if(!MiscUtils.isEmpty(lastCourse)){
     			long lastCourseEnd = MiscUtils.convertObjectToLong(lastCourse.get("end_time"));
-    			if(query_time !=null && lastCourseEnd<query_time){
+    			if(query_time ==null || lastCourseEnd<query_time){
     				query_time=lastCourseEnd;
     				position = MiscUtils.convertObjectToLong(lastCourse.get("position"));
     			}
