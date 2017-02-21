@@ -921,6 +921,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("room_id", courseMap.get("room_id"));
                     String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
 
+                    if(courseMap.get("student_num") != null){
+                        long student_num_original = Long.parseLong(courseMap.get("student_num"));
+                        if(student_num_original <= 0){
+                            jedis.hincrBy(roomDistributeKey, "course_num", 1);
+                            jedis.hincrBy(roomDistributeKey, "last_course_num", 1);
+                        }
+                    }
+
                     //todo 总成交人数 最后一次:成交人数
                     if(! MiscUtils.isEmpty(userDistributionInfo)){
                         if(userDistributionInfo.get("userDistributionInfoForDoneNum") != null){
@@ -931,7 +939,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                         if(userDistributionInfo.get("userDistributionInfoForLastDoneNum") != null){
                             if(((Boolean)(userDistributionInfo.get("userDistributionInfoForLastDoneNum"))) == false){
-                                jedis.hincrBy(roomDistributeKey, "done_num", 1);
+                                jedis.hincrBy(roomDistributeKey, "last_done_num", 1);
                             }
                         }
                     }
