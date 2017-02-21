@@ -1387,10 +1387,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				total_amount=jedis.hget(roomKey, "last_total_amount");				
 			}
 			result.put("total_amount",MiscUtils.convertObjectToLong(total_amount));
-			List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(reqMap);
+			List<Map<String,Object>> course_list = commonModuleServer.findCourseWithRoomDistributerCourseInfo(reqMap);
 			if(!MiscUtils.isEmpty(course_list)){
 				Date currentDate=MiscUtils.getEndDateOfToday();
 				for(Map<String,Object> values:course_list){
+					values.put("profit_share_rate", totalInfo.get("profit_share_rate"));
+					values.put("effective_time", totalInfo.get("effective_time"));
+					values.put("end_date", totalInfo.get("end_date"));
 					Date end_Date = (Date)values.get("end_date");
 					if(!MiscUtils.isEmpty(end_Date) && end_Date.before(currentDate)){
 						values.put("effective_time", null);
