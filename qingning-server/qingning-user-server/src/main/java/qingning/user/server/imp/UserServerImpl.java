@@ -1517,6 +1517,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             List<Map<String,Object>> messageList = userModuleServer.findCourseMessageList(queryMap);
 
             if(! CollectionUtils.isEmpty(messageList)){
+				for(Map<String,Object> messageMap : messageList){
+					if(! MiscUtils.isEmpty(messageMap.get("message"))){
+						messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageMap.get("message").toString()));
+					}
+				}
                 resultMap.put("message_list", messageList);
             }
 
@@ -1575,6 +1580,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
 								messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
 							}
 						}
+					}
+
+					String messageContent = messageMap.get("message");
+					if(! MiscUtils.isEmpty(messageContent)){
+						messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageContent));
 					}
                     messageMap.put("message_pos", startIndex+"");
                     messageListCache.add(messageMap);
