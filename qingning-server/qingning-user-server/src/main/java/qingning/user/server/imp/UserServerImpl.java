@@ -1673,59 +1673,73 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
     			@Override
     			public void batchOperation(Pipeline pipeline, Jedis jedis) {
-    				Map<String,Response<Set<Tuple>>> courseInfoMap = new HashMap<String,Response<Set<Tuple>>>();
+    				Map<String,Response<Set<Tuple>>> courseInfoDictMap = new HashMap<String,Response<Set<Tuple>>>();
+    				Map<String,Response<Set<Tuple>>> courseInfoPreDictMap = new HashMap<String,Response<Set<Tuple>>>();
+    				Map<String,Response<Set<Tuple>>> courseInfoFinDictMap = new HashMap<String,Response<Set<Tuple>>>();
+    				long currentTime = System.currentTimeMillis();
     				Map<String,Object> map = new HashMap<String,Object>();
     				for(Map<String,Object> fansRoom:list){
     					String lecturer_id = (String)fansRoom.get("lecturer_id");
     					map.clear();
     			        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
-    			        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);    			        
-    			        Response<Set<Tuple>> response = pipeline.zrangeByScoreWithScores(lecturerCoursesPredictionKey, "-inf", "+inf", 0, 1);
-    			        courseInfoMap.put(lecturer_id, response);
+    			        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+    			        Response<Set<Tuple>> response = pipeline.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, currentTime+"", "-inf", 0,  1);
+    			        courseInfoDictMap.put(lecturer_id, response);    			        
+    			        response = pipeline.zrevrangeByScoreWithScores(lecturerCoursesPredictionKey, "+inf", "-inf", 0,  1);
+    			        courseInfoPreDictMap.put(lecturer_id, response);
+
+						String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+						response = pipeline.zrevrangeByScoreWithScores(lecturerCoursesFinishKey, "+inf", "-inf", 0, 1);
+						courseInfoFinDictMap.put(lecturer_id, response);
     				}
-    				pipeline.sync();
-    				for(String key:courseInfoMap.keySet()){
-    					Response<Set<Tuple>> response = courseInfoMap.get(key);
-    					boolean reQuery = false;
-    					if(response==null){
-    						reQuery = true;
-    					} else {
-    						Set<Tuple> set = response.get();
-    						if(set==null || set.isEmpty()){
-    							reQuery = true;
-    						} else if(MiscUtils.isEmpty(set.iterator().next().getElement())){
-    							reQuery = true;
-    						}
-    					}
-    					
-    					if(reQuery){
-    						map.clear();
-    						map.put(Constants.CACHED_KEY_LECTURER_FIELD, key);
-    						String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-    						response = pipeline.zrevrangeByScoreWithScores(lecturerCoursesFinishKey, "+inf", "-inf", 0, 1);
-    						courseInfoMap.put(key, response);
-    					}
-    				}
+    				
     				pipeline.sync();
     				Map<String,Response<Map<String,String>>> courseInfo = new HashMap<String,Response<Map<String,String>>>();
-    				for(String key:courseInfoMap.keySet()){
-    					Response<Set<Tuple>> response = courseInfoMap.get(key);
+    				
+    				for(Map<String,Object> fansRoom:list){
+    					String lecturer_id = (String)fansRoom.get("lecturer_id");
+    					if(courseInfo.containsKey(lecturer_id)){
+    						continue;
+    					}
+    					Response<Set<Tuple>> tupleSet = courseInfoDictMap.get(lecturer_id);
     					String courseId = null;
-    					if(response!=null){
-    						Set<Tuple> set = response.get();
-    						if(set!=null && !set.isEmpty()){
-    							courseId = set.iterator().next().getElement();    						
+    					if(tupleSet!=null && !MiscUtils.isEmpty(tupleSet.get())){
+    						Set<Tuple> set = tupleSet.get();
+    						for(Tuple tupe:set){
+    							courseId = tupe.getElement();
+    						}    						
+    					}
+    					if(MiscUtils.isEmpty(courseId)){
+    						tupleSet = courseInfoPreDictMap.get(lecturer_id);
+    					}
+    					
+    					if(tupleSet!=null && !MiscUtils.isEmpty(tupleSet.get())){
+    						Set<Tuple> set = tupleSet.get();
+    						for(Tuple tupe:set){
+    							courseId = tupe.getElement();
+    						}    						
+    					}
+    					
+    					if(MiscUtils.isEmpty(courseId)){
+    						tupleSet = courseInfoFinDictMap.get(lecturer_id);
+    					}
+    					
+    					if(tupleSet!=null && !MiscUtils.isEmpty(tupleSet.get())){
+    						Set<Tuple> set = tupleSet.get();
+    						for(Tuple tupe:set){
+    							courseId = tupe.getElement();
     						}    						
     					}
     					if(!MiscUtils.isEmpty(courseId)){
     						map.clear();
     						map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
     						String cachedKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-    						courseInfo.put(key, pipeline.hgetAll(cachedKey));
+    						courseInfo.put(lecturer_id, pipeline.hgetAll(cachedKey));
     					}
     				}
+    				
     				pipeline.sync();
-    				long times = System.currentTimeMillis();
+    				
     				for(Map<String,Object> fansRoom:list){
     					String lecturer_id = (String)fansRoom.get("lecturer_id");
     					Response<Map<String,String>> response = courseInfo.get(lecturer_id);
@@ -1736,7 +1750,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     					if(MiscUtils.isEmpty(courseValue)){
     						continue;
     					}
-    					MiscUtils.courseTranferState(times, courseValue);
+    					MiscUtils.courseTranferState(currentTime, courseValue);
     					fansRoom.put("course_title", courseValue.get("course_title"));
     					fansRoom.put("course_id", courseValue.get("course_id"));
     					fansRoom.put("course_type", courseValue.get("course_type"));

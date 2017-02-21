@@ -959,6 +959,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
+                    
+                    query.clear();
+                    query.put(Constants.CACHED_KEY_USER_FIELD, distributeRoom.get("distributer_id"));
+                    String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+                    jedis.hincrBy(userCacheKey, "today_distributer_amount", share_amount);
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id"));
                 }else {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
@@ -1036,7 +1042,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
                         jedis.hincrBy(userCacheKey, "course_num", 1L);
                     }
- 
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
                     nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
                     String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
                     JSONArray levelJson = JSON.parseArray(levelString);
@@ -1192,13 +1198,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					Map<String,Object> queryParam = new HashMap<String,Object>();
 					Map<String,Response<String>> roomNameMap = new HashMap<String,Response<String>>();
 					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
+					Map<String,Response<String>> lecturerName = new HashMap<String,Response<String>>();
+					Map<String,Response<String>> lecturerAvatar = new HashMap<String,Response<String>>();
+					
 					long currentTime = MiscUtils.getEndDateOfToday().getTime();
 					for(Map<String,Object> values: detailsList){
 						String roomid = (String)values.get("room_id");
+						String lecturerId = (String)values.get("lecturer_id");
 						if(!roomNameMap.containsKey(roomid)){
 							queryParam.put(Constants.FIELD_ROOM_ID, roomid);
 							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);
 							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));
+						}
+						if(!lecturerName.containsKey(lecturerId)){
+							queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+							String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
+							lecturerName.put(lecturerId, pipeline.hget(lecturerKey, "nick_name"));
+							lecturerAvatar.put(lecturerId, pipeline.hget(lecturerKey, "avatar_address"));
 						}
 						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
 						if(endDate == 0 || endDate >= currentTime){
@@ -1211,17 +1227,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					pipeline.sync();
 					for(Map<String,Object> values: detailsList){
 						String roomid = (String)values.get("room_id");
+						String lecturerId = (String)values.get("lecturer_id");
 						Response<String> roomName = roomNameMap.get(roomid);
 						if(roomName!=null){
 							values.put("room_name", roomName.get());
 						}
-						Response<Map<String,String>> lastInfoDetails = latestInfo.get("room_distributer_details_id");
+						Response<Map<String,String>> lastInfoDetails = latestInfo.get(values.get("room_distributer_details_id"));
 						if(lastInfoDetails!=null){
 							Map<String,String> details = lastInfoDetails.get();
 							values.put("course_num", details.get("last_course_num"));
 							values.put("recommend_num", details.get("last_recommend_num"));
 							values.put("done_num", details.get("last_done_num"));
 							values.put("total_amount", details.get("last_total_amount"));
+						}
+						if(lecturerName.containsKey(lecturerId)){
+							values.put("nick_name", lecturerName.get(lecturerId).get());
+							values.put("avatar_address", lecturerAvatar.get(lecturerId).get());
 						}
 					}
 				}
