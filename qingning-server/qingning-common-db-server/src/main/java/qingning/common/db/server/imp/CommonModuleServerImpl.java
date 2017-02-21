@@ -273,6 +273,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
 				roomDistributerCourseMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
 				roomDistributerCourseMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+				roomDistributerCourseMap.put("course_id", tradeBill.get("course_id"));
 				Map<String,Object> roomDistributerCourse = roomDistributerCoursesMapper.findRoomDistributerCourse(roomDistributerCourseMap);
 
 				if(MiscUtils.isEmpty(roomDistributerCourse)){

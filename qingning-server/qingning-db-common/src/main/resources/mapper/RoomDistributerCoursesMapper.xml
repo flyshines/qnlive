@@ -105,6 +105,7 @@
     where
     distributer_id = #{distributer_id}
     and rq_code = #{rq_code}
+    and course_id = #{course_id}
     limit 1
   </select>
 
