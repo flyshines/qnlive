@@ -1094,37 +1094,36 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String, String> courseByCourseId,
             Map<String, String> lecturerUser,String courseId) {
         Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+
+
         TemplateData first = new TemplateData();
         first.setColor("#000000");
         String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseByCourseId.get("course_title"));
         first.setValue(firstContent);
         templateMap.put("first", first);
-        
-        Date start_time = new Date(MiscUtils.convertObjectToLong(courseByCourseId.get("start_time")));
+
+        TemplateData courseTitle = new TemplateData();
+        courseTitle.setColor("#000000");
+        courseTitle.setValue(courseByCourseId.get("course_title"));
+        templateMap.put("keyword1", courseTitle);
+
+        Date start_time = new Date(Long.parseLong(courseByCourseId.get("start_time")));
         TemplateData orderNo = new TemplateData();
         orderNo.setColor("#000000");
         orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
-        templateMap.put("keyword1", orderNo);
-        
-        TemplateData wuliu = new TemplateData();
-        wuliu.setColor("#000000");
-        wuliu.setValue(lecturerUser.get("nick_name"));
-        templateMap.put("keyword2", wuliu);    
- 
-        TemplateData name = new TemplateData();
-        name.setColor("#000000");
-        String thirdContent;
-        if(MiscUtils.isEmpty(courseByCourseId.get("course_remark"))){
-            thirdContent = "";
-        }else {
-            thirdContent = courseByCourseId.get("course_remark");
+        templateMap.put("keyword2", orderNo);
+
+        String lastContent;
+        lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + lecturerUser.get("nick_name");
+        String thirdContent = courseByCourseId.get("course_remark");
+        if(! MiscUtils.isEmpty(thirdContent)){
+            lastContent += "\n" + thirdContent;
         }
-        name.setValue(thirdContent);
-        templateMap.put("keyword3", name);
- 
+        lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark");
+
         TemplateData remark = new TemplateData();
         remark.setColor("#000000");
-        remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+        remark.setValue(lastContent);
         templateMap.put("remark", remark);
         String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;
         WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
