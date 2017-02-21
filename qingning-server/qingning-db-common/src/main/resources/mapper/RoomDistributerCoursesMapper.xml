@@ -29,9 +29,7 @@
       <if test="course_id != null" >
         course_id,
       </if>
-      <if test="lecturer_id != null" >
-        lecturer_id,
-      </if>
+
       <if test="recommend_num != null" >
         recommend_num,
       </if>
@@ -65,15 +63,16 @@
       <if test="distributer_id != null" >
         #{distributer_id},
       </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
       <if test="room_id != null" >
         #{room_id},
       </if>
       <if test="course_id != null" >
         #{course_id},
       </if>
-      <if test="lecturer_id != null" >
-        #{lecturer_id},
-      </if>
+
       <if test="recommend_num != null" >
         #{recommend_num},
       </if>
