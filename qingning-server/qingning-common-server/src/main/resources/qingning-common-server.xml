@@ -72,40 +72,13 @@
 					<accessToken require="N" />
 				</auth>
 				<inputs>
-					<param name="login_id" type="string"  validate="(login_id)=>{
-					       		var isEmpty= login_id==null || login_id.length == 0;
-					       		return !isEmpty;},000100"/>
-				</inputs>
-				<outputs>
-					<param name="access_token" type="string"/>
-					<param name="m_user_id" type="string"/>
-					<param name="user_id" type="string"/>
-					<param name="nick_name" type="rstring"/>
-					<param name="server_url_info_update_time" type="long"/>
-					<param name="avatar_address" type="string"/>
-					<param name="im_account_info" type="string"/>
-					<param name="web_im_url" type="string"/>
-					<param name="server_url_info_list" type="map">
-						<param name="protocol" type="string"/>
-						<param name="domain_name" type="string"/>
-						<param name="method" type="string"/>
-						<param name="server_url" type="string"/>
-					</param>					
-				</outputs>
-			</function>
-
-			<function name="weixinLogin">
-				<auth>
-					<accessToken require="N" />
-				</auth>
-				<inputs>
 					<param name="code" type="string"  validate="(code)=>{
 					       		var isEmpty= code==null || code.length == 0;
 					       		return !isEmpty;},000100"/>
 				</inputs>
 				<outputs>
 					<param name="access_token" type="string"/>
-					<param name="subscribe" type="string"/>
+					<param name="key" type="string"/>
 					<param name="m_user_id" type="string"/>
 					<param name="user_id" type="string"/>
 					<param name="nick_name" type="rstring"/>
@@ -121,6 +94,8 @@
 					</param>
 				</outputs>
 			</function>
+
+
 
 			<function name="generateWeixinPayBill">
 				<auth>

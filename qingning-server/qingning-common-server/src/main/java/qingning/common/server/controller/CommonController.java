@@ -159,14 +159,13 @@ public class CommonController extends AbstractController {
         String code = codes[0];
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
-
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "");
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-        boolean key = (boolean)resultMap.get("key");
-        if(key){
+        Integer key = Integer.valueOf(resultMap.get("key").toString());
+        if(key == 1){
             //正常跳转到首页
             String userWeixinAccessToken = (String) resultMap.get("access_token");
             response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
