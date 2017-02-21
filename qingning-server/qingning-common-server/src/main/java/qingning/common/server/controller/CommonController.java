@@ -229,7 +229,15 @@ public class CommonController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-
+    /**
+     * 查询用户信息
+     * @param query_type 1:个人中心信息 2：个人基本信息
+     * @param server_url_info_update_time 服务与对应url信息更新时间
+     * @param accessToken 后台安全证书
+     * @param version 版本号
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/common/user", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getUserInfo(

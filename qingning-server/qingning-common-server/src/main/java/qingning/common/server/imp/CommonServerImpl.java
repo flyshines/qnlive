@@ -670,8 +670,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String JSApiTIcket = WeiXinUtil.getJSApiTIcket(jedisUtils.getJedis());
         return WeiXinUtil.sign(JSApiTIcket, reqMap.get("url").toString());
     }
- 
- 
+
+    /**
+     * 查询用户信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("userInfo")
     public Map<String,Object> getUserInfo (RequestEntity reqEntity) throws Exception{
