@@ -1826,6 +1826,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 content = MiscUtils.getConfigByKey("weixin_other_page_share_content");
                 icon_url = MiscUtils.getConfigByKey("weixin_other_page_share_icon_url");
                 simple_content = MiscUtils.getConfigByKey("weixin_other_page_share_simple_content");
+                share_url = MiscUtils.getConfigByKey("other_share_url");
                 break;
  
             case "4":
