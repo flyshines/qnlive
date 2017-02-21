@@ -2358,11 +2358,33 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Date curDate = new Date(System.currentTimeMillis());
                 List<Map<String,Object>> list = lectureModuleServer.findRoomDistributerInfo(query);
                 int count = 0;
+                Map<String,Response<Map<String,String>>> roomInfo = new HashMap<String,Response<Map<String,String>>>();
+                for(Map<String,Object> value : list){
+                	String roomid = (String)value.get("room_id");
+                	String distributerId = (String)value.get("distributer_id");
+                	Map<String,String> query = new HashMap<String,String>();
+            		query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD,distributerId);
+            		query.put(Constants.FIELD_ROOM_ID, roomid);
+            		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+            		String roomDistributerId = (String)value.get("room_distributer_id");
+            		roomInfo.put(roomDistributerId, pipeline.hgetAll(key));
+                }
+                pipeline.sync();
+                
                 for(Map<String,Object> value : list){
                     Date date = (Date)value.get("end_date");
                     if(date!=null && !date.after(curDate)){
                         value.put("effective_time", null);
-                    }                    
+                    }
+                    String roomDistributerId = (String)value.get("room_distributer_id");
+                    Response<Map<String,String>> response = roomInfo.get(roomDistributerId);
+                    if(response!=null && !MiscUtils.isEmpty(response.get())){
+                    	Map<String,String> currentValue = response.get();
+                    	value.put("recommend_num", currentValue.get("recommend_num"));
+                    	value.put("course_num", currentValue.get("course_num"));
+                    	value.put("done_num", currentValue.get("done_num"));
+                    	value.put("total_amount", currentValue.get("total_amount"));
+                    }
                     long position = 0;
                     if(ajustPos){
                         position= start_pos+1+(count++);                        
