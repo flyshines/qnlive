@@ -942,7 +942,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
 
                     //todo 总成交人数 最后一次:成交人数
-                    if(! MiscUtils.isEmpty(userDistributionInfo)){
+                    /*if(! MiscUtils.isEmpty(userDistributionInfo)){
                         if(userDistributionInfo.get("userDistributionInfoForDoneNum") != null){
                             if(((Boolean)(userDistributionInfo.get("userDistributionInfoForDoneNum"))) == false){
                                 jedis.hincrBy(roomDistributeKey, "done_num", 1);
@@ -955,7 +955,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             }
                         }
                     }
-
+                    */
+                    jedis.hincrBy(roomDistributeKey, "done_num", 1);
+                    jedis.hincrBy(roomDistributeKey, "last_done_num", 1);
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
@@ -1196,6 +1198,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				public void batchOperation(Pipeline pipeline, Jedis jedis) {
 					Map<String,Object> queryParam = new HashMap<String,Object>();
 					Map<String,Response<String>> roomNameMap = new HashMap<String,Response<String>>();
+					Map<String,Response<String>> paymentCourseMap = new HashMap<String,Response<String>>();
+					
 					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
 					Map<String,Response<String>> lecturerName = new HashMap<String,Response<String>>();
 					Map<String,Response<String>> lecturerAvatar = new HashMap<String,Response<String>>();
@@ -1207,13 +1211,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						if(!roomNameMap.containsKey(roomid)){
 							queryParam.put(Constants.FIELD_ROOM_ID, roomid);
 							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);
-							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));
+							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));							
 						}
 						if(!lecturerName.containsKey(lecturerId)){
 							queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 							String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
 							lecturerName.put(lecturerId, pipeline.hget(lecturerKey, "nick_name"));
 							lecturerAvatar.put(lecturerId, pipeline.hget(lecturerKey, "avatar_address"));
+							paymentCourseMap.put(lecturerId, pipeline.hget(lecturerKey, "pay_course_num"));
 						}
 						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
 						if(endDate == 0 || endDate >= currentTime){
@@ -1234,15 +1239,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						Response<Map<String,String>> lastInfoDetails = latestInfo.get(values.get("room_distributer_details_id"));
 						if(lastInfoDetails!=null){
 							Map<String,String> details = lastInfoDetails.get();
-							values.put("course_num", details.get("last_course_num"));
+							//values.put("course_num", details.get("last_course_num"));							
 							values.put("recommend_num", details.get("last_recommend_num"));
 							values.put("done_num", details.get("last_done_num"));
 							values.put("total_amount", details.get("last_total_amount"));
 						}
+						
+						long courseNum = 0l;
 						if(lecturerName.containsKey(lecturerId)){
 							values.put("nick_name", lecturerName.get(lecturerId).get());
 							values.put("avatar_address", lecturerAvatar.get(lecturerId).get());
+							Response<String> response = paymentCourseMap.get(lecturerId);
+							if(response != null){
+								courseNum = MiscUtils.convertObjectToLong(response.get());
+							}
 						}
+						values.put("course_num", courseNum);
 					}
 				}
         	});        	
