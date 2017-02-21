@@ -1381,7 +1381,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				Date currentDate=MiscUtils.getEndDateOfToday();
 				for(Map<String,Object> values:course_list){
 					Date end_Date = (Date)values.get("end_date");
-					if(!MiscUtils.isEmpty(endDate) && end_Date.before(currentDate)){
+					if(!MiscUtils.isEmpty(end_Date) && end_Date.before(currentDate)){
 						values.put("effective_time", null);
 					}
 				}
