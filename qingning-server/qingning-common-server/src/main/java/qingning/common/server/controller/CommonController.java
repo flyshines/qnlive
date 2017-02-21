@@ -168,7 +168,7 @@ public class CommonController extends AbstractController {
         Integer subscribe = Integer.valueOf((String)resultMap.get("subscribe"));
         if(subscribe == 0){//如果没有关注公众号
             logger.info("没有关注我们微信,跳转至关注页面");
-            response.sendRedirect("https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzIyNTc1MDQ2Mw==&scene=110#wechat_redirect");
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_auth_redirect_url"));
             return ;
         }
 
@@ -176,7 +176,7 @@ public class CommonController extends AbstractController {
         logger.info("微信Access_token"+userWeixinAccessToken);
         Map<String, String> param = new HashMap<String, String>();
         param.put("token",userWeixinAccessToken);
-        response.sendRedirect("http://test.qnlive.1758app.com/web?token="+userWeixinAccessToken);
+        response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
         return ;
     }
 

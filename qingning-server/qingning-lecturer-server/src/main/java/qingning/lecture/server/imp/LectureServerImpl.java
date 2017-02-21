@@ -413,7 +413,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //timerMap.put("course_id", dbResultMap.get("course_id").toString());
         timerMap.put("start_time", startTime + "");
         timerMap.put("position", course.get("position"));
-        
+        timerMap.put("im_course_id", course.get("im_course_id"));
+
         if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
         	//提前五分钟开课提醒        
         	if(startTime-System.currentTimeMillis()> 5 * 60 *1000){        
