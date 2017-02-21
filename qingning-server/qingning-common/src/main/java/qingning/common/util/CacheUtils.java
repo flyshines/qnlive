@@ -142,7 +142,16 @@ public final class CacheUtils {
 	
 	public static Map<String,String> readCourse(String course_id, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
-		return readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, cachedValue);
+		Map<String,String> values = readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, cachedValue);
+		String curCourse_id = values.get(Constants.CACHED_KEY_COURSE_FIELD);
+		if(!course_id.equals(curCourse_id)){
+			Map<String, String> keyMap = new HashMap<String, String>();
+			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+			jedisUtils.getJedis().del(key);
+			values = readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, cachedValue);
+		}
+		return values;
 	}
 	
 	@SuppressWarnings("unchecked")
