@@ -1848,7 +1848,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     distributer_num = Long.parseLong(distributer_num_str);
                 }
             }
-            if(position == null || distributer_num>0){
+            if(distributer_num>0){
                 distributerIdList = getDistributerListFromSys(room_id, distributer_id, distributeKey, key,position==null?0:position,page_count,distributer_num);
                 distributer_num_len = jedis.get(key);                       
                 if(!MiscUtils.isEmpty(distributer_num_len)){

@@ -304,6 +304,7 @@
 						}"/>
 					<param name="profit_list" type="list">
 						<param name="profit_amount" type="double" default="0"/>
+						<param name="share_amount" type="double" default="0"/>
 						<param name="nick_name" type="rstring"/>
 						<param name="record_time" type="long" fieldname="create_time"/>
 						<param name="position" type="long"/>
