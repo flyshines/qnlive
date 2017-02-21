@@ -335,14 +335,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("key",true);//钥匙 用于在controller判断跳转的页面
-        String code = reqMap.get("login_id").toString();
+        resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
         //1.传递授权code及相关参数，调用微信验证code接口
+        String code = reqMap.get("code").toString();
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             if(getCodeResultJson.getString("openid") == null){
-                resultMap.put("key",false);
+                resultMap.put("key","0");
                 return resultMap;
             }
             throw new QNLiveException("120008");
@@ -368,7 +367,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
                 if(userJson.getString("unionid") == null){
-                    resultMap.put("key",false);
+                    resultMap.put("key","0");
                     return resultMap;
                 }
                 throw new QNLiveException("120008");
@@ -448,111 +447,113 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
     }
 
-
-    /**
-     * 微信授权
-     * @param reqEntity
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @FunctionName("weixinLogin")
-    public Map<String,Object> weixinLogin (RequestEntity reqEntity) throws Exception{
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-        Map<String,Object> resultMap = new HashMap<String, Object>();
-        String code = reqMap.get("code").toString();
-        //1.传递授权code及相关参数，调用微信验证code接口
-        JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null) {
-            throw new QNLiveException("120008");
-        }
-        String openid = getCodeResultJson.getString("openid");//拿到openid
-
-        Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
-        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
-        if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
-            wei_xin_access_token = WeiXinUtil.updAccessToken(jedis);
-            if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
-                throw new QNLiveException("120008");
-            }
-        }
-
-        //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
-        //1.2.1根据 openid查询数据库
-        Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("login_type","4");//4.微信code方式登录
-        queryMap.put("web_openid",openid);
-        Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-
-        //1.2.1.1如果用户存在则进行登录流程
-        if(loginInfoMap != null){
-            processLoginSuccess(2, null, loginInfoMap, resultMap);
-            return resultMap;
-        }else {
-            String nickname = user.getString("nickname");//用户名称
-            String sex = user.getString("sex");//性别
-            String headimgurl = user.getString("headimgurl");//头像地址
-            String unionid = user.getString("unionid");//获取unionid
-
-            queryMap.clear();
-            queryMap.put("login_type","0");//0.微信方式登录
-            queryMap.put("login_id",unionid);
-            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-            if(loginInfoMapFromUnionid != null){
-                //将open_id更新到login_info表中
-                Map<String,Object> updateMap = new HashMap<>();
-                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
-                updateMap.put("web_openid", openid);
-                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
-                return resultMap;
-            }
-            Map<String,String> imResultMap = null;
-            try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
-            }catch (Exception e){
-                //TODO 暂不处理
-            }
-            //初始化数据库相关表
-            reqMap.put("m_user_id", imResultMap.get("uid"));
-            reqMap.put("m_pwd", imResultMap.get("password"));
-            //设置默认用户头像
-            if(MiscUtils.isEmpty(headimgurl)){
-                reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address"));//TODO
-            }else {
-                String transferAvatarAddress = qiNiuFetchURL(headimgurl);
-                reqMap.put("avatar_address",transferAvatarAddress);
-            }
-            //设置用户名
-            if(MiscUtils.isEmpty(nickname)){
-                reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
-            }else {
-                reqMap.put("nick_name", nickname);
-            }
-
-            //判断性别
-            //微信性别与本系统性别转换
-            //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-            if(MiscUtils.isEmpty(sex)){
-                reqMap.put("gender","2");//TODO
-            }else if(sex.equals("1")){
-                reqMap.put("gender","1");//TODO
-            }else if(sex.equals("2")){
-                reqMap.put("gender","0");//TODO
-            }else{
-                reqMap.put("gender","2");//TODO
-            }
-            reqMap.put("unionid",unionid);
-            reqMap.put("web_openid",openid);
-            reqMap.put("login_type","4");
-            Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-
-            //生成access_token，将相关信息放入缓存，构造返回参数
-            processLoginSuccess(1, dbResultMap, null, resultMap);
-            return resultMap;
-        }
-    }
+//
+    //<editor-fold desc="微信登录">
+    //    /**
+//     * 微信授权
+//     * @param reqEntity
+//     * @return
+//     * @throws Exception
+//     */
+//    @SuppressWarnings("unchecked")
+//    @FunctionName("weixinLogin")
+//    public Map<String,Object> weixinLogin (RequestEntity reqEntity) throws Exception{
+//        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+//        Map<String,Object> resultMap = new HashMap<String, Object>();
+//        String code = reqMap.get("code").toString();
+//        //1.传递授权code及相关参数，调用微信验证code接口
+//        JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
+//        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null) {
+//            throw new QNLiveException("120008");
+//        }
+//        String openid = getCodeResultJson.getString("openid");//拿到openid
+//
+//        Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
+//        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+//        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
+//        if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
+//            wei_xin_access_token = WeiXinUtil.updAccessToken(jedis);
+//            if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
+//                throw new QNLiveException("120008");
+//            }
+//        }
+//
+//        //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
+//        //1.2.1根据 openid查询数据库
+//        Map<String,Object> queryMap = new HashMap<>();
+//        queryMap.put("login_type","4");//4.微信code方式登录
+//        queryMap.put("web_openid",openid);
+//        Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+//
+//        //1.2.1.1如果用户存在则进行登录流程
+//        if(loginInfoMap != null){
+//            processLoginSuccess(2, null, loginInfoMap, resultMap);
+//            return resultMap;
+//        }else {
+//            String nickname = user.getString("nickname");//用户名称
+//            String sex = user.getString("sex");//性别
+//            String headimgurl = user.getString("headimgurl");//头像地址
+//            String unionid = user.getString("unionid");//获取unionid
+//
+//            queryMap.clear();
+//            queryMap.put("login_type","0");//0.微信方式登录
+//            queryMap.put("login_id",unionid);
+//            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+//            if(loginInfoMapFromUnionid != null){
+//                //将open_id更新到login_info表中
+//                Map<String,Object> updateMap = new HashMap<>();
+//                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+//                updateMap.put("web_openid", openid);
+//                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
+//                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
+//                return resultMap;
+//            }
+//            Map<String,String> imResultMap = null;
+//            try {
+//                imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
+//            }catch (Exception e){
+//                //TODO 暂不处理
+//            }
+//            //初始化数据库相关表
+//            reqMap.put("m_user_id", imResultMap.get("uid"));
+//            reqMap.put("m_pwd", imResultMap.get("password"));
+//            //设置默认用户头像
+//            if(MiscUtils.isEmpty(headimgurl)){
+//                reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address"));//TODO
+//            }else {
+//                String transferAvatarAddress = qiNiuFetchURL(headimgurl);
+//                reqMap.put("avatar_address",transferAvatarAddress);
+//            }
+//            //设置用户名
+//            if(MiscUtils.isEmpty(nickname)){
+//                reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+//            }else {
+//                reqMap.put("nick_name", nickname);
+//            }
+//
+//            //判断性别
+//            //微信性别与本系统性别转换
+//            //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
+//            if(MiscUtils.isEmpty(sex)){
+//                reqMap.put("gender","2");//TODO
+//            }else if(sex.equals("1")){
+//                reqMap.put("gender","1");//TODO
+//            }else if(sex.equals("2")){
+//                reqMap.put("gender","0");//TODO
+//            }else{
+//                reqMap.put("gender","2");//TODO
+//            }
+//            reqMap.put("unionid",unionid);
+//            reqMap.put("web_openid",openid);
+//            reqMap.put("login_type","4");
+//            Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
+//
+//            //生成access_token，将相关信息放入缓存，构造返回参数
+//            processLoginSuccess(1, dbResultMap, null, resultMap);
+//            return resultMap;
+//        }
+//    }
+    //</editor-fold>
 
     /**
      *
@@ -953,6 +954,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
+                    
+                    query.clear();
+                    query.put(Constants.CACHED_KEY_USER_FIELD, distributeRoom.get("distributer_id"));
+                    String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+                    jedis.hincrBy(userCacheKey, "today_distributer_amount", share_amount);
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id"));
                 }else {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
@@ -1030,7 +1037,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
                         jedis.hincrBy(userCacheKey, "course_num", 1L);
                     }
- 
+                    jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
                     nowStudentNum = Long.parseLong(courseMap.get("student_num")) + 1;
                     String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
                     JSONArray levelJson = JSON.parseArray(levelString);
@@ -1186,13 +1193,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					Map<String,Object> queryParam = new HashMap<String,Object>();
 					Map<String,Response<String>> roomNameMap = new HashMap<String,Response<String>>();
 					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
+					Map<String,Response<String>> lecturerName = new HashMap<String,Response<String>>();
+					Map<String,Response<String>> lecturerAvatar = new HashMap<String,Response<String>>();
+					
 					long currentTime = MiscUtils.getEndDateOfToday().getTime();
 					for(Map<String,Object> values: detailsList){
 						String roomid = (String)values.get("room_id");
+						String lecturerId = (String)values.get("lecturer_id");
 						if(!roomNameMap.containsKey(roomid)){
 							queryParam.put(Constants.FIELD_ROOM_ID, roomid);
 							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);
 							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));
+						}
+						if(!lecturerName.containsKey(lecturerId)){
+							queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+							String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
+							lecturerName.put(lecturerId, pipeline.hget(lecturerKey, "nick_name"));
+							lecturerAvatar.put(lecturerId, pipeline.hget(lecturerKey, "avatar_address"));
 						}
 						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
 						if(endDate == 0 || endDate >= currentTime){
@@ -1205,17 +1222,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					pipeline.sync();
 					for(Map<String,Object> values: detailsList){
 						String roomid = (String)values.get("room_id");
+						String lecturerId = (String)values.get("lecturer_id");
 						Response<String> roomName = roomNameMap.get(roomid);
 						if(roomName!=null){
 							values.put("room_name", roomName.get());
 						}
-						Response<Map<String,String>> lastInfoDetails = latestInfo.get("room_distributer_details_id");
+						Response<Map<String,String>> lastInfoDetails = latestInfo.get(values.get("room_distributer_details_id"));
 						if(lastInfoDetails!=null){
 							Map<String,String> details = lastInfoDetails.get();
 							values.put("course_num", details.get("last_course_num"));
 							values.put("recommend_num", details.get("last_recommend_num"));
 							values.put("done_num", details.get("last_done_num"));
 							values.put("total_amount", details.get("last_total_amount"));
+						}
+						if(lecturerName.containsKey(lecturerId)){
+							values.put("nick_name", lecturerName.get(lecturerId).get());
+							values.put("avatar_address", lecturerAvatar.get(lecturerId).get());
 						}
 					}
 				}

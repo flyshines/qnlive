@@ -19,6 +19,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,6 +87,19 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			private void updateUserData(Set<String> userSet, Pipeline pipeline){
 		    	Map<String,Object> queryParam = new HashMap<String,Object>();
 		    	Map<String,Response<Map<String,String>>> userDataMap = new HashMap<String,Response<Map<String,String>>>();
+		    	Calendar cal = Calendar.getInstance();
+		    	cal.setTimeInMillis(System.currentTimeMillis());
+		    	int hour = cal.get(Calendar.HOUR_OF_DAY);
+		    	if(hour<=4){
+					for(String userId:userSet){
+						queryParam.clear();
+						queryParam.put(Constants.CACHED_KEY_USER_FIELD, userId);
+						String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryParam);
+						pipeline.hset(userKey, "today_distributer_amount","0");
+					}
+					pipeline.sync();
+		    	}				
+				
 				for(String userId:userSet){
 					queryParam.clear();
 					queryParam.put(Constants.CACHED_KEY_USER_FIELD, userId);
