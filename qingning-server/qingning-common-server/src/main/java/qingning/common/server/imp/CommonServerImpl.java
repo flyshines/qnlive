@@ -1068,6 +1068,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
                 String user_id = (String) billMap.get("user_id");
                 String course_id = (String) billMap.get("course_id");
+                String room_id = (String) billMap.get("room_id");
 
                 if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
@@ -1076,7 +1077,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     //wpushLecture(billMap, jedis, openId, courseByCourseId, user);
                     //成功购买课程则通知学生
                     if(profit_type.equals("0")){
-                        wpushUser(jedis, openId, courseMap, lecturerMap,course_id);
+                        wpushUser(jedis, openId, courseMap, lecturerMap,course_id, room_id);
                     }
                 }
             }else{
@@ -1094,7 +1095,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
     private void wpushUser(Jedis jedis, String openId,
             Map<String, String> courseByCourseId,
-            Map<String, String> lecturerUser,String courseId) {
+            Map<String, String> lecturerUser,String courseId,String roomId) {
         Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 
 
@@ -1127,7 +1128,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         remark.setColor("#000000");
         remark.setValue(lastContent);
         templateMap.put("remark", remark);
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;
+        String url = String.format(MiscUtils.getConfigByKey("course_live_room_url"), courseId, roomId);
         WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
     }
  

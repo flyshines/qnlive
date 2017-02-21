@@ -1293,7 +1293,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		remark.setColor("#000000");
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
-    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseInfoMap.get("course_id");
+			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url"), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
