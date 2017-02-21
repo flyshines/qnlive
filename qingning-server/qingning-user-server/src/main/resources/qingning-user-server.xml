@@ -191,6 +191,7 @@
 					<param name="course_title" type="string"/>
 					<param name="lecturer_nick_name" type="string"/>
 					<param name="lecturer_avatar_address" type="string"/>
+					<param name="course_url" type="string"/>
 				</outputs>
 			</function>
 
