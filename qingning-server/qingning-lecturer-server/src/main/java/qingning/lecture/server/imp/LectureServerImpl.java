@@ -1533,7 +1533,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(! CollectionUtils.isEmpty(messageList)){
                 for(Map<String,Object> messageMap : messageList){
                     if(! MiscUtils.isEmpty(messageMap.get("message"))){
-                        messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageMap.get("message").toString()));
+                        messageMap.put("message",MiscUtils.RecoveryEmoji(messageMap.get("message").toString()));
+                    }
+
+                    if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
+                        messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
                     }
                 }
                 resultMap.put("message_list", messageList);
@@ -1600,7 +1604,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                     String messageContent = messageMap.get("message");
                     if(! MiscUtils.isEmpty(messageContent)){
-                        messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageContent));
+                        messageMap.put("message",MiscUtils.RecoveryEmoji(messageContent));
+                    }
+
+                    if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
+                        messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
                     }
                     messageListCache.add(messageMap);
                     startIndex++;
