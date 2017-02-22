@@ -2162,7 +2162,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> insertResultMap = lectureModuleServer.createRoomDistributer(values);
         
         distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
-        boolean totaldistributerAdd = MiscUtils.convertObjectToLong(distributerRoom.get("create_time")) == MiscUtils.convertObjectToLong(distributerRoom.get("update_time"));
+        //boolean totaldistributerAdd = MiscUtils.convertObjectToLong(distributerRoom.get("create_time")) == MiscUtils.convertObjectToLong(distributerRoom.get("update_time"));
+        boolean totaldistributerAdd = true;
         if(totaldistributerAdd){
         	jedis.hincrBy(liveRoomKey, "distributer_num", 1);
             map.clear();

@@ -1784,6 +1784,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                                 //4.直播间分销员的推荐人数增加一
                                 jedis.hincrBy(distributerKey, "click_num", 1);
                                 jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
+
+                                //5.修改讲师缓存中的推荐用户数
+                                Map<String,Object> cacheKeyMap = new HashMap<>();
+                                cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheKeyMap);
+                                jedis.hincrBy(lecturerKey, "room_recommend_num", 1);
                             }
                         }
                     }
