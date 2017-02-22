@@ -268,6 +268,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
  
             if(queryType.equals("1")){
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark",  MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -277,6 +278,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 return resultMap;
  
             }else {
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -524,7 +526,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
     /**
      * 微信推送
-     * @param findFollowUserIds
+     * @param followUserList
      * @param templateId
      * @param templateMap
      */
@@ -1207,9 +1209,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
         */
     }
- 
- 
- 
+
+
+
+    //<editor-fold desc="暂时不用此方法">
 /*    private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
                                                     String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count,String userId){
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
@@ -1258,6 +1261,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("startIndexDB", startIndexDB);
         return resultMap;
     }*/
+    //</editor-fold>
  
     @SuppressWarnings("unchecked")
     @FunctionName("processCoursePPTs")
@@ -1819,9 +1823,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //从讲师信息中加载，数据不存在需加载缓存
         Map<String,String> keyMap = new HashMap<String,String>();
-        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+
+        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);//加入老师id
         reqEntity.setParam(keyMap);
-        Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);        
+        Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);
         return values;
     }
     

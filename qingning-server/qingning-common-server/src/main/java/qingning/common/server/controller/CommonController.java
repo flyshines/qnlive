@@ -344,7 +344,7 @@ public class CommonController extends AbstractController {
 	/**
 	 * 查询个人的分销信息
 	 * @param page_count 每页记录数（默认10）
-	 * @param record_date 用户加入直播间分销的时间（分页时使用）
+	 * @param position 用户加入直播间分销的时间（分页时使用）
 	 * @param access_token token 验证
 	 * @param version 版本号
 	 * @return ResponseEntity responseEntity
