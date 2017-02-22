@@ -78,4 +78,6 @@ public interface ILectureModuleServer {
 	Map<String,Object> findByDistributerId(String distributer_id);
 	
 	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
+	
+	List<Map<String,Object>> findDistributionRoomByLectureInfo(Map<String, Object> record);
 }
