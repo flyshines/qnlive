@@ -229,6 +229,9 @@ public class ImMsgServiceImp implements ImMsgService {
 					//进行超时预先提醒定时任务
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 
+					//取消15分钟未开始定时任务
+					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+
 					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
 					String str = sdf.format(now);
