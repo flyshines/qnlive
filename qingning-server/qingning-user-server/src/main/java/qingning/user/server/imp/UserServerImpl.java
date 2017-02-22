@@ -1622,6 +1622,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("student_list", messageList);
         }
 
+        Map<String,String> liveRoomMap = CacheUtils.readCourse(reqMap.get("course_id").toString(),reqEntity,readCourseOperation,jedisUtils,true);
+        resultMap.put("student_num",liveRoomMap.get("student_num"));
         return resultMap;
 
     }
