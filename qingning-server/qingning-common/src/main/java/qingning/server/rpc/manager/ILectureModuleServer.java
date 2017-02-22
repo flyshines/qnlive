@@ -16,7 +16,9 @@ public interface ILectureModuleServer {
 	Map<String,Object> createCourse(Map<String, Object> reqMap);
 
 	Map<String,Object> findCourseByCourseId(String courseId);
-
+	
+	Map<String,Object> findLastestFinishCourse(Map<String,Object> record);
+	
 	Map<String,Object> updateCourse(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);

@@ -374,4 +374,44 @@ public final class CacheUtils {
 													CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		return readData(os, Constants.FORCE_UPDATE_VERSION, Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 	}
+	
+	public static Map<String,String> readLastCourseOfTheRoom(String roomId, String lectureId,RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lectureId);
+        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+        Jedis jedis = jedisUtils.getJedis();
+        Set<String> courseSet = jedis.zrevrangeByScore(lecturerCoursesFinishKey, "+inf", "-inf", 0, 1);
+        String courseId = null;
+        if(courseSet != null){
+        	for(String value:courseSet){
+        		courseId = value;
+        	}
+        }
+        Map<String,String> courseInfo = new HashMap<String,String>();
+        if(MiscUtils.isEmpty(courseId)){
+        	Map result = (Map) operation.invokeProcess(requestEntity);
+        	if(!MiscUtils.isEmpty(result)){
+        		MiscUtils.converObjectMapToStringMap(result, courseInfo);
+        	}
+        	if(!MiscUtils.isEmpty(courseInfo)){
+        		Map<String, String> keyMap = new HashMap<String, String>();
+    			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, (String)courseInfo.get("course_id"));
+    			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+    			jedis.hmset(key, courseInfo);
+        	} else {
+        		courseSet = jedis.zrangeByScore(lecturerCoursesPredictionKey, "-inf", "+inf", 0, 1);
+            	for(String value:courseSet){
+            		courseId = value;
+            	}
+        	}
+        }
+        if(MiscUtils.isEmpty(courseInfo) && !MiscUtils.isEmpty(courseId)){
+    		Map<String, String> keyMap = new HashMap<String, String>();
+			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+			courseInfo = jedis.hgetAll(key);
+        }
+        return courseInfo;
+	}
 }

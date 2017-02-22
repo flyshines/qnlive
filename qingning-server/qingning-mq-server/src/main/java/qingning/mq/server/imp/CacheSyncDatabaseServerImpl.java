@@ -257,7 +257,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						liveRoom.put("course_num", MiscUtils.convertObjectToLong(values.get("course_num")));
 						liveRoom.put("distributer_num", MiscUtils.convertObjectToLong(values.get("distributer_num")));
 						liveRoom.put("total_amount", MiscUtils.convertObjectToLong(values.get("total_amount")));
-						liveRoom.put("last_course_amount", MiscUtils.convertObjectToLong(values.get("last_course_amount")));
+						//liveRoom.put("last_course_amount", MiscUtils.convertObjectToLong(values.get("last_course_amount")));
 						liveRoom.put("room_address", roomAddress);						
 						liveRoomMapper.updateLiveRoom(liveRoom);
 						pipeline.hset(liveRoomKey, "room_address", roomAddress);

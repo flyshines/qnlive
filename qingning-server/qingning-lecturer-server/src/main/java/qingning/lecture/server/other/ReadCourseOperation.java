@@ -1,6 +1,7 @@
 package qingning.lecture.server.other;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
@@ -23,7 +24,11 @@ public class ReadCourseOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-
-        return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+        String functionName = requestEntity.getFunctionName();
+        if(Constants.SYS_READ_LAST_COURSE.equals(functionName)){
+        	return lectureModuleServer.findLastestFinishCourse(reqMap);
+        } else {
+        	return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+        }
     }
 }

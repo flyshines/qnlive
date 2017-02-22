@@ -233,10 +233,24 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         Map<String,Object> peocessLiveRoomMap;
  
                         if(! CollectionUtils.isEmpty(liveRoomMap)){
+                        	String roomId = liveRoomMap.get("room_id");
+                        	String lectureId = liveRoomMap.get("lecturer_id");
+                        	Map<String,Object> query = new HashMap<String,Object>();
+                        	query.put("room_id", roomId);
+                        	query.put("room_id", lectureId);
+                        	RequestEntity entity = this.generateRequestEntity(null, null, Constants.SYS_READ_LAST_COURSE, query);
+                        	Map<String,String> courseInfo = CacheUtils.readLastCourseOfTheRoom(roomId, lectureId, entity, readCourseOperation, jedisUtils);
+                        	
                             peocessLiveRoomMap = new HashMap<>();
                             peocessLiveRoomMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                             peocessLiveRoomMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
-                            peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount"),true));
+                            //peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount"),true));
+                            if(!MiscUtils.isEmpty(courseInfo)){
+                            	long amount = MiscUtils.convertObjectToLong(courseInfo.get("course_amount")) + MiscUtils.convertObjectToLong(courseInfo.get("extra_amount"));
+                            	peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(amount,true));
+                            } else {
+                            	peocessLiveRoomMap.put("last_course_amount", 0d);
+                            }
                             peocessLiveRoomMap.put("fans_num", MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
                             peocessLiveRoomMap.put("room_id", MiscUtils.convertString(liveRoomMap.get("room_id")));
                             peocessLiveRoomMap.put("update_time", MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
@@ -266,9 +280,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(CollectionUtils.isEmpty(liveRoomMap)){
                 throw new QNLiveException("100002");
             }
- 
+        	String roomId = liveRoomMap.get("room_id");
+        	String lectureId = liveRoomMap.get("lecturer_id");
+        	Map<String,Object> query = new HashMap<String,Object>();
+        	query.put("room_id", roomId);
+        	query.put("room_id", lectureId);
+        	RequestEntity entity = this.generateRequestEntity(null, null, Constants.SYS_READ_LAST_COURSE, query);
+        	Map<String,String> courseInfo = CacheUtils.readLastCourseOfTheRoom(roomId, lectureId, entity, readCourseOperation, jedisUtils);
+        	long amount = 0l;
+        	if(!MiscUtils.isEmpty(courseInfo)){
+            	amount = MiscUtils.convertObjectToLong(courseInfo.get("course_amount")) + MiscUtils.convertObjectToLong(courseInfo.get("extra_amount"));
+        	}            
             if(queryType.equals("1")){
-                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
+                //resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
+                resultMap.put("last_course_amount", MiscUtils.convertObjectToDouble(amount,true));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark",  MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -278,7 +303,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 return resultMap;
  
             }else {
-                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
+                resultMap.put("last_course_amount", MiscUtils.convertObjectToDouble(amount,true));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
