@@ -268,6 +268,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
  
             if(queryType.equals("1")){
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark",  MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -277,6 +278,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 return resultMap;
  
             }else {
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -1813,9 +1815,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //从讲师信息中加载，数据不存在需加载缓存
         Map<String,String> keyMap = new HashMap<String,String>();
+
         keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);//加入老师id
         reqEntity.setParam(keyMap);
-        Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);        
+        Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);
         return values;
     }
     
