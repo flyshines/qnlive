@@ -755,11 +755,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(profit_type.equals("1")){
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
-            goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name").getBytes()+courseMap.get("course_id");
+            goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name") +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
         }else if(profit_type.equals("0")){
             insertMap.put("amount", courseMap.get("course_price"));
             totalFee = Integer.parseInt(courseMap.get("course_price"));
-            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name").getBytes()+courseMap.get("course_id");
+            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name") +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
         }
         insertMap.put("status","0");
         String tradeId = MiscUtils.getWeiXinId();//TODO
