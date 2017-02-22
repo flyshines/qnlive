@@ -40,6 +40,7 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String,Object> parameters);
 	List<Map<String,Object>> findRoomDistributerRecommendInfo(Map<String,Object> parameters);
 	List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> parameters);
+	List<Map<String,Object>> findCourseWithRoomDistributerCourseInfo(Map<String,Object> parameters);
 	List<Map<String,Object>> findRoomDistributerCourseDetailsInfo(Map<String,Object> parameters);
 	
 	int updateUser(Map<String,Object> parameters);

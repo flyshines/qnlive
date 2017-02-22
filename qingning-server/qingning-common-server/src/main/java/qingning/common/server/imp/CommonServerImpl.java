@@ -694,7 +694,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));            
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
-            resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSLONG, "today_distributer_amount", 0l));
+            resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSDOUBLE, "today_distributer_amount", 0d, true));
             resultMap.put("update_time", MiscUtils.convertObjToObject(values.get("update_time"),Constants.SYSLONG,"update_time", 0l));            
         }else if(queryType.equals("2")){            
             if(MiscUtils.isEmpty(values)){
@@ -942,7 +942,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
 
                     //todo 总成交人数 最后一次:成交人数
-                    if(! MiscUtils.isEmpty(userDistributionInfo)){
+                    /*if(! MiscUtils.isEmpty(userDistributionInfo)){
                         if(userDistributionInfo.get("userDistributionInfoForDoneNum") != null){
                             if(((Boolean)(userDistributionInfo.get("userDistributionInfoForDoneNum"))) == false){
                                 jedis.hincrBy(roomDistributeKey, "done_num", 1);
@@ -955,7 +955,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             }
                         }
                     }
-
+                    */
+                    jedis.hincrBy(roomDistributeKey, "done_num", 1);
+                    jedis.hincrBy(roomDistributeKey, "last_done_num", 1);
                     jedis.hincrBy(roomDistributeKey, "total_amount", share_amount);
                     jedis.hincrBy(roomDistributeKey, "last_total_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("rq_code"));
@@ -1066,6 +1068,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
                 String user_id = (String) billMap.get("user_id");
                 String course_id = (String) billMap.get("course_id");
+                String room_id = (String) billMap.get("room_id");
 
                 if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
@@ -1074,7 +1077,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     //wpushLecture(billMap, jedis, openId, courseByCourseId, user);
                     //成功购买课程则通知学生
                     if(profit_type.equals("0")){
-                        wpushUser(jedis, openId, courseMap, lecturerMap,course_id);
+                        wpushUser(jedis, openId, courseMap, lecturerMap,course_id, room_id);
                     }
                 }
             }else{
@@ -1092,41 +1095,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
     private void wpushUser(Jedis jedis, String openId,
             Map<String, String> courseByCourseId,
-            Map<String, String> lecturerUser,String courseId) {
+            Map<String, String> lecturerUser,String courseId,String roomId) {
         Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+
+
         TemplateData first = new TemplateData();
         first.setColor("#000000");
         String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseByCourseId.get("course_title"));
         first.setValue(firstContent);
         templateMap.put("first", first);
-        
-        Date start_time = new Date(MiscUtils.convertObjectToLong(courseByCourseId.get("start_time")));
+
+        TemplateData courseTitle = new TemplateData();
+        courseTitle.setColor("#000000");
+        courseTitle.setValue(courseByCourseId.get("course_title"));
+        templateMap.put("keyword1", courseTitle);
+
+        Date start_time = new Date(Long.parseLong(courseByCourseId.get("start_time")));
         TemplateData orderNo = new TemplateData();
         orderNo.setColor("#000000");
         orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
-        templateMap.put("keyword1", orderNo);
-        
-        TemplateData wuliu = new TemplateData();
-        wuliu.setColor("#000000");
-        wuliu.setValue(lecturerUser.get("nick_name"));
-        templateMap.put("keyword2", wuliu);    
- 
-        TemplateData name = new TemplateData();
-        name.setColor("#000000");
-        String thirdContent;
-        if(MiscUtils.isEmpty(courseByCourseId.get("course_remark"))){
-            thirdContent = "";
-        }else {
-            thirdContent = courseByCourseId.get("course_remark");
+        templateMap.put("keyword2", orderNo);
+
+        String lastContent;
+        lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + lecturerUser.get("nick_name");
+        String thirdContent = courseByCourseId.get("course_remark");
+        if(! MiscUtils.isEmpty(thirdContent)){
+            lastContent += "\n" + thirdContent;
         }
-        name.setValue(thirdContent);
-        templateMap.put("keyword3", name);
- 
+        lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark");
+
         TemplateData remark = new TemplateData();
         remark.setColor("#000000");
-        remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+        remark.setValue(lastContent);
         templateMap.put("remark", remark);
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;
+        String url = String.format(MiscUtils.getConfigByKey("course_live_room_url"), courseId, roomId);
         WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
     }
  
@@ -1197,6 +1199,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				public void batchOperation(Pipeline pipeline, Jedis jedis) {
 					Map<String,Object> queryParam = new HashMap<String,Object>();
 					Map<String,Response<String>> roomNameMap = new HashMap<String,Response<String>>();
+					Map<String,Response<String>> paymentCourseMap = new HashMap<String,Response<String>>();
+					
 					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
 					Map<String,Response<String>> lecturerName = new HashMap<String,Response<String>>();
 					Map<String,Response<String>> lecturerAvatar = new HashMap<String,Response<String>>();
@@ -1208,13 +1212,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						if(!roomNameMap.containsKey(roomid)){
 							queryParam.put(Constants.FIELD_ROOM_ID, roomid);
 							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, queryParam);
-							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));
+							roomNameMap.put(roomid, pipeline.hget(roomKey, "room_name"));							
 						}
 						if(!lecturerName.containsKey(lecturerId)){
 							queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 							String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
 							lecturerName.put(lecturerId, pipeline.hget(lecturerKey, "nick_name"));
 							lecturerAvatar.put(lecturerId, pipeline.hget(lecturerKey, "avatar_address"));
+							paymentCourseMap.put(lecturerId, pipeline.hget(lecturerKey, "pay_course_num"));
 						}
 						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
 						if(endDate == 0 || endDate >= currentTime){
@@ -1235,15 +1240,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						Response<Map<String,String>> lastInfoDetails = latestInfo.get(values.get("room_distributer_details_id"));
 						if(lastInfoDetails!=null){
 							Map<String,String> details = lastInfoDetails.get();
-							values.put("course_num", details.get("last_course_num"));
+							//values.put("course_num", details.get("last_course_num"));							
 							values.put("recommend_num", details.get("last_recommend_num"));
 							values.put("done_num", details.get("last_done_num"));
 							values.put("total_amount", details.get("last_total_amount"));
 						}
+						
+						long courseNum = 0l;
 						if(lecturerName.containsKey(lecturerId)){
 							values.put("nick_name", lecturerName.get(lecturerId).get());
 							values.put("avatar_address", lecturerAvatar.get(lecturerId).get());
+							Response<String> response = paymentCourseMap.get(lecturerId);
+							if(response != null){
+								courseNum = MiscUtils.convertObjectToLong(response.get());
+							}
 						}
+						values.put("course_num", courseNum);
 					}
 				}
         	});        	
@@ -1376,12 +1388,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 				total_amount=jedis.hget(roomKey, "last_total_amount");				
 			}
 			result.put("total_amount",MiscUtils.convertObjectToLong(total_amount));
-			List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(reqMap);
+			List<Map<String,Object>> course_list = commonModuleServer.findCourseWithRoomDistributerCourseInfo(reqMap);
 			if(!MiscUtils.isEmpty(course_list)){
 				Date currentDate=MiscUtils.getEndDateOfToday();
 				for(Map<String,Object> values:course_list){
-					Date end_Date = (Date)values.get("end_date");
-					if(!MiscUtils.isEmpty(endDate) && end_Date.before(currentDate)){
+					values.put("profit_share_rate", totalInfo.get("profit_share_rate"));
+					values.put("effective_time", totalInfo.get("effective_time"));
+					values.put("end_date", totalInfo.get("end_date"));
+					Date end_Date = null;
+					if(!MiscUtils.isEmpty(values.get("end_date"))){
+						end_Date = new Date(MiscUtils.convertObjectToLong(values.get("end_date")));
+					}					
+					if(!MiscUtils.isEmpty(end_Date) && end_Date.before(currentDate)){
 						values.put("effective_time", null);
 					}
 				}

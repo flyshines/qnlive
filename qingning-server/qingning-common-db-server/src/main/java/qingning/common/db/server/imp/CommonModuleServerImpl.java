@@ -248,6 +248,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
 				long shareAmount= (MiscUtils.convertObjectToLong(tradeBill.get("amount")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate")))/10000L;
 				profitRecord.put("share_amount", shareAmount);
+				profitRecord.put("distributer_id", roomDistributerCache.get("distributer_id"));
 			}
 		}
 		
@@ -272,6 +273,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
 				roomDistributerCourseMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
 				roomDistributerCourseMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+				roomDistributerCourseMap.put("course_id", tradeBill.get("course_id"));
 				Map<String,Object> roomDistributerCourse = roomDistributerCoursesMapper.findRoomDistributerCourse(roomDistributerCourseMap);
 
 				if(MiscUtils.isEmpty(roomDistributerCourse)){
@@ -577,5 +579,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap) {		
 		return roomDistributerDetailsMapper.findDistributionRoomDetail(reqMap);
-	}	
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseWithRoomDistributerCourseInfo(Map<String, Object> parameters) {
+		return distributerMapper.findCourseWithRoomDistributerCourseInfo(parameters);
+	}
 }

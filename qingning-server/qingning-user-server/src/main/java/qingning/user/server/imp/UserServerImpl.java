@@ -1268,33 +1268,32 @@ public class UserServerImpl extends AbstractQNLiveServer {
 			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseInfoMap.get("course_title"));
     		first.setValue(firstContent);
     		templateMap.put("first", first);
-    		
+
+			TemplateData courseTitle = new TemplateData();
+			courseTitle.setColor("#000000");
+			courseTitle.setValue(courseInfoMap.get("course_title"));
+			templateMap.put("keyword1", courseTitle);
+
     		Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
     		TemplateData orderNo = new TemplateData();
     		orderNo.setColor("#000000");
     		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
-    		templateMap.put("keyword1", orderNo);
-    		
-    		TemplateData wuliu = new TemplateData();
-    		wuliu.setColor("#000000");
-    		wuliu.setValue(user.get("nick_name")==null?"":user.get("nick_name").toString());
-    		templateMap.put("keyword2", wuliu);	
+    		templateMap.put("keyword2", orderNo);
 
-    		TemplateData name = new TemplateData();
-    		name.setColor("#000000");
+			String lastContent;
+			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + user.get("nick_name");
 			String thirdContent = courseInfoMap.get("course_remark");
-			if(MiscUtils.isEmpty(thirdContent)){
-				thirdContent = "";
+			if(! MiscUtils.isEmpty(thirdContent)){
+				lastContent += "\n" + thirdContent;
 			}
-    		name.setValue(thirdContent);
-    		templateMap.put("keyword3", name);
+			lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark");
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
     		TemplateData remark = new TemplateData();
     		remark.setColor("#000000");
-    		remark.setValue(MiscUtils.getConfigByKey("wpush_shop_course_remark"));
+    		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
-    		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseInfoMap.get("course_id");
+			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url"), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
@@ -1472,6 +1471,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
         resultMap.put("lecturer_nick_name",userMap.get("nick_name"));
         resultMap.put("lecturer_avatar_address",userMap.get("avatar_address"));
+        resultMap.put("course_url",courseMap.get("course_url"));
 
         return resultMap;
     }
@@ -1516,6 +1516,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             List<Map<String,Object>> messageList = userModuleServer.findCourseMessageList(queryMap);
 
             if(! CollectionUtils.isEmpty(messageList)){
+				for(Map<String,Object> messageMap : messageList){
+					if(! MiscUtils.isEmpty(messageMap.get("message"))){
+						messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageMap.get("message").toString()));
+					}
+				}
                 resultMap.put("message_list", messageList);
             }
 
@@ -1574,6 +1579,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
 								messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
 							}
 						}
+					}
+
+					String messageContent = messageMap.get("message");
+					if(! MiscUtils.isEmpty(messageContent)){
+						messageMap.put("message",MiscUtils.emojiConvertToNormalString(messageContent));
 					}
                     messageMap.put("message_pos", startIndex+"");
                     messageListCache.add(messageMap);
