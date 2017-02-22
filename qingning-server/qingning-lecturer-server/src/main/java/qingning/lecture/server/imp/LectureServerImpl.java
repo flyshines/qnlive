@@ -268,7 +268,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
  
             if(queryType.equals("1")){
-                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark",  MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
@@ -278,6 +278,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 return resultMap;
  
             }else {
+                resultMap.put("last_course_amount",MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount")));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
                 resultMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
                 resultMap.put("room_remark", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_remark")));
