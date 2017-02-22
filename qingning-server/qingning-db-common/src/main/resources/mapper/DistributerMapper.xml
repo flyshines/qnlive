@@ -29,6 +29,16 @@
     order by a.position desc limit #{page_count}	
   </select>
   
+  <select id="findCourseWithRoomDistributerCourseInfo" resultType="hashmap" parameterType="hashmap" >
+  	select a.course_title,a.start_time,a.course_price,b.* from t_courses a 
+  	left join t_room_distributer_courses b on a.course_id=b.course_id and b.room_id=#{room_id} and b.distributer_id=#{distributer_id} and b.rq_code=#{rq_code} 		
+	where a.course_type='2' and a.room_id=#{room_id}
+    <if test="start_time != null" >
+		and a.start_time<![CDATA[<]]>#{start_time} 
+	</if>
+	order by a.start_time desc limit #{page_count}
+  </select>
+  
   <select id="findRoomDistributerCourseInfo" resultType="hashmap" parameterType="hashmap" >
 	select a.*,b.course_title,b.start_time,b.course_price from t_room_distributer_courses a, t_courses b
 	where a.course_id=b.course_id and a.distributer_id=#{distributer_id} 

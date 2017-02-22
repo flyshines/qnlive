@@ -579,5 +579,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap) {		
 		return roomDistributerDetailsMapper.findDistributionRoomDetail(reqMap);
-	}	
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseWithRoomDistributerCourseInfo(Map<String, Object> parameters) {
+		return distributerMapper.findCourseWithRoomDistributerCourseInfo(parameters);
+	}
 }
