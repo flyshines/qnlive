@@ -485,12 +485,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData name = new TemplateData();
         	name.setColor("#000000");
-        	name.setValue(courseTitle);
+        	name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
         	templateMap.put("keyword1", name);
 
         	TemplateData wuliu = new TemplateData();
         	wuliu.setColor("#000000");
-            String content = course.get("course_remark");
+            String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
             if(MiscUtils.isEmpty(content)){
                 content = "";
             }
@@ -500,7 +500,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData orderNo = new TemplateData();
         	orderNo.setColor("#000000");
-        	orderNo.setValue(nickName);
+        	orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
         	templateMap.put("keyword3", orderNo);
 
         	Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
@@ -511,7 +511,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	TemplateData remark = new TemplateData();
         	remark.setColor("#000000");
-        	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),nickName));
+        	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),MiscUtils.RecoveryEmoji(nickName)));
         	templateMap.put("remark", remark);
 
         	String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;

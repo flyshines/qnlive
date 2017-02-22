@@ -260,7 +260,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		    		
 		    		TemplateData orderNo = new TemplateData();
 		    		orderNo.setColor("#000000");
-		    		orderNo.setValue(courseMap.get("course_title"));
+		    		orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
 		    		templateMap.put("keyword1", orderNo);
 		    		
 		    		TemplateData wuliu = new TemplateData();

@@ -1265,13 +1265,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
     		TemplateData first = new TemplateData();
     		first.setColor("#000000");
-			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), courseInfoMap.get("course_title"));
+			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
     		first.setValue(firstContent);
     		templateMap.put("first", first);
 
 			TemplateData courseTitle = new TemplateData();
 			courseTitle.setColor("#000000");
-			courseTitle.setValue(courseInfoMap.get("course_title"));
+			courseTitle.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
 			templateMap.put("keyword1", courseTitle);
 
     		Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
@@ -1281,8 +1281,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		templateMap.put("keyword2", orderNo);
 
 			String lastContent;
-			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + user.get("nick_name");
-			String thirdContent = courseInfoMap.get("course_remark");
+			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + MiscUtils.RecoveryEmoji(user.get("nick_name"));
+			String thirdContent = MiscUtils.RecoveryEmoji(courseInfoMap.get("course_remark"));
 			if(! MiscUtils.isEmpty(thirdContent)){
 				lastContent += "\n" + thirdContent;
 			}
