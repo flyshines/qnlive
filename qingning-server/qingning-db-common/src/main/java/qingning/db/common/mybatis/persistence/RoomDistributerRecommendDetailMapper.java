@@ -8,4 +8,5 @@ public interface RoomDistributerRecommendDetailMapper {
 
     int updateRoomDistributerRecommend(Map<String, Object> insertMap);
 
+    Long getLatestPostion(String distributer_recommend_detail_id);
 }

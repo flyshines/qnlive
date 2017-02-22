@@ -98,4 +98,8 @@
     where rq_code = #{old_rq_code}
   </update>
 
+  <select id="getLatestPostion" resultType="long" parameterType="string">
+  	select `position` from t_room_distributer_recommend_detail where distributer_recommend_detail_id=#{distributer_recommend_detail_id}
+  </select>
+
 </mapper>
