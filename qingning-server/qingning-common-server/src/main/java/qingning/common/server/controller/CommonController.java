@@ -382,6 +382,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="distributer_id",defaultValue="") String distributer_id,
     		@RequestParam(value="page_count",defaultValue="20") String page_count,
     		@RequestParam(value="position",defaultValue="") String position,
+    		@RequestParam(value="rq_code",defaultValue="") String rq_code,
     		@RequestHeader("access_token") String access_token,
     		@RequestHeader("version") String version) throws Exception{
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributerRecommendInfo", access_token, version);
@@ -389,6 +390,7 @@ public class CommonController extends AbstractController {
         param.put("room_id", room_id);
         param.put("distributer_id", distributer_id);
         param.put("page_count", page_count);
+        param.put("rq_code", rq_code);
         param.put("position", position);        
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
