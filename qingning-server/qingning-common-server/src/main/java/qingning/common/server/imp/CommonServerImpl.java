@@ -1316,19 +1316,35 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String room_id = (String)reqMap.get("room_id");
         String distributer_id = (String)reqMap.get("distributer_id");
+        String rqCode = (String)reqMap.get("rq_code");
         if(MiscUtils.isEmpty(distributer_id)){
             distributer_id = userId;
         }
-
+        
         reqMap.put("distributer_id",distributer_id);
         Map<String,String> roomDistributerMap = null;
-        roomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
+        Map<String,String> currentRoomDistributerMap = CacheUtils.readDistributerRoom(distributer_id, room_id, readRoomDistributerOperation, jedisUtils);
+        if(MiscUtils.isEmpty(rqCode)){
+        	roomDistributerMap = currentRoomDistributerMap; 
+        	reqMap.remove("rq_code");
+        } else {
+            RequestEntity queryOperation = this.generateRequestEntity(null, null, Constants.FUNCTION_DISTRIBUTERS_ROOM_RQ, reqMap);
+            roomDistributerMap = CacheUtils.readRoomDistributerDetails(room_id, userId, rqCode, queryOperation, readDistributerOperation, jedisUtils);
+            if(roomDistributerMap!= null && currentRoomDistributerMap != null 
+            		&& MiscUtils.isEqual(currentRoomDistributerMap.get("rq_code"), roomDistributerMap.get("rq_code"))){
+            	roomDistributerMap.put("recommend_num", currentRoomDistributerMap.get("last_recommend_num"));
+            }
+        }
         if(MiscUtils.isEmpty(roomDistributerMap)){
             throw new QNLiveException("100028");
         }
 
         //2.查询直播间分销员的推荐用户数量
-        long roomDistributerRecommendNum = Long.parseLong(roomDistributerMap.get("recommend_num"));
+        long roomDistributerRecommendNum = 0l;
+        if(!MiscUtils.isEmpty(roomDistributerMap)){
+        	roomDistributerRecommendNum = Long.parseLong(roomDistributerMap.get("recommend_num"));
+        }
+        
         resultMap.put("recommend_num", roomDistributerRecommendNum);
 
         //3.如果推荐用户数量大于0，则查询列表
