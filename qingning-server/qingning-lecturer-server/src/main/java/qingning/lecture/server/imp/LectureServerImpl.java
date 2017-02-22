@@ -1817,7 +1817,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     for(String key:profitMap.keySet()){
                         keyMap.clear();
                         keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, key);
-                        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, map);
+                        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, keyMap);
                         distributerNameMap.put(key, pipeline.hget(distributerKey, "nick_name"));
                     }
                     pipeline.sync();
@@ -1855,6 +1855,51 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return values;
     }
     
+    @SuppressWarnings("unchecked")
+    @FunctionName("roomDistributerInfo")
+    public Map<String, Object> getRoomDistributerInfo(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam(); 
+        
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String room_id = (String)reqMap.get("room_id");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIELD_ROOM_ID, room_id);     
+        String liveRoomOwner =  CacheUtils.readLiveRoomInfoFromCached(room_id, "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils,true);
+        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+            throw new QNLiveException("100002");
+        }
+        
+        reqMap.put("lecturer_id", userId);        
+        
+        
+        long distributer_num = MiscUtils.convertObjectToLong(CacheUtils.readLiveRoomInfoFromCached(room_id, "distributer_num", reqEntity, readLiveRoomOperation, jedisUtils,true));
+        Map<String, Object> result = new HashMap<String,Object>();
+        result.put("distributer_num", distributer_num);
+        List<Map<String,Object>> list = null;
+        if(distributer_num>0){
+        	list = lectureModuleServer.findDistributionRoomByLectureInfo(reqMap);
+        	if(!MiscUtils.isEmpty(list)){
+        		Map<String,Object> query = new HashMap<String,Object>();
+        		RequestEntity entity= generateRequestEntity(null, null, null, query);
+        		for(Map<String,Object> values:list){
+        			String distributerId = (String)values.get("distributer_id");
+        			query.put("user_id", distributerId);
+        			Map<String,String> userInfo = CacheUtils.readUser(distributerId, entity, readUserOperation, jedisUtils);
+        			if(!MiscUtils.isEmpty(userInfo)){
+        				values.put("nick_name", userInfo.get("nick_name"));
+        				values.put("avatar_address", userInfo.get("avatar_address"));
+        			}
+        		}
+        	}
+        } 
+        if(list==null){
+        	list = new LinkedList<Map<String,Object>>();
+        }
+        result.put("distributer_num", list);        
+        return result;
+    }
+    
+    /*
     @SuppressWarnings("unchecked")
     @FunctionName("roomDistributerInfo")
     public Map<String, Object> getRoomDistributerInfo(RequestEntity reqEntity) throws Exception {
@@ -1931,7 +1976,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return result;
     }
-    
+    */
     @SuppressWarnings("unchecked")
     @FunctionName("roomDistributerCoursesInfo")
     public Map<String, Object> getRoomDistributerCoursesInfo(RequestEntity reqEntity) throws Exception {

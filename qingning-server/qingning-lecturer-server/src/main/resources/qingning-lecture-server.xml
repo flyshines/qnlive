@@ -431,9 +431,9 @@
 							var ret = student;
 							if(!utils.isEqual(profit_type,'1')){
 								if(!utils.isEmpty(distributer)){
-								   ret = student+'通过'+distributer+'的分销';
+								   ret = utils.RecoveryEmoji(student)+'通过'+utils.RecoveryEmoji(distributer)+'的分销';
 								} else {
-								   ret = student+'通过分销';
+								   ret = utils.RecoveryEmoji(student)+'通过分销';
 								}
 							}
 							return ret;

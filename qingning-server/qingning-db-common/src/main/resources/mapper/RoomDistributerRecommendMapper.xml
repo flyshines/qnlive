@@ -149,6 +149,9 @@
     where
     rdr.distributer_id = #{distributer_id}
     and rdr.room_id = #{room_id}
+    <if test="rq_code != null" >
+    	and rdr.rq_code=#{rq_code}
+    </if>
     <if test="position != null" >
       and rdr.`position`  <![CDATA[ < ]]> #{position}
     </if>

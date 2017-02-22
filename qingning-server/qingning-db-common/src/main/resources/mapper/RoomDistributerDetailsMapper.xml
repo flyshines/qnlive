@@ -185,4 +185,12 @@
   	select * from t_room_distributer_details where distributer_id = #{distributer_id} and rq_code=#{rq_code}
   </select>
   
+  <select id="findDistributionRoomByLectureInfo" resultType="hashmap" parameterType="hashmap" >  
+  	select * from t_room_distributer_details where room_id = #{room_id} and lecturer_id=#{lecturer_id}
+  	<if test="position != null">
+      and position <![CDATA[ < ]]> #{position}
+    </if>
+	order by position DESC limit #{page_count}
+  </select>
+  
 </mapper>
