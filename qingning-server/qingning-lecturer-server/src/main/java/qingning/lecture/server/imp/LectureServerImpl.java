@@ -524,7 +524,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
     /**
      * 微信推送
-     * @param findFollowUserIds
+     * @param followUserList
      * @param templateId
      * @param templateMap
      */
@@ -1207,9 +1207,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
         */
     }
- 
- 
- 
+
+
+
+    //<editor-fold desc="暂时不用此方法">
 /*    private Map<String,Object> findCourseFinishList(Jedis jedis, String key,
                                                     String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count,String userId){
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
@@ -1258,6 +1259,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("startIndexDB", startIndexDB);
         return resultMap;
     }*/
+    //</editor-fold>
  
     @SuppressWarnings("unchecked")
     @FunctionName("processCoursePPTs")
@@ -1802,7 +1804,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //从讲师信息中加载，数据不存在需加载缓存
         Map<String,String> keyMap = new HashMap<String,String>();
-        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);//加入老师id
         reqEntity.setParam(keyMap);
         Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedisUtils);        
         return values;
