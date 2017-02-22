@@ -1392,15 +1392,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(totalInfo)){
         	result.put("total_amount", 0l);
         	result.put("course_list", new LinkedList<Map<String,Object>>());
-        } else {
-			long endDate = MiscUtils.convertObjectToLong(totalInfo.get("end_date"));
-			long currentTime = MiscUtils.getEndDateOfToday().getTime();
-			String total_amount = totalInfo.get("total_amount");
-			if(endDate == 0 || endDate >= currentTime){
-				Map<String,Object> queryParam = new HashMap<String,Object>();
-				queryParam.put("distributer_id", totalInfo.get("distributer_id"));
-				queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
-				String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+        } else {			
+			String total_amount = totalInfo.get("total_amount");			
+			Map<String,Object> queryParam = new HashMap<String,Object>();
+			queryParam.put("distributer_id", totalInfo.get("distributer_id"));
+			queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
+			String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+			String crtRqCode = jedis.hget(roomKey, "rq_code");
+			if(rq_code.equals(crtRqCode)){
 				total_amount=jedis.hget(roomKey, "last_total_amount");				
 			}
 			result.put("total_amount",MiscUtils.convertObjectToLong(total_amount));
