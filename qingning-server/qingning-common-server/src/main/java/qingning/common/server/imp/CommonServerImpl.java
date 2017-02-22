@@ -1725,7 +1725,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         //5.修改讲师缓存中的推荐用户数
                         Map<String,Object> cacheKeyMap = new HashMap<>();
                         cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheKeyMap);
                         jedis.hincrBy(lecturerKey, "room_recommend_num", 1);
 
                        /* Map<String,Object> updateMap = new HashMap<>();
