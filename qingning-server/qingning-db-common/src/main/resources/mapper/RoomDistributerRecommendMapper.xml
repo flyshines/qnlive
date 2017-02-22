@@ -135,7 +135,7 @@
       <if test="rq_code != null" >
         rq_code = #{rq_code},
       </if>
-      `position` = ((select max(`position`) from t_room_distributer_recommend) + 1)
+      `position` = #{position}
     </set>
     where distributer_recommend_id = #{distributer_recommend_id}
     <if test="last_update_time != null" >

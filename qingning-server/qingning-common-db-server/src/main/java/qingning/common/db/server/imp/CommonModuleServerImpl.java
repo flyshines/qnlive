@@ -552,11 +552,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	@Transactional(rollbackFor=Exception.class)
 	public void updateRoomDistributerRecommend(Map<String, Object> insertMap) {
-		insertMap.put("update_time", insertMap.get("now"));
-		roomDistributerRecommendMapper.updateRoomDistributerRecommend(insertMap);
-
 		insertMap.put("create_time", insertMap.get("now"));
 		roomDistributerRecommendDetailMapper.insertRoomDistributerRecommend(insertMap);
+		long position = roomDistributerRecommendDetailMapper.getLatestPostion((String)insertMap.get("distributer_recommend_detail_id"));
+		insertMap.remove("create_time");
+		
+		insertMap.put("update_time", insertMap.get("now"));
+		insertMap.put("position", position);
+		roomDistributerRecommendMapper.updateRoomDistributerRecommend(insertMap);
+		
+		insertMap.remove("position");
 		roomDistributerRecommendDetailMapper.updateRoomDistributerRecommend(insertMap);
 
 	}
