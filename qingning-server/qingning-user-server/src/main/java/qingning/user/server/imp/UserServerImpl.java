@@ -1245,7 +1245,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             JSONObject obj = new JSONObject();
             //String course_type = courseMap.get("course_type");
             String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
-            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, courseInfoMap.get("course_title"), nowStudentNum+""));
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")), nowStudentNum+""));
             obj.put("to", userId);
             obj.put("msg_type","7");
             Map<String,String> extrasMap = new HashMap<>();

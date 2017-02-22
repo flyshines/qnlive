@@ -1052,7 +1052,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         JSONObject obj = new JSONObject();
                         String course_type = courseMap.get("course_type");
                         String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
-                        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, courseMap.get("course_title"), nowStudentNum+""));
+                        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseMap.get("course_title")), nowStudentNum+""));
                         obj.put("to", courseMap.get("lecturer_id"));
                         obj.put("msg_type","7");
                         Map<String,String> extrasMap = new HashMap<>();

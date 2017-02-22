@@ -2125,7 +2125,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //发送成为新分销员极光推送
         JSONObject obj = new JSONObject();
         String roomName = CacheUtils.readLiveRoomInfoFromCached(room_id, "room_name", reqEntity, readLiveRoomOperation, jedisUtils,true);
-        obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), roomName));
+        obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_room_new_distributer"), MiscUtils.RecoveryEmoji(roomName)));
         obj.put("to", values.get("lecturer_id"));
         obj.put("msg_type", "9");
         Map<String,String> extrasMap = new HashMap<>();

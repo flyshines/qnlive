@@ -151,7 +151,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     String fotmatString = "HH:mm";
                     String startTimeFormat = MiscUtils.parseDateToFotmatString((Date)(reqMap.get("start_time")),fotmatString);
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_long_notice"), course_title,startTimeFormat));
+                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_long_notice"), MiscUtils.RecoveryEmoji(course_title),startTimeFormat));
                     obj.put("to",lecturer_id);
                     obj.put("msg_type","1");
                     Map<String,String> extrasMap = new HashMap<>();
@@ -191,7 +191,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         		public void process() {
         			log.debug("-----------开播预先5min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_short_notice"), course_title,"5"));
+                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"5"));
                     obj.put("to",lecturer_id);
                     obj.put("msg_type","2");
                     Map<String,String> extrasMap = new HashMap<>();
@@ -231,7 +231,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         		public void process() {
                     log.debug("-----------加入学生上课3min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_study_notice"), course_title));
+                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_study_notice"), MiscUtils.RecoveryEmoji(course_title)));
                     List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
                     obj.put("user_ids",studentIds);
                     obj.put("msg_type","10");
@@ -279,7 +279,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                         return;
                     }
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_lecturer_not_show"), course_title));
+                    obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_lecturer_not_show"), MiscUtils.RecoveryEmoji(course_title)));
                     obj.put("to",lecturer_id);
                     obj.put("msg_type","3");
                     Map<String,String> extrasMap = new HashMap<>();
@@ -532,7 +532,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             if(type.equals("1")){
                 //1.9极光推送结束消息
                 JSONObject obj = new JSONObject();
-                obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_not_start_force_end"),courseMap.get("course_title")));
+                obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_not_start_force_end"),MiscUtils.RecoveryEmoji(courseMap.get("course_title"))));
                 obj.put("to",courseMap.get("lecturer_id"));
                 obj.put("msg_type","6");
                 Map<String,String> extrasMap = new HashMap<>();
@@ -545,7 +545,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 //课程直播超时结束
                 //1.9极光推送结束消息
                 JSONObject obj = new JSONObject();
-                obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_live_overtime_force_end"),courseMap.get("course_title")));
+                obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_live_overtime_force_end"),MiscUtils.RecoveryEmoji(courseMap.get("course_title"))));
                 obj.put("to",courseMap.get("lecturer_id"));
                 obj.put("msg_type","5");
                 Map<String,String> extrasMap = new HashMap<>();
