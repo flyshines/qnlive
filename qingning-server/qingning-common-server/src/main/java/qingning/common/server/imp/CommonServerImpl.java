@@ -1470,6 +1470,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(list)){
             throw new QNLiveException("120014");
         }
+
+        Map<String,Object> map = list.get(0);
+        if(map.get("end_date") != null){
+            Date end_date = (Date)map.get("end_date");
+            Date todayEndDay = MiscUtils.getEndDateOfToday();
+            if(end_date.getTime() < todayEndDay.getTime()){
+                throw new QNLiveException("120021");
+            }
+        }
+        
         return list.get(0);
     }
     
