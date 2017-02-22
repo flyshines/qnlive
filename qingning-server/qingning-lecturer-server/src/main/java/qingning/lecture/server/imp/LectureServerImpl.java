@@ -1817,7 +1817,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     for(String key:profitMap.keySet()){
                         keyMap.clear();
                         keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, key);
-                        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, map);
+                        String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, keyMap);
                         distributerNameMap.put(key, pipeline.hget(distributerKey, "nick_name"));
                     }
                     pipeline.sync();
