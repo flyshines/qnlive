@@ -1569,14 +1569,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseId = reqMap.get("course_id").toString();
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id", userId);        
-        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-        resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+
  
         Map<String,String> courseMap =  CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedisUtils, false);
         resultMap.put("course_title",MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
         resultMap.put("start_time",courseMap.get("start_time"));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
+
+        Map<String, String> userMap = CacheUtils.readUser(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         return resultMap;
     }
@@ -1590,17 +1592,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         
         Map<String,Object> query = new HashMap<String,Object>();
-        query.put("user_id", userId);        
-        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-        
+        query.put("user_id", userId);
         String roomId = reqMap.get("room_id").toString();
-        
-        resultMap.put("avatar_address",userMap.get("avatar_address"));
-        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
- 
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
         resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
- 
+
+        Map<String, String> userMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+
         //查询该用户是否为该直播间的分销员
         String share_url = getLiveRoomShareURL(userId, roomId);
  
