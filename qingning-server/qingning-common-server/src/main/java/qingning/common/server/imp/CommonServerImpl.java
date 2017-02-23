@@ -1596,7 +1596,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
 
         Map<String, String> userMap = CacheUtils.readUser(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"),reqEntity,readLiveRoomOperation,jedisUtils,true);
+
+        resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
  
         return resultMap;
@@ -1617,7 +1619,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
 
         Map<String, String> userMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
 
         //查询该用户是否为该直播间的分销员
