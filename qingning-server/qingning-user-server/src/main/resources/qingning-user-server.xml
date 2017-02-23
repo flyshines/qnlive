@@ -40,7 +40,8 @@
 						<param name="course_type" type="string"/>
 						<param name="data_source" type="string"/>
 						<param name="query_time" type="long"/>
-						<param name="position" type="long"/>						
+						<param name="position" type="long"/>
+						<param name="student" type="string"/>
 					</param>
 				</outputs>
 			</function>
