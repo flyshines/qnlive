@@ -317,6 +317,7 @@
 						<param name="ban_status" type="string"/>
 						<param name="user_id" type="string"/>
 						<param name="student_pos" type="long"/>
+						<param name="student_num" type="long"/>
 						<param name="data_source" type="string"/>						
 					</param>
 				</outputs>
