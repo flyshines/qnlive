@@ -1924,7 +1924,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_second_content").replace("%s", (Integer.parseInt(values.get("profit_share_rate")) / 100.0)+"") + "\n"
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
-                share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), values.get("profit_share_rate"), values.get("effective_time"));
+                share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
                 break;
         }
  
