@@ -2396,7 +2396,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         RequestEntity queryOperation = generateRequestEntity(null, null, null, query);
         CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
 		
-		final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
         for(Map<String,String> courseInfo:courseList){
         	String courseId = courseInfo.get("course_id");
         	if(jedis.sismember(key, courseId)){

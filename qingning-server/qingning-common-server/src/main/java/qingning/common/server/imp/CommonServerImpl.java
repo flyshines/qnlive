@@ -1427,20 +1427,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					}
 				}
 				
-		        Map<String,Object> query = new HashMap<String,Object>();
-		        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
-		        queryOperation = generateRequestEntity(null, null, null, query);
-		        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
-				
-				final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
-		        for(Map<String,Object> courseInfo:course_list){
-		        	String courseId = (String)courseInfo.get("course_id");
-		        	if(jedis.sismember(key, courseId)){
-		        		courseInfo.put("student", "Y");
-		        	} else {
-		        		courseInfo.put("student", "N");
-		        	}
-		        }
+//		        Map<String,Object> query = new HashMap<String,Object>();
+//		        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+//		        queryOperation = generateRequestEntity(null, null, null, query);
+//		        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+//
+//				final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+//		        for(Map<String,Object> courseInfo:course_list){
+//		        	String courseId = (String)courseInfo.get("course_id");
+//		        	if(jedis.sismember(key, courseId)){
+//		        		courseInfo.put("student", "Y");
+//		        	} else {
+//		        		courseInfo.put("student", "N");
+//		        	}
+//		        }
 			} else {
 				course_list = new LinkedList<Map<String,Object>>(); 
 			}
