@@ -1497,12 +1497,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("roomDistributionShareInfo")
     public Map<String,Object> getRoomDistributionShareInfo(RequestEntity reqEntity) throws Exception{
         @SuppressWarnings("unchecked")
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("distributer_id", userId);        
+        reqMap.put("distributer_id", userId);
         List<Map<String,Object>> list = commonModuleServer.findDistributionInfoByDistributerId(reqMap);
         if(MiscUtils.isEmpty(list)){
-            throw new QNLiveException("120014");
+            throw new QNLiveException("120021");
         }
 
         Map<String,Object> map = list.get(0);
@@ -1513,7 +1513,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("120021");
             }
         }
-        
+
         return list.get(0);
     }
     
