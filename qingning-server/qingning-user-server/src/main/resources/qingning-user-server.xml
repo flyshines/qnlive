@@ -226,7 +226,8 @@
 						<param name="nick_name" type="rstring"/>
 						<param name="student_pos" type="string"/>
 						<param name="create_time" type="long"/>
-						<param name="student_pos" type="long"/>					
+						<param name="student_pos" type="long"/>
+						<param name="student_num" type="long"/>
 					</param>
 				</outputs>
 			</function>
