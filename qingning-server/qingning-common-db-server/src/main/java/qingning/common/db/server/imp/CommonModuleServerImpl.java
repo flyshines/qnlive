@@ -590,4 +590,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findCourseWithRoomDistributerCourseInfo(Map<String, Object> parameters) {
 		return distributerMapper.findCourseWithRoomDistributerCourseInfo(parameters);
 	}
+
+	@Override
+	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {		
+		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
+	}
 }

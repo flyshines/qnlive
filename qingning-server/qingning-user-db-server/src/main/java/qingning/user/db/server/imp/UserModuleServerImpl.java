@@ -229,4 +229,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	public List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record){
 		return coursesMapper.findFinishCourseListForLecturer(record);
 	}
+	
+	@Override
+	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {		
+		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
+	}
 }

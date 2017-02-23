@@ -80,4 +80,6 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 	
 	List<Map<String,Object>> findDistributionRoomByLectureInfo(Map<String, Object> record);
+	
+	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 }
