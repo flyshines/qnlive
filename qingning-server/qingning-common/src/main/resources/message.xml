@@ -26,6 +26,7 @@
 				<entry key="000102" value="返回参数类型错误"/>
 				<entry key="000103" value="功能的返回参数定义错误"/>
 				<entry key="000104" value="信息已经被其他用户更新，请刷新重试"/>
+				<entry key="000105" value="数据已经处理，不可以再次处理"/>
 				
 				<entry key="100002" value="直播间不存在"/>
 				<entry key="100003" value="直播间信息已经被修改，请刷新同步"/>
