@@ -230,7 +230,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
 		updatePaymentBill.put("update_time", realPayTime);
 		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
-		paymentBillMapper.updatePaymentBill(updatePaymentBill);
+		updatePaymentBill.put("trade_id", paymentBill.get("trade_id"));
+		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
+			throw new QNLiveException("000105");
+		}
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", MiscUtils.getUUId());
