@@ -207,9 +207,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> handleWeixinPayResult(Map<String, Object> requestMapData) throws Exception{
-		Map<String,Object> profitRecord = new HashMap<String,Object>();
-		
-		
+	
 		Date now = new Date();
 		Map<String,Object> tradeBill = (Map<String,Object>)requestMapData.get("tradeBillInCache");
 		Map<String,Object> updateTradeBill = new HashMap<String,Object>();
@@ -218,28 +216,23 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		updateTradeBill.put("status", "2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
 		updateTradeBill.put("update_time", now);
 		if(tradeBillMapper.updateTradeBill(updateTradeBill) < 1){			
-			//throw new QNLiveException("000105");
-			profitRecord.put("TEST_A", "F");
+			throw new QNLiveException("000105");			
 		}
 
 		//2.更新t_payment_bill 支付信息表
 		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
 		String status = (String)paymentBill.get("status");
 		if("2".equals(status)){
-			//throw new QNLiveException("000105");
-			profitRecord.put("TEST_B", "F");
+			throw new QNLiveException("000105");			
 		}
 		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
 		updatePaymentBill.put("status", "2");
 		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
 		updatePaymentBill.put("update_time", realPayTime);
 		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
-		if(paymentBillMapper.updatePaymentBill(updatePaymentBill)< 1){
-			//throw new QNLiveException("000105");
-			profitRecord.put("TEST_C", "F");
-		}
+		paymentBillMapper.updatePaymentBill(updatePaymentBill);
 		//3.更新 讲师课程收益信息表
-		//Map<String,Object> profitRecord = new HashMap<String,Object>();
+		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", MiscUtils.getUUId());
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
