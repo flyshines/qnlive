@@ -648,300 +648,276 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        //发送微信推送 TODO
-        
         String    course_id = (String) reqMap.get("course_id");
-        //0.检查课程是否存在并且状态是否正确。
-        // （在缓存中的课程为未结束课程，缓存中有课程则代表课程存在且状态正确）
-        if (jedis.exists(courseKey)) {
-            //0.1校验课程更新时间
-            if (!"2".equals(reqMap.get("status"))){
-            	if(MiscUtils.isEmpty(reqMap.get("update_time"))){
-            		throw new QNLiveException("000100");
-            	}
-                String update_time_cache = jedis.hget(courseKey, "update_time");
-                if (!MiscUtils.isEqual(update_time_cache, String.valueOf(reqMap.get("update_time")))) {
-                    throw new QNLiveException("000104");
-                }
-            }
- 
-            //0.2进一步校验课程状态
-            String statusFromCache = jedis.hget(courseKey, "status");
-            if (statusFromCache == null || statusFromCache.equals("2")) {
-                throw new QNLiveException("100011");
-            }
- 
-            //0.3校验该课程是否属于该用户
-            String courseOwner = jedis.hget(courseKey, "lecturer_id");
-            if(courseOwner == null || !userId.equals(courseOwner)){
-                throw new QNLiveException("100013");
-            }
- 
-            //1如果为课程结束
-            String original_start_time = null;
-            Map<String,String> originalCourseMap = CacheUtils.readCourse(course_id, reqEntity, readCourseOperation, jedisUtils, false);
-            original_start_time = originalCourseMap.get("start_time");
-            if ("2".equals(reqMap.get("status"))) {
-                //1.1如果为课程结束，则取当前时间为课程结束时间
-                //1.2更新课程详细信息(dubble服务)
-                String start_time = jedis.hget(courseKey, "start_time");
-                try{
-                    if(System.currentTimeMillis() <= Long.parseLong(start_time)){
-                        throw new QNLiveException("100032");
-                    }
-                } catch(Exception e){
-                    if(e instanceof QNLiveException){
-                        throw e;
-                    }
-                }
-                Date courseEndTime = new Date();
-                reqMap.put("now",courseEndTime);
-                Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
-                if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
-                    throw new QNLiveException("100005");
-                }
- 
-                //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
-                map.clear();
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-                String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                jedis.zrem(lecturerCoursesPredictionKey, reqMap.get("course_id").toString());
-                
-                long lpos = MiscUtils.convertInfoToPostion(courseEndTime.getTime(), MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
-                
-                String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-                
-                jedis.zadd(lecturerCoursesFinishKey, lpos, reqMap.get("course_id").toString());
- 
-                //1.4将该课程从平台的预告课程列表 SYS：courses  ：prediction移除。如果存在结束课程列表 SYS：courses ：finish，则增加到课程结束列表
-                jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
-                if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){                	
-                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
-                }
- 
-                //1.5如果课程标记为结束，则清除该课程的禁言缓存数据
-                map.put(Constants.CACHED_KEY_COURSE_FIELD, userId);
-                String banKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
-                jedis.del(banKey);
- 
-                //1.6更新课程缓存信息
-                Map<String, String> updateCacheMap = new HashMap<String, String>();
-                updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
-                updateCacheMap.put("end_time", courseEndTime.getTime() + "");
-                updateCacheMap.put("status", "2");
-                jedis.hmset(courseKey, updateCacheMap);
- 
-                //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
-                RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
-                this.mqUtils.sendMessage(mqRequestEntity);
- 
- 
-                //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
-                RequestEntity mqAudioRequestEntity = new RequestEntity();
-                mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
-                mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                mqAudioRequestEntity.setParam(reqEntity.getParam());
-                this.mqUtils.sendMessage(mqAudioRequestEntity);
- 
-                //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
-                if(jedis.hget(courseKey, "real_start_time") == null){
-                    String courseStartTime = jedis.hget(courseKey, "start_time");
-                    if(Long.parseLong(courseStartTime) < MiscUtils.getEndTimeOfToday().getTime()){
-                        RequestEntity timerRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseNotStartCancel",reqEntity.getParam());
-                        this.mqUtils.sendMessage(timerRequestEntity);
-                    }
-                }
- 
-                resultMap.put("update_time", courseEndTime.getTime());
-                SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-                String str = sdf.format(courseEndTime);
-                String courseEndMessage = "直播结束于"+str;
-                //发送结束推送消息
-                long currentTime = System.currentTimeMillis();
-                String mGroupId = jedis.hget(courseKey,"im_course_id");
-                String message = courseEndMessage;
-                String sender = "system";
-                Map<String,Object> infomation = new HashMap<>();
-                infomation.put("course_id", reqMap.get("course_id").toString());
-                infomation.put("creator_id", userId);
-                infomation.put("message", message);
-                infomation.put("message_type", "1");
-                infomation.put("send_type", "6");//5.结束消息
-                infomation.put("create_time", currentTime);
-                Map<String,Object> messageMap = new HashMap<>();
-                messageMap.put("msg_type","1");
-                messageMap.put("send_time",currentTime);
-                messageMap.put("information",infomation);
-                messageMap.put("mid",MiscUtils.getUUId());
-                String content = JSON.toJSONString(messageMap);
-                IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
- 
-            } else {
-                Map<String,Object> query = new HashMap<String,Object>();
-                query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-                String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
-                Date now = new Date();
-				if(reqMap.get("start_time") != null){
-                	//课程之间需要间隔三十分钟
-                    Calendar cal = Calendar.getInstance();
-                    long startTime = (Long)reqMap.get("start_time");
-                    cal.setTimeInMillis(startTime);
-                    cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
-                    long preStartTime = cal.getTimeInMillis();
-                    cal.setTimeInMillis(startTime);
-                    cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
-                    long nextStartTime = cal.getTimeInMillis();
-                    Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
-                    course_id = (String)reqMap.get("course_id");
-                    if(!MiscUtils.isEmpty(courseList)){
-                        for(Tuple tuple:courseList){
-                            if(!course_id.equals(tuple.getElement())){
-                                throw new QNLiveException("100029");
-                            }
-                        }                        
-                    }
-                    /*String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, query);
-                    courseList = jedis.zrangeByScoreWithScores(lecturerCoursesFinishKey, preStartTime+"", nextStartTime+"", 0, 1);
-                    if(!MiscUtils.isEmpty(courseList)){
-                        for(Tuple tuple:courseList){
-                            if(!course_id.equals(tuple.getElement())){
-                                throw new QNLiveException("100029");
-                            }
-                        }
-                    }*/
-                                        
-                    if(now.getTime() > startTime){
-                    	throw new QNLiveException("100034");
-                    }
-                }
-				reqMap.put("now",now);
-                //2.不为课程结束
-                //修改缓存，同时修改数据库
-                Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
-                if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
-                    throw new QNLiveException("100005");
-                }
- 
-                Map<String, String> updateCacheMap = new HashMap<String, String>();
-                if (!MiscUtils.isEmpty(reqMap.get("course_title"))) {
-                    updateCacheMap.put("course_title", reqMap.get("course_title").toString());
-                }
-                if (reqMap.get("course_remark") != null) {
-                    updateCacheMap.put("course_remark", reqMap.get("course_remark").toString());
-                }
-                if (!MiscUtils.isEmpty(reqMap.get("course_url"))) {
-                    updateCacheMap.put("course_url", reqMap.get("course_url").toString());
-                }
-                if (!MiscUtils.isEmpty(reqMap.get("course_password"))) {
-                    updateCacheMap.put("course_password", reqMap.get("course_password").toString());
-                }
-                if (reqMap.get("start_time") != null) {
-                	updateCacheMap.put("start_time", reqMap.get("start_time").toString());
-                }
-                updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
-                jedis.hmset(courseKey, updateCacheMap);
-                
-                if (reqMap.get("start_time") != null) {
-                	String newStartTime = reqMap.get("start_time").toString();
-                	
-                	jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
-                	
-                    query.clear();
-                    query.put("course_id", course_id);
-                    Map<String,String> course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
-                	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-                    Map<String,Object> timerMap = new HashMap<>();
-                    timerMap.put("course_id", course_id);
-                    timerMap.put("start_time", new Date(startTime));
-                    timerMap.put("lecturer_id", userId);
-                    timerMap.put("course_title", course.get("course_title"));        
-                    timerMap.put("course_id", course.get("course_id"));
-                    timerMap.put("start_time", startTime + "");
-                    timerMap.put("position", course.get("position"));
-                    
-            		RequestEntity mqRequestEntity = new RequestEntity();
-            		mqRequestEntity.setServerName("MessagePushServer");
-            		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            		mqRequestEntity.setParam(timerMap);
-            		
-            		mqRequestEntity.setFunctionName("processCourseStartShortNoticeUpdate");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-            		
-            		mqRequestEntity.setFunctionName("processCourseNotStartUpdate");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-            		
-            		mqRequestEntity.setFunctionName("processCourseStartLongNoticeUpdate");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-
-            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNoticeUpdate");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-            		
-                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShowUpdate");
-                    mqUtils.sendMessage(mqRequestEntity);
-            		
-                    long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
-                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());                    
-                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                    TemplateData first = new TemplateData();
-                    first.setColor("#000000");
-                    first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first"));
-                    templateMap.put("first", first);
-                    
-                    TemplateData wuliu = new TemplateData();
-                    wuliu.setColor("#000000");
-                    wuliu.setValue(course.get("course_title").toString());
-                    templateMap.put("keyword1", wuliu);    
- 
-                    TemplateData name = new TemplateData();
-                    name.setColor("#000000");
-                    name.setValue("修改部分课程信息！");
-                    templateMap.put("keyword2", name);
-                    
-                    TemplateData orderNo = new TemplateData();
-                    orderNo.setColor("#000000");
-                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(original_start_time)) , "yyyy-MM-dd HH:mm:ss"));
-                    templateMap.put("keyword3", orderNo);
-                    
-                    TemplateData nowDate = new TemplateData();
-                    nowDate.setColor("#000000");
-                    nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
-                    templateMap.put("keyword4", nowDate);
-                    
-                    TemplateData remark = new TemplateData();
-                    remark.setColor("#000000");
-                    remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark"));
-                    templateMap.put("remark", remark);
-                    //TODO 推送多人  报名的所有人
-                    List<Map<String,Object>> userInfo = lectureModuleServer.findCourseStudentListWithLoginInfo(course_id);
-                    String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id");
-                    if (!MiscUtils.isEmpty(userInfo)) {
-                        weiPush(userInfo, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
-                    }
-                    
-                    //发送极光推送,通知学员上课时间变更//todo
-//                    JSONObject obj = new JSONObject();
-//                    Date newStartTimeDate = new Date(Long.parseLong(newStartTime));
-//                    String courseTitle = jedis.hget(courseKey,"course_title");
-//                    String startTimeFormat = MiscUtils.parseDateToFotmatString(newStartTimeDate,"MM月dd日HH:mm");
-//                    List<String> studentIds = lectureModuleServer.findUserIdsFromStudentsByCourseId(reqMap.get("course_id").toString());
-//                    obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), courseTitle,startTimeFormat));
-//                    obj.put("user_ids", studentIds);
-//                    obj.put("msg_type", "13");
-//                    Map<String,String> extrasMap = new HashMap<>();
-//                    extrasMap.put("msg_type","13");
-//                    extrasMap.put("course_id",reqMap.get("course_id").toString());
-//                    obj.put("extras_map", extrasMap);
-//                    JPushHelper.push(obj);
- 
-                }
-
-                resultMap.put("update_time", updateCacheMap.get("update_time"));
-            }
-            jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
-        } else {
-            throw new QNLiveException("100010");
+        
+        Map<String, String> course = CacheUtils.readCourse((String)course_id, generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedisUtils, false);
+        if(MiscUtils.isEmpty(course)){
+        	throw new QNLiveException("100004");
         }
- 
+        
+        String status = course.get("status");
+        if("2".equals(status)){
+        	if(reqMap.get("start_time") != null){
+        		throw new QNLiveException("100010");
+        	}
+        } else if("2".equals(status) && "2".equals(reqMap.get("status"))){
+        	throw new QNLiveException("100010");
+        }
+        
+        String newStatus = (String)reqMap.get("status");
+        
+        //0.1校验课程更新时间
+        if (!"2".equals(newStatus)){
+        	if(MiscUtils.isEmpty(reqMap.get("update_time"))){
+        		throw new QNLiveException("000100");
+        	}
+            String update_time_cache = course.get("update_time");
+            if (!MiscUtils.isEqual(update_time_cache, String.valueOf(reqMap.get("update_time")))) {
+                throw new QNLiveException("000104");
+            }
+        }
+        
+        //0.3校验该课程是否属于该用户
+        String courseOwner = course.get("lecturer_id");
+        if(!userId.equals(courseOwner)){
+            throw new QNLiveException("100013");
+        }
+        
+        String original_start_time = course.get("start_time");
+        
+        if ("2".equals(reqMap.get("status"))) {
+            //1.1如果为课程结束，则取当前时间为课程结束时间
+            //1.2更新课程详细信息(dubble服务)
+            String start_time = original_start_time;
+            try{
+                if(System.currentTimeMillis() <= Long.parseLong(start_time)){
+                    throw new QNLiveException("100032");
+                }
+            } catch(Exception e){
+                if(e instanceof QNLiveException){
+                    throw e;
+                }
+            }
+            Date courseEndTime = new Date();
+            reqMap.put("now",courseEndTime);
+            Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
+            if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
+                throw new QNLiveException("100005");
+            }
+
+            //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
+            map.clear();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+            jedis.zrem(lecturerCoursesPredictionKey, reqMap.get("course_id").toString());
+            
+            long lpos = MiscUtils.convertInfoToPostion(courseEndTime.getTime(), MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
+            
+            String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+            
+            jedis.zadd(lecturerCoursesFinishKey, lpos, reqMap.get("course_id").toString());
+
+            //1.4将该课程从平台的预告课程列表 SYS：courses  ：prediction移除。如果存在结束课程列表 SYS：courses ：finish，则增加到课程结束列表
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
+            if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){                	
+                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
+            }
+
+            //1.5如果课程标记为结束，则清除该课程的禁言缓存数据
+            map.put(Constants.CACHED_KEY_COURSE_FIELD, userId);
+            String banKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
+            jedis.del(banKey);
+
+            //1.6更新课程缓存信息
+            Map<String, String> updateCacheMap = new HashMap<String, String>();
+            updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
+            updateCacheMap.put("end_time", courseEndTime.getTime() + "");
+            updateCacheMap.put("status", "2");
+            jedis.hmset(courseKey, updateCacheMap);
+
+            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
+            RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
+            this.mqUtils.sendMessage(mqRequestEntity);
+
+
+            //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
+            RequestEntity mqAudioRequestEntity = new RequestEntity();
+            mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
+            mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            mqAudioRequestEntity.setParam(reqEntity.getParam());
+            this.mqUtils.sendMessage(mqAudioRequestEntity);
+
+            //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
+            if(jedis.hget(courseKey, "real_start_time") == null){
+                String courseStartTime = jedis.hget(courseKey, "start_time");
+                if(Long.parseLong(courseStartTime) < MiscUtils.getEndTimeOfToday().getTime()){
+                    RequestEntity timerRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseNotStartCancel",reqEntity.getParam());
+                    this.mqUtils.sendMessage(timerRequestEntity);
+                }
+            }
+
+            resultMap.put("update_time", courseEndTime.getTime());
+            SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+            String str = sdf.format(courseEndTime);
+            String courseEndMessage = "直播结束于"+str;
+            //发送结束推送消息
+            long currentTime = System.currentTimeMillis();
+            String mGroupId = jedis.hget(courseKey,"im_course_id");
+            String message = courseEndMessage;
+            String sender = "system";
+            Map<String,Object> infomation = new HashMap<>();
+            infomation.put("course_id", reqMap.get("course_id").toString());
+            infomation.put("creator_id", userId);
+            infomation.put("message", message);
+            infomation.put("message_type", "1");
+            infomation.put("send_type", "6");//5.结束消息
+            infomation.put("create_time", currentTime);
+            Map<String,Object> messageMap = new HashMap<>();
+            messageMap.put("msg_type","1");
+            messageMap.put("send_time",currentTime);
+            messageMap.put("information",infomation);
+            messageMap.put("mid",MiscUtils.getUUId());
+            String content = JSON.toJSONString(messageMap);
+            IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+        } else {
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
+            Date now = new Date();
+			if(reqMap.get("start_time") != null){
+            	//课程之间需要间隔三十分钟
+                Calendar cal = Calendar.getInstance();
+                long startTime = (Long)reqMap.get("start_time");
+                cal.setTimeInMillis(startTime);
+                cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
+                long preStartTime = cal.getTimeInMillis();
+                cal.setTimeInMillis(startTime);
+                cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
+                long nextStartTime = cal.getTimeInMillis();
+                Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
+                course_id = (String)reqMap.get("course_id");
+                if(!MiscUtils.isEmpty(courseList)){
+                    for(Tuple tuple:courseList){
+                        if(!course_id.equals(tuple.getElement())){
+                            throw new QNLiveException("100029");
+                        }
+                    }                        
+                }                                    
+                if(now.getTime() > startTime){
+                	throw new QNLiveException("100034");
+                }
+            }
+			reqMap.put("now",now);
+            //2.不为课程结束
+            //修改缓存，同时修改数据库
+            Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
+            if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
+                throw new QNLiveException("100005");
+            }
+
+            Map<String, String> updateCacheMap = new HashMap<String, String>();
+            if (!MiscUtils.isEmpty(reqMap.get("course_title"))) {
+                updateCacheMap.put("course_title", reqMap.get("course_title").toString());
+            }
+            if (reqMap.get("course_remark") != null) {
+                updateCacheMap.put("course_remark", reqMap.get("course_remark").toString());
+            }
+            if (!MiscUtils.isEmpty(reqMap.get("course_url"))) {
+                updateCacheMap.put("course_url", reqMap.get("course_url").toString());
+            }
+            if (!MiscUtils.isEmpty(reqMap.get("course_password"))) {
+                updateCacheMap.put("course_password", reqMap.get("course_password").toString());
+            }
+            if (reqMap.get("start_time") != null) {
+            	updateCacheMap.put("start_time", reqMap.get("start_time").toString());
+            }
+            updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
+            if(jedis.exists(courseKey)){
+            	jedis.hmset(courseKey, updateCacheMap);
+            }
+            
+            if (reqMap.get("start_time") != null) {
+            	String newStartTime = reqMap.get("start_time").toString();
+            	
+            	jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
+            	
+                query.clear();
+                query.put("course_id", course_id);
+                course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
+            	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+                Map<String,Object> timerMap = new HashMap<>();
+                timerMap.put("course_id", course_id);
+                timerMap.put("start_time", new Date(startTime));
+                timerMap.put("lecturer_id", userId);
+                timerMap.put("course_title", course.get("course_title"));        
+                timerMap.put("course_id", course.get("course_id"));
+                timerMap.put("start_time", startTime + "");
+                timerMap.put("position", course.get("position"));
+                
+        		RequestEntity mqRequestEntity = new RequestEntity();
+        		mqRequestEntity.setServerName("MessagePushServer");
+        		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+        		mqRequestEntity.setParam(timerMap);
+        		
+        		mqRequestEntity.setFunctionName("processCourseStartShortNoticeUpdate");
+        		this.mqUtils.sendMessage(mqRequestEntity);
+        		
+        		mqRequestEntity.setFunctionName("processCourseNotStartUpdate");
+        		this.mqUtils.sendMessage(mqRequestEntity);
+        		
+        		mqRequestEntity.setFunctionName("processCourseStartLongNoticeUpdate");
+        		this.mqUtils.sendMessage(mqRequestEntity);
+
+        		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNoticeUpdate");
+        		this.mqUtils.sendMessage(mqRequestEntity);
+        		
+                mqRequestEntity.setFunctionName("processCourseStartLecturerNotShowUpdate");
+                mqUtils.sendMessage(mqRequestEntity);
+        		
+                long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
+                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());                    
+                Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                TemplateData first = new TemplateData();
+                first.setColor("#000000");
+                first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first"));
+                templateMap.put("first", first);
+                
+                TemplateData wuliu = new TemplateData();
+                wuliu.setColor("#000000");
+                wuliu.setValue(course.get("course_title").toString());
+                templateMap.put("keyword1", wuliu);    
+
+                TemplateData name = new TemplateData();
+                name.setColor("#000000");
+                name.setValue("修改部分课程信息！");
+                templateMap.put("keyword2", name);
+                
+                TemplateData orderNo = new TemplateData();
+                orderNo.setColor("#000000");
+                orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(original_start_time)) , "yyyy-MM-dd HH:mm:ss"));
+                templateMap.put("keyword3", orderNo);
+                
+                TemplateData nowDate = new TemplateData();
+                nowDate.setColor("#000000");
+                nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
+                templateMap.put("keyword4", nowDate);
+                
+                TemplateData remark = new TemplateData();
+                remark.setColor("#000000");
+                remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark"));
+                templateMap.put("remark", remark);
+                //TODO 推送多人  报名的所有人
+                List<Map<String,Object>> userInfo = lectureModuleServer.findCourseStudentListWithLoginInfo(course_id);
+                String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id");
+                if (!MiscUtils.isEmpty(userInfo)) {
+                    weiPush(userInfo, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
+                }
+            }
+
+            resultMap.put("update_time", updateCacheMap.get("update_time"));
+        }
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
     /**
@@ -1075,6 +1051,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	if(courseInfoMap==null){
             		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
             	}
+            	MiscUtils.courseTranferState(currentTime, courseInfoMap);
             	courseList.add(courseInfoMap);
             	lastCourse = courseInfoMap;
             }
@@ -1724,7 +1701,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
     	Map<String, Object> queryMap = new HashMap<>();
     	if(studentList.size()< pageCount){
-    		Set<Tuple> allBanUserIdList = jedis.zrangeByScoreWithScores(bandKey, "+inf", "-inf");
+    		Set<Tuple> allBanUserIdList = jedis.zrangeByScoreWithScores(bandKey, "-inf", "+inf");
     		List<String> banUserIdList = new LinkedList<String>();
     		if(!MiscUtils.isEmpty(allBanUserIdList)){
     			for(Tuple tuple:allBanUserIdList){

@@ -283,7 +283,7 @@
 				<outputs>
 					<param name="message_list" type="list">
 						<param name="creator_avatar_address" type="string"/>
-						<param name="creator_nick_name" type="string"/>
+						<param name="creator_nick_name" type="rstring"/>
 						<param name="message_pos" type="long"/>
 						<param name="message_id" type="string"/>
 						<param name="message_type" type="string"/>
@@ -475,7 +475,7 @@
 				<outputs>
 					<param name="distributer_num" type="long"/>
 					<param name="distributer_list" type="list">
-						<param name="nick_name" type="string"/>
+						<param name="nick_name" type="rstring"/>
 						<param name="avatar_address" type="string"/>
 						<param name="room_id" type="string"/>
 						<param name="distributer_id" type="string"/>

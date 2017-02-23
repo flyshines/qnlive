@@ -120,6 +120,9 @@
       </if>
     </set>
     where trade_id = #{trade_id,jdbcType=VARCHAR}
+    <if test="status != null" >
+        and status != #{status}
+    </if>
     <if test="last_update_time != null" >
        and update_time=#{last_update_time}
     </if>
