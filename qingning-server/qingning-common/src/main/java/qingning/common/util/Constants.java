@@ -12,6 +12,7 @@ public final class Constants {
 	
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
+	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 	
 	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
@@ -126,6 +127,8 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
 	
 	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
+	
+	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";
 	
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";

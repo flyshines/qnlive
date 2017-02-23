@@ -1,6 +1,7 @@
 package qingning.lecture.server.other;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.ILectureModuleServer;
 
@@ -17,7 +18,14 @@ public class ReadUserOperation implements CommonReadOperation {
     @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        return lectureModuleServer.findUserInfoByUserId(reqMap.get("user_id").toString());
+    	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        String userId =(String)reqMap.get("user_id");
+        Object  result = null;
+        if(Constants.SYS_READ_USER_COURSE_LIST.equals(requestEntity.getFunctionName())){
+        	result = lectureModuleServer.findCourseIdByStudent(reqMap);
+        } else {
+        	result = lectureModuleServer.findUserInfoByUserId(userId);
+        }
+        return result;
     }
 }

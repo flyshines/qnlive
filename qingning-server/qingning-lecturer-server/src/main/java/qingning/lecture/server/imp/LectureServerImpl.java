@@ -1118,7 +1118,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
             }
         }
-        
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        RequestEntity queryOperation = generateRequestEntity(null, null, null, query);
+        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+		
+		final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+        for(Map<String,String> courseInfo:courseList){
+        	String courseId = courseInfo.get("course_id");
+        	if(jedis.sismember(key, courseId)){
+        		courseInfo.put("student", "Y");
+        	} else {
+        		courseInfo.put("student", "N");
+        	}
+        }
         
 /*        List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"),(String)reqMap.get("course_id"), 
                 (Long)reqMap.get("query_time"), false, true);*/
@@ -2366,6 +2379,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
             }
         }
+        
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        RequestEntity queryOperation = generateRequestEntity(null, null, null, query);
+        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+		
+		final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+        for(Map<String,String> courseInfo:courseList){
+        	String courseId = courseInfo.get("course_id");
+        	if(jedis.sismember(key, courseId)){
+        		courseInfo.put("student", "Y");
+        	} else {
+        		courseInfo.put("student", "N");
+        	}
+        }
+        
         return courseList;
     }
     

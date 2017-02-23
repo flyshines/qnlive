@@ -907,7 +907,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					}
 				}
 				Map<String,Object> handleResultMap = commonModuleServer.handleWeixinPayResult(requestValues);
-
+				
+				query.clear();
+		        query.put(Constants.CACHED_KEY_USER_FIELD, userId);		        
+				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+				jedis.del(key);
                 //3.处理缓存中的数据
                 //3.4如果是购买课程，且存在分销行为，则进行相关缓存处理
                 long lecturerProfit = 0L;
@@ -1418,6 +1422,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						values.put("effective_time", null);
 					}
 				}
+				
+		        Map<String,Object> query = new HashMap<String,Object>();
+		        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+		        queryOperation = generateRequestEntity(null, null, null, query);
+		        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+				
+				final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+		        for(Map<String,Object> courseInfo:course_list){
+		        	String courseId = (String)courseInfo.get("course_id");
+		        	if(jedis.sismember(key, courseId)){
+		        		courseInfo.put("student", "Y");
+		        	} else {
+		        		courseInfo.put("student", "N");
+		        	}
+		        }
 			} else {
 				course_list = new LinkedList<Map<String,Object>>(); 
 			}

@@ -77,6 +77,14 @@
     where course_id = #{course_id} and user_id = #{user_id} limit 1
   </select>
   
+  <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
+  	select course_id, student_pos from t_courses_students where user_id=#{user_id}
+  	<if test="student_pos != null">
+  	   and student_pos <![CDATA[ < ]]> #{student_pos}
+  	</if> 
+  	order by student_pos limit #{size}
+  </select>
+  
   <insert id="insertStudent" parameterType="hashmap" >
     insert into t_courses_students
     <trim prefix="(" suffix=")" suffixOverrides="," >

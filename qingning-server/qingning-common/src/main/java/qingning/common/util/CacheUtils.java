@@ -114,9 +114,56 @@ public final class CacheUtils {
 		return result;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
 		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
+		if(!MiscUtils.isEmpty(result)){
+			Jedis jedis = jedisUtils.getJedis();
+			Map<String,Object> query = new HashMap<String,Object>();
+			query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+			final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+			if(jedis.exists(key)){
+				jedis.expire(key, 60*60*72);
+			} else {
+				RequestEntity entity = new RequestEntity();
+				entity.setFunctionName(Constants.SYS_READ_USER_COURSE_LIST);
+				entity.setParam(query);
+				query.put("size", Constants.MAX_QUERY_LIMIT);	
+				final Set<String> userCourseSet = new HashSet<String>();
+				int readCount = 0;
+				long student_pos=0;
+				do{
+					if(student_pos>0){
+						query.put("student_pos", student_pos);
+					}
+					List<Map<String,Object>> list = (List<Map<String,Object>>)operation.invokeProcess(entity);
+					if(!MiscUtils.isEmpty(list)){
+						readCount = list.size();
+						for(Map<String,Object> course:list){
+							userCourseSet.add((String)course.get("course_id"));
+							student_pos = MiscUtils.convertObjectToLong(course.get("student_pos"));
+						}
+					} else {
+						readCount = 0;
+					}
+					
+					
+				} while(readCount==Constants.MAX_QUERY_LIMIT);				
+				if(!MiscUtils.isEmpty(userCourseSet)){
+					((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+						@Override
+						public void batchOperation(Pipeline pipeline, Jedis jedis) {
+							for(String courseId:userCourseSet){
+								pipeline.sadd(key, courseId);
+							}
+							pipeline.sync();
+						}						
+					});
+					jedis.expire(key, 60*60*72);
+				}
+			}
+		}
 		return result;
 	}
 	

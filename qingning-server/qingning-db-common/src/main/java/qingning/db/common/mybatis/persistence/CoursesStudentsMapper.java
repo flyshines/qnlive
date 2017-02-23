@@ -18,4 +18,6 @@ public interface CoursesStudentsMapper {
     List<Map<String,Object>> findCourseRecommendUsers(Map<String, Object> reqMap);
 
     Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
+    
+    List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 }
