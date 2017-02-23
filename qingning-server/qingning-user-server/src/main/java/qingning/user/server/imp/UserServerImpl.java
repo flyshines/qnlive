@@ -1284,7 +1284,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + MiscUtils.RecoveryEmoji(user.get("nick_name"));
 			String thirdContent = MiscUtils.RecoveryEmoji(courseInfoMap.get("course_remark"));
 			if(! MiscUtils.isEmpty(thirdContent)){
-				lastContent += "\n" + thirdContent;
+				lastContent += "\n" + MiscUtils.getConfigByKey("wpush_shop_course_brief") + thirdContent;
 			}
 			lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark");
 
