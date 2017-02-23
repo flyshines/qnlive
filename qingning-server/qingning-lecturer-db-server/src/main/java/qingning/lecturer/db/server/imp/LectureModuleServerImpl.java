@@ -376,6 +376,32 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		roomDistributerDetails.put("create_time", date);
 		roomDistributerDetails.put("status", "0");
 		roomDistributerDetailsMapper.insertRoomDistributerDetails(roomDistributerDetails);
+		
+		String lastRoomDistributerDetailsId = reqMap.get("last_room_distributer_details_id");
+		String lastRecommendNum = reqMap.get("last_recommend_num");
+		String lastDoneNum = reqMap.get("last_done_num");
+		String lastTotalAmount = reqMap.get("last_total_amount");
+		String lastCourseNum = reqMap.get("last_course_num");
+		if(!MiscUtils.isEmpty(lastRoomDistributerDetailsId)){
+			roomDistributerDetails = new HashMap<String,Object>();
+			if(!MiscUtils.isEmpty(lastRecommendNum)){
+				roomDistributerDetails.put("recommend_num", lastRecommendNum);
+			}
+			if(!MiscUtils.isEmpty(lastDoneNum)){
+				roomDistributerDetails.put("done_num", lastDoneNum);
+			}
+			if(!MiscUtils.isEmpty(lastTotalAmount)){
+				roomDistributerDetails.put("total_amount", lastTotalAmount);
+			}
+			if(!MiscUtils.isEmpty(lastCourseNum)){
+				roomDistributerDetails.put("course_num", lastCourseNum);
+			}
+			if(!MiscUtils.isEmpty(roomDistributerDetails)){
+				roomDistributerDetails.put("room_distributer_details_id", lastRoomDistributerDetailsId);
+				roomDistributerDetailsMapper.updateRoomDistributerDetails(roomDistributerDetails);
+			}
+		}
+		
 		Map<String,Object> resultMap = new HashMap<>();
 		resultMap.put("now", date);
 		return resultMap;
