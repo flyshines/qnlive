@@ -480,6 +480,7 @@
 						<param name="total_amount" type="double"/>
 						<param name="recommend_num" type="long"/>
 						<param name="done_num" type="long"/>
+						<param name="rq_code" type="string"/>
 						<param name="profit_share_rate" type="double"/>
 						<param name="effective_time" type="string" convert="(effective_time)=>{
 						    var result='';

@@ -1895,7 +1895,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(list==null){
         	list = new LinkedList<Map<String,Object>>();
         }
-        result.put("distributer_num", list);        
+        result.put("distributer_list", list);
         return result;
     }
     
