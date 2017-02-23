@@ -1869,6 +1869,40 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(distributer_num>0){
         	list = lectureModuleServer.findDistributionRoomByLectureInfo(reqMap);
         	if(!MiscUtils.isEmpty(list)){
+        		final List<Map<String,Object>>  listInfo=list;
+        		((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+					@Override
+					public void batchOperation(Pipeline pipeline, Jedis jedis) {
+		        		Map<String,Response<Map<String,String>>> roomInfo = new HashMap<String,Response<Map<String,String>>>();		        		
+		        		for(Map<String,Object> values:listInfo){
+		        			Map<String,Object> queryParam = new HashMap<String,Object>();
+		        			queryParam.put("distributer_id", values.get("distributer_id"));
+		        			queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
+		        			String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+		        			if(!roomInfo.containsKey(roomKey)){
+		        				roomInfo.put(roomKey, pipeline.hgetAll(roomKey));
+		        			}
+		        		}
+		        		pipeline.sync();
+		        		for(Map<String,Object> values:listInfo){		        			
+		        			Map<String,Object> queryParam = new HashMap<String,Object>();
+		        			queryParam.put("distributer_id", values.get("distributer_id"));
+		        			queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
+		        			String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+		        			Response<Map<String,String>> response = roomInfo.get(roomKey);
+		        			if(response!=null && response.get() != null){
+		        				Map<String,String> curRoomInfo = response.get();
+		        				if(MiscUtils.isEqual(values.get("room_distributer_details_id"),curRoomInfo.get("room_distributer_details_id"))){
+									values.put("recommend_num", curRoomInfo.get("last_recommend_num"));
+									values.put("done_num", curRoomInfo.get("last_done_num"));
+									values.put("total_amount", curRoomInfo.get("last_total_amount"));
+		        				}
+		        			}
+		        		}		        		
+					}        			
+        		});
+
+        		
         		Map<String,Object> query = new HashMap<String,Object>();
         		RequestEntity entity= generateRequestEntity(null, null, null, query);
         		for(Map<String,Object> values:list){

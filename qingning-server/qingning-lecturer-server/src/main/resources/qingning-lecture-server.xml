@@ -431,7 +431,7 @@
 						<param name="profit_type" type="string"/>
 						<param name="profit_amount" type="double" default="0"/>
 						<param name="profit_desc" type="string" convert="(profit_type,student,distributer)=>{
-							var ret = student;
+							var ret = utils.RecoveryEmoji(student);
 							if(!utils.isEqual(profit_type,'1')){
 								if(!utils.isEmpty(distributer)){
 								   ret = utils.RecoveryEmoji(student)+'通过'+utils.RecoveryEmoji(distributer)+'的分销';

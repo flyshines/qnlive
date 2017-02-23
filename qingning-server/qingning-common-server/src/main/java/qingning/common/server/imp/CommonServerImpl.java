@@ -1208,8 +1208,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 					Map<String,Response<Map<String,String>>> latestInfo = new HashMap<String,Response<Map<String,String>>>();
 					Map<String,Response<String>> lecturerName = new HashMap<String,Response<String>>();
 					Map<String,Response<String>> lecturerAvatar = new HashMap<String,Response<String>>();
-					
-					long currentTime = MiscUtils.getEndDateOfToday().getTime();
+										
 					for(Map<String,Object> values: detailsList){
 						String roomid = (String)values.get("room_id");
 						String lecturerId = (String)values.get("lecturer_id");
@@ -1225,12 +1224,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 							lecturerAvatar.put(lecturerId, pipeline.hget(lecturerKey, "avatar_address"));
 							paymentCourseMap.put(lecturerId, pipeline.hget(lecturerKey, "pay_course_num"));
 						}
-						long endDate = MiscUtils.convertObjectToLong(values.get("end_date"));
-						if(endDate == 0 || endDate >= currentTime){
-							queryParam.put("distributer_id", values.get("distributer_id"));
-							queryParam.put(Constants.FIELD_ROOM_ID, roomid);							
-							String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
-							latestInfo.put((String)values.get("room_distributer_details_id"), pipeline.hgetAll(roomKey));
+						
+						queryParam.put("distributer_id", values.get("distributer_id"));
+						queryParam.put(Constants.FIELD_ROOM_ID, roomid);							
+						String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+						if(!latestInfo.containsKey(roomKey)){
+							latestInfo.put(roomKey, pipeline.hgetAll(roomKey));
 						}
 					}
 					pipeline.sync();
@@ -1241,22 +1240,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 						if(roomName!=null){
 							values.put("room_name", roomName.get());
 						}
-						Response<Map<String,String>> lastInfoDetails = latestInfo.get(values.get("room_distributer_details_id"));
-						if(lastInfoDetails!=null){
-							Map<String,String> details = lastInfoDetails.get();
-							//values.put("course_num", details.get("last_course_num"));							
-							values.put("recommend_num", details.get("last_recommend_num"));
-							values.put("done_num", details.get("last_done_num"));
-							values.put("total_amount", details.get("last_total_amount"));
+						
+						queryParam.put("distributer_id", values.get("distributer_id"));
+						queryParam.put(Constants.FIELD_ROOM_ID, roomid);							
+						String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
+						Response<Map<String,String>> response = latestInfo.get(roomKey);
+						if(response !=null ){
+							Map<String,String> curRoomInfo = response.get();
+							if(curRoomInfo !=null && MiscUtils.isEqual(values.get("room_distributer_details_id"),curRoomInfo.get("room_distributer_details_id"))){
+								values.put("recommend_num", curRoomInfo.get("last_recommend_num"));
+								values.put("done_num", curRoomInfo.get("last_done_num"));
+								values.put("total_amount", curRoomInfo.get("last_total_amount"));
+	        				}
 						}
 						
 						long courseNum = 0l;
 						if(lecturerName.containsKey(lecturerId)){
 							values.put("nick_name", lecturerName.get(lecturerId).get());
 							values.put("avatar_address", lecturerAvatar.get(lecturerId).get());
-							Response<String> response = paymentCourseMap.get(lecturerId);
-							if(response != null){
-								courseNum = MiscUtils.convertObjectToLong(response.get());
+							Response<String> responseStr = paymentCourseMap.get(lecturerId);
+							if(responseStr != null){
+								courseNum = MiscUtils.convertObjectToLong(responseStr.get());
 							}
 						}
 						values.put("course_num", courseNum);
