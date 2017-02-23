@@ -175,8 +175,8 @@ public class CommonController extends AbstractController {
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
         String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
-        authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
-        response.sendRedirect(authorization_url);
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
+        response.sendRedirect(authorizationUrl);
         return ;
     }
 
