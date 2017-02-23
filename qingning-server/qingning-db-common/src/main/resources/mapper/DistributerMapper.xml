@@ -7,10 +7,14 @@
   
   <select id="findDistributionInfoByDistributerId" resultType="hashmap" parameterType="hashmap" >
     select a.*,b.nick_name,b.avatar_address from t_room_distributer a, t_user b 
-    where a.distributer_id=#{distributer_id} and a.lecturer_id=b.user_id
+    where a.distributer_id=#{distributer_id}  and a.lecturer_id=b.user_id
+	<if test="rq_code != null">
+		  and  a.rq_code =#{rq_code}
+	</if>
     <if test="room_id != null" >
 		and a.room_id = #{room_id}
 	</if>
+
 	<if test="create_time != null" >
 		and a.create_time<![CDATA[<]]>#{create_time} 
 	</if>

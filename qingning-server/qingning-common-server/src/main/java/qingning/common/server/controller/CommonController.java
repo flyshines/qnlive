@@ -464,11 +464,16 @@ public class CommonController extends AbstractController {
     @RequestMapping(value="/common/distribution/room/{room_id}/share",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getRoomDistributionShareInfo(
     		@PathVariable("room_id") String room_id,
+            @RequestParam(value="rq_code") String rq_code,
     		@RequestHeader("access_token") String access_token,
     		@RequestHeader("version") String version) throws Exception{
+        if(rq_code == "" || "".equals(rq_code))
+            throw new QNLiveException("120012");
+
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributionShareInfo", access_token, version);
     	Map<String, Object> param = new HashMap<String, Object>();
-        param.put("room_id", room_id);           
+        param.put("room_id", room_id);
+        param.put("rq_code",rq_code);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
