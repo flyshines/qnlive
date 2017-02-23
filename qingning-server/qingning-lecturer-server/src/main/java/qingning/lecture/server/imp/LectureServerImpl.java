@@ -1725,7 +1725,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
     	Map<String, Object> queryMap = new HashMap<>();
     	if(studentList.size()< pageCount){
-    		Set<Tuple> allBanUserIdList = jedis.zrangeByScoreWithScores(bandKey, "+inf", "-inf");
+    		Set<Tuple> allBanUserIdList = jedis.zrangeByScoreWithScores(bandKey, "-inf", "+inf");
     		List<String> banUserIdList = new LinkedList<String>();
     		if(!MiscUtils.isEmpty(allBanUserIdList)){
     			for(Tuple tuple:allBanUserIdList){

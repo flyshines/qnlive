@@ -1591,7 +1591,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 						Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
 						if(! MiscUtils.isEmpty(userMap)){
 							if(userMap.get("nick_name") != null){
-								messageMap.put("creator_nick_name", userMap.get("nick_name"));
+								messageMap.put("creator_nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
 							}
 							if(userMap.get("avatar_address") != null){
 								messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
