@@ -1075,6 +1075,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	if(courseInfoMap==null){
             		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
             	}
+            	MiscUtils.courseTranferState(currentTime, courseInfoMap);
             	courseList.add(courseInfoMap);
             	lastCourse = courseInfoMap;
             }

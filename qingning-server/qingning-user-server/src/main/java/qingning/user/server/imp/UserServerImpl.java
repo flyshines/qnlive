@@ -1049,6 +1049,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             	if(courseInfoMap==null){
             		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
             	}
+            	MiscUtils.courseTranferState(currentTime, courseInfoMap);
             	courseList.add(courseInfoMap);
             	lastCourse = courseInfoMap;
             }
@@ -1093,8 +1094,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());   
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        RequestEntity queryOperation = generateRequestEntity(null, null, null, query);
+        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+		
+		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+		
         for(Map<String,String> course:courseList){
+        	String courseId = course.get("course_id");
+        	if(jedis.sismember(key, courseId)){
+        		course.put("student", "Y");
+        	} else {
+        		course.put("student", "N");
+        	}
         	if("2".equals(course.get("status"))){
         		if(course.get("end_time")==null){
         			course.put("query_time", course.get("start_time"));

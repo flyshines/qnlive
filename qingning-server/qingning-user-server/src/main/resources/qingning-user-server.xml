@@ -132,6 +132,7 @@
 						<param name="position" type="long"/>
 						<param name="course_amount" type="double"/>
 						<param name="student_num" type="long"/>
+						<param name="student" type="string"/>
 					</param>
 				</outputs>
 			</function>
