@@ -319,6 +319,7 @@
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"/>
+					<param name="rq_code" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
 					<param name="nick_name" type="rstring"/>

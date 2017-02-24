@@ -284,7 +284,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	String lectureId = liveRoomMap.get("lecturer_id");
         	Map<String,Object> query = new HashMap<String,Object>();
         	query.put("room_id", roomId);
-        	query.put("room_id", lectureId);
+        	query.put("lecturer_id", lectureId);
         	RequestEntity entity = this.generateRequestEntity(null, null, Constants.SYS_READ_LAST_COURSE, query);
         	Map<String,String> courseInfo = CacheUtils.readLastCourseOfTheRoom(roomId, lectureId, entity, readCourseOperation, jedisUtils);
         	long amount = 0l;

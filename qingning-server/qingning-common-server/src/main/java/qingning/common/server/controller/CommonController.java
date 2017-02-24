@@ -10,6 +10,7 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
+import qingning.common.util.CreateRqPage;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
@@ -467,8 +468,6 @@ public class CommonController extends AbstractController {
             @RequestParam(value="rq_code") String rq_code,
     		@RequestHeader("access_token") String access_token,
     		@RequestHeader("version") String version) throws Exception{
-        if(rq_code == "" || "".equals(rq_code))
-            throw new QNLiveException("120012");
 
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "roomDistributionShareInfo", access_token, version);
     	Map<String, Object> param = new HashMap<String, Object>();
@@ -478,6 +477,7 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
 
 
     /**
@@ -581,6 +581,36 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+    /**
+     * 获取qr_code
+     * @param response servlet请求
+     * @param request 返回
+     * @param query_type 请求那种状态 如果是0 那么就是请求课程 如果是 1 那么就请求直播间
+     * @param id 具体的id
+     * @param access_token 安全证书
+     * @param version 版本号
+     * @return 返回ResponseEntity
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/getqr_code",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getQr_Code(
+            HttpServletResponse response,HttpServletRequest request,
+            @RequestParam(value="query_type",defaultValue="") String query_type,
+            @RequestParam(value="id",defaultValue="") String id,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getShareInfo", access_token, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("query_type", query_type);
+        param.put("id", id);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+
+        return responseEntity;
+    }
+
+
 
     /**
      * 直播间中的分销课程的推荐用户列表

@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -134,7 +135,19 @@ public class JGMsgUtil {
 	}
 
 	public static void main(String[] args) {
-		// sendMsg(null,null,"推送测试数据");
-	}
+		System.out.println("发送推送"+"  执行时间"+System.currentTimeMillis());
+		JSONObject obj = new JSONObject();
+		obj.put("body","单次直播最长1440分钟，您已直播1430分钟，还剩10分钟");
+		obj.put("to","000054dea56b56d34535a8f5e529ad53327b");//courseMap.get("lecturer_id")
+		obj.put("msg_type","4");
+		Map<String,String> extrasMap = new HashMap<>();
+		extrasMap.put("msg_type","4");
+		extrasMap.put("course_id","0000df343ef902404d74b4b8a62394e9f69c");//courseId
+		extrasMap.put("im_course_id","424");//im_course_id
+		obj.put("extras_map", extrasMap);
+		JPushHelper.push(obj);
+
+		};
+
 
 }
