@@ -80,7 +80,7 @@
 					<param name="student_num" type="long"/>
 					<param name="student_list" type="list"/>					
 					<param name="avatar_address" type="string"/>
-					<param name="room_name" type="string"/>
+					<param name="room_name" type="rstring"/>
 					<param name="room_remark" type="rstring"/>
 					<param name="course_remark" type="rstring"/>
 					<param name="room_id" type="string"/>
@@ -192,8 +192,8 @@
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
 					<param name="course_update_time" type="long"/>
-					<param name="course_title" type="string"/>
-					<param name="lecturer_nick_name" type="string"/>
+					<param name="course_title" type="rstring"/>
+					<param name="lecturer_nick_name" type="rstring"/>
 					<param name="lecturer_avatar_address" type="string"/>
 					<param name="course_url" type="string"/>
 				</outputs>
@@ -224,7 +224,7 @@
 					<param name="student_num" type="string"/>
 					<param name="student_list" type="list">
 						<param name="avatar_address" type="string"/>
-						<param name="nick_name" type="string"/>
+						<param name="nick_name" type="rstring"/>
 						<param name="student_pos" type="string"/>
 						<param name="create_time" type="long"/>
 						<param name="student_pos" type="long"/>
@@ -251,13 +251,13 @@
 							if(!utils.isEqual(profit_type,'0')){
 								return '';
 							}
-							return course_title;
+							return utils.RecoveryEmoji(course_title);
 						}"/>
 						<param name="lecturer_name" type="string" convert="(lecturer_name,profit_type)=>{
 							if(!utils.isEqual(profit_type,'1')){
 								return '';
 							}
-							return lecturer_name;
+							return utils.RecoveryEmoji(lecturer_name);
 						}"/>
 					</param>
 				</outputs>
