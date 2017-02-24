@@ -983,6 +983,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
                     jedis.hincrBy(lecturerKey,"room_done_num",1);
+                    if(!MiscUtils.isEmpty(distributeRoom)){
+                    	jedis.hincrBy(lecturerKey,"room_distributer_done_num",1);
+                    }
                 }
                 jedis.hincrBy(lecturerKey, "total_amount", lecturerProfit);
                 jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id"));
@@ -1388,7 +1391,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String room_id = (String)reqMap.get("room_id");
         String rq_code = (String)reqMap.get("rq_code");
-        reqMap.put("distributer_id", userId);
+        String distributer_id = (String)reqMap.get("distributer_id");
+        if(MiscUtils.isEmpty(distributer_id)){
+        	reqMap.put("distributer_id", userId);
+        } else {
+        	reqMap.put("distributer_id", distributer_id);
+        }
         Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
         if(MiscUtils.isEmpty(distributer)){
             throw new QNLiveException("120012");

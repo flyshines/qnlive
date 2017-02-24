@@ -398,6 +398,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			}
 			if(!MiscUtils.isEmpty(roomDistributerDetails)){
 				roomDistributerDetails.put("room_distributer_details_id", lastRoomDistributerDetailsId);
+				roomDistributerDetails.put("status", "1");
 				roomDistributerDetailsMapper.updateRoomDistributerDetails(roomDistributerDetails);
 			}
 		}

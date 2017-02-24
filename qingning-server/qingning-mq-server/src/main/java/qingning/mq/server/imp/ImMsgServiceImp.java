@@ -139,7 +139,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 		String message_question = stringMap.get("message_question");
 		if(!MiscUtils.isEmpty(message_question)){
-			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message));
+			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
 		}
 		stringMap.put("message_id", messageId);
 		jedis.hmset(messageKey, stringMap);

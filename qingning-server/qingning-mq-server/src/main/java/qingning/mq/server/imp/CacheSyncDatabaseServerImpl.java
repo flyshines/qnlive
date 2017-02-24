@@ -195,7 +195,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        		lecturerDistributionInfo.put("course_distributer_num", MiscUtils.convertObjectToLong(values.get("course_distributer_num")));
 		        		lecturerDistributionInfo.put("course_recommend_num", MiscUtils.convertObjectToLong(values.get("course_recommend_num")));
 		        		lecturerDistributionInfo.put("course_done_num", MiscUtils.convertObjectToLong(values.get("course_done_num")));
-		        	
+		        		lecturerDistributionInfo.put("room_distributer_done_num", MiscUtils.convertObjectToLong(values.get("room_distributer_done_num")));
+		        		lecturerDistributionInfo.put("course_distributer_done_num", MiscUtils.convertObjectToLong(values.get("course_distributer_done_num")));
 		        		lecturerDistributionInfoMapper.updateLecturerDistributionInfo(lecturerDistributionInfo);
 		        	} catch (Exception e){
 		        		errorIds.add(lecturerId);

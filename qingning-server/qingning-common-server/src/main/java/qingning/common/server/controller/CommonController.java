@@ -412,6 +412,7 @@ public class CommonController extends AbstractController {
     public @ResponseBody ResponseEntity getRoomDistributionInfo(
     		@PathVariable("room_id") String room_id,
     		@PathVariable("rq_code") String rq_code,
+    		@RequestParam("distributer_id") String distributer_id,
     		@RequestParam(value="page_count",defaultValue="20") String page_count,
     		@RequestParam(value="start_time",defaultValue="") String start_time,
     		@RequestHeader("access_token") String access_token,
@@ -420,6 +421,7 @@ public class CommonController extends AbstractController {
     	Map<String, Object> param = new HashMap<String, Object>();
         param.put("room_id", room_id);
         param.put("rq_code", rq_code);
+        param.put("distributer_id", distributer_id);
         param.put("start_time", start_time);
         param.put("page_count", page_count);        
         requestEntity.setParam(param);
