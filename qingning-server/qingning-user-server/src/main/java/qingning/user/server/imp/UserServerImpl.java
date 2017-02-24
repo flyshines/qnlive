@@ -771,7 +771,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             
             if (! MiscUtils.isEmpty(roomDistributer)) {
                roles.add("4");
-                resultMap.put("rq_code",infoMap.get("rq_code"));
+                resultMap.put("rq_code",roomDistributer.get("rq_code"));
             }else {
                roles.add("1");
             }
