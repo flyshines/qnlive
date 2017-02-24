@@ -2218,7 +2218,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //在缓存中删除旧的RQCode，插入新的RQCode
         String oldRQcode = distributerRoom.get("rq_code");
-        Map<String,Object> queryParam = new HashMap<String,Object>();
+        queryParam.clear();
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
         String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
         jedis.del(oldRQcodeKey);
