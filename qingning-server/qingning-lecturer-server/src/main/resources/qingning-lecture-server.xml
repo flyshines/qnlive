@@ -457,10 +457,12 @@
 					<param name="room_distributer_num" type="long" default="0"/>
 					<param name="room_recommend_num" type="long" default="0"/>
 					<param name="room_done_num" type="long" default="0"/>
-					<param name="course_distribution_num" type="long" default="0"/>
+					<param name="room_done_num" type="long" default="0"/>
+					<param name="room_distributer_done_num" type="long" default="0"/>
 					<param name="course_distributer_num" type="long" default="0"/>
 					<param name="course_recommend_num" type="long" default="0"/>
 					<param name="course_done_num" type="long" default="0"/>
+					<param name="course_distributer_done_num" type="long" default="0"/>
 				</outputs>
 			</function>
 			<function name="roomDistributerInfo">

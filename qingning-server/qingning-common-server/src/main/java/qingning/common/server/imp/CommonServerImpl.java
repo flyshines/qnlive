@@ -983,6 +983,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
                     jedis.hincrBy(lecturerKey,"room_done_num",1);
+                    if(!MiscUtils.isEmpty(distributeRoom)){
+                    	jedis.hincrBy(lecturerKey,"room_distributer_done_num",1);
+                    }
                 }
                 jedis.hincrBy(lecturerKey, "total_amount", lecturerProfit);
                 jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id"));

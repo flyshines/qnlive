@@ -111,6 +111,12 @@
       <if test="update_time != null" >
         update_time = #{update_time},
       </if>
+      <if test="room_distributer_done_num != null" >
+        room_distributer_done_num = #{room_distributer_done_num},
+      </if>
+      <if test="course_distributer_done_num != null" >
+        course_distributer_done_num = #{course_distributer_done_num},
+      </if>      
     </set>
     where lecturer_id = #{lecturer_id}
     <if test="last_update_time != null" >
