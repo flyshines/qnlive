@@ -225,6 +225,7 @@
 				<inputs>
 					<param name="page_count" type="int"/>
 					<param name="start_time" type="Date"/>
+					<param name="distributer_id" type="string"/>
 					<param name="room_id" type="string"/>
 				</inputs>
 				<outputs>

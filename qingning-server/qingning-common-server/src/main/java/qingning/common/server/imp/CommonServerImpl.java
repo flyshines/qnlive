@@ -1391,7 +1391,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String room_id = (String)reqMap.get("room_id");
         String rq_code = (String)reqMap.get("rq_code");
-        reqMap.put("distributer_id", userId);
+        String distributer_id = (String)reqMap.get("distributer_id");
+        if(MiscUtils.isEmpty(distributer_id)){
+        	reqMap.put("distributer_id", userId);
+        } else {
+        	reqMap.put("distributer_id", distributer_id);
+        }
         Map<String,String> distributer = CacheUtils.readDistributer(userId, reqEntity, readDistributerOperation, jedisUtils, true);
         if(MiscUtils.isEmpty(distributer)){
             throw new QNLiveException("120012");
