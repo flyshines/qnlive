@@ -54,12 +54,13 @@
 					<param name="room_id" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="rq_code" type="string" />
 					<param name="avatar_address" type="string" />
 					<param name="room_name" type="rstring" />
 					<param name="room_remark" type="rstring" />					
 					<param name="fans_num" type="long" />
 					<param name="follow_status" type="string" />
-					<param name="roles" type="list" />					
+					<param name="roles" type="list" />
 				</outputs>
 			</function>
 
