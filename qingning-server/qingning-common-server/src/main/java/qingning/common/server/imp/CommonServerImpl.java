@@ -1518,7 +1518,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
-        return list.get(0);
+        String roomId = map.get("room_id").toString();
+        Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedisUtils,true);
+        map.put("avatar_address",liveRoomMap.get("avatar_address"));
+
+        return map;
     }
     
     @FunctionName("updateUserInfo")
