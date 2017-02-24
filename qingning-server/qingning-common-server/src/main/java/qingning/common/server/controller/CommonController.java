@@ -412,7 +412,7 @@ public class CommonController extends AbstractController {
     public @ResponseBody ResponseEntity getRoomDistributionInfo(
     		@PathVariable("room_id") String room_id,
     		@PathVariable("rq_code") String rq_code,
-    		@RequestParam("distributer_id") String distributer_id,
+    		@RequestParam(value="distributer_id", defaultValue="") String distributer_id,
     		@RequestParam(value="page_count",defaultValue="20") String page_count,
     		@RequestParam(value="start_time",defaultValue="") String start_time,
     		@RequestHeader("access_token") String access_token,
