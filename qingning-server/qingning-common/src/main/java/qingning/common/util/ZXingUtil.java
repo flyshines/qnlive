@@ -203,25 +203,16 @@ public class ZXingUtil {
     /**
      * 给图片添加文字水印
      * 
-     * @param pressText
-     *            水印文字
+     * @param pressText 水印文字
      * @param srcImageFile 源图像流
-     * @param fontName
-     *            水印的字体名称
-     * @param fontStyle
-     *            水印的字体样式
-     * @param color
-     *            水印的字体颜色
-     * @param fontSize
-     *            水印的字体大小
-     * @param x
-     *            修正值
-     * @param y
-     *            修正值
-     * @param alpha
-     *            透明度：alpha 必须是范围 [0.0, 1.0] 之内（包含边界值）的一个浮点数字
+     * @param fontName  水印的字体名称
+     * @param fontStyle 水印的字体样式
+     * @param color   水印的字体颜色
+     * @param fontSize 水印的字体大小
+     * @param x 修正值
+     * @param y   修正值
+     * @param alpha 透明度：alpha 必须是范围 [0.0, 1.0] 之内（包含边界值）的一个浮点数字
      * @param formatType  目标格式
-     *
      * @param flag 是否累计换回高度   默认false 不增加换行
      * @return
      */
@@ -270,6 +261,48 @@ public class ZXingUtil {
 //            ImageIO.write((BufferedImage) image, formatType, new File(destImageFile));// 输出到文件流
             return (BufferedImage) image;
            
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+		return null;
+    }
+    
+    
+    /**
+     * 给图片添加文字水印
+     * 
+     * @param pressText 水印文字
+     * @param srcImageFile 源图像流
+     * @param fontName  水印的字体名称
+     * @param fontStyle 水印的字体样式
+     * @param color   水印的字体颜色
+     * @param fontSize 水印的字体大小
+     * @param x 修正值
+     * @param y   修正值
+     * @param alpha 透明度：alpha 必须是范围 [0.0, 1.0] 之内（包含边界值）的一个浮点数字
+     * @param formatType  目标格式
+     * @param flag 是否累计换回高度   默认false 不增加换行
+     * @return
+     */
+    public final static BufferedImage pressText(String pressText,BufferedImage  srcImageFile, String fontName, int fontStyle, Color color,
+            int fontSize, int x, int y, float alpha,String formatType)
+    {
+        try
+        {
+        	Image src =	srcImageFile;
+            int width = src.getWidth(null);
+            int height = src.getHeight(null);
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = image.createGraphics();
+            g.drawImage(src, 0, 0, width, height, null);
+            g.setColor(color);
+            g.setFont(new Font(fontName, fontStyle, fontSize));
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,alpha));
+			g.drawString(pressText, (width - (getLength(pressText) * fontSize)) / 2 + x, (height - fontSize) / 2 + y);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.dispose();
+            return (BufferedImage) image;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -635,13 +668,13 @@ public class ZXingUtil {
 
         BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
 
-        BufferedImage pressText1 = pressText("直播间分销员邀请", pressText, "Courier", 1, Color.gray, 40, 0, -250, 1.0f, "png",true);
+        BufferedImage pressText1 = pressText("直播间分销员邀请", pressText, "Courier", 1, Color.gray, 40, 0, -260, 1.0f, "png",true);
 
-        BufferedImage pressText2 = pressText(userName+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -40, 1.0f, "png",false);
+        BufferedImage pressText2 = pressText(userName+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -80, 1.0f, "png",false);
 
-        BufferedImage pressText3 = pressText("成功推荐用户即可获得"+profit_share_rate+"%的提成", pressText2, "Courier", 1, Color.orange, 38, 0, -40, 1.0f, "png",false);
+        BufferedImage pressText3 = pressText("成功推荐用户即可获得"+profit_share_rate+"%的提成", pressText2, "Courier", 1, Color.orange, 38, 0, -30, 1.0f, "png",false);
 
-        BufferedImage pressText4 = pressText("长按识别二维码进入,即可成为直播间分销员", pressText3, "Courier", 1, Color.gray, 40, 0,560, 1.0f, "png",false);
+        BufferedImage pressText4 = pressText("长按识别二维码进入即可成为直播间分销员", pressText3, "Courier", 1, Color.gray, 30, 0,540, 1.0f, "png");
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
         BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
@@ -889,9 +922,14 @@ public class ZXingUtil {
 	    	//二维码内容
 	    	String qr_code_content="www.baidu.com";
 	    	long time = 1488160472302l;
+	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 0.03);
 	    	
-			createCoursePng(user_head_portrait, userName, qr_code_content, time);
-			createLivePng(user_head_portrait, userName, qr_code_content);;
+	    	  //生成的图片位置
+	    	String imagePath= "C:/Users/Administrator/Desktop/Imag.png";
+	        ImageIO.write(createRoomDistributerPng, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath));
+	        System.out.println("ok");
+//			createCoursePng(user_head_portrait, userName, qr_code_content, time);
+//			createLivePng(user_head_portrait, userName, qr_code_content);;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
