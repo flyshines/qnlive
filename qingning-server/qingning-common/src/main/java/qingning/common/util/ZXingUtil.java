@@ -611,14 +611,47 @@ public class ZXingUtil {
         convertImage = convertCircular(convertImage);
         int height= (int) (HEIGHT*0.03);
         BufferedImage waterMark2 = waterMark(pressText3, convertImage, WIDTH/2-head_portrait_size/2, height+10, 1.0f);
-        
-        //生成的图片位置
-//    	String imagePath= "C:/Users/Administrator/Desktop/createImag54.png";
-//      ImageIO.write(waterMark2, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath)); 
-//      ImageIO.write(bi, "jpg", response.getOutputStream());  
-//    	System.out.println("ok");
+
         return waterMark2;
     }
+
+    /**
+     * 生成 分销  图
+     * @return
+     * @throws Exception
+     */
+    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,double profit_share_rate) throws Exception{
+        BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        //镶嵌背景图  七牛云地址
+        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
+        //二维码的长宽
+        int qr_code_size= 270;
+        //用户头像的长宽
+        int head_portrait_size= 55*3;
+        //二维码
+        BufferedImage markImage = createImage(qr_code_content, "", qr_code_size, false);
+        //合成二维码后的图片
+        BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
+
+        BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
+
+        BufferedImage pressText1 = pressText("直播间分销员邀请", pressText, "Courier", 1, Color.gray, 40, 0, -250, 1.0f, "png",true);
+
+        BufferedImage pressText2 = pressText(userName+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -40, 1.0f, "png",false);
+
+        BufferedImage pressText3 = pressText("成功推荐用户即可获得"+profit_share_rate+"%的提成", pressText2, "Courier", 1, Color.orange, 38, 0, -40, 1.0f, "png",false);
+
+        BufferedImage pressText4 = pressText("长按识别二维码进入,即可成为直播间分销员", pressText3, "Courier", 1, Color.gray, 40, 0,560, 1.0f, "png",false);
+        //用户头像
+        BufferedImage url = getUrl(user_head_portrait);
+        BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
+        convertImage = convertCircular(convertImage);
+        int height= (int) (HEIGHT*0.03);
+        BufferedImage waterMark2 = waterMark(pressText4, convertImage, WIDTH/2-head_portrait_size/2, height+10, 1.0f);
+
+        return waterMark2;
+    }
+
     
     /**
      * 创建 课程 图片
