@@ -282,7 +282,7 @@ public class ZXingUtil {
      * @param y   修正值
      * @param alpha 透明度：alpha 必须是范围 [0.0, 1.0] 之内（包含边界值）的一个浮点数字
      * @param formatType  目标格式
-     * @param flag 是否累计换回高度   默认false 不增加换行
+     * @param fontSize 是否累计换回高度   默认false 不增加换行
      * @return
      */
     public final static BufferedImage pressText(String pressText,BufferedImage  srcImageFile, String fontName, int fontStyle, Color color,
@@ -591,8 +591,8 @@ public class ZXingUtil {
     /**
      * 缩放Image，此方法返回源图像按给定宽度、高度限制下缩放后的图像
      * @param inputImage
-     * @param maxWidth：压缩后宽度
-     * @param maxHeight：压缩后高度
+     * @param newWidth：压缩后宽度
+     * @param newHeight：压缩后高度
      * @throws java.io.IOException
      * return 
      */
@@ -612,13 +612,17 @@ public class ZXingUtil {
         graphics2d.dispose();
         return img;
     }
-    
+
     /**
-     * 生成 直播间  图
-     * @return 
+     * 直播间 分享
+     * @param user_head_portrait 头像
+     * @param userName 分享者 姓名
+     * @param lecturer_name 老师名称
+     * @param qr_code_content 二维码分享链接
+     * @return
      * @throws Exception
      */
-    public static BufferedImage createLivePng(String user_head_portrait,String userName,String qr_code_content) throws Exception{
+    public static BufferedImage createLivePng(String user_head_portrait,String userName,String lecturer_name,String qr_code_content) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
         bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
@@ -630,12 +634,12 @@ public class ZXingUtil {
         BufferedImage markImage = createImage(qr_code_content, "", qr_code_size, false);  
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
-        
+        //分享者
         BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
         
         BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -250, 1.0f, "png",true);
-      
-        BufferedImage pressText2 = pressText(userName+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -40, 1.0f, "png",false);
+        //老直播间
+        BufferedImage pressText2 = pressText(lecturer_name+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -40, 1.0f, "png",false);
         
         BufferedImage pressText3 = pressText("长按识别二维码进入直播间", pressText2, "Courier", 1, Color.black, 40, 0,560, 1.0f, "png",false);
         //用户头像
@@ -653,7 +657,7 @@ public class ZXingUtil {
      * @return
      * @throws Exception
      */
-    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,double profit_share_rate) throws Exception{
+    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Integer profit_share_rate) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
         bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
@@ -685,17 +689,18 @@ public class ZXingUtil {
         return waterMark2;
     }
 
-    
+
     /**
-     * 创建 课程 图片
-     * @param user_head_portrait 网络中的 用户头像地址
-     * @param userName 	 	用户名称
-     * @param qr_code_content 二维码内容
-     * @param time		上课时间时间戳
-     * @return 
+     * 分享课程
+     * @param user_head_portrait 分享者 用户头像
+     * @param userName  分享者名称
+     * @param course_name 课程名称
+     * @param qr_code_content 二维码链接
+     * @param time 时间
+     * @return 分会图片流
      * @throws Exception
      */
-    public static BufferedImage createCoursePng(String user_head_portrait,String userName,String qr_code_content,Long time) throws Exception{
+    public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,String qr_code_content,Long time) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
         bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
@@ -710,17 +715,17 @@ public class ZXingUtil {
         
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
-        
+        //名字
         BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
-        
-        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -250, 1.0f, "png",true);
-      
-        BufferedImage pressText2 = pressText("会情感化互动，教你绝佳的用户体验", pressText1, "Courier", 1, Color.black, 52, 0, -90, 1.0f, "png",false);
-        
+
+        BufferedImage pressText1 = pressText("推荐一个不错的课程", pressText, "Courier", 1, Color.black, 40, 0, -250, 1.0f, "png",true);
+        //课程名字
+        BufferedImage pressText2 = pressText(course_name, pressText1, "Courier", 1, Color.black, 52, 0, -90, 1.0f, "png",false);
+        //时间
         String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
         BufferedImage pressText3 = pressText("直播时间:"+format, pressText2, "Courier", 1, Color.black, 40, 0, 30, 1.0f, "png",false);
       
-        BufferedImage pressText4 = pressText("长按识别二维码进入直播间", pressText3, "Courier", 1, Color.black, 40, 0,560, 1.0f, "png",false);
+        BufferedImage pressText4 = pressText("长按图片,识别二维码进入直播间", pressText3, "Courier", 1, Color.black, 40, 0,560, 1.0f, "png",false);
         
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -728,11 +733,6 @@ public class ZXingUtil {
         convertImage = convertCircular(convertImage);
         int height= (int) (HEIGHT*0.03);
         BufferedImage waterMark2 = waterMark(pressText4, convertImage, WIDTH/2-head_portrait_size/2, height+10, 1.0f);
-        //生成的图片位置
-//    	String imagePath= "C:/Users/Administrator/Desktop/createCourseImag.png";
-//      ImageIO.write(waterMark2, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath)); 
-//      ImageIO.write(bi, "jpg", response.getOutputStream());  
-//    	System.out.println("ok");
     	return waterMark2;
     }
 
