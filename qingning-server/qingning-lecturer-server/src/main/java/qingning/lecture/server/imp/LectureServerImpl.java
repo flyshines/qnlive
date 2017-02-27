@@ -2357,7 +2357,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             pageCount=pageCount+1;
                         } else {
                             if(finishCourse.size() > pageCount){
-                                finishCourse.remove(courseList.size()-1);
+                                finishCourse.remove(finishCourse.size()-1);
                             }
                         }
                     } else if(!preDesc && finDesc){
