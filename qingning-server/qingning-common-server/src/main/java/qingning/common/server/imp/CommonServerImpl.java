@@ -2057,9 +2057,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String user_head_portrait = userMap.get("avatar_address");
         String userName = userMap.get("nick_name");
 
-
-
-        if(param.containsKey("room_id")){ //判断room_id 是否存在
+        if(param.containsKey("recommend_code")){
+            String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
+                    param.get("id"),
+                    param.get("room_id"),
+                    (Integer)param.get("profit_share_rate"),
+                    param.get("effective_time"));
+            BufferedImage room_live_png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url, (Integer)param.get("profit_share_rate"));//生成图片
+            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
+            return;
+        }else if(param.containsKey("room_id")){ //判断room_id 是否存在
             Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(param.get("room_id").toString(),null,readLiveRoomOperation,jedisUtils,true);//根据直播间id获取数据
             query.put("user_id",liveRoomMap.get("lecturer_id"));
             Map<String, String> lecturerMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
@@ -2074,16 +2081,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             BufferedImage room_live_png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
             ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
             return;
-        }else if(param.containsKey("recommend_code")){
-            String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
-                    param.get("id"),
-                    param.get("room_id"),
-                    (Integer)param.get("profit_share_rate"),
-                    param.get("effective_time"));
-            BufferedImage room_live_png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url, (Integer)param.get("profit_share_rate"));//生成图片
-            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
-            return;
-
         }
     }
 

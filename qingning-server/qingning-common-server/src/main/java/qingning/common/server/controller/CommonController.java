@@ -672,15 +672,15 @@ public class CommonController extends AbstractController {
     ) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
         Map<String, Object> param = new HashMap<>();
-        if(course_id != null)
+        if(!course_id.equals(""))
             param.put("course_id", course_id);
-        else if(room_id != null)
+        else if(!room_id.equals(""))
             param.put("room_id", room_id);
 
-       if(recommend_code != null)
+       if(!recommend_code.equals(""))
            param.put("recommend_code", recommend_code);
 
-       if(room_share_code != null){
+       if(!room_share_code.equals("")){
            param.put("recommend_code", recommend_code);
            param.put("profit_share_rate", profit_share_rate);
            param.put("effective_time", effective_time);
