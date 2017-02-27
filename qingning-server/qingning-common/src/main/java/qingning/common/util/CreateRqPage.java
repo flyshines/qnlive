@@ -23,9 +23,9 @@ public class CreateRqPage {
      * @param icon_img 展示头像图片
      * @param qr_url 名称
      * @param trunToUrl 扫描二维码后的跳转路径
-     * @param date 时间
+     * @param date 毫秒值 时间戳
      */
-    public static BufferedImage getQrCodeImage(String icon_img,String qr_url,String trunToUrl,String date){
+    public static BufferedImage getQrCodeImage(String icon_img,String qr_url,String trunToUrl,Long date){
         return null;
     }
 
