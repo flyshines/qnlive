@@ -442,6 +442,7 @@ public class CommonController extends AbstractController {
     @RequestMapping(value="/common/distribution/course/{course_id}",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getCourseDistributionInfo(
     		@PathVariable("course_id") String course_id,
+    		@RequestParam(value="rq_code",defaultValue="") String rq_code,
     		@RequestParam(value="page_count",defaultValue="20") String page_count,
     		@RequestParam(value="position",defaultValue="") String position,
     		@RequestHeader("access_token") String access_token,
@@ -449,6 +450,7 @@ public class CommonController extends AbstractController {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "courseDistributionInfo", access_token, version);
     	Map<String, Object> param = new HashMap<String, Object>();
         param.put("course_id", course_id);
+        param.put("rq_code", rq_code);
         param.put("page_count", page_count);
         param.put("position", position);        
         requestEntity.setParam(param);

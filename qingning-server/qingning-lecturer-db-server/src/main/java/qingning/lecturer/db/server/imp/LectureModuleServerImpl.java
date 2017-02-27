@@ -343,6 +343,11 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			roomDistributer.put("last_course_num", 0l);
 			roomDistributer.put("last_done_num", 0l);
 			roomDistributer.put("last_total_amount", 0l);
+			roomDistributer.put("recommend_num", MiscUtils.convertObjectToLong("new_recommend_num"));
+			roomDistributer.put("course_num", MiscUtils.convertObjectToLong("new_course_num"));
+			roomDistributer.put("done_num", MiscUtils.convertObjectToLong("new_done_num"));
+			roomDistributer.put("total_amount", MiscUtils.convertObjectToLong("new_total_amount"));	
+			
 			int count = roomDistributerMapper.updateRoomDistributer(roomDistributer);
 			if(count<1){
 				throw new QNLiveException("100027");
@@ -382,6 +387,15 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		String lastDoneNum = reqMap.get("last_done_num");
 		String lastTotalAmount = reqMap.get("last_total_amount");
 		String lastCourseNum = reqMap.get("last_course_num");
+		Date doneTime = null;
+		if(!MiscUtils.isEmpty(reqMap.get("last_done_time"))){
+			doneTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("last_done_time")));
+		}
+		Date endTime =  null;
+		if(!MiscUtils.isEmpty(reqMap.get("last_end_date"))){
+			endTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("last_end_date")));
+		}
+		long clickNum = MiscUtils.convertObjectToLong(reqMap.get("last_click_num"));
 		String rqCode = reqMap.get("rq_code");
 		if(!MiscUtils.isEmpty(lastRoomDistributerDetailsId)){
 			roomDistributerDetails = new HashMap<String,Object>();
@@ -397,6 +411,13 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			if(!MiscUtils.isEmpty(lastCourseNum)){
 				roomDistributerDetails.put("course_num", lastCourseNum);
 			}
+			if(doneTime!=null){
+				roomDistributerDetails.put("done_time", doneTime);
+			}
+			if(endTime!=null){
+				roomDistributerDetails.put("end_date", endTime);
+			}			
+			roomDistributerDetails.put("click_num", clickNum);
 			if(!MiscUtils.isEmpty(rqCode)){
 				roomDistributerDetails.put("rq_code", rqCode);
 			}

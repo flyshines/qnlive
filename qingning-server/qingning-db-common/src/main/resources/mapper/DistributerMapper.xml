@@ -66,6 +66,9 @@
   <select id="findRoomDistributerCourseDetailsInfo" resultType="hashmap" parameterType="hashmap" >
   	select a.*,b.nick_name from t_lecturer_courses_profit a, t_user b 
   	where a.user_id=b.user_id and course_id=#{course_id} and distributer_id=#{distributer_id}
+  	<if test="rq_code != null" >
+  		and a.rq_code = #{rq_code}
+  	</if>
     <if test="position != null" >
 		and a.position<![CDATA[<]]>#{position} 
 	</if>
