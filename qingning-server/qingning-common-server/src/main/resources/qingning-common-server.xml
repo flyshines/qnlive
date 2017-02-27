@@ -490,9 +490,12 @@
 					<accessToken require="Y" />
 				</auth>
 				<inputs>
-					<param name="room_id" type="string" />
-					<param name="course_id" type="string" />
-					<param name="recommend_code" type="string" />
+					<param name="room_id" type="string"  require="N"/>
+					<param name="course_id" type="string" require="N" />
+					<param name="recommend_code" type="string" require="N"/>
+					<param name="room_share_code" type="string"  require="N"/>
+					<param name="profit_share_rate" type="string"  require="N"/>
+					<param name="effective_time" type="string"  require="N" />
 				</inputs>
 				<outputs>
 				</outputs>

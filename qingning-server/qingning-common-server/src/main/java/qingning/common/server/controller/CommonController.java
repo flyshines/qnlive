@@ -660,12 +660,12 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value = "/common/getqrcode", method = RequestMethod.GET)
     public void CreateRqPage(
-            @RequestParam(value = "course_id") String course_id,
-            @RequestParam(value = "room_id") String room_id,
-            @RequestParam(value = "recommend_code") String recommend_code,
-            @RequestParam(value = "room_share_code") String room_share_code,
-            @RequestParam(value = "profit_share_rate") String profit_share_rate,
-            @RequestParam(value = "effective_time") Integer effective_time,
+            @RequestParam(value = "course_id" ,defaultValue="") String course_id,
+            @RequestParam(value = "room_id",defaultValue="") String room_id,
+            @RequestParam(value = "recommend_code",defaultValue="") String recommend_code,
+            @RequestParam(value = "room_share_code",defaultValue="") String room_share_code,
+            @RequestParam(value = "profit_share_rate",defaultValue="") String profit_share_rate,
+            @RequestParam(value = "effective_time",defaultValue="1") Integer effective_time,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version,
             HttpServletResponse response
