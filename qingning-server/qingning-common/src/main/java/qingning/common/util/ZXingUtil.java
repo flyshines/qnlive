@@ -49,16 +49,16 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 /** 
  * ZXing工具类 
  * @see ----------------------------------------------------------------------------------------------------------------------- 
- * @see 首页--https://code.google.com/p/zxing 
- * @see 介绍--用于解析多种格式条形码(EAN-13)和二维码(QRCode)的开源Java类库,其提供了多种应用的类库,如javase/jruby/cpp/csharp/android 
- * @see 说明--下载到的ZXing-2.2.zip是它的源码,我们在JavaSE中使用时需用到其core和javase两部分 
- * @see      可直接引入它俩的源码到项目中,或将它俩编译为jar再引入,这是我编译好的：http://download.csdn.net/detail/jadyer/6245849 
+ * @see /首页--https://code.google.com/p/zxing
+ * @see/介绍--用于解析多种格式条形码(EAN-13)和二维码(QRCode)的开源Java类库,其提供了多种应用的类库,如javase/jruby/cpp/csharp/android
+ * @see /说明--下载到的ZXing-2.2.zip是它的源码,我们在JavaSE中使用时需用到其core和javase两部分
+ * @see      /可直接引入它俩的源码到项目中,或将它俩编译为jar再引入,这是我编译好的：http://download.csdn.net/detail/jadyer/6245849
  * @see ----------------------------------------------------------------------------------------------------------------------- 
- * @see 经测试:用微信扫描GBK编码的中文二维码时出现乱码,用UTF-8编码时微信可正常识别 
- * @see       并且MultiFormatWriter.encode()时若传入hints参数来指定UTF-8编码中文时,微信压根就不识别所生成的二维码 
- * @see       所以这里使用的是这种方式new String(content.getBytes("UTF-8"), "ISO-8859-1") 
+ * @see /经测试:用微信扫描GBK编码的中文二维码时出现乱码,用UTF-8编码时微信可正常识别
+ * @see      / 并且MultiFormatWriter.encode()时若传入hints参数来指定UTF-8编码中文时,微信压根就不识别所生成的二维码
+ * @see      / 所以这里使用的是这种方式new String(content.getBytes("UTF-8"), "ISO-8859-1")
  * @see ----------------------------------------------------------------------------------------------------------------------- 
- * @see 将logo图片加入二维码中间时,需注意以下几点 
+ * @see /将logo图片加入二维码中间时,需注意以下几点
  * @see 1)生成二维码的纠错级别建议采用最高等级H,这样可以增加二维码的正确识别能力(我测试过,不设置级别时,二维码工具无法读取生成的二维码图片) 
  * @see 2)头像大小最好不要超过二维码本身大小的1/5,而且只能放在正中间部位,这是由于二维码本身结构造成的(你就把它理解成图片水印吧) 
  * @see 3)在仿照腾讯微信在二维码四周增加装饰框,那么一定要在装饰框和二维码之间留出白边,这是为了二维码可被识别 
@@ -93,7 +93,7 @@ public class ZXingUtil {
       
     /** 
      * 为二维码图片增加logo头像 
-     * @see 其原理类似于图片加水印 
+     * @see /其原理类似于图片加水印
      * @param imagePath 二维码图片存放路径(含文件名) 
      * @param logoPath  logo头像存放路径(含文件名) 
      */  
@@ -778,7 +778,7 @@ public class ZXingUtil {
      *  
      * @param url 
      *            String 访问的URL 
-     * @param param 
+     * @param /param
      *            String 提交的内容 
      * @param repType  返回类型 
      * @return String 
@@ -844,7 +844,7 @@ public class ZXingUtil {
     
     /**
      * 将图像转换为 圆形
-     * @param url 用户头像地址  
+     * @param  /url 用户头像地址
      * @return
      * @throws IOException
      */
@@ -913,26 +913,26 @@ public class ZXingUtil {
 		//生成二维码
 		// encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/新建文件夹/5.png");
 		// System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null)); TODO
-
-		try {
-		 	//通过网络  用户头像	    	
-			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
-	    	//用户名称
-	    	String userName= "Jason老师";
-	    	//二维码内容
-	    	String qr_code_content="www.baidu.com";
-	    	long time = 1488160472302l;
-	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 0.03);
-	    	
-	    	  //生成的图片位置
-	    	String imagePath= "C:/Users/Administrator/Desktop/Imag.png";
-	        ImageIO.write(createRoomDistributerPng, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath));
-	        System.out.println("ok");
-//			createCoursePng(user_head_portrait, userName, qr_code_content, time);
-//			createLivePng(user_head_portrait, userName, qr_code_content);;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//
+//		try {
+//		 	//通过网络  用户头像
+//			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
+//	    	//用户名称
+//	    	String userName= "Jason老师";
+//	    	//二维码内容
+//	    	String qr_code_content="www.baidu.com";
+//	    	long time = 1488160472302l;
+//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 0.03);
+//
+//	    	  //生成的图片位置
+//	    	String imagePath= "C:/Users/Administrator/Desktop/Imag.png";
+//	        ImageIO.write(createRoomDistributerPng, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath));
+//	        System.out.println("ok");
+////			createCoursePng(user_head_portrait, userName, qr_code_content, time);
+////			createLivePng(user_head_portrait, userName, qr_code_content);;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
     
 }  
