@@ -433,7 +433,7 @@ public final class CacheUtils {
 	public static Map<String,String> readLastCourseOfTheRoom(String roomId, String lectureId,RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
         Map<String,Object> map = new HashMap<String,Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, lectureId);
-        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+        //String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
         Jedis jedis = jedisUtils.getJedis();
         Set<String> courseSet = jedis.zrevrangeByScore(lecturerCoursesFinishKey, "+inf", "-inf", 0, 1);
@@ -455,10 +455,10 @@ public final class CacheUtils {
     			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
     			jedis.hmset(key, courseInfo);
         	} else {
-        		courseSet = jedis.zrangeByScore(lecturerCoursesPredictionKey, "-inf", "+inf", 0, 1);
+        		/*courseSet = jedis.zrangeByScore(lecturerCoursesPredictionKey, "-inf", "+inf", 0, 1);
             	for(String value:courseSet){
             		courseId = value;
-            	}
+            	}*/
         	}
         }
         if(MiscUtils.isEmpty(courseInfo) && !MiscUtils.isEmpty(courseId)){
