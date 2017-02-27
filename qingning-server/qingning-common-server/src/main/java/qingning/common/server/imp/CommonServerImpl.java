@@ -1,6 +1,7 @@
 package qingning.common.server.imp;
 
 import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.*;
 
 import com.qiniu.storage.BucketManager;
@@ -2050,13 +2051,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public void CreateRqPage(RequestEntity reqEntity)throws Exception{
         Map<String, Object> param = (Map<String, Object>) reqEntity.getParam();
         HttpServletResponse response = (HttpServletResponse)param.get("response");
+        response.setContentType("image/png");
+        response.setDateHeader("expries", -1);
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Pragma", "no-cache");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id",userId);
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
         String user_head_portrait = userMap.get("avatar_address");
         String userName = userMap.get("nick_name");
-
+        OutputStream os = response.getOutputStream();
         if(param.containsKey("recommend_code")){
             String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
                     param.get("id"),
@@ -2079,10 +2084,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,String> courseMap =  CacheUtils.readCourse(param.get("course_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
             String share_url = getCourseShareURL(userId,param.get("course_id").toString() , courseMap).toString();
             BufferedImage room_live_png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
-            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
+            ImageIO.write(room_live_png, "png", os);//写入返回
             return;
         }
-    }
+
+        os.flush();
+        os.close();
+        os=null;
+        response.flushBuffer();
+}
 
 
 
