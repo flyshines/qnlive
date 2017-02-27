@@ -325,12 +325,12 @@ public final class CacheUtils {
 			if(!MiscUtils.isEmpty(end_date)){
 				long endDate = MiscUtils.convertObjectToLong(end_date);
 				if(currentDate.getTime() > endDate){					
-					String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
-			        String oldRQcode = (String)values.get("rq_code");
-			        Map<String,Object> queryParam = new HashMap<>();
-			        queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
-			        String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);			        
-			        jedisUtils.getJedis().del(key,oldRQcodeKey);
+					//String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+			        //String oldRQcode = (String)values.get("rq_code");
+			        //Map<String,Object> queryParam = new HashMap<>();
+			        //queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
+			        //String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);			        
+			        //jedisUtils.getJedis().del(key,oldRQcodeKey);
 			        values=null;
 				}
 			}
