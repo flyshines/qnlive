@@ -647,11 +647,13 @@ public class CommonController extends AbstractController {
     //<editor-fold desc="后台生成二维码图片">
     /**
      * 生成二维码
-     * @param id 如果 query_type=0 那么就是直播间id  如果query_type=1 那么就是课程id
      * @param course_id 课程
      * @param room_id 直播间
      * @param recommend_code 推荐码
      * @param access_token 需要检验
+     * @param room_share_code
+     * @param effective_time 月份
+     * @param profit_share_rate 分销比例
      * @param version 版本
      * @return 返回流信息
      * @throws Exception
@@ -661,6 +663,9 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "course_id") String course_id,
             @RequestParam(value = "room_id") String room_id,
             @RequestParam(value = "recommend_code") String recommend_code,
+            @RequestParam(value = "room_share_code") String room_share_code,
+            @RequestParam(value = "profit_share_rate") String profit_share_rate,
+            @RequestParam(value = "effective_time") Integer effective_time,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version,
             HttpServletResponse response
@@ -674,6 +679,13 @@ public class CommonController extends AbstractController {
 
        if(recommend_code != null)
            param.put("recommend_code", recommend_code);
+
+       if(room_share_code != null){
+           param.put("recommend_code", recommend_code);
+           param.put("profit_share_rate", profit_share_rate);
+           param.put("effective_time", effective_time);
+       }
+
 
         param.put("response",response);
         requestEntity.setParam(param);

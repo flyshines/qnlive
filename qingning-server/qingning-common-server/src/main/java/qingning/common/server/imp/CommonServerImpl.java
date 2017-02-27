@@ -1979,6 +1979,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
                 share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
+                png_url = String.format(MiscUtils.getConfigByKey("be_distributer_rq_code_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
                 break;
         }
  
@@ -2050,31 +2051,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> param = (Map<String, Object>) reqEntity.getParam();
         HttpServletResponse response = (HttpServletResponse)param.get("response");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id",userId);
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
+        String user_head_portrait = userMap.get("avatar_address");
+        String userName = userMap.get("nick_name");
+
+
+
         if(param.containsKey("room_id")){ //判断room_id 是否存在
             Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(param.get("room_id").toString(),null,readLiveRoomOperation,jedisUtils,true);//根据直播间id获取数据
-            String icon_img = liveRoomMap.get("avatar_address");//直播间头像
-            String nick_name = liveRoomMap.get("room_name");//直播间名称
-            String qr_url = liveRoomMap.get("room_address");//直播间地址
+            query.put("user_id",liveRoomMap.get("lecturer_id"));
+            Map<String, String> lecturerMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
             String share_url = getLiveRoomShareURL(userId, param.get("room_id").toString()).get("share_url");
-            BufferedImage room_live_png = ZXingUtil.createLivePng(icon_img,nick_name,share_url);//生成图片
+            String lecturerName = lecturerMap.get("nick_name");
+            BufferedImage room_live_png = ZXingUtil.createLivePng(user_head_portrait,userName,share_url,lecturerName);//生成图片
             ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
             return;
         }else if(param.containsKey("course_id")){
-            Map<String,String> courseMap =  CacheUtils.readCourse(param.get("room_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
-            Map<String,Object> query = new HashMap<String,Object>();
-            query.put("user_id", courseMap.get("lecturer_id"));
-            Map<String, String> lecturerMap = CacheUtils.readUser(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-
-            String icon_img = lecturerMap.get("avatar_address");//老师头像
-            String nick_name = lecturerMap.get("nick_name");//名称
-            String share_url = getCourseShareURL(userId, param.get("room_id").toString(), courseMap).toString();
-            BufferedImage room_live_png = ZXingUtil.createCoursePng(icon_img,nick_name,share_url,System.currentTimeMillis());//生成图片
+            Map<String,String> courseMap =  CacheUtils.readCourse(param.get("course_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
+            String share_url = getCourseShareURL(userId,param.get("course_id").toString() , courseMap).toString();
+            BufferedImage room_live_png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
             ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
             return;
+        }else if(param.containsKey("recommend_code")){
+            String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
+                    param.get("id"),
+                    param.get("room_id"),
+                    (Integer)param.get("profit_share_rate"),
+                    param.get("effective_time"));
+            BufferedImage room_live_png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url, (Integer)param.get("profit_share_rate"));//生成图片
+            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
+            return;
+
         }
-
-
-
     }
 
 
