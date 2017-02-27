@@ -694,6 +694,7 @@ public class ZXingUtil {
 			conn.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727)");  
 			conn.connect();
             BufferedImage bufImg = ImageIO.read(conn.getInputStream());  
+            conn.disconnect();  
             return bufImg;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
