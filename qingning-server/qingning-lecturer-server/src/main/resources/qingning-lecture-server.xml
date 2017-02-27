@@ -436,7 +436,7 @@
 								if(!utils.isEmpty(distributer)){
 								   ret = utils.RecoveryEmoji(student)+'通过'+utils.RecoveryEmoji(distributer)+'的分销';
 								} else {
-								   ret = utils.RecoveryEmoji(student)+'通过分销';
+								   ret = utils.RecoveryEmoji(student);
 								}
 							}
 							return ret;

@@ -382,6 +382,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		String lastDoneNum = reqMap.get("last_done_num");
 		String lastTotalAmount = reqMap.get("last_total_amount");
 		String lastCourseNum = reqMap.get("last_course_num");
+		String rqCode = reqMap.get("rq_code");
 		if(!MiscUtils.isEmpty(lastRoomDistributerDetailsId)){
 			roomDistributerDetails = new HashMap<String,Object>();
 			if(!MiscUtils.isEmpty(lastRecommendNum)){
@@ -395,6 +396,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			}
 			if(!MiscUtils.isEmpty(lastCourseNum)){
 				roomDistributerDetails.put("course_num", lastCourseNum);
+			}
+			if(!MiscUtils.isEmpty(rqCode)){
+				roomDistributerDetails.put("rq_code", rqCode);
 			}
 			if(!MiscUtils.isEmpty(roomDistributerDetails)){
 				roomDistributerDetails.put("room_distributer_details_id", lastRoomDistributerDetailsId);

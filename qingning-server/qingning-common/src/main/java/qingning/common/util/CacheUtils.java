@@ -299,6 +299,10 @@ public final class CacheUtils {
 	}
 
 	public static Map<String,String> readDistributerRoom(String distributer_id, String room_id, CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
+		return readDistributerRoom(distributer_id,room_id,operation,jedisUtils,false);
+	}
+	
+	public static Map<String,String> readDistributerRoom(String distributer_id, String room_id, CommonReadOperation operation, JedisUtils jedisUtils, boolean expired) throws Exception{
 		String[] searchKeys={distributer_id,room_id};
 		String[] keyFields={Constants.CACHED_KEY_DISTRIBUTER_FIELD,Constants.FIELD_ROOM_ID};
 		RequestEntity requestEntity = new RequestEntity();
@@ -309,10 +313,14 @@ public final class CacheUtils {
 			query.put(keyFields[i], searchKeys[i]);
 		}
 		Date currentDate = new Date();
-		query.put("current_date", currentDate);
+		if(!expired){
+			query.put("current_date", currentDate);
+		} else {
+			query.remove("current_date");
+		}
 		requestEntity.setParam(query);
 		Map<String,String> values =  readData(searchKeys, Constants.CACHED_KEY_ROOM_DISTRIBUTER, keyFields, requestEntity, operation, jedisUtils, true, -1);
-		if(!MiscUtils.isEmpty(values)){
+		if(!expired && !MiscUtils.isEmpty(values)){
 			String end_date = values.get("end_date");
 			if(!MiscUtils.isEmpty(end_date)){
 				long endDate = MiscUtils.convertObjectToLong(end_date);

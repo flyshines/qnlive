@@ -2170,6 +2170,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100026");
         }
         
+		Map<String,String> roomInfo =  CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils,true);		
+		if(!MiscUtils.isEmpty(roomInfo)){
+			values.put("last_room_distributer_details_id", roomInfo.get("room_distributer_details_id"));
+			values.put("last_recommend_num", roomInfo.get("last_recommend_num"));
+			values.put("last_done_num", roomInfo.get("last_done_num"));
+			values.put("last_total_amount", roomInfo.get("last_total_amount"));	
+			values.put("last_course_num", roomInfo.get("last_course_num"));	
+			values.put("rq_code", roomInfo.get("rq_code"));	
+		}
         Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
         if(!MiscUtils.isEmpty(distributerRoom)){
         	throw new QNLiveException("100027");
@@ -2184,20 +2193,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String newRqCode = MiscUtils.getUUId();
         values.put("newRqCode",newRqCode);
         
-        Map<String,Object> queryParam = new HashMap<String,Object>();
-		queryParam.put("distributer_id", values.get("distributer_id"));
-		queryParam.put(Constants.FIELD_ROOM_ID, room_id);							
-		String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
-		Map<String,String> roomInfo = jedis.hgetAll(roomKey);
-		if(!MiscUtils.isEmpty(roomInfo)){
-			values.put("last_room_distributer_details_id", roomInfo.get("room_distributer_details_id"));
-			values.put("last_recommend_num", roomInfo.get("last_recommend_num"));
-			values.put("last_done_num", roomInfo.get("last_done_num"));
-			values.put("last_total_amount", roomInfo.get("last_total_amount"));	
-			values.put("last_course_num", roomInfo.get("last_course_num"));	
-		}
         Map<String,Object> insertResultMap = lectureModuleServer.createRoomDistributer(values);
-        jedis.del(roomKey);
+
         distributerRoom = CacheUtils.readDistributerRoom(userId, room_id, readRoomDistributerOperation, jedisUtils);
         //boolean totaldistributerAdd = MiscUtils.convertObjectToLong(distributerRoom.get("create_time")) == MiscUtils.convertObjectToLong(distributerRoom.get("update_time"));
         boolean totaldistributerAdd = true;
@@ -2218,7 +2215,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //在缓存中删除旧的RQCode，插入新的RQCode
         String oldRQcode = distributerRoom.get("rq_code");
-        queryParam.clear();
+        Map<String,Object> queryParam = new HashMap<String,Object>();
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, oldRQcode);
         String oldRQcodeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE, queryParam);
         jedis.del(oldRQcodeKey);
