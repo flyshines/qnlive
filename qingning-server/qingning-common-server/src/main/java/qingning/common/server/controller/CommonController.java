@@ -10,7 +10,6 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
-import qingning.common.util.CreateRqPage;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
@@ -77,6 +76,7 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, null);
         return this.process(requestEntity, serviceManger, message);
     }
+
 
 
     /**
@@ -642,4 +642,42 @@ public class CommonController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+
+
+    //<editor-fold desc="后台生成二维码图片">
+    /**
+     * 生成二维码
+     * @param id 如果 query_type=0 那么就是直播间id  如果query_type=1 那么就是课程id
+     * @param course_id 课程
+     * @param room_id 直播间
+     * @param recommend_code 推荐码
+     * @param access_token 需要检验
+     * @param version 版本
+     * @return 返回流信息
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/getqrcode", method = RequestMethod.GET)
+    public void CreateRqPage(
+            @RequestParam(value = "course_id") String course_id,
+            @RequestParam(value = "room_id") String room_id,
+            @RequestParam(value = "recommend_code") String recommend_code,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader("version") String version,
+            HttpServletResponse response
+    ) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
+        Map<String, Object> param = new HashMap<>();
+        if(course_id != null)
+            param.put("course_id", course_id);
+        else if(room_id != null)
+            param.put("room_id", room_id);
+
+       if(recommend_code != null)
+           param.put("recommend_code", recommend_code);
+
+        param.put("response",response);
+        requestEntity.setParam(param);
+        this.process(requestEntity, serviceManger, message);
+    }
+    //</editor-fold>
 }

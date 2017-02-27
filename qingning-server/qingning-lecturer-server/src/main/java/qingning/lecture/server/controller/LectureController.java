@@ -418,9 +418,6 @@ public class LectureController extends AbstractController {
 	/**
 	 * 生成直播间分享链接的分享码
 	 * @param room_id
-	 * @param distributer_id 
-	 * @param page_count
-	 * @param start_time
 	 * @param access_token
 	 * @param version
 	 * @return
