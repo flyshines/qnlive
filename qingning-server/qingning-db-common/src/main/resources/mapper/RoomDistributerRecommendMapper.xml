@@ -146,9 +146,10 @@
   <select id="findRoomRecommendUserList" resultType="hashmap" parameterType="hashmap" >
     select u.nick_name, u.avatar_address, rdr.done_num, rdr.create_time, rdr.end_date, rdr.position
     from t_room_distributer_recommend rdr join t_user u on u.user_id = rdr.user_id
-    where
-    rdr.distributer_id = #{distributer_id}
-    and rdr.room_id = #{room_id}
+    where rdr.room_id = #{room_id}
+    <if test="distributer_id != null" >
+    	and rdr.distributer_id = #{distributer_id}
+    </if>
     <if test="rq_code != null" >
     	and rdr.rq_code=#{rq_code}
     </if>
