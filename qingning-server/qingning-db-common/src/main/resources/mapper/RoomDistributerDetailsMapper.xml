@@ -157,12 +157,12 @@
         click_num=#{click_num},
       </if>
       <if test="status != null" >
-        #{status},
+        status = #{status},
       </if>            
     </set>
     where room_distributer_details_id = #{room_distributer_details_id}
     <if test="rq_code != null" >
-        and rq_code = #{rq_code},
+        and rq_code = #{rq_code}
     </if>
     <if test="last_update_time != null" >
     	and update_time = #{last_update_time}
