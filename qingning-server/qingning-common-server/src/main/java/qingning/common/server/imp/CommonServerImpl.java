@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.model.DefaultPutRet;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2062,7 +2063,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String user_head_portrait = userMap.get("avatar_address");
         String userName = userMap.get("nick_name");
         OutputStream os = response.getOutputStream();
-        if(param.containsKey("recommend_code")){
+        OutputStream b64 = new Base64OutputStream(os);
+        if(!("").equals(param.get("room_share_code").toString())){
             String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
                     param.get("id"),
                     param.get("room_id"),
@@ -2071,26 +2073,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             BufferedImage room_live_png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url, (Integer)param.get("profit_share_rate"));//生成图片
             ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
             return;
-        }else if(param.containsKey("room_id")){ //判断room_id 是否存在
+        }else if(!("").equals(param.get("room_id").toString())){ //判断room_id 是否存在
             Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(param.get("room_id").toString(),null,readLiveRoomOperation,jedisUtils,true);//根据直播间id获取数据
             query.put("user_id",liveRoomMap.get("lecturer_id"));
             Map<String, String> lecturerMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
             String share_url = getLiveRoomShareURL(userId, param.get("room_id").toString()).get("share_url");
             String lecturerName = lecturerMap.get("nick_name");
-            BufferedImage room_live_png = ZXingUtil.createLivePng(user_head_portrait,userName,share_url,lecturerName);//生成图片
+            BufferedImage room_live_png = ZXingUtil.createLivePng(user_head_portrait,userName,lecturerName,share_url);//生成图片
             ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
             return;
-        }else if(param.containsKey("course_id")){
+        }else if(!("").equals(param.get("course_id").toString())){
             Map<String,String> courseMap =  CacheUtils.readCourse(param.get("course_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
             String share_url = getCourseShareURL(userId,param.get("course_id").toString() , courseMap).toString();
             BufferedImage room_live_png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
-            ImageIO.write(room_live_png, "png", os);//写入返回
+            ImageIO.write(room_live_png, "png", b64);//写入返回
             return;
         }
 
-        os.flush();
-        os.close();
-        os=null;
+        b64.flush();
+        b64.close();
+        b64=null;
         response.flushBuffer();
 }
 

@@ -658,7 +658,7 @@ public class CommonController extends AbstractController {
      * @return 返回流信息
      * @throws Exception
      */
-    @RequestMapping(value = "/common/getqrcode", method = RequestMethod.GET)
+    @RequestMapping(value = "/common/getqrcode.png", method = RequestMethod.GET)
     public void CreateRqPage(
             @RequestParam(value = "course_id" ,defaultValue="") String course_id,
             @RequestParam(value = "room_id",defaultValue="") String room_id,
@@ -672,21 +672,12 @@ public class CommonController extends AbstractController {
     ) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
         Map<String, Object> param = new HashMap<>();
-        if(!course_id.equals(""))
-            param.put("course_id", course_id);
-        else if(!room_id.equals(""))
-            param.put("room_id", room_id);
-
-       if(!recommend_code.equals(""))
-           param.put("recommend_code", recommend_code);
-
-       if(!room_share_code.equals("")){
-           param.put("recommend_code", recommend_code);
-           param.put("profit_share_rate", profit_share_rate);
-           param.put("effective_time", effective_time);
-       }
-
-
+        param.put("course_id", course_id);
+        param.put("room_id", room_id);
+        param.put("recommend_code", recommend_code);
+        param.put("room_share_code", recommend_code);
+        param.put("profit_share_rate", profit_share_rate);
+        param.put("effective_time", effective_time);
         param.put("response",response);
         requestEntity.setParam(param);
         this.process(requestEntity, serviceManger, message);
