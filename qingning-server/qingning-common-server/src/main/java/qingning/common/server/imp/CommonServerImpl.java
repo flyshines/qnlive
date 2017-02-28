@@ -2119,7 +2119,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
-        ImageIO.write(png, "jpg", baos);//写入流中
+        ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
         BASE64Encoder encoder = new BASE64Encoder();
         String png_base64 =  encoder.encodeBuffer(bytes).trim();//转换成base64串
