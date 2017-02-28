@@ -2124,14 +2124,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
         }
 
-
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(png, "png", baos);
-        byte[] bytes = baos.toByteArray();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
+        ImageIO.write(png, "jpg", baos);//写入流中
+        byte[] bytes = baos.toByteArray();//转换成字节
         BASE64Encoder encoder = new BASE64Encoder();
-        String png_base64 =  encoder.encodeBuffer(bytes);
-        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");
+        String png_base64 =  encoder.encodeBuffer(bytes).trim();//转换成base64串
+        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
         return png_base64;
     }
 

@@ -81,7 +81,10 @@ public class ZXingUtil {
     private static final int HEIGHT = 404*3; 
 	
     //字体累计增加高度
-    private static int font_height = 0; 
+    private static int font_height = 0;
+
+    private static String a  ="http://image.qnhdlive.tsingning.com/bg_later.jpg";
+
     
     private ZXingUtil(){
     	font_height = 0;
@@ -621,7 +624,7 @@ public class ZXingUtil {
     public static BufferedImage createLivePng(String user_head_portrait,String userName,String lecturer_name,String qr_code_content) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -655,7 +658,7 @@ public class ZXingUtil {
     public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Double profit_share_rate) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -698,7 +701,7 @@ public class ZXingUtil {
     public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,String qr_code_content,Long time) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -783,7 +786,7 @@ public class ZXingUtil {
         String result = "";  
         byte[] resByt = null;  
         try {  
-            URL urlObj = new URL(url);  
+            URL urlObj = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();  
             // 连接超时  
             conn.setDoInput(true);  
