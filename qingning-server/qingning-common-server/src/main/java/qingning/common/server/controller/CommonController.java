@@ -647,7 +647,9 @@ public class CommonController extends AbstractController {
         param.put("rq_code", rq_code);
         param.put("course_id", course_id);
         param.put("page_count", page_count);
-        param.put("student_pos", student_pos);
+        if(!student_pos.equals("")){
+            param.put("student_pos", student_pos);
+        }
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }

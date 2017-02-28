@@ -188,7 +188,7 @@
   		and a.distributer_id = #{distributer_id} 
   	</if>
   	<if test="rq_code !=null">
-  	    and a.rq_code=#{rq_code}
+  	    or a.rq_code=#{rq_code}
   	</if>
   	<if test="position != null">
   		and a.student_pos <![CDATA[ < ]]> #{position}
