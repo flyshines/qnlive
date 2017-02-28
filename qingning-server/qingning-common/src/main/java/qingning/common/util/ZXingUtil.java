@@ -83,7 +83,6 @@ public class ZXingUtil {
     //字体累计增加高度
     private static int font_height = 0;
 
-    private static String a  ="http://image.qnhdlive.tsingning.com/bg_later.jpg";
 
     
     private ZXingUtil(){
