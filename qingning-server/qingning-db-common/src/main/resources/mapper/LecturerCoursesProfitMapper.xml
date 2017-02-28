@@ -141,5 +141,27 @@
     limit 1
   </select>
 
+  <select id="findCoursesSumInfo" resultType="hashmap" parameterType="hashmap">
+  	select sum(profit_amount) profit_amount,sum(share_amount) share_amount,sum(profit_amount-share_amount) lecturer_profit 
+	from t_lecturer_courses_profit where 1=1
+	<if test="course_id != null" >
+		and course_id= #{course_id}
+	</if>
+	<if test="lecturer_id != null" >
+		and lecturer_id= #{lecturer_id}
+	</if>
+	<if test="room_id != null" > 
+		and room_id=#{room_id}
+	</if>
+	<if test="distributer_id != null" >
+		and distributer_id=#{distributer_id}
+	</if>
+	<if test="rq_code != null" >
+		and rq_code=#{rq_code}
+	</if>
+	<if test="profit_type != null">
+		and profit_type=#{profit_type}
+	</if>
+  </select>
   
 </mapper>

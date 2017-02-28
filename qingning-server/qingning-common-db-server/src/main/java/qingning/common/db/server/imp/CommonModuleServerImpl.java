@@ -607,4 +607,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {		
 		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
 	}
+
+	@Override
+	public Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap) {		
+		return lecturerCoursesProfitMapper.findCoursesSumInfo(queryMap);
+	}
+	
 }
