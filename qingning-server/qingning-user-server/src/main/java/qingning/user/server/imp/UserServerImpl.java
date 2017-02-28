@@ -1248,7 +1248,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Long nowStudentNum = 0L;
         if(jedis.exists(courseKey)){
-            jedis.hincrBy(courseKey, "student_num", 1);
+            //jedis.hincrBy(courseKey, "student_num", 1);
+        	map.clear();
+        	map.put("course_id", course_id);
+        	Map<String,Object> numInfo = userModuleServer.findCourseRecommendUserNum(map);
+        	long num = 0;
+        	if(!MiscUtils.isEmpty(numInfo)){
+        		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+        	}
+        	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
+        	if(lastNum<num){
+        		jedis.hset(courseKey, "student_num", num+"");
+        	}
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
         }

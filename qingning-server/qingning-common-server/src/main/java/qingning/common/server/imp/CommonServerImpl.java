@@ -998,7 +998,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 //3.3 课程缓存或者表 t_courses
                 if("0".equals(profit_type)){
-                    jedis.hincrBy(courseKey, "student_num", 1);
+                    //jedis.hincrBy(courseKey, "student_num", 1);
+                	query.clear();
+                	query.put("course_id", courseId);
+                	Map<String,Object> numInfo = commonModuleServer.findCourseRecommendUserNum(query);
+                	long num = 0;
+                	if(!MiscUtils.isEmpty(numInfo)){
+                		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+                	}
+                	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
+                	if(lastNum<num){
+                		jedis.hset(courseKey, "student_num", num+"");
+                	}
                     jedis.hincrBy(courseKey, "course_amount", lecturerProfit);
                 }else {
                     //如果之前并没有打赏该课程，则计入
@@ -1999,27 +2010,60 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         //2.查询数据库得到相关数据
-        reqMap.put("distributer_id", userId);
+        if(MiscUtils.isEmpty(reqMap.get("distributer_id"))){
+        	reqMap.put("distributer_id", userId);
+        }        
         reqMap.put("current_date", MiscUtils.getEndDateOfToday());
         if(MiscUtils.isEmpty(reqMap.get("student_pos"))){
             reqMap.remove("student_pos");
         }
+        String roomId = (String)reqMap.get("room_id");
         List<Map<String,Object>> recommendUsers = commonModuleServer.findcourseRecommendUsers(reqMap);
         Map<String,Object> recommendUserNum = commonModuleServer.findCourseRecommendUserNum(reqMap);
         long todayDateEndTime = MiscUtils.getEndDateOfToday().getTime();
-
-        for(Map<String,Object> recommendUser : recommendUsers){
-            if(recommendUser.get("end_date") == null){
-                recommendUser.put("status", 0);
-            }else {
-                long endDateTime = ((Date)recommendUser.get("end_date")).getTime();
-
-                if(endDateTime >= todayDateEndTime){
-                    recommendUser.put("status", 0);
-                }else {
-                    recommendUser.put("status", 2);
-                }
-            }
+        if(!MiscUtils.isEmpty(recommendUsers)){
+        	Jedis jedis = jedisUtils.getJedis();
+        	((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
+				@Override
+				public void batchOperation(Pipeline pipeline, Jedis jedis) {
+					Map<String,Response<Map<String,String>>> response = new HashMap<String,Response<Map<String,String>>>();
+					Map<String,Object> query = new HashMap<String,Object>();
+		            for(Map<String,Object> recommendUser : recommendUsers){
+		            	String distributerId = (String)recommendUser.get("distributer_id");
+		            	if(response.containsKey(distributerId)){
+		            		continue;
+		            	}
+		            	query.clear();
+		            	query.put("room_id", roomId);
+		            	query.put("distributer_id", distributerId);
+		            	String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
+		            	response.put(distributerId, pipeline.hgetAll(roomDistributeKey));
+		            }
+		            pipeline.sync();
+		            for(Map<String,Object> recommendUser : recommendUsers){
+		            	String distributerId = (String)recommendUser.get("distributer_id");
+		            	Response<Map<String,String>> values = response.get(distributerId);
+		            	if(values!=null && !MiscUtils.isEmpty(values.get())){
+		            		Map<String,String> roomInfo = values.get();
+		            		String rqCode = (String)recommendUser.get("rq_code");
+		            		if(MiscUtils.isEmpty(rqCode)){
+		            			recommendUser.put("status", 0);
+		            		} else if(!rqCode.equals(roomInfo.get("rq_code"))) {
+		            			recommendUser.put("status", 2);
+		            		} else {
+		            			long endDateTime = MiscUtils.convertObjectToLong(roomInfo.get("end_date"));
+			                    if(endDateTime == 0 || endDateTime >= todayDateEndTime){
+			                        recommendUser.put("status", 0);
+			                    }else {
+			                        recommendUser.put("status", 2);
+			                    }
+		            		}
+		            	} else {
+		            		recommendUser.put("status", 0);
+		            	}
+		            }
+				}
+        	});
         }
         resultMap.put("student_list", recommendUsers);
         if((! MiscUtils.isEmpty(recommendUserNum)) && recommendUserNum.get("recommend_num") != null){

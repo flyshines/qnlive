@@ -124,6 +124,9 @@
       <if test="student_pos != null">
         student_pos,
       </if>
+      <if test="rq_code != null">
+        rq_code,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="student_id != null" >
@@ -162,6 +165,9 @@
       <if test="student_pos != null">
         #{student_pos},
       </if>
+      <if test="rq_code != null">
+         #{rq_code},
+      </if>      
     </trim>
   </insert>
 
@@ -175,28 +181,32 @@
   </select>
 
   <select id="findCourseRecommendUsers" resultType="hashmap" parameterType="hashmap" >
-    select u.nick_name, u.avatar_address,  rdr.create_time, rdr.position, rdr.end_date
-    from
-    (t_courses_students cs join t_user u on cs.user_id = u.user_id)
-    join t_room_distributer_recommend rdr on cs.user_id = rdr.user_id
-    where
-    cs.course_id = #{course_id}
-    and rdr.room_id = #{room_id}
-    and rdr.distributer_id = #{distributer_id}
-
-    <if test="position != null">
-      and `position` <![CDATA[ < ]]> #{position}
-    </if>
-    order by rdr.position desc
-    limit #{page_count}
+  	select b.nick_name, b.avatar_address, a.* from t_courses_students a, t_user b 
+  	where a.user_id=b.user_id
+  	and a.room_id = #{room_id}
+  	<if test="distributer_id !=null">
+  		and a.distributer_id = #{distributer_id} 
+  	</if>
+  	<if test="rq_code !=null">
+  	    and a.rq_code=#{rq_code}
+  	</if>
+  	<if test="position != null">
+  		and a.student_pos <![CDATA[ < ]]> #{position}
+  	</if>
+  	order by a.student_pos desc
+  	limit #{page_count}
   </select>
-
+  
   <select id="findCourseRecommendUserNum" resultType="hashmap" parameterType="hashmap" >
     select count(1) as recommend_num
     from t_courses_students
     where
     course_id = #{course_id}
-    and room_id = #{room_id}
-    and distributer_id = #{distributer_id}
+    <if test="room_id != null">
+    	and room_id = #{room_id}
+    </if>
+    <if test="distributer_id != null">
+    	and distributer_id = #{distributer_id}
+    </if>
   </select>
 </mapper>
