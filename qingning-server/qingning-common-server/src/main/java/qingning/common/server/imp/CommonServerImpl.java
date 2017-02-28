@@ -1019,7 +1019,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("user_id", handleResultMap.get("user_id"));        
                     Map<String, String> payUserMap = CacheUtils.readUserNoCache((String)handleResultMap.get("user_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
                     
-                    String message = payUserMap.get("nick_name") + "打赏了" + lecturerMap.get("nick_name") +" "+ + (Long)handleResultMap.get("profit_amount")/100.0 + "元";
+                    String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+ + (Long)handleResultMap.get("profit_amount")/100.0 + "元";
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();

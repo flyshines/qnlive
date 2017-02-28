@@ -1,8 +1,10 @@
 package qingning.mq.server.imp;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,14 +16,18 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.IMMsgUtil;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.WeiXinUtil;
+import qingning.db.common.mybatis.persistence.CourseMessageMapper;
+import qingning.db.common.mybatis.persistence.CoursesMapper;
 import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
 import qingning.db.common.mybatis.persistence.LoginInfoMapper;
 import qingning.server.ImMsgService;
+import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 
 import com.alibaba.fastjson.JSON;
@@ -32,12 +38,18 @@ public class ImMsgServiceImp implements ImMsgService {
 
 	@Autowired(required = true)
 	private CoursesStudentsMapper coursesStudentsMapper;
-
+	
+	@Autowired(required = true)
+	private CourseMessageMapper courseMessageMapper;
+	
+	@Autowired(required = true)
+	private CoursesMapper coursesMapper;
+	
 	@Autowired(required = true)
 	private LoginInfoMapper loginInfoMapper;
 
 	private static Hashtable<String,Object> messageLockMap = new Hashtable<>();
-
+	private static Hashtable<String,Object> maxLockMap = new Hashtable<>();
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		Map<String,Object> body = imMessage.getBody();
@@ -72,7 +84,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 
 		Map<String,Object> body = imMessage.getBody();
-		Map<String,Object> information = (Map<String,Object>)body.get("information");
+		final Map<String,Object> information = (Map<String,Object>)body.get("information");
 
 		Jedis jedis = jedisUtils.getJedis();
 		Map<String, Object> map = new HashMap<>();
@@ -85,17 +97,80 @@ public class ImMsgServiceImp implements ImMsgService {
 		//判断课程状态
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
-		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-		Map<String,String> courseMap = jedis.hgetAll(courseKey);
+		//String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+		Map<String,String> courseMap = null;
+		try{
+			courseMap = CacheUtils.readCourse((String)information.get("course_id"), null, new CommonReadOperation(){
+				@Override
+				public Object invokeProcess(RequestEntity requestEntity) throws Exception {				
+					return coursesMapper.findCourseByCourseId((String)information.get("course_id"));
+				}
+			}, jedisUtils, false);//jedis.hgetAll(courseKey);
+		} catch(Exception e){
+			log.error("read course["+(String)information.get("course_id")+"]:"+e.getMessage());
+		}
+		if(MiscUtils.isEmpty(courseMap)){
+			log.info("Course["+(String)information.get("course_id")+"] can't be readed.");
+			return;
+		}
+		
+		String messageId = MiscUtils.getUUId();
+		Map<String,String> stringMap = new HashMap<>();
+		MiscUtils.converObjectMapToStringMap(information, stringMap);
+		String message = stringMap.get("message");
+		if(!MiscUtils.isEmpty(message)){
+			stringMap.put("message", MiscUtils.emojiConvertToNormalString(message));
+		}
+		String message_question = stringMap.get("message_question");
+		if(!MiscUtils.isEmpty(message_question)){
+			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
+		}
+		stringMap.put("message_id", messageId);
 		//课程为已结束
 		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){
+			if("4".equals(information.get("send_type"))){				
+				Map<String,Object> messageObjectMap = new HashMap<>();				
+				messageObjectMap.put("message_id", stringMap.get("message_id"));
+				messageObjectMap.put("course_id", stringMap.get("course_id"));
+				messageObjectMap.put("message_url", stringMap.get("message_url"));
+				messageObjectMap.put("message_question", stringMap.get("message_question"));
+				if(!MiscUtils.isEmpty(stringMap.get("audio_time"))){
+					messageObjectMap.put("audio_time", Long.parseLong(stringMap.get("audio_time")));
+				}else {
+					messageObjectMap.put("audio_time", 0);
+				}				
+				messageObjectMap.put("message_type", stringMap.get("message_type"));
+				messageObjectMap.put("send_type", stringMap.get("send_type"));
+				messageObjectMap.put("creator_id", stringMap.get("creator_id"));
+				if(!MiscUtils.isEmpty(stringMap.get("create_time"))){
+					Date createTime = new Date(Long.parseLong(stringMap.get("create_time")));
+					messageObjectMap.put("create_time", createTime);
+				}
+				Object lockObject;
+				if(maxLockMap.containsKey(stringMap.get("course_id"))){
+					lockObject = maxLockMap.get(stringMap.get("course_id"));
+				}else {
+					maxLockMap.put(stringMap.get("course_id"),stringMap.get("course_id"));
+					lockObject = stringMap.get("course_id");
+				}
+				List<Map<String,Object>> list = new LinkedList<Map<String,Object>>();
+				list.add(messageObjectMap);
+				synchronized (lockObject){
+					Map<String,Object> maxPosMessage = courseMessageMapper.findCourseMessageMaxPos(stringMap.get("course_id"));
+					long messagePos = 0;
+					if(!MiscUtils.isEmpty(maxPosMessage)){
+						messagePos = MiscUtils.convertObjectToLong(maxPosMessage.get("message_pos"))+1;
+					}
+					messageObjectMap.put("message_pos", messagePos);					
+					courseMessageMapper.insertCourseMessageList(list);
+				}
+			}
 			return;
 		}
 
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(information.get("create_time").toString());
-		String messageId = MiscUtils.getUUId();
-
+		
 		//1.将聊天信息id插入到redis zsort列表中
 		jedis.zadd(messageListKey, createTime, messageId);
 
@@ -131,17 +206,6 @@ public class ImMsgServiceImp implements ImMsgService {
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, messageId);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-		Map<String,String> stringMap = new HashMap<>();
-		MiscUtils.converObjectMapToStringMap(information, stringMap);
-		String message = stringMap.get("message");
-		if(!MiscUtils.isEmpty(message)){
-			stringMap.put("message", MiscUtils.emojiConvertToNormalString(message));
-		}
-		String message_question = stringMap.get("message_question");
-		if(!MiscUtils.isEmpty(message_question)){
-			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
-		}
-		stringMap.put("message_id", messageId);
 		jedis.hmset(messageKey, stringMap);
 	}
 
@@ -361,5 +425,6 @@ public class ImMsgServiceImp implements ImMsgService {
 
 	public static void clearMessageLockMap(){
 		messageLockMap.clear();
+		maxLockMap.clear();
 	}
 }

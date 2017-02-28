@@ -49,7 +49,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 
-				Long messagePos = 0L;
+				long messagePos = 0L;
 				List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
 				for(String messageId : messageIdList){
 					map.put(Constants.FIELD_MESSAGE_ID, messageId);
@@ -75,7 +75,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					}else {
 						messageObjectMap.put("audio_time", 0);
 					}
-					messageObjectMap.put("message_pos", messagePos);
+					messageObjectMap.put("message_pos", messagePos++);
 					messageObjectMap.put("message_type", messageStringMap.get("message_type"));
 					messageObjectMap.put("send_type", messageStringMap.get("send_type"));
 					messageObjectMap.put("creator_id", messageStringMap.get("creator_id"));
