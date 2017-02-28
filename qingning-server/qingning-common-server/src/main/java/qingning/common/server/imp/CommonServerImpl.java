@@ -1,6 +1,7 @@
 package qingning.common.server.imp;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 
@@ -33,6 +34,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+import sun.misc.BASE64Encoder;
 import sun.security.x509.OIDMap;
 
 import javax.imageio.ImageIO;
@@ -1612,11 +1614,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"),reqEntity,readLiveRoomOperation,jedisUtils,true);
 
 
-        Map<String,String> urlMap = getCourseShareURL(userId, courseId, courseMap);
         resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
-        resultMap.put("share_url",urlMap.get("share_url"));
-        resultMap.put("png_url",urlMap.get("png_url"));
+        resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
+
+        resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
  
         return resultMap;
     }
@@ -1640,17 +1642,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
 
         //查询该用户是否为该直播间的分销员
-        Map<String,String> urlMap = getLiveRoomShareURL(userId, roomId);
- 
-        resultMap.put("share_url",urlMap.get("share_url"));
-        resultMap.put("png_url",urlMap.get("png_url"));
+        resultMap.put("share_url",getLiveRoomShareURL(userId, roomId));
+        resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
         return resultMap;
     }
  
-    private Map<String,String> getLiveRoomShareURL(String userId, String roomId) throws Exception{
-        Map<String,String>  returnMap = new HashMap<>();
+    private String getLiveRoomShareURL(String userId, String roomId) throws Exception{
         String share_url;
-        String png_url;
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
         queryMap.put("room_id", roomId);
@@ -1666,22 +1664,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //是分销员
         if(isDistributer == true){
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
-            png_url = MiscUtils.getConfigByKey("live_room_share_rq_code_url_pre_fix")+roomId+"&recommend_code="+recommend_code;
-
         }else {
             //不是分销员
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+roomId;
-            png_url = MiscUtils.getConfigByKey("live_room_share_rq_code_url_pre_fix")+roomId;
         }
-        returnMap.put("share_url",share_url);
-        returnMap.put("png_url",png_url);
-        return returnMap;
+        return share_url;
     }
 
-    private Map<String,String> getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
-        Map<String,String>  returnMap = new HashMap<>();
+    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
         String share_url ;
-        String png_url;
         String roomId = courseMap.get("room_id");
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
@@ -1698,14 +1689,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //是分销员
         if(isDistributer == true){
             share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
-            png_url = MiscUtils.getConfigByKey("course_share_rq_code_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
         }else {  //不是分销员
             share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId;
-            png_url = MiscUtils.getConfigByKey("course_share_rq_code_url_pre_fix") + courseId;
         }
-        returnMap.put("share_url",share_url);
-        returnMap.put("png_url",png_url);
-        return returnMap;
+        return share_url;
     }
 
 
@@ -1904,8 +1891,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String simple_content = null;
         String share_url = null;
         String png_url = null;
-        Map<String,String> urlMap = null;
- 
+
         //1.课程分享 2.直播间分享 3.其他页面分享 4.成为直播间分销员分享
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         switch (query_type){
@@ -1933,9 +1919,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
-                urlMap = getCourseShareURL(userId, id, courseMap);
-                share_url = urlMap.get("share_url");
-                png_url = urlMap.get("png_url");
+                share_url = getCourseShareURL(userId, id, courseMap);
+                png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
  
             case "2":
@@ -1947,9 +1932,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 title = liveRoomInfoMap.get("room_name");
                 content = liveRoomInfoMap.get("room_remark");
                 icon_url = liveRoomInfoMap.get("avatar_address");
-                urlMap = getLiveRoomShareURL(userId, id);
-                share_url = urlMap.get("share_url");
-                png_url = urlMap.get("png_url");
+                share_url = getLiveRoomShareURL(userId, id);
+                png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content") + liveRoomInfoMap.get("room_name");
                 break;
  
@@ -1981,7 +1965,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
                 share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
-                png_url = String.format(MiscUtils.getConfigByKey("be_distributer_rq_code_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
+                png_url = this.CreateRqPage(null,liveRoomInfo.get("room_id"),reqMap.get("id").toString(),(Integer.parseInt(values.get("profit_share_rate")) / 100.0),Integer.valueOf(values.get("effective_time")),reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
         }
  
@@ -2047,53 +2031,53 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    @SuppressWarnings("unchecked")
-    @FunctionName("CreateRqPage")
-    public void CreateRqPage(RequestEntity reqEntity)throws Exception{
-        Map<String, Object> param = (Map<String, Object>) reqEntity.getParam();
-        HttpServletResponse response = (HttpServletResponse)param.get("response");
-        response.setContentType("image/png");
-        response.setDateHeader("expries", -1);
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Pragma", "no-cache");
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+    /**
+     * 生成二维码
+     * @param course_id 课程
+     * @param room_id 直播间
+     * @param access_token 需要检验
+     * @param room_share_code
+     * @param effective_time 月份
+     * @param profit_share_rate 分销比例
+     * @param version 版本
+     * @return 返回流信息
+     * @throws Exception
+     */
+    public String CreateRqPage(String course_id,String room_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version)throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(access_token);//用安全证书拿userId
+        RequestEntity reqEntity = new RequestEntity();
         Map<String,Object> query = new HashMap<String,Object>();
-        query.put("user_id",userId);
+        query.put("user_id",userId);//
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-        String user_head_portrait = userMap.get("avatar_address");
-        String userName = userMap.get("nick_name");
-        OutputStream os = response.getOutputStream();
-        OutputStream b64 = new Base64OutputStream(os);
-        if(!("").equals(param.get("room_share_code").toString())){
-            String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),
-                    param.get("id"),
-                    param.get("room_id"),
-                    (Integer)param.get("profit_share_rate"),
-                    param.get("effective_time"));
-            BufferedImage room_live_png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url, (Integer)param.get("profit_share_rate"));//生成图片
-            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
-            return;
-        }else if(!("").equals(param.get("room_id").toString())){ //判断room_id 是否存在
-            Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(param.get("room_id").toString(),null,readLiveRoomOperation,jedisUtils,true);//根据直播间id获取数据
+        String user_head_portrait = userMap.get("avatar_address");//用户头像
+        String userName = userMap.get("nick_name");//用户姓名
+        BufferedImage png = null;//返回的图片
+
+
+        if(room_share_code!=null){//如果是分销链接
+            String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"),room_share_code,room_id,profit_share_rate,effective_time);
+            png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url,profit_share_rate);//生成图片
+
+        }else if(room_id != null){ //判断分享直播间
+
+            Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedisUtils,true);//根据直播间id获取数据
             query.put("user_id",liveRoomMap.get("lecturer_id"));
             Map<String, String> lecturerMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
-            String share_url = getLiveRoomShareURL(userId, param.get("room_id").toString()).get("share_url");
+            String share_url = getLiveRoomShareURL(userId, room_id);
             String lecturerName = lecturerMap.get("nick_name");
-            BufferedImage room_live_png = ZXingUtil.createLivePng(user_head_portrait,userName,lecturerName,share_url);//生成图片
-            ImageIO.write(room_live_png, "png", response.getOutputStream());//写入返回
-            return;
-        }else if(!("").equals(param.get("course_id").toString())){
-            Map<String,String> courseMap =  CacheUtils.readCourse(param.get("course_id").toString(), reqEntity, readCourseOperation, jedisUtils, false);
-            String share_url = getCourseShareURL(userId,param.get("course_id").toString() , courseMap).toString();
-            BufferedImage room_live_png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
-            ImageIO.write(room_live_png, "png", b64);//写入返回
-            return;
+            png = ZXingUtil.createLivePng(user_head_portrait,userName,lecturerName,share_url);//生成图片
+
+        }else if(course_id != null){//分享课程
+            Map<String,String> courseMap =  CacheUtils.readCourse(course_id, reqEntity, readCourseOperation, jedisUtils, false);
+            String share_url = getCourseShareURL(userId,course_id, courseMap);
+            png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
         }
 
-        b64.flush();
-        b64.close();
-        b64=null;
-        response.flushBuffer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(png, "png", baos);
+        byte[] bytes = baos.toByteArray();
+        BASE64Encoder encoder = new BASE64Encoder();
+        return encoder.encodeBuffer(bytes);
 }
 
 

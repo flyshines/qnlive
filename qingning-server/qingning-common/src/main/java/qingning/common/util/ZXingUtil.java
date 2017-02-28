@@ -635,9 +635,9 @@ public class ZXingUtil {
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
         //分享者
-        BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -560, 1.0f, "png",true);
+        BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
         
-        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -500, 1.0f, "png",true);
+        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -300, 1.0f, "png",true);
         BufferedImage pressText2 = pressText(lecturer_name+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -80, 1.0f, "png",false);
         
         BufferedImage pressText3 = pressText("长按图片,识别二维码进入直播间", pressText2, "Courier", 1, Color.black, 30, 0,540, 1.0f, "png",false);
@@ -656,7 +656,7 @@ public class ZXingUtil {
      * @return
      * @throws Exception
      */
-    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Integer profit_share_rate) throws Exception{
+    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Double profit_share_rate) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
         bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");

@@ -658,29 +658,35 @@ public class CommonController extends AbstractController {
      * @return 返回流信息
      * @throws Exception
      */
-    @RequestMapping(value = "/common/getqrcode.png", method = RequestMethod.GET)
-    public void CreateRqPage(
-            @RequestParam(value = "course_id" ,defaultValue="") String course_id,
-            @RequestParam(value = "room_id",defaultValue="") String room_id,
-            @RequestParam(value = "recommend_code",defaultValue="") String recommend_code,
-            @RequestParam(value = "room_share_code",defaultValue="") String room_share_code,
-            @RequestParam(value = "profit_share_rate",defaultValue="") String profit_share_rate,
-            @RequestParam(value = "effective_time",defaultValue="1") Integer effective_time,
-            @RequestHeader("access_token") String access_token,
-            @RequestHeader("version") String version,
-            HttpServletResponse response
-    ) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
-        Map<String, Object> param = new HashMap<>();
-        param.put("course_id", course_id);
-        param.put("room_id", room_id);
-        param.put("recommend_code", recommend_code);
-        param.put("room_share_code", recommend_code);
-        param.put("profit_share_rate", profit_share_rate);
-        param.put("effective_time", effective_time);
-        param.put("response",response);
-        requestEntity.setParam(param);
-        this.process(requestEntity, serviceManger, message);
-    }
+//    public String CreateRqPage(String course_id,String room_id,String recommend_code,String room_share_code,String profit_share_rate,Integer effective_time,String access_token, String version) throws Exception {
+//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
+//        Map<String, Object> param = new HashMap<>();
+//        if(course_id != null)//课程id
+//        param.put("course_id", course_id);
+//
+//        if(room_id != null)//直播间id
+//        param.put("room_id", room_id);
+//
+//        if(recommend_code != null)//推荐码
+//        param.put("recommend_code", recommend_code);
+//
+//        if(room_share_code != null)//
+//        param.put("room_share_code", room_share_code);
+//
+//        if(profit_share_rate != null)//分销比例
+//        param.put("profit_share_rate", profit_share_rate);
+//
+//        if(effective_time != null)//期限
+//        param.put("effective_time", effective_time);
+//        requestEntity.setParam(param);
+//        Map<String, String> value = (Map<String, String>) this.process(requestEntity, serviceManger, message);
+//        return value.get("png_url");
+////        return new ResponseEntity();
+//    }
+
+
+
+
+
     //</editor-fold>
 }
