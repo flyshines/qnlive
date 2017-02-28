@@ -2,21 +2,15 @@ package qingning.common.server.imp;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.*;
 
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
-import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.DefaultPutRet;
-import com.qiniu.storage.model.FetchRet;
-import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.util.CollectionUtils;
-import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -1885,11 +1879,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
  
     private String qiNiuFetchURL(String mediaUrl) throws Exception{
-        Configuration cfg = new Configuration(Zone.zone0());
-        BucketManager bucketManager = new BucketManager(auth,cfg);
+        BucketManager bucketManager = new BucketManager(auth);
         String bucket = MiscUtils.getConfigByKey("image_space");
         String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-        FetchRet result = bucketManager.fetch(mediaUrl, bucket,key);
+        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
         String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
         return imageUrl;
     }
