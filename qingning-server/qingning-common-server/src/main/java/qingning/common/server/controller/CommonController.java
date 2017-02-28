@@ -633,6 +633,8 @@ public class CommonController extends AbstractController {
     public @ResponseBody ResponseEntity getCourseRecommendUsers(
             @PathVariable("room_id") String room_id,
             @PathVariable("course_id") String course_id,
+            @RequestParam(value="rq_code",defaultValue="") String rq_code,
+            @RequestParam(value="distributer_id",defaultValue="") String distributer_id,
             @RequestParam(value="page_count",defaultValue="20") String page_count,
             @RequestParam(value="student_pos",defaultValue="") String student_pos,
             @RequestHeader("access_token") String accessToken,
@@ -641,6 +643,8 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseRecommendUsers", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("room_id", room_id);
+        param.put("distributer_id", distributer_id);
+        param.put("rq_code", rq_code);
         param.put("course_id", course_id);
         param.put("page_count", page_count);
         param.put("student_pos", student_pos);

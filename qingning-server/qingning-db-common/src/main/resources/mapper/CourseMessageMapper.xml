@@ -33,22 +33,22 @@
     values
     <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
       #{item.message_id},#{item.course_id},
-      <if test="message != null" >
+      <if test="item.message != null" >
         #{item.message},
       </if>
-      <if test="message == null" >
+      <if test="item.message == null" >
         null,
       </if>
-      <if test="message_url != null" >
+      <if test="item.message_url != null" >
         #{item.message_url},
       </if>
-      <if test="message_url == null" >
+      <if test="item.message_url == null" >
         null,
       </if>
-      <if test="message_question != null" >
+      <if test="item.message_question != null" >
         #{item.message_question},
       </if>
-      <if test="message_question == null" >
+      <if test="item.message_question == null" >
         null,
       </if>
       #{item.audio_time},#{item.message_pos},

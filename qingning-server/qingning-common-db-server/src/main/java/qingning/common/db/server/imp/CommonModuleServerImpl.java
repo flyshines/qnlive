@@ -267,6 +267,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
 			String distributer_id = null;
+			String rqCode = null;
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
 				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新
 				Map<String,Object> roomDistributerRecommendUpdateMap = new HashMap<>();
@@ -278,7 +279,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 				distributer_id=(String)roomDistributerCache.get("distributer_id");
-
+				rqCode = (String)roomDistributerCache.get("rq_code");
 				//查询是否有t_room_distributer_courses表，如果没有，则插入数据
 				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
 				roomDistributerCourseMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
@@ -320,6 +321,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("payment_amount", tradeBill.get("amount"));
 			student.put("course_password", courseMap.get("course_password"));
 			student.put("student_type", distributer_id==null? 0 : 1);  //TODO 课程学员待修改
+			student.put("rq_code", rqCode);
 			student.put("create_time", now);
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);			

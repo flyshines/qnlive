@@ -216,7 +216,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
- 
+        
+        RequestEntity request = new RequestEntity();                   
+        request.setParam(map); 
+        Map<String,String> lectureInfo = CacheUtils.readLecturer(userId, request, readLecturerOperation, jedisUtils);
+        long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
  
@@ -227,7 +231,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     return resultMap;
  
                 }else {
-                    List<Map<String,Object>> liveRoomListResult = new ArrayList<>();
+                    List<Map<String,Object>> liveRoomListResult = new ArrayList<>();  
                     for(String roomIdCache : liveRoomsMap.keySet()){
                         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomIdCache, reqEntity, readLiveRoomOperation, jedisUtils, true);
                         Map<String,Object> peocessLiveRoomMap;
@@ -254,6 +258,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             peocessLiveRoomMap.put("fans_num", MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
                             peocessLiveRoomMap.put("room_id", MiscUtils.convertString(liveRoomMap.get("room_id")));
                             peocessLiveRoomMap.put("update_time", MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
+                            peocessLiveRoomMap.put("pay_course_num", payCourseNum);
                             liveRoomListResult.add(peocessLiveRoomMap);
                         }
                     }
@@ -300,6 +305,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("rq_code",  MiscUtils.convertString(liveRoomMap.get("rq_code")));
                 resultMap.put("room_address",  MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(Long.valueOf(liveRoomMap.get("update_time"))));
+                resultMap.put("pay_course_num", payCourseNum);
                 return resultMap;
  
             }else {
@@ -310,6 +316,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("fans_num",  MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
                 resultMap.put("room_address", MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
+                resultMap.put("pay_course_num", payCourseNum);
                 return resultMap;
             }
         }

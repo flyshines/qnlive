@@ -58,4 +58,6 @@ public interface IUserModuleServer {
 	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 	
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+	
+	Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
 }
