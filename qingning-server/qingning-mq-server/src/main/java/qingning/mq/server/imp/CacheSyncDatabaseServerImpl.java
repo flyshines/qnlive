@@ -98,7 +98,11 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						pipeline.hset(userKey, "today_distributer_amount","0");
 					}
 					pipeline.sync();
-		    	}				
+		    	} else {
+		    		for(String userId:userSet){
+		    			jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
+		    		}
+		    	}			
 				
 				for(String userId:userSet){
 					queryParam.clear();
@@ -485,9 +489,12 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					roomDistributerMap.put(rqCode, pipeline.hgetAll(key));
 				}
 				pipeline.sync();
+				if(MiscUtils.isEmpty(roomDistributerMap)){
+					return;
+				}
 				//t_room_distributer
 				Map<String,Object> roomDistributerValues = new HashMap<String,Object>();
-				Map<String,Map<String,String>> roomDistributerDetailsMap = new HashMap<String,Map<String,String>>();
+				Map<String,Map<String,String>> roomDistributerDetailsMap = new HashMap<String,Map<String,String>>();				
 				for(String rqCode:roomDistributerMap.keySet()){
 					Map<String,String> values = roomDistributerMap.get(rqCode).get();
 					if(MiscUtils.isEmpty(values)){
@@ -509,7 +516,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						//TODO
 					}
 				}
-				
+				if(MiscUtils.isEmpty(roomDistributerDetailsMap)){
+					return;
+				}
 				for(String roomDistributerDetailsId : roomDistributerDetailsMap.keySet()){
 					Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
 					Map<String,String> values = roomDistributerDetailsMap.get("roomDistributerDetailsId");

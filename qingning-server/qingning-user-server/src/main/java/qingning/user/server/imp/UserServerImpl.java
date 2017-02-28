@@ -1256,10 +1256,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
         	if(!MiscUtils.isEmpty(numInfo)){
         		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
         	}
-        	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
-        	if(lastNum<num){
-        		jedis.hset(courseKey, "student_num", num+"");
-        	}
+        	jedis.hset(courseKey, "student_num", num+"");
+        	//long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
+        	//if(lastNum<num){
+        	//	jedis.hset(courseKey, "student_num", num+"");
+        	//}
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
         }
