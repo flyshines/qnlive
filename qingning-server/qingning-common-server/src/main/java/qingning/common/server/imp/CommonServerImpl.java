@@ -1056,6 +1056,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.clear();
                     query.put("course_id", courseId);
                     query.put("profit_type", "1");
+                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
 
