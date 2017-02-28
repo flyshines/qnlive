@@ -351,6 +351,7 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="png" type="string" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -362,6 +363,7 @@
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"/>
+					<param name="png" type="string"  require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -444,6 +446,7 @@
 					<accessToken require="Y" />
 				</auth>
 				<inputs>
+					<param name="png" type="string"  require="N"/>
 					<param name="query_type" type="string" require="Y,000100"/>
 					<param name="id" type="string" require="N" validate="(query_type,id)=>{
                                    var isEmpty= id==null || id.length == 0;

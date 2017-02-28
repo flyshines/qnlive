@@ -5,8 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.DefaultPutRet;
+import com.qiniu.storage.model.FetchRet;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -1617,9 +1620,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap));
-
-        resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
- 
+        if(reqMap.get("png").toString().equals("Y")){
+            resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
+        }
         return resultMap;
     }
  
@@ -1643,7 +1646,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //查询该用户是否为该直播间的分销员
         resultMap.put("share_url",getLiveRoomShareURL(userId, roomId));
-        resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
+        if(reqMap.get("png").toString().equals("Y"))
+             resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
         return resultMap;
     }
  
@@ -1869,10 +1873,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
  
     private String qiNiuFetchURL(String mediaUrl) throws Exception{
-        BucketManager bucketManager = new BucketManager(auth);
+        Configuration cfg = new Configuration(Zone.zone0());
+        BucketManager bucketManager = new BucketManager(auth,cfg);
         String bucket = MiscUtils.getConfigByKey("image_space");
         String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+        FetchRet result = bucketManager.fetch(mediaUrl, bucket,key);
         String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
         return imageUrl;
     }
@@ -1906,7 +1911,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//把roomid 放进参数中 传到后面
                 Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedisUtils, true);
                 if("2".equals(courseMap.get("status"))){
-                    content = liveRoomMap.get("room_name");
+                    content = liveRoomMap.get("room_name")+"\n";
                 }else if("1".equals(courseMap.get("status"))){
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
@@ -1915,7 +1920,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         content += "\n" + liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time") + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }
                 }else if("4".equals(courseMap.get("status"))){
-                    content  = liveRoomMap.get("room_name") + " " + MiscUtils.getConfigByKey("weixin_course_share_content");
+                    content  = liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_content");
                 }
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
@@ -1974,7 +1979,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("icon_url",icon_url);
         resultMap.put("simple_content",simple_content);
         resultMap.put("share_url",share_url);
-        resultMap.put("png_url",png_url);
+        if(reqMap.get("png").toString().equals("Y"))
+            resultMap.put("png_url",png_url);
+
         return resultMap;
     }
  
@@ -2073,12 +2080,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
         }
 
+
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(png, "png", baos);
         byte[] bytes = baos.toByteArray();
         BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encodeBuffer(bytes);
-}
+        String png_base64 =  encoder.encodeBuffer(bytes);
+        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");
+        return png_base64;
+    }
 
 
 

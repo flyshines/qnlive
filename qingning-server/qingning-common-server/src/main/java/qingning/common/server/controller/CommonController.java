@@ -494,12 +494,14 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value="/common/courses/{course_id}/card",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getCourseInviteCard(
+            @RequestParam(value="png",defaultValue="N") String png,
             @PathVariable("course_id") String course_id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version) throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseInviteCard", access_token, version);
         Map<String, Object> param = new HashMap<>();
         param.put("course_id", course_id);
+        param.put("png",png);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -515,12 +517,14 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value="/common/rooms/{room_id}/card",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getRoomInviteCard(
+            @RequestParam(value="png",defaultValue="N") String png,
             @PathVariable("room_id") String room_id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version) throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getRoomInviteCard", access_token, version);
         Map<String, Object> param = new HashMap<>();
         param.put("room_id", room_id);
+        param.put("png",png);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -574,6 +578,7 @@ public class CommonController extends AbstractController {
     @RequestMapping(value="/common/share",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity getShareInfo(
             @RequestParam(value="query_type",defaultValue="") String query_type,
+            @RequestParam(value="png",defaultValue="N") String png,
             @RequestParam(value="id",defaultValue="") String id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version) throws Exception{
@@ -581,6 +586,7 @@ public class CommonController extends AbstractController {
         Map<String, Object> param = new HashMap<>();
         param.put("query_type", query_type);
         param.put("id", id);
+        param.put("png",png);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;

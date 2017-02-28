@@ -12,13 +12,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -45,7 +39,9 @@ import com.google.zxing.NotFoundException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-  
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
 /** 
  * ZXing工具类 
  * @see ----------------------------------------------------------------------------------------------------------------------- 
@@ -625,7 +621,7 @@ public class ZXingUtil {
     public static BufferedImage createLivePng(String user_head_portrait,String userName,String lecturer_name,String qr_code_content) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
+        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -637,10 +633,10 @@ public class ZXingUtil {
         //分享者
         BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
         
-        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -300, 1.0f, "png",true);
+        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, "Courier", 1, Color.black, 40, 0, -250, 1.0f, "png",true);
         BufferedImage pressText2 = pressText(lecturer_name+"的直播间", pressText1, "Courier", 1, Color.black, 52, 0, -80, 1.0f, "png",false);
         
-        BufferedImage pressText3 = pressText("长按图片,识别二维码进入直播间", pressText2, "Courier", 1, Color.black, 30, 0,540, 1.0f, "png",false);
+        BufferedImage pressText3 = pressText("长按图片识别二维码进入直播间", pressText2, "Courier", 1, Color.black, 30, 0,540, 1.0f, "png",false);
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
         BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
@@ -659,7 +655,7 @@ public class ZXingUtil {
     public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Double profit_share_rate) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
+        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -669,7 +665,7 @@ public class ZXingUtil {
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
 
-        BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -510, 1.0f, "png",true);
+        BufferedImage pressText =  pressText(userName, waterMark, "Courier", 1, Color.black, 44, 0, -310, 1.0f, "png",true);
 
         BufferedImage pressText1 = pressText("直播间分销员邀请", pressText, "Courier", 1, Color.gray, 40, 0, -260, 1.0f, "png",true);
 
@@ -702,7 +698,7 @@ public class ZXingUtil {
     public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,String qr_code_content,Long time) throws Exception{
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later.png");
+        bi = convertBG(bi,"http://image.qnhdlive.tsingning.com/bg_later_low.png");
         //二维码的长宽
         int qr_code_size= 270;
         //用户头像的长宽
@@ -722,9 +718,10 @@ public class ZXingUtil {
         BufferedImage pressText2 = pressText(course_name, pressText1, "Courier", 1, Color.black, 52, 0, -90, 1.0f, "png",false);
         //时间
         String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
-        BufferedImage pressText3 = pressText("直播时间:"+format, pressText2, "Courier", 1, Color.black, 40, 0, 30, 1.0f, "png",false);
+
+        BufferedImage pressText3 = pressText("直播时间:"+format, pressText2, "Courier", 1, Color.black, 32, 0, 30, 1.0f, "png",false);
       
-        BufferedImage pressText4 = pressText("长按图片,识别二维码进入直播间", pressText3, "Courier", 1, Color.black, 40, 0,560, 1.0f, "png",false);
+        BufferedImage pressText4 = pressText("长按图片识别二维码进入直播间", pressText3, "Courier", 1, Color.black, 30, 0,560, 1.0f, "png",false);
         
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -908,7 +905,7 @@ public class ZXingUtil {
     
 	
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		//生成二维码
 		// encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/新建文件夹/5.png");
 		// System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null)); TODO
@@ -921,18 +918,40 @@ public class ZXingUtil {
 //	    	//二维码内容
 //	    	String qr_code_content="www.baidu.com";
 //	    	long time = 1488160472302l;
-//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 0.03);
-//
+//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
+//            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字", qr_code_content, time);
+//            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
 //	    	  //生成的图片位置
-//	    	String imagePath= "C:/Users/Administrator/Desktop/Imag.png";
-//	        ImageIO.write(createRoomDistributerPng, imagePath.substring(imagePath.lastIndexOf(".") + 1), new File(imagePath));
-//	        System.out.println("ok");
-////			createCoursePng(user_head_portrait, userName, qr_code_content, time);
-////			createLivePng(user_head_portrait, userName, qr_code_content);;
+//	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng.png";
+//           // String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
+//            //String imagePath3= "C:/Users/Administrator/Desktop/LivePng.png";
+//	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
+//           // ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
+//           // ImageIO.write(createLivePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
+//
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            ImageIO.write(createRoomDistributerPng, "png", baos);
+//            byte[] bytes = baos.toByteArray();
+//            QiNiuUpUtils.uploadByIO(bytes,userName);
+////            BASE64Encoder encoder = new BASE64Encoder();
+////            BASE64Decoder decoder = new BASE64Decoder();
+//            //System.out.println(encoder.encodeBuffer(bytes));
+////            byte[] b = decoder.decodeBuffer( encoder.encodeBuffer(bytes));
+////            for (int i = 0; i < b.length; ++i) {
+////                if (b[i] < 0) {// 调整异常数据
+////                    b[i] += 256;
+////                }
+////            }// 生成jpeg图片
+////            String imgFilePath = "C:/Users/Administrator/Desktop/test22.png";//新生成的图片
+////            OutputStream out = new FileOutputStream(imgFilePath);
+////            out.write(b);
+////            out.flush();
+////            out.close();
+////            System.out.println("ok");
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-	}
-    
+
+    }
 }  
 
