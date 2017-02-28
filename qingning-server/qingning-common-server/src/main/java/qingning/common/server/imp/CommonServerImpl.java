@@ -1009,10 +1009,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 	if(!MiscUtils.isEmpty(numInfo)){
                 		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
                 	}
-                	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
+                	jedis.hset(courseKey, "student_num", num+"");
+/*                	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
                 	if(lastNum<num){
                 		jedis.hset(courseKey, "student_num", num+"");
-                	}
+                	}*/
                     jedis.hincrBy(courseKey, "course_amount", lecturerProfit);
                 }else {
                     //如果之前并没有打赏该课程，则计入
