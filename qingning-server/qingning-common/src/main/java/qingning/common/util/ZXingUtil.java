@@ -630,11 +630,12 @@ public class ZXingUtil {
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
         //分享者
         BufferedImage pressText =  pressText(userName, waterMark, FONT_NAME, 1, Color.black, 44, 0, -310, 1.0f, "png",true);
-        
-        BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, FONT_NAME, 1, Color.black, 40, 0, -250, 1.0f, "png",true);
-        BufferedImage pressText2 = pressText(lecturer_name+"的直播间", pressText1, FONT_NAME, 1, Color.black, 52, 0, -80, 1.0f, "png",false);
-        
-        BufferedImage pressText3 = pressText("长按图片识别二维码进入直播间", pressText2, FONT_NAME, 1, Color.black, 30, 0,540, 1.0f, "png",false);
+        //推荐一个不错的直播间
+        BufferedImage pressText1 = pressText("Recommend a good studio", pressText, FONT_NAME, 1, Color.black, 40, 0, -250, 1.0f, "png",true);
+        //的直播间
+        BufferedImage pressText2 = pressText(lecturer_name+"direct broadcasting room", pressText1, FONT_NAME, 1, Color.black, 52, 0, -80, 1.0f, "png",false);
+        //长按图片识别二维码进入直播间
+        BufferedImage pressText3 = pressText("DavidGHS", pressText2, FONT_NAME, 1, Color.black, 30, 0,540, 1.0f, "png",false);
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
         BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
