@@ -2,6 +2,7 @@ package qingning.common.server.imp;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 import com.qiniu.common.Zone;
@@ -2175,6 +2176,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         BASE64Encoder encoder = new BASE64Encoder();
         String png_base64 =  encoder.encodeBuffer(bytes);//转换成base64串
         png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
+        png_base64=png_base64.replaceAll("\\+", "!").replaceAll("/", "-");
         return png_base64;
     }
 
