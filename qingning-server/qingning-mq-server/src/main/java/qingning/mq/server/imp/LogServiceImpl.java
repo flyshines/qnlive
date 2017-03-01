@@ -17,6 +17,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
@@ -26,6 +27,7 @@ import qingning.mq.persistence.mongo.MongoDB;
 import qingning.mq.utils.CommonLocationUtils;
 import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
+import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 import com.alibaba.fastjson.JSONObject;
 
@@ -100,7 +102,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		if("0".equals(clientSideInfo.get("status"))){
     			insertActiveDeviceDB(clientSideInfoStrMap);
     		} else if(!"2".equals(clientSideInfo.get("status"))){
-    			insertUserDB(clientSideInfoStrMap);
+    			insertUserDB(clientSideInfoStrMap,jedisUtils);
     		}
     		
     	}catch(Exception e){
@@ -195,7 +197,7 @@ public class LogServiceImpl extends AbstractMsgService {
 		}
     }
     
-    private void insertUserDB(Map<String,String> values){
+    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils){
     	String user_id = (String)values.get("user_id");
     	if(MiscUtils.isEmpty(user_id)){
     		return;
@@ -214,6 +216,7 @@ public class LogServiceImpl extends AbstractMsgService {
 		MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_USER_REGISTRY_DATABASE);
 		MongoCollection<Document> collection = dataBase.getCollection(String.format(Constants.MONGODB_USER_REGISTRY_COLLECTION_FORMAT,year_month));
 		BasicDBObject basicDBObject = new BasicDBObject("_id",user_id);
+		values.put("_id",user_id);
 		List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
 		if(MiscUtils.isEmpty(list)){
 			MongoDB.insert(collection, values);
@@ -233,6 +236,38 @@ public class LogServiceImpl extends AbstractMsgService {
 			info.put("subscribe", values.get("subscribe"));
 			
 			loginInfoMapper.updateLoginInfo(info);
+		}
+		try {
+			Map<String,String> info = new HashMap<String,String>();
+			String country = values.get("country");
+			String province = values.get("province");
+			String city = values.get("city");
+			String district = values.get("district");
+			if(!MiscUtils.isEmpty(country)){
+				info.put("country", country);
+			}
+			if(!MiscUtils.isEmpty(province)){
+				info.put("province", province);
+			}
+			if(!MiscUtils.isEmpty(city)){
+				info.put("city", city);
+			}
+			if(!MiscUtils.isEmpty(district)){
+				info.put("district", district);
+			}
+			CacheUtils.readUser(user_id, null, new CommonReadOperation(){
+				@Override
+				public Object invokeProcess(RequestEntity requestEntity) throws Exception {					
+					return userMapper.findByUserId(user_id);
+				}
+			}, jedisUtils);
+			Map<String,Object> query = new HashMap<String,Object>();
+        	query.put("user_id", user_id);
+        	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+        	jedisUtils.getJedis().hmset(key, info);
+			
+		} catch (Exception e) {
+			log.error("read user["+user_id+"]:"+e.getMessage());
 		}
     }
     
