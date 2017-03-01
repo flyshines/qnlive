@@ -50,6 +50,24 @@ public class ImMsgServiceImp implements ImMsgService {
 
 	private static Hashtable<String,Object> messageLockMap = new Hashtable<>();
 	private static Hashtable<String,Object> maxLockMap = new Hashtable<>();
+	
+    private SaveCourseMessageService saveCourseMessageService;
+    private SaveCourseAudioService saveCourseAudioService;
+	
+    private SaveCourseMessageService getSaveCourseMessageService(ApplicationContext context){
+    	if(saveCourseMessageService == null){
+    		saveCourseMessageService =  (SaveCourseMessageService)context.getBean("SaveCourseMessageServer");
+    	}
+    	return saveCourseMessageService;
+    }
+    
+    private SaveCourseAudioService getSaveCourseAudioService(ApplicationContext context){
+    	if(saveCourseAudioService == null){
+    		saveCourseAudioService =  (SaveCourseAudioService)context.getBean("SaveAudioMessageServer");
+    	}
+    	return saveCourseAudioService;
+    }
+	
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		Map<String,Object> body = imMessage.getBody();
@@ -207,6 +225,33 @@ public class ImMsgServiceImp implements ImMsgService {
 		map.put(Constants.FIELD_MESSAGE_ID, messageId);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
+		if("6".equals(information.get("send_type"))){
+			//1.7如果存在课程聊天信息
+            RequestEntity messageRequestEntity = new RequestEntity();
+            Map<String,Object> processMap = new HashMap<>();
+            processMap.put("course_id", (String)information.get("course_id"));
+            messageRequestEntity.setParam(processMap);
+            try {
+            	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
+            	if(saveCourseMessageService != null){
+            		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
+            	}
+            } catch (Exception e) {
+                //TODO 暂时不处理
+            }
+
+            //1.8如果存在课程音频信息
+            RequestEntity audioRequestEntity = new RequestEntity();
+            audioRequestEntity.setParam(processMap);
+            try {            	
+            	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
+            	if(saveCourseAudioService!=null){
+            		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
+            	}
+            } catch (Exception e) {
+                //TODO 暂时不处理
+            }
+		}
 	}
 
 	/**

@@ -28,15 +28,15 @@ public class MessagePushServerImpl extends AbstractMsgService {
     private CoursesStudentsMapper coursesStudentsMapper;
 
 
-    private SaveCourseMessageService saveCourseMessageService;
-    private SaveCourseAudioService saveCourseAudioService;
+/*    private SaveCourseMessageService saveCourseMessageService;
+    private SaveCourseAudioService saveCourseAudioService;*/
 
     static QNSchedule qnSchedule;
     static {
     	qnSchedule = new QNSchedule();
     }
 
-    private SaveCourseMessageService getSaveCourseMessageService(ApplicationContext context){
+/*    private SaveCourseMessageService getSaveCourseMessageService(ApplicationContext context){
     	if(saveCourseMessageService == null){
     		saveCourseMessageService =  (SaveCourseMessageService)context.getBean("SaveCourseMessageServer");
     	}
@@ -48,7 +48,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     		saveCourseAudioService =  (SaveCourseAudioService)context.getBean("SaveAudioMessageServer");
     	}
     	return saveCourseAudioService;
-    }
+    }*/
     
     //课程未开播，强制结束处理定时任务
     @SuppressWarnings("unchecked")
@@ -72,7 +72,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
 			@Override
 			public void process() {
                 log.debug("-----------课程未开播处理定时任务 课程id"+this.getCourseId()+"  执行时间"+System.currentTimeMillis());
-                processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis, getSaveCourseMessageService(context), getSaveCourseAudioService(context));
+                //processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis, getSaveCourseMessageService(context), getSaveCourseAudioService(context));
+                processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis);
 			}        	
         };
         scheduleTask.setId(courseId);
@@ -319,7 +320,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         		@Override
         		public void process() {
                     log.debug("课程直播超时处理定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
-                    processCourseEnd(coursesMapper,"2",jedisUtils,courseId,jedis,getSaveCourseMessageService(),getSaveCourseAudioService());
+                    processCourseEnd(coursesMapper,"2",jedisUtils,courseId,jedis);
         		}
         	};
         	scheduleTask.setId(courseId);
@@ -427,7 +428,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     }
     
     //type 为1则为课程未开播强制结束，type为2则为课程直播超时强制结束
-    private void processCourseEnd(CoursesMapper processCoursesMapper, String type ,JedisUtils jedisUtils, String courseId, Jedis jedis, SaveCourseMessageService saveCourseMessageService, SaveCourseAudioService saveCourseAudioService){
+    private void processCourseEnd(CoursesMapper processCoursesMapper, String type ,JedisUtils jedisUtils, String courseId, Jedis jedis){
         Map<String,Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -508,7 +509,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
-            //1.7如果存在课程聊天信息
+/*            //1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
             processMap.put("course_id", courseId);
@@ -526,7 +527,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
             } catch (Exception e) {
                 //TODO 暂时不处理
-            }
+            }*/
 
             //课程未开播强制结束
             if(type.equals("1")){
@@ -568,7 +569,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         this.coursesMapper = coursesMapper;
     }
 
-    public SaveCourseMessageService getSaveCourseMessageService() {
+/*    public SaveCourseMessageService getSaveCourseMessageService() {
         return saveCourseMessageService;
     }
 
@@ -582,5 +583,5 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     public void setSaveCourseAudioService(SaveCourseAudioService saveCourseAudioService) {
         this.saveCourseAudioService = saveCourseAudioService;
-    }
+    }*/
 }
