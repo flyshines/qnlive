@@ -1782,6 +1782,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         if(!find){
         	Map<String,Object> roomDistributerMap = commonModuleServer.findRoomDistributerInfoByRqCode(rqCode);
+        	distributerRoom = new HashMap<String, String>();
         	if(!MiscUtils.isEmpty(roomDistributerMap)){
         		MiscUtils.converObjectMapToStringMap(roomDistributerMap, distributerRoom);
         		Map<String,String> query = new HashMap<String,String>();
