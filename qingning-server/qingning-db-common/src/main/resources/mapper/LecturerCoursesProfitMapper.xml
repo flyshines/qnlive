@@ -162,6 +162,9 @@
 	<if test="profit_type != null">
 		and profit_type=#{profit_type}
 	</if>
+	<if test="create_date != null">
+		and create_date=#{create_date}
+	</if>
   </select>
   
 </mapper>

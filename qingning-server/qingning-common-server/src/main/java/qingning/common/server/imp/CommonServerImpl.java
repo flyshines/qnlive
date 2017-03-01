@@ -989,17 +989,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(roomDistributeKey, "last_total_amount", MiscUtils.convertObjectToLong(sumInfo.get("share_amount"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("distributer_id"));
-                	
+                	/*
                     long share_amount = 0L;
                     if(handleResultMap.containsKey("share_amount")){
                         share_amount = (Long)handleResultMap.get("share_amount");
                     }
                     lecturerProfit = (Long)handleResultMap.get("profit_amount") - share_amount;
-                    
+                    */
+                    query.clear();
+                    query.put("distributer_id", distributeRoom.get("distributer_id"));
+                    Date date = MiscUtils.getEndDateOfToday();
+                    query.put("create_date", date);
+                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     query.clear();
                     query.put(Constants.CACHED_KEY_USER_FIELD, distributeRoom.get("distributer_id"));
                     String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
-                    jedis.hincrBy(userCacheKey, "today_distributer_amount", share_amount);
+                    jedis.hset(userCacheKey, "today_distributer_amount", MiscUtils.convertObjectToLong(sumInfo.get("share_amount"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id"));
                 }else {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");

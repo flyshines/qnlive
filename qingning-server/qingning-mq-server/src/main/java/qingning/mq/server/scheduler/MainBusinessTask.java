@@ -72,6 +72,8 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	private RoomDistributerDetailsMapper roomDistributerDetailsMapper;	
 	@Autowired(required=true)
 	private UserMapper userMapper;
+	@Autowired(required=true)
+	private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
 	
 	public void init(){
 		if(list.isEmpty()){
@@ -88,6 +90,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			cacheSyncDatabaseServerimpl.setLecturerDistributionLinkMapper(lecturerDistributionLinkMapper);
 			cacheSyncDatabaseServerimpl.setRoomDistributerDetailsMapper(roomDistributerDetailsMapper);
 			cacheSyncDatabaseServerimpl.setUserMapper(userMapper);
+			cacheSyncDatabaseServerimpl.setLecturerCoursesProfitMapper(lecturerCoursesProfitMapper);
 			list.add(cacheSyncDatabaseServerimpl);
 
 			//讲师课程列表定时任务
