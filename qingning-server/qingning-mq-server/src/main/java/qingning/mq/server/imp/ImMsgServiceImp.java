@@ -238,7 +238,7 @@ public class ImMsgServiceImp implements ImMsgService {
             		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
-                //TODO 暂时不处理
+            	log.error("SaveCourseMessageService["+information.get("course_id")+"] error:"+e.getMessage());
             }
 
             //1.8如果存在课程音频信息
@@ -250,7 +250,7 @@ public class ImMsgServiceImp implements ImMsgService {
             		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
-                //TODO 暂时不处理
+            	log.error("save SaveCourseAudioService["+information.get("course_id")+"] error:"+e.getMessage());
             }
 		}
 	}

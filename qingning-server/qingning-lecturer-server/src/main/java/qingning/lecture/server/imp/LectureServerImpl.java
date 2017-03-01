@@ -1561,6 +1561,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
                         messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
                     }
+                    
+					if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name"))){
+						messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
+					}
                 }
                 resultMap.put("message_list", messageList);
             }

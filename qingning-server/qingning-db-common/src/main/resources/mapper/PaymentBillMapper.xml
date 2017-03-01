@@ -80,7 +80,10 @@
       </if> 
       <if test="update_time != null" >
         update_time = #{update_time},
-      </if>                 
+      </if>
+      <if test="profit_id != null" >
+        profit_id = #{profit_id},
+      </if>                  
     </set>
     where trade_id = #{trade_id}
     <if test="status != null" >

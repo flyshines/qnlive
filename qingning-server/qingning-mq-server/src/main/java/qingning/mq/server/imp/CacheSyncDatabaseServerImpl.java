@@ -522,7 +522,10 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				}
 				for(String roomDistributerDetailsId : roomDistributerDetailsMap.keySet()){
 					Map<String,Object> roomDistributerDetails = new HashMap<String,Object>();
-					Map<String,String> values = roomDistributerDetailsMap.get("roomDistributerDetailsId");
+					Map<String,String> values = roomDistributerDetailsMap.get(roomDistributerDetailsId);
+					if(MiscUtils.isEmpty(values)){
+						continue;
+					}
 					roomDistributerDetails.put("done_time", values.get("done_time"));
 					roomDistributerDetails.put("click_num", values.get("click_num"));
 					roomDistributerDetails.put("recommend_num", values.get("last_recommend_num"));

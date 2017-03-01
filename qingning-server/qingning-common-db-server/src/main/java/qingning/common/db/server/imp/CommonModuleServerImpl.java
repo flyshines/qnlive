@@ -225,18 +225,20 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if("2".equals(status)){
 			throw new QNLiveException("000105");			
 		}
+		String profitId = MiscUtils.getUUId();
 		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
 		updatePaymentBill.put("status", "2");
 		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
 		updatePaymentBill.put("update_time", realPayTime);
 		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
 		updatePaymentBill.put("trade_id", paymentBill.get("trade_id"));
+		updatePaymentBill.put("profit_id", profitId);
 		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
 			throw new QNLiveException("000105");
 		}
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
-		profitRecord.put("profit_id", MiscUtils.getUUId());
+		profitRecord.put("profit_id", profitId);
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
 		profitRecord.put("user_id", tradeBill.get("user_id"));
