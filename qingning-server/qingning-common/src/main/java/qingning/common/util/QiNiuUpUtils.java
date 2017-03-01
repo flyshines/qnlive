@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
+import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
@@ -13,6 +14,7 @@ import com.qiniu.util.Auth;
  * 上传东西到七牛服务器
  */
 public class QiNiuUpUtils {
+
     private static Auth auth;
     static {//利用
         auth = Auth.create (MiscUtils.getConfigByKey("qiniu_AK"), MiscUtils.getConfigByKey("qiniu_SK"));
@@ -30,18 +32,24 @@ public class QiNiuUpUtils {
         UploadManager uploadManager = new UploadManager(cfg);
         try {
             Response response = uploadManager.put(uploadBytes,fileName,upToken);
-            //解析上传成功的结果
             DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
             String url = MiscUtils.getConfigByKey("images_qrcode_domain_name")+"/"+putRet.key;
             return url;
         } catch (QiniuException ex) {
-            Response r = ex.response;
-            System.err.println(r.toString());
+            //删除文件
+            BucketManager bucketManager = new BucketManager(auth, cfg);
             try {
-                System.err.println(r.bodyString());
-            } catch (QiniuException ex2) {
-                //ignore
+                bucketManager.delete(MiscUtils.getConfigByKey("qnlive_qrcode_image"), fileName);
+                Response response = uploadManager.put(uploadBytes,fileName,upToken);
+                DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+                String url = MiscUtils.getConfigByKey("images_qrcode_domain_name")+"/"+putRet.key;
+                return url;
+            } catch (QiniuException e) {
+                //如果遇到异常，说明删除失败
+                System.err.println(e.code());
+                System.err.println(e.response.toString());
             }
+
         }
         return null;
     }
