@@ -36,7 +36,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 
 		Jedis jedisObject = jedisUtils.getJedis();
 		//1.从缓存中查询该课程的消息列表
-		Set<String> messageIdList = jedisObject.zrevrange(messageListKey, 0 , -1);
+		Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
 		if(messageIdList == null || messageIdList.size() == 0){
 			return;
 		}
@@ -69,6 +69,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					messageObjectMap.put("message_id", messageStringMap.get("message_id"));
 					messageObjectMap.put("course_id", messageStringMap.get("course_id"));
 					messageObjectMap.put("message_url", messageStringMap.get("message_url"));
+					messageObjectMap.put("message", messageStringMap.get("message"));
 					messageObjectMap.put("message_question", messageStringMap.get("message_question"));
 					if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
 						messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));

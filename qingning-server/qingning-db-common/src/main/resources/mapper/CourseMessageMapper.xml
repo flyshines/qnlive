@@ -31,8 +31,8 @@
     creator_id, create_time
     )
     values
-    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
-      #{item.message_id},#{item.course_id},
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.message_id},#{item.course_id},
       <if test="item.message != null" >
         #{item.message},
       </if>
@@ -52,7 +52,7 @@
         null,
       </if>
       #{item.audio_time},#{item.message_pos},
-      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time}
+      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time})
     </foreach>
   </insert>
 

@@ -151,6 +151,7 @@ public class ImMsgServiceImp implements ImMsgService {
 				messageObjectMap.put("message_id", stringMap.get("message_id"));
 				messageObjectMap.put("course_id", stringMap.get("course_id"));
 				messageObjectMap.put("message_url", stringMap.get("message_url"));
+				messageObjectMap.put("message", stringMap.get("message"));
 				messageObjectMap.put("message_question", stringMap.get("message_question"));
 				if(!MiscUtils.isEmpty(stringMap.get("audio_time"))){
 					messageObjectMap.put("audio_time", Long.parseLong(stringMap.get("audio_time")));
