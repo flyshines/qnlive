@@ -1985,7 +1985,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
                 share_url = getCourseShareURL(userId, id, courseMap);
-                png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
+                
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
  
             case "2":
@@ -1998,8 +2000,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 content = liveRoomInfoMap.get("room_remark");
                 icon_url = liveRoomInfoMap.get("avatar_address");
                 share_url = getLiveRoomShareURL(userId, id);
-                png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content") + liveRoomInfoMap.get("room_name");
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
+
+
                 break;
  
             case "3":
@@ -2030,7 +2035,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
                 share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
-                png_url = this.CreateRqPage(null,liveRoomInfo.get("room_id"),reqMap.get("id").toString(),(Integer.parseInt(values.get("profit_share_rate")) / 100.0),Integer.valueOf(values.get("effective_time")),reqEntity.getAccessToken(),reqEntity.getVersion());
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(null,liveRoomInfo.get("room_id"),reqMap.get("id").toString(),(Integer.parseInt(values.get("profit_share_rate")) / 100.0),Integer.valueOf(values.get("effective_time")),reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
         }
  
