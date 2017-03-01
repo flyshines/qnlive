@@ -7,7 +7,9 @@ import java.util.*;
 
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
+import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.DefaultPutRet;
+import com.qiniu.storage.model.FetchRet;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1931,10 +1933,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
  
     private String qiNiuFetchURL(String mediaUrl) throws Exception{
-        BucketManager bucketManager = new BucketManager(auth);
+        Configuration cfg = new Configuration(Zone.zone0());
+        BucketManager bucketManager = new BucketManager(auth,cfg);
         String bucket = MiscUtils.getConfigByKey("image_space");
         String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+        FetchRet result = bucketManager.fetch(mediaUrl, bucket,key);
         String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
         return imageUrl;
     }
@@ -2173,11 +2176,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
-        BASE64Encoder encoder = new BASE64Encoder();
-        String png_base64 =  encoder.encodeBuffer(bytes);//转换成base64串
-        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
-        logger.info(png_base64);
-        return png_base64;
+        String png_url = QiNiuUpUtils.uploadByIO(bytes,userId);
+
+//        BASE64Encoder encoder = new BASE64Encoder();
+//        String png_base64 =  encoder.encodeBuffer(bytes);//转换成base64串
+//        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
+//        logger.info(png_base64);
+        return png_url;
     }
 
 
