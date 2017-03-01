@@ -1543,11 +1543,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();        
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String course_id = (String)reqMap.get("course_id");
+        String rqCode = (String)reqMap.get("rq_code");
         Long position = (Long)reqMap.get("position");
         
         Map<String,Object> parameters = new HashMap<String,Object>();
         parameters.put("course_id", course_id);
-        parameters.put("distributer_id", userId);        
+        parameters.put("distributer_id", userId); 
+        parameters.put("rq_code", rqCode);
         List<Map<String,Object>> course_list = commonModuleServer.findRoomDistributerCourseInfo(parameters);
         if(MiscUtils.isEmpty(course_list)){
             throw new QNLiveException("120013");
