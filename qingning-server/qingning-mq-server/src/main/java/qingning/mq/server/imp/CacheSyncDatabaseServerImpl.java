@@ -41,6 +41,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     private LecturerDistributionLinkMapper lecturerDistributionLinkMapper;
     private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
     private UserMapper userMapper;
+    private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
     
     @Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
@@ -89,20 +90,20 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		    	Map<String,Response<Map<String,String>>> userDataMap = new HashMap<String,Response<Map<String,String>>>();
 		    	Calendar cal = Calendar.getInstance();
 		    	cal.setTimeInMillis(System.currentTimeMillis());
-		    	int hour = cal.get(Calendar.HOUR_OF_DAY);
-		    	if(hour<=4){
-					for(String userId:userSet){
-						queryParam.clear();
-						queryParam.put(Constants.CACHED_KEY_USER_FIELD, userId);
-						String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryParam);
-						pipeline.hset(userKey, "today_distributer_amount","0");
-					}
-					pipeline.sync();
-		    	} else {
-		    		for(String userId:userSet){
-		    			jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, userId);
-		    		}
-		    	}			
+		    	 Date currentDate = MiscUtils.getEndDateOfToday();
+		    	for(String userId:userSet){
+		    		queryParam.clear();
+		    		queryParam.put("distributer_id", userId);                   
+		    		queryParam.put("create_date", currentDate);
+                    Map<String,Object> sumInfo = lecturerCoursesProfitMapper.findCoursesSumInfo(queryParam);
+                    if(!MiscUtils.isEmpty(sumInfo)){
+    		    		queryParam.clear();
+    		    		queryParam.put(Constants.CACHED_KEY_USER_FIELD, userId);
+    		    		String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryParam);
+    		    		pipeline.hset(userKey, "today_distributer_amount", MiscUtils.convertObjectToLong(sumInfo.get("share_amount"))+"");
+                    }
+		    	}
+		    	pipeline.sync();
 				
 				for(String userId:userSet){
 					queryParam.clear();
@@ -596,4 +597,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 	public void setUserMapper(UserMapper userMapper){
 		this.userMapper = userMapper;
 	}
+
+	public void setLecturerCoursesProfitMapper(LecturerCoursesProfitMapper lecturerCoursesProfitMapper) {
+		this.lecturerCoursesProfitMapper = lecturerCoursesProfitMapper;
+	}
+	
 }

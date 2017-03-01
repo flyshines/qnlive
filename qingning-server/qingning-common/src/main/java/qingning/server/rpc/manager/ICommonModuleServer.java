@@ -86,4 +86,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findDistributionRoomDetail(Map<String, Object> reqMap);
 	
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+	
+	Map<String,Object> findCoursesSumInfo(Map<String, Object> queryMap);
 }
