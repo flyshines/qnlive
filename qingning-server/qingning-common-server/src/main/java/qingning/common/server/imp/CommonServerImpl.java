@@ -1985,7 +1985,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
                 share_url = getCourseShareURL(userId, id, courseMap);
-                
+
                 if(reqMap.get("png").toString().equals("Y"))
                     png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
@@ -2181,8 +2181,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
-        String png_url = QiNiuUpUtils.uploadByIO(bytes,userId);
-        return png_url;
+        BASE64Encoder encoder = new BASE64Encoder();
+        return encoder.encodeBuffer(bytes);
     }
 
 
