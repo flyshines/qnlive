@@ -1859,6 +1859,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         updateMap.put("room_id",room_id);
                         commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
                     }else {
+                    	if(!rqCode.equals(roomDistributerRecommendMap.get("rq_code"))){
+                    		Map<String,Object> param = new HashMap<String,Object>();
+                    		param.put("distributer_id", distributer_id);
+                    		param.put("rq_code", roomDistributerRecommendMap.get("rq_code"));
+                    		Map<String,Object> result = commonModuleServer.findDistributionRoomDetail(param);
+                    		if(!MiscUtils.isEmpty(result)){
+                    			roomDistributerRecommendMap.put("end_date",result.get("end_date"));                    			
+                    		}
+                    	} else {
+                    		roomDistributerRecommendMap.put("end_date",distributerRoom.get("end_date"));
+                    	}
                         //判断如果该推荐用户如果处于该直播间的无效分销状态，则需要重新成为推荐用户
                         if(roomDistributerRecommendMap.get("end_date") != null){
                             Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
@@ -1875,6 +1886,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                                 insertMap.put("recommend_num", 0);
                                 insertMap.put("done_num", 0);
                                 insertMap.put("course_num", 0);
+                                insertMap.put("old_end_date", roomDistributerRecommendMap.get("end_date"));
                                 insertMap.put("old_recommend_num", roomDistributerRecommendMap.get("recommend_num"));
                                 insertMap.put("old_done_num", roomDistributerRecommendMap.get("done_num"));
                                 insertMap.put("old_course_num", roomDistributerRecommendMap.get("course_num"));

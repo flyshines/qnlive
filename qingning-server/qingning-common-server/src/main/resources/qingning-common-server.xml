@@ -170,7 +170,7 @@
 						<param name="position" type="long"/>
 						<param name="rq_code" type="string" />
 						<param name="distributer_id" type="string"/>
-						<param name="room_name" type="string" />
+						<param name="room_name" type="rstring" />
 						<param name="effective_time" type="string" convert="(effective_time)=>{
 						    var result='';
 							if(utils.isEmpty(effective_time)){
