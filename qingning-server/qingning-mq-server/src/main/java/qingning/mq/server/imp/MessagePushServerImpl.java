@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.*;
+import qingning.mq.server.entyity.QNQuartzSchedule;
 import qingning.mq.server.entyity.QNSchedule;
 import qingning.mq.server.entyity.ScheduleTask;
 import qingning.server.AbstractMsgService;
@@ -31,9 +32,13 @@ public class MessagePushServerImpl extends AbstractMsgService {
 /*    private SaveCourseMessageService saveCourseMessageService;
     private SaveCourseAudioService saveCourseAudioService;*/
 
-    static QNSchedule qnSchedule;
+/*    static QNSchedule qnSchedule;
     static {
     	qnSchedule = new QNSchedule();
+    }*/
+    private static QNQuartzSchedule qnSchedule;
+    static {
+    	qnSchedule = new QNQuartzSchedule();
     }
 
 /*    private SaveCourseMessageService getSaveCourseMessageService(ApplicationContext context){
