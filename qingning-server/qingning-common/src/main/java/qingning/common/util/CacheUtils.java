@@ -118,7 +118,7 @@ public final class CacheUtils {
 	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
 		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
-		if(!MiscUtils.isEmpty(result)){
+		if(jedisUtils !=null && !MiscUtils.isEmpty(result)){
 			Jedis jedis = jedisUtils.getJedis();
 			Map<String,Object> query = new HashMap<String,Object>();
 			query.put(Constants.CACHED_KEY_USER_FIELD, userId);

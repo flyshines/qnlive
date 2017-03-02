@@ -24,7 +24,11 @@ public class ServiceManger {
 	private static Log log = LogFactory.getLog(ServiceManger.class);
 	private Map<String, Map<String,QNLiveServer>> servicerMap = new HashMap<String, Map<String,QNLiveServer>>();
 	private JedisUtils jedisUtils = null;
-		
+	
+	public JedisUtils getJedisUtils(){
+		return jedisUtils;
+	}
+	
 	private void initServerDetails(Map<String,QNLiveServer> map, Element element) throws Exception {
 		List<Element> children = element.getChildren();
 		if(MiscUtils.isEmpty(children)){
