@@ -49,18 +49,18 @@ public class JGMsgUtil {
 			//不做累加角标的消息
 			if(MiscUtils.isEmpty(extrasMap)){
 				notification = Notification.newBuilder()
-						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).disableBadge().build())
+						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).disableBadge().setSound("default").build())
 						.addPlatformNotification(AndroidNotification.newBuilder().setAlert(contents).build()).build();
 			}else {
 				notification = Notification.newBuilder()
-						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).addExtras(extrasMap).disableBadge().build())
+						.addPlatformNotification(IosNotification.newBuilder().setAlert(contents).addExtras(extrasMap).disableBadge().setSound("default").build())
 						.addPlatformNotification(AndroidNotification.newBuilder().setAlert(contents).addExtras(extrasMap).build()).build();
 			}
 		}
 		if (plat.equals(Platforms.ios.getName())) {
 			platform = Platform.ios();
 			notification = Notification.newBuilder()
-					.addPlatformNotification(IosNotification.newBuilder().setAlert("新消息").disableBadge().build())
+					.addPlatformNotification(IosNotification.newBuilder().setAlert("新消息").disableBadge().setSound("default").build())
 					.build();
 		}
 		if (plat.equals(Platforms.android.getName())) {
