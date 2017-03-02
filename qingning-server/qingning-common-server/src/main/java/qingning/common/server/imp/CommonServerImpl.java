@@ -97,10 +97,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     Map<String, Object> queryMap = new HashMap<String, Object>();                    
                     String login_id = (String)reqMap.get("login_id");
                     String login_type = (String)reqMap.get("login_type");
-                    queryMap.put("login_type", login_type);
-                    queryMap.put("login_id", login_id);
                     accessTokenInfo = new HashMap<String,String>();
-                    MiscUtils.converObjectMapToStringMap(commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap), accessTokenInfo);                    
+                    if(!MiscUtils.isEmpty(login_id)){
+                        queryMap.put("login_type", login_type);
+                        queryMap.put("login_id", login_id);
+                    	MiscUtils.converObjectMapToStringMap(commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap), accessTokenInfo);
+                    } else {                    	
+                    	MiscUtils.converObjectMapToStringMap(commonModuleServer.findLoginInfoByUserId(user_id), accessTokenInfo);
+                    	reqMap.put("login_id", accessTokenInfo.get("union_id"));
+                    }
                 }
                 reqMap.put("record_time", userInfo.get("create_time"));
                 reqMap.put("old_subscribe", accessTokenInfo.get("subscribe"));
