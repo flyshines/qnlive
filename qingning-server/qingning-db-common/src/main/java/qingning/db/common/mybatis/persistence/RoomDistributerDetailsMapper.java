@@ -12,4 +12,6 @@ public interface RoomDistributerDetailsMapper {
 	Map<String,Object> findDistributionRoomDetail(Map<String, Object> reqMap);
 	
 	List<Map<String,Object>> findDistributionRoomByLectureInfo(Map<String, Object> record);
+	
+	List<Map<String,Object>> findRoomRecommendUserListByCode(Map<String, Object> record);
 }

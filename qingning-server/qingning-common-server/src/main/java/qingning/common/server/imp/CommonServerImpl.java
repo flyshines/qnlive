@@ -1422,8 +1422,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(roomDistributerRecommendNum > 0){
             if(MiscUtils.isEmpty(reqMap.get("position"))){
                 reqMap.remove("position");
+            }            
+            List<Map<String,Object>> recommendUserList = null;
+            if(MiscUtils.isEmpty(rqCode)){
+            	recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
+            } else {
+            	recommendUserList = commonModuleServer.findRoomRecommendUserListByCode(reqMap);
             }
-            List<Map<String,Object>> recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
+            
 
             for(Map<String,Object> map : recommendUserList){
                 if(map.get("end_date") == null){

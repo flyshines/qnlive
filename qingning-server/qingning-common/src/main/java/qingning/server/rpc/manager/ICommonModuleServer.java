@@ -88,4 +88,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 	
 	Map<String,Object> findCoursesSumInfo(Map<String, Object> queryMap);
+	
+	List<Map<String,Object>> findRoomRecommendUserListByCode(Map<String, Object> record);
 }
