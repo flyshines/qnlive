@@ -229,8 +229,8 @@ public class LogServiceImpl extends AbstractMsgService {
 			loginInfoMapper.updateLoginInfo(info);
 
 			userMapper.updateUser(info);
-		} else if(!MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){
-			collection.updateOne(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
+		} else if(!MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){			
+			collection.updateMany(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
 			Map<String,Object> info = new HashMap<String,Object>();
 			info.put("user_id", user_id);
 			info.put("subscribe", values.get("subscribe"));

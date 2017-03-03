@@ -46,6 +46,7 @@ public class QNQuartzSchedule {
 				ScheduleTask task = (ScheduleTask)map.get("Task");
 				QNQuartzSchedule schedule = (QNQuartzSchedule)map.get("Schedule");				
 				task.SetCheckScheduledFuture(false);
+				log.debug("Run Task ("+task.getId()+"---"+task.getTaskName());
 				task.run();
 				schedule.cancelTask(task.getId(), task.getTaskName(), true);
 			}catch(Exception e){

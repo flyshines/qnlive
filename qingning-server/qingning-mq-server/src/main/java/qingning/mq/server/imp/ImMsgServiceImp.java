@@ -111,7 +111,9 @@ public class ImMsgServiceImp implements ImMsgService {
 			log.info("msgType"+body.get("msg_type").toString() + "消息course_id为空" + JSON.toJSONString(imMessage));
 			return;
 		}
-
+		if(MiscUtils.isEmpty(information.get("creator_id"))){
+			information.put("creator_id","SYS");
+		}
 		//判断课程状态
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
