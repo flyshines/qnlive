@@ -112,7 +112,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			return;
 		}
 		if(MiscUtils.isEmpty(information.get("creator_id"))){
-			information.set("creator_id","SYS");
+			information.put("creator_id","SYS");
 		}
 		//判断课程状态
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
