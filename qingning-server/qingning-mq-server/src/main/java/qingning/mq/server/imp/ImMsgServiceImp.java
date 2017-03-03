@@ -370,9 +370,11 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message_id",messageMap.get("mid"));
 					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);										
 					//1.将聊天信息id插入到redis zsort列表中
-					jedis.zadd(messageListKey, now, messageId);
+					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);
-					jedis.hmset(messageKey, startInformation);
+					Map<String,String> result = new HashMap<String,String>();
+					MiscUtils.converObjectMapToStringMap(startInformation, result);
+					jedis.hmset(messageKey, result);
 					
 		    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 		    		TemplateData first = new TemplateData();
