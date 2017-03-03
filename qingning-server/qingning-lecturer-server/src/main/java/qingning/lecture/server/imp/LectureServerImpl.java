@@ -742,17 +742,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
-            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
-            RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
-            this.mqUtils.sendMessage(mqRequestEntity);
+            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中            
+            //RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
+            //this.mqUtils.sendMessage(mqRequestEntity);
 
 
             //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
-            RequestEntity mqAudioRequestEntity = new RequestEntity();
-            mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
-            mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqAudioRequestEntity.setParam(reqEntity.getParam());
-            this.mqUtils.sendMessage(mqAudioRequestEntity);
+            //RequestEntity mqAudioRequestEntity = new RequestEntity();
+            //mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
+            //mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            //mqAudioRequestEntity.setParam(reqEntity.getParam());
+            //this.mqUtils.sendMessage(mqAudioRequestEntity);
 
             //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
             if(jedis.hget(courseKey, "real_start_time") == null){
