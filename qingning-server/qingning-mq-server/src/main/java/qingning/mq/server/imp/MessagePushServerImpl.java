@@ -239,6 +239,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     JSONObject obj = new JSONObject();
                     obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_study_notice"), MiscUtils.RecoveryEmoji(course_title)));
                     List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
+                    if(MiscUtils.isEmpty(studentIds)){
+                    	return;
+                    }
                     obj.put("user_ids",studentIds);
                     obj.put("msg_type","10");
                     Map<String,String> extrasMap = new HashMap<>();
