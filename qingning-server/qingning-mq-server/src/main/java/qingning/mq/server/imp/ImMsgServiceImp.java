@@ -112,6 +112,9 @@ public class ImMsgServiceImp implements ImMsgService {
 			return;
 		}
 		if(MiscUtils.isEmpty(information.get("creator_id"))){
+			if(information.get("send_type").equals("5")){
+				return;
+			}
 			information.put("creator_id","SYS");
 		}
 		//判断课程状态

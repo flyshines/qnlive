@@ -85,16 +85,6 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						messageObjectMap.put("create_time", createTime);
 					}
 					
-					/**The system has exception, the end message pos will be 0,but still don't find reason.The following is for fix,but should be removed when find the reason**/
-					//TODO the real reason is found
-					if(messagePos==0 && "6".equals(messageStringMap.get("send_type"))){
-						Map<String,Object> maxPosMessage = courseMessageMapper.findCourseMessageMaxPos(messageStringMap.get("course_id"));
-						if(!MiscUtils.isEmpty(maxPosMessage)){
-							messagePos = MiscUtils.convertObjectToLong(maxPosMessage.get("message_pos"))+1;
-							messageObjectMap.put("message_pos", messagePos++);							
-						}
-					}
-					/**End***/
 					messageList.add(messageObjectMap);
 				}
 			}
