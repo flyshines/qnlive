@@ -17,7 +17,7 @@
     <if test="send_type_query != null" >
       and  cm.send_type = 0 or cm.send_type = 1
     </if>
-    order by cm.message_pos asc
+    order by cm.message_pos desc
     limit #{page_count}
   </select>
 
