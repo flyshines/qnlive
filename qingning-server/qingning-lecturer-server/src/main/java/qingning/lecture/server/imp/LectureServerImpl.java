@@ -1542,12 +1542,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
             }else {
-                Map<String,Object> maxInfoMap = lectureModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+/*                Map<String,Object> maxInfoMap = lectureModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
                 if(MiscUtils.isEmpty(maxInfoMap)){
                     return resultMap;
                 }
                 Long maxPos = (Long)maxInfoMap.get("message_pos");
-                queryMap.put("message_pos", maxPos);
+                queryMap.put("message_pos", maxPos);*/
             }
             queryMap.put("course_id", reqMap.get("course_id").toString());
             List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);

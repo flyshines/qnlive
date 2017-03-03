@@ -146,13 +146,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
             qnSchedule.add(scheduleTask); 
         }
     }
-
-
-
-
-
-
-
     
     @FunctionName("processCourseStartLongNotice")
     public void processCourseStartLongNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {

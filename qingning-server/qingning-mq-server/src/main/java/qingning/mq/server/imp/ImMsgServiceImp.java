@@ -366,7 +366,14 @@ public class ImMsgServiceImp implements ImMsgService {
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
 					
-				   	
+					startInformation.put("creator_id",courseMap.get("lecturer_id"));
+					startInformation.put("message_id",messageMap.get("mid"));
+					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);										
+					//1.将聊天信息id插入到redis zsort列表中
+					jedis.zadd(messageListKey, now, messageId);
+					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);
+					jedis.hmset(messageKey, startInformation);
+					
 		    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 		    		TemplateData first = new TemplateData();
 		    		first.setColor("#000000");
