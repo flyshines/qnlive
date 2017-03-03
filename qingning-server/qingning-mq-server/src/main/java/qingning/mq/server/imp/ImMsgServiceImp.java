@@ -338,9 +338,12 @@ public class ImMsgServiceImp implements ImMsgService {
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 
-					//进行超时预先提醒定时任务
+					//进行超时预先提醒定时任务					
+					timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-
+					timerMap.remove(Constants.OVERTIME_NOTICE_TYPE_30);
+					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+					
 					//取消15分钟未开始定时任务
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
 
