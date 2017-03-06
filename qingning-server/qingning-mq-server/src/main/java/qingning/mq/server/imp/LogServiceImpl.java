@@ -209,66 +209,70 @@ public class LogServiceImpl extends AbstractMsgService {
     		return;
     	}
     	Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(record_time);
-		int date = cal.get(Calendar.DATE);
-		String year_month = cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1);
-		MongoClient mongoClient = mongoDB.getMongoClient();
-		MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_USER_REGISTRY_DATABASE);
-		MongoCollection<Document> collection = dataBase.getCollection(String.format(Constants.MONGODB_USER_REGISTRY_COLLECTION_FORMAT,year_month));
-		BasicDBObject basicDBObject = new BasicDBObject("_id",user_id);
-		values.put("_id",user_id);
-		List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
-		if(MiscUtils.isEmpty(list)){
-			MongoDB.insert(collection, values);
-			Map<String,Object> info = new HashMap<String,Object>();
-			info.put("user_id", user_id);
-			info.put("country", values.get("country"));
-			info.put("province", values.get("province"));
-			info.put("city", values.get("city"));
-			info.put("district", values.get("district"));			
-			loginInfoMapper.updateLoginInfo(info);
+    	cal.setTimeInMillis(record_time);
+    	int date = cal.get(Calendar.DATE);
+    	String year_month = cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1);
+    	MongoClient mongoClient = mongoDB.getMongoClient();
+    	MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_USER_REGISTRY_DATABASE);
+    	MongoCollection<Document> collection = dataBase.getCollection(String.format(Constants.MONGODB_USER_REGISTRY_COLLECTION_FORMAT,year_month));
+    	BasicDBObject basicDBObject = new BasicDBObject("_id",user_id);
+    	values.put("_id",user_id);
+    	List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
+    	if(MiscUtils.isEmpty(list)){
+    		MongoDB.insert(collection, values);
+    		Map<String,Object> info = new HashMap<String,Object>();
+    		info.put("user_id", user_id);
+    		info.put("country", values.get("country"));
+    		info.put("province", values.get("province"));
+    		info.put("city", values.get("city"));
+    		info.put("district", values.get("district"));			
+    		loginInfoMapper.updateLoginInfo(info);
 
-			userMapper.updateUser(info);
-		} else if(!MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){			
-			collection.updateMany(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
-			Map<String,Object> info = new HashMap<String,Object>();
-			info.put("user_id", user_id);
-			info.put("subscribe", values.get("subscribe"));
-			
-			loginInfoMapper.updateLoginInfo(info);
-		}
-		try {
-			Map<String,String> info = new HashMap<String,String>();
-			String country = values.get("country");
-			String province = values.get("province");
-			String city = values.get("city");
-			String district = values.get("district");
-			if(!MiscUtils.isEmpty(country)){
-				info.put("country", country);
-			}
-			if(!MiscUtils.isEmpty(province)){
-				info.put("province", province);
-			}
-			if(!MiscUtils.isEmpty(city)){
-				info.put("city", city);
-			}
-			if(!MiscUtils.isEmpty(district)){
-				info.put("district", district);
-			}
-			CacheUtils.readUser(user_id, null, new CommonReadOperation(){
-				@Override
-				public Object invokeProcess(RequestEntity requestEntity) throws Exception {					
-					return userMapper.findByUserId(user_id);
-				}
-			}, jedisUtils);
-			Map<String,Object> query = new HashMap<String,Object>();
-        	query.put("user_id", user_id);
-        	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
-        	jedisUtils.getJedis().hmset(key, info);
-			
-		} catch (Exception e) {
-			log.error("read user["+user_id+"]:"+e.getMessage());
-		}
+    		userMapper.updateUser(info);
+    	} else if(!MiscUtils.isEmpty(values.get("subscribe")) && !MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){			
+    		collection.updateMany(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
+    		Map<String,Object> info = new HashMap<String,Object>();
+    		info.put("user_id", user_id);
+    		info.put("subscribe", values.get("subscribe"));			
+    		loginInfoMapper.updateLoginInfo(info);			
+    	}
+    	try {
+    		Map<String,String> info = new HashMap<String,String>();
+    		String country = values.get("country");
+    		String province = values.get("province");
+    		String city = values.get("city");
+    		String district = values.get("district");
+    		if(!MiscUtils.isEmpty(country)){
+    			info.put("country", country);
+    		}
+    		if(!MiscUtils.isEmpty(province)){
+    			info.put("province", province);
+    		}
+    		if(!MiscUtils.isEmpty(city)){
+    			info.put("city", city);
+    		}
+    		if(!MiscUtils.isEmpty(district)){
+    			info.put("district", district);
+    		}
+    		CacheUtils.readUser(user_id, null, new CommonReadOperation(){
+    			public Object invokeProcess(RequestEntity requestEntity) throws Exception {
+    				Object result = null;
+    				if(requestEntity != null){
+    					result = null;
+    				} else {
+    					result = userMapper.findByUserId(user_id);
+    				}
+    				return result;
+    			}
+    		}, jedisUtils);
+    		Map<String,Object> query = new HashMap<String,Object>();
+    		query.put("user_id", user_id);
+    		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+    		jedisUtils.getJedis().hmset(key, info);
+
+    	} catch (Exception e) {
+    		log.error("read user["+user_id+"]:"+e.getMessage());
+    	}
     }
     
     private void insertActiveDeviceDB(Map<String,String> values){ 
