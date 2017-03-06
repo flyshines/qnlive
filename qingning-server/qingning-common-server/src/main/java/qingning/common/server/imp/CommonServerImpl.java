@@ -180,6 +180,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
                         versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
                         versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
+                        versionReturnMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
                         resultMap.put("version_info", versionReturnMap);
                     }
                 }
