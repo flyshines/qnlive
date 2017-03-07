@@ -2608,4 +2608,29 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list,readCourseOperation);
     }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getCustomerService")
+    public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        reqMap.put("customer_service_phone",MiscUtils.getConfigByKey("customer_service_phone"));//获取客服电话
+        reqMap.put("customer_service_qrcode_img",MiscUtils.getConfigByKey("customer_service_qrcode_img"));//获取客服微信二维码
+        return reqMap;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

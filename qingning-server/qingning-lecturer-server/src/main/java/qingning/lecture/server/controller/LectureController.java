@@ -507,4 +507,20 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+	/**
+	 * 获取客服信息
+	 * @param access_token 安全证书
+	 * @param version 版本信息
+	 * @return 返回课程
+ 	 * @throws Exception
+	 */
+	@RequestMapping(value="/lecturer/getCustomerService",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getCustomerService(
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getCustomerService", access_token, version);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 }

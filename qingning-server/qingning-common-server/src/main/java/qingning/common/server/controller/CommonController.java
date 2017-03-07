@@ -1,22 +1,14 @@
 package qingning.common.server.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpRequest;
-import qingning.common.entity.AccessToken;
-import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
-import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
-import qingning.common.util.WeiXinUtil;
 import qingning.server.AbstractController;
 
 import java.io.PrintWriter;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -29,11 +21,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @RestController
 public class CommonController extends AbstractController {
@@ -139,6 +129,15 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+
+
+
+    @RequestMapping(value = "/common/weixin/weCatLogin", method = RequestMethod.GET)
+    public void weCatLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
+        response.sendRedirect("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx1e1ba10bf307d648&redirect_uri=http%3a%2f%2ftest.qnlive.1758app.com%2fauth&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect");
+    }
+
+
     /**
      * 测试 微信公众号授权后的回调
      * 前端 默认进行 微信静默授权
@@ -153,7 +152,6 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
     public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
@@ -656,49 +654,4 @@ public class CommonController extends AbstractController {
 
 
 
-    //<editor-fold desc="后台生成二维码图片">
-    /**
-     * 生成二维码
-     * @param course_id 课程
-     * @param room_id 直播间
-     * @param recommend_code 推荐码
-     * @param access_token 需要检验
-     * @param room_share_code
-     * @param effective_time 月份
-     * @param profit_share_rate 分销比例
-     * @param version 版本
-     * @return 返回流信息
-     * @throws Exception
-     */
-//    public String CreateRqPage(String course_id,String room_id,String recommend_code,String room_share_code,String profit_share_rate,Integer effective_time,String access_token, String version) throws Exception {
-//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
-//        Map<String, Object> param = new HashMap<>();
-//        if(course_id != null)//课程id
-//        param.put("course_id", course_id);
-//
-//        if(room_id != null)//直播间id
-//        param.put("room_id", room_id);
-//
-//        if(recommend_code != null)//推荐码
-//        param.put("recommend_code", recommend_code);
-//
-//        if(room_share_code != null)//
-//        param.put("room_share_code", room_share_code);
-//
-//        if(profit_share_rate != null)//分销比例
-//        param.put("profit_share_rate", profit_share_rate);
-//
-//        if(effective_time != null)//期限
-//        param.put("effective_time", effective_time);
-//        requestEntity.setParam(param);
-//        Map<String, String> value = (Map<String, String>) this.process(requestEntity, serviceManger, message);
-//        return value.get("png_url");
-////        return new ResponseEntity();
-//    }
-
-
-
-
-
-    //</editor-fold>
 }
