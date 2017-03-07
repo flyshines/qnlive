@@ -394,7 +394,8 @@
 					<param name="status" type="string" default="2"/>							
 				</inputs>
 				<outputs>
-					<param name="server_time" type="long"/>			
+					<param name="server_time" type="long"/>
+					<param name="os_audit_version" type="String"/>
 					<param name="version_info" type="map">
 						<param name="version_no" type="string"/>
 						<param name="is_force" type="string"/>
