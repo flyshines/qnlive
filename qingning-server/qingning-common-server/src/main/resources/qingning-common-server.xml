@@ -400,6 +400,7 @@
 						<param name="is_force" type="string"/>
 						<param name="update_desc" type="string"/>
 						<param name="version_url" type="string"/>
+						<param name="os_audit_version" type="String"/>
 					</param>
 				</outputs>
 			</function>
