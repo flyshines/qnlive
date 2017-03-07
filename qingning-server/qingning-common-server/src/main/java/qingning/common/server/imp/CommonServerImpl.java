@@ -164,8 +164,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(! "0".equals(reqMap.get("plateform"))){
             Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
             resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
-            if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
-                if(! MiscUtils.isEmpty(versionInfoMap)){
+                if(! MiscUtils.isEmpty(versionInfoMap)){ //判断是否有version信息
+                    if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
                     //状态 0：关闭 1：开启
                     if(versionInfoMap.get("status").equals("1")){
                         if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
