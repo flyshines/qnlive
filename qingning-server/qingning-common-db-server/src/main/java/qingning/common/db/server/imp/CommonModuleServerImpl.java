@@ -95,6 +95,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("avatar_address", reqMap.get("avatar_address"));
 		user.put("phone_number", reqMap.get("phone_number"));
 		user.put("gender", reqMap.get("gender"));
+		user.put("subscribe",reqMap.get("subscribe"));
 		user.put("create_time", now);
 		user.put("update_time", now);
 		//位置信息未插入由消息服务处理

@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -162,32 +163,32 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //平台：0： 微信 1：andriod 2:IOS
         if(! "0".equals(reqMap.get("plateform"))){
             Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
-            if(! MiscUtils.isEmpty(versionInfoMap)){
-                //状态 0：关闭 1：开启
-                if(versionInfoMap.get("status").equals("1")){
-                    if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                        Map<String,Object> cacheMap = new HashMap<>();
-                        cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
-                        String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
-                        ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
-                        Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
-                        versionReturnMap.put("is_force","2");
-                        if(! MiscUtils.isEmpty(forceVersionInfoMap)){
-                            if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                                versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
+            resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
+            if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
+                if(! MiscUtils.isEmpty(versionInfoMap)){
+                    //状态 0：关闭 1：开启
+                    if(versionInfoMap.get("status").equals("1")){
+                        if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+                            Map<String,Object> cacheMap = new HashMap<>();
+                            cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
+                            String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
+                            ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
+                            Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
+                            versionReturnMap.put("is_force","2");
+                            if(! MiscUtils.isEmpty(forceVersionInfoMap)){
+                                if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+                                    versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
+                                }
                             }
+                            versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
+                            versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
+                            versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
+                            resultMap.put("version_info", versionReturnMap);
                         }
-                        versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
-                        versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
-                        versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
-                        versionReturnMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
-                        resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
-                        resultMap.put("version_info", versionReturnMap);
                     }
                 }
             }
         }
-
         return resultMap;
     }
 
@@ -342,6 +343,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
+        String subscribe = "0";
         resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
         //1.传递授权code及相关参数，调用微信验证code接口
         String code = reqMap.get("code").toString();
@@ -357,7 +359,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
         //1.2.1根据 union_id查询数据库
-
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","4");//4.微信code方式登录
         queryMap.put("web_openid",openid);
@@ -368,7 +369,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             processLoginSuccess(2, null, loginInfoMap, resultMap);
             return resultMap;
         }else {
-            //1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
+            //1.2.1.2 如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
@@ -440,16 +441,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
+
+            //判断当前用户是否关注我们公众号
+            Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
+            try{
+                AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+                JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
+                if(user.get("subscribe") != null){
+                    subscribe = user.get("subscribe").toString();
+                }
+            }catch(Exception e){
+                //出现异常不处理
+            }
+
             String unionid =  userJson.getString("unionid");
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
+            reqMap.put("subscribe",subscribe);
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);
-            //}
-
             return resultMap;
         }
     }
