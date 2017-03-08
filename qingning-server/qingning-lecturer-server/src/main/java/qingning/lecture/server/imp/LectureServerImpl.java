@@ -507,6 +507,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
         String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
         String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
+        //TODO 改变异步MQ处理
         //取出粉丝列表
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
         //TODO  关注的直播间有新的课程，推送提醒
@@ -552,6 +553,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         	weiPush(findFollowUser, MiscUtils.getConfigByKey("wpush_start_course"),url, templateMap);
         }
+//        RequestEntity requestEntity = new RequestEntity();
+//        requestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//MQ异步调用
+//        requestEntity.setFunctionName("方法名称");
+//        requestEntity.setServerName("MessagePushServer");//处理类的springid
+//      //  requestEntity.getParam(new HashMap<String,String>());
+//        this.mqUtils.sendMessage(requestEntity);
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
