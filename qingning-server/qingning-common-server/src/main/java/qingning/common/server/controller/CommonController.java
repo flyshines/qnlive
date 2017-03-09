@@ -81,26 +81,6 @@ public class CommonController extends AbstractController {
 
 
 
-
-
-
-//    /**
-//     * 获取系统时间
-//     *
-//     * @return
-//     * @throws Exception
-//     */
-//    @RequestMapping(value = "/common/time", method = RequestMethod.GET)
-//    public
-//    @ResponseBody
-//    ResponseEntity getServerTime(
-//    ) throws Exception {
-//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, null);
-//        return this.process(requestEntity, serviceManger, message);
-//    }
-
-
-
     /**
      * 用户登录
      *
@@ -208,7 +188,8 @@ public class CommonController extends AbstractController {
 
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
+      //  String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
+        String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
         String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
         response.sendRedirect(authorizationUrl);
         return ;
@@ -686,6 +667,27 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
+    /**
+     * 发送手机验证码
+     * @param phone 电话号码
+     * @param accessToken 用户安全证书
+     * @param version 版本
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/sendVerificationCode", method = RequestMethod.GET)
+    public void sendVerificationCode(
+            @RequestParam(value = "phone") String phone,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendVerificationCode", accessToken, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("phone",phone);
+        requestEntity.setParam(map);
+        this.process(requestEntity, serviceManger, message);
+    }
+
 
 
 
