@@ -52,20 +52,52 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+
+
+
     /**
-     * 获取系统时间
+     * 获取版本信息
      *
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/common/time", method = RequestMethod.GET)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @RequestMapping(value = "/common/client/version", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity getServerTime(
-    ) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, null);
-        return this.process(requestEntity, serviceManger, message);
+    ResponseEntity getVersion(
+            @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getVersion", null, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("plateform",plateform);
+        map.put("version",version);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
     }
+
+
+
+
+
+
+
+//    /**
+//     * 获取系统时间
+//     *
+//     * @return
+//     * @throws Exception
+//     */
+//    @RequestMapping(value = "/common/time", method = RequestMethod.GET)
+//    public
+//    @ResponseBody
+//    ResponseEntity getServerTime(
+//    ) throws Exception {
+//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, null);
+//        return this.process(requestEntity, serviceManger, message);
+//    }
 
 
 
@@ -134,7 +166,10 @@ public class CommonController extends AbstractController {
 
     @RequestMapping(value = "/common/weixin/weCatLogin", method = RequestMethod.GET)
     public void weCatLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-        response.sendRedirect("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx1e1ba10bf307d648&redirect_uri=http%3a%2f%2ftest.qnlive.1758app.com%2fauth&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect");
+        String authorization_url = MiscUtils.getConfigByKey("authorization_base_url");//手动授权url
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
+        response.sendRedirect(authorizationUrl);
+        return;
     }
 
 
@@ -173,7 +208,7 @@ public class CommonController extends AbstractController {
 
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-        String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
+        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
         String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
         response.sendRedirect(authorizationUrl);
         return ;

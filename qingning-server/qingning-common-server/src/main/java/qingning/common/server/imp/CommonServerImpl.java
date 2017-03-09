@@ -154,43 +154,65 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             RequestEntity requestEntity = this.generateRequestEntity("LogServer",  Constants.MQ_METHOD_ASYNCHRONIZED, "logUserInfo", reqMap);
             mqUtils.sendMessage(requestEntity);
         }
-        loginTime = System.currentTimeMillis();
+   //     loginTime = System.currentTimeMillis();
         Map<String,Object> resultMap = new HashMap<String, Object>();
         resultMap.put("server_time", System.currentTimeMillis());
  
-        Map<String,Object> versionReturnMap = new HashMap<>();
+//        Map<String,Object> versionReturnMap = new HashMap<>();
         //增加下发版本号逻辑
         //平台：0： 微信 1：andriod 2:IOS
-        if(! "0".equals(reqMap.get("plateform"))){
-            Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
-            resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
-                if(! MiscUtils.isEmpty(versionInfoMap)){ //判断是否有version信息
-                    if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
-                    //状态 0：关闭 1：开启
-                    if(versionInfoMap.get("status").equals("1")){
-                        if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                            Map<String,Object> cacheMap = new HashMap<>();
-                            cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
-                            String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
-                            ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
-                            Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
-                            versionReturnMap.put("is_force","2");
-                            if(! MiscUtils.isEmpty(forceVersionInfoMap)){
-                                if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                                    versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
-                                }
-                            }
-                            versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
-                            versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
-                            versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
-                            resultMap.put("version_info", versionReturnMap);
-                        }
-                    }
+//        if(! "0".equals(reqMap.get("plateform"))){
+//            Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+//            resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
+//                if(! MiscUtils.isEmpty(versionInfoMap)){ //判断是否有version信息
+//                    if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
+//                    //状态 0：关闭 1：开启
+//                    if(versionInfoMap.get("status").equals("1")){
+//                        if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+//                            Map<String,Object> cacheMap = new HashMap<>();
+//                            cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
+//                            String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
+//                            ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
+//                            Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
+//                            versionReturnMap.put("is_force","2");
+//                            if(! MiscUtils.isEmpty(forceVersionInfoMap)){
+//                                if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+//                                    versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
+//                                }
+//                            }
+//                            versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
+//                            versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
+//                            versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
+//                            resultMap.put("version_info", versionReturnMap);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        return resultMap;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getVersion")
+    public Map<String,String> getVersion (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
+        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS
+        if(plateform != 0) {
+            Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+            if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
+                //1.先判断系统和当前version
+                if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//当前version 小于 最小需要跟新的版本
+                    return versionInfoMap;
                 }
             }
         }
-        return resultMap;
+    return null;
     }
+
+
+
+
 
     //客户版本号小于系统版本号 true， 否则为false
     private boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
@@ -231,7 +253,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
         }
-
         return false;
     }
 

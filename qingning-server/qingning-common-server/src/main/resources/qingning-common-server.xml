@@ -396,12 +396,7 @@
 				<outputs>
 					<param name="server_time" type="long"/>
 					<param name="os_audit_version" type="String"/>
-					<param name="version_info" type="map">
-						<param name="version_no" type="string"/>
-						<param name="is_force" type="string"/>
-						<param name="update_desc" type="string"/>
-						<param name="version_url" type="string"/>
-					</param>
+
 				</outputs>
 			</function>
 
@@ -505,6 +500,27 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="getVersion">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="plateform" type="int"  require="Y,000100"/>
+					<param name="version" type="String"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="version_info" type="map">
+						<param name="version_no" type="string"/>
+						<param name="is_force" type="string"/>
+						<param name="update_desc" type="string"/>
+						<param name="version_url" type="string"/>
+					</param>
+				</outputs>
+			</function>
+
+
+
+
 
 		</default>
  

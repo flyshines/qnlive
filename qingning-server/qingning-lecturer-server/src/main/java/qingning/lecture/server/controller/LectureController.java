@@ -515,7 +515,7 @@ public class LectureController extends AbstractController {
 	 * @return 返回课程
  	 * @throws Exception
 	 */
-	@RequestMapping(value="/lecturer/getCustomerService",method=RequestMethod.GET)
+	@RequestMapping(value="/lecturer/customerService",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getCustomerService(
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader("version") String version) throws Exception{
