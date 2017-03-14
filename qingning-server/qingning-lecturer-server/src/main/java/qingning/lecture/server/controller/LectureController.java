@@ -550,10 +550,11 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(map);
 		return this.process(requestEntity, serviceManger, message);
 	}
-	
- * @return
-	 * @throws Exception
-	 */
+
+    /**
+     * 微信平台回调第三方平台的ticker回调
+     * @throws Exception
+     */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public String wechatAuth(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		//解析XML文件
