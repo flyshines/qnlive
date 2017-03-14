@@ -8,4 +8,8 @@ public interface LecturerMapper {
     int insertLecture(Map<String,Object> record);
     int updateLecture(Map<String,Object> record);
     List<Map<String,Object>> findLectureId(Map<String,Object> query);
+
+    int insertServiceNoInfo(Map<String, String> map);
+    int updateServiceNoInfo(Map<String, String> map);
+    Map<String,Object> findServiceNoInfoByLectureId(String lecturer_id);
 }

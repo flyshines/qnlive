@@ -127,7 +127,7 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
 	
 	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
-	
+
 	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";
 	
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
@@ -188,6 +188,9 @@ public final class Constants {
 	public static final String USER_ROLE_LECTURER="lecturer";
 	public static final String USER_ROLE_LISTENER="listener";
 	public static final String USER_ROLE_ADMIN="admin";
+
+	public static final String SERVICE_NO_ACCESS_TOKEN = "SERVICE_NO_ACCESS_TOKEN_MAP";
+
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
 	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 200;
 	
@@ -220,5 +223,10 @@ public final class Constants {
 	public static final String WEB_FILE_PRE_FIX = "WEB_FILE/";
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
+
+	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
+	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";
+
+	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";
 
 }

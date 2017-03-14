@@ -657,6 +657,52 @@
 					</param>
 				</outputs>
 			</function>
+
+			<function name="wechatTicketNotify">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="verifyTicket" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="wechatAuthRedirect">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="auth_code" type="string" />
+				</inputs>
+				<outputs>
+					<param name="redirectUrl" type="string" />
+				</outputs>
+			</function>
+
+			<function name="bindServiceNo">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="redirectUrl" type="string" />
+				</outputs>
+			</function>
+
+			<!--<function name="associateWechatCode">-->
+				<!--<auth>-->
+					<!--<accessToken require="Y" />-->
+				<!--</auth>-->
+				<!--<inputs>-->
+					<!--<param name="type" type="string" />-->
+					<!--<param name="url" type="string" />-->
+				<!--</inputs>-->
+				<!--<outputs>-->
+				<!--</outputs>-->
+			<!--</function>-->
 			
 		</default>
 

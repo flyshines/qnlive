@@ -42,7 +42,7 @@
 	<bean id="billsManagerServer"  class="gcw.manager.db.server.imp.BillsManagerServerImpl"/>
 	<bean id="courseManagerServer"  class="gcw.manager.db.server.imp.CourseManagerServerImpl"/>
 	<bean id="choreographerServer"  class="gcw.manager.db.server.imp.ChoreographerServerImpl"/>
-	<bean id="userManagerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
+	<bean id="userManaigerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
 	 -->
 
 

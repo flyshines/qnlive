@@ -82,4 +82,9 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findDistributionRoomByLectureInfo(Map<String, Object> record);
 	
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+
+	int insertServiceNoInfo(Map<String, String> map);
+	int updateServiceNoInfo(Map<String, String> map);
+
+	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);
 }

@@ -768,13 +768,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.clear();        
         query.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, query);
-        Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
  
         //4.调用微信生成预付单接口
         String terminalIp = reqMap.get("remote_ip_address").toString();
         String tradeType = "JSAPI";
         String outTradeNo = tradeId;
-        String openid = userMap.get("web_openid");
+        String platform = (String) reqMap.get("platform");
+        String openid = null;
+        if (platform != null) {
+            openid = Constants.CACHED_KEY_WECHAT_APPID;
+        } else  {
+            Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
+            openid = userMap.get("web_openid");
+        }
+
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
  
         //5.处理生成微信预付单接口

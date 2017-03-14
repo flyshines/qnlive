@@ -115,7 +115,7 @@ public final class CacheUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Map<String,String> readUser(String userId, RequestEntity requestEntity, 
+	public static Map<String,String> readUser(String userId, RequestEntity requestEntity,
 			CommonReadOperation operation, JedisUtils jedisUtils) throws Exception{
 		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
 		if(!MiscUtils.isEmpty(result)){
