@@ -111,7 +111,12 @@ public class ImMsgServiceImp implements ImMsgService {
 			log.info("msgType"+body.get("msg_type").toString() + "消息course_id为空" + JSON.toJSONString(imMessage));
 			return;
 		}
-
+		if(MiscUtils.isEmpty(information.get("creator_id"))){
+			if(information.get("send_type").equals("5")){
+				return;
+			}
+			information.put("creator_id","SYS");
+		}
 		//判断课程状态
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
@@ -151,6 +156,7 @@ public class ImMsgServiceImp implements ImMsgService {
 				messageObjectMap.put("message_id", stringMap.get("message_id"));
 				messageObjectMap.put("course_id", stringMap.get("course_id"));
 				messageObjectMap.put("message_url", stringMap.get("message_url"));
+				messageObjectMap.put("message", stringMap.get("message"));
 				messageObjectMap.put("message_question", stringMap.get("message_question"));
 				if(!MiscUtils.isEmpty(stringMap.get("audio_time"))){
 					messageObjectMap.put("audio_time", Long.parseLong(stringMap.get("audio_time")));
@@ -237,7 +243,7 @@ public class ImMsgServiceImp implements ImMsgService {
             		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
-                //TODO 暂时不处理
+            	log.error("SaveCourseMessageService["+information.get("course_id")+"] error:"+e.getMessage());
             }
 
             //1.8如果存在课程音频信息
@@ -249,7 +255,7 @@ public class ImMsgServiceImp implements ImMsgService {
             		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
-                //TODO 暂时不处理
+            	log.error("save SaveCourseAudioService["+information.get("course_id")+"] error:"+e.getMessage());
             }
 		}
 	}
@@ -339,9 +345,12 @@ public class ImMsgServiceImp implements ImMsgService {
 					//
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 
-					//进行超时预先提醒定时任务
+					//进行超时预先提醒定时任务					
+					timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-
+					timerMap.remove(Constants.OVERTIME_NOTICE_TYPE_30);
+					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+					
 					//取消15分钟未开始定时任务
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
 
@@ -367,7 +376,16 @@ public class ImMsgServiceImp implements ImMsgService {
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//TODO
 					
-				   	
+					startInformation.put("creator_id",courseMap.get("lecturer_id"));
+					startInformation.put("message_id",messageMap.get("mid"));
+					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);										
+					//1.将聊天信息id插入到redis zsort列表中
+					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
+					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);
+					Map<String,String> result = new HashMap<String,String>();
+					MiscUtils.converObjectMapToStringMap(startInformation, result);
+					jedis.hmset(messageKey, result);
+					
 		    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 		    		TemplateData first = new TemplateData();
 		    		first.setColor("#000000");

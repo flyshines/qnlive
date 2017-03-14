@@ -506,6 +506,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
         String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
         String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
+        //TODO 改变异步MQ处理
         //取出粉丝列表
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
 
@@ -609,7 +610,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 this.mqUtils.sendMessage(mqRequestEntity);
             }
         }
-
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
@@ -801,17 +801,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
-            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中
-            RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
-            this.mqUtils.sendMessage(mqRequestEntity);
+            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中            
+            //RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
+            //this.mqUtils.sendMessage(mqRequestEntity);
 
 
             //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
-            RequestEntity mqAudioRequestEntity = new RequestEntity();
-            mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
-            mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqAudioRequestEntity.setParam(reqEntity.getParam());
-            this.mqUtils.sendMessage(mqAudioRequestEntity);
+            //RequestEntity mqAudioRequestEntity = new RequestEntity();
+            //mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
+            //mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            //mqAudioRequestEntity.setParam(reqEntity.getParam());
+            //this.mqUtils.sendMessage(mqAudioRequestEntity);
 
             //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
             if(jedis.hget(courseKey, "real_start_time") == null){
@@ -1613,17 +1613,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
             }else {
-                Map<String,Object> maxInfoMap = lectureModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+/*                Map<String,Object> maxInfoMap = lectureModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
                 if(MiscUtils.isEmpty(maxInfoMap)){
                     return resultMap;
                 }
                 Long maxPos = (Long)maxInfoMap.get("message_pos");
-                queryMap.put("message_pos", maxPos);
+                queryMap.put("message_pos", maxPos);*/
             }
             queryMap.put("course_id", reqMap.get("course_id").toString());
             List<Map<String,Object>> messageList = lectureModuleServer.findCourseMessageList(queryMap);
  
             if(! CollectionUtils.isEmpty(messageList)){
+            	List<Map<String,Object>> resultList = new LinkedList<Map<String,Object>>();
                 for(Map<String,Object> messageMap : messageList){
                     if(! MiscUtils.isEmpty(messageMap.get("message"))){
                         messageMap.put("message",MiscUtils.RecoveryEmoji(messageMap.get("message").toString()));
@@ -1632,8 +1633,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
                         messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
                     }
+                    
+					if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name"))){
+						messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
+					}
+					resultList.add(0, messageMap);
                 }
-                resultMap.put("message_list", messageList);
+                resultMap.put("message_list", resultList);
             }
  
             return resultMap;
@@ -2202,6 +2208,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         queryParam.clear();
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = generateRequestEntity(null,null, null, queryParam);
+        
         Map<String,String> userMap = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
         reqMap.clear();
         double profit_share_rate = Long.parseLong(values.get("profit_share_rate")) / 100.0;
@@ -2787,5 +2794,33 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return CacheUtils.readCourseListInfoOnlyFromCached(jedisUtils, list,readCourseOperation);
     }
 
+	@SuppressWarnings("unchecked")
+    @FunctionName("getCustomerService")
+    public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_QRCODE_URL);//获取客服二维码url
+        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_PHONE_NUM);//获取客服电话
+        reqMap.put("customer_service_phone",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
+        reqMap.put("customer_service_qrcode_img",customerPhoneNum.get("config_value"));//获取客服电话
+        return reqMap;
+    }
 
-}
+
+    /**
+     * 效验手机验证码
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("verifyVerificationCode")
+    public  Map<String, Object>  verifyVerificationCode (RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String verification_code = map.get("verification_code");
+        //TODO 用userid拿到手机号
+        //TODO  用手机号拿到验证码
+        //TODO  验证手机验证码
+
+       return createLiveRoom(reqEntity);
+    }
+}}

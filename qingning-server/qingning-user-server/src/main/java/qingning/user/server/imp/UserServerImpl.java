@@ -1282,7 +1282,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //String course_type = courseMap.get("course_type");
             String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
             obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")), nowStudentNum+""));
-            obj.put("to", userId);
+            obj.put("to", courseInfoMap.get("lecturer_id"));
             obj.put("msg_type","7");
             Map<String,String> extrasMap = new HashMap<>();
             extrasMap.put("msg_type","7");
@@ -1504,9 +1504,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
-        Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
-        resultMap.put("lecturer_nick_name",userMap.get("nick_name"));
-        resultMap.put("lecturer_avatar_address",userMap.get("avatar_address"));
+        //Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
+        map.clear();
+        map.put("lecturer_id", courseMap.get("lecturer_id"));
+        Map<String, String> userMap = CacheUtils.readLecturer(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
+        if(!MiscUtils.isEmpty(userMap)){
+        	resultMap.put("lecturer_nick_name",userMap.get("nick_name"));
+        	resultMap.put("lecturer_avatar_address",userMap.get("avatar_address"));
+        }
         resultMap.put("course_url",courseMap.get("course_url"));
 
         return resultMap;
@@ -1541,26 +1546,31 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
             }else {
-                Map<String,Object> maxInfoMap = userModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
+/*              Map<String,Object> maxInfoMap = userModuleServer.findCourseMessageMaxPos(reqMap.get("course_id").toString());
                 if(MiscUtils.isEmpty(maxInfoMap)){
                     return resultMap;
                 }
                 Long maxPos = (Long)maxInfoMap.get("message_pos");
-                queryMap.put("message_pos", maxPos);
+                queryMap.put("message_pos", maxPos);*/
             }
             queryMap.put("course_id", reqMap.get("course_id").toString());
             List<Map<String,Object>> messageList = userModuleServer.findCourseMessageList(queryMap);
 
             if(! CollectionUtils.isEmpty(messageList)){
-				for(Map<String,Object> messageMap : messageList){
+            	List<Map<String,Object>> resultList = new LinkedList<Map<String,Object>>();
+				for(Map<String,Object> messageMap : messageList){					
 					if(! MiscUtils.isEmpty(messageMap.get("message"))){
 						messageMap.put("message",MiscUtils.RecoveryEmoji(messageMap.get("message").toString()));
 					}
 					if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
 						messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
 					}
+					if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name"))){
+						messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
+					}
+					resultList.add(0, messageMap);
 				}
-                resultMap.put("message_list", messageList);
+                resultMap.put("message_list", resultList);
             }
 
             return resultMap;

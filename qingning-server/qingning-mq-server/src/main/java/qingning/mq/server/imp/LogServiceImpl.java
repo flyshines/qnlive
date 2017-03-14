@@ -17,6 +17,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
@@ -26,6 +27,7 @@ import qingning.mq.persistence.mongo.MongoDB;
 import qingning.mq.utils.CommonLocationUtils;
 import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
+import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 import com.alibaba.fastjson.JSONObject;
 
@@ -100,7 +102,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		if("0".equals(clientSideInfo.get("status"))){
     			insertActiveDeviceDB(clientSideInfoStrMap);
     		} else if(!"2".equals(clientSideInfo.get("status"))){
-    			insertUserDB(clientSideInfoStrMap);
+    			insertUserDB(clientSideInfoStrMap,jedisUtils);
     		}
     		
     	}catch(Exception e){
@@ -195,7 +197,7 @@ public class LogServiceImpl extends AbstractMsgService {
 		}
     }
     
-    private void insertUserDB(Map<String,String> values){
+    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils){
     	String user_id = (String)values.get("user_id");
     	if(MiscUtils.isEmpty(user_id)){
     		return;
@@ -207,33 +209,76 @@ public class LogServiceImpl extends AbstractMsgService {
     		return;
     	}
     	Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(record_time);
-		int date = cal.get(Calendar.DATE);
-		String year_month = cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1);
-		MongoClient mongoClient = mongoDB.getMongoClient();
-		MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_USER_REGISTRY_DATABASE);
-		MongoCollection<Document> collection = dataBase.getCollection(String.format(Constants.MONGODB_USER_REGISTRY_COLLECTION_FORMAT,year_month));
-		BasicDBObject basicDBObject = new BasicDBObject("_id",user_id);
-		List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
-		if(MiscUtils.isEmpty(list)){
-			MongoDB.insert(collection, values);
-			Map<String,Object> info = new HashMap<String,Object>();
-			info.put("user_id", user_id);
-			info.put("country", values.get("country"));
-			info.put("province", values.get("province"));
-			info.put("city", values.get("city"));
-			info.put("district", values.get("district"));			
-			loginInfoMapper.updateLoginInfo(info);
+    	cal.setTimeInMillis(record_time);
+    	int date = cal.get(Calendar.DATE);
+    	String year_month = cal.get(Calendar.YEAR)+"_"+(cal.get(Calendar.MONTH)+1);
+    	MongoClient mongoClient = mongoDB.getMongoClient();
+    	MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_USER_REGISTRY_DATABASE);
+    	MongoCollection<Document> collection = dataBase.getCollection(String.format(Constants.MONGODB_USER_REGISTRY_COLLECTION_FORMAT,year_month));
+    	BasicDBObject basicDBObject = new BasicDBObject("_id",user_id);
+    	values.put("_id",user_id);
+    	List<Map<String,Object>> list =MongoDB.queryValue(collection, basicDBObject, 1);
+    	if(MiscUtils.isEmpty(list)){
+    		MongoDB.insert(collection, values);
+    		Map<String,Object> info = new HashMap<String,Object>();
+    		info.put("user_id", user_id);
+    		info.put("country", values.get("country"));
+    		info.put("province", values.get("province"));
+    		info.put("city", values.get("city"));
+    		info.put("district", values.get("district"));			
+    		loginInfoMapper.updateLoginInfo(info);
 
-			userMapper.updateUser(info);
-		} else if(!MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){
-			collection.updateOne(basicDBObject, new BasicDBObject("subscribe",values.get("subscribe")));
-			Map<String,Object> info = new HashMap<String,Object>();
-			info.put("user_id", user_id);
-			info.put("subscribe", values.get("subscribe"));
-			
-			loginInfoMapper.updateLoginInfo(info);
-		}
+    		userMapper.updateUser(info);
+    	} else if(!MiscUtils.isEmpty(values.get("subscribe")) && !MiscUtils.isEqual(values.get("old_subscribe"), values.get("subscribe"))){    		
+    		Document doc=new Document();
+    		Map<String,Object> lastValues = list.get(0);
+    		for(String key:lastValues.keySet()){
+    			doc.put(key, lastValues.get(key));
+    		}
+    		doc.put("subscribe", values.get("subscribe"));
+    		collection.replaceOne(basicDBObject, doc);
+    		Map<String,Object> info = new HashMap<String,Object>();
+    		info.put("user_id", user_id);
+    		info.put("subscribe", values.get("subscribe"));			
+    		loginInfoMapper.updateLoginInfo(info);			
+    	}
+    	try {
+    		Map<String,String> info = new HashMap<String,String>();
+    		String country = values.get("country");
+    		String province = values.get("province");
+    		String city = values.get("city");
+    		String district = values.get("district");
+    		if(!MiscUtils.isEmpty(country)){
+    			info.put("country", country);
+    		}
+    		if(!MiscUtils.isEmpty(province)){
+    			info.put("province", province);
+    		}
+    		if(!MiscUtils.isEmpty(city)){
+    			info.put("city", city);
+    		}
+    		if(!MiscUtils.isEmpty(district)){
+    			info.put("district", district);
+    		}
+    		CacheUtils.readUser(user_id, null, new CommonReadOperation(){
+    			public Object invokeProcess(RequestEntity requestEntity) throws Exception {
+    				Object result = null;
+    				if(requestEntity != null){
+    					result = null;
+    				} else {
+    					result = userMapper.findByUserId(user_id);
+    				}
+    				return result;
+    			}
+    		}, jedisUtils);
+    		Map<String,Object> query = new HashMap<String,Object>();
+    		query.put("user_id", user_id);
+    		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+    		jedisUtils.getJedis().hmset(key, info);
+
+    	} catch (Exception e) {
+    		log.error("read user["+user_id+"]:"+e.getMessage());
+    	}
     }
     
     private void insertActiveDeviceDB(Map<String,String> values){ 

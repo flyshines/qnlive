@@ -515,9 +515,43 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}
+
 	/**
-	 * 微信服务器每隔10分钟定时推送component_verify_ticket
-	 * @return
+	 * 获取客服信息
+	 * @param access_token 安全证书
+	 * @param version 版本信息
+	 * @return 返回课程
+ 	 * @throws Exception
+	 */
+	@RequestMapping(value="/lecturer/customerService",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity getCustomerService(
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getCustomerService", access_token, version);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 发送手机验证码
+	 * @param verification_code 验证码
+	 * @param accessToken 用户安全证书
+	 * @param version 版本
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/verifyVerificationCode", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity  verifyVerificationCode(
+			@RequestParam(value = "verification_code") String verification_code,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version)throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null);
+		Map<String,String> map = new HashMap<>();
+		map.put("verification_code",verification_code);
+		requestEntity.setParam(map);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	
+ * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)

@@ -47,7 +47,7 @@
 				<entry key="100018" value="直播间简介不能超过一百个字符"/>
 				<entry key="100019" value="课程的开始时间要在当前时间的10分钟后"/>
 				<entry key="100020" value="课程标题不能超过三十个字符"/>
-				<entry key="100021" value="课程简介不能超过两百个字符"/>
+				<entry key="100021" value="课程简介不能超过1000个字符"/>
 				<entry key="100023" value="结束课程时，不允许修改课程信息"/>
 				<entry key="100024" value="课程分成比要大于等于0，小于等于50"/>
 				<entry key="100025" value="分享链接已经过期"/>
@@ -88,6 +88,10 @@
 				<entry key="120021" value="分销员分销关系已经过期"/>
 
 				<entry key="120016" value="平台信息不能为空"/>
+
+				<entry key="130001" value="电话号码有误"/>
+				<entry key="130002" value="验证码有误"/>
+				<entry key="130003" value="直播间没有手机号"/>
 			</map>
 		</property>
 	</bean>	

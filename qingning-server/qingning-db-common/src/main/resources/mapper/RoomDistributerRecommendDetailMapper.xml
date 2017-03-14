@@ -92,6 +92,9 @@
 
   <update id="updateRoomDistributerRecommend" parameterType="hashmap" >
     update t_room_distributer_recommend_detail set
+    <if test="old_end_date != null" >
+        end_date=#{old_end_date},
+    </if>
     recommend_num = #{old_recommend_num},
     done_num = #{old_done_num},
     course_num = #{old_course_num}

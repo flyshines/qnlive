@@ -1,8 +1,9 @@
-package qingning.common.util;
+﻿package qingning.common.util;
 
 public final class Constants {
 	private Constants(){};
 	public static final long SEQUENCE =1000000000l;
+	public static final String OVERTIME_NOTICE_TYPE_30="OVERTIME_NOTICE_TYPE_30";
 	public static final String SYS_FIELD_COUNTRY="country";
 	public static final String SYS_FIELD_COUNTRY_SHORT="country_short";
 	public static final String SYS_FIELD_PROVINCE="province";
@@ -195,15 +196,15 @@ public final class Constants {
 	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 200;
 	
 	
-	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";
-	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";
-	public static final String MONGODB_ADDRESS_DATABASE = "CITY_ADDRESS";
-	public static final String MONGODB_USER_REGISTRY_COLLECTION_FORMAT = "USER_REGISTRY_COLL_%s";
-	public static final String MONGODB_USER_REGISTRY_DATABASE = "USER_REGISTRY_DB";
+	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";//根据月份
+	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";//根据日期
+	public static final String MONGODB_ADDRESS_DATABASE = "CITY_ADDRESS";//城市地址
+	public static final String MONGODB_USER_REGISTRY_COLLECTION_FORMAT = "USER_REGISTRY_COLL_%s";//用户注册集合 日期
+	public static final String MONGODB_USER_REGISTRY_DATABASE = "USER_REGISTRY_DB";//用户注册DBb
 	public static final String MONGODB_CITY_IP_COLL_FORMAT = "CITY_IP_COLL_%s";
-	public static final String MONGODB_DEVICE_ACTIVE_DATABASE = "DEVICE_ACTIVE_DB";
-	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_FORMAT = "DEVICE_ACTIVE_COLL_%s";
-	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_DETAILS_FORMAT = "DEVICE_ACTIVE_DETAILS_COLL_%s";
+	public static final String MONGODB_DEVICE_ACTIVE_DATABASE = "DEVICE_ACTIVE_DB";//激活设备的表
+	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_FORMAT = "DEVICE_ACTIVE_COLL_%s";//激活设备的表 根据时间
+	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_DETAILS_FORMAT = "DEVICE_ACTIVE_DETAILS_COLL_%s";//日期
 	
 	public static final String MONGODB_LECTURER_COURSE_DATABASE_FORMAT =    "LECTURER_COURSE_%s";
 	public static final String MONGODB_ROOM_DISTRIBUTER_DATABASE_FORMAT =   "ROOM_DISTRIBUTER_%s";
@@ -224,9 +225,9 @@ public final class Constants {
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
 
+	public static final String CUSTOMER_QRCODE_URL = "customerQrCodeUrl";
+	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
+
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
-	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";
-
-	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";
-
-}
+	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";	
+	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";}

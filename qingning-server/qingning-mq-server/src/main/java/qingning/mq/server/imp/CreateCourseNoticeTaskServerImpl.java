@@ -90,6 +90,10 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
                     if(realStartTime>0){
                     	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
                     	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
+                    	
+                    	map.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
+                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+                    	map.remove(Constants.OVERTIME_NOTICE_TYPE_30);                    	
                     	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
                     } else {
                     	messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);

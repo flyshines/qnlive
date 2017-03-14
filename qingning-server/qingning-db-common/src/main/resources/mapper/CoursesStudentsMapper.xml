@@ -84,7 +84,8 @@
   	</if> 
   	order by student_pos limit #{size}
   </select>
-  
+
+
   <insert id="insertStudent" parameterType="hashmap" >
     insert into t_courses_students
     <trim prefix="(" suffix=")" suffixOverrides="," >

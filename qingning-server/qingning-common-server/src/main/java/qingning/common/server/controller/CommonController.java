@@ -1,22 +1,14 @@
 package qingning.common.server.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import org.apache.http.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpRequest;
-import qingning.common.entity.AccessToken;
-import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
-import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
-import qingning.common.util.WeiXinUtil;
 import qingning.server.AbstractController;
 
 import java.io.PrintWriter;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -29,11 +21,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @RestController
 public class CommonController extends AbstractController {
@@ -62,19 +52,49 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+
+
+
     /**
-     * 获取系统时间
+     * 获取版本信息
      *
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/common/time", method = RequestMethod.GET)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @RequestMapping(value = "/common/client/version", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity getServerTime(
-    ) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, null);
-        return this.process(requestEntity, serviceManger, message);
+    ResponseEntity getVersion(
+            @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getVersion", null, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("plateform",plateform);
+        map.put("version",version);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+    /**
+     * 总控开关
+     */
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @RequestMapping(value = "/common/client/control", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity control(
+            @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "control", null, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("plateform",plateform);
+        requestEntity.setParam(map);
+        return  this.process(requestEntity, serviceManger, message);
     }
 
 
@@ -139,6 +159,18 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+
+
+
+    @RequestMapping(value = "/common/weixin/weCatLogin", method = RequestMethod.GET)
+    public void weCatLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
+        String authorization_url = MiscUtils.getConfigByKey("authorization_base_url");//静默授权url
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
+        response.sendRedirect(authorizationUrl);
+        return;
+    }
+
+
     /**
      * 测试 微信公众号授权后的回调
      * 前端 默认进行 微信静默授权
@@ -153,7 +185,6 @@ public class CommonController extends AbstractController {
      */
     @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
     public void weixinLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-
         StringBuffer url = request.getRequestURL();//获取路径
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
@@ -172,25 +203,14 @@ public class CommonController extends AbstractController {
             response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
             return ;
         }
-
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-        String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
+        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
         String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
         response.sendRedirect(authorizationUrl);
         return ;
     }
 
-    /**
-     * 微信 开放平台 公众号消息与事件接受
-     * @param request
-     * @param response
-     * @throws Exception
-     */
-    @RequestMapping(value = "/common/weixin/weiXinSystemMsg", method = RequestMethod.GET)
-    public void weiXinSystemMsg(HttpServletRequest request,HttpServletResponse response) throws Exception {
-
-    }
 
     /**
      * 获得上传到七牛token
@@ -655,51 +675,97 @@ public class CommonController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-
-
-    //<editor-fold desc="后台生成二维码图片">
     /**
-     * 生成二维码
-     * @param course_id 课程
-     * @param room_id 直播间
-     * @param recommend_code 推荐码
-     * @param access_token 需要检验
-     * @param room_share_code
-     * @param effective_time 月份
-     * @param profit_share_rate 分销比例
+     * 发送手机验证码
+     * @param phone 电话号码
+     * @param accessToken 用户安全证书
      * @param version 版本
-     * @return 返回流信息
      * @throws Exception
      */
-//    public String CreateRqPage(String course_id,String room_id,String recommend_code,String room_share_code,String profit_share_rate,Integer effective_time,String access_token, String version) throws Exception {
-//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "CreateRqPage", access_token, version);
-//        Map<String, Object> param = new HashMap<>();
-//        if(course_id != null)//课程id
-//        param.put("course_id", course_id);
-//
-//        if(room_id != null)//直播间id
-//        param.put("room_id", room_id);
-//
-//        if(recommend_code != null)//推荐码
-//        param.put("recommend_code", recommend_code);
-//
-//        if(room_share_code != null)//
-//        param.put("room_share_code", room_share_code);
-//
-//        if(profit_share_rate != null)//分销比例
-//        param.put("profit_share_rate", profit_share_rate);
-//
-//        if(effective_time != null)//期限
-//        param.put("effective_time", effective_time);
-//        requestEntity.setParam(param);
-//        Map<String, String> value = (Map<String, String>) this.process(requestEntity, serviceManger, message);
-//        return value.get("png_url");
-////        return new ResponseEntity();
-//    }
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/sendVerificationCode", method = RequestMethod.GET)
+    public void sendVerificationCode(
+            @RequestParam(value = "phone") String phone,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendVerificationCode", accessToken, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("phone",phone);
+        requestEntity.setParam(map);
+        this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 查询课程消息列表
+     * @param course_id 课程id
+     * @param page_count 分页
+     * @param message_imid 消息imid
+     * @param user_type  用户类型 0老师/顾问  1用户
+     * @param message_type 消息类型:0:音频 1：文字 3：图片 4 附件
+     * @param message_id 消息id
+     * @param accessToken 后台安全证书
+     * @param version 版本号
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/courses/{course_id}/messages", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity getMessageList(
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value = "page_count", defaultValue = "20") String page_count,
+            @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
+            @RequestParam(value = "user_type", defaultValue = "0") String user_type,
+            @RequestParam(value = "message_type") String message_type,
+            @RequestParam(value = "message_id", defaultValue = "") String message_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "messageList", accessToken, version);
+        Map<String, Object> parMap = new HashMap<>();
+        parMap.put("course_id", course_id);
+        parMap.put("page_count", page_count);
+        parMap.put("message_imid", message_imid);
+        parMap.put("user_type", user_type);
+        if(message_type != null){
+            parMap.put("message_type", message_type);
+        }
+        parMap.put("message_id", message_id);
+        requestEntity.setParam(parMap);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
+    /**
+     * 查询课程综合信息，包括PPT信息，讲课音频信息，打赏列表信息
+     * @param course_id
+     * @param reward_update_time
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCoursesInfo(
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "courseInfo", accessToken, version);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("course_id", course_id);
+        param.put("reward_update_time", reward_update_time);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 
-
-
-    //</editor-fold>
+        //处理打赏信息
+        Map<String, Object> resultMap = null;
+        if(! reward_update_time.equals(rewardConfigurationTime.toString())){
+            resultMap = (Map<String, Object>) responseEntity.getReturnData();
+            resultMap.put("reward_info",rewardConfigurationMap);
+            responseEntity.setReturnData(resultMap);
+        }
+        return responseEntity;
+    }
 }

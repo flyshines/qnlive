@@ -136,6 +136,15 @@
 						<param name="course_amount" type="double"/>
 						<param name="student_num" type="long"/>
 						<param name="student" type="string"/>
+						<param name="total_amount" type="double" default="0" convert="(course_amount,extra_amount,course_type)=>{
+						    var ret = 0;						
+							if(utils.isEqual(course_type,'0') || utils.isEqual(course_type,'1')){
+								ret=utils.convertObjectToLong(extra_amount);
+							} else if(utils.isEqual(course_type,'2')){
+								ret=utils.convertObjectToLong(course_amount)+utils.convertObjectToLong(extra_amount);								
+							}												
+							return ret;
+						}"/>
 					</param>
 				</outputs>
 			</function>

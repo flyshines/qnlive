@@ -1,17 +1,18 @@
 package qingning.common.server.imp;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.*;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
-import com.qiniu.storage.model.DefaultPutRet;
+import com.qiniu.storage.Configuration;
+import com.qiniu.storage.model.FetchRet;
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -26,17 +27,14 @@ import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.qiniu.util.Auth;
-import com.qiniu.util.StringMap;
 import sun.misc.BASE64Encoder;
-import sun.security.x509.OIDMap;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
  
@@ -95,10 +93,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     Map<String, Object> queryMap = new HashMap<String, Object>();                    
                     String login_id = (String)reqMap.get("login_id");
                     String login_type = (String)reqMap.get("login_type");
-                    queryMap.put("login_type", login_type);
-                    queryMap.put("login_id", login_id);
                     accessTokenInfo = new HashMap<String,String>();
-                    MiscUtils.converObjectMapToStringMap(commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap), accessTokenInfo);                    
+                    if(!MiscUtils.isEmpty(login_id)){
+                        queryMap.put("login_type", login_type);
+                        queryMap.put("login_id", login_id);
+                    	MiscUtils.converObjectMapToStringMap(commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap), accessTokenInfo);
+                    } else {                    	
+                    	MiscUtils.converObjectMapToStringMap(commonModuleServer.findLoginInfoByUserId(user_id), accessTokenInfo);
+                    	reqMap.put("login_id", accessTokenInfo.get("union_id"));
+                    }
                 }
                 reqMap.put("record_time", userInfo.get("create_time"));
                 reqMap.put("old_subscribe", accessTokenInfo.get("subscribe"));
@@ -146,45 +149,90 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             RequestEntity requestEntity = this.generateRequestEntity("LogServer",  Constants.MQ_METHOD_ASYNCHRONIZED, "logUserInfo", reqMap);
             mqUtils.sendMessage(requestEntity);
         }
-        loginTime = System.currentTimeMillis();
+   //     loginTime = System.currentTimeMillis();
         Map<String,Object> resultMap = new HashMap<String, Object>();
         resultMap.put("server_time", System.currentTimeMillis());
  
-        Map<String,Object> versionReturnMap = new HashMap<>();
+//        Map<String,Object> versionReturnMap = new HashMap<>();
         //增加下发版本号逻辑
         //平台：0： 微信 1：andriod 2:IOS
-        if(! "0".equals(reqMap.get("plateform"))){
-            Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
-            if(! MiscUtils.isEmpty(versionInfoMap)){
-                //状态 0：关闭 1：开启
-                if(versionInfoMap.get("status").equals("1")){
-                    if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                        Map<String,Object> cacheMap = new HashMap<>();
-                        cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
-                        String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
-                        ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
-                        Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
-                        versionReturnMap.put("is_force","2");
-                        if(! MiscUtils.isEmpty(forceVersionInfoMap)){
-                            if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
-                                versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
-                            }
-                        }
-                        versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
-                        versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
-                        versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
-                        resultMap.put("version_info", versionReturnMap);
-                    }
-                }
-            }
-        }
-
+//        if(! "0".equals(reqMap.get("plateform"))){
+//            Map<String,String> versionInfoMap = CacheUtils.readAppVersion(reqMap.get("plateform").toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+//            resultMap.put("os_audit_version", versionInfoMap.get("os_audit_version"));
+//                if(! MiscUtils.isEmpty(versionInfoMap)){ //判断是否有version信息
+//                    if(!"0".equals(versionInfoMap.get("is_force").toString())){ //是否强制更新  1强制更新  2非强制更新 0不更新
+//                    //状态 0：关闭 1：开启
+//                    if(versionInfoMap.get("status").equals("1")){
+//                        if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+//                            Map<String,Object> cacheMap = new HashMap<>();
+//                            cacheMap.put(Constants.CACHED_KEY_APP_VERSION_INFO_FIELD, reqMap.get("plateform"));
+//                            String force_version_key = MiscUtils.getKeyOfCachedData(Constants.FORCE_UPDATE_VERSION, cacheMap);
+//                            ((Map<String, Object>) reqEntity.getParam()).put("force_version_key", force_version_key);
+//                            Map<String,String> forceVersionInfoMap = CacheUtils.readAppForceVersion(reqMap.get("plateform").toString(), reqEntity, readForceVersionOperation, jedisUtils, true);
+//                            versionReturnMap.put("is_force","2");
+//                            if(! MiscUtils.isEmpty(forceVersionInfoMap)){
+//                                if(MiscUtils.isEmpty(reqMap.get("version")) || compareVersion(reqMap.get("plateform").toString(), versionInfoMap.get("version_no"), reqMap.get("version").toString())){
+//                                    versionReturnMap.put("is_force","1");//是否强制更新  1强制更新  2非强制更新
+//                                }
+//                            }
+//                            versionReturnMap.put("version_no",versionInfoMap.get("version_no"));
+//                            versionReturnMap.put("update_desc",versionInfoMap.get("update_desc"));
+//                            versionReturnMap.put("version_url",versionInfoMap.get("version_url"));
+//                            resultMap.put("version_info", versionReturnMap);
+//                        }
+//                    }
+//                }
+//            }
+//        }
         return resultMap;
     }
 
+    /**
+     * 获取版本信息 根据不同的平台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("getVersion")
+    public Map<String,String> getVersion (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
+        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
+        if(plateform != 0) {//安卓或者ios
+            Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+            if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
+                //1.先判断系统和当前version
+                if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//当前version 小于 最小需要跟新的版本
+                    return versionInfoMap;
+                }
+            }
+        }
+    return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("control")
+    public Map<String,String> control (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
+        Map<String,String> retMap = new HashMap<>();
+        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
+        if(plateform != 0) {
+            Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+            if (!MiscUtils.isEmpty(versionInfoMap)) { //判断有没有信息
+                if(versionInfoMap.get("os_audit_version") != null){
+                    retMap.put("os_audit_version",versionInfoMap.get("os_audit_version"));
+                    return retMap;
+                }
+            }
+        }
+        return null;
+    }
+
+
+
     //客户版本号小于系统版本号 true， 否则为false
     private boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
-        //1：andriod 2:IOS
+        //1：andriod 2:IOS 3是js
         if(plateform.equals("1")){
             if(customerVersion.compareTo(systemVersion) < 0){
                 return true;
@@ -221,7 +269,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
         }
-
         return false;
     }
 
@@ -333,6 +380,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> weixinCodeUserLogin (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
+        String subscribe = "0";
         resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
         //1.传递授权code及相关参数，调用微信验证code接口
         String code = reqMap.get("code").toString();
@@ -348,18 +396,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
         //1.2.1根据 union_id查询数据库
-
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","4");//4.微信code方式登录
         queryMap.put("web_openid",openid);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
         //1.2.1.1如果用户存在则进行登录流程
-        if(loginInfoMap != null){
-            processLoginSuccess(2, null, loginInfoMap, resultMap);
+        if(loginInfoMap != null){//有
+            processLoginSuccess(2, null, loginInfoMap, resultMap);//获取后台安全证书 access_token
             return resultMap;
         }else {
-            //1.2.1.2如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
+            //1.2.1.2 如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
@@ -385,14 +432,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 return resultMap;
             }
 
-            String nickname = userJson.getString("nickname");
-            String sex = userJson.getString("sex");
-            String headimgurl = userJson.getString("headimgurl");
+            String nickname = userJson.getString("nickname");//昵称
+            String sex = userJson.getString("sex");//性别
+            String headimgurl = userJson.getString("headimgurl");//头像
 
 
             Map<String,String> imResultMap = null;
             try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");
+                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//注册im
             }catch (Exception e){
                 //TODO 暂不处理
             }
@@ -431,127 +478,31 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
+
+            //判断当前用户是否关注我们公众号
+            Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
+            try{
+                AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+                JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
+                if(user.get("subscribe") != null){
+                    subscribe = user.get("subscribe").toString();
+                }
+            }catch(Exception e){
+                //出现异常不处理
+            }
+
             String unionid =  userJson.getString("unionid");
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
+            reqMap.put("subscribe",subscribe);
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);
-            //}
-
             return resultMap;
         }
     }
 
-//
-    //<editor-fold desc="微信登录">
-    //    /**
-//     * 微信授权
-//     * @param reqEntity
-//     * @return
-//     * @throws Exception
-//     */
-//    @SuppressWarnings("unchecked")
-//    @FunctionName("weixinLogin")
-//    public Map<String,Object> weixinLogin (RequestEntity reqEntity) throws Exception{
-//        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-//        Map<String,Object> resultMap = new HashMap<String, Object>();
-//        String code = reqMap.get("code").toString();
-//        //1.传递授权code及相关参数，调用微信验证code接口
-//        JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code);
-//        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null) {
-//            throw new QNLiveException("120008");
-//        }
-//        String openid = getCodeResultJson.getString("openid");//拿到openid
-//
-//        Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
-//        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-//        JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
-//        if(user == null || user.getInteger("errcode") != null || user.getString("unionid") == null) { //可能服务器重启的时候 redis没有清空 所以会有就得accesstoken 存在出现错误 那么强制刷新
-//            wei_xin_access_token = WeiXinUtil.updAccessToken(jedis);
-//            if(wei_xin_access_token == null){ //没有获取到token 那么就是 appsecret错误
-//                throw new QNLiveException("120008");
-//            }
-//        }
-//
-//        //1.2如果验证成功，则得到用户的union_id和用户的access_token。 只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
-//        //1.2.1根据 openid查询数据库
-//        Map<String,Object> queryMap = new HashMap<>();
-//        queryMap.put("login_type","4");//4.微信code方式登录
-//        queryMap.put("web_openid",openid);
-//        Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-//
-//        //1.2.1.1如果用户存在则进行登录流程
-//        if(loginInfoMap != null){
-//            processLoginSuccess(2, null, loginInfoMap, resultMap);
-//            return resultMap;
-//        }else {
-//            String nickname = user.getString("nickname");//用户名称
-//            String sex = user.getString("sex");//性别
-//            String headimgurl = user.getString("headimgurl");//头像地址
-//            String unionid = user.getString("unionid");//获取unionid
-//
-//            queryMap.clear();
-//            queryMap.put("login_type","0");//0.微信方式登录
-//            queryMap.put("login_id",unionid);
-//            Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
-//            if(loginInfoMapFromUnionid != null){
-//                //将open_id更新到login_info表中
-//                Map<String,Object> updateMap = new HashMap<>();
-//                updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
-//                updateMap.put("web_openid", openid);
-//                commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-//                processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
-//                return resultMap;
-//            }
-//            Map<String,String> imResultMap = null;
-//            try {
-//                imResultMap = IMMsgUtil.createIMAccount("weixinLogin");
-//            }catch (Exception e){
-//                //TODO 暂不处理
-//            }
-//            //初始化数据库相关表
-//            reqMap.put("m_user_id", imResultMap.get("uid"));
-//            reqMap.put("m_pwd", imResultMap.get("password"));
-//            //设置默认用户头像
-//            if(MiscUtils.isEmpty(headimgurl)){
-//                reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address"));//TODO
-//            }else {
-//                String transferAvatarAddress = qiNiuFetchURL(headimgurl);
-//                reqMap.put("avatar_address",transferAvatarAddress);
-//            }
-//            //设置用户名
-//            if(MiscUtils.isEmpty(nickname)){
-//                reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
-//            }else {
-//                reqMap.put("nick_name", nickname);
-//            }
-//
-//            //判断性别
-//            //微信性别与本系统性别转换
-//            //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-//            if(MiscUtils.isEmpty(sex)){
-//                reqMap.put("gender","2");//TODO
-//            }else if(sex.equals("1")){
-//                reqMap.put("gender","1");//TODO
-//            }else if(sex.equals("2")){
-//                reqMap.put("gender","0");//TODO
-//            }else{
-//                reqMap.put("gender","2");//TODO
-//            }
-//            reqMap.put("unionid",unionid);
-//            reqMap.put("web_openid",openid);
-//            reqMap.put("login_type","4");
-//            Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-//
-//            //生成access_token，将相关信息放入缓存，构造返回参数
-//            processLoginSuccess(1, dbResultMap, null, resultMap);
-//            return resultMap;
-//        }
-//    }
-    //</editor-fold>
 
     /**
      *
@@ -789,20 +740,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //更新交易表
             Map<String,Object> failUpdateMap = new HashMap<>();
             failUpdateMap.put("status","3");
-            failUpdateMap.put("close_reason","生成微信预付单失败 "+payResultMap.get("return_msg"));
+            failUpdateMap.put("close_reason","生成微信预付单失败 "+payResultMap.get("return_msg")+ payResultMap.get ("err_code_des"));
             failUpdateMap.put("trade_id",tradeId);
             commonModuleServer.closeTradeBill(failUpdateMap);
  
             throw new QNLiveException("120015");
-        } else if (payResultMap.get ("result_code").equals ("FAIL")) {
-            //更新交易表
-            Map<String,Object> failUpdateMap = new HashMap<>();
-            failUpdateMap.put("status","3");
-            failUpdateMap.put("close_reason","生成微信预付单失败 "+ payResultMap.get ("err_code_des"));
-            failUpdateMap.put("trade_id",tradeId);
-            commonModuleServer.closeTradeBill(failUpdateMap);
- 
-            throw new QNLiveException("120015");
+//        } else if (payResultMap.get ("result_code").equals ("FAIL")) {
+//            //更新交易表
+//            Map<String,Object> failUpdateMap = new HashMap<>();
+//            failUpdateMap.put("status","3");
+//            failUpdateMap.put("close_reason","生成微信预付单失败 "+ payResultMap.get ("err_code_des"));
+//            failUpdateMap.put("trade_id",tradeId);
+//            commonModuleServer.closeTradeBill(failUpdateMap);
+//
+//            throw new QNLiveException("120015");
         } else {
             //成功，则需要插入支付表
             Map<String,Object> insertPayMap = new HashMap<>();
@@ -812,18 +763,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertPayMap.put("status","1");
             insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
             insertPayMap.put("create_time",new Date());
+            insertPayMap.put("update_time",new Date());
             commonModuleServer.insertPaymentBill(insertPayMap);
  
             //返回相关参数给前端.
             SortedMap<String,String> resultMap = new TreeMap<>();
             resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
             resultMap.put("nonceStr", payResultMap.get("random_char"));
-            resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
+            resultMap.put("pack age", "prepay_id="+payResultMap.get("prepay_id"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
             String paySign  = TenPayUtils.getSign(resultMap);
             resultMap.put ("paySign", paySign);
- 
+
             return resultMap;
         }
     }
@@ -1427,8 +1379,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(roomDistributerRecommendNum > 0){
             if(MiscUtils.isEmpty(reqMap.get("position"))){
                 reqMap.remove("position");
+            }            
+            List<Map<String,Object>> recommendUserList = null;
+            if(MiscUtils.isEmpty(rqCode)){
+            	recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
+            } else {
+            	recommendUserList = commonModuleServer.findRoomRecommendUserListByCode(reqMap);
             }
-            List<Map<String,Object>> recommendUserList = commonModuleServer.findRoomRecommendUserList(reqMap);
+            
 
             for(Map<String,Object> map : recommendUserList){
                 if(map.get("end_date") == null){
@@ -1864,6 +1822,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         updateMap.put("room_id",room_id);
                         commonModuleServer.increteRecommendNumForRoomDistributer(updateMap);*/
                     }else {
+                    	if(!rqCode.equals(roomDistributerRecommendMap.get("rq_code"))){
+                    		Map<String,Object> param = new HashMap<String,Object>();
+                    		param.put("distributer_id", distributer_id);
+                    		param.put("rq_code", roomDistributerRecommendMap.get("rq_code"));
+                    		Map<String,Object> result = commonModuleServer.findDistributionRoomDetail(param);
+                    		if(!MiscUtils.isEmpty(result)){
+                    			roomDistributerRecommendMap.put("end_date",result.get("end_date"));                    			
+                    		}
+                    	} else {
+                    		roomDistributerRecommendMap.put("end_date",distributerRoom.get("end_date"));
+                    	}
                         //判断如果该推荐用户如果处于该直播间的无效分销状态，则需要重新成为推荐用户
                         if(roomDistributerRecommendMap.get("end_date") != null){
                             Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
@@ -1880,6 +1849,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                                 insertMap.put("recommend_num", 0);
                                 insertMap.put("done_num", 0);
                                 insertMap.put("course_num", 0);
+                                insertMap.put("old_end_date", roomDistributerRecommendMap.get("end_date"));
                                 insertMap.put("old_recommend_num", roomDistributerRecommendMap.get("recommend_num"));
                                 insertMap.put("old_done_num", roomDistributerRecommendMap.get("done_num"));
                                 insertMap.put("old_course_num", roomDistributerRecommendMap.get("course_num"));
@@ -1889,6 +1859,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                                 //4.直播间分销员的推荐人数增加一
                                 jedis.hincrBy(distributerKey, "click_num", 1);
+                                jedis.hincrBy(distributerKey, "recommend_num", 1);
+                                jedis.hincrBy(distributerKey, "last_recommend_num", 1);
                                 jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
 
                                 //5.修改讲师缓存中的推荐用户数
@@ -1938,10 +1910,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
  
     private String qiNiuFetchURL(String mediaUrl) throws Exception{
-        BucketManager bucketManager = new BucketManager(auth);
+        Configuration cfg = new Configuration(Zone.zone0());
+        BucketManager bucketManager = new BucketManager(auth,cfg);
         String bucket = MiscUtils.getConfigByKey("image_space");
         String key = Constants.WEB_FILE_PRE_FIX + MiscUtils.parseDateToFotmatString(new Date(),"yyyyMMddHH")+MiscUtils.getUUId();
-        DefaultPutRet result = bucketManager.fetch(mediaUrl, bucket,key);
+        FetchRet result = bucketManager.fetch(mediaUrl, bucket,key);
         String imageUrl = MiscUtils.getConfigByKey("images_space_domain_name") + "/"+key;
         return imageUrl;
     }
@@ -1989,7 +1962,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 icon_url = liveRoomMap.get("avatar_address");
                 simple_content = courseMap.get("course_title");
                 share_url = getCourseShareURL(userId, id, courseMap);
-                png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
+
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
  
             case "2":
@@ -2002,8 +1977,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 content = liveRoomInfoMap.get("room_remark");
                 icon_url = liveRoomInfoMap.get("avatar_address");
                 share_url = getLiveRoomShareURL(userId, id);
-                png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content") + liveRoomInfoMap.get("room_name");
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion());
+
+
                 break;
  
             case "3":
@@ -2034,7 +2012,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         + MiscUtils.getConfigByKey("weixin_live_room_be_distributer_share_third_content");
                 icon_url = liveRoomInfo.get("avatar_address");
                 share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix"), reqMap.get("id"), liveRoomInfo.get("room_id"), (Integer.parseInt(values.get("profit_share_rate")) / 100.0), values.get("effective_time"));
-                png_url = this.CreateRqPage(null,liveRoomInfo.get("room_id"),reqMap.get("id").toString(),(Integer.parseInt(values.get("profit_share_rate")) / 100.0),Integer.valueOf(values.get("effective_time")),reqEntity.getAccessToken(),reqEntity.getVersion());
+                if(reqMap.get("png").toString().equals("Y"))
+                    png_url = this.CreateRqPage(null,liveRoomInfo.get("room_id"),reqMap.get("id").toString(),(Integer.parseInt(values.get("profit_share_rate")) / 100.0),Integer.valueOf(values.get("effective_time")),reqEntity.getAccessToken(),reqEntity.getVersion());
                 break;
         }
  
@@ -2176,17 +2155,68 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String share_url = getCourseShareURL(userId,course_id, courseMap);
             png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis());//生成图片
         }
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
         BASE64Encoder encoder = new BASE64Encoder();
-        String png_base64 =  encoder.encodeBuffer(bytes);//转换成base64串
+        String png_base64 =  encoder.encodeBuffer(bytes).trim();//转换成base64串
         png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
-        logger.info(png_base64);
         return png_base64;
     }
 
+    /**
+     *  发送验证码
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("sendVerificationCode")
+    public void sendVerificationCode (RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String phoneNum = map.get("phone");
+        if(isMobile(phoneNum)){
+            //TODO 效验手机号码
+            //TODO 生成随机的效验码
+            //TODO 把手机号码和userid还有效验码 存入缓存当中
+        }else{
+            throw new QNLiveException("130001");
+        }
+    }
+    public static boolean isMobile(final String str) {
+        Pattern p = null;
+        Matcher m = null;
+        boolean b = false;
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // 验证手机号
+        m = p.matcher(str);
+        b = m.matches();
+        return b;
+    }
+
+
+    /**
+     * 获取课程消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("messageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
+        return null;
+    }
+
+    /**
+     * 获取课程信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseInfo")
+    public Map<String, Object> getCourseInfo(RequestEntity reqEntity) throws Exception {
+        return null;
+    }
 
 
 }

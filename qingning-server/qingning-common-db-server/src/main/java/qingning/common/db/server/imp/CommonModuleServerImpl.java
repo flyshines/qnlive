@@ -95,8 +95,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("avatar_address", reqMap.get("avatar_address"));
 		user.put("phone_number", reqMap.get("phone_number"));
 		user.put("gender", reqMap.get("gender"));
+		user.put("subscribe",reqMap.get("subscribe"));
 		user.put("create_time", now);
 		user.put("update_time", now);
+		user.put("user_role", Constants.USER_ROLE_LISTENER);
 		//位置信息未插入由消息服务处理
 		userMapper.insertUser(user);
 		//2.插入login_info
@@ -225,18 +227,20 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if("2".equals(status)){
 			throw new QNLiveException("000105");			
 		}
+		String profitId = MiscUtils.getUUId();
 		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
 		updatePaymentBill.put("status", "2");
 		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
 		updatePaymentBill.put("update_time", realPayTime);
 		updatePaymentBill.put("payment_id", paymentBill.get("payment_id"));
 		updatePaymentBill.put("trade_id", paymentBill.get("trade_id"));
+		updatePaymentBill.put("profit_id", profitId);
 		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
 			throw new QNLiveException("000105");
 		}
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
-		profitRecord.put("profit_id", MiscUtils.getUUId());
+		profitRecord.put("profit_id", profitId);
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
 		profitRecord.put("user_id", tradeBill.get("user_id"));
@@ -612,5 +616,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap) {		
 		return lecturerCoursesProfitMapper.findCoursesSumInfo(queryMap);
 	}
-	
+
+	@Override
+	public List<Map<String, Object>> findRoomRecommendUserListByCode(Map<String, Object> record) {		
+		return roomDistributerRecommendMapper.findRoomRecommendUserList(record);
+	}
 }

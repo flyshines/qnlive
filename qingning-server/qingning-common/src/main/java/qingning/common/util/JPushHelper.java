@@ -55,8 +55,9 @@ public class JPushHelper {
 			//推送人MID结合，适合多人推送
 			List<String> audiences = new ArrayList<String>();
 			if (m_user_id != null) {
-				audiences.add(m_user_id);
+				audiences.add(m_user_id);				
 			}
+			
 			if(userIds!=null&&!userIds.isEmpty()){
 				audiences.addAll(userIds);
 			}

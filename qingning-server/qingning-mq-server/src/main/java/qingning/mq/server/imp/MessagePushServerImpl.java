@@ -11,6 +11,7 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
 import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.*;
+import qingning.mq.server.entyity.QNQuartzSchedule;
 import qingning.mq.server.entyity.QNSchedule;
 import qingning.mq.server.entyity.ScheduleTask;
 import qingning.server.AbstractMsgService;
@@ -33,9 +34,13 @@ public class MessagePushServerImpl extends AbstractMsgService {
 /*    private SaveCourseMessageService saveCourseMessageService;
     private SaveCourseAudioService saveCourseAudioService;*/
 
-    static QNSchedule qnSchedule;
+/*    static QNSchedule qnSchedule;
     static {
     	qnSchedule = new QNSchedule();
+    }*/
+    private static QNQuartzSchedule qnSchedule;
+    static {
+    	qnSchedule = new QNQuartzSchedule();
     }
 
 /*    private SaveCourseMessageService getSaveCourseMessageService(ApplicationContext context){
@@ -91,7 +96,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     public void processLiveCourseOvertimeNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入直播超时预先提醒定时任务"+reqMap);
+        log.debug("---------------将课程加入直播间即将超时预先提醒定时任务=分为 30分钟 和 10分钟"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_OVER_TIME_NOTICE)){
@@ -99,7 +104,15 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
     	String courseOvertime = MiscUtils.getConfigByKey("course_live_overtime_msec");
-    	long taskStartTime =MiscUtils.convertObjectToLong(courseOvertime) + real_start_time - 10*60*1000;
+    	long taskStartTime = MiscUtils.convertObjectToLong(courseOvertime) + real_start_time ;
+    	final boolean isThiryNotice = reqMap.containsKey(Constants.OVERTIME_NOTICE_TYPE_30);//判断 提醒类型  true=30  false=10
+        if(isThiryNotice){
+            taskStartTime-= 30*60*1000;// 提前30分钟 提醒课程结束
+        } else {
+            taskStartTime-= 10*60*1000;//提前10分钟 提醒课程结束
+        }
+
+
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
@@ -113,7 +126,12 @@ public class MessagePushServerImpl extends AbstractMsgService {
         			}
         			log.debug("-----------课程加入直播超时预先提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
         			JSONObject obj = new JSONObject();
-        			obj.put("body",MiscUtils.getConfigByKey("jpush_course_live_overtime_per_notice"));
+        			if(isThiryNotice){
+                        obj.put("body",MiscUtils.getConfigByKey("jpush_course_live_overtime_per_notice_30"));
+                    } else {
+                        obj.put("body",MiscUtils.getConfigByKey("jpush_course_live_overtime_per_notice_10"));
+                    }
+
         			obj.put("to",courseMap.get("lecturer_id"));
         			obj.put("msg_type","4");
         			Map<String,String> extrasMap = new HashMap<>();
@@ -312,6 +330,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     JSONObject obj = new JSONObject();
                     obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_study_notice"), MiscUtils.RecoveryEmoji(course_title)));
                     List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
+                    if(MiscUtils.isEmpty(studentIds)){
+                    	return;
+                    }
                     obj.put("user_ids",studentIds);
                     obj.put("msg_type","10");
                     Map<String,String> extrasMap = new HashMap<>();

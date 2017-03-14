@@ -3,15 +3,12 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.CourseMessageMapper" >
 
   <select id="findCourseMessageList" resultType="hashmap" parameterType="hashmap" >
-    select
-    cm.message_pos, cm.message_id, cm.message_type, cm.send_type, cm.message, cm.message_url,
-    cm.audio_time, cm.create_time, cm.creator_id, cm.message_question,
-    u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
+    select cm.*, u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
     from t_course_message cm join t_user u on cm.creator_id = u.user_id
     where 1 = 1
     and
     cm.course_id = #{course_id}
-    <if test="messagePos != null" >
+    <if test="message_pos != null" >
       and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
     </if>
     <if test="send_type != null" >
@@ -20,7 +17,7 @@
     <if test="send_type_query != null" >
       and  cm.send_type = 0 or cm.send_type = 1
     </if>
-    order by cm.message_pos asc
+    order by cm.message_pos desc
     limit #{page_count}
   </select>
 
@@ -31,8 +28,8 @@
     creator_id, create_time
     )
     values
-    <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
-      #{item.message_id},#{item.course_id},
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.message_id},#{item.course_id},
       <if test="item.message != null" >
         #{item.message},
       </if>
@@ -52,7 +49,7 @@
         null,
       </if>
       #{item.audio_time},#{item.message_pos},
-      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time}
+      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time})
     </foreach>
   </insert>
 

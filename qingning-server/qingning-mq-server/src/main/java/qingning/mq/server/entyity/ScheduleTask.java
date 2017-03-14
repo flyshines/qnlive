@@ -15,6 +15,7 @@ public abstract class ScheduleTask implements Runnable{
 	private long startTime=0;
 	private String taskName = null;
 	private String id;
+	private boolean checkScheduledFuture = true;
 	
 	public String getId() {
 		return id;
@@ -61,16 +62,23 @@ public abstract class ScheduleTask implements Runnable{
 		}
 	}
 	
+	public void SetCheckScheduledFuture(boolean check){
+		this.checkScheduledFuture = check;
+	}
+	
 	@Override
 	public void run() {
 		try{
-			if(!MiscUtils.isEmpty(taskName) && scheduledFuture !=null){
+			if(checkScheduledFuture && scheduledFuture ==null){
+				return;
+			}
+			if(!MiscUtils.isEmpty(taskName)){
 				process();
 			}
 		} catch(Exception e){
 			log.warn(e.getMessage());
 		} finally{			
 		}
-	}	
+	}
 	public abstract void process();
 }
