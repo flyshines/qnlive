@@ -1,7 +1,7 @@
 ﻿package qingning.common.util;
 
 public final class Constants {
-	private Constants(){};
+	private Constants(){}
 	public static final long SEQUENCE =1000000000l;
 	public static final String OVERTIME_NOTICE_TYPE_30="OVERTIME_NOTICE_TYPE_30";
 	public static final String SYS_FIELD_COUNTRY="country";
@@ -230,4 +230,5 @@ public final class Constants {
 
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";	
-	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";}
+	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";
+}
