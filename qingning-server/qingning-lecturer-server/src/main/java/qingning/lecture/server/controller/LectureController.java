@@ -550,8 +550,8 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(map);
 		return this.process(requestEntity, serviceManger, message);
 	}
-
-    /**
+	
+	/**
      * 微信平台回调第三方平台的ticker回调
      * @throws Exception
      */

@@ -150,7 +150,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
 		}
 		stringMap.put("message_id", messageId);
-		//课程为已结束
+		//<editor-fold desc="课程为已结束">
 		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){ //如果课程状态是2结束 消息类型不是6 结束信息
 			if("4".equals(information.get("send_type"))){				
 				Map<String,Object> messageObjectMap = new HashMap<>();				
@@ -192,6 +192,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			}
 			return;
 		}
+		//</editor-fold>
 
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(information.get("create_time").toString());
@@ -201,12 +202,12 @@ public class ImMsgServiceImp implements ImMsgService {
 
 		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问 4讲师互动
 		//2.如果该条信息为提问，则存入消息提问列表
-		if(information.get("send_type").equals("3")){
+		if(information.get("send_type").equals("3") || information.get("send_type").equals("2")){//用户消息
 			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
 			jedis.zadd(messageQuestionListKey, createTime, messageId);
 
 			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
-		}else if(information.get("send_type").equals("0") || information.get("send_type").equals("1")  || information.get("send_type").equals("7")){
+		}else if(information.get("send_type").equals("0") || information.get("send_type").equals("1")  || information.get("send_type").equals("7")){//老师消息
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
 			//如果为讲师回答，则需要进行极光推送//TODO
@@ -314,10 +315,8 @@ public class ImMsgServiceImp implements ImMsgService {
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, information.get("course_id").toString());
 		String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 		Map<String,String> courseMap = jedis.hgetAll(courseKey);
-		//先判断是否有实际开播时间，没有则进行进一步判断
-		//没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，
-		// 且当前时间大于开播时间的前十分钟，如果开课前15分钟讲课，则该课程存入实际开播时间，
-		//并且进行直播超时定时任务检查
+
+		//<editor-fold desc="先判断是否有实际开播时间，没有则进行进一步判断  2.没有实际开播时间，判断是否为预告中，如果为预告中，且发送者为讲师，且当前时间大于开播时间的前十分钟，如果开课前15分钟讲课，则该课程存入实际开播时间，并且进行直播超时定时任务检查">
 		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
 			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
 				long now = System.currentTimeMillis();
@@ -382,6 +381,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					//1.将聊天信息id插入到redis zsort列表中
 					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
+
 					Map<String,String> result = new HashMap<String,String>();
 					MiscUtils.converObjectMapToStringMap(startInformation, result);
 					jedis.hmset(messageKey, result);
@@ -419,6 +419,7 @@ public class ImMsgServiceImp implements ImMsgService {
 				}
 			}
 		}
+		//</editor-fold>
 
 
 		String audioListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, map);
@@ -435,6 +436,11 @@ public class ImMsgServiceImp implements ImMsgService {
 		MiscUtils.converObjectMapToStringMap(information, stringMap);
 		stringMap.put("audio_id", audioId);
 		jedis.hmset(messageKey, stringMap);
+
+
+		String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+		//jedis.zadd(messageLecturerListKey, createTime, messageId);
+
 	}
 
 

@@ -308,7 +308,7 @@ public class UserController extends AbstractController{
 	/**
 	 * 查询用户加入的课程列表
 	 * @param page_count
-	 * @param notice_create_time
+	 * @param record_time
 	 * @param access_token
 	 * @param version
 	 * @return
