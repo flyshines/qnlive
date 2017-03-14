@@ -130,7 +130,6 @@ public class TenPayUtils {
 
     private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid){
         Map<String, String> params = new TreeMap<String, String> ();
-        params.put ("appid", TenPayConstant.APP_ID);
         params.put ("body", goodName);
         params.put ("mch_id", TenPayConstant.MCH_ID);
         params.put ("nonce_str", getRandomStr ());
@@ -139,7 +138,13 @@ public class TenPayUtils {
         params.put ("spbill_create_ip", terminalIp);
         params.put ("total_fee", totalFee.toString ());
         params.put ("trade_type", tradeType);
-        params.put ("openid", openid);
+        if (openid != null) {
+            params.put ("openid", openid);
+            params.put ("appid", TenPayConstant.APP_ID);
+        } else  {
+            params.put("appid", TenPayConstant.APP_APP_ID);
+        }
+
         return params;
     }
 

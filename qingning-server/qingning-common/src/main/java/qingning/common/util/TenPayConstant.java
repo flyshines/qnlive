@@ -11,4 +11,6 @@ public class TenPayConstant {
     public static final String REFUND_URL = MiscUtils.getConfigByKey("weixin_refund_url");
     public static final String FAIL = "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg></return_msg></xml>";
     public static final String SUCCESS = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+
+    public static final String APP_APP_ID = "wx2e1a960d749aaf39";
 }
