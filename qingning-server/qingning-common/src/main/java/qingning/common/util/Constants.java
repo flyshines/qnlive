@@ -1,7 +1,7 @@
-﻿package qingning.common.util;
+package qingning.common.util;
 
 public final class Constants {
-	private Constants(){}
+	private Constants(){};
 	public static final long SEQUENCE =1000000000l;
 	public static final String OVERTIME_NOTICE_TYPE_30="OVERTIME_NOTICE_TYPE_30";
 	public static final String SYS_FIELD_COUNTRY="country";
