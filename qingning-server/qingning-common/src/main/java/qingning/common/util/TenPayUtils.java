@@ -72,10 +72,10 @@ public class TenPayUtils {
     public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid) throws IOException,ParserConfigurationException,SAXException{
         Map<String, String> params = createParams (goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
         params.put ("sign", getSign (params));
-        logger.info("-----微信预支付请求参数"+ params);
+        logger.debug("-----微信预支付请求参数"+ params);
         String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.PRE_PAY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
-        logger.info("-----生成微信预支付单结果"+ payResultMap.toString());
+        logger.debug("-----生成微信预支付单结果"+ payResultMap.toString());
         return payResultMap;
 
     }
