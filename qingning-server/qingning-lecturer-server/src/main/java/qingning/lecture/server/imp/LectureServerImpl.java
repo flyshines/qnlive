@@ -2470,6 +2470,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //服务号信息插入数据库
         lectureModuleServer.insertServiceNoInfo(authInfoMap);
 
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturer.get("lecturer_id"));
+        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
+        jedis.hmset(serviceNoKey, authInfoMap);
+
         //授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
         String service_type_info = serviceNoJsonObj.getString("service_type_info");
         //-1代表未认证，0代表微信认证，1代表新浪微博认证，2代表腾讯微博认证，3代表已资质认证通过但还未通过名称认证，
@@ -2479,9 +2484,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //返回给客户端的URL
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
-//        result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code, userId));
-        //TODO
-
+        if (service_type_info.equals("2") && !verify_type_info.equals("-1")) {
+            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_SUCCESS_URL);
+        } else {
+            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_FAILURE_URL);
+        }
         return result;
     }
 
