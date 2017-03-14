@@ -222,4 +222,6 @@ public final class Constants {
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
 
+	public static final String CUSTOMER_QRCODE_URL = "customerQrCodeUrl";
+	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
 }

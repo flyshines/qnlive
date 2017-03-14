@@ -523,4 +523,24 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 发送手机验证码
+	 * @param verification_code 验证码
+	 * @param accessToken 用户安全证书
+	 * @param version 版本
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/verifyVerificationCode", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity  verifyVerificationCode(
+			@RequestParam(value = "verification_code") String verification_code,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version)throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null);
+		Map<String,String> map = new HashMap<>();
+		map.put("verification_code",verification_code);
+		requestEntity.setParam(map);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 }

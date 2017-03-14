@@ -657,7 +657,18 @@
 					</param>
 				</outputs>
 			</function>
-			
+
+			<function name="getCustomerService">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="customer_service_phone" type="string"/>
+					<param name="customer_service_qrcode_img" type="string" />
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

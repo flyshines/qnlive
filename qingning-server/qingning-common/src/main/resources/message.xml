@@ -88,6 +88,10 @@
 				<entry key="120021" value="分销员分销关系已经过期"/>
 
 				<entry key="120016" value="平台信息不能为空"/>
+
+				<entry key="130001" value="电话号码有误"/>
+				<entry key="130002" value="验证码有误"/>
+				<entry key="130003" value="直播间没有手机号"/>
 			</map>
 		</property>
 	</bean>	

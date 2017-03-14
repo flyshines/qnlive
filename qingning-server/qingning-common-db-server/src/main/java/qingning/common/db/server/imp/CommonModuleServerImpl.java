@@ -98,6 +98,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("subscribe",reqMap.get("subscribe"));
 		user.put("create_time", now);
 		user.put("update_time", now);
+		user.put("user_role", Constants.USER_ROLE_LISTENER);
 		//位置信息未插入由消息服务处理
 		userMapper.insertUser(user);
 		//2.插入login_info

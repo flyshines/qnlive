@@ -3,6 +3,7 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public interface ILectureModuleServer {
 	Map<String,Object> createLiveRoom(Map<String, Object> reqMap);
@@ -82,4 +83,12 @@ public interface ILectureModuleServer {
 	List<Map<String,Object>> findDistributionRoomByLectureInfo(Map<String, Object> record);
 	
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+
+
+	/**
+	 * 获取客服信息
+	 */
+	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+
+
 }

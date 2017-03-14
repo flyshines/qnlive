@@ -2621,23 +2621,31 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("getCustomerService")
     public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        reqMap.put("customer_service_phone",MiscUtils.getConfigByKey("customer_service_phone"));//获取客服电话
-        reqMap.put("customer_service_qrcode_img",MiscUtils.getConfigByKey("customer_service_qrcode_img"));//获取客服微信二维码
+        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_QRCODE_URL);//获取客服二维码url
+        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_PHONE_NUM);//获取客服电话
+        reqMap.put("customer_service_phone",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
+        reqMap.put("customer_service_qrcode_img",customerPhoneNum.get("config_value"));//获取客服电话
         return reqMap;
     }
 
 
+    /**
+     * 效验手机验证码
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("verifyVerificationCode")
+    public  Map<String, Object>  verifyVerificationCode (RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String verification_code = map.get("verification_code");
+        //TODO 用userid拿到手机号
+        //TODO  用手机号拿到验证码
+        //TODO  验证手机验证码
 
-
-
-
-
-
-
-
-
-
-
+       return createLiveRoom(reqEntity);
+    }
 
 
 }

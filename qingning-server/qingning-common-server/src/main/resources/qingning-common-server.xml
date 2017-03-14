@@ -395,7 +395,7 @@
 				</inputs>
 				<outputs>
 					<param name="server_time" type="long"/>
-					<param name="os_audit_version" type="String"/>
+
 
 				</outputs>
 			</function>
@@ -517,11 +517,17 @@
 					</param>
 				</outputs>
 			</function>
-
-
-
-
-
+			<function name="control">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="plateform" type="int"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="os_audit_version" type="String"/>
+				</outputs>
+			</function>
 		</default>
  
  

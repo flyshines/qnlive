@@ -79,6 +79,24 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**
+     * 总控开关
+     */
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @RequestMapping(value = "/common/client/control", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity control(
+            @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "control", null, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("plateform",plateform);
+        requestEntity.setParam(map);
+        return  this.process(requestEntity, serviceManger, message);
+    }
+
 
 
     /**
@@ -146,7 +164,7 @@ public class CommonController extends AbstractController {
 
     @RequestMapping(value = "/common/weixin/weCatLogin", method = RequestMethod.GET)
     public void weCatLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
-        String authorization_url = MiscUtils.getConfigByKey("authorization_base_url");//手动授权url
+        String authorization_url = MiscUtils.getConfigByKey("authorization_base_url");//静默授权url
         String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
         response.sendRedirect(authorizationUrl);
         return;
@@ -185,26 +203,14 @@ public class CommonController extends AbstractController {
             response.sendRedirect(MiscUtils.getConfigByKey("web_index")+userWeixinAccessToken);
             return ;
         }
-
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-      //  String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
-        String authorization_url = MiscUtils.getConfigByKey("authorization_url");//手动授权url
+        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
         String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url"));//修改参数
         response.sendRedirect(authorizationUrl);
         return ;
     }
 
-    /**
-     * 微信 开放平台 公众号消息与事件接受
-     * @param request
-     * @param response
-     * @throws Exception
-     */
-    @RequestMapping(value = "/common/weixin/weiXinSystemMsg", method = RequestMethod.GET)
-    public void weiXinSystemMsg(HttpServletRequest request,HttpServletResponse response) throws Exception {
-
-    }
 
     /**
      * 获得上传到七牛token
@@ -688,7 +694,77 @@ public class CommonController extends AbstractController {
         this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 查询课程消息列表
+     * @param course_id 课程id
+     * @param page_count 分页
+     * @param message_imid 消息imid
+     * @param user_type  用户类型 0老师/顾问  1用户
+     * @param message_type 消息类型:0:音频 1：文字 3：图片 4 附件
+     * @param message_id 消息id
+     * @param accessToken 后台安全证书
+     * @param version 版本号
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/courses/{course_id}/messages", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity getMessageList(
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value = "page_count", defaultValue = "20") String page_count,
+            @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
+            @RequestParam(value = "user_type", defaultValue = "0") String user_type,
+            @RequestParam(value = "message_type") String message_type,
+            @RequestParam(value = "message_id", defaultValue = "") String message_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "messageList", accessToken, version);
+        Map<String, Object> parMap = new HashMap<>();
+        parMap.put("course_id", course_id);
+        parMap.put("page_count", page_count);
+        parMap.put("message_imid", message_imid);
+        parMap.put("user_type", user_type);
+        if(message_type != null){
+            parMap.put("message_type", message_type);
+        }
+        parMap.put("message_id", message_id);
+        requestEntity.setParam(parMap);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
+    /**
+     * 查询课程综合信息，包括PPT信息，讲课音频信息，打赏列表信息
+     * @param course_id
+     * @param reward_update_time
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/user/courses/{course_id}/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCoursesInfo(
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "courseInfo", accessToken, version);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("course_id", course_id);
+        param.put("reward_update_time", reward_update_time);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 
+        //处理打赏信息
+        Map<String, Object> resultMap = null;
+        if(! reward_update_time.equals(rewardConfigurationTime.toString())){
+            resultMap = (Map<String, Object>) responseEntity.getReturnData();
+            resultMap.put("reward_info",rewardConfigurationMap);
+            responseEntity.setReturnData(resultMap);
+        }
+        return responseEntity;
+    }
 }

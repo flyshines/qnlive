@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
@@ -192,13 +194,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
+    /**
+     * 获取版本信息 根据不同的平台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("getVersion")
     public Map<String,String> getVersion (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
-        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS
-        if(plateform != 0) {
+        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
+        if(plateform != 0) {//安卓或者ios
             Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
             if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
                 //1.先判断系统和当前version
@@ -210,13 +217,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     return null;
     }
 
-
+    @SuppressWarnings("unchecked")
+    @FunctionName("control")
+    public Map<String,String> control (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
+        Map<String,String> retMap = new HashMap<>();
+        Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
+        if(plateform != 0) {
+            Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
+            if (!MiscUtils.isEmpty(versionInfoMap)) { //判断有没有信息
+                if(versionInfoMap.get("os_audit_version") != null){
+                    retMap.put("os_audit_version",versionInfoMap.get("os_audit_version"));
+                    return retMap;
+                }
+            }
+        }
+        return null;
+    }
 
 
 
     //客户版本号小于系统版本号 true， 否则为false
     private boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
-        //1：andriod 2:IOS
+        //1：andriod 2:IOS 3是js
         if(plateform.equals("1")){
             if(customerVersion.compareTo(systemVersion) < 0){
                 return true;
@@ -717,20 +740,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //更新交易表
             Map<String,Object> failUpdateMap = new HashMap<>();
             failUpdateMap.put("status","3");
-            failUpdateMap.put("close_reason","生成微信预付单失败 "+payResultMap.get("return_msg"));
+            failUpdateMap.put("close_reason","生成微信预付单失败 "+payResultMap.get("return_msg")+ payResultMap.get ("err_code_des"));
             failUpdateMap.put("trade_id",tradeId);
             commonModuleServer.closeTradeBill(failUpdateMap);
  
             throw new QNLiveException("120015");
-        } else if (payResultMap.get ("result_code").equals ("FAIL")) {
-            //更新交易表
-            Map<String,Object> failUpdateMap = new HashMap<>();
-            failUpdateMap.put("status","3");
-            failUpdateMap.put("close_reason","生成微信预付单失败 "+ payResultMap.get ("err_code_des"));
-            failUpdateMap.put("trade_id",tradeId);
-            commonModuleServer.closeTradeBill(failUpdateMap);
- 
-            throw new QNLiveException("120015");
+//        } else if (payResultMap.get ("result_code").equals ("FAIL")) {
+//            //更新交易表
+//            Map<String,Object> failUpdateMap = new HashMap<>();
+//            failUpdateMap.put("status","3");
+//            failUpdateMap.put("close_reason","生成微信预付单失败 "+ payResultMap.get ("err_code_des"));
+//            failUpdateMap.put("trade_id",tradeId);
+//            commonModuleServer.closeTradeBill(failUpdateMap);
+//
+//            throw new QNLiveException("120015");
         } else {
             //成功，则需要插入支付表
             Map<String,Object> insertPayMap = new HashMap<>();
@@ -740,18 +763,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertPayMap.put("status","1");
             insertPayMap.put("pre_pay_no",payResultMap.get("prepay_id"));
             insertPayMap.put("create_time",new Date());
+            insertPayMap.put("update_time",new Date());
             commonModuleServer.insertPaymentBill(insertPayMap);
  
             //返回相关参数给前端.
             SortedMap<String,String> resultMap = new TreeMap<>();
             resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
             resultMap.put("nonceStr", payResultMap.get("random_char"));
-            resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
+            resultMap.put("pack age", "prepay_id="+payResultMap.get("prepay_id"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
             String paySign  = TenPayUtils.getSign(resultMap);
             resultMap.put ("paySign", paySign);
- 
+
             return resultMap;
         }
     }
@@ -2140,6 +2164,59 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return png_base64;
     }
 
+    /**
+     *  发送验证码
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("sendVerificationCode")
+    public void sendVerificationCode (RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String phoneNum = map.get("phone");
+        if(isMobile(phoneNum)){
+            //TODO 效验手机号码
+            //TODO 生成随机的效验码
+            //TODO 把手机号码和userid还有效验码 存入缓存当中
+        }else{
+            throw new QNLiveException("130001");
+        }
+    }
+    public static boolean isMobile(final String str) {
+        Pattern p = null;
+        Matcher m = null;
+        boolean b = false;
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // 验证手机号
+        m = p.matcher(str);
+        b = m.matches();
+        return b;
+    }
+
+
+    /**
+     * 获取课程消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("messageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
+        return null;
+    }
+
+    /**
+     * 获取课程信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseInfo")
+    public Map<String, Object> getCourseInfo(RequestEntity reqEntity) throws Exception {
+        return null;
+    }
 
 
 }
