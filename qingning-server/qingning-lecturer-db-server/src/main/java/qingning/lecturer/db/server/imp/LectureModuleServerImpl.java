@@ -66,8 +66,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private LecturerDistributionLinkMapper lecturerDistributionLinkMapper;
 
-//	@Autowired(required = true)
-//	private SystemConfigMapper systemConfigMapper;
+	@Autowired(required = true)
+	private SystemConfigMapper systemConfigMapper;
 
 	@Transactional(rollbackFor=Exception.class)
 	@Override
