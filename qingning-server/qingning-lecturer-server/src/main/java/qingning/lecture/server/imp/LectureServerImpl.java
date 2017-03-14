@@ -2823,4 +2823,4 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
        return createLiveRoom(reqEntity);
     }
-}}
+}
