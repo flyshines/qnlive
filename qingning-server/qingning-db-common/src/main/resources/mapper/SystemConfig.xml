@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.SystemConfigMapper" >
+
+  <select id="findCustomerServiceBySystemConfig" resultType="string" parameterType="hashmap" >
+    select * from t_system_config
+    <where>
+      <if test="config_key != null">
+        config_key = #{config_key}
+      </if>
+    </where>
+  </select>
+  
+</mapper>
