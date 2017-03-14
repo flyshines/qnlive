@@ -300,7 +300,7 @@ public class CommonController extends AbstractController {
     @ResponseBody
     ResponseEntity generateWeixinPayBill(
             HttpEntity<Object> entity,
-            @RequestParam(value = "platform",defaultValue = "web") String platform,
+            @RequestParam(value = "platform", defaultValue = "3") String platform,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version, HttpServletRequest request) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "generateWeixinPayBill", accessToken, version);
