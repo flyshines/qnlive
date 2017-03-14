@@ -102,9 +102,9 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 
 		Map<String,Object> body = imMessage.getBody();
-		final Map<String,Object> information = (Map<String,Object>)body.get("information");
+		final Map<String,Object> information = (Map<String,Object>)body.get("information");//获取信息
 
-		Jedis jedis = jedisUtils.getJedis();
+		Jedis jedis = jedisUtils.getJedis();//缓存
 		Map<String, Object> map = new HashMap<>();
 		//课程id为空，则该条消息为无效消息
 		if(information.get("course_id") == null){
@@ -137,20 +137,21 @@ public class ImMsgServiceImp implements ImMsgService {
 			return;
 		}
 		
-		String messageId = MiscUtils.getUUId();
+		String messageId = MiscUtils.getUUId();//设置messageid
 		Map<String,String> stringMap = new HashMap<>();
 		MiscUtils.converObjectMapToStringMap(information, stringMap);
 		String message = stringMap.get("message");
 		if(!MiscUtils.isEmpty(message)){
 			stringMap.put("message", MiscUtils.emojiConvertToNormalString(message));
 		}
+		//增加回复
 		String message_question = stringMap.get("message_question");
 		if(!MiscUtils.isEmpty(message_question)){
 			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
 		}
 		stringMap.put("message_id", messageId);
 		//课程为已结束
-		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){
+		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){ //如果课程状态是2结束 消息类型不是6 结束信息
 			if("4".equals(information.get("send_type"))){				
 				Map<String,Object> messageObjectMap = new HashMap<>();				
 				messageObjectMap.put("message_id", stringMap.get("message_id"));
@@ -198,17 +199,16 @@ public class ImMsgServiceImp implements ImMsgService {
 		//1.将聊天信息id插入到redis zsort列表中
 		jedis.zadd(messageListKey, createTime, messageId);
 
-		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户评论 3 用户提问
+		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问 4讲师互动
 		//2.如果该条信息为提问，则存入消息提问列表
 		if(information.get("send_type").equals("3")){
 			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
 			jedis.zadd(messageQuestionListKey, createTime, messageId);
 
 			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
-		}else if(information.get("send_type").equals("0") || information.get("send_type").equals("1")){
+		}else if(information.get("send_type").equals("0") || information.get("send_type").equals("1")  || information.get("send_type").equals("7")){
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
-
 			//如果为讲师回答，则需要进行极光推送//TODO
 		}
 // else if(information.get("send_type").equals("1")){
@@ -377,7 +377,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);										
 					//1.将聊天信息id插入到redis zsort列表中
 					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
-					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);
+					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
 					Map<String,String> result = new HashMap<String,String>();
 					MiscUtils.converObjectMapToStringMap(startInformation, result);
 					jedis.hmset(messageKey, result);
