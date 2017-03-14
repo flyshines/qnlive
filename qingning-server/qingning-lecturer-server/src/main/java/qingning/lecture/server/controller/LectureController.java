@@ -569,6 +569,8 @@ public class LectureController extends AbstractController {
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document doc = builder.parse(in);
 
+
+
         //InfoType
 		NodeList infoTypeNodeL = doc.getElementsByTagName ("InfoType");
 		String infoType = infoTypeNodeL.item(0).getFirstChild().getNodeValue();
@@ -649,23 +651,4 @@ public class LectureController extends AbstractController {
 		String redirectUrl = (String) resultMap.get("redirectUrl");
 		resp.sendRedirect(redirectUrl);
 	}
-
-//	/**
-//	 * 关联微信号二维码号
-//	 * @param type
-//	 * @param url
-//	 * @param access_token
-//	 * @param version
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	@RequestMapping(value="/lecturer/wechat/associate",method=RequestMethod.GET)
-//	public @ResponseBody ResponseEntity associateWechatCode (
-//			@RequestParam(value = "type", defaultValue = "") String type,
-//			@RequestParam(value = "url", defaultValue = "") String url,
-//			@RequestHeader("access_token") String access_token,
-//			@RequestHeader("version") String version) throws Exception{
-//		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "associateWechatCode", access_token, version);
-//		return this.process(requestEntity, serviceManger, message);
-//	}
 }

@@ -2401,6 +2401,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("wechatTicketNotify")
     public void wechatTicketNotify(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+
+        log.debug("------微信服务号接收微信推送事件------"+reqMap);
+
         String appidOrTicket = (String) reqMap.get("appidOrTicket");  //微信每10分钟推送一次verifyTicket
         String type = (String) reqMap.get("type");
         Jedis jedis = jedisUtils.getJedis();
@@ -2442,6 +2445,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String auth_code = (String) reqMap.get("auth_code");
         String user_id = (String) reqMap.get("user_id");
+
+        log.debug("------微信服务号授权回调------"+reqMap);
 
         //根据微信回调的URL的参数去获取公众号的接口调用凭据和授权信息
         Jedis jedis = jedisUtils.getJedis();
@@ -2497,6 +2502,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
 
+        log.debug("------微信服务号去绑定服务号------"+userId);
+
         //获取预授权码pre_auth_code 进入微信平台
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
         JSONObject jsonObj = WeiXinUtil.getPreAuthCode(access_token);
@@ -2508,15 +2515,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         return result;
     }
-
-//    @FunctionName("associateWechatCode")
-//    public Map<String, Object> associateWechatCode(RequestEntity reqEntity) throws Exception {
-//        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-//        Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
-//        //如果type=1 解析HTML获取二维码的链接地址
-//        //如果type=2 直接是二维码图片的URL
-//        return null;
-//    }
 
     private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion,
                                                    boolean preDesc, boolean finDesc) throws Exception{

@@ -727,10 +727,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String platform = (String) reqMap.get("platform");
         String openid = null;
         if (platform.equals("3")) {//3是js调用 默认是js web调用
-            openid = Constants.CACHED_KEY_WECHAT_APPID;
-        } else  {
             Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
             openid = userMap.get("web_openid");
+        } else  {
+            openid = Constants.CACHED_KEY_WECHAT_APPID;
         }
 
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);

@@ -296,9 +296,7 @@ public class CommonController extends AbstractController {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/payment/weixin/bill", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    ResponseEntity generateWeixinPayBill(
+    public @ResponseBody ResponseEntity generateWeixinPayBill(
             HttpEntity<Object> entity,
             @RequestParam(value = "platform", defaultValue = "3") String platform,
             @RequestHeader("access_token") String accessToken,
