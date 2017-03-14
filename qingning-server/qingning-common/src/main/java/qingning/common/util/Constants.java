@@ -229,6 +229,10 @@ public final class Constants {
 	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
 
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
-	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";	
+	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";
+
 	public static final String CACHED_KEY_WECHAT_APPID = "a51b56dd7b06abcdf1f5b4806aa4f4";
+
+	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "www.baidu.com";
+	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "www.sogou.com";
 }
