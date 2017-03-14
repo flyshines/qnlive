@@ -1,21 +1,17 @@
 package qingning.common.server.imp;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
-import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.storage.model.FetchRet;
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -31,17 +27,14 @@ import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.qiniu.util.Auth;
-import com.qiniu.util.StringMap;
 import sun.misc.BASE64Encoder;
-import sun.security.x509.OIDMap;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
  
@@ -726,13 +719,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.clear();        
         query.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, query);
-        Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
  
         //4.调用微信生成预付单接口
         String terminalIp = reqMap.get("remote_ip_address").toString();
         String tradeType = "JSAPI";
         String outTradeNo = tradeId;
-        String openid = userMap.get("web_openid");
+        String platform = (String) reqMap.get("platform");
+        String openid = null;
+        if (platform != null) {
+            openid = Constants.CACHED_KEY_WECHAT_APPID;
+        } else  {
+            Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
+            openid = userMap.get("web_openid");
+        }
+
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
  
         //5.处理生成微信预付单接口

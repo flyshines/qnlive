@@ -84,11 +84,10 @@ public interface ILectureModuleServer {
 	
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 
-
 	/**
 	 * 获取客服信息
 	 */
-	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);	int insertServiceNoInfo(Map<String, String> map);
+	int updateServiceNoInfo(Map<String, String> map);
 
-
-}
+	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);}

@@ -141,4 +141,72 @@
     	and update_time = #{last_update_time}
     </if>   
   </update>
+
+  <insert id="insertServiceNoInfo" parameterMap="hashmap">
+    INSERT INTO t_wechat_service_no
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="authorizer_appid != null">
+        authorizer_appid,
+      </if>
+      <if test="authorizer_access_token != null">
+        authorizer_access_token,
+      </if>
+      <if test="authorizer_refresh_token != null">
+        authorizer_appid,
+      </if>
+      <if test="expires_in != null">
+        expires_in,
+      </if>
+      <if test="qrcode_url != null">
+        qrcode_url,
+      </if>
+      <if test="lecturer_id != null">
+        lecturer_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="authorizer_appid != null">
+        #{authorizer_appid},
+      </if>
+      <if test="authorizer_access_token != null">
+        #{authorizer_appid},
+      </if>
+      <if test="authorizer_refresh_token != null">
+        #{authorizer_appid},
+      </if>
+      <if test="expires_in != null">
+        #{authorizer_appid},
+      </if>
+      <if test="qrcode_url != null">
+        #{authorizer_appid},
+      </if>
+      <if test="lecturer_id != null">
+        #{authorizer_appid},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateServiceNoInfo" parameterMap="hashmap">
+    update t_wechat_service_no
+    <set>
+      <if test="authorizer_appid != null">
+        authorizer_appid = #{authorizer_appid}
+      </if>
+      <if test="authorizer_access_token != null">
+        authorizer_access_token = #{authorizer_access_token}
+      </if>
+      <if test="authorizer_refresh_token != null">
+        authorizer_refresh_token = #{authorizer_refresh_token}
+      </if>
+      <if test="expiresTimeStamp != null">
+        expiresTimeStamp = #{expiresTimeStamp}
+      </if>
+    </set>
+    WHERE lecturer_id = #{lecturer_id}
+  </update>
+
+  <select id="findServiceNoInfoByLectureId" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_wechat_service_no
+    where lecturer_id = #{lecturer_id}
+  </select>
 </mapper>

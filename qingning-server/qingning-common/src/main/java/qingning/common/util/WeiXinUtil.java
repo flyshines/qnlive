@@ -58,6 +58,16 @@ public class WeiXinUtil {
     private static final String appsecret = MiscUtils.getConfigByKey("appsecret");
     private final static String weixin_template_push_url = MiscUtils.getConfigByKey("weixin_template_push_url");//"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
+    public final static String component_access_token_url = MiscUtils.getConfigByKey("service_component_access_token_url");
+    public final static String pre_auth_code_url = MiscUtils.getConfigByKey("service_pre_auth_code");
+    public final static String service_auth_url = MiscUtils.getConfigByKey("service_auth_url");
+    public final static String service_auth_info_url = MiscUtils.getConfigByKey("service_auth_info_url");
+    public final static String service_auth_refresh_info_url = MiscUtils.getConfigByKey("service_auth_refresh_info_url");
+    public final static String service_auth_account_info_url = MiscUtils.getConfigByKey("service_auth_account_info_url");
+
+    public final static String service_fans_url1 = MiscUtils.getConfigByKey("service_fans_url1");
+    public final static String service_fans_url2 = MiscUtils.getConfigByKey("service_fans_url2");
+
     /**
      * 获取accessToekn
      * @param appid 凭证
@@ -123,8 +133,159 @@ public class WeiXinUtil {
         }
         return null;
     }
+    /**
+     * 获取第三方平台component_access_token
+     * @return
+     */
+    public static JSONObject getComponentAccessToken(String ticket) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppSecret = WeiXinUtil.appsecret;//TODO 待配置
+        String requestUrl = component_access_token_url;
 
+        Map<String, String> param = new HashMap<>();
+        param.put("component_appid", componentAppid);
+        param.put("component_appsecret", componentAppSecret);
+        param.put("component_verify_ticket", ticket);
 
+        String requestResult = HttpTookit.doPost(requestUrl, param);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+    /**
+     * 获取第三方平台预授权码pre_auth_code
+     * @return
+     */
+    public static JSONObject getPreAuthCode(String accessToken) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = pre_auth_code_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("component_appid", componentAppid);
+
+        String requestResult = HttpTookit.doPost(requestUrl, param);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+    /**
+     * 获取第三方平台授权重定向到微信url
+     * @return
+     */
+    public static String getServiceAuthUrl(String preAuthCode, String userId) {
+        //TODO
+        String redirectUrl = "";//TODO 待配置 重定向URL 需要配置 追加userId
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = service_auth_url.replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", redirectUrl);
+        log.debug("------微信--服务号重定向URL--  "+requestUrl);
+        return requestUrl;
+    }
+    /**
+     * 获取第三方平台授权信息
+     * @return
+     */
+    public static JSONObject getServiceAuthInfo(String accessToken, String authCode) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("component_appid", componentAppid);
+        param.put("authorization_code", authCode);
+
+        String requestResult = HttpTookit.doPost(requestUrl, param);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
+    /**
+     * 刷新第三方平台授权信息 主要是accessToken 和 refreshToken
+     * @param accessToken
+     * @param refreshToken
+     * @param authorizerAppid
+     * @return
+     */
+    public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("component_appid", componentAppid);
+        param.put("authorizer_appid", authorizerAppid);
+        param.put("authorizer_refresh_token", refreshToken);
+
+        String requestResult = HttpTookit.doPost(requestUrl, param);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+    /**
+     * 获取第三方平台账号信息
+     * @return
+     */
+    public static JSONObject getServiceAuthAccountInfo(String accessToken, String authorizerAppid) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = service_auth_account_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("component_appid", componentAppid);
+        param.put("authorizer_appid", authorizerAppid);
+
+        String requestResult = HttpTookit.doPost(requestUrl, param);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
+    /**
+     * 获取服务号的粉丝的openid
+     * @param accessToken 服务号的
+     * @param nextOpenId 粉丝的
+     * @return
+     */
+    public static JSONObject getServiceFansList(String accessToken, String nextOpenId) {
+        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String requestUrl = null;
+        if (nextOpenId == null) {
+            requestUrl = service_fans_url1.replace("ACCESS_TOKEN", accessToken);
+        } else {
+            requestUrl = service_fans_url2.replace("ACCESS_TOKEN", accessToken).replace("NEXT_OPENID", nextOpenId);
+        }
+
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
+    /**
+     * 给服务号的粉丝发送模板消息
+     * @param accessToken 服务号的
+     * @param openId  服务号粉丝的
+     * @param url 详情链接地址
+     * @param templateId 模板消息id
+     * @param templateMap 模板数据
+     */
+    public static int sendTemplateMessageToServiceNoFan(String accessToken, String openId, String url, String templateId, Map<String, TemplateData> templateMap) {
+        String accessUrl = weixin_template_push_url.replace("ACCESS_TOKEN", accessToken);
+        WxTemplate temp = new WxTemplate();
+        temp.setUrl(url);
+        temp.setTouser(openId);
+        temp.setTopcolor("#000000");
+        temp.setTemplate_id(templateId);
+
+        temp.setData(templateMap);
+        String jsonString="";
+        try {
+            jsonString = com.alibaba.dubbo.common.json.JSON.json(temp);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = WeiXinUtil.httpRequest(accessUrl, "POST", jsonString);
+        log.info("微信推送消息发送参数：" + jsonObject);
+        int result = 0;
+        if (null != jsonObject) {
+            if (0 != jsonObject.getIntValue("errcode")) {
+                result = jsonObject.getIntValue("errcode");
+                log.error("错误 errcode:{} errmsg:{}", jsonObject.getIntValue("errcode"), jsonObject.getString("errmsg"));
+            }
+        }
+        return result;
+    }
 
     public static JSONObject getUserInfoByCode(String code) {
         String requestUrl = get_user_info_by_code_url.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
@@ -134,7 +295,6 @@ public class WeiXinUtil {
         log.debug("------微信--通过H5传递code获得access_token-返回参数  "+requestResult);
         return jsonObject;
     }
-
 
     /**
      * 通过微信openId 来判断是否关注公众号
