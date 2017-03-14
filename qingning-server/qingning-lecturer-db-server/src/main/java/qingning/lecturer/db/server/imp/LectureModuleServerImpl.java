@@ -519,10 +519,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {		
 		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
 	}
-//	@Override
-//	public Map<String, Object> findCustomerServiceBySystemConfig(String config_key) {
-//		return systemConfigMapper.findCustomerServiceBySystemConfig(config_key);
-//	}
+	@Override
+	public Map<String, Object> findCustomerServiceBySystemConfig(String config_key) {
+		return systemConfigMapper.findCustomerServiceBySystemConfig(config_key);
+	}
 	@Override
 	public int insertServiceNoInfo(Map<String, String> map) {
 		return lecturerMapper.insertServiceNoInfo(map);

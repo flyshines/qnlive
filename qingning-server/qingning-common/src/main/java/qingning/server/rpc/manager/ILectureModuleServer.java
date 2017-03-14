@@ -87,7 +87,7 @@ public interface ILectureModuleServer {
 	/**
 	 * 获取客服信息
 	 */
-//	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
 
 	int insertServiceNoInfo(Map<String, String> map);
 

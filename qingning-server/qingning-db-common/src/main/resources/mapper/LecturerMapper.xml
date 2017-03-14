@@ -142,7 +142,7 @@
     </if>   
   </update>
 
-  <insert id="insertServiceNoInfo" parameterMap="hashmap">
+  <insert id="insertServiceNoInfo" parameterType="hashmap">
     INSERT INTO t_wechat_service_no
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="authorizer_appid != null">
@@ -186,7 +186,7 @@
     </trim>
   </insert>
 
-  <update id="updateServiceNoInfo" parameterMap="hashmap">
+  <update id="updateServiceNoInfo" parameterType="hashmap">
     update t_wechat_service_no
     <set>
       <if test="authorizer_appid != null">
