@@ -23,6 +23,11 @@
 		<artifactId>mongo-java-driver</artifactId>
 		<version>3.4.0</version>
 	</dependency>
+	  <dependency>
+		  <groupId>org.apache.poi</groupId>
+		  <artifactId>poi-ooxml</artifactId>
+		  <version>3.11-beta1</version>
+	  </dependency>
   </dependencies>
   <build>
 	<finalName>qingning-mq-server</finalName>	
