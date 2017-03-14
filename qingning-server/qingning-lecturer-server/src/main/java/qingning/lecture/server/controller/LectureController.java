@@ -551,9 +551,9 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
- * @return
-	 * @throws Exception
-	 */
+// * @return
+//	 * @throws Exception
+//	 */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public String wechatAuth(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		//解析XML文件
