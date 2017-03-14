@@ -87,7 +87,10 @@ public interface ILectureModuleServer {
 	/**
 	 * 获取客服信息
 	 */
-	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);	int insertServiceNoInfo(Map<String, String> map);
+	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+
+	int insertServiceNoInfo(Map<String, String> map);
+
 	int updateServiceNoInfo(Map<String, String> map);
 
 	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);}
