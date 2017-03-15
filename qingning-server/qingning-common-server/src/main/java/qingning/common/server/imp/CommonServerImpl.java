@@ -723,7 +723,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         //4.调用微信生成预付单接口
         String terminalIp = reqMap.get("remote_ip_address").toString();
-        String tradeType = "JSAPI";
         String outTradeNo = tradeId;
         String platform = (String) reqMap.get("platform");
         String openid = null;
@@ -775,11 +774,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
             } else  {
                 resultMap.put("prepayId", payResultMap.get("prepay_id"));
+                resultMap.put("package", "Sign=WXPay");
             }
             resultMap.put("nonceStr", payResultMap.get("random_char"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
-            String paySign  = TenPayUtils.getSign(resultMap, platform);
+
+            String paySign = null;
+            if (isWeb) {
+                paySign = TenPayUtils.getSign(resultMap, platform);
+            } else {
+                SortedMap<String,String> signMap = new TreeMap<>();
+                signMap.put("appid", MiscUtils.getConfigByKey("app_app_id"));
+                signMap.put("partnerid", MiscUtils.getConfigByKey("weixin_app_pay_mch_id"));
+                signMap.put("prepayid", resultMap.get("prepayId"));
+                signMap.put("package", resultMap.get("package"));
+                signMap.put("noncestr", resultMap.get("nonceStr"));
+                signMap.put("signtype", resultMap.get("signType"));
+                signMap.put("timestamp", resultMap.get("timeStamp"));
+                paySign = TenPayUtils.getSign(resultMap, platform);
+            }
+
             resultMap.put ("paySign", paySign);
 
             return resultMap;
