@@ -1,5 +1,7 @@
 package qingning.db.common.mybatis.persistence;
 
+import org.apache.ibatis.annotations.Param;
+
 import java.util.Map;
 
 /**
@@ -10,5 +12,5 @@ public interface SystemConfigMapper {
     /**
      * 获取客服信息
      */
-    Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+    Map<String,Object> findCustomerServiceBySystemConfig(@Param("config_key")String config_key);
 }

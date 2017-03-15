@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.omg.CORBA.OBJ_ADAPTER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -2797,11 +2798,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("getCustomerService")
     public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String,Object> retMap = new HashMap<>();
         Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_QRCODE_URL);//获取客服二维码url
         Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_PHONE_NUM);//获取客服电话
-        reqMap.put("customer_service_phone",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
-        reqMap.put("customer_service_qrcode_img",customerPhoneNum.get("config_value"));//获取客服电话
-        return reqMap;
+        retMap.put("customer_service_phone",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
+        retMap.put("customer_service_qrcode_img",customerPhoneNum.get("config_value"));//获取客服电话
+        return retMap;
     }
 
 
