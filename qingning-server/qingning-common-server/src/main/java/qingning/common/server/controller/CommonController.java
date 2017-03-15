@@ -296,17 +296,13 @@ public class CommonController extends AbstractController {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/payment/weixin/bill", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    ResponseEntity generateWeixinPayBill(
+    public @ResponseBody ResponseEntity generateWeixinPayBill(
             HttpEntity<Object> entity,
-            @RequestParam(value = "platform", defaultValue = "3") String platform,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version, HttpServletRequest request) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "generateWeixinPayBill", accessToken, version);
         String remote_ip_address = MiscUtils.getIpAddr(request);
         ((Map<String,Object>)entity.getBody()).put("remote_ip_address",remote_ip_address);
-        ((Map<String,Object>)entity.getBody()).put("platform",platform);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;

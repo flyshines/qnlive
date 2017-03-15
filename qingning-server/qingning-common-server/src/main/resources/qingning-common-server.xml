@@ -99,7 +99,7 @@
 
 			<function name="generateWeixinPayBill">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="N" />
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
