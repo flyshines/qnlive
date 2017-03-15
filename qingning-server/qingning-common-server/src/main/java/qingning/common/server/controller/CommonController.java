@@ -698,7 +698,7 @@ public class CommonController extends AbstractController {
      * @param page_count 分页
      * @param user_type  用户类型 0老师/顾问  1用户
      * @param message_type 消息类型:0:音频 1：文字 3：图片 4 附件
-     * @param message_id 消息id
+     * @param message_imid 消息id
      * @param direction  获取那种信息  0旧  1新 默认为1
      * @param accessToken 后台安全证书
      * @param version 版本号
@@ -712,7 +712,7 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "page_count", defaultValue = "20") String page_count,
             @RequestParam(value = "user_type", defaultValue = "0") String user_type,
             @RequestParam(value = "message_type",defaultValue = "") String message_type,
-            @RequestParam(value = "message_id", defaultValue = "") String message_id,
+            @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
             @RequestParam(value = "message_pos", defaultValue = "") String message_pos,
             @RequestParam(value = "direction", defaultValue = "1") String direction,
             @RequestHeader("access_token") String accessToken,
@@ -724,7 +724,7 @@ public class CommonController extends AbstractController {
         parMap.put("user_type", user_type);
         parMap.put("message_type", message_type);
         parMap.put("message_pos", message_pos);
-        parMap.put("message_id", message_id);
+        parMap.put("message_imid", message_imid);
         parMap.put("direction",direction);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);

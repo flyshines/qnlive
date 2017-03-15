@@ -2451,6 +2451,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         JSONObject authJsonObj = WeiXinUtil.getServiceAuthInfo(access_token, auth_code);
 
         //存储公众号的授权信息
+
         Map<String, String> authInfoMap = new HashMap<>();
         String authorizer_appid = authJsonObj.getString("authorizer_appid");
         authInfoMap.put("authorizer_appid", authorizer_appid);
@@ -2467,7 +2468,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //获取讲师id
         Map<String,String> lecturer = CacheUtils.readLecturer(user_id, reqEntity, readLecturerOperation, jedisUtils);
         authInfoMap.put("lecturer_id", lecturer.get("lecturer_id"));
-
         //服务号信息插入数据库
         lectureModuleServer.insertServiceNoInfo(authInfoMap);
 
@@ -2802,8 +2802,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> retMap = new HashMap<>();
         Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_QRCODE_URL);//获取客服二维码url
         Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_PHONE_NUM);//获取客服电话
-        retMap.put("customer_service_phone",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
-        retMap.put("customer_service_qrcode_img",customerPhoneNum.get("config_value"));//获取客服电话
+        retMap.put("customer_service_qrcode_img",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
+        retMap.put("customer_service_phone",customerPhoneNum.get("config_value"));//获取客服电话
         return retMap;
     }
 

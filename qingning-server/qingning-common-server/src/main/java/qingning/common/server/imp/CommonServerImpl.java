@@ -2279,10 +2279,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //初始化下标
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
-            Set<String> messageIdList = null;//消息集合
+            Set<String> messageImIdList = null;//消息集合
             //来确定消息集合
-            if(reqMap.get("message_id") != null && StringUtils.isNotBlank(reqMap.get("message_id").toString())){   //判断前台是否有传message_id 过来
-                long endRank = jedis.zrank(messageListKey, reqMap.get("message_id").toString());//这个message_id 在缓存zset中的排名
+            if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid 过来
+                long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid 在缓存zset中的排名
                 if(direction==0){ //获取比当前message旧的消息
                     startIndex = endRank + 1;
                     if(startIndex < 0){
@@ -2306,18 +2306,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(startIndex < 0){
                         startIndex = 0;
                     }
-                    messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);
                 }else{//从最新的信息开始
                     startIndex = 0;
                     endIndex = pageCount;
                 }
             }
-            messageIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
-            if(! CollectionUtils.isEmpty(messageIdList)){
+            messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+            if(! CollectionUtils.isEmpty(messageImIdList)){
                 //缓存中存在则读取缓存内容
                 List<Map<String,String>> messageListCache = new ArrayList<>();
-                for(String messageId : messageIdList){
-                    map.put(Constants.FIELD_MESSAGE_ID, messageId);
+                for(String messageImId : messageImIdList){
+                    map.put(Constants.FIELD_MESSAGE_ID, messageImId);
                     String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
                     messageMap.put("message_pos", startIndex+"");

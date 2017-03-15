@@ -68,17 +68,20 @@
     select cm.*, u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
     from t_course_message cm join t_user u on cm.creator_id = u.user_id
     <where>
+      <if test="user_type == 0" >
+          and (cm.send_type = '0' or cm.send_type = '1' or cm.send_type = '4' or cm.send_type = '5' or cm.send_type = '6' or cm.send_type = '7')
+      </if>
+      <if test="user_type == 1" >
+        and  (cm.send_type = '2' or cm.send_type = '3' )
+      </if>
       <if test="course_id != null">
-        cm.course_id = #{course_id}
+        and cm.course_id = #{course_id}
       </if>
       <if test="direction != null and direction == 0 and message_pos != null">
         and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
       </if>
       <if test="direction != null and direction == 1 and message_pos != null" >
         and  cm.message_pos <![CDATA[ > ]]> #{message_pos}
-      </if>
-      <if test="user_type != null" >
-        and  cm.user_type = #{user_type}
       </if>
       <if test="message_type != null">
         and  cm.message_type = #{message_type}

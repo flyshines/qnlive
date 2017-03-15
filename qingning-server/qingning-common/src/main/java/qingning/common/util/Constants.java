@@ -175,8 +175,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_BAN_USER_LIST="COURSE:{course_id}:BAN_USER_LIST";
 	public static final String CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM="SYS:USER_NICK_NAME_INCREMENT_NUM";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST="COURSE:{course_id}:MESSAGE_LIST";
-	public static final String FIELD_MESSAGE_ID="message_id";
-	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_id}";
+	public static final String FIELD_MESSAGE_ID="message_imid";
+	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_imid}";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION = "COURSE:{course_id}:MESSAGE_LIST:QUESTION";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_USER = "COURSE:{course_id}:MESSAGE_LIST:USER";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER = "COURSE:{course_id}:MESSAGE_LIST:LECTURER";
@@ -230,7 +230,7 @@ public final class Constants {
 	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
 
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
-	public static final String CACHED_KEY_SERVICE_LECTURER = "SYS:LECTURER:{lecturer_id}";
+	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 
 	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
