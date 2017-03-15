@@ -726,12 +726,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String outTradeNo = tradeId;
         String platform = (String) reqMap.get("platform");
         String openid = null;
-        if (platform == null || platform.equals("3")) {//3是js调用 默认是js web调用
+        if (platform == null || platform.equals("3") || platform.equals("0")) {//0web 3是js调用 默认是js web调用
             Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
             openid = userMap.get("web_openid");
         }
 
-        Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid);
+        Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid, platform);
  
         //5.处理生成微信预付单接口
         if (payResultMap.get ("return_code").equals ("FAIL")) {
@@ -771,7 +771,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("pack age", "prepay_id="+payResultMap.get("prepay_id"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
-            String paySign  = TenPayUtils.getSign(resultMap);
+            String paySign  = TenPayUtils.getSign(resultMap, platform);
             resultMap.put ("paySign", paySign);
 
             return resultMap;
