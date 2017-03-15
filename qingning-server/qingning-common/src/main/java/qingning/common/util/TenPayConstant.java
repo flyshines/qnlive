@@ -13,5 +13,5 @@ public class TenPayConstant {
     public static final String SUCCESS = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
     public static final String APP_APP_ID = "wx2e1a960d749aaf39";
-    public static final String APP_MCH_ID = "1429696002@1429696002";
+    public static final String APP_MCH_ID = "1429696002";
 }
