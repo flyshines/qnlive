@@ -790,7 +790,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 signMap.put("prepayid", resultMap.get("prepayId"));
                 signMap.put("package", resultMap.get("package"));
                 signMap.put("noncestr", resultMap.get("nonceStr"));
-                signMap.put("signtype", resultMap.get("signType"));
                 signMap.put("timestamp", resultMap.get("timeStamp"));
                 paySign = TenPayUtils.getSign(resultMap, platform);
             }

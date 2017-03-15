@@ -12,4 +12,6 @@ public interface LecturerMapper {
     int insertServiceNoInfo(Map<String, String> map);
     int updateServiceNoInfo(Map<String, String> map);
     Map<String,Object> findServiceNoInfoByLectureId(String lecturer_id);
+
+    List<Map<String,Object>> findRobotUsers(String type);
 }

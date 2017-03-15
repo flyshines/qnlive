@@ -512,10 +512,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
 
         //取出服务号的相关信息
-        Map<String, Object> serviceNoMap = lectureModuleServer.findServiceNoInfoByLectureId(userId);
+//        Map<String, Object> serviceNoMap = lectureModuleServer.findServiceNoInfoByLectureId(userId);
 
         //TODO  关注的直播间有新的课程，推送提醒
-        if (!MiscUtils.isEmpty(findFollowUser) || serviceNoMap != null) {
+        if (!MiscUtils.isEmpty(findFollowUser)) {
+//        if (!MiscUtils.isEmpty(findFollowUser) || serviceNoMap != null) {
 
         	Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
         	TemplateData first = new TemplateData();
@@ -569,47 +570,47 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 this.mqUtils.sendMessage(mqRequestEntity);
             }
 
-            if (serviceNoMap != null) { //该讲师绑定服务号，推送提醒给粉丝
-                String expiresTimes = (String) serviceNoMap.get("expiresTimes");
-                String authorizer_appid = (String) serviceNoMap.get("authorizer_appid");
-                String authorizer_access_token  = (String) serviceNoMap.get("authorizer_access_token");
-                String authorizer_refresh_token  = (String) serviceNoMap.get("authorizer_refresh_token");
-                long expiresTimeStamp = Long.parseLong(expiresTimes);
-                //是否快要超时 令牌是存在有效期（2小时）
-                long nowTimeStamp = System.currentTimeMillis();
-                if (nowTimeStamp-expiresTimeStamp < 0) {  //accessToken已经过期了
-                    JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+//            if (serviceNoMap != null) { //该讲师绑定服务号，推送提醒给粉丝
+//                String expiresTimes = (String) serviceNoMap.get("expiresTimes");
+//                String authorizer_appid = (String) serviceNoMap.get("authorizer_appid");
+//                String authorizer_access_token  = (String) serviceNoMap.get("authorizer_access_token");
+//                String authorizer_refresh_token  = (String) serviceNoMap.get("authorizer_refresh_token");
+//                long expiresTimeStamp = Long.parseLong(expiresTimes);
+//                //是否快要超时 令牌是存在有效期（2小时）
+//                long nowTimeStamp = System.currentTimeMillis();
+//                if (nowTimeStamp-expiresTimeStamp < 0) {  //accessToken已经过期了
+//                    JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+//
+//                    authorizer_appid = authJsonObj.getString("authorizer_appid");
+//                    authorizer_access_token = authJsonObj.getString("authorizer_access_token");
+//                    authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
+//                    long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+//                    expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
+//
+//                    //更新服务号的授权信息
+//                    Map<String, String> authInfoMap = new HashMap<>();
+//                    authInfoMap.put("lecturer_id", userId);
+//                    authInfoMap.put("authorizer_appid", authorizer_appid);
+//                    authInfoMap.put("authorizer_access_token", authorizer_access_token);
+//                    authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
+//                    authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
+//
+//                    //更新服务号信息插入数据库
+//                    lectureModuleServer.insertServiceNoInfo(authInfoMap);
+//                }
 
-                    authorizer_appid = authJsonObj.getString("authorizer_appid");
-                    authorizer_access_token = authJsonObj.getString("authorizer_access_token");
-                    authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
-                    long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-                    expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
-
-                    //更新服务号的授权信息
-                    Map<String, String> authInfoMap = new HashMap<>();
-                    authInfoMap.put("lecturer_id", userId);
-                    authInfoMap.put("authorizer_appid", authorizer_appid);
-                    authInfoMap.put("authorizer_access_token", authorizer_access_token);
-                    authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
-                    authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
-
-                    //更新服务号信息插入数据库
-                    lectureModuleServer.insertServiceNoInfo(authInfoMap);
-                }
-
-                Map<String, Object> wxPushParam = new HashMap<>();
-                wxPushParam.put("templateParam", templateMap);//模板消息
-                wxPushParam.put("courseId", courseId);//课程ID
-                wxPushParam.put("accessToken", authorizer_access_token);//课程ID
-
-                RequestEntity mqRequestEntity = new RequestEntity();
-                mqRequestEntity.setServerName("MessagePushServer");
-                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                mqRequestEntity.setParam(wxPushParam);
-                this.mqUtils.sendMessage(mqRequestEntity);
-            }
+//                Map<String, Object> wxPushParam = new HashMap<>();
+//                wxPushParam.put("templateParam", templateMap);//模板消息
+//                wxPushParam.put("courseId", courseId);//课程ID
+//                wxPushParam.put("accessToken", authorizer_access_token);//课程ID
+//
+//                RequestEntity mqRequestEntity = new RequestEntity();
+//                mqRequestEntity.setServerName("MessagePushServer");
+//                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+//                mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+//                mqRequestEntity.setParam(wxPushParam);
+//                this.mqUtils.sendMessage(mqRequestEntity);
+//            }
         }
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;

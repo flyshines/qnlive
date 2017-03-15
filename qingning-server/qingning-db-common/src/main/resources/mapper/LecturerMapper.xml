@@ -209,4 +209,9 @@
     select * from t_wechat_service_no
     where lecturer_id = #{lecturer_id}
   </select>
+
+  <select id="findRobotUsers" resultType="hashmap" parameterType="java.lang.String">
+    SELECT * FROM t_user WHERE user_type = #{type}
+  </select>
+
 </mapper>
