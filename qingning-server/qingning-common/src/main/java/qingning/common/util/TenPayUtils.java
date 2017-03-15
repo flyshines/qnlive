@@ -69,8 +69,8 @@ public class TenPayUtils {
         return MD5Util.getMD5(sb.toString() + "key=" + TenPayConstant.APP_KEY).toUpperCase ();
     }
 
-    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid) throws IOException,ParserConfigurationException,SAXException{
-        Map<String, String> params = createParams (goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
+    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid) throws IOException,ParserConfigurationException,SAXException{
+        Map<String, String> params = createParams (goodName, totalFee, terminalIp, outTradeNo, openid);
         params.put ("sign", getSign (params));
         logger.debug("-----微信预支付请求参数"+ params);
         String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.PRE_PAY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
@@ -128,21 +128,24 @@ public class TenPayUtils {
 
 
 
-    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String tradeType,String outTradeNo,String openid){
+    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid){
         Map<String, String> params = new TreeMap<String, String> ();
         params.put ("body", goodName);
-        params.put ("mch_id", TenPayConstant.MCH_ID);
         params.put ("nonce_str", getRandomStr ());
         params.put ("notify_url", TenPayConstant.NOTIFY_URL);
         params.put ("out_trade_no", outTradeNo);
         params.put ("spbill_create_ip", terminalIp);
         params.put ("total_fee", totalFee.toString ());
-        params.put ("trade_type", tradeType);
+
         if (openid != null) {
             params.put ("openid", openid);
             params.put ("appid", TenPayConstant.APP_ID);
+            params.put ("trade_type", "JSAPI");
+            params.put ("mch_id", TenPayConstant.MCH_ID);
         } else  {
             params.put("appid", TenPayConstant.APP_APP_ID);
+            params.put("trade_type", "APP");
+            params.put("mch_id", TenPayConstant.APP_MCH_ID);
         }
 
         return params;

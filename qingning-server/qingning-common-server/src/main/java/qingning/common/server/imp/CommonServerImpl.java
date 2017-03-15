@@ -731,7 +731,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             openid = userMap.get("web_openid");
         }
 
-        Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, tradeType, outTradeNo, openid);
+        Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid);
  
         //5.处理生成微信预付单接口
         if (payResultMap.get ("return_code").equals ("FAIL")) {
