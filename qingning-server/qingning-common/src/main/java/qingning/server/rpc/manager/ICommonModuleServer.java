@@ -3,6 +3,7 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public interface ICommonModuleServer {
 	public List<Map<String, Object>> getServerUrls();
@@ -96,5 +97,6 @@ public interface ICommonModuleServer {
 	 */
 	List<Map<String,Object>> findCourseMessageListByComm(Map<String, Object> queryMap);
 
+	int findCourseMessageSum(Map<String,Object> queryMap);
 
 }

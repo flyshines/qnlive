@@ -2222,6 +2222,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD,course_id);//存入map中
         String messageListKey = null;//查找信息类的key
         Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("course_id",course_id);
         queryMap.put("page_count", pageCount);//要查询的记录数据
         queryMap.put("user_type", userType);//查询角色类型
         queryMap.put("direction", direction);//方向
@@ -2247,6 +2248,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 resultMap.put("message_list", messageList);
             }
+            resultMap.put("message_sum", commonModuleServer.findCourseMessageSum(queryMap));
             return resultMap;
         }else{ //TODO 查询缓存
             //当前课程没有结束 可以直接查询缓存
@@ -2255,6 +2257,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }else if(userType == 1){//查询用户
                 messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
             }
+            long message_sum = jedis.zcard(messageListKey);//总共有多少个总数
+            resultMap.put("message_sum", message_sum);
+
+
             //缓存中存在，则读取缓存中的内容
             //初始化下标
             long startIndex = 0; //开始下标
@@ -2280,10 +2286,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }else{// 如果没有传过来message_id
                //判断需求是要新的信息 还是就得信息
-                long messageListlength = jedis.zcard(messageListKey);//总共有多少个集合
                 if(direction == 0){//从最早的信息开始
                     endIndex = -1;
-                    startIndex = jedis.zcard(messageListKey) - pageCount;
+                    startIndex = message_sum - pageCount;
                     if(startIndex < 0){
                         startIndex = 0;
                     }
@@ -2331,6 +2336,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                     resultMap.put("message_list", messageListCache);
             }
+
             return resultMap;
         }
     }

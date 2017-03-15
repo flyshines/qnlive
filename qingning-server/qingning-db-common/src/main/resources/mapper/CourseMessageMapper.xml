@@ -89,4 +89,21 @@
   </select>
 
 
+
+
+
+  <select id="findCourseMessageSum" resultType="int" parameterType="hashmap" >
+    select COUNT(*) from t_course_message
+    <where>
+      <if test="course_id != null">
+        course_id = #{course_id}
+      </if>
+      <if test="user_type != null" >
+        and  user_type = #{user_type}
+      </if>
+      <if test="message_type != null">
+        and  message_type = #{message_type}
+      </if>
+    </where>
+  </select>
 </mapper>

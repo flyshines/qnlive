@@ -631,5 +631,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return courseMessageMapper.findCourseMessageListByComm(queryMap);
 	}
 
+	@Override
+	public int findCourseMessageSum(Map<String, Object> queryMap) {
+		return courseMessageMapper.findCourseMessageSum(queryMap);
+	}
 
 }
