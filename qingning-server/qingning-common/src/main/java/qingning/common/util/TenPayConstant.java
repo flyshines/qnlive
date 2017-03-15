@@ -16,8 +16,8 @@ public class TenPayConstant {
 //    public static final String APP_MCH_ID = MiscUtils.getConfigByKey("weixin_app_pay_mch_id");
 //    public static final String APP_APP_KEY = MiscUtils.getConfigByKey("weixin_app_pay_app_key");
 
-    public static final String APP_APP_ID = "wx1e1ba10bf307d648";
+    public static final String APP_APP_ID = "wx2e1a960d749aaf39";
     public static final String APP_MCH_ID = "1429696002";
     public static final String APP_APP_KEY = "qingninglive987654321shaoyibolzd";
-    
+
 }
