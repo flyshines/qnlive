@@ -774,6 +774,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
             } else  {
                 resultMap.put("prepayId", payResultMap.get("prepay_id"));
+                resultMap.put("package", "Sign=WXPay");
             }
             resultMap.put("nonceStr", payResultMap.get("random_char"));
             resultMap.put("signType", "MD5");

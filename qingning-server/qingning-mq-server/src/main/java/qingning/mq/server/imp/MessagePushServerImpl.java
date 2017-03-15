@@ -72,17 +72,16 @@ public class MessagePushServerImpl extends AbstractMsgService {
         
         long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
-        //15分钟
+        //15分钟没出现会结束
         String processCourseNotStartTime = IMMsgUtil.configMap.get("course_not_start_time_msec");
         long taskStartTime = MiscUtils.convertObjectToLong(processCourseNotStartTime) + startTime;
-        
+
         ScheduleTask scheduleTask = new ScheduleTask(){
 			@Override
 			public void process() {
                 log.debug("-----------课程未开播处理定时任务 课程id"+this.getCourseId()+"  执行时间"+System.currentTimeMillis());
-                //processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis, getSaveCourseMessageService(context), getSaveCourseAudioService(context));
                 processCourseEnd(coursesMapper, "1", jedisUtils, courseId, jedis);
-			}        	
+			}
         };
         scheduleTask.setId(courseId);
         scheduleTask.setCourseId(courseId);
@@ -105,7 +104,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
 
-        //1440分钟
+        //1440分钟 超时结束
     	String courseOvertime = MiscUtils.getConfigByKey("course_live_overtime_msec");
     	long taskStartTime = MiscUtils.convertObjectToLong(courseOvertime) + real_start_time ;
     	final boolean isThiryNotice = reqMap.containsKey(Constants.OVERTIME_NOTICE_TYPE_30);//判断 提醒类型  true=30  false=10
@@ -152,7 +151,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
             qnSchedule.add(scheduleTask); 
         }
     }
-    
+
+    //极光推送给讲师 课程开始前24小时
     @FunctionName("processCourseStartLongNotice")
     public void processCourseStartLongNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         @SuppressWarnings("unchecked")
@@ -166,6 +166,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String course_title = reqMap.get("course_title").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+
+        //24小时 课程开始24小时时推送提示
         long noticeTime= 24*60*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
@@ -194,7 +196,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
             qnSchedule.add(scheduleTask); 
         }
     }
-    
+
+    //极光推送给讲师 课程开始前五分钟
     @FunctionName("processCourseStartShortNotice")
     public void processCourseStartShortNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         @SuppressWarnings("unchecked")
@@ -208,6 +211,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String course_title = reqMap.get("course_title").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+
+        //5分钟 课程开始5分钟推送提示
         long noticeTime= 5*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
@@ -235,82 +240,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
-    /**
-     * 进行异步 推送模板消息跟直播间关注者
-     * @param requestEntity 参数对象
-     * @param jedisUtils 缓存对象
-     * @param context
-     * @姜
-     */
-    @FunctionName("noticeCourseToWXFollow")
-    public void noticeCourseToWXFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
-        log.debug("---------------将课程创建的信息推送给WX关注直播间的粉丝"+reqMap);
 
-        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
-        String courseId = reqMap.get("course_id").toString();//课程id
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
-        List<Map<String,Object>> followers = (List<Map<String, Object>>) reqMap.get("followers");//获取推送列表
-        String type = (String) reqMap.get("pushType");//类型
-        String templateId = null;
-        if ("1".equals(type)) {//发布课程
-            templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
-        } else if ("2".equals(type)) {//更新课程
-            templateId = MiscUtils.getConfigByKey("wpush_update_course");//更新课程的模板id
-        }
-        Jedis jedis = jedisUtils.getJedis();
-        for (Map<String,Object> user: followers) {//循环推送
-    		String openId = (String)user.get("web_openid");
-    		if(!MiscUtils.isEmpty(openId)){
-    			WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
-    		}
-    	}
-    }
-
-    @FunctionName("noticeCourseToServiceNoFollow")
-    public void noticeCourseToServiceNoFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
-        log.debug("---------------将课程创建的信息推送给服务号的粉丝"+reqMap);
-
-        String accessToken = (String) reqMap.get ("accessToken");
-
-        String templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
-        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
-        String courseId = reqMap.get("course_id").toString();//课程id
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
-
-        String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap);
-        while (next_openid != null) {
-            next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap);
-        }
-    }
-
-    /**
-     * 把课程创建的模板消息推送给服务号粉丝的具体逻辑
-     * @param next_openid
-     * @param accessToken
-     * @param url
-     * @param templateId
-     * @param templateMap
-     * @return
-     */
-    public String toServiceNoFollow(String next_openid, String accessToken, String url, String templateId, Map<String, TemplateData> templateMap) {
-        //step1 获取粉丝信息 可能多页
-        JSONObject fansInfo = WeiXinUtil.getServiceFansList(accessToken, next_openid);
-        JSONArray fansOpenIDArr = fansInfo.getJSONObject("data").getJSONArray("openid");
-
-        //step2 循环推送模板消息
-        for (Object openID: fansOpenIDArr) {
-            int result = WeiXinUtil.sendTemplateMessageToServiceNoFan(accessToken, String.valueOf(openID), url, templateId, templateMap);
-            if (result != 0) {
-                //step3 出现失败的情况（服务号可能没设置这个行业和模板ID ）就中断发送
-                log.error("给第三方服务号：{} 粉丝推送模板消息出现错误：{}", accessToken, result);
-                return null;
-            }
-        }
-        return fansInfo.getString("next_openid");
-    }
-
+    //极光推送 有学生 学习三分钟
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseStartStudentStudyNotice")
     public void processCourseStartStudentStudyNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
@@ -323,6 +254,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         String course_title = reqMap.get("course_title").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+
+        //3分钟
         long noticeTime= 3*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime > 0){
@@ -353,7 +286,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
             qnSchedule.add(scheduleTask); 
         }
     }
-    
+
+    //极光推送 课程开始 讲师未出现
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseStartLecturerNotShow")
     public void processCourseStartLecturerNotShow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
@@ -367,7 +301,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String lecturer_id = reqMap.get("lecturer_id").toString();
         String course_title = reqMap.get("course_title").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
+
+        //课程开始时间
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+
         if(taskStartTime > 0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
@@ -402,7 +339,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     } 
     
-    //课程直播超时处理
+    //课程直播超时处理 服务端逻辑
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseLiveOvertime")
     public void processCourseLiveOvertime(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context){
@@ -414,6 +351,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         	return;
         }
         long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
+
+        //1440分钟 超时结束
         long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));
         long taskStartTime = courseLiveOvertimeMsec + realStartTime;
         
@@ -663,12 +602,86 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
+
     public CoursesMapper getCoursesMapper() {
         return coursesMapper;
     }
 
     public void setCoursesMapper(CoursesMapper coursesMapper) {
         this.coursesMapper = coursesMapper;
+    }
+
+    /**
+     * 进行异步 推送模板消息跟直播间关注者
+     * @param requestEntity 参数对象
+     * @param jedisUtils 缓存对象
+     * @param context
+     * @姜
+     */
+    @FunctionName("noticeCourseToWXFollow")
+    public void noticeCourseToWXFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
+        log.debug("---------------将课程创建的信息推送给WX关注直播间的粉丝"+reqMap);
+
+        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
+        String courseId = reqMap.get("course_id").toString();//课程id
+        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
+        List<Map<String,Object>> followers = (List<Map<String, Object>>) reqMap.get("followers");//获取推送列表
+        String type = (String) reqMap.get("pushType");//类型
+        String templateId = null;
+        if ("1".equals(type)) {//发布课程
+            templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
+        } else if ("2".equals(type)) {//更新课程
+            templateId = MiscUtils.getConfigByKey("wpush_update_course");//更新课程的模板id
+        }
+        Jedis jedis = jedisUtils.getJedis();
+        for (Map<String,Object> user: followers) {//循环推送
+            String openId = (String)user.get("web_openid");
+            if(!MiscUtils.isEmpty(openId)){
+                WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
+            }
+        }
+    }
+
+    /**
+     * 把课程创建的模板消息推送给服务号粉丝
+     */
+    @FunctionName("noticeCourseToServiceNoFollow")
+    public void noticeCourseToServiceNoFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
+        log.debug("---------------将课程创建的信息推送给服务号的粉丝"+reqMap);
+
+        String accessToken = (String) reqMap.get ("accessToken");
+
+        String templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
+        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
+        String courseId = reqMap.get("course_id").toString();//课程id
+        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
+
+        String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap);
+        while (next_openid != null) {
+            next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap);
+        }
+    }
+
+    /**
+     * 把课程创建的模板消息推送给服务号粉丝的具体逻辑
+     */
+    public String toServiceNoFollow(String next_openid, String accessToken, String url, String templateId, Map<String, TemplateData> templateMap) {
+        //step1 获取粉丝信息 可能多页
+        JSONObject fansInfo = WeiXinUtil.getServiceFansList(accessToken, next_openid);
+        JSONArray fansOpenIDArr = fansInfo.getJSONObject("data").getJSONArray("openid");
+
+        //step2 循环推送模板消息
+        for (Object openID: fansOpenIDArr) {
+            int result = WeiXinUtil.sendTemplateMessageToServiceNoFan(accessToken, String.valueOf(openID), url, templateId, templateMap);
+            if (result != 0) {
+                //step3 出现失败的情况（服务号可能没设置这个行业和模板ID ）就中断发送
+                log.error("给第三方服务号：{} 粉丝推送模板消息出现错误：{}", accessToken, result);
+                return null;
+            }
+        }
+        return fansInfo.getString("next_openid");
     }
 
 /*    public SaveCourseMessageService getSaveCourseMessageService() {
