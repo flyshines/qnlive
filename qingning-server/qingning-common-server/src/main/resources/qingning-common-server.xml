@@ -553,7 +553,7 @@
 					<accessToken require="Y" />
 				</auth>
 				<inputs>
-					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="course_id" type="string" require="Y,000100" />
 					<param name="user_type" type="int" require="Y,000100"/>
 					<param name="direction" type="int" require="Y,000100"/>
 				</inputs>

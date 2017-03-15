@@ -364,12 +364,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	return resultMap;
     }
 
-/*    *//**
-     * 查询平台所有的课程
-     *
-     * @param reqEntity
-     * @return
-     *//*
+/*
     @SuppressWarnings({ "unchecked", "unused" })
     private Map<String, Object> getPlatformCoursesOld(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
@@ -1883,4 +1878,38 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	}
     	return result;
     }
+
+    /**
+     * 获取讲师二维码/青柠二维码
+     */
+    public void getQrCode(String lectureId,String userId,Map retMap,Jedis jedis){
+        Map<String,String> query = new HashMap();
+        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,lectureId);
+        //1.判断讲师是否有公众号 有就直接返回
+        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
+
+
+        //2.判断是否有关注我们公众号
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
