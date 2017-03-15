@@ -12,7 +12,12 @@ public class TenPayConstant {
     public static final String FAIL = "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg></return_msg></xml>";
     public static final String SUCCESS = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
 
-    public static final String APP_APP_ID = MiscUtils.getConfigByKey("app_app_id");
-    public static final String APP_MCH_ID = MiscUtils.getConfigByKey("weixin_app_pay_mch_id");
-    public static final String APP_APP_KEY = MiscUtils.getConfigByKey("weixin_app_pay_app_key");
+//    public static final String APP_APP_ID = MiscUtils.getConfigByKey("app_app_id");
+//    public static final String APP_MCH_ID = MiscUtils.getConfigByKey("weixin_app_pay_mch_id");
+//    public static final String APP_APP_KEY = MiscUtils.getConfigByKey("weixin_app_pay_app_key");
+
+    public static final String APP_APP_ID = "wx1e1ba10bf307d648";
+    public static final String APP_MCH_ID = "1429696002";
+    public static final String APP_APP_KEY = "qingninglive987654321shaoyibolzd";
+    
 }
