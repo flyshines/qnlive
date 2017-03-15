@@ -664,8 +664,6 @@
 				<inputs>
 				</inputs>
 				<outputs>
-					<param name="customer_service_phone" type="string"/>
-					<param name="customer_service_qrcode_img" type="string" />
 				</outputs>
 			</function>
 			<function name="wechatTicketNotify">

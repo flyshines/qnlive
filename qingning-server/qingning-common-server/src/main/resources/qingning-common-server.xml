@@ -528,6 +528,38 @@
 					<param name="os_audit_version" type="String"/>
 				</outputs>
 			</function>
+			<function name="sendVerificationCode">
+				<auth>
+					<accessToken require="N"/>
+				</auth>
+				<inputs>
+					<param name="phone" type="string"  require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="sendVerificationCode">
+				<auth>
+					<accessToken require="N"/>
+				</auth>
+				<inputs>
+					<param name="phone" type="string"  require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="messageList">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="user_type" type="int" require="Y,000100"/>
+					<param name="direction" type="int" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
  
  

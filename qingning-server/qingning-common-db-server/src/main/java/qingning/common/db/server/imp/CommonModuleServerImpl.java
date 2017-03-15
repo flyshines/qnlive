@@ -71,7 +71,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private RoomDistributerCoursesMapper roomDistributerCoursesMapper;
-	
+
+	@Autowired(required = true)
+	private CourseMessageMapper courseMessageMapper;
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -621,4 +624,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findRoomRecommendUserListByCode(Map<String, Object> record) {		
 		return roomDistributerRecommendMapper.findRoomRecommendUserList(record);
 	}
+
+
+	@Override
+	public List<Map<String, Object>> findCourseMessageListByComm(Map<String, Object> queryMap) {
+		return courseMessageMapper.findCourseMessageListByComm(queryMap);
+	}
+
+	@Override
+	public int findCourseMessageSum(Map<String, Object> queryMap) {
+		return courseMessageMapper.findCourseMessageSum(queryMap);
+	}
+
 }
