@@ -84,7 +84,6 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
 						messageObjectMap.put("create_time", createTime);
 					}
-					messageObjectMap.put("user_type", messageStringMap.get("user_type"));
 					messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
 					messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
 

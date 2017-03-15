@@ -307,14 +307,19 @@ public class ImMsgServiceImp implements ImMsgService {
 		//1.将聊天信息id插入到redis zsort列表中
 		jedis.zadd(messageListKey, createTime, messageId);
 
-		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问 4讲师互动
+		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问
+		//4.打赏信息 5.课程开始 6结束消息 7讲师互动
 		//2.如果该条信息为提问，则存入消息提问列表
 		if(information.get("send_type").equals("3") || information.get("send_type").equals("2")){//用户消息
 			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
 			jedis.zadd(messageQuestionListKey, createTime, messageId);
-
 			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
-		}else if(information.get("send_type").equals("0") || information.get("send_type").equals("1")  || information.get("send_type").equals("7")){//老师消息
+		}else if(information.get("send_type").equals("0") ||
+				information.get("send_type").equals("1")  ||
+				information.get("send_type").equals("4")  ||
+				information.get("send_type").equals("5")  ||
+				information.get("send_type").equals("6")  ||
+				information.get("send_type").equals("7")){//老师消息
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, messageId);
 		}
