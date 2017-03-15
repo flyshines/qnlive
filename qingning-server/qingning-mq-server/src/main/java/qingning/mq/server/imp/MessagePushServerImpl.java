@@ -71,7 +71,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         
         long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-        
+
+        //15分钟
         String processCourseNotStartTime = IMMsgUtil.configMap.get("course_not_start_time_msec");
         long taskStartTime = MiscUtils.convertObjectToLong(processCourseNotStartTime) + startTime;
         
@@ -103,15 +104,17 @@ public class MessagePushServerImpl extends AbstractMsgService {
         	return;
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
+
+        //1440分钟
     	String courseOvertime = MiscUtils.getConfigByKey("course_live_overtime_msec");
     	long taskStartTime = MiscUtils.convertObjectToLong(courseOvertime) + real_start_time ;
     	final boolean isThiryNotice = reqMap.containsKey(Constants.OVERTIME_NOTICE_TYPE_30);//判断 提醒类型  true=30  false=10
+
         if(isThiryNotice){
             taskStartTime-= 30*60*1000;// 提前30分钟 提醒课程结束
         } else {
             taskStartTime-= 10*60*1000;//提前10分钟 提醒课程结束
         }
-
 
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){

@@ -66,10 +66,10 @@ public class TenPayUtils {
             sb.append (k + "=" + v + "&");
         }
         String app_key = null;
-        if (type.equals("1") || type.equals("2")) { //0是web
-            app_key = TenPayConstant.APP_APP_KEY;
-        } else {//1 2是app
+        if (type == null || type.equals("0") || type.equals(3)) { //web
             app_key = TenPayConstant.APP_KEY;
+        } else { //app
+            app_key = TenPayConstant.APP_APP_KEY;
         }
         System.out.println (sb.toString () + "key=" + app_key);
         return MD5Util.getMD5(sb.toString() + "key=" + app_key).toUpperCase ();
@@ -143,15 +143,15 @@ public class TenPayUtils {
         params.put ("spbill_create_ip", terminalIp);
         params.put ("total_fee", totalFee.toString ());
 
-        if (type.equals("1") || type.equals("2")) { //0是web
-            params.put("appid", TenPayConstant.APP_APP_ID);
-            params.put("trade_type", "APP");
-            params.put("mch_id", TenPayConstant.APP_MCH_ID);
-        } else  { //1 2 是app
+        if (type == null || type.equals("0") || type.equals(3)) {//web
             params.put ("openid", openid);
             params.put ("appid", TenPayConstant.APP_ID);
             params.put ("trade_type", "JSAPI");
             params.put ("mch_id", TenPayConstant.MCH_ID);
+        } else {//app
+            params.put("appid", TenPayConstant.APP_APP_ID);
+            params.put("trade_type", "APP");
+            params.put("mch_id", TenPayConstant.APP_MCH_ID);
         }
 
         return params;

@@ -722,7 +722,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
         //4.调用微信生成预付单接口
         String terminalIp = reqMap.get("remote_ip_address").toString();
-        String tradeType = "JSAPI";
         String outTradeNo = tradeId;
         String platform = (String) reqMap.get("platform");
         String openid = null;
