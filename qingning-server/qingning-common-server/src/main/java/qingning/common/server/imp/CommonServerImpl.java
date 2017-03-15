@@ -726,9 +726,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String outTradeNo = tradeId;
         String platform = (String) reqMap.get("platform");
         String openid = null;
+
+        boolean isWeb = false;
         if (platform == null || platform.equals("3") || platform.equals("0")) {//0web 3是js调用 默认是js web调用
             Map<String,String> userMap =jedisUtils.getJedis().hgetAll(key);
             openid = userMap.get("web_openid");
+            isWeb = true;
         }
 
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid, platform);
@@ -766,9 +769,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
  
             //返回相关参数给前端.
             SortedMap<String,String> resultMap = new TreeMap<>();
-            resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
+            if (isWeb) {
+                resultMap.put("appId",MiscUtils.getConfigByKey("appid"));
+                resultMap.put("package", "prepay_id="+payResultMap.get("prepay_id"));
+            } else  {
+                resultMap.put("prepayId", payResultMap.get("prepay_id"));
+            }
             resultMap.put("nonceStr", payResultMap.get("random_char"));
-            resultMap.put("pack age", "prepay_id="+payResultMap.get("prepay_id"));
             resultMap.put("signType", "MD5");
             resultMap.put("timeStamp",System.currentTimeMillis()/1000 + "");
             String paySign  = TenPayUtils.getSign(resultMap, platform);
