@@ -341,7 +341,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //		}
 
 		//4.将聊天信息放入redis的map中
-		map.put(Constants.FIELD_MESSAGE_ID, messageId);
+		map.put(Constants.FIELD_MESSAGE_ID, imid);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
 		if("6".equals(information.get("send_type"))){
