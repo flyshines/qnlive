@@ -90,4 +90,11 @@ public interface ICommonModuleServer {
 	Map<String,Object> findCoursesSumInfo(Map<String, Object> queryMap);
 	
 	List<Map<String,Object>> findRoomRecommendUserListByCode(Map<String, Object> record);
+
+	/**
+	 * 查询课程消息列表
+	 */
+	List<Map<String,Object>> findCourseMessageListByComm(Map<String, Object> queryMap);
+
+
 }

@@ -23,8 +23,8 @@
 
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
-    message_url, message_question, audio_time,
-    message_pos, message_type, send_type,
+    message_url, message_question,audio_image, audio_time,
+    message_pos, message_type, send_type,message_imid,user_type,
     creator_id, create_time
     )
     values
@@ -48,13 +48,45 @@
       <if test="item.message_question == null" >
         null,
       </if>
+      <if test="item.audio_image != null">
+        #{item.audio_image},
+      </if>
+      <if test="item.audio_image == null">
+        null,
+      </if>
       #{item.audio_time},#{item.message_pos},
-      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time})
+      #{item.message_type},#{item.send_type},#{item.message_imid},#{item.user_type},#{item.creator_id},#{item.create_time})
     </foreach>
   </insert>
 
   <select id="findCourseMessageMaxPos" resultType="hashmap" parameterType="string" >
     select * from t_course_message cm where cm.course_id = #{course_id} order by message_pos desc limit 1
   </select>
-  
+
+
+  <select id="findCourseMessageListByComm" resultType="hashmap" parameterType="hashmap" >
+    select cm.*, u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
+    from t_course_message cm join t_user u on cm.creator_id = u.user_id
+    <where>
+      <if test="course_id != null">
+        cm.course_id = #{course_id}
+      </if>
+      <if test="direction != null and direction == 0 and message_pos != null">
+        and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
+      </if>
+      <if test="direction != null and direction == 1 and message_pos != null" >
+        and  cm.message_pos <![CDATA[ > ]]> #{message_pos}
+      </if>
+      <if test="user_type != null" >
+        and  cm.user_type = #{user_type}
+      </if>
+      <if test="message_type != null">
+        and  cm.message_type = #{message_type}
+      </if>
+    </where>
+      order by cm.message_pos
+      limit #{page_count}
+  </select>
+
+
 </mapper>

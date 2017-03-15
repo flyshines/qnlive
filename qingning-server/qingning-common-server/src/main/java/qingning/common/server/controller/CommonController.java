@@ -700,10 +700,10 @@ public class CommonController extends AbstractController {
      * 查询课程消息列表
      * @param course_id 课程id
      * @param page_count 分页
-     * @param message_imid 消息imid
      * @param user_type  用户类型 0老师/顾问  1用户
      * @param message_type 消息类型:0:音频 1：文字 3：图片 4 附件
      * @param message_id 消息id
+     * @param direction  获取那种信息  0旧  1新 默认为1
      * @param accessToken 后台安全证书
      * @param version 版本号
      * @return
@@ -714,22 +714,22 @@ public class CommonController extends AbstractController {
     @ResponseBody ResponseEntity getMessageList(
             @PathVariable("course_id") String course_id,
             @RequestParam(value = "page_count", defaultValue = "20") String page_count,
-            @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
             @RequestParam(value = "user_type", defaultValue = "0") String user_type,
-            @RequestParam(value = "message_type") String message_type,
+            @RequestParam(value = "message_type",defaultValue = "") String message_type,
             @RequestParam(value = "message_id", defaultValue = "") String message_id,
+            @RequestParam(value = "message_pos", defaultValue = "") String message_pos,
+            @RequestParam(value = "direction", defaultValue = "1") String direction,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "messageList", accessToken, version);
         Map<String, Object> parMap = new HashMap<>();
         parMap.put("course_id", course_id);
         parMap.put("page_count", page_count);
-        parMap.put("message_imid", message_imid);
         parMap.put("user_type", user_type);
-        if(message_type != null){
-            parMap.put("message_type", message_type);
-        }
+        parMap.put("message_type", message_type);
+        parMap.put("message_pos", message_pos);
         parMap.put("message_id", message_id);
+        parMap.put("direction",direction);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }
