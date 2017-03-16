@@ -106,7 +106,8 @@ public class ImMsgServiceImp implements ImMsgService {
 
 		Jedis jedis = jedisUtils.getJedis();//缓存
 		Map<String, Object> map = new HashMap<>();
-		String imid = imMessage.getId();
+		String imid = body.get("mid").toString();
+
 		//<editor-fold desc="课程id为空，则该条消息为无效消息">
 		if(information.get("course_id") == null){
 			log.info("msgType"+body.get("msg_type").toString() + "消息course_id为空" + JSON.toJSONString(imMessage));
