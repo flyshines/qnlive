@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.omg.CORBA.OBJ_ADAPTER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +25,8 @@ import redis.clients.jedis.Tuple;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LectureServerImpl extends AbstractQNLiveServer {
 	private static Logger log = LoggerFactory.getLogger(LectureServerImpl.class);
@@ -37,6 +38,72 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	private ReadUserOperation readUserOperation;
 	private ReadRoomDistributerOperation readRoomDistributerOperation;
 	private ReadDistributerOperation readDistributerOperation;
+
+    protected static ConcurrentLinkedQueue<Map<String, String>> notJoinRobots                           = new ConcurrentLinkedQueue<>();
+
+    protected static ConcurrentHashMap<String, ConcurrentLinkedQueue<Map<String, String>>> joinRobots   = new ConcurrentHashMap<>();
+
+    protected static boolean                                                initRobots                  = false;
+
+    protected static ConcurrentHashMap<String, Boolean>                     hasJoinOrleftFlag    =       new ConcurrentHashMap<>();
+
+    //初始化机器人
+    private void initRobot(){
+        List<Map<String, String>> robotList = lectureModuleServer.findRobotUsers("robot");// 机器人
+        if (robotList != null) {
+            notJoinRobots.addAll (robotList);
+        }
+        initRobots = true;
+    }
+
+    //机器人管理
+    private void robotManage(String roomId, String lectureId) {
+        final String key = "robot_in_" + roomId + "_" + lectureId;
+
+//        String robotSwitch = jedis.get("ROBOT_SWITCH");
+
+//        if (robotSwitch != null && robotSwitch.equals ("1")) {
+            // 开启线程管理直播间的机器人
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    long startTime = System.currentTimeMillis ();
+                    Jedis jedis = jedisUtils.getJedis();
+                    while (jedis.exists (key)) {
+                        log.debug ("=====创建直播,直播机器人准备进入了直播间====");
+                        try {
+                            Thread.sleep (60 * 1000);
+                            long currentTime = System.currentTimeMillis ();
+                            if ((currentTime - startTime) < 30 * 60 * 1000) {
+                                int num = (int) (1 + Math.random () * 6);
+                                for ( int i = 0 ; i < num ; i++ ) {
+                                    Map<String, String> user = notJoinRobots.poll ();
+                                    if (user != null) {
+                                        log.debug ("=====创建直播,直播机器人:" + user.get("nick_name") + "进入了直播间====" + roomId);
+                                        joinCourse(roomId, lectureId, user);
+                                        if (joinRobots.get (key) != null) {
+                                            joinRobots.get (key).offer (user);
+                                        } else {
+                                            ConcurrentLinkedQueue<Map<String, String>> joinRobotQueue = new ConcurrentLinkedQueue<> ();
+                                            joinRobotQueue.offer (user);
+                                            joinRobots.put (key, joinRobotQueue);
+                                        }
+                                    }
+                                    int second = (int) (10 + Math.random () * 20);
+                                    Thread.sleep (second * 1000);
+                                }
+                            }
+                        } catch (InterruptedException e) {}
+                    }
+                }
+            });
+//        }
+    }
+
+    //机器人加入课程
+    private void joinCourse(String roomId, String lectureId, Map<String, String> user) {
+
+    }
 
     @Override
     public void initRpcServer() {

@@ -89,8 +89,17 @@ public interface ILectureModuleServer {
 	 */
 	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
 
+	/**
+	 * 插入服务号的信息
+	 */
 	int insertServiceNoInfo(Map<String, String> map);
 
 	int updateServiceNoInfo(Map<String, String> map);
 
-	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);}
+	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);
+
+	/**
+	 * 查找机器人
+	 */
+	List<Map<String,String>> findRobotUsers(String user_role);
+}
