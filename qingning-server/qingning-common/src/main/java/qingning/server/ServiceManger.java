@@ -63,7 +63,6 @@ public class ServiceManger {
 			QNLiveServer gcwServer = (QNLiveServer) Class.forName(className).newInstance();
 			map.put(elementName, gcwServer);
 			gcwServer.setJedisUtils(jedisUtils);
-			if (gcwServer instanceof  Lectu)
 
 			for(Element functionElement : functionElementList){
 				String functionName=functionElement.getAttributeValue(Constants.NAME);
