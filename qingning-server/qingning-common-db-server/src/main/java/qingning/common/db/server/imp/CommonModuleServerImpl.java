@@ -98,7 +98,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("avatar_address", reqMap.get("avatar_address"));
 		user.put("phone_number", reqMap.get("phone_number"));
 		user.put("gender", reqMap.get("gender"));
-		user.put("subscribe",reqMap.get("subscribe"));
 		user.put("create_time", now);
 		user.put("update_time", now);
 		user.put("user_role", Constants.USER_ROLE_LISTENER);
@@ -126,6 +125,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("user_role", Constants.USER_ROLE_LISTENER);
 		//位置信息未插入由消息服务处理
 		loginInfo.put("create_time", now);
+		user.put("subscribe",reqMap.get("subscribe"));
 		loginInfo.put("update_time", now);
 		loginInfoMapper.insertLoginInfo(loginInfo);
 
@@ -199,6 +199,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> record = new HashMap<String,Object>();
 		record.put("user_id", updateMap.get("user_id"));
 		record.put("web_openid",updateMap.get("web_openid"));
+		record.put("subscribe",updateMap.get("updateMap"));
 		loginInfoMapper.updateLoginInfo(record);
 	}
 

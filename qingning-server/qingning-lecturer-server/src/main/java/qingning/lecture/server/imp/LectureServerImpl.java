@@ -2957,10 +2957,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String,Object> retMap = new HashMap<>();
-        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_QRCODE_URL);//获取客服二维码url
-        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(Constants.CUSTOMER_PHONE_NUM);//获取客服电话
-        retMap.put("customer_service_qrcode_img",customerQrCodeUrl.get("config_value"));//获取客服微信二维码
-        retMap.put("customer_service_phone",customerPhoneNum.get("config_value"));//获取客服电话
+        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig("customerQrCodeUrl");//获取客服二维码url
+        retMap.put("customerQrCodeUrl",customerQrCodeUrl.get("config_value"));
+
+        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig("customerPhoneNum");//获取客服电话
+        retMap.put("customerPhoneNum",customerPhoneNum.get("config_value"));
+
+        Map<String,Object> customerTitle = lectureModuleServer.findCustomerServiceBySystemConfig("customerTitle");//标题
+        retMap.put("customerTitle",customerTitle.get("config_value"));
+
+        Map<String,Object> cystomerHint = lectureModuleServer.findCustomerServiceBySystemConfig("customerHint");//客服二维码提示
+        retMap.put("customerHint",cystomerHint.get("config_value"));
+
         return retMap;
     }
 
@@ -2982,4 +2990,28 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
        return createLiveRoom(reqEntity);
     }
+
+
+
+
+    /**
+     * TODO 有复用的方法 以后重构是需要进行河滨
+     * 获取讲师二维码/青柠二维码
+     */
+    public String getQrCode(String lectureId, String userId, Jedis jedis) {
+        Map<String, String> query = new HashMap();
+        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lectureId);
+        //1.判断讲师是否有公众号 有就直接返回
+        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
+        if (jedis.exists(serviceNoKey)) {//判断当前是否有这个缓存
+            return jedis.hgetAll(serviceNoKey).get("qr_code");
+        } else {//2.判断是否有关注我们公众号
+            Map<String,Object> map = lectureModuleServer.findLoginInfoByUserId(userId);
+            if(Integer.parseInt(map.get("subscribe").toString())==0){//没有关注
+                return MiscUtils.getConfigByKey("weixin_qrcode");//公众号
+            }
+        }
+        return "";
+    }
+
 }

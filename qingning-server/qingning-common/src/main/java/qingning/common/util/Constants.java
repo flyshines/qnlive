@@ -229,12 +229,12 @@ public final class Constants {
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
 
-	public static final String CUSTOMER_QRCODE_URL = "customerQrCodeUrl";
-	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
-
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 
 	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
+
+	public static final String WEI_CAT_QRCODE_URL="http://ok2dmpnnz.bkt.clouddn.com/qnliveTestQrcode.jpg";
+	public static final String COURES_ADVERTISING="关注公众号\\n获取更多信息";
 }

@@ -39,7 +39,6 @@ public class UserController extends AbstractController{
 	 * 用户-查询课程列表（正在直播（用户查看））
 	 * @param page_count
 	 * @param course_id
-	 * @param query_type
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -66,7 +65,7 @@ public class UserController extends AbstractController{
 		param.put("query_time", start_time);
 		param.put("position", position);
 		requestEntity.setParam(param);
-		return this.process(requestEntity, serviceManger, message);
+			return this.process(requestEntity, serviceManger, message);
 	}
 
 	/**

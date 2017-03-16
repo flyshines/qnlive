@@ -394,6 +394,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("120008");
         }
         String openid = getCodeResultJson.getString("openid");
+        //判断当前用户是否关注我们公众号
+
+
+        Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
+        try{
+            AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+            JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
+            if(user.get("subscribe") != null){
+                subscribe = user.get("subscribe").toString();
+            }
+        }catch(Exception e){
+            //出现异常不处理
+        }
+
+
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
         //1.2.1根据 union_id查询数据库
@@ -424,10 +439,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             queryMap.put("login_id",userJson.getString("unionid"));
             Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
             if(loginInfoMapFromUnionid != null){
-                //将open_id更新到login_info表中
+                //将open_id更新到login_info表中 h
                 Map<String,Object> updateMap = new HashMap<>();
                 updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
                 updateMap.put("web_openid", openid);
+                updateMap.put("subscribe",subscribe);
                 commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
                 processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap);
                 return resultMap;
@@ -457,7 +473,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             if(MiscUtils.isEmpty(nickname)){
-                Jedis jedis = jedisUtils.getJedis();
+                jedis = jedisUtils.getJedis();
                 reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);
@@ -480,17 +496,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
 
-            //判断当前用户是否关注我们公众号
-            Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
-            try{
-                AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-                JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid);//获取是否有关注公众信息
-                if(user.get("subscribe") != null){
-                    subscribe = user.get("subscribe").toString();
-                }
-            }catch(Exception e){
-                //出现异常不处理
-            }
+
 
             String unionid =  userJson.getString("unionid");
             reqMap.put("unionid",unionid);
@@ -2240,16 +2246,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         queryMap.put("page_count", pageCount);//要查询的记录数据
         queryMap.put("user_type", userType);//查询角色类型
         queryMap.put("direction", direction);//方向
-        if(reqMap.get("message_type") != null && StringUtils.isNotBlank(reqMap.get("message_type").toString())){ //传过来的信息位置
-            queryMap.put("message_type", Integer.parseInt(reqMap.get("message_type").toString()));
+        if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){ //传过来的信息位置
+            queryMap.put("message_imid", reqMap.get("message_imid").toString());
         }
-
         Map<String,String> courseMap = jedis.hgetAll(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map));
         if(courseMap.get("status").equals("2")){ //查询当前课程是否结束
-            //如果课程结束就直接查询数据库
-            if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){ //传过来的信息位置
-                queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
-            }
             List<Map<String,Object>> messageList = commonModuleServer.findCourseMessageListByComm(queryMap);
             if(! CollectionUtils.isEmpty(messageList)){
                 for(Map<String,Object> messageMap : messageList){
@@ -2275,46 +2276,42 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
             long message_sum = jedis.zcard(messageListKey);//总共有多少个总数
             resultMap.put("message_count", message_sum);
-
-
             //缓存中存在，则读取缓存中的内容
             //初始化下标
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
             Set<String> messageImIdList = null;//消息集合
-            //来确定消息集合
+            //来确定消息集合 0旧 -> 1...新
             if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid 过来
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid 在缓存zset中的排名
                 if(direction==0){ //获取比当前message旧的消息
-                    startIndex = endRank + 1;
-                    if(startIndex < 0){
-                        startIndex = 0;
-                    }
-                    endIndex = startIndex + pageCount - 1; //消息位置
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
-                }else{//获取比当前message新消息
                     endIndex = endRank - 1;
                     if(endIndex >= 0){
                         startIndex = endIndex - pageCount + 1;
                         if(startIndex < 0){
                             startIndex = 0;
                         }
+                        messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                     }else{
                         messageImIdList = null;//消息集合
                     }
+                }else{//获取比当前message新消息
+                    startIndex = endRank + 1;
+                    endIndex = startIndex + pageCount - 1; //消息位置
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }
             }else{// 如果没有传过来message_id
                //判断需求是要新的信息 还是就得信息
                 if(direction == 0){//从最早的信息开始
+                    startIndex = 0;
+                    endIndex = pageCount-1;
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                }else{//从最新的信息开始
                     endIndex = -1;
                     startIndex = message_sum - pageCount;
                     if(startIndex < 0){
                         startIndex = 0;
                     }
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
-                }else{//从最新的信息开始
-                    startIndex = 0;
-                    endIndex = pageCount-1;
                     messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }
             }
@@ -2356,7 +2353,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                     resultMap.put("message_list", messageListCache);
             }
-
             return resultMap;
         }
     }

@@ -24,7 +24,7 @@
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
     message_url, message_question,audio_image, audio_time,
-    message_pos, message_type, send_type,message_imid,user_type,
+    message_pos, message_type, send_type,message_imid,
     creator_id, create_time
     )
     values
@@ -55,7 +55,7 @@
         null,
       </if>
       #{item.audio_time},#{item.message_pos},
-      #{item.message_type},#{item.send_type},#{item.message_imid},#{item.user_type},#{item.creator_id},#{item.create_time})
+      #{item.message_type},#{item.send_type},#{item.message_imid},#{item.creator_id},#{item.create_time})
     </foreach>
   </insert>
 
@@ -77,11 +77,13 @@
       <if test="course_id != null">
         and cm.course_id = #{course_id}
       </if>
-      <if test="direction != null and direction == 0 and message_pos != null">
-        and  cm.message_pos <![CDATA[ < ]]> #{message_pos}
+      <if test="direction != null and direction == 0 and message_imid != null">
+        and  cm.message_pos <![CDATA[ < ]]>
+        (select message_pos from t_course_message where message_imid = #{message_imid})
       </if>
-      <if test="direction != null and direction == 1 and message_pos != null" >
-        and  cm.message_pos <![CDATA[ > ]]> #{message_pos}
+      <if test="direction != null and direction == 1 and message_imid != null" >
+        and  cm.message_pos <![CDATA[ > ]]>
+        (select message_pos from t_course_message where message_imid = #{message_imid})
       </if>
       <if test="message_type != null">
         and  cm.message_type = #{message_type}
