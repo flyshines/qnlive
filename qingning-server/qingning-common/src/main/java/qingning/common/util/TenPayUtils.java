@@ -243,11 +243,11 @@ public class TenPayUtils {
                 sb.append("&");
             }
         }
-        String openid = requestMapData.get("openid");
-        if (openid != null) {
-            sb.append("key=" + TenPayConstant.APP_KEY);
-        } else  {
+        String trade_type = requestMapData.get("trade_type");
+        if (trade_type.equals("APP")) {
             sb.append("key=" + TenPayConstant.APP_APP_KEY);
+        } else  {
+            sb.append("key=" + TenPayConstant.APP_KEY);
         }
 
         String sign = MD5Util.getMD5(sb.toString());
