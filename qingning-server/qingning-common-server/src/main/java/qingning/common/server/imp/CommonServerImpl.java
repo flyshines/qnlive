@@ -2281,17 +2281,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
             Set<String> messageImIdList = null;//消息集合
-            //来确定消息集合
+            //来确定消息集合 0旧 -> 1...新
             if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid 过来
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid 在缓存zset中的排名
                 if(direction==0){ //获取比当前message旧的消息
-                    startIndex = endRank + 1;
-                    if(startIndex < 0){
-                        startIndex = 0;
-                    }
-                    endIndex = startIndex + pageCount - 1; //消息位置
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
-                }else{//获取比当前message新消息
                     endIndex = endRank - 1;
                     if(endIndex >= 0){
                         startIndex = endIndex - pageCount + 1;
@@ -2302,19 +2295,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }else{
                         messageImIdList = null;//消息集合
                     }
+                }else{//获取比当前message新消息
+                    startIndex = endRank + 1;
+                    endIndex = startIndex + pageCount - 1; //消息位置
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }
             }else{// 如果没有传过来message_id
                //判断需求是要新的信息 还是就得信息
                 if(direction == 0){//从最早的信息开始
+                    startIndex = 0;
+                    endIndex = pageCount-1;
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                }else{//从最新的信息开始
                     endIndex = -1;
                     startIndex = message_sum - pageCount;
                     if(startIndex < 0){
                         startIndex = 0;
                     }
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
-                }else{//从最新的信息开始
-                    startIndex = 0;
-                    endIndex = pageCount-1;
                     messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }
             }
@@ -2356,7 +2353,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                     resultMap.put("message_list", messageListCache);
             }
-
             return resultMap;
         }
     }
