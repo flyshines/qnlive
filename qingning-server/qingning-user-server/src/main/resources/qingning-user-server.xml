@@ -94,6 +94,11 @@
 					<param name="share_url" type="string"/>
 					<param name="update_time" type="long"/>
 					<param name="im_course_id" type="string"/>
+					<param name="qr_code" type="map">
+						<param name="qr_code_url" type="string"/>
+						<param name="qr_message_1" type="string"/>
+					</param>
+
 				</outputs>
 			</function>
 

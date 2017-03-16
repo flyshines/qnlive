@@ -60,4 +60,9 @@ public interface IUserModuleServer {
 	List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 	
 	Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
+
+	/**
+	 * 获取客服信息
+	 */
+	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
 }
