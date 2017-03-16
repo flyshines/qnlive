@@ -243,7 +243,13 @@ public class TenPayUtils {
                 sb.append("&");
             }
         }
-        sb.append("key=" + TenPayConstant.APP_KEY);
+        String openid = requestMapData.get("openid");
+        if (openid != null) {
+            sb.append("key=" + TenPayConstant.APP_KEY);
+        } else  {
+            sb.append("key=" + TenPayConstant.APP_APP_KEY);
+        }
+
         String sign = MD5Util.getMD5(sb.toString());
         String ValidSign = requestMapData.get("sign").toUpperCase();
         return ValidSign.equals(sign);
