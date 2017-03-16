@@ -923,8 +923,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         Map<String,String> qrCode = new HashMap<>();
         qrCode.put("qr_code_url",getQrCode(courseMap.get("lecturer_id"),userId,jedis));
-        qrCode.put("qr_message_1",MiscUtils.getConfigByKey("qr_message_1_by_course"));
-
+        qrCode.put("qr_message_1",Constants.COURES_ADVERTISING);
+            //MiscUtils.getConfigByKey("qr_message_1_by_course")
         resultMap.put("qr_code",qrCode);
         return resultMap;
     }
@@ -1901,7 +1901,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         } else {//2.判断是否有关注我们公众号
             Map<String,Object> map = userModuleServer.findLoginInfoByUserId(userId);
             if(Integer.parseInt(map.get("subscribe").toString())==0){//没有关注
-                return MiscUtils.getConfigByKey("weixin_qrcode");//公众号
+                return Constants.WEI_CAT_QRCODE_URL;
+              //  return MiscUtils.getConfigByKey("weixin_qrcode");//公众号
             }
         }
         return "";
