@@ -2244,7 +2244,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(reqMap.get("message_type") != null && StringUtils.isNotBlank(reqMap.get("message_type").toString())){ //传过来的信息位置
             queryMap.put("message_type", Integer.parseInt(reqMap.get("message_type").toString()));
         }
-        if(!jedis.exists(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map))){ //查询当前课程是否结束
+
+        Map<String,String> courseMap = jedis.hgetAll(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map));
+        if(courseMap.get("status").equals("2")){ //查询当前课程是否结束
             //如果课程结束就直接查询数据库
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){ //传过来的信息位置
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));
@@ -2263,7 +2265,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 resultMap.put("message_list", messageList);
             }
-            resultMap.put("message_sum", commonModuleServer.findCourseMessageSum(queryMap));
+            resultMap.put("message_count", commonModuleServer.findCourseMessageSum(queryMap));
             return resultMap;
         }else{ //TODO 查询缓存
             //当前课程没有结束 可以直接查询缓存
@@ -2273,7 +2275,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
             }
             long message_sum = jedis.zcard(messageListKey);//总共有多少个总数
-            resultMap.put("message_sum", message_sum);
+            resultMap.put("message_count", message_sum);
 
 
             //缓存中存在，则读取缓存中的内容
