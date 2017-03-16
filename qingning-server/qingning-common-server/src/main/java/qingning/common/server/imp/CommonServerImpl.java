@@ -2298,6 +2298,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         if(startIndex < 0){
                             startIndex = 0;
                         }
+                        messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                     }else{
                         messageImIdList = null;//消息集合
                     }
