@@ -2292,6 +2292,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         startIndex = 0;
                     }
                     endIndex = startIndex + pageCount - 1; //消息位置
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }else{//获取比当前message新消息
                     endIndex = endRank - 1;
                     if(endIndex >= 0){
@@ -2299,6 +2300,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         if(startIndex < 0){
                             startIndex = 0;
                         }
+                    }else{
+                        messageImIdList = null;//消息集合
                     }
                 }
             }else{// 如果没有传过来message_id
@@ -2309,13 +2312,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(startIndex < 0){
                         startIndex = 0;
                     }
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }else{//从最新的信息开始
                     startIndex = 0;
                     endIndex = pageCount-1;
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
                 }
             }
-            messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+
             if(! CollectionUtils.isEmpty(messageImIdList)){
                 //缓存中存在则读取缓存内容
                 List<Map<String,String>> messageListCache = new ArrayList<>();
