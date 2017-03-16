@@ -537,4 +537,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String, Object> findServiceNoInfoByLectureId(String lectureId) {
 		return lecturerMapper.findServiceNoInfoByLectureId(lectureId);
 	}
+
+	@Override
+	public List<Map<String, String>> findRobotUsers(String user_role) {
+		return lecturerMapper.findRobotUsers(user_role);
+	}
 }
