@@ -2312,7 +2312,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);
                 }else{//从最新的信息开始
                     startIndex = 0;
-                    endIndex = pageCount;
+                    endIndex = pageCount-1;
                 }
             }
             messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
