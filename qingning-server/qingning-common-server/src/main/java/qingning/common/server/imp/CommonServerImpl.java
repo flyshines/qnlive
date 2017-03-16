@@ -2240,12 +2240,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         queryMap.put("page_count", pageCount);//要查询的记录数据
         queryMap.put("user_type", userType);//查询角色类型
         queryMap.put("direction", direction);//方向
-        if(reqMap.get("message_type") != null && StringUtils.isNotBlank(reqMap.get("message_type").toString())){ //传过来的信息位置
-            queryMap.put("message_type", Integer.parseInt(reqMap.get("message_type").toString()));
+        if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){ //传过来的信息位置
+            queryMap.put("message_imid", Integer.parseInt(reqMap.get("message_imid").toString()));
         }
-
         Map<String,String> courseMap = jedis.hgetAll(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map));
         if(courseMap.get("status").equals("2")){ //查询当前课程是否结束
+
             //如果课程结束就直接查询数据库
             if(reqMap.get("message_pos") != null && StringUtils.isNotBlank(reqMap.get("message_pos").toString())){ //传过来的信息位置
                 queryMap.put("message_pos", Long.parseLong(reqMap.get("message_pos").toString()));

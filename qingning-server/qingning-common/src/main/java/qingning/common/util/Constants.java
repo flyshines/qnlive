@@ -226,9 +226,6 @@ public final class Constants {
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
 
-	public static final String CUSTOMER_QRCODE_URL = "customerQrCodeUrl";
-	public static final String CUSTOMER_PHONE_NUM = "customerPhoneNum";
-
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 
