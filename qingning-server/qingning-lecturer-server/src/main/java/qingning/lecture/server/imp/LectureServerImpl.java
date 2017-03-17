@@ -25,8 +25,6 @@ import redis.clients.jedis.Tuple;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class LectureServerImpl extends AbstractQNLiveServer {
 	private static Logger log = LoggerFactory.getLogger(LectureServerImpl.class);
@@ -39,161 +37,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	private ReadUserOperation readUserOperation;
 	private ReadRoomDistributerOperation readRoomDistributerOperation;
 	private ReadDistributerOperation readDistributerOperation;
-
-    protected static ConcurrentLinkedQueue<Map<String, String>>                             notJoinRobots   = new ConcurrentLinkedQueue<>();
-
-    protected static ConcurrentHashMap<String, ConcurrentLinkedQueue<Map<String, String>>>  joinRobots      = new ConcurrentHashMap<>();
-
-    protected static boolean                                                                didInitRobots   = false;
-
-    protected static ConcurrentHashMap<String, Boolean>                                     hasJoinOrleftFlag   =   new ConcurrentHashMap<>();
-
-    //初始化机器人
-    private void robotInit() {
-        List<Map<String, String>> robotList = lectureModuleServer.findRobotUsers("robot");// 机器人
-        if (robotList != null) {
-            notJoinRobots.addAll (robotList);
-        }
-        didInitRobots = true;
-    }
-
-    //机器人管理
-    private void robotManage(Map<String, String> courseInfoMap) {
-        String course_id = courseInfoMap.get("course_id");
-        final String key = "robot_in_" + course_id + courseInfoMap.get("lecturer_id");
-
-        //有机器人参与的课程总量
-
-        //课程是讲师公开课 或者 青柠公开课
-
-        //
-
-        // 开启线程管理直播间的机器人
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long startTime = System.currentTimeMillis ();
-                Jedis jedis = jedisUtils.getJedis();
-                boolean robotEnough = false;
-                boolean courseEnd = false;
-                Map<String, String> map = new HashMap<>();
-
-                while (jedis.exists (key) && !robotEnough && !courseEnd) {
-                    log.debug ("=====创建直播,直播机器人准备进入了直播间====");
-                    try {
-                        //a、1,课程预告开始——课程结束，00：30——8：00每小时增量N：0-2，每60分钟分N次随机；
-                        //   2,08：01——19：00每小时增量N：2-5，每60分钟分N次随机；
-                        //   3,19：01——00：30每小时增量N：5-10，每60分钟分N次随机；
-                        //b、每加入一个真实听众，同时增加1—2个假听众；
-                        map.clear();
-                        map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
-                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-                        Map<String,String> courseInfoMap = jedis.hgetAll(courseKey);
-                        if (courseInfoMap.get("end_time") != null) {
-                            courseEnd = true;
-                            continue;
-                        }
-
-                        long start_time = Long.parseLong(courseInfoMap.get("start_time"));
-                        long currentTimeS = System.currentTimeMillis();
-                        long delta = currentTimeS - start_time;
-
-                        long sleepTime = 60*60*1000;
-                        int robotNum = 0;
-                        if (delta > 24*60*60*1000) { //大于24小时
-                            continue;
-                        } else if (delta > 16*60*60*1000) { //16-24
-                            robotNum = (int) (0 + Math.random () * 2);
-                        } else if (delta > 8*60*60*1000) { //8-16
-                            robotNum = (int) (2 + Math.random () * 3);
-                        } else if (delta > 0) { //0-8
-                            robotNum = (int) (5 + Math.random () * 5);
-                        } else { //课程已经开始
-                            sleepTime = 60*1000;
-
-                            robotNum = (int) (2 + Math.random () * 3);
-                        }
-
-                        Thread.sleep (sleepTime);
-
-                        for ( int i = 0 ; i < robotNum; i++ ) {
-                            Map<String, String> user = notJoinRobots.poll ();
-                            if (user != null) {
-                                log.debug ("=====创建直播,直播机器人:" + user.get("nick_name") + "进入了课程====" + courseInfoMap.get("course_id"));
-                                robotJoinCourse(courseInfoMap, user);
-
-                                if (joinRobots.get (key) != null) {
-                                    joinRobots.get (key).offer (user);
-                                } else {
-                                    ConcurrentLinkedQueue<Map<String, String>> joinRobotQueue = new ConcurrentLinkedQueue<> ();
-                                    joinRobotQueue.offer (user);
-                                    joinRobots.put (key, joinRobotQueue);
-                                }
-                            }
-                            int second = (int) (10 + Math.random () * 20);
-                            Thread.sleep (second * 1000);
-                        }
-
-                        Map<String,Object> query = new HashMap<String,Object>();
-                        query.put(Constants.CACHED_KEY_COURSE_ROBOT_FIELD, course_id);
-                        String course_robot_key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ROBOT, query);
-                        int courseRobot = Integer.parseInt(jedis.get(course_robot_key));
-                        courseRobot += robotNum;
-
-                        //c、最多当真实用户达到30—40选个随机数，停止加机器人；
-                        //d、机器人加到90—120，选个随机数之后不再增加；
-                        int real_student_num = Integer.parseInt(courseInfoMap.get("real_student_num"));
-                        int robot_num = joinRobots.get (key).size();
-                        if (robot_num > 90 || (real_student_num - robot_num) > 30) {
-                            robotEnough = true;
-                        }
-
-
-                    } catch (InterruptedException e) {}
-                }
-                robotLeaveCourse(courseInfoMap);
-            }
-        });
-    }
-
-    //机器人加入课程 只允许讲师的公开课 和 青柠的公开课
-    private void robotJoinCourse(Map<String, String> courseInfoMap, Map<String, String> user) {
-        Jedis jedis = jedisUtils.getJedis();
-        //1 课程消息已有
-        //2 不是讲师
-        //3 是公开课
-        //4 是否参加过该课程
-//        Map<String,Object> studentQueryMap = new HashMap<>();
-//        studentQueryMap.put("user_id", user.get("user_id"));
-//        studentQueryMap.put("course_id", courseInfoMap.get("course_id"));
-//        if(userModuleServer.isStudentOfTheCourse(studentQueryMap)){
-//            throw new QNLiveException("100004");
-//        }
-        //5 学员信息到 学员参与表中
-        //6 修改讲师的课程参与人数
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id"));
-        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        jedis.hincrBy(lecturerKey, "total_student_num", 1);
-        //7 修改用户加入的课程数
-        //7.修改用户缓存信息中的加入课程数
-        map.clear();
-        map.put(Constants.CACHED_KEY_USER_FIELD, user.get("user_id"));
-        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
-        if(jedis.exists(userCacheKey)){
-            jedis.hincrBy(userCacheKey, "course_num", 1L);
-        } else {
-//            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
-            jedis.hincrBy(userCacheKey, "course_num", 1L);
-        }
-        //8 付费课程推送消息
-
-    }
-
-    //机器人离开课程
-    private void robotLeaveCourse(Map<String, String> courseInfoMap) {
-
-    }
 
     @Override
     public void initRpcServer() {
@@ -769,6 +612,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                this.mqUtils.sendMessage(mqRequestEntity);
 //            }
         }
+
+        map.clear();
+        map.put("course_id", courseId);
+        RequestEntity mqRequestEntity = new RequestEntity();
+        mqRequestEntity.setServerName("CourseRobotService");
+        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+        mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
+        mqRequestEntity.setParam(map);
+        this.mqUtils.sendMessage(mqRequestEntity);
+
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }

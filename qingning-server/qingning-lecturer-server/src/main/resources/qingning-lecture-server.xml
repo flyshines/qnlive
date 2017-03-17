@@ -55,7 +55,7 @@
 			<function name="createCourse">
 				<auth>
 					<accessToken require="Y" />
-					<timesLimit millisecond="100" />
+					<!--<timesLimit millisecond="100" />-->
 				</auth>
 				<inputs>
 					<param name="course_title" type="rstring" require="Y,000100" />
