@@ -36,11 +36,14 @@ public class CourseRobotSevice extends AbstractMsgService {
     protected static boolean                                                                didInitRobots   = false;
 
     private void robotInit() {
-        List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
-        if (robotList != null) {
-            notJoinRobots.addAll (robotList);
+        synchronized (this) {
+            if (didInitRobots) return;
+            List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
+            if (robotList != null) {
+                notJoinRobots.addAll (robotList);
+            }
+            didInitRobots = true;
         }
-        didInitRobots = true;
     }
 
     //机器人管理
