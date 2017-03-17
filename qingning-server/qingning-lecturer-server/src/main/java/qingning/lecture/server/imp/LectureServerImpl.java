@@ -256,7 +256,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> queryParam = new HashMap<String,Object>();
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
-        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+        //TODO 手机号
+//        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
         if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
         	reqMap.put("avatar_address",userInfo.get("avatar_address"));
         }
