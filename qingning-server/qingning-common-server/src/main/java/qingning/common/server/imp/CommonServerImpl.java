@@ -2270,7 +2270,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }else{ //TODO 查询缓存
             //当前课程没有结束 可以直接查询缓存
             if(userType == 0){//查询老师
-                messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+                if(reqMap.get("message_type") != null && reqMap.get("message_type").toString().equals("0")){
+                    messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
+                }else{
+                    messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+                }
             }else if(userType == 1){//查询用户
                 messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
             }
@@ -2379,7 +2383,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("courseStatus")
     public void setCourseStatus(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-
+        String courseId = reqMap.get("course_id").toString();
+  //      String status = r
 
     }
 

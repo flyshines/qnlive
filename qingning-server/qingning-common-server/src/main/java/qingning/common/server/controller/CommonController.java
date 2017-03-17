@@ -713,7 +713,6 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "user_type", defaultValue = "0") String user_type,
             @RequestParam(value = "message_type",defaultValue = "") String message_type,
             @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
-            @RequestParam(value = "message_pos", defaultValue = "") String message_pos,
             @RequestParam(value = "direction", defaultValue = "1") String direction,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
@@ -723,7 +722,6 @@ public class CommonController extends AbstractController {
         parMap.put("page_count", page_count);
         parMap.put("user_type", user_type);
         parMap.put("message_type", message_type);
-        parMap.put("message_pos", message_pos);
         parMap.put("message_imid", message_imid);
         parMap.put("direction",direction);
         requestEntity.setParam(parMap);
