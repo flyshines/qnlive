@@ -8,11 +8,14 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.persistence.CoursesMapper;
+import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
 import qingning.db.common.mybatis.persistence.LecturerMapper;
 import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
 import redis.clients.jedis.Jedis;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,15 @@ public class CourseRobotSevice extends AbstractMsgService {
     @Autowired
     private LecturerMapper lecturerMapper;
 
+    @Autowired
+    private CoursesStudentsMapper coursesStudentsMapper;
+
+    @Autowired
+    private CoursesMapper coursesMapper;
+    //coursesStudentsMapper.findCourseRecommendUserNum(reqMap)
+    //Integer insertCount = coursesStudentsMapper.insertStudent(student);
+    //coursesMapper.increaseStudent(course_id);
+
     protected static ConcurrentLinkedQueue<Map<String, String>> notJoinRobots                               = new ConcurrentLinkedQueue<>();
 
     protected static ConcurrentHashMap<String, ConcurrentLinkedQueue<Map<String, String>>> joinRobots       = new ConcurrentHashMap<>();
@@ -36,11 +48,14 @@ public class CourseRobotSevice extends AbstractMsgService {
     protected static boolean                                                                didInitRobots   = false;
 
     private void robotInit() {
-        List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
-        if (robotList != null) {
-            notJoinRobots.addAll (robotList);
+        synchronized (this) {
+            if (didInitRobots) return;
+            List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
+            if (robotList != null) {
+                notJoinRobots.addAll (robotList);
+            }
+            didInitRobots = true;
         }
-        didInitRobots = true;
     }
 
     //机器人管理
@@ -95,19 +110,19 @@ public class CourseRobotSevice extends AbstractMsgService {
 
                         long sleepTime = 60*60*1000;
                         int robotNum = 0;
-                        if (delta > 24*60*60*1000) { //大于24小时
-                            continue;
-                        } else if (delta > 16*60*60*1000) { //16-24
-                            robotNum = (int) (0 + Math.random () * 2);
-                        } else if (delta > 8*60*60*1000) { //8-16
-                            robotNum = (int) (2 + Math.random () * 3);
-                        } else if (delta > 0) { //0-8
-                            robotNum = (int) (5 + Math.random () * 5);
-                        } else { //课程已经开始
+//                        if (delta > 24*60*60*1000) { //大于24小时
+//                            continue;
+//                        } else if (delta > 16*60*60*1000) { //16-24
+//                            robotNum = (int) (0 + Math.random () * 2);
+//                        } else if (delta > 8*60*60*1000) { //8-16
+//                            robotNum = (int) (2 + Math.random () * 3);
+//                        } else if (delta > 0) { //0-8
+//                            robotNum = (int) (5 + Math.random () * 5);
+//                        } else { //课程已经开始
                             sleepTime = 60*1000;
 
                             robotNum = (int) (2 + Math.random () * 3);
-                        }
+//                        }
 
                         Thread.sleep (sleepTime);
 
@@ -151,7 +166,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                 robotLeaveCourse(jedis, course_id);
 
             }
-        });
+        }).start();
     }
 
     //b、每加入一个真实听众，同时增加1—2个假听众；
@@ -198,7 +213,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                     }
                 } catch (InterruptedException e) {}
             }
-        });
+        }).start();
     }
     //机器人加入课程 只允许讲师的公开课 和 青柠的公开课
     private void robotJoinCourse(Jedis jedis, Map<String, String> courseInfoMap, Map<String, String> user) {
@@ -212,13 +227,47 @@ public class CourseRobotSevice extends AbstractMsgService {
 //        if(userModuleServer.isStudentOfTheCourse(studentQueryMap)){
 //            throw new QNLiveException("100004");
 //        }
+        String course_id = courseInfoMap.get("course_id");
+
         //5 学员信息到 学员参与表中
+        Date now = new Date();
+        Map<String,Object> student = new HashMap<String,Object>();
+        student.put("student_id", MiscUtils.getUUId());
+        student.put("user_id", user.get("user_id"));
+        student.put("lecturer_id", courseInfoMap.get("lecturer_id"));
+        student.put("room_id", courseInfoMap.get("room_id"));
+        student.put("course_id", courseInfoMap.get("course_id"));
+        student.put("course_password", courseInfoMap.get("course_password"));
+        student.put("student_type", "0"); //TODO distribution case
+        student.put("create_time", now);
+        student.put("create_date", now);
+        coursesStudentsMapper.insertStudent(student);
+
         //6 修改讲师的课程参与人数
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id"));
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "total_student_num", 1);
         //7 修改用户加入的课程数
+        map.clear();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        Long nowStudentNum = 0L;
+        coursesMapper.increaseStudent(course_id);
+
+//        if(jedis.exists(courseKey)){
+//            map.clear();
+//            map.put("course_id", course_id);
+//            Map<String,Object> numInfo = coursesStudentsMapper.findCourseRecommendUserNum(reqMap);
+//            long num = 0;
+//            if(!MiscUtils.isEmpty(numInfo)){
+//                num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+//            }
+//            jedis.hset(courseKey, "student_num", num+"");
+//        }else {
+//            coursesMapper.increaseStudent(course_id);
+//        }
+
         //7.修改用户缓存信息中的加入课程数
 //        map.clear();
 //        map.put(Constants.CACHED_KEY_USER_FIELD, user.get("user_id"));
