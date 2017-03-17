@@ -98,19 +98,19 @@ public class CourseRobotSevice extends AbstractMsgService {
 
                         long sleepTime = 60*60*1000;
                         int robotNum = 0;
-                        if (delta > 24*60*60*1000) { //大于24小时
-                            continue;
-                        } else if (delta > 16*60*60*1000) { //16-24
-                            robotNum = (int) (0 + Math.random () * 2);
-                        } else if (delta > 8*60*60*1000) { //8-16
-                            robotNum = (int) (2 + Math.random () * 3);
-                        } else if (delta > 0) { //0-8
-                            robotNum = (int) (5 + Math.random () * 5);
-                        } else { //课程已经开始
+//                        if (delta > 24*60*60*1000) { //大于24小时
+//                            continue;
+//                        } else if (delta > 16*60*60*1000) { //16-24
+//                            robotNum = (int) (0 + Math.random () * 2);
+//                        } else if (delta > 8*60*60*1000) { //8-16
+//                            robotNum = (int) (2 + Math.random () * 3);
+//                        } else if (delta > 0) { //0-8
+//                            robotNum = (int) (5 + Math.random () * 5);
+//                        } else { //课程已经开始
                             sleepTime = 60*1000;
 
                             robotNum = (int) (2 + Math.random () * 3);
-                        }
+//                        }
 
                         Thread.sleep (sleepTime);
 
@@ -154,7 +154,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                 robotLeaveCourse(jedis, course_id);
 
             }
-        });
+        }).start();
     }
 
     //b、每加入一个真实听众，同时增加1—2个假听众；
@@ -201,7 +201,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                     }
                 } catch (InterruptedException e) {}
             }
-        });
+        }).start();
     }
     //机器人加入课程 只允许讲师的公开课 和 青柠的公开课
     private void robotJoinCourse(Jedis jedis, Map<String, String> courseInfoMap, Map<String, String> user) {
