@@ -179,15 +179,38 @@ public class ImMsgServiceImp implements ImMsgService {
 					messageMap.put("information",startInformation);
 					messageMap.put("mid",MiscUtils.getUUId());
 					String content = JSON.toJSONString(messageMap);
-					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
 
 					startInformation.put("creator_id",courseMap.get("lecturer_id"));
 					startInformation.put("message_id",messageMap.get("mid"));
 					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
 					//1.将聊天信息id插入到redis zsort列表中
 					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
-					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
+					//添加到老师发送的集合中
+					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+					jedis.zadd(messageLecturerListKey, now,  (String)startInformation.get("message_id"));
 
+
+					Map<String, Object> userLoginInfo = loginInfoMapper.findLoginInfoByUserId(courseMap.get("lecturer_id"));
+
+					Map<String,Object> startLecturerMessageInformation = new HashMap<>();
+					startLecturerMessageInformation.put("creator_id",courseMap.get("lecturer_id"));//发送人id
+					startLecturerMessageInformation.put("course_id", information.get("course_id").toString());//课程id
+					startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
+					startLecturerMessageInformation.put("message_type", "1");
+					startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
+					startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
+					startLecturerMessageInformation.put("create_time", now);
+					startLecturerMessageInformation.put("send_type","0");
+					startLecturerMessageInformation.put("creator_avatar_address",userLoginInfo.get("avatar_address"));
+					startLecturerMessageInformation.put("creator_nick_name",userLoginInfo.get("nick_name"));
+					jedis.zadd(messageListKey, now, (String)startLecturerMessageInformation.get("message_id"));
+					jedis.zadd(messageLecturerListKey, now,  (String)startLecturerMessageInformation.get("message_id"));
+					messageMap.put("information",startLecturerMessageInformation);
+					String startLecturerMessageInformationContent = JSON.toJSONString(messageMap);
+					IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", sender);//发送信息
+
+					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
 					Map<String,String> result = new HashMap<String,String>();
 					MiscUtils.converObjectMapToStringMap(startInformation, result);
 					jedis.hmset(messageKey, result);

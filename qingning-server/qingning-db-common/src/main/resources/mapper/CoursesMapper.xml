@@ -6,7 +6,7 @@
     order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit 1
   </select>
   <select id="findCourseByCourseId" resultType="hashmap" parameterType="java.lang.String" >
-    select * from t_courses where course_id = #{courseId}
+    select * from t_courses where course_id = #{courseId} and status != '5'
   </select>
   <select id="findFinishCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
   	select * from t_courses where status='2'
@@ -19,7 +19,7 @@
   	 order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit #{pageCount}
   </select>
   <select id="findCourseListForLecturer" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses  where 1 =1
+    select * from t_courses  where
     <if test="orderType == 1" >     
        <if test="startIndex != null" >
       	<if test="status == 2" >

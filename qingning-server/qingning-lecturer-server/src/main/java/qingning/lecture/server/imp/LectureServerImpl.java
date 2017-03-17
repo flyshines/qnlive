@@ -70,6 +70,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(lectureLiveRoomKey)) {
             throw new QNLiveException("100006");
         }
+        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
+            throw new QNLiveException("100006");
+        }
+
+
 
         //2.数据库修改
         //2.如果为新讲师用户，插入讲师表。插入直播间表。更新登录信息表中的用户身份
@@ -93,7 +99,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> queryParam = new HashMap<String,Object>();
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
-        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+        //TODO 手机号
+//        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
         if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
         	reqMap.put("avatar_address",userInfo.get("avatar_address"));
         }
@@ -201,6 +208,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
         resultMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+
+
+        resultMap.put("qr_code",getQrCode(userId,jedis));
         return resultMap;
     }
  
@@ -2851,20 +2861,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
      * TODO 有复用的方法 以后重构是需要进行河滨
      * 获取讲师二维码/青柠二维码
      */
-    public String getQrCode(String lectureId, String userId, Jedis jedis) {
+    public Map getQrCode(String lectureId,Jedis jedis) {
         Map<String, String> query = new HashMap();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lectureId);
         //1.判断讲师是否有公众号 有就直接返回
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
         if (jedis.exists(serviceNoKey)) {//判断当前是否有这个缓存
-            return jedis.hgetAll(serviceNoKey).get("qr_code");
-        } else {//2.判断是否有关注我们公众号
-            Map<String,Object> map = lectureModuleServer.findLoginInfoByUserId(userId);
-            if(Integer.parseInt(map.get("subscribe").toString())==0){//没有关注
-                return MiscUtils.getConfigByKey("weixin_qrcode");//公众号
-            }
+            query.put("qr_code_url",jedis.hgetAll(serviceNoKey).get("qr_code"));
+            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_lecturer"));
+            query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message"));
+            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
+            return query;
         }
-        return "";
+        return null;
     }
 
 }

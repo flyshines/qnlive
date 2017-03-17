@@ -62,6 +62,13 @@
 					<param name="fans_num" type="long" />
 					<param name="follow_status" type="string" />
 					<param name="roles" type="list" />
+					<param name="qr_code" type="map">
+						<param name="qr_code_url" type="string"/>
+						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_message" type="string"/>
+						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_ad" type="string"/>
+					</param>
 				</outputs>
 			</function>
 
@@ -96,7 +103,10 @@
 					<param name="im_course_id" type="string"/>
 					<param name="qr_code" type="map">
 						<param name="qr_code_url" type="string"/>
-						<param name="qr_message_1" type="string"/>
+						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_message" type="string"/>
+						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_ad" type="string"/>
 					</param>
 
 				</outputs>
