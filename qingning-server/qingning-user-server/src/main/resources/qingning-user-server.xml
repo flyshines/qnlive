@@ -67,6 +67,7 @@
 						<param name="qr_code_title" type="string"/>
 						<param name="qr_code_message" type="string"/>
 						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_ad" type="string"/>
 					</param>
 				</outputs>
 			</function>
@@ -105,6 +106,7 @@
 						<param name="qr_code_title" type="string"/>
 						<param name="qr_code_message" type="string"/>
 						<param name="qr_code_title" type="string"/>
+						<param name="qr_code_ad" type="string"/>
 					</param>
 
 				</outputs>

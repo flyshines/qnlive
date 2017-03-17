@@ -1904,7 +1904,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 query.put("qr_code_ad", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
             }
         }
-
         return query;
     }
 
