@@ -771,7 +771,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,new Jedis()));
+        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedisUtils.getJedis()));
         return resultMap;
     }
 
