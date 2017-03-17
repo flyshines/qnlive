@@ -1754,6 +1754,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     	String bandKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
     	String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
     	String studentNum = null;
+
     	studentNum = jedis.hget(courseKey, "student_num");
     	if(StringUtils.isBlank(studentNum)){
     		Map<String,String> courseMap = CacheUtils.readCourse((String)reqMap.get("course_id"), generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedisUtils, false);
@@ -1762,6 +1763,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     		}
     		studentNum = courseMap.get("student_num");
     	}
+
     	resultMap.put("student_num",studentNum);
     	Long minStudentPos = (Long)reqMap.get("student_pos");
     	boolean userStudentPos = minStudentPos!=null;
