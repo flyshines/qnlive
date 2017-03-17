@@ -245,7 +245,6 @@ public class CourseRobotSevice extends AbstractMsgService {
         joinRobots.remove(key);
     }
 
-    @SuppressWarnings("unchecked")
     @FunctionName("courseCreateAndRobotStart")
     public void courseCreateAndRobotStart(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
@@ -256,7 +255,6 @@ public class CourseRobotSevice extends AbstractMsgService {
         robotManage(course_id, jedisUtils.getJedis());
     }
 
-    @SuppressWarnings("unchecked")
     @FunctionName("courseHaveStudentIn")
     public void courseHaveStudentIn(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();

@@ -81,7 +81,7 @@
 
 	<bean id="LogServer" class="qingning.mq.server.imp.LogServiceImpl"/>
 
-	<bean id="CourseRobotSevice" class="qingning.mq.server.imp.CourseRobotSevice"></bean>
+	<bean id="CourseRobotService" class="qingning.mq.server.imp.CourseRobotSevice"></bean>
 
 	<bean id="mongoDB" class="qingning.mq.persistence.mongo.MongoDB">
 		<property name="ip" value="${mongodb.ip}"/>
