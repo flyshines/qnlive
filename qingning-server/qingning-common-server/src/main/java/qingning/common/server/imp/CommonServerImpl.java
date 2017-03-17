@@ -2369,5 +2369,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return null;
     }
 
+    /**
+     * 获取课程信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("courseStatus")
+    public void setCourseStatus(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+
+
+    }
+
+
 
 }

@@ -232,6 +232,5 @@ public final class Constants {
 	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
 
-	public static final String WEI_CAT_QRCODE_URL="http://ok2dmpnnz.bkt.clouddn.com/qnliveTestQrcode.jpg";
-	public static final String COURES_ADVERTISING="关注公众号\\n获取更多信息";
+
 }
