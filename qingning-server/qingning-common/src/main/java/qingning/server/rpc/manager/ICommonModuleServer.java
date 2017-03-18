@@ -99,4 +99,5 @@ public interface ICommonModuleServer {
 
 	int findCourseMessageSum(Map<String,Object> queryMap);
 
+	void updateCourseByCourseId(Map<String,Object> queryMap);
 }

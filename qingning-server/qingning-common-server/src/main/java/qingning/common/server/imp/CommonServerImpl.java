@@ -2391,9 +2391,60 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("courseStatus")
     public void setCourseStatus(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-        String courseId = reqMap.get("course_id").toString();
-  //      String status = r
+        String courseId = reqMap.get("course_id").toString();//课程id
+        String status = reqMap.get("status").toString();//修改状态
+        Map<String,Object> course = new HashMap<>();
+        course.put("course_id",courseId);//课程id
+        course.put("status",status);//修改的装填
+        commonModuleServer.updateCourseByCourseId(course);
+        Jedis jedis = jedisUtils.getJedis();
 
+        if(status.equals("5")){//屏蔽课程 删除所有课程信息
+            String delKey1 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//删除课程详细信息列表
+            jedis.del(delKey1);
+
+            String delKey2 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, course);//课程ppt信息
+            jedis.del(delKey2);
+
+            String delKey3 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, course);//讲课音频列表
+            Set<String> audioIdList = jedis.zrange(delKey3, 0, -1);//获取所有要删除的音频列表
+            if(audioIdList != null && audioIdList.size() > 0){
+                for(String delKey : audioIdList){
+                    course.put(Constants.FIELD_AUDIO_ID,delKey);
+                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, course));//讲课音频详细信息
+                }
+            }
+            jedis.del(delKey3);
+
+            String delKey4 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, course);//课程聊天消息列表
+            Set<String> messageList = jedis.zrange(delKey3, 0, -1);//获取所有要删除的课程聊天消息列表
+            if(messageList != null && messageList.size() > 0){
+                for(String delKey : audioIdList){
+                    course.put(Constants.FIELD_MESSAGE_ID,delKey);
+                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, course));//单条聊天详细信息
+                }
+            }
+            jedis.del(delKey4);
+
+            String delKey5 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, course);//课程禁言学生列表
+            jedis.del(delKey5);
+
+            String delKey6 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, course);//课程用户发言列表
+            jedis.del(delKey6);
+
+            String delKey7 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, course);//课程讲师发言列表
+            jedis.del(delKey7);
+
+            String delKey8 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, course);//课程讲师语音列表
+            jedis.del(delKey8);
+
+            String delKey9 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, course);//讲课音频JSON String
+            jedis.del(delKey9);
+
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE,courseId);//平台的直播中课程列表
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,courseId);//平台的预告中课程列表
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,courseId);//平台的已结束课程列表
+        }
     }
 
 
