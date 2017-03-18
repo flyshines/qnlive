@@ -620,7 +620,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                this.mqUtils.sendMessage(mqRequestEntity);
 //            }
         }
-
         map.clear();
         map.put("course_id", courseId);
         RequestEntity mqRequestEntity = new RequestEntity();
@@ -629,8 +628,32 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
         mqRequestEntity.setParam(map);
         this.mqUtils.sendMessage(mqRequestEntity);
-
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+        //给课程里面推消息
+        Map<String, Object> userLoginInfo = lectureModuleServer.findLoginInfoByUserId(timerMap.get("lecturer_id").toString());
+        Map<String,Object> startLecturerMessageInformation = new HashMap<>();
+        startLecturerMessageInformation.put("creator_id",userLoginInfo.get("lecturer_id"));//发送人id
+        startLecturerMessageInformation.put("course_id", timerMap.get("course_id").toString());//课程id
+        startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
+        startLecturerMessageInformation.put("message_type", "1");
+        startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
+        startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
+        startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
+        startLecturerMessageInformation.put("send_type","0");
+        startLecturerMessageInformation.put("creator_avatar_address",userLoginInfo.get("avatar_address"));
+        startLecturerMessageInformation.put("creator_nick_name",userLoginInfo.get("nick_name"));
+        Map<String,Object> startLecturerMessageMap = new HashMap<>();
+        startLecturerMessageMap.put("msg_type","1");
+        startLecturerMessageMap.put("send_time", System.currentTimeMillis());
+        startLecturerMessageMap.put("create_time", System.currentTimeMillis());
+        startLecturerMessageMap.put("information",startLecturerMessageInformation);
+        startLecturerMessageMap.put("mid",MiscUtils.getUUId());
+        String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
+        IMMsgUtil.sendMessageInIM(timerMap.get("im_course_id").toString(), startLecturerMessageInformationContent, "", userLoginInfo.get("m_user_id").toString());//发送信息
+        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
+        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
+        jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_id"));
+        jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startLecturerMessageInformation.get("message_id"));
         return resultMap;
     }
  
@@ -733,7 +756,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        String    course_id = (String) reqMap.get("course_id");
+        String course_id = (String) reqMap.get("course_id");
         
         Map<String, String> course = CacheUtils.readCourse((String)course_id, generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedisUtils, false);
         if(MiscUtils.isEmpty(course)){
@@ -865,6 +888,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             messageMap.put("mid",MiscUtils.getUUId());
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+
+
 
         } else {
             Map<String,Object> query = new HashMap<String,Object>();

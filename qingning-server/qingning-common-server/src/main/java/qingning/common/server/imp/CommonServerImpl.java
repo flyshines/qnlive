@@ -33,6 +33,7 @@ import sun.misc.BASE64Encoder;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.time.chrono.MinguoChronology;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1062,7 +1063,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("user_id", handleResultMap.get("user_id"));        
                     Map<String, String> payUserMap = CacheUtils.readUserNoCache((String)handleResultMap.get("user_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
                     
-                    String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+ + (Long)handleResultMap.get("profit_amount")/100.0 + "元";
+            //        String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "元";
+                    HashMap<String,String> payMessageMap = new HashMap<>();
+                    payMessageMap.put("pay_user",payUserMap.get("nick_name"));
+                    payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message"));
+                    payMessageMap.put("collect_user",lecturerMap.get("nick_name"));
+                    payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");
+                    payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit"));
+                    String message = JSON.toJSONString(payMessageMap);
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
