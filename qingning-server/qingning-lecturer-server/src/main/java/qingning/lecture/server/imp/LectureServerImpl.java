@@ -70,12 +70,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(lectureLiveRoomKey)) {
             throw new QNLiveException("100006");
         }
-        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
-        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
-            throw new QNLiveException("100006");
-        }
-
-
+//        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+//        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
+//            throw new QNLiveException("130003");
+//        }
 
         //2.数据库修改
         //2.如果为新讲师用户，插入讲师表。插入直播间表。更新登录信息表中的用户身份
@@ -100,7 +98,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         queryParam.put("user_id", userId);
         RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
         //TODO 手机号
-//        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
         if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
         	reqMap.put("avatar_address",userInfo.get("avatar_address"));
         }

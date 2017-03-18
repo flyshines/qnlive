@@ -1906,6 +1906,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_lecturer"));
             query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message"));
             query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
+            return query;
         } else {//2.判断是否有关注我们公众号
             Map<String,Object> map = userModuleServer.findLoginInfoByUserId(userId);
             if(Integer.parseInt(map.get("subscribe").toString())==0){//没有关注
@@ -1913,9 +1914,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_qingning"));
                 query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message"));
                 query.put("qr_code_ad", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
+                return query;
             }
         }
-        return query;
+        return null;
     }
 
 }

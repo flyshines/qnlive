@@ -183,6 +183,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION = "COURSE:{course_id}:MESSAGE_LIST:QUESTION";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_USER = "COURSE:{course_id}:MESSAGE_LIST:USER";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER = "COURSE:{course_id}:MESSAGE_LIST:LECTURER";
+	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE = "COURSE:{course_id}:MESSAGE_LIST:LECTURER_VOICE";
 	public static final String CACHED_KEY_COURSE_REAL_STUDENT_NUM = "COURSE:{course_id}:REAL_STUDENT_NUM";
 	public static final String CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO = "SYS:USER:{user_id}:LAST_JOIN_COURSE_IM_INFO";
 	public static final String CACHED_KEY_APP_VERSION_INFO_FIELD = "os";
