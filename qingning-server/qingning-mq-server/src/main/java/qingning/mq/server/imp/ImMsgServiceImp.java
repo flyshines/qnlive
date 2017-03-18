@@ -190,31 +190,6 @@ public class ImMsgServiceImp implements ImMsgService {
 					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_id"));
 
-
-					Map<String, Object> userLoginInfo = loginInfoMapper.findLoginInfoByUserId(courseMap.get("lecturer_id"));
-					Map<String,Object> startLecturerMessageInformation = new HashMap<>();
-					startLecturerMessageInformation.put("creator_id",courseMap.get("lecturer_id"));//发送人id
-					startLecturerMessageInformation.put("course_id", information.get("course_id").toString());//课程id
-					startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
-					startLecturerMessageInformation.put("message_type", "1");
-					startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
-					startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
-					startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
-					startLecturerMessageInformation.put("send_type","0");
-					startLecturerMessageInformation.put("creator_avatar_address",userLoginInfo.get("avatar_address"));
-					startLecturerMessageInformation.put("creator_nick_name",userLoginInfo.get("nick_name"));
-					Map<String,Object> startLecturerMessageMap = new HashMap<>();
-					startLecturerMessageMap.put("msg_type","1");
-					startLecturerMessageMap.put("send_time", System.currentTimeMillis());
-					startLecturerMessageMap.put("create_time", System.currentTimeMillis());
-					startLecturerMessageMap.put("information",startLecturerMessageInformation);
-					startLecturerMessageMap.put("mid",MiscUtils.getUUId());
-					String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
-					IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", userLoginInfo.get("m_user_id").toString());//发送信息
-
-					jedis.zadd(messageListKey, now, (String)startLecturerMessageInformation.get("message_id"));
-					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startLecturerMessageInformation.get("message_id"));
-
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
 					Map<String,String> result = new HashMap<String,String>();
 					MiscUtils.converObjectMapToStringMap(startInformation, result);
