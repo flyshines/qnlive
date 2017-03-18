@@ -70,12 +70,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(lectureLiveRoomKey)) {
             throw new QNLiveException("100006");
         }
-        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
-        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
-            throw new QNLiveException("100006");
-        }
-
-
+//        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+//        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
+//            throw new QNLiveException("130003");
+//        }
 
         //2.数据库修改
         //2.如果为新讲师用户，插入讲师表。插入直播间表。更新登录信息表中的用户身份

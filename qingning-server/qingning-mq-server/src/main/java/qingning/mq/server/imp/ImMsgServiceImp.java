@@ -351,8 +351,10 @@ public class ImMsgServiceImp implements ImMsgService {
 				String messageLecturerVoiceListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
 				jedis.zadd(messageLecturerVoiceListKey, createTime, imid);
 			}
+			if(information.get("send_type").equals("1") && information.get("send_type").equals("7")){//讲师回答 和 讲师回复
+					
+			}
 		}
-
 
 
 
