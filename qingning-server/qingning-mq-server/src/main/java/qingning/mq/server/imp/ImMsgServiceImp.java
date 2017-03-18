@@ -333,6 +333,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			}
 			if(information.get("send_type").equals("1") && information.get("send_type").equals("7")){//讲师回答 和 讲师回复
   				Map<String, Object> map1 = JSON.parseObject(information.get("message_qunestion").toString(), HashMap.class);
+				map1.put("course_id",information.get("course_id"));
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
 				jedis.hset(key,"status","1");
 			}
@@ -603,4 +604,16 @@ public class ImMsgServiceImp implements ImMsgService {
 		messageLockMap.clear();
 		maxLockMap.clear();
 	}
+
+
+	public static void main(String[] args){
+		String str =
+				"{creator_id:0000962bccf4fe284632a15ec8ba7f8e438d,creator_avatar_address:http://ok2dmpnnz.bkt.clouddn.com/WEB_FILE/201703181200006f997a140ff14f0ca889699f7423634f,message_id:0000a60b9983e07f4ada839dbb44cdcf2537,message_type:1,message:10,send_type:3,creator_nick_name:青柠互动－测试,create_time:1489833663755}";
+		Map<String, Object> map1 = JSON.parseObject(str, HashMap.class);
+		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
+
+		System.out.println(map1);
+		System.out.println(key);
+	}
+
 }
