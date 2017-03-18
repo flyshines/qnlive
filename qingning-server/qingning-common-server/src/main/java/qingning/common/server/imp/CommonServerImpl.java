@@ -9,6 +9,9 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.FetchRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.write.WritableWorkbook;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +36,7 @@ import sun.misc.BASE64Encoder;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.time.chrono.MinguoChronology;
+import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2392,10 +2395,90 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public void setCourseStatus(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         String courseId = reqMap.get("course_id").toString();
-  //      String status = r
-
     }
 
+    //上传机器数据
+    @FunctionName("uploadusers")
+    public void uploadusers(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        String result = reqMap.get("result").toString();
+        String path = reqMap.get("path").toString();
 
+        if (result.equals("0")) { //上传数据处理成功
 
+            WritableWorkbook book = null;
+            ArrayList<HashMap<String, String>> userList = new ArrayList<>();
+            //解析excel
+            try{
+                Workbook rwb=Workbook.getWorkbook(new File(path));//新增workbook excel对象
+                Sheet rs=rwb.getSheet(0); //获取第一张表
+                logger.info(" 打开对应excel第一个表");
+
+                int rows=rs.getRows();//得到所有的行
+                for (int i = 0; i < rows; i++) {//遍历所有的行  解析每一列的参数
+                    if(i==0){//第一行进行判断  判断模版是否出现错误
+                        continue;
+                    }
+
+                    String user_id=rs.getCell(0,i).getContents();//user_id
+                    String user_name=rs.getCell(1,i).getContents(); //user_name
+                    String nick_name=rs.getCell(2,i).getContents();//nick_name
+                    String avatar_address =rs.getCell(3, i).getContents();//avatar_address
+                    String phone_number = rs.getCell(4, i).getContents();//phone_number
+                    String gender=rs.getCell(5,i).getContents();//gender
+                    String country=rs.getCell(6,i).getContents(); //country
+                    String province=rs.getCell(7,i).getContents();//province
+                    String city =rs.getCell(8, i).getContents();//city
+                    String district = rs.getCell(9, i).getContents();//district
+                    String area=rs.getCell(10,i).getContents();//area
+                    String course_num=rs.getCell(11,i).getContents(); //course_num
+                    String live_room_num=rs.getCell(12,i).getContents();//live_room_num
+                    String status =rs.getCell(13, i).getContents();//status
+                    String plateform = rs.getCell(14, i).getContents();//plateform
+                    String user_role=rs.getCell(15,i).getContents();//user_role
+                    String last_login_time =rs.getCell(16, i).getContents();//last_login_time
+                    String last_login_ip = rs.getCell(17, i).getContents();//last_login_ip
+                    String create_time = rs.getCell(18, i).getContents();//create_time
+                    String update_time=rs.getCell(19,i).getContents();//update_time
+
+                    HashMap<String, String> userInfo = new HashMap<>();
+                    userInfo.put("user_id", user_id);
+                    userInfo.put("user_name", user_name);
+                    userInfo.put("nick_name", nick_name);
+                    userInfo.put("avatar_address", avatar_address);
+                    userInfo.put("phone_number", phone_number);
+                    userInfo.put("gender", gender);
+                    userInfo.put("country", country);
+                    userInfo.put("province", province);
+                    userInfo.put("city", city);
+                    userInfo.put("district", district);
+                    userInfo.put("area", area);
+                    userInfo.put("course_num", course_num);
+                    userInfo.put("live_room_num", live_room_num);
+                    userInfo.put("status", status);
+                    userInfo.put("plateform", plateform);
+                    userInfo.put("user_role", user_role);
+                    userInfo.put("last_login_time", last_login_time);
+                    userInfo.put("last_login_ip", last_login_ip);
+                    userInfo.put("create_time", create_time);
+                    userInfo.put("update_time", update_time);
+
+                    userList.add(userInfo);
+                    //添加信息
+//                    insertWyZhByExcel(xqId,userName,mobile,idNumber,roomCode,Short.valueOf(userRole));
+                }
+            }catch(Exception e){//如果失败
+                logger.error("Excel错误获取错误");
+            }finally {
+                try {//释放资源
+                    book.write();
+                    book.close();
+                } catch (Exception e) {
+                    logger.error("Excel写入和关闭错误");
+                }
+            }
+        } else {
+            throw new QNLiveException("140001");
+        }
+    }
 }
