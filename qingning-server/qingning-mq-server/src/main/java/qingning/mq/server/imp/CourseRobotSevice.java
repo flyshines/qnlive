@@ -53,8 +53,8 @@ public class CourseRobotSevice extends AbstractMsgService {
             List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
             if (robotList != null) {
                 notJoinRobots.addAll (robotList);
+                didInitRobots = true;
             }
-            didInitRobots = true;
         }
     }
 
@@ -71,6 +71,12 @@ public class CourseRobotSevice extends AbstractMsgService {
             return;
         }
         jedis.set("course_robot_key", "1");
+
+        //机器人数量 少于100
+        if (notJoinRobots.size() < 10) {
+            return;
+        }
+
         //有机器人参与的课程总量 大于50
         if (joinRobots.size() > 50) {
             return;
@@ -99,6 +105,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                         map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
                         Map<String,String> courseInfoMap = jedis.hgetAll(courseKey);
+                        //课程结束
                         if (courseInfoMap == null ||  courseInfoMap.get("end_time") != null) {
                             courseEnd = true;
                             continue;
@@ -110,19 +117,19 @@ public class CourseRobotSevice extends AbstractMsgService {
 
                         long sleepTime = 60*60*1000;
                         int robotNum = 0;
-//                        if (delta > 24*60*60*1000) { //大于24小时
-//                            continue;
-//                        } else if (delta > 16*60*60*1000) { //16-24
-//                            robotNum = (int) (0 + Math.random () * 2);
-//                        } else if (delta > 8*60*60*1000) { //8-16
-//                            robotNum = (int) (2 + Math.random () * 3);
-//                        } else if (delta > 0) { //0-8
-//                            robotNum = (int) (5 + Math.random () * 5);
-//                        } else { //课程已经开始
+                        if (delta > 24*60*60*1000) { //大于24小时
+                            continue;
+                        } else if (delta > 16*60*60*1000) { //16-24
+                            robotNum = (int) (0 + Math.random () * 2);
+                        } else if (delta > 8*60*60*1000) { //8-16
+                            robotNum = (int) (2 + Math.random () * 3);
+                        } else if (delta > 0) { //0-8
+                            robotNum = (int) (5 + Math.random () * 5);
+                        } else { //课程已经开始
                             sleepTime = 60*1000;
 
-                            robotNum = (int) (2 + Math.random () * 3);
-//                        }
+                            robotNum = (int) (1 + Math.random () * 1);
+                        }
 
                         Thread.sleep (sleepTime);
 
@@ -144,18 +151,11 @@ public class CourseRobotSevice extends AbstractMsgService {
                             Thread.sleep (second * 1000);
                         }
 
-//                        Map<String,Object> query = new HashMap<String,Object>();
-//                        query.put(Constants.CACHED_KEY_COURSE_ROBOT_FIELD, course_id);
-//                        String course_robot_key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ROBOT, query);
-//                        int courseRobot = Integer.parseInt(jedis.get(course_robot_key));
-//                        courseRobot += robotNum;
-//                        jedis.set(course_robot_key, String.valueOf(courseRobot));
-
                         //c、最多当真实用户达到30—40选个随机数，停止加机器人；
-                        //d、机器人加到90—120，选个随机数之后不再增加；
+                        //d、机器人加到50—120，选个随机数之后不再增加；
                         int real_student_num = Integer.parseInt(courseInfoMap.get("real_student_num"));
                         int robot_num = joinRobots.get (key).size();
-                        if (robot_num > 90 || (real_student_num - robot_num) > 30) {
+                        if (robot_num > 50 || (real_student_num - robot_num) > 30) {
                             robotEnough = true;
                         }
 
@@ -179,13 +179,16 @@ public class CourseRobotSevice extends AbstractMsgService {
         Map<String,String> courseInfoMap = jedis.hgetAll(courseKey);
         //课程是讲师公开课 或者 青柠公开课
 
+        //课程结束
         if (courseInfoMap == null ||  courseInfoMap.get("end_time") != null) {
             return;
         }
 
+        //c、最多当真实用户达到30—40选个随机数，停止加机器人；
+        //d、机器人加到50—120，选个随机数之后不再增加；
         int real_student_num = Integer.parseInt(courseInfoMap.get("real_student_num"));
         int robot_num = joinRobots.get (key).size();
-        if (robot_num > 90 || (real_student_num - robot_num) > 30) {
+        if (robot_num > 50 || (real_student_num - robot_num) > 30) {
             return;
         }
 
@@ -193,7 +196,7 @@ public class CourseRobotSevice extends AbstractMsgService {
             @Override
             public void run() {
                 try {
-                    int robotNum = (int) (2 + Math.random () * 3);
+                    int robotNum = (int) (1 + Math.random () * 1);
                     for (int i = 0 ; i < robotNum; i++ ) {
                         Map<String, String> user = notJoinRobots.poll ();
                         if (user != null) {
@@ -215,6 +218,7 @@ public class CourseRobotSevice extends AbstractMsgService {
             }
         }).start();
     }
+
     //机器人加入课程 只允许讲师的公开课 和 青柠的公开课
     private void robotJoinCourse(Jedis jedis, Map<String, String> courseInfoMap, Map<String, String> user) {
         //1 课程消息已有
