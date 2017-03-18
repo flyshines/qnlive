@@ -1580,8 +1580,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
  
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
- 
- 
         }else{
             //2.如果不在缓存中，则查询数据库
             Map<String,Object> courseInfoMap = lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
