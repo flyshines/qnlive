@@ -144,7 +144,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					requestEntity.setFunctionName("processCourseLiveOvertime");
 					Map<String,Object> timerMap = new HashMap<>();
 					timerMap.put("course_id", courseMap.get("course_id"));
-					timerMap.put("real_start_time", now+"");
+					timerMap.put("real_start_time",  System.currentTimeMillis()+"");
 					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
@@ -161,7 +161,7 @@ public class ImMsgServiceImp implements ImMsgService {
 
 					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-					String str = sdf.format(now);
+					String str = sdf.format( System.currentTimeMillis());
 					String courseStartMessage = "直播开始于"+str;
 					String mGroupId = courseMap.get("im_course_id");
 					String message = courseStartMessage;
@@ -171,11 +171,11 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message", message);
 					startInformation.put("message_type", "1");
 					startInformation.put("send_type", "5");//5.开始/结束消息
-					startInformation.put("create_time", now);//5.开始/结束消息
+					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
-					messageMap.put("send_time",now);
-					messageMap.put("create_time",now);
+					messageMap.put("send_time", System.currentTimeMillis());
+					messageMap.put("create_time", System.currentTimeMillis());
 					messageMap.put("information",startInformation);
 					messageMap.put("mid",MiscUtils.getUUId());
 					String content = JSON.toJSONString(messageMap);
@@ -185,14 +185,13 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message_id",messageMap.get("mid"));
 					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
 					//1.将聊天信息id插入到redis zsort列表中
-					jedis.zadd(messageListKey, now, (String)startInformation.get("message_id"));
+					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_id"));
 					//添加到老师发送的集合中
 					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-					jedis.zadd(messageLecturerListKey, now,  (String)startInformation.get("message_id"));
+					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_id"));
 
 
 					Map<String, Object> userLoginInfo = loginInfoMapper.findLoginInfoByUserId(courseMap.get("lecturer_id"));
-
 					Map<String,Object> startLecturerMessageInformation = new HashMap<>();
 					startLecturerMessageInformation.put("creator_id",courseMap.get("lecturer_id"));//发送人id
 					startLecturerMessageInformation.put("course_id", information.get("course_id").toString());//课程id
@@ -200,15 +199,21 @@ public class ImMsgServiceImp implements ImMsgService {
 					startLecturerMessageInformation.put("message_type", "1");
 					startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
 					startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
-					startLecturerMessageInformation.put("create_time", now);
+					startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
 					startLecturerMessageInformation.put("send_type","0");
 					startLecturerMessageInformation.put("creator_avatar_address",userLoginInfo.get("avatar_address"));
 					startLecturerMessageInformation.put("creator_nick_name",userLoginInfo.get("nick_name"));
+					Map<String,Object> startLecturerMessageMap = new HashMap<>();
+					startLecturerMessageMap.put("msg_type","1");
+					startLecturerMessageMap.put("send_time", System.currentTimeMillis());
+					startLecturerMessageMap.put("create_time", System.currentTimeMillis());
+					startLecturerMessageMap.put("information",startLecturerMessageInformation);
+					startLecturerMessageMap.put("mid",MiscUtils.getUUId());
+					String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
+					IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", userLoginInfo.get("m_user_id").toString());//发送信息
+
 					jedis.zadd(messageListKey, now, (String)startLecturerMessageInformation.get("message_id"));
-					jedis.zadd(messageLecturerListKey, now,  (String)startLecturerMessageInformation.get("message_id"));
-					messageMap.put("information",startLecturerMessageInformation);
-					String startLecturerMessageInformationContent = JSON.toJSONString(messageMap);
-					IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", sender);//发送信息
+					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startLecturerMessageInformation.get("message_id"));
 
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
 					Map<String,String> result = new HashMap<String,String>();
