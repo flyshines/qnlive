@@ -1792,6 +1792,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     	Long minStudentPos = (Long)reqMap.get("student_pos");
     	boolean userStudentPos = minStudentPos!=null;
     	DecimalFormat decimalFormat = new DecimalFormat("#");
+
     	//1.数据来源为缓存
     	if( MiscUtils.isEmpty(reqMap.get("data_source")) || "1".equals(reqMap.get("data_source"))){
     		//1.1先查找缓存中的数据
