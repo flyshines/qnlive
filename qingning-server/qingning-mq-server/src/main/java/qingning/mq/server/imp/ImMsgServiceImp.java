@@ -357,7 +357,9 @@ public class ImMsgServiceImp implements ImMsgService {
 				jedis.zadd(messageLecturerVoiceListKey, createTime, imid);
 			}
 			if(information.get("send_type").equals("1") && information.get("send_type").equals("7")){//讲师回答 和 讲师回复
-					
+  				Map<String, Object> map1 = JSON.parseObject(information.get("message_qunestion").toString(), HashMap.class);
+				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
+				jedis.hset(key,"status","1");
 			}
 		}
 
