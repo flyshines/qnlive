@@ -253,20 +253,20 @@ public class CourseRobotSevice extends AbstractMsgService {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Long nowStudentNum = 0L;
-        coursesMapper.increaseStudent(course_id);
 
-//        if(jedis.exists(courseKey)){
-//            map.clear();
-//            map.put("course_id", course_id);
-//            Map<String,Object> numInfo = coursesStudentsMapper.findCourseRecommendUserNum(reqMap);
-//            long num = 0;
-//            if(!MiscUtils.isEmpty(numInfo)){
-//                num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
-//            }
-//            jedis.hset(courseKey, "student_num", num+"");
-//        }else {
-//            coursesMapper.increaseStudent(course_id);
-//        }
+        if(jedis.exists(courseKey)){
+            map.clear();
+            map.put("course_id", course_id);
+            map.put("room_id", courseInfoMap.get("room_id"));
+            Map<String,Object> numInfo = coursesStudentsMapper.findCourseRecommendUserNum(map);
+            long num = 0;
+            if(!MiscUtils.isEmpty(numInfo)){
+                num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+            }
+            jedis.hset(courseKey, "student_num", num+"");
+        }else {
+            coursesMapper.increaseStudent(course_id);
+        }
 
         //7.修改用户缓存信息中的加入课程数
 //        map.clear();
