@@ -84,7 +84,15 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
 						messageObjectMap.put("create_time", createTime);
 					}
-					messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
+					if(!MiscUtils.isEmpty(messageStringMap.get("audio_image"))){
+						messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
+					}
+					if(!MiscUtils.isEmpty(messageStringMap.get("message_status"))){
+						messageObjectMap.put("message_status",messageStringMap.get("message_status"));
+					}else{
+						messageObjectMap.put("message_status",0);
+					}
+
 					messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
 
 					messageList.add(messageObjectMap);
@@ -103,9 +111,9 @@ public class SaveCourseMessageService extends AbstractMsgService{
 			messageKeyList.toArray(messageKeyArray);
 			jedisObject.del(messageKeyArray);
 			jedisObject.del(messageListKey);
-			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION, map);
+			String messageUserListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-			jedisObject.del(messageQuestionListKey);
+			jedisObject.del(messageUserListKey);
 			jedisObject.del(messageLecturerListKey);
 		}
 
