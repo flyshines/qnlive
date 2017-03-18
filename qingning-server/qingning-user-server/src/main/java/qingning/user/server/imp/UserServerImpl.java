@@ -1331,14 +1331,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		}
 
 		//一个用户进入加入直播间带入1到2个人进入
-//        map.clear();
-//        map.put("course_id", course_id);
-//        RequestEntity mqRequestEntity = new RequestEntity();
-//        mqRequestEntity.setServerName("CourseRobotService");
-//        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-//        mqRequestEntity.setFunctionName("courseHaveStudentIn");
-//        mqRequestEntity.setParam(map);
-//        this.mqUtils.sendMessage(mqRequestEntity);
+        map.clear();
+        map.put("course_id", course_id);
+        RequestEntity mqRequestEntity = new RequestEntity();
+        mqRequestEntity.setServerName("CourseRobotService");
+        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+        mqRequestEntity.setFunctionName("courseHaveStudentIn");
+        mqRequestEntity.setParam(map);
+        this.mqUtils.sendMessage(mqRequestEntity);
 
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
         return resultMap;
