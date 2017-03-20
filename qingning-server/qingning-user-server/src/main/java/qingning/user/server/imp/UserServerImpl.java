@@ -364,6 +364,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	return resultMap;
     }
 
+    //<editor-fold desc="无用">
 /*
     @SuppressWarnings({ "unchecked", "unused" })
     private Map<String, Object> getPlatformCoursesOld(RequestEntity reqEntity) throws Exception {
@@ -618,6 +619,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
     }*/
+    //</editor-fold>
 
     private Map<String, Object> findCoursesStartWithPrediction(Jedis jedis, String startIndex, String endIndex, Integer pageCount) {
         Map<String, Object> resultMap = new HashMap<>();

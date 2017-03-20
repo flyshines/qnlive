@@ -268,7 +268,6 @@ public class CommonController extends AbstractController {
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("query_type", query_type);
         requestEntity.setParam(param);
-
         //根据相关条件将server_url列表信息返回
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();

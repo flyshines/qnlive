@@ -100,4 +100,11 @@ public interface ICommonModuleServer {
 	int findCourseMessageSum(Map<String,Object> queryMap);
 
 	void updateCourseByCourseId(Map<String,Object> queryMap);
+
+
+	List<Map<String,Object>> findPPTListByCourseId(String course_id);
+
+	List<Map<String,Object>> findAudioListByCourseId(String course_id);
+
+	Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
 }

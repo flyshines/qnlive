@@ -75,6 +75,15 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private CourseMessageMapper courseMessageMapper;
 
+	@Autowired(required = true)
+	private CourseImageMapper courseImageMapper;
+
+	@Autowired(required = true)
+	private CourseAudioMapper courseAudioMapper;
+
+	@Autowired(required = true)
+	private FansMapper fansMapper;
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -640,6 +649,24 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void updateCourseByCourseId(Map<String, Object> queryMap) {
 		coursesMapper.updateCourse(queryMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findPPTListByCourseId(String course_id) {
+		return courseImageMapper.findPPTListByCourseId(course_id);
+	}
+
+	@Override
+	public List<Map<String, Object>> findAudioListByCourseId(String course_id) {
+		return courseAudioMapper.findAudioListByCourseId(course_id);
+	}
+
+	@Override
+	public Map<String, Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap) {
+		Map<String,Object> fansKey = new HashMap<>();
+		fansKey.put("user_id",reqMap.get("user_id").toString());
+		fansKey.put("room_id", reqMap.get("room_id").toString());
+		return fansMapper.findFansByUserIdAndRoomId(fansKey);
 	}
 
 }
