@@ -335,7 +335,9 @@ public class ImMsgServiceImp implements ImMsgService {
   				Map<String, Object> map1 = JSON.parseObject(information.get("message_qunestion").toString(), HashMap.class);
 				map1.put("course_id",information.get("course_id"));
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
-				jedis.hset(key,"status","1");
+				Map<String,String> msetMap = new HashMap<>();
+				msetMap.put("status","1");
+				jedis.hmset(key,msetMap);
 			}
 		}
 
