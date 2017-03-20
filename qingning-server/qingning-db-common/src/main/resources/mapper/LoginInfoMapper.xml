@@ -29,7 +29,7 @@
     </foreach>)
   </select>
 
-  <select id="findLoginInfoByStudentId" resultMap="hashmap" parameterType="string">
+  <select id="findLoginInfoByStudentId" resultType="hashmap" parameterType="string">
     SELECT a.web_openid, a.m_user_id FROM t_login_info a, t_courses_student b where a.user_id=b.user_id and b.student_id=#{student_id}
   </select>
 
