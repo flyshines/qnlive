@@ -100,7 +100,6 @@ public class ImMsgServiceImp implements ImMsgService {
 		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
 			return;
 		}
-
 		Map<String,Object> body = imMessage.getBody();
 		final Map<String,Object> information = (Map<String,Object>)body.get("information");//获取信息
 
@@ -236,7 +235,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		try{
 			courseMap = CacheUtils.readCourse((String)information.get("course_id"), null, new CommonReadOperation(){
 				@Override
-				public Object invokeProcess(RequestEntity requestEntity) throws Exception {				
+				public Object invokeProcess(RequestEntity requestEntity) throws Exception {
 					return coursesMapper.findCourseByCourseId((String)information.get("course_id"));
 				}
 			}, jedisUtils, false);//jedis.hgetAll(courseKey);
@@ -247,7 +246,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			log.info("Course["+(String)information.get("course_id")+"] can't be readed.");
 			return;
 		}
-		
+
 		String messageId = MiscUtils.getUUId();//设置messageid
 		Map<String,String> stringMap = new HashMap<>();
 		MiscUtils.converObjectMapToStringMap(information, stringMap);
@@ -264,8 +263,8 @@ public class ImMsgServiceImp implements ImMsgService {
 		stringMap.put("message_imid",imid);
 		//<editor-fold desc="课程为已结束">
 		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){ //如果课程状态是2结束 消息类型不是6 结束信息
-			if("4".equals(information.get("send_type"))){				
-				Map<String,Object> messageObjectMap = new HashMap<>();				
+			if("4".equals(information.get("send_type"))){
+				Map<String,Object> messageObjectMap = new HashMap<>();
 				messageObjectMap.put("message_id", stringMap.get("message_id"));
 				messageObjectMap.put("course_id", stringMap.get("course_id"));
 				messageObjectMap.put("message_url", stringMap.get("message_url"));
@@ -275,7 +274,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					messageObjectMap.put("audio_time", Long.parseLong(stringMap.get("audio_time")));
 				}else {
 					messageObjectMap.put("audio_time", 0);
-				}				
+				}
 				messageObjectMap.put("message_type", stringMap.get("message_type"));
 				messageObjectMap.put("send_type", stringMap.get("send_type"));
 				messageObjectMap.put("creator_id", stringMap.get("creator_id"));
@@ -298,7 +297,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					if(!MiscUtils.isEmpty(maxPosMessage)){
 						messagePos = MiscUtils.convertObjectToLong(maxPosMessage.get("message_pos"))+1;
 					}
-					messageObjectMap.put("message_pos", messagePos);					
+					messageObjectMap.put("message_pos", messagePos);
 					courseMessageMapper.insertCourseMessageList(list);
 				}
 			}
@@ -308,7 +307,7 @@ public class ImMsgServiceImp implements ImMsgService {
 
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
 		double createTime = Double.parseDouble(information.get("create_time").toString());
-		
+
 		//1.将聊天信息id插入到redis zsort列表中
 		jedis.zadd(messageListKey, createTime, messageId);
 
@@ -319,12 +318,12 @@ public class ImMsgServiceImp implements ImMsgService {
 			String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
 			jedis.zadd(messageQuestionListKey, createTime, imid);
 			//3.如果该条信息为讲师发送的信息，则存入消息-讲师列表
-		}else if(information.get("send_type").equals("0") ||
-				information.get("send_type").equals("1")  ||
-				information.get("send_type").equals("4")  ||
-				information.get("send_type").equals("5")  ||
-				information.get("send_type").equals("6")  ||
-				information.get("send_type").equals("7")){//老师消息
+		}else if(information.get("send_type").equals("0") ||	//老师讲解
+				information.get("send_type").equals("1")  ||	//老师回答
+				information.get("send_type").equals("4")  ||	//用户互动
+				information.get("send_type").equals("5")  ||	//课程开始
+				information.get("send_type").equals("6")  ||	//结束消息
+				information.get("send_type").equals("7")){		//老师回复
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, imid);
 			if(information.get("send_type").equals("0") && information.get("message_type").equals("0")){//老师的语音消息
@@ -332,17 +331,12 @@ public class ImMsgServiceImp implements ImMsgService {
 				jedis.zadd(messageLecturerVoiceListKey, createTime, imid);
 			}
 			if(information.get("send_type").equals("1") || information.get("send_type").equals("7")){//讲师回答 和 讲师回复
-  				Map<String, Object> map1 = JSON.parseObject(information.get("message_qunestion").toString(), HashMap.class);
+  				Map<String, Object> map1 = JSON.parseObject(information.get("message_question").toString(), HashMap.class);
 				map1.put("course_id",information.get("course_id"));
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
-				Map<String,String> msetMap = new HashMap<>();
-				msetMap.put("status","1");
-				jedis.hmset(key,msetMap);
+				jedis.hset(key,"status","1");
 			}
 		}
-
-
-
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
@@ -365,7 +359,7 @@ public class ImMsgServiceImp implements ImMsgService {
             //1.8如果存在课程音频信息
             RequestEntity audioRequestEntity = new RequestEntity();
             audioRequestEntity.setParam(processMap);
-            try {            	
+            try {
             	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
             	if(saveCourseAudioService!=null){
             		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
