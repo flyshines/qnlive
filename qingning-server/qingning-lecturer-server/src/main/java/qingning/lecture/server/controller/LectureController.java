@@ -6,6 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.Constants;
 import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -612,17 +613,17 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/auth/redirectUrl/{user_id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/auth/redirectUrl", method = RequestMethod.GET)
 	public void wechatAuthRedirect(
-			@PathVariable("user_id") String user_id,
 			@RequestParam(value = "auth_code") String auth_code,
+			@RequestParam(value = "expires_in") String expires_in,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatAuthRedirect", null, null);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("auth_code", auth_code);
-		parMap.put("user_id", user_id);
+		parMap.put("expires_in", expires_in);
 		requestEntity.setParam(parMap);
 
 		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -631,6 +632,21 @@ public class LectureController extends AbstractController {
 		String redirectUrl = (String) resultMap.get("redirectUrl");
 		resp.sendRedirect(redirectUrl);
 	}
+
+	@RequestMapping(value="/lecturer/wechat/tobinding",method=RequestMethod.GET)
+	public void tobindServiceNo (
+			HttpServletRequest req,
+			HttpServletResponse resp) throws Exception{
+
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindServiceNo", null, null);
+
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+		String redirectUrl = (String) resultMap.get("redirectUrl");
+		resp.sendRedirect(redirectUrl);
+		resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
+	}
 	/**
 	 * 跳转微信服务号授权页面
 	 * @return
@@ -638,17 +654,8 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value="/lecturer/wechat/binding",method=RequestMethod.GET)
 	public void bindServiceNo (
-			@RequestHeader("access_token") String access_token,
-			@RequestHeader("version") String version,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception{
-
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindServiceNo", access_token, null);
-
-		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-
-		String redirectUrl = (String) resultMap.get("redirectUrl");
-		resp.sendRedirect(redirectUrl);
+		resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
 	}
 }
