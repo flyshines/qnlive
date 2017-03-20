@@ -627,7 +627,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         log.debug("---------------将课程创建的信息推送给WX关注直播间的粉丝"+reqMap);
 
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
-        Map<String, String> courseInfo = (Map<String, String>) reqMap.get("courseInfo");
+        Map<String, String> courseInfo = (Map<String, String>) reqMap.get("course");
 
         String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
         List<Map<String,Object>> followers = (List<Map<String, Object>>) reqMap.get("followers");//获取推送列表
@@ -649,7 +649,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             String start_time = reqMap.get("start_time").toString();
             obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), MiscUtils.RecoveryEmoji(courseInfo.get("course_title")), start_time));
         } else {
-            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("course_room")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("room_name")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
         }
         if (isUpdateCourse) { //更新上课时间
             obj.put("msg_type","13");
@@ -658,7 +658,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             obj.put("msg_type","11");//发布新课程
             extrasMap.put("msg_type","11");
         }
-        extrasMap.put("course_id",courseInfo.get("courseId"));
+        extrasMap.put("course_id",courseInfo.get("course_id"));
         extrasMap.put("im_course_id",courseInfo.get("im_course_id"));
         obj.put("extras_map", extrasMap);
 

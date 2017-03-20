@@ -566,8 +566,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	if (!MiscUtils.isEmpty(findFollowUser) ) { //青柠服务号 有粉丝关注该讲师
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
-                course.put("course_room", jedis.hget(liveRoomKey, "room_name"));
-                wxPushParam.put("courseInfo", course);//课程ID
+
+                course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
+                wxPushParam.put("course", course);//课程ID
+
                 wxPushParam.put("followers", findFollowUser);//直播间关注者
                 wxPushParam.put("pushType", "1");//1创建课程 2更新课程
 
