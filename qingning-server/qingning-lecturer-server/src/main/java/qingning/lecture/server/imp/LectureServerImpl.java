@@ -217,7 +217,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> queryLiveRoomDetail(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
- 
+        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl"));
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         String queryType = reqMap.get("query_type").toString();
