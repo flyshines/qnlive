@@ -202,7 +202,6 @@ public class UserController extends AbstractController{
 			resultMap.put("reward_info",rewardConfigurationMap);
 			responseEntity.setReturnData(resultMap);
 		}
-
 		return responseEntity;
 	}
 

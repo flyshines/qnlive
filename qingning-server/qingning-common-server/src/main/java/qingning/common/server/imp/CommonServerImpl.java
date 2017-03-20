@@ -9,9 +9,9 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.FetchRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.write.WritableWorkbook;
+//import jxl.Sheet;
+//import jxl.Workbook;
+//import jxl.write.WritableWorkbook;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2394,91 +2394,142 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("courseStatus")
     public void setCourseStatus(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-        String courseId = reqMap.get("course_id").toString();
-    }
+         String courseId = reqMap.get("course_id").toString();//课程id
+        String status = reqMap.get("status").toString();//修改状态
+        Map<String,Object> course = new HashMap<>();
+        course.put("course_id",courseId);//课程id
+        course.put("status",status);//修改的装填
+        commonModuleServer.updateCourseByCourseId(course);
+        Jedis jedis = jedisUtils.getJedis();        if(status.equals("5")){//屏蔽课程 删除所有课程信息
+            String delKey1 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//删除课程详细信息列表
+            jedis.del(delKey1);
 
-    //上传机器数据
-    @FunctionName("uploadusers")
-    public void uploadusers(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-        String result = reqMap.get("result").toString();
-        String path = reqMap.get("path").toString();
+            String delKey2 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, course);//课程ppt信息
+            jedis.del(delKey2);
 
-        if (result.equals("0")) { //上传数据处理成功
-
-            WritableWorkbook book = null;
-            ArrayList<HashMap<String, String>> userList = new ArrayList<>();
-            //解析excel
-            try{
-                Workbook rwb=Workbook.getWorkbook(new File(path));//新增workbook excel对象
-                Sheet rs=rwb.getSheet(0); //获取第一张表
-                logger.info(" 打开对应excel第一个表");
-
-                int rows=rs.getRows();//得到所有的行
-                for (int i = 0; i < rows; i++) {//遍历所有的行  解析每一列的参数
-                    if(i==0){//第一行进行判断  判断模版是否出现错误
-                        continue;
-                    }
-
-                    String user_id=rs.getCell(0,i).getContents();//user_id
-                    String user_name=rs.getCell(1,i).getContents(); //user_name
-                    String nick_name=rs.getCell(2,i).getContents();//nick_name
-                    String avatar_address =rs.getCell(3, i).getContents();//avatar_address
-                    String phone_number = rs.getCell(4, i).getContents();//phone_number
-                    String gender=rs.getCell(5,i).getContents();//gender
-                    String country=rs.getCell(6,i).getContents(); //country
-                    String province=rs.getCell(7,i).getContents();//province
-                    String city =rs.getCell(8, i).getContents();//city
-                    String district = rs.getCell(9, i).getContents();//district
-                    String area=rs.getCell(10,i).getContents();//area
-                    String course_num=rs.getCell(11,i).getContents(); //course_num
-                    String live_room_num=rs.getCell(12,i).getContents();//live_room_num
-                    String status =rs.getCell(13, i).getContents();//status
-                    String plateform = rs.getCell(14, i).getContents();//plateform
-                    String user_role=rs.getCell(15,i).getContents();//user_role
-                    String last_login_time =rs.getCell(16, i).getContents();//last_login_time
-                    String last_login_ip = rs.getCell(17, i).getContents();//last_login_ip
-                    String create_time = rs.getCell(18, i).getContents();//create_time
-                    String update_time=rs.getCell(19,i).getContents();//update_time
-
-                    HashMap<String, String> userInfo = new HashMap<>();
-                    userInfo.put("user_id", user_id);
-                    userInfo.put("user_name", user_name);
-                    userInfo.put("nick_name", nick_name);
-                    userInfo.put("avatar_address", avatar_address);
-                    userInfo.put("phone_number", phone_number);
-                    userInfo.put("gender", gender);
-                    userInfo.put("country", country);
-                    userInfo.put("province", province);
-                    userInfo.put("city", city);
-                    userInfo.put("district", district);
-                    userInfo.put("area", area);
-                    userInfo.put("course_num", course_num);
-                    userInfo.put("live_room_num", live_room_num);
-                    userInfo.put("status", status);
-                    userInfo.put("plateform", plateform);
-                    userInfo.put("user_role", user_role);
-                    userInfo.put("last_login_time", last_login_time);
-                    userInfo.put("last_login_ip", last_login_ip);
-                    userInfo.put("create_time", create_time);
-                    userInfo.put("update_time", update_time);
-
-                    userList.add(userInfo);
-                    //添加信息
-//                    insertWyZhByExcel(xqId,userName,mobile,idNumber,roomCode,Short.valueOf(userRole));
-                }
-            }catch(Exception e){//如果失败
-                logger.error("Excel错误获取错误");
-            }finally {
-                try {//释放资源
-                    book.write();
-                    book.close();
-                } catch (Exception e) {
-                    logger.error("Excel写入和关闭错误");
+            String delKey3 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS, course);//讲课音频列表
+            Set<String> audioIdList = jedis.zrange(delKey3, 0, -1);//获取所有要删除的音频列表
+            if(audioIdList != null && audioIdList.size() > 0){
+                for(String delKey : audioIdList){
+                    course.put(Constants.FIELD_AUDIO_ID,delKey);
+                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIO, course));//讲课音频详细信息
                 }
             }
-        } else {
-            throw new QNLiveException("140001");
+            jedis.del(delKey3);
+
+            String delKey4 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, course);//课程聊天消息列表
+            Set<String> messageList = jedis.zrange(delKey3, 0, -1);//获取所有要删除的课程聊天消息列表
+            if(messageList != null && messageList.size() > 0){
+                for(String delKey : audioIdList){
+                    course.put(Constants.FIELD_MESSAGE_ID,delKey);
+                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, course));//单条聊天详细信息
+                }
+            }
+            jedis.del(delKey4);
+
+            String delKey5 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, course);//课程禁言学生列表
+            jedis.del(delKey5);
+
+            String delKey6 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, course);//课程用户发言列表
+            jedis.del(delKey6);
+
+            String delKey7 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, course);//课程讲师发言列表
+            jedis.del(delKey7);
+
+            String delKey8 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, course);//课程讲师语音列表
+            jedis.del(delKey8);
+
+            String delKey9 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, course);//讲课音频JSON String
+            jedis.del(delKey9);
+
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_LIVE,courseId);//平台的直播中课程列表
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,courseId);//平台的预告中课程列表
+            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,courseId);//平台的已结束课程列表
         }
     }
+
+//    //上传机器数据
+//    @FunctionName("uploadusers")
+//    public void uploadusers(RequestEntity reqEntity) throws Exception {
+//        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+//        String result = reqMap.get("result").toString();
+//        String path = reqMap.get("path").toString();
+//
+//        if (result.equals("0")) { //上传数据处理成功
+//
+//            WritableWorkbook book = null;
+//            ArrayList<HashMap<String, String>> userList = new ArrayList<>();
+//            //解析excel
+//            try{
+//                Workbook rwb=Workbook.getWorkbook(new File(path));//新增workbook excel对象
+//                Sheet rs=rwb.getSheet(0); //获取第一张表
+//                logger.info(" 打开对应excel第一个表");
+//
+//                int rows=rs.getRows();//得到所有的行
+//                for (int i = 0; i < rows; i++) {//遍历所有的行  解析每一列的参数
+//                    if(i==0){//第一行进行判断  判断模版是否出现错误
+//                        continue;
+//                    }
+//
+//                    String user_id=rs.getCell(0,i).getContents();//user_id
+//                    String user_name=rs.getCell(1,i).getContents(); //user_name
+//                    String nick_name=rs.getCell(2,i).getContents();//nick_name
+//                    String avatar_address =rs.getCell(3, i).getContents();//avatar_address
+//                    String phone_number = rs.getCell(4, i).getContents();//phone_number
+//                    String gender=rs.getCell(5,i).getContents();//gender
+//                    String country=rs.getCell(6,i).getContents(); //country
+//                    String province=rs.getCell(7,i).getContents();//province
+//                    String city =rs.getCell(8, i).getContents();//city
+//                    String district = rs.getCell(9, i).getContents();//district
+//                    String area=rs.getCell(10,i).getContents();//area
+//                    String course_num=rs.getCell(11,i).getContents(); //course_num
+//                    String live_room_num=rs.getCell(12,i).getContents();//live_room_num
+//                    String status =rs.getCell(13, i).getContents();//status
+//                    String plateform = rs.getCell(14, i).getContents();//plateform
+//                    String user_role=rs.getCell(15,i).getContents();//user_role
+//                    String last_login_time =rs.getCell(16, i).getContents();//last_login_time
+//                    String last_login_ip = rs.getCell(17, i).getContents();//last_login_ip
+//                    String create_time = rs.getCell(18, i).getContents();//create_time
+//                    String update_time=rs.getCell(19,i).getContents();//update_time
+//
+//                    HashMap<String, String> userInfo = new HashMap<>();
+//                    userInfo.put("user_id", user_id);
+//                    userInfo.put("user_name", user_name);
+//                    userInfo.put("nick_name", nick_name);
+//                    userInfo.put("avatar_address", avatar_address);
+//                    userInfo.put("phone_number", phone_number);
+//                    userInfo.put("gender", gender);
+//                    userInfo.put("country", country);
+//                    userInfo.put("province", province);
+//                    userInfo.put("city", city);
+//                    userInfo.put("district", district);
+//                    userInfo.put("area", area);
+//                    userInfo.put("course_num", course_num);
+//                    userInfo.put("live_room_num", live_room_num);
+//                    userInfo.put("status", status);
+//                    userInfo.put("plateform", plateform);
+//                    userInfo.put("user_role", user_role);
+//                    userInfo.put("last_login_time", last_login_time);
+//                    userInfo.put("last_login_ip", last_login_ip);
+//                    userInfo.put("create_time", create_time);
+//                    userInfo.put("update_time", update_time);
+//
+//                    userList.add(userInfo);
+//                    //添加信息
+////                    insertWyZhByExcel(xqId,userName,mobile,idNumber,roomCode,Short.valueOf(userRole));
+//                }
+//            }catch(Exception e){//如果失败
+//                logger.error("Excel错误获取错误");
+//            }finally {
+//                try {//释放资源
+//                    book.write();
+//                    book.close();
+//                } catch (Exception e) {
+//                    logger.error("Excel写入和关闭错误");
+//                }
+//            }
+//        } else {
+//            throw new QNLiveException("140001");
+//        }
+//    }
 }
