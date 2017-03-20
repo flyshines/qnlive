@@ -566,14 +566,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	if (!MiscUtils.isEmpty(findFollowUser) ) { //青柠服务号 有粉丝关注该讲师
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
-                wxPushParam.put("courseId", courseId);//课程ID
+                course.put("course_room", jedis.hget(liveRoomKey, "room_name"));
+                wxPushParam.put("courseInfo", course);//课程ID
                 wxPushParam.put("followers", findFollowUser);//直播间关注者
                 wxPushParam.put("pushType", "1");//1创建课程 2更新课程
 
                 RequestEntity mqRequestEntity = new RequestEntity();
                 mqRequestEntity.setServerName("MessagePushServer");
                 mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                mqRequestEntity.setFunctionName("noticeCourseToWXFollow");
+                mqRequestEntity.setFunctionName("noticeCourseToFollower");
                 mqRequestEntity.setParam(wxPushParam);
                 this.mqUtils.sendMessage(mqRequestEntity);
             }
@@ -629,6 +630,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         mqRequestEntity.setParam(map);
         this.mqUtils.sendMessage(mqRequestEntity);
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+
+
         //给课程里面推消息
         Map<String, Object> userLoginInfo = lectureModuleServer.findLoginInfoByUserId(timerMap.get("lecturer_id").toString());
         Map<String,Object> startLecturerMessageInformation = new HashMap<>();
@@ -656,8 +659,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startLecturerMessageInformation.get("message_id"));
         return resultMap;
     }
- 
-//    /**
+
+    //<editor-fold desc="这个没用">
+    //    /**
 //     * 微信推送
 //     * @param followUserList
 //     * @param templateId
@@ -674,6 +678,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //    		}
 //    	}
 //    }
+    //</editor-fold>
     
     
     @SuppressWarnings("unchecked")
@@ -749,7 +754,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
- 
+
  
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
@@ -1050,13 +1055,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                    weiPush(userInfo, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
                     Map<String, Object> wxPushParam = new HashMap<>();
                     wxPushParam.put("templateParam", templateMap);
-                    wxPushParam.put("courseId", reqMap.get("course_id"));
+
+                    Date startDate = new Date(startTime);
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+                    String str = sdf.format(startDate);
+                    course.put("start_time", str);
+                    wxPushParam.put("courseInfo", course);
                     wxPushParam.put("pushType", "2");
 
                     RequestEntity wxMqRequestEntity = new RequestEntity();
                     mqRequestEntity.setServerName("MessagePushServer");
                     mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                    mqRequestEntity.setFunctionName("noticeCourseToWXFollow");
+                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
                     mqRequestEntity.setParam(wxPushParam);
                     this.mqUtils.sendMessage(wxMqRequestEntity);
                 }
@@ -2510,7 +2520,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> wechatAuthRedirect(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String auth_code = (String) reqMap.get("auth_code");
-        String user_id = (String) reqMap.get("user_id");
+        String expires_in = (String) reqMap.get("expires_in");
 
         log.debug("------微信服务号授权回调------"+reqMap);
 
@@ -2536,13 +2546,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         authInfoMap.put("qr_code", serviceNoJsonObj.getString("qrcode_url"));
 
         //获取讲师id
-        Map<String,String> lecturer = CacheUtils.readLecturer(user_id, reqEntity, readLecturerOperation, jedisUtils);
-        authInfoMap.put("lecturer_id", lecturer.get("lecturer_id"));
+//        Map<String,String> lecturer = CacheUtils.readLecturer(user_id, reqEntity, readLecturerOperation, jedisUtils);
+//        authInfoMap.put("lecturer_id", lecturer.get("lecturer_id"));
+        //TODO  此处逻辑还未完善
+        authInfoMap.put("lecturer_id", "99999999999");
         //服务号信息插入数据库
         lectureModuleServer.insertServiceNoInfo(authInfoMap);
 
         Map<String,Object> query = new HashMap<String,Object>();
-        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturer.get("lecturer_id"));
+//        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturer.get("lecturer_id"));
+
+        //TODO  此处逻辑还未完善
+        query.put("lecturer_id", "99999999999");
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
         jedis.hmset(serviceNoKey, authInfoMap);
 

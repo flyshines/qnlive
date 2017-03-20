@@ -621,27 +621,56 @@ public class MessagePushServerImpl extends AbstractMsgService {
      * @param context
      * @姜
      */
-    @FunctionName("noticeCourseToWXFollow")
-    public void noticeCourseToWXFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    @FunctionName("noticeCourseToFollower")
+    public void noticeCourseToFollower(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
         log.debug("---------------将课程创建的信息推送给WX关注直播间的粉丝"+reqMap);
 
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
-        String courseId = reqMap.get("course_id").toString();//课程id
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
+        Map<String, String> courseInfo = (Map<String, String>) reqMap.get("courseInfo");
+
+        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
         List<Map<String,Object>> followers = (List<Map<String, Object>>) reqMap.get("followers");//获取推送列表
         String type = (String) reqMap.get("pushType");//类型
         String templateId = null;
+        Boolean isUpdateCourse = false;
         if ("1".equals(type)) {//发布课程
             templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
-        } else if ("2".equals(type)) {//更新课程
+        } else if ("2".equals(type)) {//更新课程的时间
             templateId = MiscUtils.getConfigByKey("wpush_update_course");//更新课程的模板id
+            isUpdateCourse = true;
         }
         Jedis jedis = jedisUtils.getJedis();
+
+        JSONObject obj = new JSONObject();
+        Map<String,String> extrasMap = new HashMap<>();
+
+        if (isUpdateCourse) {
+            String start_time = reqMap.get("start_time").toString();
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), MiscUtils.RecoveryEmoji(courseInfo.get("course_title")), start_time));
+        } else {
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("course_room")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
+        }
+        if (isUpdateCourse) { //更新上课时间
+            obj.put("msg_type","13");
+            extrasMap.put("msg_type","13");
+        } else {
+            obj.put("msg_type","11");//发布新课程
+            extrasMap.put("msg_type","11");
+        }
+        extrasMap.put("course_id",courseInfo.get("courseId"));
+        extrasMap.put("im_course_id",courseInfo.get("im_course_id"));
+        obj.put("extras_map", extrasMap);
+
         for (Map<String,Object> user: followers) {//循环推送
-            String openId = (String)user.get("web_openid");
-            if(!MiscUtils.isEmpty(openId)){
+            String openId = user.get("web_openid").toString();
+            if(!MiscUtils.isEmpty(openId)){//推送微信模板消息给微信用户
                 WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
+            }
+            String mUserId = user.get("m_user_id").toString();
+            if (!MiscUtils.isEmpty(mUserId)) {//极光推送给app用户
+                obj.put("to",mUserId);
+                JPushHelper.push(obj);
             }
         }
     }

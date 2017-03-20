@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,7 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.ImMessage;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
-import qingning.common.util.CacheUtils;
-import qingning.common.util.Constants;
-import qingning.common.util.IMMsgUtil;
-import qingning.common.util.JedisUtils;
-import qingning.common.util.MiscUtils;
-import qingning.common.util.WeiXinUtil;
+import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.CourseMessageMapper;
 import qingning.db.common.mybatis.persistence.CoursesMapper;
 import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
@@ -335,6 +331,13 @@ public class ImMsgServiceImp implements ImMsgService {
   				Map<String, Object> map1 = JSON.parseObject(information.get("message_qunestion").toString(), HashMap.class);
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
 				jedis.hset(key,"status","1");
+
+				//<editor-fold desc="暂时还没测试">
+				//给学生发送推送消息
+//				Map<String,Object> courseInfo = coursesMapper.findCourseByCourseId(information.get("course_id").toString());
+//				Map<String,Object> userInfo = null;
+//				noticeToStudent(courseInfo, userInfo, jedisUtils);
+				//</editor-fold>
 			}
 		}
 
@@ -372,6 +375,40 @@ public class ImMsgServiceImp implements ImMsgService {
             }
 		}
 	}
+
+	/**
+	 * 讲师回复学生或者和学生互动之后 推送消息给学生
+	 * @param courseInfo
+	 * @param userInfo
+	 * @param jedisUtils
+	 */
+	//<editor-fold desc="暂时还没测试">
+	private void noticeToStudent(Map<String,Object> courseInfo, Map<String,Object> userInfo, JedisUtils jedisUtils) {
+//		Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
+//		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
+//		String templateId = MiscUtils.getConfigByKey("wpush_update_course");//更新课程的模板id;
+//		String openId = userInfo.get("web_openid").toString();
+//		if(!MiscUtils.isEmpty(openId)){//推送微信模板消息给微信用户
+//			WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
+//		}
+
+		Jedis jedis = jedisUtils.getJedis();
+		JSONObject obj = new JSONObject();
+		Map<String,String> extrasMap = new HashMap<>();
+		obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_question_answer"), "讲师xxx",  MiscUtils.RecoveryEmoji(courseInfo.get("course_title").toString())));
+		obj.put("msg_type","12");//发布新课程
+		extrasMap.put("msg_type","12");
+		extrasMap.put("course_id",courseInfo.get("courseId").toString());
+		extrasMap.put("im_course_id",courseInfo.get("im_course_id").toString());
+		obj.put("extras_map", extrasMap);
+
+		String mUserId = userInfo.get("m_user_id").toString();
+		if (!MiscUtils.isEmpty(mUserId)) {//极光推送给app用户
+			obj.put("to", mUserId);
+			JPushHelper.push(obj);
+		}
+	}
+	//</editor-fold>
 
 	/**
 	 * 处理课程禁言
