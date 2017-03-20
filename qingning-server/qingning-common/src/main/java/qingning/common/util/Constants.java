@@ -236,6 +236,6 @@ public final class Constants {
 	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
 
-	public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "http://192.168.1.238:5000/#/nav/bindServiceNumber";
-
+//	public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "http://192.168.1.238:5000/#/nav/bindServiceNumber";
+public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "www.baidu.com";
 }
