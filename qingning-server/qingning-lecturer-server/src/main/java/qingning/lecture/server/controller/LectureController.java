@@ -657,5 +657,6 @@ public class LectureController extends AbstractController {
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception{
 		resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
+		return;
 	}
 }
