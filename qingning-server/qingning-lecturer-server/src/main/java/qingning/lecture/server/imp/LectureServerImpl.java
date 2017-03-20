@@ -1643,7 +1643,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("status",courseMap.get("status"));
         resultMap.put("course_type",courseMap.get("course_type"));
         resultMap.put("course_password",courseMap.get("course_password"));
-        resultMap.put("share_url","http://test.qnlive.1758app.com/web/#/nav/living/detail?course_id"+reqMap.get("course_id").toString());//TODO
+        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
         resultMap.put("course_url",courseMap.get("course_url"));
@@ -2070,7 +2070,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         result.put("distributer_list", list);
         return result;
     }
-    
+
+    //<editor-fold desc="暂时无用">
     /*
     @SuppressWarnings("unchecked")
     @FunctionName("roomDistributerInfo")
@@ -2149,6 +2150,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return result;
     }
     */
+    //</editor-fold>
     @SuppressWarnings("unchecked")
     @FunctionName("roomDistributerCoursesInfo")
     public Map<String, Object> getRoomDistributerCoursesInfo(RequestEntity reqEntity) throws Exception {
