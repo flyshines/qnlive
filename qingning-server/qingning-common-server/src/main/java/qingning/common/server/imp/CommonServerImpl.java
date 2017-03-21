@@ -1162,12 +1162,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     //</editor-fold>
 
     //<editor-fold desc="姜军 购买成功后推送给学生的通知">
-    /**
-     * 极光推送给学生购买通知
-     * @param courseInfo
-     * @param user_id
-     * @param msg_type
-     */
+
 //    private void jpushUser(Map<String,String> courseInfo, String user_id, String msg_type) {
 //        JSONObject obj = new JSONObject();
 //        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseMap.get("course_title")), nowStudentNum+""));
@@ -2330,6 +2325,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Set<String> messageImIdList = null;//消息集合
             //来确定消息集合 0旧 -> 1...新
             if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid 过来
+
                 long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid 在缓存zset中的排名
                 if(direction==0){ //获取比当前message旧的消息
                     endIndex = endRank - 1;
@@ -2346,6 +2342,33 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     startIndex = endRank + 1;
                     endIndex = startIndex + pageCount - 1; //消息位置
                     messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                }
+
+                String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, queryMap);
+                Map<String,String> messageMap = jedis.hgetAll(messageKey);
+                //更改用户名和昵称
+                if(MiscUtils.isEmpty(messageMap)){
+                    if(messageMap.get("creator_id") != null){
+                        Map<String,Object> innerMap = new HashMap<>();
+                        innerMap.put("user_id", messageMap.get("creator_id"));
+                        Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
+                        if(! MiscUtils.isEmpty(userMap)){
+                            if(userMap.get("nick_name") != null){
+                                messageMap.put("creator_nick_name", userMap.get("nick_name"));
+                            }
+                            if(userMap.get("avatar_address") != null){
+                                messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+                            }
+                        }
+                    }
+                    String messageContent = messageMap.get("message");
+                    if(! MiscUtils.isEmpty(messageContent)){
+                        messageMap.put("message",MiscUtils.RecoveryEmoji(messageContent));
+                    }
+                    if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
+                        messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
+                    }
+                    resultMap.put("this_message",message_sum);
                 }
             }else{// 如果没有传过来message_id
                //判断需求是要新的信息 还是就得信息
