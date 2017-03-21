@@ -624,9 +624,9 @@ public class ZXingUtil {
         if(lecturer_name.length()>9){
             lecturer_name = lecturer_name.substring(0,9)+"...";
         }
-
+        //花图框
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        //镶嵌背景图  七牛云地址
+        //镶嵌背景图  七牛云地址  不需要变
         bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 270;
@@ -636,7 +636,7 @@ public class ZXingUtil {
         BufferedImage markImage = createImage(qr_code_content, "", qr_code_size, false);  
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
-        //分享者
+        //userName 改 确定星标
         BufferedImage pressText =  pressText(userName, waterMark, FONT_NAME, 1, Color.black, 44, 0, -310, 1.0f, IMG_TYPE,true);
         //
         BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, FONT_NAME, 1, Color.black, 40, 0, -250, 1.0f, IMG_TYPE,true);
