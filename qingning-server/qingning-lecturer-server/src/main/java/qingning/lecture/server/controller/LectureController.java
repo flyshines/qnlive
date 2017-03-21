@@ -645,7 +645,7 @@ public class LectureController extends AbstractController {
 
 		String redirectUrl = (String) resultMap.get("redirectUrl");
 		resp.sendRedirect(redirectUrl);
-		resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
+	//	resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
 	}
 	/**
 	 * 跳转微信服务号授权页面
@@ -656,7 +656,7 @@ public class LectureController extends AbstractController {
 	public void bindServiceNo (
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception{
-		resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
+	//	resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
 		return;
 	}
 }

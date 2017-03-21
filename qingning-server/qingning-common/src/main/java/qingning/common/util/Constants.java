@@ -10,11 +10,11 @@ public final class Constants {
 	public static final String SYS_FIELD_CITY="city";
 	public static final String SYS_FIELD_DISTRICT="district";
 	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
-	
+
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
-	
+
 	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
 	public static final String SYSLONG="long";
@@ -31,7 +31,7 @@ public final class Constants {
 	public static final int CACHED_MAX_COURSE_TIME_LIFE = 1000*60 *24 *7;
 	public static final int MAX_QUERY_LIMIT = 1000;
 	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";
-	
+
 	public static final String DEFAULT = "default";
 	public static final String SPECIAL = "_SPECIAL";
 	public static final String CONVERT = "convert";
@@ -60,7 +60,7 @@ public final class Constants {
 	public static final String REDIS_POOL_TESTONBORROW="redis.pool.testOnBorrow";
 	public static final String REDIS_POOL_TESTONRETURN="redis.pool.testOnReturn";
 	public static final String REDIS_POOL_OUTTIME="redis.pool.outTime";
-	
+
 	public static final String REDIS_IP="redis.ip";
 	public static final String REDIS_PORT="redis.port";
 	public static final String REDIS_PASS="redis.pass";
@@ -77,42 +77,42 @@ public final class Constants {
 	public static final String MONGODB_MAXLIFETIME="mongodb.maxLifeTime";
 	public static final String MONGODB_SOKETTIMEOUT="mongodb.soketTimeout";
 	public static final String MONGODB_SOKETKEEPALIVE="mongodb.soketKeepAlive";
-	
+
 	public static final String FUNCTION = "function";
 	public static final String VALIDATION = "validation";
 	public static final String CONVERTVALUE = "convertValue";
 	public static final String JS_ENGINE = "nashorn";
-	
+
 	public static final String SYS_SINGLE_KEY = "SYS_SINGLE_KEY";
 	public static final String SYS_OUT_TRADE_NO_KEY = "SYS_OUT_TRADE_NO_KEY";
-	
+
 	public static final String CACHED_UPDATE_LECTURER_KEY="SYS:UPDATE:LECTURER:KEYS";
 	public static final String CACHED_UPDATE_DISTRIBUTER_KEY="SYS:UPDATE:DISTRIBUTER:KEYS";
-	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS"; 
+	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS";
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
 	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";
-	
+
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE="SYS:ROOM:DISTRIBUTER:RQCODE:{rq_code}";
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD="rq_code";
 	public static final String CACHED_UPDATE_RQ_CODE_KEY = "SYS:UPDATE:RQCODE:KEYS";
-	
-	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}"; 
-	
+
+	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}";
+
 	public static final String CACHED_KEY_ACCESS_TOKEN_FIELD = "access_token";
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";
 	public static final String CACHED_KEY_USER_FIELD ="user_id";
 	public static final String CACHED_KEY_USER = "SYS:USER:{user_id}";
 	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";
-	
+
 	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";
 	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";
-	
+
 	//public static final String CACHED_KEY_SPECIAL_LECTURER_ROOM = "SYS:LECTURER:{lecturer_id}:ROOM:{room_id}";
-	
+
 	public static final String FIELD_CREATE_TIME="create_time";
 	public static final String FIELD_ROOM_ID="room_id";
-	
+
 	public static final String CACHED_KEY_DISTRIBUTER_FIELD = "distributer_id";
 	public static final String CACHED_KEY_DISTRIBUTER_RECOMMEND_FIELD = "recommend_code";
 	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";
@@ -120,23 +120,23 @@ public final class Constants {
 
 	public static final String CACHED_KEY_USER_DISTRIBUTERS = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS";
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_LEN = "USER:{user_id}:LECTURER:{room_id}:DISTRIBUTERS:LEN";
-	
+
 	public static final String CACHED_KEY_USER_DISTRIBUTERS_ROOM_RQ = "USER:{distributer_id}:ROOM:{room_id}:RQ:{rq_code}";
 	public static final String FUNCTION_DISTRIBUTERS_ROOM_RQ = "FUNCTION_DISTRIBUTERS_ROOM_RQ";
-	
+
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES = "USER:{user_id}:LECTURER:{room_id}:COURSES:{distributer_id}";
 	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
-	
+
 	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
 
 	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";
-	
+
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";
 
 	public static final String CACHED_KEY_COURSE_ROBOT = "SYS:COURSEROBOT:{course_id}";
 	public static final String CACHED_KEY_COURSE_ROBOT_FIELD = "course_id";
-	
+
 	public static final String CACHED_KEY_COURSE_PPTS = "SYS:COURSE:{course_id}:PPTS";
 	public static final String CACHED_KEY_COURSE_PPTS_FIELD = "ppt_list";
 	public static final String CACHED_KEY_COURSE_AUDIOS = "SYS:COURSE:{course_id}:AUDIOS";
@@ -144,25 +144,25 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_AUDIOS_FIELD = "audio_list";
 	public static final String FIELD_AUDIO_ID="audio_id";
 	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";
-	
+
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
 
 	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";
 	public static final String CACHED_KEY_USER_ROOM_SHARE_FIELD = "room_share_code";
 	public static final String CACHED_KEY_USER_SHARE_CODES = "USER:SHARE_CODES:{lecturer_id}";
-	
+
 	public static final String MSG_TYPE_ATTR = "type";
 	public static final String MSG_NEWSTYPE_ATTR = "newstype";
 	public static final String MSG_IP_ATTR = "ip";
 	public static final String MSG_MID_ATTR = "mid";
 	public static final String MSG_ID_ATTR = "id";
 	public static final String MSG_TO_ATTR = "to";
-	
+
 	public static final String MSG_FROMJID_ELEMENT = "fromjid";
 	public static final String MSG_GROUPID_ELEMENT = "groupid";
-	public static final String MSG_BODY_ELEMENT = "body";	
-	
+	public static final String MSG_BODY_ELEMENT = "body";
+
 	public static final String MQ_METHOD_SYNCHRONIZED = "SYNCHRONIZED";
 	public static final String MQ_METHOD_ASYNCHRONIZED = "ASYNCHRONIZED";
 
@@ -199,8 +199,8 @@ public final class Constants {
 
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
 	public static final int PLATFORM_PREDICTION_COURSE_LIST_SIZE = 200;
-	
-	
+
+
 	public static final String MONGODB_ORG_LOG_DB_FORMAT = "ORG_LOG_DB_%s";//根据月份
 	public static final String MONGODB_ORG_LOG_COLLECTION_FORMAT = "ORG_LOG_COLLECTION_%s";//根据日期
 	public static final String MONGODB_ADDRESS_DATABASE = "CITY_ADDRESS";//城市地址
@@ -210,15 +210,15 @@ public final class Constants {
 	public static final String MONGODB_DEVICE_ACTIVE_DATABASE = "DEVICE_ACTIVE_DB";//激活设备的表
 	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_FORMAT = "DEVICE_ACTIVE_COLL_%s";//激活设备的表 根据时间
 	public static final String MONGODB_DEVICE_ACTIVE_COLLECTION_DETAILS_FORMAT = "DEVICE_ACTIVE_DETAILS_COLL_%s";//日期
-	
+
 	public static final String MONGODB_LECTURER_COURSE_DATABASE_FORMAT =    "LECTURER_COURSE_%s";
 	public static final String MONGODB_ROOM_DISTRIBUTER_DATABASE_FORMAT =   "ROOM_DISTRIBUTER_%s";
 	public static final String MONGODB_COURSE_DISTRIBUTER_DATABASE_FORMAT = "COURSE_DISTRIBUTER_%s";
-	
+
 	public static final String MONGODB_LECTURER_COURSE_COLLECTION_FORMAT =    "LECTURER_COURSE_COLL_%s";
 	public static final String MONGODB_ROOM_DISTRIBUTER_COLLECTION_FORMAT =   "ROOM_DISTRIBUTER_COLL_%s";
 	public static final String MONGODB_COURSE_DISTRIBUTER_COLLECTION_FORMAT = "COURSE_DISTRIBUTER_COLL_%s";
-	
+
 	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
 	public static final String JPUSH_SEND_TYPE_ALIAS = "ALIAS";
 	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";
@@ -237,5 +237,10 @@ public final class Constants {
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
 
 //	public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "http://192.168.1.238:5000/#/nav/bindServiceNumber";
-public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "www.baidu.com";
+	public static final String SEND_MSG_TIME_S = "MW:SEND_MSG_TIME_S:{user_id}";//时间
+	public static final String SEND_MSG_TIME_H = "MW:SEND_MSG_TIME_H:{user_id}";//
+	public static final String SEND_MSG_TIME_D = "MW:SEND_MSG_TIME_D:{user_id}";
+
+
+
 }

@@ -910,6 +910,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 long lecturerProfit = 0L;
                 Map<String,Object> sumInfo = null;
                 if("0".equals(profit_type) && !MiscUtils.isEmpty(distributeRoom)){
+                    //<editor-fold desc="wuyong">
                 	/*
                     long share_amount = 0L;
                     if(handleResultMap.containsKey("share_amount")){
@@ -950,7 +951,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
                     jedis.hincrBy(userCacheKey, "today_distributer_amount", share_amount);
                     jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id")); 
-                	*/                	
+                	*/
+                    //</editor-fold>
                 	query.clear();
                 	String distributer_id = distributeRoom.get("distributer_id");
                 	query.put("distributer_id", distributer_id);                	
@@ -2218,14 +2220,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String phoneNum = map.get("phone");
-        if(isMobile(phoneNum)){
-            //TODO 效验手机号码
+        if(isMobile(phoneNum)){ //效验手机号码
+
             //TODO 生成随机的效验码
             //TODO 把手机号码和userid还有效验码 存入缓存当中
+
+
+
         }else{
             throw new QNLiveException("130001");
         }
     }
+
+
     public static boolean isMobile(final String str) {
         Pattern p = null;
         Matcher m = null;
@@ -2419,7 +2426,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取课程信息
+     * 修改课程状态
      * @param reqEntity
      * @return
      * @throws Exception
@@ -2911,4 +2918,61 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         return null;
     }
+
+//
+//    public Map<String, Object> sendMsgCode(String phone,String userId){
+//        Map<String, Object> resMap = new HashMap<String, Object>();
+//        Jedis jedis = null;
+//        try{
+//            jedis = jedisUtils.getJedis();
+//            String code = RandomUtil.createRandom(true, 4);
+//            String message = String.format("msgCode=您的短信验证码:%s，请及时完成验证。",code);
+//
+//
+//            if(jedis.exists(Constants.SEND_MSG_TIME_S+userId)){
+//                resMap.put("code", 2);
+//                resMap.put("msg", "短信发送太频繁");
+//                return resMap;
+//            }else{
+//                jedis.setex(Constants.SEND_MSG_TIME_S+userId, 60, phone);
+//                 if(jedis.exists(Constants.SEND_MSG_TIME_H+userId) && this.isExpire(jedis, Constants.SEND_MSG_TIME_H+userId, 3)){
+//                    resMap.put("code", 2);
+//                    resMap.put("msg", "1小时内已达3次");
+//                    return resMap;
+//                }else if(jedis.exists(Constants.SEND_MSG_TIME_D+userId) && this.isExpire(jedis, Constants.SEND_MSG_TIME_D+userId, 5)){
+//                    resMap.put("code", 3);
+//                    resMap.put("msg", "24小时内已达5次");
+//                    return resMap;
+//                }else{
+//                    String is_test = new String(ResourceBundle.getBundle("application").getString("is_test").getBytes("ISO-8859-1"),"UTF-8");
+//                    if(!StringUtils.isBlank(is_test) && "0".equals(is_test)){//测试验证码
+//                        jedis.setex(Constants.MSG_CODE_KEY + userId, 1800, "1111");
+//                        resMap.put("code", 0);
+//                        resMap.put("msg", "发送短信成功");
+//                    }else{
+//                        logger.error("sendMsgCode()开始发送短信手机号: "+userId+" ,内容:" + message+" ,IP: "+ipAdress);
+//                        String result = SendMsgUtil.sendMsgCode(phone, message);
+//                        if("success".equals(SendMsgUtil.validateCode(result))){
+//                            jedis.setex(Constants.MSG_CODE_KEY + userId, 1800, code);
+//                            resMap.put("code", 0);
+//                            resMap.put("msg", "发送短信成功");
+//                            logger.error("sendMsgCode()短信发送【成功】手机号: "+userId+" ,内容:" + message+" ,IP: "+ipAdress);
+//                        }else{
+//                            logger.error("sendMsgCode()发送短信【失败】手机号: "+userId+" ,内容:" + message+" ,IP: "+ipAdress);
+//                            resMap.put("code", 1);
+//                            resMap.put("msg", "发送短信失败");
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }catch(Exception e){
+//            logger.error("sendMsgCode()短信发送异常手机号: "+loginId+" ,IP: "+ipAdress);
+//            if(jedis != null)
+//            resMap.put("code", 1);
+//            resMap.put("msg", "发送短信异常");
+//        }
+//        return resMap;
+//    }
+
 }

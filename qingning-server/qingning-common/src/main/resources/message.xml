@@ -92,7 +92,7 @@
 				<entry key="130001" value="电话号码有误"/>
 				<entry key="130002" value="验证码有误"/>
 				<entry key="130003" value="直播间没有手机号"/>
-
+				<entry key="130004" value="直播间已绑定手机号"/>
 				<entry key="140001" value="上传用户数据失败"/>
 			</map>
 		</property>
