@@ -669,4 +669,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return fansMapper.findFansByUserIdAndRoomId(fansKey);
 	}
 
+	@Override
+	public List<Map<String, Object>> findRewardConfigurationList() {
+		return rewardConfigurationMapper.findRewardConfigurationList();
+	}
+
+
 }

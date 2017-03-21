@@ -107,4 +107,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findAudioListByCourseId(String course_id);
 
 	Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
+
+	List<Map<String,Object>> findRewardConfigurationList();
 }
