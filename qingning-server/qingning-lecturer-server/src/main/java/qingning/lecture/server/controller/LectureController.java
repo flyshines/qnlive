@@ -592,7 +592,14 @@ public class LectureController extends AbstractController {
 //					MiscUtils.getConfigByKey("weixin_service_no_appid"));
 		}
 		//微信消息解密
-		String decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
+
+		String decryptMsg = null;
+		try {
+			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
+		} catch (AesException e) {
+			e.printStackTrace();
+			return "success";
+		}
 
 		InputStream in = new ByteArrayInputStream(decryptMsg.getBytes ());
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

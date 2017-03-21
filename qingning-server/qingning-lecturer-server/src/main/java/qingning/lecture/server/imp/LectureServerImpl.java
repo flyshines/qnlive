@@ -2596,7 +2596,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //重定向微信URL
         Map<String,Object> result = new HashMap<String,Object>();
-        result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code, userId));
+        result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
 
         return result;
     }
