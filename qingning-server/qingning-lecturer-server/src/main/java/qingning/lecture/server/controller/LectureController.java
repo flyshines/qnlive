@@ -611,6 +611,8 @@ public class LectureController extends AbstractController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "success";
+		} finally {
+			in.close();
 		}
 
 		//InfoType
@@ -636,8 +638,7 @@ public class LectureController extends AbstractController {
             NodeList appidNodeL = doc.getElementsByTagName ("AuthorizerAppid");
             appidOrTicket = appidNodeL.item(0).getFirstChild().getNodeValue();
 		}
-		in.close();
-
+		
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatTicketNotify", null, null);
 		Map<String, Object> parMap = new HashMap<>();
         parMap.put("type", type);
