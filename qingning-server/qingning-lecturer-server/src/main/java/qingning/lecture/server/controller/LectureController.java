@@ -592,7 +592,14 @@ public class LectureController extends AbstractController {
 //					MiscUtils.getConfigByKey("weixin_service_no_appid"));
 		}
 		//微信消息解密
-		String decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
+
+		String decryptMsg = null;
+		try {
+			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
+		} catch (AesException e) {
+			e.printStackTrace();
+			return "success";
+		}
 
 		InputStream in = new ByteArrayInputStream(decryptMsg.getBytes ());
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -604,6 +611,8 @@ public class LectureController extends AbstractController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "success";
+		} finally {
+			in.close();
 		}
 
 		//InfoType
@@ -629,8 +638,7 @@ public class LectureController extends AbstractController {
             NodeList appidNodeL = doc.getElementsByTagName ("AuthorizerAppid");
             appidOrTicket = appidNodeL.item(0).getFirstChild().getNodeValue();
 		}
-		in.close();
-
+		
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatTicketNotify", null, null);
 		Map<String, Object> parMap = new HashMap<>();
         parMap.put("type", type);

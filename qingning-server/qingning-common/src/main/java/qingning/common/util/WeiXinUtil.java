@@ -58,6 +58,9 @@ public class WeiXinUtil {
     private static final String appsecret = MiscUtils.getConfigByKey("appsecret");
     private final static String weixin_template_push_url = MiscUtils.getConfigByKey("weixin_template_push_url");//"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
+    private static final String service_no_appid = MiscUtils.getConfigByKey("weixin_service_no_appid");
+    private static final String service_no_appsecret = MiscUtils.getConfigByKey("weixin_service_no_secret");
+
     public final static String component_access_token_url = MiscUtils.getConfigByKey("service_component_access_token_url");
     public final static String pre_auth_code_url = MiscUtils.getConfigByKey("service_pre_auth_code");
     public final static String service_auth_url = MiscUtils.getConfigByKey("service_auth_url");
@@ -138,8 +141,8 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getComponentAccessToken(String ticket) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
-        String componentAppSecret = WeiXinUtil.appsecret;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppSecret = WeiXinUtil.service_no_appsecret;
         String requestUrl = component_access_token_url;
 
         Map<String, String> param = new HashMap<>();
@@ -156,7 +159,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getPreAuthCode(String accessToken) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
         String requestUrl = pre_auth_code_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -170,11 +173,9 @@ public class WeiXinUtil {
      * 获取第三方平台授权重定向到微信url
      * @return
      */
-    public static String getServiceAuthUrl(String preAuthCode, String userId) {
-        //TODO
-        String redirectUrl = "";//TODO 待配置 重定向URL 需要配置 追加userId
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
-        String requestUrl = service_auth_url.replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", redirectUrl);
+    public static String getServiceAuthUrl(String preAuthCode) {
+        String componentAppid = WeiXinUtil.service_no_appid;
+        String requestUrl = service_auth_url.replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", MiscUtils.getConfigByKey("weixin_service_redirect_url"));
         log.debug("------微信--服务号重定向URL--  "+requestUrl);
         return requestUrl;
     }
@@ -183,7 +184,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceAuthInfo(String accessToken, String authCode) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
         String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -203,7 +204,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
         String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -220,7 +221,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceAuthAccountInfo(String accessToken, String authorizerAppid) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
         String requestUrl = service_auth_account_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -239,7 +240,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceFansList(String accessToken, String nextOpenId) {
-        String componentAppid = WeiXinUtil.appid;//TODO 待配置
+        String componentAppid = WeiXinUtil.service_no_appid;
         String requestUrl = null;
         if (nextOpenId == null) {
             requestUrl = service_fans_url1.replace("ACCESS_TOKEN", accessToken);
