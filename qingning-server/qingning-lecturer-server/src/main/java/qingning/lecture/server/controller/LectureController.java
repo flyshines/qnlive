@@ -4,10 +4,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
+import qingning.common.util.wxEncrypt.AesException;
+import qingning.common.util.wxEncrypt.WXBizMsgCrypt;
 import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,12 +19,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class LectureController extends AbstractController {	
+public class LectureController extends AbstractController {
+
+	private WXBizMsgCrypt cryptUtil = null;
+
 	/**
 	 * 创建直播间
 	 * @param entity
@@ -558,7 +565,12 @@ public class LectureController extends AbstractController {
      * @throws Exception
      */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
-	public String wechatAuth(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	public String wechatAuth(
+			@RequestParam(value = "msg_signature") String msg_signature,
+			@RequestParam(value = "timestamp") String timestamp,
+			@RequestParam(value = "nonce") String nonce,
+			HttpServletRequest req,
+			HttpServletResponse resp) throws Exception {
 		//解析XML文件
 		BufferedReader br = req.getReader();
 		String temp = null;
@@ -566,14 +578,28 @@ public class LectureController extends AbstractController {
 		while((temp = br.readLine()) != null){
 			xmlStrB.append(temp);
 		}
-		InputStream in = new ByteArrayInputStream(xmlStrB.toString().getBytes ("UTF-8"));
+		if (cryptUtil == null) {
+			cryptUtil = new WXBizMsgCrypt(
+					MiscUtils.getConfigByKey("weixin_service_no_token"),
+					MiscUtils.getConfigByKey("weixin_service_no_aeskey"),
+					MiscUtils.getConfigByKey("weixin_service_no_appid"));
+		}
+		//微信消息解密
+		String decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
+
+		InputStream in = new ByteArrayInputStream(decryptMsg.getBytes ());
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document doc = builder.parse(in);
 
+		Document doc = null;
+		try {
+			doc = builder.parse(in);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "success";
+		}
 
-
-        //InfoType
+		//InfoType
 		NodeList infoTypeNodeL = doc.getElementsByTagName ("InfoType");
 		String infoType = infoTypeNodeL.item(0).getFirstChild().getNodeValue();
 		String type = null;

@@ -232,7 +232,4 @@ public final class Constants {
 
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
-
-	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
-	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
 }
