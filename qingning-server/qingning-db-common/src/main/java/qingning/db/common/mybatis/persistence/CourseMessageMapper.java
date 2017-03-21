@@ -9,4 +9,5 @@ public interface CourseMessageMapper {
 	Map<String,Object> findCourseMessageMaxPos(String course_id);
 	List<Map<String,Object>> findCourseMessageListByComm(Map<String, Object> queryMap);
 	int findCourseMessageSum(Map<String, Object> queryMa);
+	Map<String,Object> findCourseMessageByComm(Map<String, Object> queryMap);
 }

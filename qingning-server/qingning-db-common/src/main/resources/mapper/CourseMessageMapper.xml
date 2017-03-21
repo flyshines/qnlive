@@ -91,7 +91,13 @@
       limit #{page_count}
   </select>
 
-
+  <select id="findCourseMessageByComm" resultType="hashmap" parameterType="hashmap" >
+    select cm.*, u.nick_name as creator_nick_name, u.avatar_address as creator_avatar_address
+    from t_course_message cm join t_user u on cm.creator_id = u.user_id
+    <where>
+      cm.course_id = #{course_id} and cm.message_imid = #{message_imid}
+    </where>
+  </select>
 
 
 

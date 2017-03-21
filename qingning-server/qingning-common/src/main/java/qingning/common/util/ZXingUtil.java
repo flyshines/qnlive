@@ -624,9 +624,9 @@ public class ZXingUtil {
         if(lecturer_name.length()>9){
             lecturer_name = lecturer_name.substring(0,9)+"...";
         }
-
+        //花图框
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        //镶嵌背景图  七牛云地址
+        //镶嵌背景图  七牛云地址  不需要变
         bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 270;
@@ -636,7 +636,7 @@ public class ZXingUtil {
         BufferedImage markImage = createImage(qr_code_content, "", qr_code_size, false);  
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, markImage, WIDTH/2-qr_code_size/2, HEIGHT/4*2+200, 1.0f);
-        //分享者
+        //userName 改 确定星标
         BufferedImage pressText =  pressText(userName, waterMark, FONT_NAME, 1, Color.black, 44, 0, -310, 1.0f, IMG_TYPE,true);
         //
         BufferedImage pressText1 = pressText("推荐一个不错的直播间", pressText, FONT_NAME, 1, Color.black, 40, 0, -250, 1.0f, IMG_TYPE,true);
@@ -923,58 +923,58 @@ public class ZXingUtil {
 	
 	
 	public static void main(String[] args) throws Exception{
-
+//字体
 //        GraphicsEnvironment eq = GraphicsEnvironment.getLocalGraphicsEnvironment();
 //        String[] fontNames = eq.getAvailableFontFamilyNames();
 //        for(String fontName : fontNames){
 //            System.out.println(fontName);
 //        }
+//
+//		//生成二维码
+//		 encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/5.png");
+//		 System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null));// TODO
 
-		//生成二维码
-		// encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/新建文件夹/5.png");
-		// System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null)); TODO
-
-//		try {
-//		 	//通过网络  用户头像
-//			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
-//	    	//用户名称
-//	    	String userName= "z";
-//	    	//二维码内容
-//	    	String qr_code_content="www.baidu.com";
-//	    	long time = 1488160472302l;
-//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-//            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字", qr_code_content, time);
-//            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
-//	    	  //生成的图片位置
+		try {
+		 	//通过网络  用户头像
+			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
+	    	//用户名称
+	    	String userName= "z";
+	    	//二维码内容
+	    	String qr_code_content="www.baidu.com";
+	    	long time = 1488160472302l;
+	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
+            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字", qr_code_content, time);
+            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
+	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
 //            String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
-//            String imagePath3= "C:/Users/Administrator/Desktop/LivePng.png";
+            String imagePath3= "C:/Users/Administrator/Desktop/LivePng.png";
 //	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
 //            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
-//            ImageIO.write(createLivePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
-//
-////            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-////            ImageIO.write(createRoomDistributerPng, "png", baos);
-////            byte[] bytes = baos.toByteArray();
-////            QiNiuUpUtils.uploadByIO(bytes,userName);
-////            BASE64Encoder encoder = new BASE64Encoder();
-////            BASE64Decoder decoder = new BASE64Decoder();
-////            System.out.println(encoder.encodeBuffer(bytes));
-////            byte[] b = decoder.decodeBuffer( encoder.encodeBuffer(bytes));
-////            for (int i = 0; i < b.length; ++i) {
-////                if (b[i] < 0) {// 调整异常数据
-////                    b[i] += 256;
-////                }
-////            }// 生成jpeg图片
-////            String imgFilePath = "C:/Users/Administrator/Desktop/test22.png";//新生成的图片
-////            OutputStream out = new FileOutputStream(imgFilePath);
-////            out.write(b);
-////            out.flush();
-////            out.close();
-//            System.out.println("ok");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+            ImageIO.write(createLivePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
+
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            ImageIO.write(createRoomDistributerPng, "png", baos);
+//            byte[] bytes = baos.toByteArray();
+//            QiNiuUpUtils.uploadByIO(bytes,userName);
+//            BASE64Encoder encoder = new BASE64Encoder();
+//            BASE64Decoder decoder = new BASE64Decoder();
+//            System.out.println(encoder.encodeBuffer(bytes));
+//            byte[] b = decoder.decodeBuffer( encoder.encodeBuffer(bytes));
+//            for (int i = 0; i < b.length; ++i) {
+//                if (b[i] < 0) {// 调整异常数据
+//                    b[i] += 256;
+//                }
+//            }// 生成jpeg图片
+//            String imgFilePath = "C:/Users/Administrator/Desktop/test22.png";//新生成的图片
+//            OutputStream out = new FileOutputStream(imgFilePath);
+//            out.write(b);
+//            out.flush();
+//            out.close();
+            System.out.println("ok");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
     }
 }  

@@ -228,9 +228,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
-            if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
-                return resultMap;
-            }
+            //TODO
+//            if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
+//                return resultMap;
+//            }
             if(jedis.exists(liveRoomListKey)){
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
                 if(CollectionUtils.isEmpty(liveRoomsMap)){
@@ -773,7 +774,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         String status = course.get("status");
-        if("2".equals(status)){
+        if("2".equals(status)){//如果查出来的课程是结束
         	if(reqMap.get("start_time") != null){
         		throw new QNLiveException("100010");
         	}
@@ -795,12 +796,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         //0.3校验该课程是否属于该用户
-        String courseOwner = course.get("lecturer_id");
-        if(!userId.equals(courseOwner)){
+        String courseOwner = course.get("lecturer_id");//讲师id
+        if(!userId.equals(courseOwner)){//如果没有
             throw new QNLiveException("100013");
         }
         
-        String original_start_time = course.get("start_time");
+        String original_start_time = course.get("start_time");//时间
         
         if ("2".equals(reqMap.get("status"))) {
             //1.1如果为课程结束，则取当前时间为课程结束时间
@@ -808,7 +809,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             String start_time = original_start_time;
             try{
-                if(System.currentTimeMillis() <= Long.parseLong(start_time)){
+                if(System.currentTimeMillis() <= Long.parseLong(start_time)){//判断是否可以结束
                     throw new QNLiveException("100032");
                 }
             } catch(Exception e){
