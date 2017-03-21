@@ -629,7 +629,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
         Map<String, String> courseInfo = (Map<String, String>) reqMap.get("course");
 
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
+        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("course_id");//推送url
         List<Map<String,Object>> followers = (List<Map<String, Object>>) reqMap.get("followers");//获取推送列表
         String type = (String) reqMap.get("pushType");//类型
         String templateId = null;
@@ -641,38 +641,40 @@ public class MessagePushServerImpl extends AbstractMsgService {
             isUpdateCourse = true;
         }
         Jedis jedis = jedisUtils.getJedis();
+        List<String> studentIds = new ArrayList<>();
 
-        JSONObject obj = new JSONObject();
-        Map<String,String> extrasMap = new HashMap<>();
-
-        if (isUpdateCourse) {
-            String start_time = reqMap.get("start_time").toString();
-            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), MiscUtils.RecoveryEmoji(courseInfo.get("course_title")), start_time));
-        } else {
-            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("room_name")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
-        }
-        if (isUpdateCourse) { //更新上课时间
-            obj.put("msg_type","13");
-            extrasMap.put("msg_type","13");
-        } else {
-            obj.put("msg_type","11");//发布新课程
-            extrasMap.put("msg_type","11");
-        }
-        extrasMap.put("course_id",courseInfo.get("course_id"));
-        extrasMap.put("im_course_id",courseInfo.get("im_course_id"));
-        obj.put("extras_map", extrasMap);
-
+        //微信模板消息推送
         for (Map<String,Object> user: followers) {//循环推送
             String openId = user.get("web_openid").toString();
             if(!MiscUtils.isEmpty(openId)){//推送微信模板消息给微信用户
                 WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
             }
-            String mUserId = user.get("m_user_id").toString();
-            if (!MiscUtils.isEmpty(mUserId)) {//极光推送给app用户
-                obj.put("to",mUserId);
-                JPushHelper.push(obj);
-            }
+            studentIds.add(user.get("user_id").toString());
         }
+
+        //极光消息推送
+        if(MiscUtils.isEmpty(studentIds)){
+            return;
+        }
+        JSONObject obj = new JSONObject();
+        Map<String,String> extrasMap = new HashMap<>();
+
+        if (!isUpdateCourse) {
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("room_name")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
+            obj.put("msg_type","11");//发布新课程
+            extrasMap.put("msg_type","11");
+        } else {
+            String start_time = reqMap.get("start_time").toString();
+            obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_start_time_modify"), MiscUtils.RecoveryEmoji(courseInfo.get("course_title")), start_time));
+            obj.put("msg_type","13");
+            extrasMap.put("msg_type","13");
+        }
+        obj.put("user_ids",studentIds);
+
+        extrasMap.put("course_id",  courseInfo.get("course_id"));
+        extrasMap.put("im_course_id", courseInfo.get("im_course_id"));
+        obj.put("extras_map", extrasMap);
+        JPushHelper.push(obj);
     }
 
     /**
