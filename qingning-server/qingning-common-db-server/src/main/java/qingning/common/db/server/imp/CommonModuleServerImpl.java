@@ -634,7 +634,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findRoomRecommendUserListByCode(Map<String, Object> record) {		
 		return roomDistributerRecommendMapper.findRoomRecommendUserList(record);
 	}
-
+	@Override
+	public Map<String, Object> findCourseMessageByComm(Map<String, Object> record) {
+		return courseMessageMapper.findCourseMessageByComm(record);
+	}
 
 	@Override
 	public List<Map<String, Object>> findCourseMessageListByComm(Map<String, Object> queryMap) {

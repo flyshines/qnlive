@@ -97,6 +97,8 @@ public interface ICommonModuleServer {
 	 */
 	List<Map<String,Object>> findCourseMessageListByComm(Map<String, Object> queryMap);
 
+	Map<String,Object> findCourseMessageByComm(Map<String, Object> queryMap);
+
 	int findCourseMessageSum(Map<String,Object> queryMap);
 
 	void updateCourseByCourseId(Map<String,Object> queryMap);
