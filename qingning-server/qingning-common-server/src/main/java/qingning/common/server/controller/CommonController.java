@@ -677,7 +677,7 @@ public class CommonController extends AbstractController {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/sendVerificationCode", method = RequestMethod.GET)
-    public void sendVerificationCode(
+    public @ResponseBody ResponseEntity sendVerificationCode(
             @RequestParam(value = "phone") String phone,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version)throws Exception {
@@ -685,7 +685,7 @@ public class CommonController extends AbstractController {
         Map<String,String> map = new HashMap<>();
         map.put("phone",phone);
         requestEntity.setParam(map);
-        this.process(requestEntity, serviceManger, message);
+        return this.process(requestEntity, serviceManger, message);
     }
 
     /**

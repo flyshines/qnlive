@@ -70,10 +70,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(lectureLiveRoomKey)) {
             throw new QNLiveException("100006");
         }
-//        Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
-//        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){
-//            throw new QNLiveException("130003");
-//        }
+
 
         //2.数据库修改
         //2.如果为新讲师用户，插入讲师表。插入直播间表。更新登录信息表中的用户身份
@@ -217,7 +214,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> queryLiveRoomDetail(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl"));
+        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl").get("config_value"));
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         String queryType = reqMap.get("query_type").toString();
@@ -231,10 +228,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
- 
+            if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
+                return resultMap;
+            }
             if(jedis.exists(liveRoomListKey)){
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
- 
                 if(CollectionUtils.isEmpty(liveRoomsMap)){
                     return resultMap;
  
@@ -315,7 +313,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(Long.valueOf(liveRoomMap.get("update_time"))));
                 resultMap.put("pay_course_num", payCourseNum);
                 return resultMap;
- 
             }else {
                 resultMap.put("last_course_amount", MiscUtils.convertObjectToDouble(amount,true));//上次课程收益  当前直播间 最近结束的课程
                 resultMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
@@ -325,6 +322,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("room_address", MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
                 resultMap.put("pay_course_num", payCourseNum);
+                if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
+                    resultMap.put("phone_number", "");
+                }else{
+                    resultMap.put("phone_number", lectureInfo.get("phone_number"));
+                }
                 return resultMap;
             }
         }
@@ -2573,9 +2575,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //返回给客户端的URL
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (service_type_info.equals("2") && !verify_type_info.equals("-1")) {
-            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_SUCCESS_URL);
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
         } else {
-            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_FAILURE_URL);
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
         }
         return result;
     }
@@ -2910,15 +2912,46 @@ public class LectureServerImpl extends AbstractQNLiveServer {
      */
     @SuppressWarnings("unchecked")
     @FunctionName("verifyVerificationCode")
-    public  Map<String, Object>  verifyVerificationCode (RequestEntity reqEntity) throws Exception{
+    public  Map<String, Object>  verifyVerificationCode (RequestEntity reqEntity) throws Exception {
+        Jedis jedis = jedisUtils.getJedis();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
-        String verification_code = map.get("verification_code");
+        String verification_code = map.get("verification_code");//验证码
+        Map<String,String> phoneMap = new HashMap();
+        phoneMap.put("user_id",userId);
+        phoneMap.put("verification_code",verification_code);
+        MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, phoneMap);
+
+
+
         //TODO 用userid拿到手机号
         //TODO  用手机号拿到验证码
         //TODO  验证手机验证码
+        //判断当前用户是否有直播间
+        Map<String, Object> roomMap = new HashMap<>();
+        roomMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, roomMap);
 
-       return createLiveRoom(reqEntity);
+        if (jedis.exists(lectureLiveRoomKey)) {//有直播间
+            Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);//查找当前用户是否有直播间
+            if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有
+                //TODO 把手机号加入user表
+
+                Map<String, Object> param = new HashMap<String, Object>();
+                param.put("query_type", "2");
+               if(map.get("room_id") == null){
+                   throw new QNLiveException("000100");//没有roomid 报错
+               }
+                param.put("room_id", map.get("room_id"));
+                reqEntity.setParam(param);
+                return queryLiveRoomDetail(reqEntity);
+            }else{//有
+                throw new QNLiveException("130004");//直播间已经有手机号
+            }
+        }else{//创建直播间
+            //TODO 把手机号加入user表
+           return createLiveRoom(reqEntity);
+        }
     }
 
 
