@@ -2453,10 +2453,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }else{//学生
             resultMap = getCourseInfoByUser(reqEntity);
             resultMap.put("user_type","1");//用户类型
-            Map<String,String> roomMap = new HashMap<>();
+            Map<String,Object> roomMap = new HashMap<>();
             roomMap.put("room_id",commonModuleServer.findCourseByCourseId(courseId).get("room_id").toString());//课程直播间
             roomMap.put("user_id",userId);//用户id
-            Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(reqMap);
+            Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
                 resultMap.put("follow_status", "0");
             } else {
