@@ -236,6 +236,9 @@ public final class Constants {
 	public static final String CACHED_KEY_SERVICE_SUCCESS_URL = "http://192.168.1.238:5000/#/nav/bindServiceFail";
 	public static final String CACHED_KEY_SERVICE_FAILURE_URL = "http://192.168.1.238:5000/#/nav/bindServiceSuccess";
 
+	public static final String SEND_MSG_TIME_S = "MW:SEND_MSG_TIME_S:{user_id}";//时间
+	public static final String SEND_MSG_TIME_H = "MW:SEND_MSG_TIME_H:{user_id}";//
+	public static final String SEND_MSG_TIME_D = "MW:SEND_MSG_TIME_D:{user_id}";<<<<<<< .mine
 //	public static final String CACHED_KEY_SERVICE_NO_COMPLETE_URL = "http://192.168.1.238:5000/#/nav/bindServiceNumber";
 	public static final String SEND_MSG_TIME_S = "MW:SEND_MSG_TIME_S:{user_id}";//时间
 	public static final String SEND_MSG_TIME_H = "MW:SEND_MSG_TIME_H:{user_id}";//
@@ -243,4 +246,13 @@ public final class Constants {
 
 
 
+=======
+
+
+
+
+
+
+
+>>>>>>> .theirs
 }

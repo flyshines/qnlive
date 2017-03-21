@@ -696,16 +696,6 @@
 				<inputs>
 				</inputs>
 				<outputs>
-				</outputs>
-			</function>
-
-			<function name="tobindServiceNo">
-				<auth>
-					<accessToken require="N" />
-				</auth>
-				<inputs>
-				</inputs>
-				<outputs>
 					<param name="redirectUrl" type="string" />
 				</outputs>
 			</function>

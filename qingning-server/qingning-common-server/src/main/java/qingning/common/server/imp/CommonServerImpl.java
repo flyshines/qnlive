@@ -1160,7 +1160,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultStr;
     }
     //</editor-fold>
- 
+
+    //<editor-fold desc="姜军 购买成功后推送给学生的通知">
+    /**
+     * 极光推送给学生购买通知
+     * @param courseInfo
+     * @param user_id
+     * @param msg_type
+     */
+//    private void jpushUser(Map<String,String> courseInfo, String user_id, String msg_type) {
+//        JSONObject obj = new JSONObject();
+//        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseMap.get("course_title")), nowStudentNum+""));
+//        obj.put("to", user_id);
+//        obj.put("msg_type","14");
+//        Map<String,String> extrasMap = new HashMap<>();
+//        extrasMap.put("msg_type","14");
+//        extrasMap.put("course_id",courseInfo.get("course_id"));
+//        obj.put("extras_map", extrasMap);
+//        JPushHelper.push(obj);
+//    }
+    //</editor-fold>
  
     private void wpushUser(Jedis jedis, String openId,
             Map<String, String> courseByCourseId,

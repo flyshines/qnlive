@@ -7,6 +7,7 @@ import org.w3c.dom.NodeList;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -645,18 +646,6 @@ public class LectureController extends AbstractController {
 
 		String redirectUrl = (String) resultMap.get("redirectUrl");
 		resp.sendRedirect(redirectUrl);
-	//	resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
-	}
-	/**
-	 * 跳转微信服务号授权页面
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value="/lecturer/wechat/binding",method=RequestMethod.GET)
-	public void bindServiceNo (
-			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception{
-	//	resp.sendRedirect(Constants.CACHED_KEY_SERVICE_NO_COMPLETE_URL);
 		return;
 	}
 }
