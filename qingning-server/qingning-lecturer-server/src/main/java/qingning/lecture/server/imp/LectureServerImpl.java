@@ -2576,9 +2576,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //返回给客户端的URL
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (service_type_info.equals("2") && !verify_type_info.equals("-1")) {
-            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_SUCCESS_URL);
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
         } else {
-            result.put("redirectUrl", Constants.CACHED_KEY_SERVICE_FAILURE_URL);
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
         }
         return result;
     }
