@@ -1073,21 +1073,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("user_id", handleResultMap.get("user_id"));        
                     Map<String, String> payUserMap = CacheUtils.readUserNoCache((String)handleResultMap.get("user_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedisUtils);
                     
-            //        String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "元";
+                    String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "元";
                     HashMap<String,String> payMessageMap = new HashMap<>();
                     payMessageMap.put("pay_user",payUserMap.get("nick_name"));
                     payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message"));
                     payMessageMap.put("collect_user",lecturerMap.get("nick_name"));
                     payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");
                     payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit"));
-                    String message = JSON.toJSONString(payMessageMap);
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
                     infomation.put("course_id", handleResultMap.get("course_id"));
 					infomation.put("creator_id", (String)handleResultMap.get("user_id"));
                     //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
-                    infomation.put("message", message);
+                    infomation.put("message",payMessageMap);
                     infomation.put("send_type", "4");//4.打赏信息
                     infomation.put("message_type", "1");
                     infomation.put("create_time", currentTime);
