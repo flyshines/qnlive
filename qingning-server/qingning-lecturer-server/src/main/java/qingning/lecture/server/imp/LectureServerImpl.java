@@ -2500,7 +2500,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             } else {//不存在accessTokenMap
                 jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
             }
-            if (jsonObj != null) {//redis存储accessTokenMap
+            String errCode = jsonObj.get("errcode").toString();
+            if (errCode != null && !errCode.equals("0")) {
+                log.error("获取微信AccessToken失败-----------"+jsonObj);
+            } else {
                 long expiresIn = jsonObj.getLongValue("expires_in")*1000;//有效毫秒值
                 long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
                 String access_token = jsonObj.getString("component_access_token");//第三方平台access_token

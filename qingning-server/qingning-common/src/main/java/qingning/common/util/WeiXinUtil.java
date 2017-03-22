@@ -151,7 +151,6 @@ public class WeiXinUtil {
         param.put("component_verify_ticket", ticket);
 
         String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
-//        String requestResult = HttpTookit.doPost(requestUrl, param);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
@@ -166,7 +165,7 @@ public class WeiXinUtil {
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
 
-        String requestResult = HttpTookit.doPost(requestUrl, param);
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
@@ -192,7 +191,7 @@ public class WeiXinUtil {
         param.put("component_appid", componentAppid);
         param.put("authorization_code", authCode);
 
-        String requestResult = HttpTookit.doPost(requestUrl, param);
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
@@ -213,7 +212,7 @@ public class WeiXinUtil {
         param.put("authorizer_appid", authorizerAppid);
         param.put("authorizer_refresh_token", refreshToken);
 
-        String requestResult = HttpTookit.doPost(requestUrl, param);
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
@@ -229,7 +228,7 @@ public class WeiXinUtil {
         param.put("component_appid", componentAppid);
         param.put("authorizer_appid", authorizerAppid);
 
-        String requestResult = HttpTookit.doPost(requestUrl, param);
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
