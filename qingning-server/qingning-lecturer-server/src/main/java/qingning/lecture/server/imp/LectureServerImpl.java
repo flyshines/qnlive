@@ -230,9 +230,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
             //TODO
-            if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
-              throw new QNLiveException("130003");
-            }
+
             if(jedis.exists(liveRoomListKey)){
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
