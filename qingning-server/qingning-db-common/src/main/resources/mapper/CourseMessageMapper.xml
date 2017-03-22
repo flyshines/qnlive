@@ -28,8 +28,7 @@
     creator_id, create_time
     )
     values
-    <foreach collection="list" item="item" index="index" separator=",">
-      (
+    <foreach collection="list" item="item" index="index" separator=","  open="(" close=")">
       <if test="item.message_id != null">
         #{item.message_id},
       </if>
@@ -61,8 +60,14 @@
       <if test="item.audio_image == null">
         null,
       </if>
-      #{item.audio_time},#{item.message_pos},
-      #{item.message_type},#{item.send_type},#{item.message_imid},#{item.status},#{item.creator_id},#{item.create_time})
+      #{item.audio_time},
+      #{item.message_pos},
+      #{item.message_type},
+      #{item.send_type},
+      #{item.message_imid},
+      #{item.status},
+      #{item.creator_id},
+      #{item.create_time}
     </foreach>
   </insert>
 

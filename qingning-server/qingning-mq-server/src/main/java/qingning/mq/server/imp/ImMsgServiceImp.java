@@ -351,12 +351,15 @@ public class ImMsgServiceImp implements ImMsgService {
 //				noticeToStudent(courseInfo, userInfo, jedisUtils);
 				//</editor-fold>
 			}
+
+
 		}
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
 		if("6".equals(information.get("send_type"))){
+			log.info("=================================================================结束课程存消息======================================================================================");
 			//1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
@@ -365,6 +368,7 @@ public class ImMsgServiceImp implements ImMsgService {
             try {
             	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
             	if(saveCourseMessageService != null){
+					log.info("=================================================================数据进行落地======================================================================================");
             		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
