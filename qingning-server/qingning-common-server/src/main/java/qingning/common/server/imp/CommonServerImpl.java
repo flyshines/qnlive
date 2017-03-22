@@ -2491,7 +2491,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.校验该课程是否属于该讲师
-        String courseOwner = jedis.hget(courseKey, "lecturer_id");
+        Map<String,String> courseMap = jedis.hgetAll(courseKey);
+        resultMap.put("room_id",commonModuleServer.findCourseByCourseId(courseId).get("room_id").toString());
+        String courseOwner = courseMap.get("lecturer_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//根据安全证书获取userId
         if(courseOwner.equals(userId)){//判断是否是老师
             //如果是老师
@@ -2501,7 +2503,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap = getCourseInfoByUser(reqEntity);
             resultMap.put("user_type","1");//用户类型
             Map<String,Object> roomMap = new HashMap<>();
-            roomMap.put("room_id",commonModuleServer.findCourseByCourseId(courseId).get("room_id").toString());//课程直播间
+            roomMap.put("room_id",resultMap.get("room_id"));//课程直播间
             roomMap.put("user_id",userId);//用户id
             Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
@@ -2511,6 +2513,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
+
         return resultMap;
     }
 
