@@ -38,15 +38,11 @@ public class SaveCourseMessageService extends AbstractMsgService{
 
 		Jedis jedisObject = jedisUtils.getJedis();
 
-		if(jedisObject.exists(messageListKey)){
-			log.error("出现错误,没有在缓存中查到message:" + messageListKey);
-			return ;
-		}
 
 		//1.从缓存中查询该课程的消息列表
 		Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
 		if(messageIdList == null || messageIdList.size() == 0){
-			log.error("没有拿到值");
+			log.error("没有拿到值messageListKey:"+messageListKey);
 			return;
 		}
 
