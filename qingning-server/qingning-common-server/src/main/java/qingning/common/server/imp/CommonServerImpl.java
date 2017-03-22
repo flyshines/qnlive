@@ -2345,31 +2345,35 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
 
                 String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, queryMap);
-                Map<String,String> messageMap = jedis.hgetAll(messageKey);
-                //更改用户名和昵称
-                if(MiscUtils.isEmpty(messageMap)){
-                    if(messageMap.get("creator_id") != null){
-                        Map<String,Object> innerMap = new HashMap<>();
-                        innerMap.put("user_id", messageMap.get("creator_id"));
-                        Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
-                        if(! MiscUtils.isEmpty(userMap)){
-                            if(userMap.get("nick_name") != null){
-                                messageMap.put("creator_nick_name", userMap.get("nick_name"));
-                            }
-                            if(userMap.get("avatar_address") != null){
-                                messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+
+                if(jedis.exists(messageKey)){
+                    Map<String,String> messageMap = jedis.hgetAll(messageKey);
+                    //更改用户名和昵称
+                    if(!MiscUtils.isEmpty(messageMap)){
+                        if(messageMap.get("creator_id") != null){
+                            Map<String,Object> innerMap = new HashMap<>();
+                            innerMap.put("user_id", messageMap.get("creator_id"));
+                            Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
+                            if(! MiscUtils.isEmpty(userMap)){
+                                if(userMap.get("nick_name") != null){
+                                    messageMap.put("creator_nick_name", userMap.get("nick_name"));
+                                }
+                                if(userMap.get("avatar_address") != null){
+                                    messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+                                }
                             }
                         }
+                        String messageContent = messageMap.get("message");
+                        if(! MiscUtils.isEmpty(messageContent)){
+                            messageMap.put("message",MiscUtils.RecoveryEmoji(messageContent));
+                        }
+                        if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
+                            messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
+                        }
+                        resultMap.put("this_message",messageMap);
                     }
-                    String messageContent = messageMap.get("message");
-                    if(! MiscUtils.isEmpty(messageContent)){
-                        messageMap.put("message",MiscUtils.RecoveryEmoji(messageContent));
-                    }
-                    if(! MiscUtils.isEmpty(messageMap.get("message_question"))){
-                        messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
-                    }
-                    resultMap.put("this_message",message_sum);
                 }
+
             }else{// 如果没有传过来message_id
                //判断需求是要新的信息 还是就得信息
                 if(direction == 0){//从最早的信息开始
