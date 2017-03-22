@@ -566,9 +566,9 @@ public class LectureController extends AbstractController {
      */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public String wechatAuth(
-			@RequestParam(value = "msg_signature") String msg_signature,
-			@RequestParam(value = "timestamp") String timestamp,
-			@RequestParam(value = "nonce") String nonce,
+			@RequestHeader(value = "msg_signature") String msg_signature,
+			@RequestHeader(value = "timestamp") String timestamp,
+			@RequestHeader(value = "nonce") String nonce,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		//解析XML文件
@@ -586,19 +586,25 @@ public class LectureController extends AbstractController {
 		}
 		//微信消息解密
 
-		String decryptMsg = null;
-		try {
-			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, xmlStrB.toString());
-		} catch (AesException e) {
-			e.printStackTrace();
-			return "success";
-		}
-
-		InputStream in = new ByteArrayInputStream(decryptMsg.getBytes ());
+		InputStream in = new ByteArrayInputStream(xmlStrB.toString().getBytes ());
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 
 		Document doc = null;
+		String decryptMsg = null;
+		try {
+			doc = builder.parse(in);
+			NodeList infoTypeNodeL = doc.getElementsByTagName ("Encrypt");
+			String encrypt = infoTypeNodeL.item(0).getFirstChild().getNodeValue();
+			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, encrypt);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "success";
+		} finally {
+			in.close();
+		}
+
+		in = new ByteArrayInputStream(decryptMsg.getBytes ());
 		try {
 			doc = builder.parse(in);
 		} catch (Exception e) {

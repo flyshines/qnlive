@@ -97,10 +97,15 @@ public class CourseRobotSevice extends AbstractMsgService {
                 while (!robotEnough && !courseEnd) {
                     log.debug ("=====创建直播,直播机器人准备进入了直播间====");
                     try {
-                        //a、1,课程预告开始——课程结束，00：30——8：00每小时增量N：0-2，每60分钟分N次随机；
-                        //   2,08：01——19：00每小时增量N：2-5，每60分钟分N次随机；
-                        //   3,19：01——00：30每小时增量N：5-10，每60分钟分N次随机；
+                        //a、1,课程预告开始——课程结束，大于16小时 增量N：0-2，每60分钟分N次随机；//5到10分钟
+                        //   2,大于8小时 每小时增量N：2-4，每60分钟分N次随机；//5到10分钟增加一个
+                        //   3,大于1小时 每小时增量N：4-8，每60分钟分N次随机；//5到10分钟增加一个
+                        //   3,大于0小时 每小时增量N：2-4，每10分钟分N次随机；//20到40秒增加一个
+                        //   4，开始直播 每2分钟增量 N: 1-2  //20到40秒增加一个
                         //b、每加入一个真实听众，同时增加1—2个假听众；
+                        //c、最多当真实用户达到30—40选个随机数，停止加机器人；
+                        //d、机器人加到>50，选个随机数之后不再增加；
+                        //e、有机器人参与的课程总量 大于50 新建的课程不再拥有机器人
                         map.clear();
                         map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -115,19 +120,22 @@ public class CourseRobotSevice extends AbstractMsgService {
                         long currentTimeS = System.currentTimeMillis();
                         long delta = currentTimeS - start_time;
 
-                        long sleepTime = 60*60*1000;
+                        long sleepTime = 60*60*1000;//1小时
+                        boolean shortTime = false;
                         int robotNum = 0;
-                        if (delta > 24*60*60*1000) { //大于24小时
-                            continue;
-                        } else if (delta > 16*60*60*1000) { //16-24
+                        if (delta > 16*60*60*1000) { //16-24
                             robotNum = (int) (0 + Math.random () * 2);
                         } else if (delta > 8*60*60*1000) { //8-16
-                            robotNum = (int) (2 + Math.random () * 3);
-                        } else if (delta > 0) { //0-8
-                            robotNum = (int) (5 + Math.random () * 5);
+                            robotNum = (int) (2 + Math.random () * 2);
+                        } else if (delta > 60*60*1000) { //1-8
+                            robotNum = (int) (4 + Math.random () * 4);
+                        } else if (delta > 0) { //0-1
+                            sleepTime = 10*60*1000;//10分钟
+                            shortTime = true;
+                            robotNum = (int) (2 + Math.random () * 2);
                         } else { //课程已经开始
-                            sleepTime = 60*1000;
-
+                            sleepTime = 2*60*1000;//2分钟
+                            shortTime = true;
                             robotNum = (int) (1 + Math.random () * 1);
                         }
 
@@ -147,12 +155,18 @@ public class CourseRobotSevice extends AbstractMsgService {
                                     joinRobots.put (key, joinRobotQueue);
                                 }
                             }
-                            int second = (int) (10 + Math.random () * 20);
+                            int second = 0;
+                            if (shortTime) {
+                                second = (int) (20 + Math.random () * 20);//20到40秒
+                            } else {
+                                second = (int) (300 + Math.random () * 300);//5到10分钟
+                            }
+
                             Thread.sleep (second * 1000);
                         }
 
                         //c、最多当真实用户达到30—40选个随机数，停止加机器人；
-                        //d、机器人加到50—120，选个随机数之后不再增加；
+                        //d、机器人加到>50，选个随机数之后不再增加；
                         int real_student_num = Integer.parseInt(courseInfoMap.get("real_student_num"));
                         int robot_num = joinRobots.get (key).size();
                         if (robot_num > 50 || (real_student_num - robot_num) > 30) {
@@ -211,7 +225,7 @@ public class CourseRobotSevice extends AbstractMsgService {
                                 joinRobots.put (key, joinRobotQueue);
                             }
                         }
-                        int second = (int) (10 + Math.random () * 20);
+                        int second = (int) (20 + Math.random () * 20);
                         Thread.sleep (second * 1000);
                     }
                 } catch (InterruptedException e) {}
