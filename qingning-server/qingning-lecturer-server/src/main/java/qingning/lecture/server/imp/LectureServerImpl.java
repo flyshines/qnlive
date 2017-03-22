@@ -227,10 +227,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         request.setParam(map); 
         Map<String,String> lectureInfo = CacheUtils.readLecturer(userId, request, readLecturerOperation, jedisUtils);
         long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
+        if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
+            resultMap.put("phone_number", "");
+        }else{
+            resultMap.put("phone_number", lectureInfo.get("phone_number"));
+        }
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
-            //TODO
-
             if(jedis.exists(liveRoomListKey)){
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
@@ -324,11 +327,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 resultMap.put("room_address", MiscUtils.convertString(liveRoomMap.get("room_address")));
                 resultMap.put("update_time",  MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
                 resultMap.put("pay_course_num", payCourseNum);
-                if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
-                    resultMap.put("phone_number", "");
-                }else{
-                    resultMap.put("phone_number", lectureInfo.get("phone_number"));
-                }
+
                 return resultMap;
             }
         }
