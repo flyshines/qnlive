@@ -2491,7 +2491,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.校验该课程是否属于该讲师
-        String courseOwner = jedis.hget(courseKey, "lecturer_id");
+        Map<String,String> courseMap = jedis.hgetAll(courseKey);
+
+        String courseOwner = courseMap.get("lecturer_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//根据安全证书获取userId
         if(courseOwner.equals(userId)){//判断是否是老师
             //如果是老师
@@ -2511,6 +2513,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
+        resultMap.put("room_id",courseMap.get("room_id"));
         return resultMap;
     }
 
