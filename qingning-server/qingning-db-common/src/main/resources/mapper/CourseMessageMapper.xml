@@ -28,10 +28,10 @@
     creator_id, create_time
     )
     values
-    <foreach collection="list" item="item" index="index" separator=","  open="(" close=")">
-      <if test="item.message_id != null">
-        #{item.message_id},
-      </if>
+    <foreach collection="list" item="item" index="index" separator="," >
+      (<if test="item.message_id != null">
+      #{item.message_id},
+    </if>
       <if test="item.message_id == null">
         null,
       </if>
@@ -67,7 +67,7 @@
       #{item.message_imid},
       #{item.status},
       #{item.creator_id},
-      #{item.create_time}
+      #{item.create_time})
     </foreach>
   </insert>
 
