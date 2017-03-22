@@ -141,8 +141,8 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getComponentAccessToken(String ticket) {
-        String componentAppid = WeiXinUtil.service_no_appid;
-        String componentAppSecret = WeiXinUtil.service_no_appsecret;
+        String componentAppid = service_no_appid;
+        String componentAppSecret = service_no_appsecret;
         String requestUrl = component_access_token_url;
 
         Map<String, String> param = new HashMap<>();
@@ -159,7 +159,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getPreAuthCode(String accessToken) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = pre_auth_code_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -174,7 +174,7 @@ public class WeiXinUtil {
      * @return
      */
     public static String getServiceAuthUrl(String preAuthCode) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = service_auth_url.replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", MiscUtils.getConfigByKey("weixin_service_redirect_url"));
         log.debug("------微信--服务号重定向URL--  "+requestUrl);
         return requestUrl;
@@ -184,7 +184,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceAuthInfo(String accessToken, String authCode) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -204,7 +204,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -221,7 +221,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceAuthAccountInfo(String accessToken, String authorizerAppid) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = service_auth_account_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
@@ -240,7 +240,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getServiceFansList(String accessToken, String nextOpenId) {
-        String componentAppid = WeiXinUtil.service_no_appid;
+        String componentAppid = service_no_appid;
         String requestUrl = null;
         if (nextOpenId == null) {
             requestUrl = service_fans_url1.replace("ACCESS_TOKEN", accessToken);
