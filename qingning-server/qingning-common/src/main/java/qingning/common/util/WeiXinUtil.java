@@ -150,7 +150,8 @@ public class WeiXinUtil {
         param.put("component_appsecret", componentAppSecret);
         param.put("component_verify_ticket", ticket);
 
-        String requestResult = HttpTookit.doPost(requestUrl, param);
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
+//        String requestResult = HttpTookit.doPost(requestUrl, param);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
     }
