@@ -166,6 +166,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message", message);
 					startInformation.put("message_type", "1");
 					startInformation.put("send_type", "5");//5.开始/结束消息
+					startInformation.put("message_imid",MiscUtils.getUUId());
 					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
@@ -180,10 +181,10 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message_id",messageMap.get("mid"));
 					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
 					//1.将聊天信息id插入到redis zsort列表中
-					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_id"));
+					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
 					//添加到老师发送的集合中
 					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_id"));
+					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_imid"));
 
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
 					Map<String,String> result = new HashMap<String,String>();
@@ -278,6 +279,17 @@ public class ImMsgServiceImp implements ImMsgService {
 					Date createTime = new Date(Long.parseLong(stringMap.get("create_time")));
 					messageObjectMap.put("create_time", createTime);
 				}
+				if(!MiscUtils.isEmpty(stringMap.get("audio_image"))){
+					messageObjectMap.put("audio_image", stringMap.get("audio_image"));
+				}
+				if(!MiscUtils.isEmpty(stringMap.get("status"))){
+					messageObjectMap.put("status",stringMap.get("status"));
+				}else{
+					messageObjectMap.put("status",0);
+				}
+
+				messageObjectMap.put("message_imid", stringMap.get("message_imid"));
+
 				Object lockObject;
 				if(maxLockMap.containsKey(stringMap.get("course_id"))){
 					lockObject = maxLockMap.get(stringMap.get("course_id"));

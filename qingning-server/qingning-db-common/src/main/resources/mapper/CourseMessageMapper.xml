@@ -29,7 +29,14 @@
     )
     values
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.message_id},#{item.course_id},
+      (
+      <if test="item.message_id != null">
+        #{item.message_id},
+      </if>
+      <if test="item.message_id == null">
+        null,
+      </if>
+      #{item.course_id},
       <if test="item.message != null" >
         #{item.message},
       </if>

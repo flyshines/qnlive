@@ -753,35 +753,34 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("updateCourse")
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//传过来的参数
+        Map<String, Object> resultMap = new HashMap<String, Object>();//返回的参数
 
  
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userId
+        Jedis jedis = jedisUtils.getJedis();//缓存
         Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        String    course_id = (String) reqMap.get("course_id");
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());//课程id
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
+        String course_id = (String) reqMap.get("course_id");
         
-        Map<String, String> course = CacheUtils.readCourse((String)course_id, generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedisUtils, false);
-        if(MiscUtils.isEmpty(course)){
-        	throw new QNLiveException("100004");
+        Map<String, String> course = CacheUtils.readCourse((String)course_id, generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedisUtils, false);//课程信息
+        if(MiscUtils.isEmpty(course)){//如果没有课程
+        	throw new QNLiveException("100004");//课程不存在 抛异常
         }
         
-        String status = course.get("status");
+        String status = course.get("status");//状态
         if("2".equals(status)){//如果查出来的课程是结束
         	if(reqMap.get("start_time") != null){
-        		throw new QNLiveException("100010");
+        		throw new QNLiveException("100010");//课程状态不正确，无法修改
         	}
         } else if("2".equals(status) && "2".equals(reqMap.get("status"))){
         	throw new QNLiveException("100010");
         }
         
-        String newStatus = (String)reqMap.get("status");
-        
-        //0.1校验课程更新时间
-        if (!"2".equals(newStatus)){
+        String newStatus = (String)reqMap.get("status");//穿过来的状态
+        //<editor-fold desc="1校验课程更新时间">
+        if (!"2".equals(newStatus)){ //如果不是结束课程
         	if(MiscUtils.isEmpty(reqMap.get("update_time"))){
         		throw new QNLiveException("000100");
         	}
@@ -790,6 +789,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("000104");
             }
         }
+        //</editor-fold>
         
         //0.3校验该课程是否属于该用户
         String courseOwner = course.get("lecturer_id");//讲师id
@@ -797,12 +797,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100013");
         }
         
-        String original_start_time = course.get("start_time");//时间
+        String original_start_time = course.get("start_time");//课程开课时间
         
-        if ("2".equals(reqMap.get("status"))) {
+        if ("2".equals(newStatus)) {
             //1.1如果为课程结束，则取当前时间为课程结束时间
             //1.2更新课程详细信息(dubble服务)
             String start_time = original_start_time;
+            //判断是否可以结束
             try{
                 if(System.currentTimeMillis() <= Long.parseLong(start_time)){//判断是否可以结束
                     throw new QNLiveException("100032");
@@ -812,7 +813,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     throw e;
                 }
             }
-            Date courseEndTime = new Date();
+
+            Date courseEndTime = new Date();//结束时间
             reqMap.put("now",courseEndTime);
             Map<String, Object> dbResultMap = lectureModuleServer.updateCourse(reqMap);
             if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
@@ -908,6 +910,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             infomation.put("message", message);
             infomation.put("message_type", "1");
             infomation.put("send_type", "6");//5.结束消息
+            infomation.put("message_imid",MiscUtils.getUUId());
             infomation.put("create_time", currentTime);
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");
