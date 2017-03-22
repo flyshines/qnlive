@@ -588,7 +588,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                long expiresTimeStamp = Long.parseLong(expiresTimes);
 //                //是否快要超时 令牌是存在有效期（2小时）
 //                long nowTimeStamp = System.currentTimeMillis();
-//                if (nowTimeStamp-expiresTimeStamp < 0) {  //accessToken已经过期了
+//                if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
 //                    JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
 //
 //                    authorizer_appid = authJsonObj.getString("authorizer_appid");
@@ -2494,7 +2494,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 long expiresTimeStamp = Long.parseLong(expiresTimes);
                 //是否快要超时 令牌是存在有效期（2小时）
                 long nowTimeStamp = System.currentTimeMillis();
-                if (nowTimeStamp-expiresTimeStamp < 10*60*1000) {  //如果超时
+                if (nowTimeStamp-expiresTimeStamp > 0) {  //如果超时
                     jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
                 }
             } else {//不存在accessTokenMap
