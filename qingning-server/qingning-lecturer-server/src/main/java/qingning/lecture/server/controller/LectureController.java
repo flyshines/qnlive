@@ -579,17 +579,10 @@ public class LectureController extends AbstractController {
 			xmlStrB.append(temp);
 		}
 		if (cryptUtil == null) {
-
-//			weixin_service_no_token=Javen123456
-//			weixin_service_no_aeskey=fHKgbyYok2vT9zDfD13UbDUckki4vKwI30W3snGKKY2
-//			weixin_service_no_appid=wx3288921b77134133
-
-			cryptUtil = new WXBizMsgCrypt("Javen123456", "fHKgbyYok2vT9zDfD13UbDUckki4vKwI30W3snGKKY2", "wx3288921b77134133");
-
-//			cryptUtil = new WXBizMsgCrypt(
-//					MiscUtils.getConfigByKey("weixin_service_no_token"),
-//					MiscUtils.getConfigByKey("weixin_service_no_aeskey"),
-//					MiscUtils.getConfigByKey("weixin_service_no_appid"));
+			cryptUtil = new WXBizMsgCrypt(
+					MiscUtils.getConfigByKey("weixin_service_no_token"),
+					MiscUtils.getConfigByKey("weixin_service_no_aeskey"),
+					MiscUtils.getConfigByKey("weixin_service_no_appid"));
 		}
 		//微信消息解密
 
@@ -638,7 +631,7 @@ public class LectureController extends AbstractController {
             NodeList appidNodeL = doc.getElementsByTagName ("AuthorizerAppid");
             appidOrTicket = appidNodeL.item(0).getFirstChild().getNodeValue();
 		}
-		
+
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatTicketNotify", null, null);
 		Map<String, Object> parMap = new HashMap<>();
         parMap.put("type", type);
