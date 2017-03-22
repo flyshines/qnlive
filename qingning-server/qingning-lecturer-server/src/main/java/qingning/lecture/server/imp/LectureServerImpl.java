@@ -589,7 +589,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                long expiresTimeStamp = Long.parseLong(expiresTimes);
 //                //是否快要超时 令牌是存在有效期（2小时）
 //                long nowTimeStamp = System.currentTimeMillis();
-//                if (nowTimeStamp-expiresTimeStamp < 0) {  //accessToken已经过期了
+//                if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
 //                    JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
 //
 //                    authorizer_appid = authJsonObj.getString("authorizer_appid");
@@ -2495,13 +2495,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 long expiresTimeStamp = Long.parseLong(expiresTimes);
                 //是否快要超时 令牌是存在有效期（2小时）
                 long nowTimeStamp = System.currentTimeMillis();
-                if (nowTimeStamp-expiresTimeStamp < 10*60*1000) {  //如果超时
+                if (nowTimeStamp-expiresTimeStamp > 0) {  //如果超时
                     jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
                 }
             } else {//不存在accessTokenMap
                 jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
             }
-            if (jsonObj != null) {//redis存储accessTokenMap
+            String errCode = jsonObj.get("errcode").toString();
+            if (errCode != null && !errCode.equals("0")) {
+                log.error("获取微信AccessToken失败-----------"+jsonObj);
+            } else {
                 long expiresIn = jsonObj.getLongValue("expires_in")*1000;//有效毫秒值
                 long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
                 String access_token = jsonObj.getString("component_access_token");//第三方平台access_token
@@ -2583,10 +2586,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
     @FunctionName("bindServiceNo")
     public Map<String, Object> bindServiceNo(RequestEntity reqEntity) throws Exception {
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis();
 
-        log.debug("------微信服务号去绑定服务号------"+userId);
+        Jedis jedis = jedisUtils.getJedis();
 
         //获取预授权码pre_auth_code 进入微信平台
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
