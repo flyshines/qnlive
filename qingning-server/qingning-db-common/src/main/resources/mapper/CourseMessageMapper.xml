@@ -25,17 +25,10 @@
     insert into t_course_message (message_id, course_id, message,
     message_url, message_question,audio_image, audio_time,
     message_pos, message_type, send_type,message_imid,status,
-    creator_id, create_time
-    )
+    creator_id, create_time)
     values
     <foreach collection="list" item="item" index="index" separator="," >
-      (<if test="item.message_id != null">
-      #{item.message_id},
-    </if>
-      <if test="item.message_id == null">
-        null,
-      </if>
-      #{item.course_id},
+      (#{item.message_id}, #{item.course_id},
       <if test="item.message != null" >
         #{item.message},
       </if>
