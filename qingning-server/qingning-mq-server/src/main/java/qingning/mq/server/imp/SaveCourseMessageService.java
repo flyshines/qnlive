@@ -24,8 +24,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context)
-			throws Exception {
+	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
 
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
 
@@ -87,10 +86,10 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					if(!MiscUtils.isEmpty(messageStringMap.get("audio_image"))){
 						messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
 					}
-					if(!MiscUtils.isEmpty(messageStringMap.get("message_status"))){
-						messageObjectMap.put("message_status",messageStringMap.get("message_status"));
+					if(!MiscUtils.isEmpty(messageStringMap.get("status"))){
+						messageObjectMap.put("status",messageStringMap.get("message_status"));
 					}else{
-						messageObjectMap.put("message_status",0);
+						messageObjectMap.put("status",0);
 					}
 
 					messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
