@@ -566,9 +566,9 @@ public class LectureController extends AbstractController {
      */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public String wechatAuth(
-			@RequestHeader(value = "msg_signature") String msg_signature,
-			@RequestHeader(value = "timestamp") String timestamp,
-			@RequestHeader(value = "nonce") String nonce,
+			@RequestParam(value = "msg_signature") String msg_signature,
+			@RequestParam(value = "timestamp") String timestamp,
+			@RequestParam(value = "nonce") String nonce,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		//解析XML文件
