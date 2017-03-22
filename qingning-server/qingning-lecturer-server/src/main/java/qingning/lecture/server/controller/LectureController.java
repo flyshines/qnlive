@@ -4,12 +4,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
-import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
-import qingning.common.util.wxEncrypt.AesException;
 import qingning.common.util.wxEncrypt.WXBizMsgCrypt;
 import qingning.server.AbstractController;
 
@@ -19,7 +16,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -566,9 +562,9 @@ public class LectureController extends AbstractController {
      */
 	@RequestMapping(value = "/auth", method = RequestMethod.POST)
 	public String wechatAuth(
-			@RequestParam(value = "msg_signature") String msg_signature,
-			@RequestParam(value = "timestamp") String timestamp,
-			@RequestParam(value = "nonce") String nonce,
+			@RequestHeader(value = "msg_signature") String msg_signature,
+			@RequestHeader(value = "timestamp") String timestamp,
+			@RequestHeader(value = "nonce") String nonce,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		//解析XML文件
@@ -596,7 +592,9 @@ public class LectureController extends AbstractController {
 			doc = builder.parse(in);
 			NodeList infoTypeNodeL = doc.getElementsByTagName ("Encrypt");
 			String encrypt = infoTypeNodeL.item(0).getFirstChild().getNodeValue();
-			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, encrypt);
+			String format = "<xml><ToUserName><![CDATA[toUser]]></ToUserName><Encrypt><![CDATA[%1$s]]></Encrypt></xml>";
+			String fromXML = String.format(format, encrypt);
+			decryptMsg = cryptUtil.decryptMsg(msg_signature, timestamp, nonce, fromXML);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "success";
