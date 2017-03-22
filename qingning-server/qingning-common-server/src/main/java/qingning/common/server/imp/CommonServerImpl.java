@@ -2303,7 +2303,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 resultMap.put("message_list", messageList);
             }
+            if(queryMap.containsKey("message_imid")){//如果有imid
+                resultMap.put("this_message",commonModuleServer.findCourseMessageByComm(queryMap));
+            }
+
             resultMap.put("message_count", commonModuleServer.findCourseMessageSum(queryMap));
+
             return resultMap;
         }else{ //TODO 查询缓存
             //当前课程没有结束 可以直接查询缓存
