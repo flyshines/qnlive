@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
+import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
@@ -677,13 +678,15 @@ public class CommonController extends AbstractController {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/sendVerificationCode", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity sendVerificationCode(
+    public @ResponseBody ResponseEntity sendVerificationCode(HttpServletRequest request,
             @RequestParam(value = "phone") String phone,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version)throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendVerificationCode", accessToken, null);
+        String ipAdress = HttpTookit.getIpAdress(request);//获取请求地址
         Map<String,String> map = new HashMap<>();
         map.put("phone",phone);
+        map.put("ipAdress",ipAdress);
         requestEntity.setParam(map);
         return this.process(requestEntity, serviceManger, message);
     }

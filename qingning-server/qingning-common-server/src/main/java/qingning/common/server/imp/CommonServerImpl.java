@@ -2233,10 +2233,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public void sendVerificationCode (RequestEntity reqEntity) throws Exception{
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
-        String phoneNum = map.get("phone");
+        String phoneNum = map.get("phone");//手机号
+        String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
+            String code = RandomUtil.createRandom(true, 4);   //4位 生成随机的效验码
 
-            //TODO 生成随机的效验码
             //TODO 把手机号码和userid还有效验码 存入缓存当中
 
 
@@ -2971,7 +2972,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
 //
-//    public Map<String, Object> sendMsgCode(String phone,String userId){
+//    public Map<String, Object> sendMsgCode(String phone,String userId,String ipAdress){
 //        Map<String, Object> resMap = new HashMap<String, Object>();
 //        Jedis jedis = null;
 //        try{

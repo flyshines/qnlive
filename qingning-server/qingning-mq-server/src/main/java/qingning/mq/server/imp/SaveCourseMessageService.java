@@ -1,6 +1,8 @@
 package qingning.mq.server.imp;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
@@ -18,7 +20,7 @@ import redis.clients.jedis.Response;
 import java.util.*;
 
 public class SaveCourseMessageService extends AbstractMsgService{
-
+	private static Logger log = LoggerFactory.getLogger(SaveCourseMessageService.class);
 	@Autowired(required = true)
 	private CourseMessageMapper courseMessageMapper;
 
@@ -54,7 +56,6 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					map.put(Constants.FIELD_MESSAGE_ID, messageId);
 					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 					redisResponseList.add(pipeline.hgetAll(messageKey));
-
 					messageKeyList.add(messageKey);
 				}
 				pipeline.sync();
@@ -87,7 +88,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
 					}
 					if(!MiscUtils.isEmpty(messageStringMap.get("status"))){
-						messageObjectMap.put("status",messageStringMap.get("message_status"));
+						messageObjectMap.put("status",messageStringMap.get("status"));
 					}else{
 						messageObjectMap.put("status",0);
 					}
@@ -98,10 +99,9 @@ public class SaveCourseMessageService extends AbstractMsgService{
 				}
 			}
 		});
-
+		log.debug("课程信息插入数据库"+messageList.size());
 		//3.批量插入到数据库中
 		Integer insertResult = courseMessageMapper.insertCourseMessageList(messageList);
-
 
 		//4.如果插入数据库正常，则删除缓存中的内容
 		if(insertResult != null && insertResult > 0){
