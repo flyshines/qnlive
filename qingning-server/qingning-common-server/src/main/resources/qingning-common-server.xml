@@ -533,21 +533,13 @@
 					<accessToken require="N"/>
 				</auth>
 				<inputs>
-					<param name="phone" type="string"  require="N"/>
+					<param name="phone" type="string"  require="Y,000100"/>
+					<param name="ipAdress" type="string"  require="Y,000100"/>
 				</inputs>
 				<outputs>
 				</outputs>
 			</function>
-			<function name="sendVerificationCode">
-				<auth>
-					<accessToken require="N"/>
-				</auth>
-				<inputs>
-					<param name="phone" type="string"  require="N"/>
-				</inputs>
-				<outputs>
-				</outputs>
-			</function>
+
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />
