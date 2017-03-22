@@ -2585,10 +2585,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
     @FunctionName("bindServiceNo")
     public Map<String, Object> bindServiceNo(RequestEntity reqEntity) throws Exception {
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis();
 
-        log.debug("------微信服务号去绑定服务号------"+userId);
+        Jedis jedis = jedisUtils.getJedis();
 
         //获取预授权码pre_auth_code 进入微信平台
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
