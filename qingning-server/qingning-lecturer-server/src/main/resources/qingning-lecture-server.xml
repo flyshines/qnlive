@@ -699,6 +699,18 @@
 					<param name="redirectUrl" type="string" />
 				</outputs>
 			</function>
+			<function name="verifyVerificationCode">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="verification_code" type="string" require="Y,00010"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+
 		</default>
 
 		<version num="1.0.0" class="">

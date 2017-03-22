@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.common.util.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -2917,14 +2918,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String verification_code = map.get("verification_code");//验证码
         Map<String,String> phoneMap = new HashMap();
         phoneMap.put("user_id",userId);
-        phoneMap.put("verification_code",verification_code);
+        phoneMap.put("code",verification_code);
         MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, phoneMap);
 
 
-
-        //TODO 用userid拿到手机号
-        //TODO  用手机号拿到验证码
-        //TODO  验证手机验证码
+        String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
+        String code = jedis.get(codeKey);
+        if(!code.equals(verification_code)){//进行判断
+            throw new QNLiveException("130002");
+        }
+        String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);//根据userId 拿到 key
+        String phone = jedis.get(phoneKey);//拿到电话
         //判断当前用户是否有直播间
         Map<String, Object> roomMap = new HashMap<>();
         roomMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
@@ -2934,7 +2938,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);//查找当前用户是否有直播间
             if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有
                 //TODO 把手机号加入user表
-
+                updateUserPhone(phone,userId);
                 Map<String, Object> param = new HashMap<String, Object>();
                 param.put("query_type", "2");
                if(map.get("room_id") == null){
@@ -2948,8 +2952,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }else{//创建直播间
             //TODO 把手机号加入user表
+            updateUserPhone(phone,userId);
            return createLiveRoom(reqEntity);
         }
+    }
+
+
+    public void updateUserPhone(String phone,String userid){
+        Map<String,Object> map = new HashMap<>();
+        map.put("user_id",userid);
+        map.put("phone_number",phone);
+        lectureModuleServer.updateUser(map);
+
+        lectureModuleServer.updateLoginInfo(map);
     }
 
 

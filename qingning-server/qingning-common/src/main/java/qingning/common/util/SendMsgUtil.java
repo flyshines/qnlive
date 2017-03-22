@@ -33,15 +33,15 @@ public class SendMsgUtil {
         }
         //短信接口验证
         Map<String, String> params = new HashMap<String, String>();
-        String msgUrl = "http://61.145.229.29:9002/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
-        params.put("userId", "J03219");//msg_user_id=J03219
-        params.put("password", "262241");//msg_password=262241
+        String msgUrl = "http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
+        params.put("userId", "H11559");//msg_user_id=J03219
+        params.put("password", "262247");//msg_password=262241
 
         params.put("pszMobis", phone);
         params.put("pszMsg", content);
         params.put("iMobiCount", list.size()+"");
         params.put("pszSubPort", "*");
-        params.put("MsgId", "9223372036854775806");
+        params.put("MsgId", "0");
 
         String postData = HttpTookit.doPost(msgUrl, params);
         try {
@@ -56,70 +56,70 @@ public class SendMsgUtil {
     }
 
 
-    /**
-     * 发短信消息
-     * 舞队邀请对应subPost  1013
-     */
-    public static String sendMsgContent(String phone, String content, String subPort) {
-        String str = "";
-        List<String> list = new ArrayList<String>();
+//    /**
+//     * 发短信消息
+//     * 舞队邀请对应subPost  1013
+//     */
+//    public static String sendMsgContent(String phone, String content, String subPort) {
+//        String str = "";
+//        List<String> list = new ArrayList<String>();
+//
+//        for (String temp : phone.split(","))
+//        {
+//            if(StringUtils.isNotBlank(temp) && !list.contains(temp))
+//                list.add(temp);
+//        }
+//        //短信接口验证
+//        Map<String, String> params = new HashMap<String, String>();
+//        String msgUrl = bundle.getString("msg_url");//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
+//        params.put("userId", bundle.getString("msg_user_id"));//
+//        params.put("password", bundle.getString("msg_password"));//
+//        params.put("pszMobis", phone);
+//        params.put("pszMsg", content);
+//        params.put("iMobiCount", list.size()+"");
+//        params.put("pszSubPort", subPort);
+//        params.put("MsgId", "9223372036854775806");
+//
+//        String postData = HttpTookit.doPost(msgUrl, params);
+//        System.out.println(postData);
+//        try {
+//            Document doc = DocumentHelper.parseText(postData); // 将字符串转为XML;
+//            Element rootElt = doc.getRootElement(); // 获取根节点
+//            str = rootElt.getText();
+////            System.out.println("根节点：" + rootElt.getText()); // 拿到根节点的名称
+//        } catch (DocumentException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return str;
+//    }
+//
+//
+//    /**
+//     * 获取上行短信消息
+//     * */
+//    public static String getMsgDeliver()
+//    {
+//    	String str = "";
+//    	//短信接口验证
+//        Map<String, String> params = new HashMap<String, String>();
+//        String msgUrl = bundle.getString("msg_deliver_url");//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
+//        params.put("userId", bundle.getString("msg_user_id"));//
+//        params.put("password", bundle.getString("msg_password"));//
+//        params.put("iReqType", "1");
+//
+//
+//        String postData = HttpTookit.doPost(msgUrl, params);
+//        /**
+//         * 返回格式
+//         * <?xml version="1.0" encoding="utf-8"?><ArrayOfString xmlns="http://tempuri.org/"><string>1,2016-03-15 16:28:06,15002078832,106903290157981013,1013,*,回复test</string>
+//			</ArrayOfString>
+//         * */
+//        System.out.println(postData);
+//
+//    	return str;
+//    }
 
-        for (String temp : phone.split(","))
-        {
-            if(StringUtils.isNotBlank(temp) && !list.contains(temp))
-                list.add(temp);
-        }
-        //短信接口验证
-        Map<String, String> params = new HashMap<String, String>();
-        String msgUrl = bundle.getString("msg_url");//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
-        params.put("userId", bundle.getString("msg_user_id"));//
-        params.put("password", bundle.getString("msg_password"));//
-        params.put("pszMobis", phone);
-        params.put("pszMsg", content);
-        params.put("iMobiCount", list.size()+"");
-        params.put("pszSubPort", subPort);
-        params.put("MsgId", "9223372036854775806");
-
-        String postData = HttpTookit.doPost(msgUrl, params);
-        System.out.println(postData);
-        try {
-            Document doc = DocumentHelper.parseText(postData); // 将字符串转为XML;
-            Element rootElt = doc.getRootElement(); // 获取根节点
-            str = rootElt.getText();
-//            System.out.println("根节点：" + rootElt.getText()); // 拿到根节点的名称
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        }
-
-        return str;
-    }
-    
-    
-    /**
-     * 获取上行短信消息
-     * */
-    public static String getMsgDeliver()
-    {
-    	String str = "";
-    	//短信接口验证
-        Map<String, String> params = new HashMap<String, String>();
-        String msgUrl = bundle.getString("msg_deliver_url");//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
-        params.put("userId", bundle.getString("msg_user_id"));//
-        params.put("password", bundle.getString("msg_password"));//
-        params.put("iReqType", "1");
-
-
-        String postData = HttpTookit.doPost(msgUrl, params);
-        /**
-         * 返回格式
-         * <?xml version="1.0" encoding="utf-8"?><ArrayOfString xmlns="http://tempuri.org/"><string>1,2016-03-15 16:28:06,15002078832,106903290157981013,1013,*,回复test</string>
-			</ArrayOfString>
-         * */
-        System.out.println(postData);
-    	
-    	return str;
-    }
-    
     /**
      * 返回结果判断
      * */

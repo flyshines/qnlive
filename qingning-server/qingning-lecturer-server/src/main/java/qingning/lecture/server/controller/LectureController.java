@@ -547,11 +547,13 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value = "/lecturer/verifyVerificationCode", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity  verifyVerificationCode(
 			@RequestParam(value = "verification_code") String verification_code,
+			@RequestParam(value = "room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version)throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null);
 		Map<String,String> map = new HashMap<>();
 		map.put("verification_code",verification_code);
+		map.put("room_id",room_id);
 		requestEntity.setParam(map);
 		return this.process(requestEntity, serviceManger, message);
 	}

@@ -102,4 +102,8 @@ public interface ILectureModuleServer {
 	 * 查找机器人
 	 */
 	List<Map<String,String>> findRobotUsers(String user_role);
+
+	int updateUser(Map<String,Object> parameters);
+
+	void updateLoginInfo(Map<String, Object> updateMap);
 }

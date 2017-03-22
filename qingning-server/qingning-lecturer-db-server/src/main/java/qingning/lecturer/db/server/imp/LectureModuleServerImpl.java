@@ -542,4 +542,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, String>> findRobotUsers(String user_role) {
 		return lecturerMapper.findRobotUsers(user_role);
 	}
+
+	@Override
+	public int updateUser(Map<String, Object> parameters) {
+		return userMapper.updateUser(parameters);
+	}
+
+	@Override
+	public void updateLoginInfo(Map<String, Object> updateMap){loginInfoMapper.updateLoginInfo(updateMap);}
 }

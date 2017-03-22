@@ -233,8 +233,10 @@ public final class Constants {
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 
-	public static final String SEND_MSG_TIME_S = "MW:SEND_MSG_TIME_S:{user_id}";//时间
-	public static final String SEND_MSG_TIME_H = "MW:SEND_MSG_TIME_H:{user_id}";//
-	public static final String SEND_MSG_TIME_D = "MW:SEND_MSG_TIME_D:{user_id}";
+	public static final String SEND_MSG_TIME_S = "CAPTCHA:SEND_MSG_TIME_S:{user_id}";//时间
+	public static final String SEND_MSG_TIME_D = "CAPTCHA:SEND_MSG_TIME_D:{user_id}";
+
+	public static final String CAPTCHA_KEY_CODE = "CAPTCHA:KEY:{user_id}";//存放验证码
+	public static final String CAPTCHA_KEY_PHONE = "CAPTCHA:KEY:{code}";//存放验证码
 
 }

@@ -3,6 +3,7 @@ package qingning.common.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
@@ -2236,12 +2237,48 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String phoneNum = map.get("phone");//手机号
         String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
+            Jedis jedis = jedisUtils.getJedis();
+            Map<String,String> userMap = new HashMap<>();
+            userMap.put("user_id",userId);
+            String userKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_S, userMap);
+            if(jedis.exists(userKey)){//如果key存在那么就抛异常
+                throw new QNLiveException("130005");//发送太频繁
+            }else{
+                jedis.setex(userKey,60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
+            }
+            String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//判断日期 一天三次
+            if(jedis.exists(dayKey)){
+                Map<String,String> redisMap = JSON.parseObject(jedis.get(dayKey), new TypeReference<Map<String, String>>(){});
+                if(Integer.parseInt(redisMap.get("count"))==3){
+                    throw new QNLiveException("130007");//发送太频繁
+                }else{
+                    int count = Integer.parseInt(redisMap.get("count")) + 1;
+
+                    int expireTime = (int) (System.currentTimeMillis()/1000 - Long.parseLong(redisMap.get("timestamp"))) ;
+
+                    jedis.setex(dayKey,
+                            86410 - expireTime , "{'timestamp':'"+redisMap.get("timestamp")+"','count':'"+count+"'}");
+                }
+            }else{
+                jedis.setex(dayKey,86400,"{'timestamp':'"+System.currentTimeMillis()/1000+"','count':'1'}");//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
+            }
+
             String code = RandomUtil.createRandom(true, 4);   //4位 生成随机的效验码
+            String message = String.format("您的短信验证码:%s，请及时完成验证。",code);
 
-            //TODO 把手机号码和userid还有效验码 存入缓存当中
+            String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, userMap);//存入缓存中
+            jedis.setex(codeKey,20*60,code);
 
+            Map<String,String> phoneMap = new HashMap<>();
+            phoneMap.put("code",code);
+            String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);
+            jedis.setex(phoneKey,20*60,phoneNum);
 
-
+            String result = SendMsgUtil.sendMsgCode(phoneNum, message);
+            logger.info("【梦网】（" + phoneNum + "）发送短信内容（" + message + "）返回结果：" + result);
+            if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
+                throw new QNLiveException("130006");
+            }
         }else{
             throw new QNLiveException("130001");
         }
@@ -3026,5 +3063,4 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        }
 //        return resMap;
 //    }
-
 }
