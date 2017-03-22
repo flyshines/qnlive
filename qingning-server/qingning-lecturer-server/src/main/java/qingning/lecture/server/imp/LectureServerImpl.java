@@ -2501,17 +2501,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             } else {//不存在accessTokenMap
                 jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
             }
-            String errCode = jsonObj.get("errcode").toString();
-            if (errCode != null && !errCode.equals("0")) {
-                log.error("获取微信AccessToken失败-----------"+jsonObj);
-            } else {
-                long expiresIn = jsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-                long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
-                String access_token = jsonObj.getString("component_access_token");//第三方平台access_token
-                Map<String, String> accessMap = new HashMap<>();
-                accessMap.put("component_access_token", access_token);//存入redis
-                accessMap.put("expires_in", String.valueOf(expiresTimeStamp));//存入redis
-                jedis.hmset(Constants.SERVICE_NO_ACCESS_TOKEN, accessMap);
+            if (jsonObj != null) { //需要再次刷新数据
+                String errCode = jsonObj.get("errcode").toString();
+                if (errCode != null && !errCode.equals("0")) {
+                    log.error("获取微信AccessToken失败-----------"+jsonObj);
+                } else {
+                    long expiresIn = jsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+                    long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
+                    String access_token = jsonObj.getString("component_access_token");//第三方平台access_token
+                    Map<String, String> accessMap = new HashMap<>();
+                    accessMap.put("component_access_token", access_token);//存入redis
+                    accessMap.put("expires_in", String.valueOf(expiresTimeStamp));//存入redis
+                    jedis.hmset(Constants.SERVICE_NO_ACCESS_TOKEN, accessMap);
+                }
             }
         } else if (type.equals("2")) {//授权成功
 
