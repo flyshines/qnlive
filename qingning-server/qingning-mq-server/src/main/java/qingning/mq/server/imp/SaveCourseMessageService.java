@@ -33,12 +33,20 @@ public class SaveCourseMessageService extends AbstractMsgService{
 		//批量读取缓存中的内容
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);
+		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);//COURSE:{course_id}:MESSAGE_LIST
+
 
 		Jedis jedisObject = jedisUtils.getJedis();
+
+		if(jedisObject.exists(messageListKey)){
+			log.error("出现错误,没有在缓存中查到message");
+			return ;
+		}
+
 		//1.从缓存中查询该课程的消息列表
 		Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
 		if(messageIdList == null || messageIdList.size() == 0){
+			log.error("没有拿到值");
 			return;
 		}
 
@@ -63,10 +71,13 @@ public class SaveCourseMessageService extends AbstractMsgService{
 				for(Response<Map<String, String>> redisResponse : redisResponseList){
 					Map<String,String> messageStringMap = redisResponse.get();
 					Map<String,Object> messageObjectMap = new HashMap<>();
-					if(messageStringMap.get("message_id") == null){
+					if(messageStringMap.get("message_imid") == null){
 						return;
 					}
-					messageObjectMap.put("message_id", messageStringMap.get("message_id"));
+					if(!MiscUtils.isEmpty(messageStringMap.get("message_id"))){
+						messageObjectMap.put("message_id", messageStringMap.get("message_id"));
+					}
+
 					messageObjectMap.put("course_id", messageStringMap.get("course_id"));
 					messageObjectMap.put("message_url", messageStringMap.get("message_url"));
 					messageObjectMap.put("message", messageStringMap.get("message"));
