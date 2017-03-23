@@ -126,7 +126,6 @@ public class SaveCourseMessageService extends AbstractMsgService{
 						messageObjectMap.put("message_imid",MiscUtils.getUUId());
 					}
 
-
 					messageObjectMap.put("message_pos", messagePos++);
 					messageList.add(messageObjectMap);
 				}

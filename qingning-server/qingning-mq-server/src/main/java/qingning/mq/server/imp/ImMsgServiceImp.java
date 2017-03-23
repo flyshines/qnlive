@@ -167,29 +167,30 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message_type", "1");
 					startInformation.put("send_type", "5");//5.开始/结束消息
 					startInformation.put("message_imid",MiscUtils.getUUId());
+					startInformation.put("message_id",startInformation.get("message_imid"));
 					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
 					messageMap.put("send_time", System.currentTimeMillis());
 					messageMap.put("create_time", System.currentTimeMillis());
 					messageMap.put("information",startInformation);
-					messageMap.put("mid",MiscUtils.getUUId());
+					messageMap.put("mid",startInformation.get("message_imid"));
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
 
-					startInformation.put("creator_id",courseMap.get("lecturer_id"));
-					startInformation.put("message_id",messageMap.get("mid"));
-					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
-					//1.将聊天信息id插入到redis zsort列表中
-					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
-					//添加到老师发送的集合中
-					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_imid"));
-
-					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
-					Map<String,String> result = new HashMap<String,String>();
-					MiscUtils.converObjectMapToStringMap(startInformation, result);
-					jedis.hmset(messageKey, result);
+//					startInformation.put("creator_id",courseMap.get("lecturer_id"));
+//					startInformation.put("message_id",messageMap.get("mid"));
+//					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
+//					//1.将聊天信息id插入到redis zsort列表中
+//					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
+//					//添加到老师发送的集合中
+//					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+//					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_imid"));
+//
+//					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
+//					Map<String,String> result = new HashMap<String,String>();
+//					MiscUtils.converObjectMapToStringMap(startInformation, result);
+//					jedis.hmset(messageKey, result);
 
 					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 					TemplateData first = new TemplateData();
@@ -317,7 +318,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		double createTime = Double.parseDouble(information.get("create_time").toString());
 
 		//1.将聊天信息id插入到redis zsort列表中
-		jedis.zadd(messageListKey, createTime, messageId);
+		jedis.zadd(messageListKey, createTime, imid);
 
 		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问
 		//4.打赏信息 5.课程开始 6结束消息 7讲师互动
@@ -612,7 +613,6 @@ public class ImMsgServiceImp implements ImMsgService {
 					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
 				} 
 			} 
-    	
     }
 
 	//根据course_id和消息id对重复消息进行过滤
