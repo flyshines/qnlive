@@ -96,7 +96,7 @@
 				<entry key="130005" value="短信发送太频繁"/>
 				<entry key="130006" value="验证码发送失败"/>
                 <entry key="130007" value="验证码每天只能发送3次"/>
-
+                <entry key="130008" value="电话号码已绑定直播间"/>
 				<entry key="140001" value="上传用户数据失败"/>
 			</map>
 		</property>

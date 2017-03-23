@@ -2235,6 +2235,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String phoneNum = map.get("phone");//手机号
+        if(CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
+            throw new QNLiveException("130008");
+        }
         String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
             Jedis jedis = jedisUtils.getJedis();
@@ -2507,9 +2510,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             roomMap.put("user_id",userId);//用户id
             Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
-                resultMap.put("follow_status", "0");
-            } else {
                 resultMap.put("follow_status", "1");
+            } else {
+                resultMap.put("follow_status", "0");
             }
         }
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
