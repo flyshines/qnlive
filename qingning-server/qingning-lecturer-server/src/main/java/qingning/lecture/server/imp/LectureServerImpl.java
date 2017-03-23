@@ -2938,6 +2938,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
         String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
+        if(!jedis.exists(codeKey)){
+            throw new QNLiveException("130009");
+        }
         String code = jedis.get(codeKey);
         if(!code.equals(verification_code)){//进行判断
             throw new QNLiveException("130002");

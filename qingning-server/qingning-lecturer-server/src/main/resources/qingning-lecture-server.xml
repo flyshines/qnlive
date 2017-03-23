@@ -705,6 +705,7 @@
 				</auth>
 				<inputs>
 					<param name="verification_code" type="string" require="Y,00010"/>
+					<param name="room_id" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>

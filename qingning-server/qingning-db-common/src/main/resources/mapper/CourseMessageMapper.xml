@@ -21,14 +21,16 @@
     limit #{page_count}
   </select>
 
+
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
-    message_url, message_question,audio_image, audio_time,
-    message_pos, message_type, send_type,message_imid,status,
-    creator_id, create_time)
+    message_url, message_question, audio_time,
+    message_pos, message_type, send_type,
+    creator_id, create_time,audio_image,message_imid,message_status
+    )
     values
-    <foreach collection="list" item="item" index="index" separator="," >
-      (#{item.message_id}, #{item.course_id},
+    <foreach collection ="list" item="item" index= "index" separator =",">
+      (#{item.message_id},#{item.course_id},
       <if test="item.message != null" >
         #{item.message},
       </if>
@@ -47,22 +49,13 @@
       <if test="item.message_question == null" >
         null,
       </if>
-      <if test="item.audio_image != null">
-        #{item.audio_image},
-      </if>
-      <if test="item.audio_image == null">
-        null,
-      </if>
-      #{item.audio_time},
-      #{item.message_pos},
-      #{item.message_type},
-      #{item.send_type},
-      #{item.message_imid},
-      #{item.status},
-      #{item.creator_id},
-      #{item.create_time})
+      #{item.audio_time},#{item.message_pos},
+      #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time},
+      #{item.audio_image},#{item.message_imid},#{item.message_status})
     </foreach>
   </insert>
+
+
 
   <select id="findCourseMessageMaxPos" resultType="hashmap" parameterType="string" >
     select * from t_course_message cm where cm.course_id = #{course_id} order by message_pos desc limit 1

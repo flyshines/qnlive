@@ -2235,6 +2235,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String phoneNum = map.get("phone");//手机号
+        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
+            throw new QNLiveException("130008");
+        }
         String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
             Jedis jedis = jedisUtils.getJedis();
@@ -2244,7 +2247,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(jedis.exists(userKey)){//如果key存在那么就抛异常
                 throw new QNLiveException("130005");//发送太频繁
             }else{
-                jedis.setex(userKey,60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
+                jedis.setex(userKey,5*60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
             }
             String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//判断日期 一天三次
             if(jedis.exists(dayKey)){
@@ -2507,9 +2510,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             roomMap.put("user_id",userId);//用户id
             Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
-                resultMap.put("follow_status", "0");
-            } else {
                 resultMap.put("follow_status", "1");
+            } else {
+                resultMap.put("follow_status", "0");
             }
         }
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));

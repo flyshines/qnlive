@@ -677,5 +677,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return rewardConfigurationMapper.findRewardConfigurationList();
 	}
 
-
+	@Override
+	public Map<String,Object> findByPhone(String phone){
+		return userMapper.findByPhone(phone);
+	}
 }

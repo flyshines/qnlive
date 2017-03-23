@@ -111,4 +111,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findRewardConfigurationList();
+
+	Map<String,Object> findByPhone(String phone);
 }
