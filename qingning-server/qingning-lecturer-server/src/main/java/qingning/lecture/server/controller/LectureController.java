@@ -670,8 +670,10 @@ public class LectureController extends AbstractController {
 		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-		String redirectUrl = (String) resultMap.get("redirectUrl");
-		resp.sendRedirect(redirectUrl);
+		Object redirectUrl =  resultMap.get("redirectUrl");
+		if (redirectUrl != null) {
+			resp.sendRedirect(redirectUrl.toString());
+		}
 	}
 
 	@RequestMapping(value="/lecturer/wechat/tobinding",method=RequestMethod.GET)
