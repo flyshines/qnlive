@@ -2592,12 +2592,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //获取预授权码pre_auth_code 进入微信平台
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
         JSONObject jsonObj = WeiXinUtil.getPreAuthCode(access_token);
-        String pre_auth_code = jsonObj.getString("pre_auth_code");//预授权码 有效期为20分
+
+        String errCode = jsonObj.get("errcode").toString();
 
         //重定向微信URL
         Map<String,Object> result = new HashMap<String,Object>();
-        result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
-
+        if (errCode != null && !errCode.equals("0")) {
+            log.error("获取微信AccessToken失败-----------"+jsonObj);
+        } else {
+            String pre_auth_code = jsonObj.getString("pre_auth_code");//预授权码 有效期为20分
+            result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
+        }
         return result;
     }
 
