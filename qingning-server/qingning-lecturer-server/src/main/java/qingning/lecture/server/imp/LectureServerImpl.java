@@ -226,8 +226,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         RequestEntity request = new RequestEntity();                   
         request.setParam(map); 
         Map<String,String> lectureInfo = CacheUtils.readLecturer(userId, request, readLecturerOperation, jedisUtils);
+        Map<String,Object> userInfo = lectureModuleServer.findUserInfoByUserId(userId);
         long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
-        if(MiscUtils.isEmpty(lectureInfo.get("phone_number"))){//如果没有手机号就直接返回
+        if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有手机号就直接返回
             resultMap.put("phone_number", "");
         }else{
             resultMap.put("phone_number", lectureInfo.get("phone_number"));
@@ -2962,9 +2963,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = new HashMap<>();
         map.put("user_id",userid);
         map.put("phone_number",phone);
+
+
+
+
         lectureModuleServer.updateUser(map);
 
         lectureModuleServer.updateLoginInfo(map);
+
+
+
+
     }
 
 
