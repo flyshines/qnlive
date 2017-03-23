@@ -2235,7 +2235,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String phoneNum = map.get("phone");//手机号
-        if(CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
+        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
             throw new QNLiveException("130008");
         }
         String ipAdress = map.get("ipAdress");//ip地址
