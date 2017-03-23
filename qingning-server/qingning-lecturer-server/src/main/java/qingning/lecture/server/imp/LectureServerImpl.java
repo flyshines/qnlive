@@ -231,7 +231,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有手机号就直接返回
             resultMap.put("phone_number", "");
         }else{
-            resultMap.put("phone_number", lectureInfo.get("phone_number"));
+            resultMap.put("phone_number", userInfo.get("phone_number"));
         }
         //0查询我创建的直播间列表
         if(queryType.equals("0")){
