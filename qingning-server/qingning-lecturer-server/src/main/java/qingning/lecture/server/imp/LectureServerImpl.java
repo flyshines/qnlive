@@ -640,7 +640,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
         startLecturerMessageInformation.put("message_type", "1");
         startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
-        startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
+        startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
         startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
         startLecturerMessageInformation.put("send_type","0");
         startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
@@ -650,7 +650,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         startLecturerMessageMap.put("send_time", System.currentTimeMillis());
         startLecturerMessageMap.put("create_time", System.currentTimeMillis());
         startLecturerMessageMap.put("information",startLecturerMessageInformation);
-        startLecturerMessageMap.put("mid",MiscUtils.getUUId());
+        startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_imid"));
         String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
         IMMsgUtil.sendMessageInIM(timerMap.get("im_course_id").toString(), startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(timerMap.get("lecturer_id").toString()).get("m_user_id").toString());//发送信息
         return resultMap;
@@ -878,7 +878,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("end_lecturer_message"));
             startLecturerMessageInformation.put("message_type", "1");
             startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
-            startLecturerMessageInformation.put("message_imid",MiscUtils.getUUId());
+            startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
             startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
             startLecturerMessageInformation.put("send_type","0");
             startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
@@ -888,7 +888,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             startLecturerMessageMap.put("send_time", System.currentTimeMillis());
             startLecturerMessageMap.put("create_time", System.currentTimeMillis());
             startLecturerMessageMap.put("information",startLecturerMessageInformation);
-            startLecturerMessageMap.put("mid",MiscUtils.getUUId());
+            startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_imid"));
             String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(userInfo.get("user_id").toString()).get("m_user_id").toString());//发送信息
 
@@ -905,13 +905,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             infomation.put("message", message);
             infomation.put("message_type", "1");
             infomation.put("send_type", "6");//5.结束消息
-            infomation.put("message_imid",MiscUtils.getUUId());
+            infomation.put("message_id",MiscUtils.getUUId());
+            infomation.put("message_imid",infomation.get("message_id"));
             infomation.put("create_time", currentTime);
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");
             messageMap.put("send_time",currentTime);
             messageMap.put("information",infomation);
-            messageMap.put("mid",MiscUtils.getUUId());
+            messageMap.put("mid",infomation.get("message_imid"));
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 

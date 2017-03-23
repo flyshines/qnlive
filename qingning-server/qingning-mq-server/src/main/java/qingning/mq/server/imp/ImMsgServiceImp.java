@@ -167,13 +167,14 @@ public class ImMsgServiceImp implements ImMsgService {
 					startInformation.put("message_type", "1");
 					startInformation.put("send_type", "5");//5.开始/结束消息
 					startInformation.put("message_imid",MiscUtils.getUUId());
+					startInformation.put("message_id",startInformation.get("message_imid"));
 					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
 					Map<String,Object> messageMap = new HashMap<>();
 					messageMap.put("msg_type","1");
 					messageMap.put("send_time", System.currentTimeMillis());
 					messageMap.put("create_time", System.currentTimeMillis());
 					messageMap.put("information",startInformation);
-					messageMap.put("mid",MiscUtils.getUUId());
+					messageMap.put("mid",startInformation.get("message_imid"));
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
 
