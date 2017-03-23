@@ -2539,7 +2539,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return new HashMap<String,Object>();
         }
 
-        HashMap<String, Object> authauthorizer_info_map = (HashMap<String, Object>) authJsonObj.get("authorization_info");
+        Map<String, Object> authauthorizer_info_map = (Map<String, Object>) authJsonObj.get("authorization_info");
 
         String authorizer_appid = authauthorizer_info_map.get("authorizer_appid").toString();
 
@@ -2552,7 +2552,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return new HashMap<String,Object>();
         }
 
-        HashMap<String, Object> authorizer_info_base_map = (HashMap<String, Object>) serviceNoJsonObj.get("authorizer_info");
+        Map<String, Object> authorizer_info_base_map = (Map<String, Object>) serviceNoJsonObj.get("authorizer_info");
 
         //授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
         HashMap<String, String> typeInfo = (HashMap<String, String>) authorizer_info_base_map.get("service_type_info");
