@@ -29,7 +29,7 @@
     creator_id, create_time,audio_image,message_imid,message_status
     )
     values
-    <foreach collection="list" item="item" index="index" separator=",">
+    <foreach collection ="list" item="item" index= "index" separator =",">
       (#{item.message_id},#{item.course_id},
       <if test="item.message != null" >
         #{item.message},

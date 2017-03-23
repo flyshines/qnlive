@@ -72,18 +72,40 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					}
 
 					messageObjectMap.put("course_id", messageStringMap.get("course_id"));
-					messageObjectMap.put("message_url", messageStringMap.get("message_url"));
-					messageObjectMap.put("message", messageStringMap.get("message"));
-					messageObjectMap.put("message_question", messageStringMap.get("message_question"));
+
+
+					if(!MiscUtils.isEmpty(messageStringMap.get("message"))){
+						messageObjectMap.put("message", messageStringMap.get("message"));
+					}else{
+						messageObjectMap.put("message", null);
+					}
+
+					if(!MiscUtils.isEmpty(messageStringMap.get("message_url"))){
+						messageObjectMap.put("message_url", messageStringMap.get("message_url"));
+					}else{
+						messageObjectMap.put("message_url",null);
+					}
+
+					if(!MiscUtils.isEmpty(messageStringMap.get("message_question"))){
+						messageObjectMap.put("message_question", messageStringMap.get("message_question"));
+					}else{
+						messageObjectMap.put("message_question", null);
+					}
+
+
 					if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
 						messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));
 					}else {
 						messageObjectMap.put("audio_time", 0);
 					}
-					messageObjectMap.put("message_pos", messagePos++);
+
+
 					messageObjectMap.put("message_type", messageStringMap.get("message_type"));
 					messageObjectMap.put("send_type", messageStringMap.get("send_type"));
+
+
 					messageObjectMap.put("creator_id", messageStringMap.get("creator_id"));
+
 					if(!MiscUtils.isEmpty(messageStringMap.get("create_time"))){
 						Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
 						messageObjectMap.put("create_time", createTime);
@@ -91,16 +113,21 @@ public class SaveCourseMessageService extends AbstractMsgService{
 					if(!MiscUtils.isEmpty(messageStringMap.get("audio_image"))){
 						messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
 					}else{
-
+						messageObjectMap.put("audio_image", null);
 					}
 					if(!MiscUtils.isEmpty(messageStringMap.get("message_status"))){
 						messageObjectMap.put("message_status",messageStringMap.get("message_status"));
 					}else{
 						messageObjectMap.put("message_status",0);
 					}
+					if(!MiscUtils.isEmpty(messageStringMap.get("message_imid"))){
+						messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
+					}else{
+						messageObjectMap.put("message_imid",MiscUtils.getUUId());
+					}
 
-					messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
 
+					messageObjectMap.put("message_pos", messagePos++);
 					messageList.add(messageObjectMap);
 				}
 			}
