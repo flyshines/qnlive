@@ -543,11 +543,10 @@ public class LectureController extends AbstractController {
 	 * @param version 版本
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/lecturer/verifyVerificationCode", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity  verifyVerificationCode(
 			@RequestParam(value = "verification_code") String verification_code,
-			@RequestParam(value = "room_id") String room_id,
+			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version)throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null);
