@@ -93,10 +93,16 @@ public interface ILectureModuleServer {
 	 * 插入服务号的信息
 	 */
 	int insertServiceNoInfo(Map<String, String> map);
+	/**
+	 * 插入服务号的信息 讲师id
+	 */
+	int updateServiceNoLecturerId(Map<String, String> map);
 
-	int updateServiceNoInfo(Map<String, String> map);
+	//根据appid查找服务号信息
+	Map<String, Object> findServiceNoInfoByAppid(String authorizer_appid);
 
-	Map<String, Object> findServiceNoInfoByLectureId(String lectureId);
+	//根据lecturerId查找服务号信息
+	Map<String, Object> findServiceNoInfoByLecturerId(String lecturerId);
 
 	/**
 	 * 查找机器人

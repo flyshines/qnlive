@@ -529,13 +529,18 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public int updateServiceNoInfo(Map<String, String> map) {
-		return lecturerMapper.updateServiceNoInfo(map);
+	public int updateServiceNoLecturerId(Map<String, String> map) {
+		return lecturerMapper.updateServiceNoLecturerId(map);
 	}
 
 	@Override
-	public Map<String, Object> findServiceNoInfoByLectureId(String lectureId) {
-		return lecturerMapper.findServiceNoInfoByLectureId(lectureId);
+	public Map<String, Object> findServiceNoInfoByAppid(String authorizer_appid) {
+		return lecturerMapper.findServiceNoInfoByLecturerId(authorizer_appid);
+	}
+
+	@Override
+	public Map<String, Object> findServiceNoInfoByLecturerId(String lectureId) {
+		return lecturerMapper.findServiceNoInfoByLecturerId(lectureId);
 	}
 
 	@Override

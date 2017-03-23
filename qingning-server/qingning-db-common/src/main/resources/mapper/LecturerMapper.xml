@@ -154,11 +154,23 @@
       <if test="authorizer_refresh_token != null">
         authorizer_appid,
       </if>
-      <if test="expires_in != null">
-        expires_in,
+      <if test="expires_time != null">
+        expires_time,
       </if>
-      <if test="qrcode_url != null">
-        qrcode_url,
+      <if test="create_time != null">
+        create_time,
+      </if>
+      <if test="qr_code != null">
+        qr_code,
+      </if>
+      <if test="nick_name != null">
+        nick_name,
+      </if>
+      <if test="head_img != null">
+        head_img,
+      </if>
+      <if test="service_type_info != null">
+        service_type_info,
       </if>
       <if test="lecturer_id != null">
         lecturer_id,
@@ -169,43 +181,51 @@
         #{authorizer_appid},
       </if>
       <if test="authorizer_access_token != null">
-        #{authorizer_appid},
+        #{authorizer_access_token},
       </if>
       <if test="authorizer_refresh_token != null">
-        #{authorizer_appid},
+        #{authorizer_refresh_token},
       </if>
-      <if test="expires_in != null">
-        #{authorizer_appid},
+      <if test="expires_time != null">
+        #{expires_time},
       </if>
-      <if test="qrcode_url != null">
-        #{authorizer_appid},
+      <if test="create_time != null">
+        #{create_time},
+      </if>
+      <if test="qr_code != null">
+        #{qr_code},
+      </if>
+      <if test="nick_name != null">
+        #{nick_name},
+      </if>
+      <if test="head_img != null">
+        #{head_img},
+      </if>
+      <if test="service_type_info != null">
+        #{service_type_info},
       </if>
       <if test="lecturer_id != null">
-        #{authorizer_appid},
+        #{lecturer_id},
       </if>
     </trim>
   </insert>
 
-  <update id="updateServiceNoInfo" parameterType="hashmap">
+  <update id="updateServiceNoLecturerId" parameterType="hashmap">
     update t_wechat_service_no
     <set>
-      <if test="authorizer_appid != null">
-        authorizer_appid = #{authorizer_appid}
-      </if>
-      <if test="authorizer_access_token != null">
-        authorizer_access_token = #{authorizer_access_token}
-      </if>
-      <if test="authorizer_refresh_token != null">
-        authorizer_refresh_token = #{authorizer_refresh_token}
-      </if>
-      <if test="expiresTimeStamp != null">
-        expiresTimeStamp = #{expiresTimeStamp}
+      <if test="lecturer_id != null">
+        lecturer_id = #{lecturer_id}
       </if>
     </set>
-    WHERE lecturer_id = #{lecturer_id}
+    WHERE authorizer_appid = #{authorizer_appid}
   </update>
 
-  <select id="findServiceNoInfoByLectureId" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findServiceNoInfoByAppid" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_wechat_service_no
+    where authorizer_appid = #{authorizer_appid}
+  </select>
+
+  <select id="findServiceNoInfoByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_wechat_service_no
     where lecturer_id = #{lecturer_id}
   </select>

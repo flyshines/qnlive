@@ -2541,16 +2541,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return new HashMap<String,Object>();
         }
 
-        //存储公众号的授权信息
-        Map<String, String> authInfoMap = new HashMap<>();
         String authorizer_appid = authJsonObj.getString("authorizer_appid");
-
-        authInfoMap.put("authorizer_appid", authorizer_appid);
-        authInfoMap.put("authorizer_access_token", authJsonObj.getString("authorizer_access_token"));
-        authInfoMap.put("authorizer_refresh_token", authJsonObj.getString("authorizer_refresh_token"));
-        long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-        long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
-        authInfoMap.put("expires_in", String.valueOf(expiresTimeStamp));
 
         //获取公众号的头像 昵称 QRCode等相关信息
         JSONObject serviceNoJsonObj = WeiXinUtil.getServiceAuthAccountInfo(access_token, authorizer_appid);
@@ -2559,39 +2550,51 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
             return new HashMap<String,Object>();
         }
-        authInfoMap.put("qr_code", serviceNoJsonObj.getString("qrcode_url"));
-
-        //获取讲师id
-//        Map<String,String> lecturer = CacheUtils.readLecturer(user_id, reqEntity, readLecturerOperation, jedisUtils);
-//        authInfoMap.put("lecturer_id", lecturer.get("lecturer_id"));
-        //TODO  此处逻辑还未完善
-        authInfoMap.put("lecturer_id", "99999999999");
-        //服务号信息插入数据库
-        lectureModuleServer.insertServiceNoInfo(authInfoMap);
-
-        Map<String,Object> query = new HashMap<String,Object>();
-//        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturer.get("lecturer_id"));
-
-        //TODO  此处逻辑还未完善
-        query.put("lecturer_id", "99999999999");
-        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
-        jedis.hmset(serviceNoKey, authInfoMap);
 
         //授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
-        String service_type_info = serviceNoJsonObj.getString("service_type_info");
+        HashMap<String, String> typeInfo = (HashMap<String, String>) serviceNoJsonObj.get("service_type_info");
+        HashMap<String, String> verifyInfo = (HashMap<String, String>) serviceNoJsonObj.get("verify_type_info");
+
         //-1代表未认证，0代表微信认证，1代表新浪微博认证，2代表腾讯微博认证，3代表已资质认证通过但还未通过名称认证，
         // 4代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
         // 5代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
-        String verify_type_info = serviceNoJsonObj.getString("verify_type_info");
 
-        //返回给客户端的URL
+
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
-        if (service_type_info.equals("2") && !verify_type_info.equals("-1")) {
-            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
+        if (typeInfo.get("id").equals("2") && !verifyInfo.get("id").equals("-1")) {
+//            //存储公众号的授权信息
+//            Map<String, String> authInfoMap = new HashMap<>();
+//
+//            authInfoMap.put("authorizer_appid", authorizer_appid);
+//            authInfoMap.put("authorizer_access_token", authJsonObj.getString("authorizer_access_token"));
+//            authInfoMap.put("authorizer_refresh_token", authJsonObj.getString("authorizer_refresh_token"));
+//            long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+//            long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
+//            authInfoMap.put("expires_time", String.valueOf(expiresTimeStamp));
+//            authInfoMap.put("create_time", String.valueOf(System.currentTimeMillis()));
+
+//            authInfoMap.put("nick_name", serviceNoJsonObj.getString("nick_name"));
+//            authInfoMap.put("head_img", serviceNoJsonObj.getString("head_img"));
+//            authInfoMap.put("service_type_info", service_type_info);
+//            authInfoMap.put("qr_code", serviceNoJsonObj.getString("qr_code"));
+//
+//            //先获取部分信息 还未和直播间绑定起来
+//            //服务号信息插入数据库
+//            lectureModuleServer.insertServiceNoInfo(authInfoMap);
+//
+//            //重定向成功页面 然后扫码登录 绑定直播间
+//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
+            result.put("redirectUrl", "http://www.baidu.com");
         } else {
-            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
+//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
+            result.put("redirectUrl", "http://www.sogou.com");
         }
         return result;
+
+//        Map<String,Object> query = new HashMap<String,Object>();
+//        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, "lecturer_id");
+//        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
+//        jedis.hmset(serviceNoKey, authInfoMap);
     }
 
     @FunctionName("bindServiceNo")
