@@ -1076,11 +1076,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     
             //        String message = payUserMap.get("nick_name") + "打赏了" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "元";
                     HashMap<String,String> payMessageMap = new HashMap<>();
-                    payMessageMap.put("pay_user",payUserMap.get("nick_name"));
-                    payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message"));
-                    payMessageMap.put("collect_user",lecturerMap.get("nick_name"));
-                    payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");
-                    payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit"));
+                    payMessageMap.put("pay_user",payUserMap.get("nick_name"));//打赏人名字
+                    payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message"));//打赏信息
+                    payMessageMap.put("collect_user",lecturerMap.get("nick_name"));//被打赏人的名字
+                    payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");//钱
+                    payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit"));//金币单元
                     String message = JSON.toJSONString(payMessageMap);
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
