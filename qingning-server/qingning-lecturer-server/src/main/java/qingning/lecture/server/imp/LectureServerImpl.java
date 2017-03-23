@@ -653,10 +653,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         startLecturerMessageMap.put("mid",MiscUtils.getUUId());
         String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
         IMMsgUtil.sendMessageInIM(timerMap.get("im_course_id").toString(), startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(timerMap.get("lecturer_id").toString()).get("m_user_id").toString());//发送信息
-        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
-        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
-        jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_id"));
-        jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startLecturerMessageInformation.get("message_id"));
         return resultMap;
     }
 

@@ -93,9 +93,9 @@ public class ImMsgServiceImp implements ImMsgService {
 	@SuppressWarnings("unchecked")
 	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----聊天消息------"+JSON.toJSONString(imMessage));
-		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
-			return;
-		}
+//		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
+//			return;
+//		}
 		Map<String,Object> body = imMessage.getBody();
 		final Map<String,Object> information = (Map<String,Object>)body.get("information");//获取信息
 
