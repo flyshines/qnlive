@@ -2542,9 +2542,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
 
         //存储公众号的授权信息
-
         Map<String, String> authInfoMap = new HashMap<>();
         String authorizer_appid = authJsonObj.getString("authorizer_appid");
+
         authInfoMap.put("authorizer_appid", authorizer_appid);
         authInfoMap.put("authorizer_access_token", authJsonObj.getString("authorizer_access_token"));
         authInfoMap.put("authorizer_refresh_token", authJsonObj.getString("authorizer_refresh_token"));
@@ -2554,6 +2554,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //获取公众号的头像 昵称 QRCode等相关信息
         JSONObject serviceNoJsonObj = WeiXinUtil.getServiceAuthAccountInfo(access_token, authorizer_appid);
+        errCode = authJsonObj.get("errcode");
+        if (errCode != null ) {
+            log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
+            return new HashMap<String,Object>();
+        }
         authInfoMap.put("qr_code", serviceNoJsonObj.getString("qrcode_url"));
 
         //获取讲师id
