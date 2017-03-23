@@ -317,7 +317,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		double createTime = Double.parseDouble(information.get("create_time").toString());
 
 		//1.将聊天信息id插入到redis zsort列表中
-		jedis.zadd(messageListKey, createTime, messageId);
+		jedis.zadd(messageListKey, createTime, imid);
 
 		//消息回复类型:0:讲师讲解 1：讲师回答 2 用户互动 3 用户提问
 		//4.打赏信息 5.课程开始 6结束消息 7讲师互动
