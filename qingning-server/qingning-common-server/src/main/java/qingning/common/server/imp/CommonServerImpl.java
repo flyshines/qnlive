@@ -2247,7 +2247,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(jedis.exists(userKey)){//如果key存在那么就抛异常
                 throw new QNLiveException("130005");//发送太频繁
             }else{
-                jedis.setex(userKey,60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
+                jedis.setex(userKey,5*60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
             }
             String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//判断日期 一天三次
             if(jedis.exists(dayKey)){
