@@ -910,9 +910,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             infomation.put("create_time", currentTime);
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");
-            messageMap.put("send_time",currentTime);
+            messageMap.put("send_time", System.currentTimeMillis());
+            messageMap.put("create_time", System.currentTimeMillis());
             messageMap.put("information",infomation);
-            messageMap.put("mid",infomation.get("message_imid"));
+            messageMap.put("mid",infomation.get("message_id"));
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
