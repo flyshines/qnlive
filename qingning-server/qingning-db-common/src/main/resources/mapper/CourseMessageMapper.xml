@@ -24,7 +24,7 @@
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
     message_url, message_question,audio_image, audio_time,
-    message_pos, message_type, send_type,message_imid,status,
+    message_pos, message_type,send_type,message_imid,message_status,
     creator_id, create_time)
     values
     <foreach collection="list" item="item" index="index" separator="," >
@@ -58,7 +58,7 @@
       #{item.message_type},
       #{item.send_type},
       #{item.message_imid},
-      #{item.status},
+      #{item.message_status},
       #{item.creator_id},
       #{item.create_time})
     </foreach>

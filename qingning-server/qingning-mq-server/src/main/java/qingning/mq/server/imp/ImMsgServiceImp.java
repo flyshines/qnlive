@@ -93,9 +93,9 @@ public class ImMsgServiceImp implements ImMsgService {
 	@SuppressWarnings("unchecked")
 	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----聊天消息------"+JSON.toJSONString(imMessage));
-		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
-			return;
-		}
+//		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
+//			return;
+//		}
 		Map<String,Object> body = imMessage.getBody();
 		final Map<String,Object> information = (Map<String,Object>)body.get("information");//获取信息
 
@@ -342,7 +342,7 @@ public class ImMsgServiceImp implements ImMsgService {
   				Map<String, Object> map1 = JSON.parseObject(information.get("message_question").toString(), HashMap.class);
 				map1.put("course_id",information.get("course_id"));
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
-				jedis.hset(key,"status","1");
+				jedis.hset(key,"message_status","1");
 
 				//<editor-fold desc="暂时还没测试">
 				//给学生发送推送消息
@@ -359,7 +359,6 @@ public class ImMsgServiceImp implements ImMsgService {
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
 		if("6".equals(information.get("send_type"))){
-			log.info("=================================================================结束课程存消息======================================================================================");
 			//1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
@@ -368,7 +367,6 @@ public class ImMsgServiceImp implements ImMsgService {
             try {
             	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
             	if(saveCourseMessageService != null){
-					log.info("=================================================================数据进行落地======================================================================================");
             		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
