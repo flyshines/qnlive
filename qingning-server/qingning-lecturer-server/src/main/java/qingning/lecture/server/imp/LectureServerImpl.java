@@ -2500,8 +2500,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jsonObj = WeiXinUtil.getComponentAccessToken(appidOrTicket);
             }
             if (jsonObj != null) { //需要再次刷新数据
-                String errCode = jsonObj.get("errcode").toString();
-                if (errCode != null && !errCode.equals("0")) {
+                Object errCode = jsonObj.get("errcode");
+                if (errCode != null ) {
                     log.error("获取微信AccessToken失败-----------"+jsonObj);
                 } else {
                     long expiresIn = jsonObj.getLongValue("expires_in")*1000;//有效毫秒值
@@ -2535,6 +2535,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
 
         JSONObject authJsonObj = WeiXinUtil.getServiceAuthInfo(access_token, auth_code);
+        Object errCode = authJsonObj.get("errcode");
+        if (errCode != null ) {
+            log.error("微信授权回调 获取服务号授权信息失败-----------"+authJsonObj);
+            return new HashMap<String,Object>();
+        }
 
         //存储公众号的授权信息
 
@@ -2593,12 +2598,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
         JSONObject jsonObj = WeiXinUtil.getPreAuthCode(access_token);
 
-        String errCode = jsonObj.get("errcode").toString();
-
         //重定向微信URL
         Map<String,Object> result = new HashMap<String,Object>();
-        if (errCode != null && !errCode.equals("0")) {
-            log.error("获取微信AccessToken失败-----------"+jsonObj);
+        Object errCode = jsonObj.get("errcode");
+        if (errCode != null ) {
+            log.error("获取微信预授权码失败-----------"+jsonObj);
         } else {
             String pre_auth_code = jsonObj.getString("pre_auth_code");//预授权码 有效期为20分
             result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
