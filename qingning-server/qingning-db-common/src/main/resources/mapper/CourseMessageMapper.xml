@@ -21,53 +21,7 @@
     limit #{page_count}
   </select>
 
-  <insert id="insertCourseMessageList" parameterType="list" >
-    insert into t_course_message (message_id, course_id, message,
-    message_url, message_question,audio_image, audio_time,
-    message_pos, message_type,send_type,message_imid,message_status,
-    creator_id, create_time
-    )
-    values
-    <foreach collection="list" item="item" index="index" separator="," >
-      (#{item.message_id}, #{item.course_id},
-      <if test="item.message != null" >
-        #{item.message},
-      </if>
-      <if test="item.message == null" >
-        null,
-      </if>
-      <if test="item.message_url != null" >
-        #{item.message_url},
-      </if>
-      <if test="item.message_url == null" >
-        null,
-      </if>
-      <if test="item.message_question != null" >
-        #{item.message_question},
-      </if>
-      <if test="item.message_question == null" >
-        null,
-      </if>
-      <if test="item.audio_image != null">
-        #{item.audio_image},
-      </if>
-      <if test="item.audio_image == null">
-        null,
-      </if>
-      #{item.audio_time},
-      #{item.message_pos},
-      #{item.message_type},
-      #{item.send_type},
-      #{item.message_imid},
-      #{item.message_status},
-      #{item.creator_id},
-      #{item.create_time})
-    </foreach>
-  </insert>
-  message_id, course_id, message,
-  message_url, message_question,audio_image, audio_time,
-  message_pos, message_type,send_type,message_imid,message_status,
-  creator_id, create_time
+
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
     message_url, message_question, audio_time,
