@@ -2539,11 +2539,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return new HashMap<String,Object>();
         }
 
-        String authorizer_appid = authJsonObj.getString("authorizer_appid");
+        HashMap<String, Object> authauthorizer_info_map = (HashMap<String, Object>) authJsonObj.get("authorization_info");
+
+        String authorizer_appid = authauthorizer_info_map.get("authorizer_appid").toString();
 
         //获取公众号的头像 昵称 QRCode等相关信息
         JSONObject serviceNoJsonObj = WeiXinUtil.getServiceAuthAccountInfo(access_token, authorizer_appid);
-        errCode = authJsonObj.get("errcode");
+
+        errCode = serviceNoJsonObj.get("errcode");
         if (errCode != null ) {
             log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
             return new HashMap<String,Object>();
@@ -2564,16 +2567,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //            Map<String, String> authInfoMap = new HashMap<>();
 //
 //            authInfoMap.put("authorizer_appid", authorizer_appid);
-//            authInfoMap.put("authorizer_access_token", authJsonObj.getString("authorizer_access_token"));
-//            authInfoMap.put("authorizer_refresh_token", authJsonObj.getString("authorizer_refresh_token"));
+//            authInfoMap.put("authorizer_access_token", authauthorizer_info_map.get("authorizer_access_token").toString());
+//            authInfoMap.put("authorizer_refresh_token", authauthorizer_info_map.get("authorizer_refresh_token").toString());
 //            long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
 //            long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
 //            authInfoMap.put("expires_time", String.valueOf(expiresTimeStamp));
 //            authInfoMap.put("create_time", String.valueOf(System.currentTimeMillis()));
-
+//
 //            authInfoMap.put("nick_name", serviceNoJsonObj.getString("nick_name"));
 //            authInfoMap.put("head_img", serviceNoJsonObj.getString("head_img"));
-//            authInfoMap.put("service_type_info", service_type_info);
+//            authInfoMap.put("service_type_info", typeInfo.get("id"));
 //            authInfoMap.put("qr_code", serviceNoJsonObj.getString("qr_code"));
 //
 //            //先获取部分信息 还未和直播间绑定起来

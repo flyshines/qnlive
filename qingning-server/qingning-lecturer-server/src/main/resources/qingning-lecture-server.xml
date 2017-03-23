@@ -682,10 +682,8 @@
 					<accessToken require="N" />
 				</auth>
 				<inputs>
-					<param name="auth_code" type="string" />
 				</inputs>
 				<outputs>
-					<param name="redirectUrl" type="string" />
 				</outputs>
 			</function>
 
@@ -696,9 +694,9 @@
 				<inputs>
 				</inputs>
 				<outputs>
-					<param name="redirectUrl" type="string" />
 				</outputs>
 			</function>
+
 			<function name="verifyVerificationCode">
 				<auth>
 					<accessToken require="Y" />
