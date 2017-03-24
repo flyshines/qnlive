@@ -762,7 +762,7 @@ public class CommonController extends AbstractController {
     }
 
     /**
-     * 设置课程状态
+     * 设置课程 状态
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/courses/{course_id}/courseStatus", method = RequestMethod.GET)

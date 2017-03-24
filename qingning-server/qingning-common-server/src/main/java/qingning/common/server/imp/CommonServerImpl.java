@@ -2517,6 +2517,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("follow_status", "0");
             }
         }
+
+        if(!resultMap.get("status").equals("2")){
+            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
+                resultMap.put("status",4);
+            }
+        }
+        resultMap.get("start_time");
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
         resultMap.put("room_id",courseMap.get("room_id"));
         return resultMap;

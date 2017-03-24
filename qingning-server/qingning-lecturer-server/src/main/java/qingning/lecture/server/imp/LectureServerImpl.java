@@ -872,12 +872,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String mGroupId = jedis.hget(courseKey,"im_course_id");
             Map<String, Object> userInfo = lectureModuleServer.findUserInfoByUserId(courseOwner);
             Map<String,Object> startLecturerMessageInformation = new HashMap<>();
-            startLecturerMessageInformation.put("creator_id",userInfo.get("user_id"));//发送人id
+            String imid = MiscUtils.getUUId();
+            startLecturerMessageInformation.put("creator_id",courseOwner);//发送人id
             startLecturerMessageInformation.put("course_id", reqMap.get("course_id").toString());//课程id
             startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("end_lecturer_message"));
             startLecturerMessageInformation.put("message_type", "1");
-            startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
-            startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
+            startLecturerMessageInformation.put("message_id",imid);
+            startLecturerMessageInformation.put("message_imid",imid);
             startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
             startLecturerMessageInformation.put("send_type","0");
             startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
@@ -887,9 +888,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             startLecturerMessageMap.put("send_time", System.currentTimeMillis());
             startLecturerMessageMap.put("create_time", System.currentTimeMillis());
             startLecturerMessageMap.put("information",startLecturerMessageInformation);
-            startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_imid"));
+            startLecturerMessageMap.put("mid",imid);
             String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
-            IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(userInfo.get("user_id").toString()).get("m_user_id").toString());//发送信息
+            IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(courseOwner).get("m_user_id").toString());//发送信息
 
             SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
             String str = sdf.format(courseEndTime);
