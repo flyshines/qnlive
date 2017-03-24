@@ -690,4 +690,16 @@ public class LectureController extends AbstractController {
 			resp.sendRedirect(redirectUrl.toString());
 		}
 	}
+
+	/**
+	 * PC微信登录授权回调URL
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/pcauth/redirectUrl", method = RequestMethod.GET)
+	public String pcAuthRedirect(
+			HttpServletRequest req,
+			HttpServletResponse resp) throws Exception {
+		return "success";
+	}
 }
