@@ -509,12 +509,6 @@
 					<param name="version" type="String"  require="Y,000100"/>
 				</inputs>
 				<outputs>
-					<param name="version_info" type="map">
-						<param name="version_no" type="string"/>
-						<param name="is_force" type="string"/>
-						<param name="update_desc" type="string"/>
-						<param name="version_url" type="string"/>
-					</param>
 				</outputs>
 			</function>
 			<function name="control">

@@ -201,7 +201,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      */
     @SuppressWarnings("unchecked")
     @FunctionName("getVersion")
-    public Map<String,String> getVersion (RequestEntity reqEntity) throws Exception{
+    public Map<String,Object> getVersion (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
         Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
         if(plateform != 0) {//安卓或者ios
@@ -209,7 +209,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
                 //1.先判断系统和当前version
                 if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//当前version 小于 最小需要跟新的版本
-                    return versionInfoMap;
+                    Map<String,Object> reqMap = new HashMap<>();
+                    reqMap.put("version_info",versionInfoMap);
+                    return reqMap;
                 }
             }
         }
