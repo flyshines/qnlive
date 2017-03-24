@@ -2587,9 +2587,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //
 //            //重定向成功页面 然后扫码登录 绑定直播间
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
+
+            log.info("绑定服务号授权成功 重定向");
             result.put("redirectUrl", "http://www.baidu.com");
         } else {
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
+
+            log.info("绑定服务号授权失败 重定向");
             result.put("redirectUrl", "http://www.sogou.com");
         }
         return result;
