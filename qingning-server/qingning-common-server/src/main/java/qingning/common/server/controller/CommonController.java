@@ -753,13 +753,10 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> reqMap = (Map<String, Object>) responseEntity.getReturnData();
-
-        if(reqMap.get("user_type").equals("1")){
-            //处理打赏信息
-            if(! reward_update_time.equals(rewardConfigurationTime.toString())){
-                reqMap.put("reward_info",rewardConfigurationMap);
-                responseEntity.setReturnData(reqMap);
-            }
+        //处理打赏信息
+        if(! reward_update_time.equals(rewardConfigurationTime.toString())){
+            reqMap.put("reward_info",rewardConfigurationMap);
+            responseEntity.setReturnData(reqMap);
         }
         return responseEntity;
     }
