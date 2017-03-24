@@ -2553,15 +2553,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         JSONObject authauthorizer_info_base = serviceNoJsonObj.getJSONObject("authorizer_info");
 
         //授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
-        Map<String, String> typeInfo = (Map<String, String>) authauthorizer_info_base.get("service_type_info");
-        Map<String, String> verifyInfo = (Map<String, String>) authauthorizer_info_base.get("verify_type_info");
+        JSONObject typeInfo = authauthorizer_info_base.getJSONObject("service_type_info");
+        JSONObject verifyInfo = authauthorizer_info_base.getJSONObject("verify_type_info");
 
         //-1代表未认证，0代表微信认证，1代表新浪微博认证，2代表腾讯微博认证，3代表已资质认证通过但还未通过名称认证，
         // 4代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
         // 5代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
 
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
-        if (typeInfo.get("id").equals("2") && !verifyInfo.get("id").equals("-1")) {
+        if (typeInfo.getString("id").equals("2") && !verifyInfo.getString("id").equals("-1")) {
 //            //存储公众号的授权信息
 //            Map<String, String> authInfoMap = new HashMap<>();
 //
