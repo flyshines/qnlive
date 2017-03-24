@@ -751,7 +751,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//传过来的参数
         Map<String, Object> resultMap = new HashMap<String, Object>();//返回的参数
 
- 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userId
         Jedis jedis = jedisUtils.getJedis();//缓存
         Map<String, Object> map = new HashMap<>();

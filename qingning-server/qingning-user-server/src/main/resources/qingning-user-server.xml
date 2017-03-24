@@ -30,6 +30,7 @@
 					<param name="position" type="long" require="N"/>
 				</inputs>
 				<outputs>
+                    <param name="course_amount" type="long"/>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>

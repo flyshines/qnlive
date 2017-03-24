@@ -125,6 +125,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(values)){
         	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
         	if(!MiscUtils.isEmpty(courseList)){
+        	    values.put("course_amount",courseList.size());
         		((JedisBatchCallback)(this.jedisUtils.getJedis())).invoke(new JedisBatchOperation(){
 					@Override
 					public void batchOperation(Pipeline pipeline, Jedis jedis) {
