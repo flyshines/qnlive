@@ -2538,29 +2538,27 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             return new HashMap<String,Object>();
         }
 
-        Map<String, Object> authauthorizer_info_map = (Map<String, Object>) authJsonObj.get("authorization_info");
+        JSONObject authauthorizer_info = authJsonObj.getJSONObject("authorization_info");
 
-        String authorizer_appid = authauthorizer_info_map.get("authorizer_appid").toString();
+        String authorizer_appid = authauthorizer_info.getString("authorizer_appid");
 
         //获取公众号的头像 昵称 QRCode等相关信息
         JSONObject serviceNoJsonObj = WeiXinUtil.getServiceAuthAccountInfo(access_token, authorizer_appid);
-
         errCode = serviceNoJsonObj.get("errcode");
         if (errCode != null ) {
             log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
             return new HashMap<String,Object>();
         }
 
-        Map<String, Object> authorizer_info_base_map = (Map<String, Object>) serviceNoJsonObj.get("authorizer_info");
+        JSONObject authauthorizer_info_base = serviceNoJsonObj.getJSONObject("authorizer_info");
 
         //授权方公众号类型，0代表订阅号，1代表由历史老帐号升级后的订阅号，2代表服务号
-        HashMap<String, String> typeInfo = (HashMap<String, String>) authorizer_info_base_map.get("service_type_info");
-        HashMap<String, String> verifyInfo = (HashMap<String, String>) authorizer_info_base_map.get("verify_type_info");
+        Map<String, String> typeInfo = (Map<String, String>) authauthorizer_info_base.get("service_type_info");
+        Map<String, String> verifyInfo = (Map<String, String>) authauthorizer_info_base.get("verify_type_info");
 
         //-1代表未认证，0代表微信认证，1代表新浪微博认证，2代表腾讯微博认证，3代表已资质认证通过但还未通过名称认证，
         // 4代表已资质认证通过、还未通过名称认证，但通过了新浪微博认证，
         // 5代表已资质认证通过、还未通过名称认证，但通过了腾讯微博认证
-
 
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (typeInfo.get("id").equals("2") && !verifyInfo.get("id").equals("-1")) {
@@ -2568,17 +2566,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //            Map<String, String> authInfoMap = new HashMap<>();
 //
 //            authInfoMap.put("authorizer_appid", authorizer_appid);
-//            authInfoMap.put("authorizer_access_token", authauthorizer_info_map.get("authorizer_access_token").toString());
-//            authInfoMap.put("authorizer_refresh_token", authauthorizer_info_map.get("authorizer_refresh_token").toString());
-//            long expiresIn = ((long) authauthorizer_info_map.get("expires_in"))*1000; //*1000;//有效毫秒值
+//            authInfoMap.put("authorizer_access_token", authauthorizer_info.getString("authorizer_access_token"));
+//            authInfoMap.put("authorizer_refresh_token", authauthorizer_info.getString("authorizer_refresh_token"));
+//            long expiresIn =  authauthorizer_info.getLong("expires_in")*1000; //*1000;//有效毫秒值
 //            long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
 //            authInfoMap.put("expires_time", String.valueOf(expiresTimeStamp));
 //            authInfoMap.put("create_time", String.valueOf(System.currentTimeMillis()));
 //
-//            authInfoMap.put("nick_name", authorizer_info_base_map.get("nick_name").toString());
-//            authInfoMap.put("head_img", authorizer_info_base_map.get("head_img").toString());
+//            authInfoMap.put("nick_name", authauthorizer_info_base.getString("nick_name"));
+//            authInfoMap.put("head_img", authauthorizer_info_base.getString("head_img"));
 //            authInfoMap.put("service_type_info", typeInfo.get("id"));
-//            authInfoMap.put("qr_code", authorizer_info_base_map.get("qr_code").toString());
+//            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qr_code"));
 //
 //            //先获取部分信息 还未和直播间绑定起来
 //            //服务号信息插入数据库
@@ -2586,9 +2584,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //
 //            //重定向成功页面 然后扫码登录 绑定直播间
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
+//
+            log.info("绑定服务号授权成功 重定向");
             result.put("redirectUrl", "http://www.baidu.com");
         } else {
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
+
+            log.info("绑定服务号授权失败 重定向");
             result.put("redirectUrl", "http://www.sogou.com");
         }
         return result;
