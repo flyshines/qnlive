@@ -2536,7 +2536,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         course.put("course_id",courseId);//课程id
         course.put("status",status);//修改的装填
         commonModuleServer.updateCourseByCourseId(course);
-        Jedis jedis = jedisUtils.getJedis();        if(status.equals("5")){//屏蔽课程 删除所有课程信息
+        Jedis jedis = jedisUtils.getJedis();
+        if(status.equals("5")){//屏蔽课程 删除所有课程信息
             String delKey1 = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//删除课程详细信息列表
             jedis.del(delKey1);
 
@@ -2804,7 +2805,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("course_password",courseMap.get("course_password"));
         resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
-        resultMap.put("course_title",courseMap.get("course_title"));
+        resultMap.put("course_title",MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
         resultMap.put("course_url",courseMap.get("course_url"));
         return resultMap;
     }
@@ -2972,7 +2973,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("course_password",courseMap.get("course_password"));
         resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
-        resultMap.put("course_title",courseMap.get("course_title"));
+        resultMap.put("course_title",MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
         //Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
         map.clear();
         map.put("lecturer_id", courseMap.get("lecturer_id"));
