@@ -15,6 +15,8 @@ public final class Constants {
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 
+	public static final String SYS_READ_USER_BY_UNIONID = "SYS_READ_USER_BY_UNIONID";
+
 	public static final String REFRESH = "refresh";
 	public static final String SYSINT="int";
 	public static final String SYSLONG="long";

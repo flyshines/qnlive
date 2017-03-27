@@ -83,7 +83,25 @@ public class TenPayUtils {
         Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
         logger.debug("-----生成微信预支付单结果"+ payResultMap.toString());
         return payResultMap;
+    }
 
+    public static Map<String, String> checkPayResult(String outTradeNo, String type) throws Exception {
+        Map<String, String> params = new TreeMap<String, String> ();
+        params.put ("nonce_str", getRandomStr ());
+        params.put ("out_trade_no", outTradeNo);
+        if (type == null || type.equals("0") || type.equals(3)) {//web
+            params.put ("appid", TenPayConstant.APP_ID);
+            params.put ("mch_id", TenPayConstant.MCH_ID);
+        } else {//app
+            params.put("appid", TenPayConstant.APP_APP_ID);
+            params.put("mch_id", TenPayConstant.APP_MCH_ID);
+        }
+        params.put ("sign", getSign (params, type));
+
+        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.CHECK_PAY_RESULT_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
+        Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
+
+        return payResultMap;
     }
 
     public static Map<String, String> sendRefundApply(String outTradeNo, String outRefundNo, Integer totalFee,Integer refundFee,String opUserId, String refundAccount) throws Exception {

@@ -37,9 +37,6 @@ public class CourseRobotSevice extends AbstractMsgService {
 
     @Autowired
     private CoursesMapper coursesMapper;
-    //coursesStudentsMapper.findCourseRecommendUserNum(reqMap)
-    //Integer insertCount = coursesStudentsMapper.insertStudent(student);
-    //coursesMapper.increaseStudent(course_id);
 
     protected static ConcurrentLinkedQueue<Map<String, String>> notJoinRobots                               = new ConcurrentLinkedQueue<>();
 
@@ -51,7 +48,7 @@ public class CourseRobotSevice extends AbstractMsgService {
         synchronized (this) {
             if (didInitRobots) return;
             List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
-            if (robotList != null) {
+            if (robotList != null || robotList.size() > 0) {
                 notJoinRobots.addAll (robotList);
                 didInitRobots = true;
             }
@@ -60,9 +57,18 @@ public class CourseRobotSevice extends AbstractMsgService {
 
     //机器人管理
     private void robotManage(String course_id, Jedis jedis) {
-        final String key = "robot_in_" + course_id;
-
-        //该课程的机器人管理线程已经开启
+        if (!didInitRobots) {
+            return;
+        }
+        //机器人数量 少于100
+        if (notJoinRobots.size() < 10) {
+            return;
+        }
+        //有机器人参与的课程总量 大于50
+        if (joinRobots.size() > 50) {
+            return;
+        }
+        //该课程的机器人管理线程是否已经开启
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_COURSE_ROBOT_FIELD, course_id);
         String course_robot_key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ROBOT, query);
@@ -72,20 +78,9 @@ public class CourseRobotSevice extends AbstractMsgService {
         }
         jedis.set("course_robot_key", "1");
 
-        //机器人数量 少于100
-        if (notJoinRobots.size() < 10) {
-            return;
-        }
+        //课程是讲师公开课 或者 青柠公开课 已经在创建课程和加入课程的时候判断了
 
-        //有机器人参与的课程总量 大于50
-        if (joinRobots.size() > 50) {
-            return;
-        }
-
-        //课程是讲师公开课 或者 青柠公开课
-
-        //
-
+        final String key = "robot_in_" + course_id;
         // 开启线程管理直播间的机器人
         new Thread(new Runnable() {
             @Override
@@ -185,19 +180,22 @@ public class CourseRobotSevice extends AbstractMsgService {
 
     //b、每加入一个真实听众，同时增加1—2个假听众；
     private void robotInByStudent (String course_id, Jedis jedis) {
-        final String key = "robot_in_" + course_id;
+        if (!didInitRobots || notJoinRobots.size() < 1) {//未初始化 或者 没有机器人
+            return;
+        }
 
+        //课程是讲师公开课 或者 青柠公开课 已经在创建课程和加入课程的时候判断了
+
+        //课程结束
         Map<String, String> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Map<String,String> courseInfoMap = jedis.hgetAll(courseKey);
-        //课程是讲师公开课 或者 青柠公开课
-
-        //课程结束
-        if (courseInfoMap == null ||  courseInfoMap.get("end_time") != null) {
+        if (courseInfoMap == null || courseInfoMap.get("end_time") != null) {
             return;
         }
 
+        final String key = "robot_in_" + course_id;
         //c、最多当真实用户达到30—40选个随机数，停止加机器人；
         //d、机器人加到50—120，选个随机数之后不再增加；
         int real_student_num = Integer.parseInt(courseInfoMap.get("real_student_num"));

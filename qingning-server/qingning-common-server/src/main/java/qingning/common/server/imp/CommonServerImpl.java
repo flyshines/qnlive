@@ -813,9 +813,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return resultMap;
         }
     }
-    //</editor-fold>
 
-    //<editor-fold desc="微信支付成功后回调的方法">
+    @FunctionName("checkWeixinPayBill")
+    public void checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, String> payResultMap = TenPayUtils.checkPayResult(reqMap.get("outTradeNo").toString(), reqMap.get("type").toString());
+
+        //订单查询结果
+        if (payResultMap.get ("return_code").equals ("FAIL") || payResultMap.get("result_code").equals("FAIL")) {
+            throw new QNLiveException("120015");
+        } else {
+            //调用支付成功的方法 去处理支付结果
+            reqEntity.setParam(payResultMap);
+            handleWeixinPayResult(reqEntity);
+        }
+    }
+
     /**
      * 微信支付成功后回调的方法
      * @param reqEntity

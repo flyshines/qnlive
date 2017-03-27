@@ -305,6 +305,16 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+
+    @RequestMapping(value = "/common/payment/weixin/check", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity checkWeixinPayBill(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version, HttpServletRequest request) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "checkWeixinPayBill", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
     /**
      * 处理微信支付回调
      * @param request

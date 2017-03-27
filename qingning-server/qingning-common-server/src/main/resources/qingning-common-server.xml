@@ -129,6 +129,18 @@
 				</outputs>
 			</function>
 
+			<function name="checkWeixinPayBill">
+				<auth>
+					<accessToken require="Y"/>
+				</auth>
+				<inputs>
+					<param name="outTradeNo" type="string"></param>
+					<param name="type" type="string"></param>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 			<function name="handleWeixinPayResult">
 
 				<inputs>

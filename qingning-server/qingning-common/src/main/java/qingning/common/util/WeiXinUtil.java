@@ -68,8 +68,15 @@ public class WeiXinUtil {
     public final static String service_auth_refresh_info_url = MiscUtils.getConfigByKey("service_auth_refresh_info_url");
     public final static String service_auth_account_info_url = MiscUtils.getConfigByKey("service_auth_account_info_url");
 
+
+
     public final static String service_fans_url1 = MiscUtils.getConfigByKey("service_fans_url1");
     public final static String service_fans_url2 = MiscUtils.getConfigByKey("service_fans_url2");
+
+    private static final String pc_no_appid = MiscUtils.getConfigByKey("weixin_pc_no_appid");
+    private static final String pc_no_appsecret = MiscUtils.getConfigByKey("weixin_pc_no_secret");
+    private static final String pc_auth_account_info_url = MiscUtils.getConfigByKey("pc_auth_account_info_url");
+
 
     /**
      * 获取accessToekn
@@ -287,6 +294,17 @@ public class WeiXinUtil {
         }
         return result;
     }
+    /**
+     * 获取PC端登录的账号信息
+     * @return
+     */
+    public static JSONObject getPCUserAccountInfo(String code) {
+        String requestUrl = pc_auth_account_info_url.replace("APPID", pc_no_appid).replace("SECRET", pc_no_appsecret).replace("CODE", code).replace("GRANTTYPE", "");
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
+
 
     public static JSONObject getUserInfoByCode(String code) {
         String requestUrl = get_user_info_by_code_url.replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);

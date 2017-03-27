@@ -8,6 +8,7 @@ import org.apache.solr.common.util.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -621,16 +622,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                this.mqUtils.sendMessage(mqRequestEntity);
 //            }
         }
-        map.clear();
-        map.put("course_id", courseId);
-        RequestEntity mqRequestEntity = new RequestEntity();
-        mqRequestEntity.setServerName("CourseRobotService");
-        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-        mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
-        mqRequestEntity.setParam(map);
-        this.mqUtils.sendMessage(mqRequestEntity);
-        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
 
+        if ("0".equals(course_type)) {//公开课才开启机器人
+            log.info("创建课程，开始机器人加入功能");
+
+            map.clear();
+            map.put("course_id", courseId);
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("CourseRobotService");
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
+            mqRequestEntity.setParam(map);
+            this.mqUtils.sendMessage(mqRequestEntity);
+            jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+        }
 
         //给课程里面推消息
         Map<String, Object> userInfo = lectureModuleServer.findUserInfoByUserId(timerMap.get("lecturer_id").toString());
@@ -2523,7 +2528,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> wechatAuthRedirect(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String auth_code = (String) reqMap.get("auth_code");
-        String expires_in = (String) reqMap.get("expires_in");
+//        String expires_in = (String) reqMap.get("expires_in");
 
         log.debug("------微信服务号授权回调------"+reqMap);
 
@@ -2618,6 +2623,110 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         } else {
             String pre_auth_code = jsonObj.getString("pre_auth_code");//预授权码 有效期为20分
             result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
+        }
+        return result;
+    }
+
+    @FunctionName("pcAuthRedirect")
+    public Map<String, Object> pcAuthRedirect(RequestEntity reqEntity) throws Exception {
+
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String code = (String) reqMap.get("code");
+
+        JSONObject jsonObj = WeiXinUtil.getPCUserAccountInfo(code);
+
+        Object errCode = jsonObj.get("errcode");
+        if (errCode != null ) {
+            log.error("pcAuthRedirect failure-----------"+jsonObj);
+            return new HashMap<String,Object>();
+        }
+
+        String unionid = jsonObj.getString("unionid");
+
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("unionID",unionid);
+        RequestEntity queryOperation = this.generateRequestEntity(null,null, Constants.SYS_READ_USER_BY_UNIONID, queryMap);
+        //TODO 手机号
+        Map<String,String> userInfo = CacheUtils.readUser(null, queryOperation, readUserOperation, null);
+        if (userInfo != null) {//用户存在
+            //是否有直播间
+
+
+
+        } else {//用户不存在存在
+            //1创建 用户 2创建直播间
+        }
+
+//        Jedis jedis = jedisUtils.getJedis();
+//        String openid = jsonObj.getString("openid");
+//        String access_token = jsonObj.getString("access_token");
+//
+//        Map<String,Object> queryParam = new HashMap<String,Object>();
+//        queryParam.put("user_id", userId);
+//        RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
+//        //TODO 手机号
+//        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+//
+//        //获取accessToken
+//        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
+//
+//        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+//        //用户是否存在
+//        Map<String,String> userMap = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+//
+//        //直播间是否存在
+
+
+//        "access_token":"ACCESS_TOKEN",
+//        "expires_in":7200,
+//        "refresh_token":"REFRESH_TOKEN",
+//        "openid":"OPENID",
+//        "scope":"SCOPE",
+//        "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
+        //重定向微信URL
+        Map<String,Object> result = new HashMap<String,Object>();
+//        Object errCode = jsonObj.get("errcode");
+//        if (errCode != null ) {
+//            log.error("获取微信用户信息失败-----------"+jsonObj);
+//        } else {
+//            String unionid = jsonObj.getString("unionid");//预授权码 有效期为20分
+//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_room_url").replace("UNIONID", unionid));
+//        }
+        return result;
+    }
+
+    @FunctionName("tobindingRoom")
+    public Map<String, Object> tobindingRoom(RequestEntity reqEntity) throws Exception {
+
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String unionid = (String) reqMap.get("unionid");
+
+        Map<String,Object> result = new HashMap<String,Object>();
+        //1 取得用户的直播间信息
+        //2 是否有绑定 手机号码 （0未绑定 1绑定）
+        //3 返回直播间信息（直播间名称和id） 和 服务号信息(名称和appid) 和 授权的微信号
+        return result;
+    }
+
+    @FunctionName("bindingRoom")
+    public Map<String, Object> bindingRoom(RequestEntity reqEntity) throws Exception {
+
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String lecturer_id = (String) reqMap.get("lecturer_id");
+        String appid = (String) reqMap.get("appid");
+
+        //1 进行关联 更新数据库
+        Map<String, String> paramMap = new HashMap<String, String>();
+        paramMap.put("authorizer_appid", lecturer_id);
+        paramMap.put("lecturer_id", appid);
+        int count = lectureModuleServer.updateServiceNoLecturerId(paramMap);
+
+        //更新结果
+        Map<String,Object> result = new HashMap<String,Object>();
+        if (count > 0) {
+
+        } else  {
+
         }
         return result;
     }

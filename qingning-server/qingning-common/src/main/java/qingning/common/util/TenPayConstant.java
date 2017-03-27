@@ -2,6 +2,8 @@ package qingning.common.util;
 
 public class TenPayConstant {
     public static final String PRE_PAY_URL = MiscUtils.getConfigByKey("weixin_pay_pre_pay_url");
+    public static final String CHECK_PAY_RESULT_URL = MiscUtils.getConfigByKey("weixin_pay_check_result_url");
+
     public static final String APP_ID = MiscUtils.getConfigByKey("appid");
     public static final String MCH_ID = MiscUtils.getConfigByKey("weixin_pay_mch_id");
     public static final String NOTIFY_URL = MiscUtils.getConfigByKey("weixin_pay_notify_url");
