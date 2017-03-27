@@ -1087,18 +1087,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
-                    infomation.put("course_id", handleResultMap.get("course_id"));
-					infomation.put("creator_id", (String)handleResultMap.get("user_id"));
+                    infomation.put("course_id", handleResultMap.get("course_id"));//课程id
+					infomation.put("creator_id", (String)handleResultMap.get("user_id"));//消息发送人id
                     //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
-                    infomation.put("message", message);
+                    infomation.put("message", message);//消息
                     infomation.put("send_type", "4");//4.打赏信息
-                    infomation.put("message_type", "1");
-                    infomation.put("create_time", currentTime);
+                    infomation.put("message_type", "1");//1.文字
+                    infomation.put("create_time", currentTime);//创建时间
+                    infomation.put("message_id",MiscUtils.getUUId());//
+                    infomation.put("message_imid",infomation.get("message_id"));
                     Map<String,Object> messageMap = new HashMap<>();
                     messageMap.put("msg_type","1");
                     messageMap.put("send_time",currentTime);
                     messageMap.put("information",infomation);
-                    messageMap.put("mid",MiscUtils.getUUId());
+                    messageMap.put("mid",infomation.get("message_id"));
                     String content = JSON.toJSONString(messageMap);
                     IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
  

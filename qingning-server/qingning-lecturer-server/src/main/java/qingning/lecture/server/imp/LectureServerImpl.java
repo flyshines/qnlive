@@ -650,7 +650,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         startLecturerMessageMap.put("send_time", System.currentTimeMillis());
         startLecturerMessageMap.put("create_time", System.currentTimeMillis());
         startLecturerMessageMap.put("information",startLecturerMessageInformation);
-        startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_imid"));
+        startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_id"));
         String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
         IMMsgUtil.sendMessageInIM(timerMap.get("im_course_id").toString(), startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(timerMap.get("lecturer_id").toString()).get("m_user_id").toString());//发送信息
         return resultMap;
@@ -916,7 +916,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             messageMap.put("mid",infomation.get("message_id"));
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
-
         } else {
             Map<String,Object> query = new HashMap<String,Object>();
             query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
