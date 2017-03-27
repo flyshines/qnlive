@@ -338,7 +338,17 @@
 					</param>
 				</outputs>
 			</function>
-
+			<function name="getCourseOrLiveRoom">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="id" type="string" require="Y,000100"/>
+					<param name="type" type="int" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">
