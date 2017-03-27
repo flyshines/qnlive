@@ -134,8 +134,8 @@
 					<accessToken require="Y"/>
 				</auth>
 				<inputs>
-					<param name="outTradeNo" type="string"></param>
-					<param name="type" type="string"></param>
+					<param name="payment_id" type="string"></param>
+					<param name="platform" type="string"></param>
 				</inputs>
 				<outputs>
 				</outputs>

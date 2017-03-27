@@ -819,7 +819,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("checkWeixinPayBill")
     public Map<String,String> checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, String> payResultMap = TenPayUtils.checkPayResult(reqMap.get("outTradeNo").toString(), reqMap.get("type").toString());
+        Map<String, String> payResultMap = TenPayUtils.checkPayResult(reqMap.get("payment_id").toString(), reqMap.get("platform").toString());
 
 //        SUCCESS (0, "支付成功"), REFUND (1, "转入退款"), NOTPAY (2, "未支付"), CLOSED (3, "已关闭"), REVOKED (4, "已撤销"),
 //        USERPAYING (5, "用户支付中"), PAYERROR (6, "支付失败"), OTHER_ERROR (7, "其它错误");
