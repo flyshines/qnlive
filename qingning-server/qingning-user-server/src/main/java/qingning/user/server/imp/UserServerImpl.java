@@ -78,7 +78,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         Map<String, Object> dbResultMap = userModuleServer.userFollowRoom(reqMap);
         if (dbResultMap == null || dbResultMap.get("update_count") == null || "0".equals(String.valueOf(dbResultMap.get("update_count")))) {
-        	if("1".equals(reqMap.get("follow_type"))){
+        	if("0".equals(reqMap.get("follow_type"))){
         		throw new QNLiveException("110006");
         	} else {
         		throw new QNLiveException("110003");
@@ -90,7 +90,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //4.更新用户缓存中直播间的关注数
         //关注操作类型 0关注 1不关注
         Integer incrementNum = null;
-        if (reqMap.get("follow_type").toString().equals("0")) {
+        if (reqMap.get("follow_type").toString().equals("1")) {
             incrementNum = 1;
         } else {
             incrementNum = -1;
@@ -1929,5 +1929,29 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         return null;
     }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getCourseOrLiveRoom")
+    public  Map<String, Object> getCourseOrLiveRoom(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//获取参数
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        String id = reqMap.get("id").toString();
+        String type = reqMap.get("type").toString();
+        if(type.equals("0")){//课程
+
+        }else if(type.equals("1")){//直播间
+
+        }else{
+            throw new QNLiveException("000100");
+        }
+
+
+
+
+      return null;
+    }
+
+
 
 }

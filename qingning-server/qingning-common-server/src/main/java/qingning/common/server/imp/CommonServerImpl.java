@@ -2514,9 +2514,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             roomMap.put("user_id",userId);//用户id
             Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
-                resultMap.put("follow_status", "1");
-            } else {
                 resultMap.put("follow_status", "0");
+            } else {
+                resultMap.put("follow_status", "1");
             }
         }
 

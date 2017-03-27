@@ -325,4 +325,27 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+
+	/**
+	 * 查询课程或者是直播间
+	 * @param id 根据type查询 0是课程id 1是直播间id
+	 * @param type 0是课程 1是直播间
+	 * @param access_token 后台证书
+	 * @param version 版本
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/find",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity  getCourseOrLiveRoom(
+			@RequestParam(value = "id", defaultValue = "") String id,
+			@RequestParam(value = "type", defaultValue = "") String type,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getCourseOrLiveRoom", access_token, version);
+		Map<String, Object> parMap = new HashMap<>();
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 }
