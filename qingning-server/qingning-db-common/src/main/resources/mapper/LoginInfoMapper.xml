@@ -22,6 +22,10 @@
     select * from t_login_info where user_id = #{userId}
   </select>
 
+  <select id="getLoginInfoByLoginId" resultType="hashmap" parameterType="string" >
+    select * from t_login_info where union_id = #{unionID}
+  </select>
+
   <select id="findLoginInfoByUserIds" resultType="string" parameterType="hashmap" >
     select web_openid from t_login_info  where web_openid is not null and  user_id in    (
     <foreach collection="list" item="item" index="index" separator=",">

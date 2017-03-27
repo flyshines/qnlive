@@ -675,6 +675,12 @@ public class LectureController extends AbstractController {
 		}
 	}
 
+	/**
+	 * 重定向到微信平台授权页面
+	 * @param req
+	 * @param resp
+	 * @throws Exception
+	 */
 	@RequestMapping(value="/lecturer/wechat/tobinding",method=RequestMethod.GET)
 	public void tobindServiceNo (
 			HttpServletRequest req,
@@ -693,13 +699,80 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * PC微信登录授权回调URL
+	 * @param  code　url带code
 	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/pcauth/redirectUrl", method = RequestMethod.GET)
-	public String pcAuthRedirect(
+	public void pcAuthRedirect(
+			@RequestParam(value = "code") String code,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
-		return "success";
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "pcAuthRedirect", null, null);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("code", code);
+		requestEntity.setParam(parMap);
+
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+		Object redirectUrl =  resultMap.get("redirectUrl");
+		if (redirectUrl != null) {
+			resp.sendRedirect(redirectUrl.toString());
+		}
+	}
+
+	/**
+	 * PC端关联直播间与服务号 预处理
+	 * @param unionid 用户的unionid
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/pcauth/tobindingRoom", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity tobindingRoom(
+			@RequestParam(value = "unionid") String unionid,
+			HttpServletRequest req,
+			HttpServletResponse resp) throws Exception {
+
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "tobindingRoom", null, null);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("unionid", unionid);
+		requestEntity.setParam(parMap);
+
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * PC端关联直播间与服务号
+	 * @param lecturer_id 用户的讲师id
+	 * @param appid 服务号的appid
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/pcauth/bindingRoom", method = RequestMethod.GET)
+	public void bindingRoom(
+			@RequestParam(value = "lecturer_id") String lecturer_id,
+			@RequestParam(value = "appid") String appid,
+			HttpServletRequest req,
+			HttpServletResponse resp) throws Exception {
+
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", null, null);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("lecturer_id", lecturer_id);
+		parMap.put("appid", appid);
+		requestEntity.setParam(parMap);
+
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+		Object redirectUrl =  resultMap.get("redirectUrl");
+		if (redirectUrl != null) {
+			resp.sendRedirect(redirectUrl.toString());
+		}
+
 	}
 }

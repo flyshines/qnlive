@@ -71,7 +71,13 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	List<String> findLoginInfoByUserIds(Map<String, Object> map);
-	
+	/**
+	 * 根据unionid 获取 userinfo
+	 * @param
+	 * @return
+	 */
+	Map<String,Object> getLoginInfoByLoginId(String unionID);
+
 	int insertLecturerDistributionLink(Map<String, Object> map);
 
 	Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record);

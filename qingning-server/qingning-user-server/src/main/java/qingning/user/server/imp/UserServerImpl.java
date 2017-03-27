@@ -1340,15 +1340,19 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
 		}
 
-		//一个用户进入加入直播间带入1到2个人进入
-        map.clear();
-        map.put("course_id", course_id);
-        RequestEntity mqRequestEntity = new RequestEntity();
-        mqRequestEntity.setServerName("CourseRobotService");
-        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-        mqRequestEntity.setFunctionName("courseHaveStudentIn");
-        mqRequestEntity.setParam(map);
-        this.mqUtils.sendMessage(mqRequestEntity);
+		//公开课 执行这段逻辑
+		if (equals(courseInfoMap.get("course_type").equals("0"))) {
+            //一个用户进入加入直播间带入1到2个人进入
+
+            map.clear();
+            map.put("course_id", course_id);
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("CourseRobotService");
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            mqRequestEntity.setFunctionName("courseHaveStudentIn");
+            mqRequestEntity.setParam(map);
+            this.mqUtils.sendMessage(mqRequestEntity);
+        }
 
 		jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
         return resultMap;
