@@ -485,6 +485,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return loginInfoMapper.findLoginInfoByUserIds(map);
 	}
 
+	//根据union查找登录信息
+	@Override
+	public Map<String, Object> getLoginInfoByLoginId(String unionID) {
+		return loginInfoMapper.getLoginInfoByLoginId(unionID);
+	}
+
 	@Override
 	public int insertLecturerDistributionLink(Map<String, Object> map) {		
 		return lecturerDistributionLinkMapper.insertLecturerDistributionLink(map);

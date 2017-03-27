@@ -98,7 +98,7 @@ public class TenPayUtils {
         }
         params.put ("sign", getSign (params, type));
 
-        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.CHECK_PAY_RESULT_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
+        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.ORDER_QUERY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
 
         return payResultMap;
