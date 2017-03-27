@@ -178,19 +178,18 @@ public class ImMsgServiceImp implements ImMsgService {
 					String content = JSON.toJSONString(messageMap);
 					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
 
-//					startInformation.put("creator_id",courseMap.get("lecturer_id"));
-//					startInformation.put("message_id",messageMap.get("mid"));
-//					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
+
+					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
 //					//1.将聊天信息id插入到redis zsort列表中
-//					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
+					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
 //					//添加到老师发送的集合中
-//					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-//					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),  (String)startInformation.get("message_imid"));
-//
-//					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
-//					Map<String,String> result = new HashMap<String,String>();
-//					MiscUtils.converObjectMapToStringMap(startInformation, result);
-//					jedis.hmset(messageKey, result);
+					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startInformation.get("message_imid").toString());
+
+					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
+					Map<String,String> result = new HashMap<String,String>();
+					MiscUtils.converObjectMapToStringMap(startInformation, result);
+					jedis.hmset(messageKey, result);
 
 					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 					TemplateData first = new TemplateData();
@@ -258,7 +257,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
 		}
 		stringMap.put("message_id", messageId);
-		stringMap.put("message_imid",imid);
+		stringMap.put("message_imid",messageId);
 		//<editor-fold desc="课程为已结束">
 		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){ //如果课程状态是2结束 消息类型不是6 结束信息
 			if("4".equals(information.get("send_type"))){
