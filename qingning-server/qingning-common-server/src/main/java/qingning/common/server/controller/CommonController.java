@@ -15,6 +15,7 @@ import qingning.common.server.util.ServerUtils;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
+import sun.misc.BASE64Decoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -786,6 +787,32 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(param);
         this.process(requestEntity, serviceManger, message);
     }
+
+
+    /**
+     * 进行分享url解码 然后进行跳转
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/shareUrl", method = RequestMethod.GET)
+    public void shareUrl(HttpServletRequest request,
+                         HttpServletResponse response,
+            @RequestParam(value = "shareUrl") String shareUrl,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        byte[] b = null;
+        String result = null;
+        if (shareUrl != null) {
+            BASE64Decoder decoder = new BASE64Decoder();
+            try {
+                b = decoder.decodeBuffer(shareUrl);
+                shareUrl = new String(b, "utf-8");
+                response.sendRedirect(shareUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 //    /**
 //     * 上传机器人数据
