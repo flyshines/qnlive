@@ -817,18 +817,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     @FunctionName("checkWeixinPayBill")
-    public void checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
+    public Map<String,String> checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, String> payResultMap = TenPayUtils.checkPayResult(reqMap.get("outTradeNo").toString(), reqMap.get("type").toString());
 
-        //订单查询结果
-        if (payResultMap.get ("return_code").equals ("FAIL") || payResultMap.get("result_code").equals("FAIL")) {
-            throw new QNLiveException("120015");
-        } else {
+//        SUCCESS (0, "支付成功"), REFUND (1, "转入退款"), NOTPAY (2, "未支付"), CLOSED (3, "已关闭"), REVOKED (4, "已撤销"),
+//        USERPAYING (5, "用户支付中"), PAYERROR (6, "支付失败"), OTHER_ERROR (7, "其它错误");
+
+        Map<String, String> result = new HashMap<>();
+        result.put("state", payResultMap.get ("trade_state"));
+        if ("SUCCESS".equals (payResultMap.get ("return_code")) && "SUCCESS".equals (payResultMap.get ("result_code"))) {
             //调用支付成功的方法 去处理支付结果
-            reqEntity.setParam(payResultMap);
-            handleWeixinPayResult(reqEntity);
+//            reqEntity.setParam(payResultMap);
+//            handleWeixinPayResult(reqEntity);
+        } else {
+            result.put("state", "7");
+            result.put("desc", payResultMap.get("trade_state_desc"));
         }
+        return result;
     }
 
     /**
