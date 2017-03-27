@@ -309,11 +309,15 @@ public class CommonController extends AbstractController {
 
     @RequestMapping(value = "/common/payment/weixin/check", method = RequestMethod.POST)
     public @ResponseBody ResponseEntity checkWeixinPayBill(
-            HttpEntity<Object> entity,
+            @RequestParam(value = "payment_id") String payment_id,
+            @RequestParam(value = "platform") String platform,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version, HttpServletRequest request) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "checkWeixinPayBill", accessToken, version);
-        requestEntity.setParam(entity.getBody());
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("payment_id", payment_id);
+        param.put("platform", platform);
+        requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
     /**
