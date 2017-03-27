@@ -201,7 +201,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      */
     @SuppressWarnings("unchecked")
     @FunctionName("getVersion")
-    public Map<String,String> getVersion (RequestEntity reqEntity) throws Exception{
+    public Map<String,Object> getVersion (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
         Integer plateform = (Integer)map.get("plateform");//平台 0是直接放过 1是安卓 2是IOS 3是JS
         if(plateform != 0) {//安卓或者ios
@@ -209,7 +209,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
                 //1.先判断系统和当前version
                 if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//当前version 小于 最小需要跟新的版本
-                    return versionInfoMap;
+                    Map<String,Object> reqMap = new HashMap<>();
+                    reqMap.put("version_info",versionInfoMap);
+                    return reqMap;
                 }
             }
         }
@@ -1098,18 +1100,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
-                    infomation.put("course_id", handleResultMap.get("course_id"));
-					infomation.put("creator_id", (String)handleResultMap.get("user_id"));
+                    infomation.put("course_id", handleResultMap.get("course_id"));//课程id
+					infomation.put("creator_id", (String)handleResultMap.get("user_id"));//消息发送人id
                     //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
-                    infomation.put("message", message);
+                    infomation.put("message", message);//消息
                     infomation.put("send_type", "4");//4.打赏信息
-                    infomation.put("message_type", "1");
-                    infomation.put("create_time", currentTime);
+                    infomation.put("message_type", "1");//1.文字
+                    infomation.put("create_time", currentTime);//创建时间
+                    infomation.put("message_id",MiscUtils.getUUId());//
+                    infomation.put("message_imid",infomation.get("message_id"));
                     Map<String,Object> messageMap = new HashMap<>();
                     messageMap.put("msg_type","1");
                     messageMap.put("send_time",currentTime);
                     messageMap.put("information",infomation);
-                    messageMap.put("mid",MiscUtils.getUUId());
+                    messageMap.put("mid",infomation.get("message_id"));
                     String content = JSON.toJSONString(messageMap);
                     IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
  
@@ -2528,6 +2532,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("follow_status", "0");
             }
         }
+
+        if(!resultMap.get("status").equals("2")){
+            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
+                resultMap.put("status",4);
+            }
+        }
+        resultMap.get("start_time");
         resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
         resultMap.put("room_id",courseMap.get("room_id"));
         return resultMap;

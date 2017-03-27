@@ -122,10 +122,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("userCourses")
     public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> values = getPlatformCourses(reqEntity);
+        //消息列表总数
+        values.put("course_amount",jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
         if(!MiscUtils.isEmpty(values)){
         	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
         	if(!MiscUtils.isEmpty(courseList)){
-        	    values.put("course_amount",courseList.size());
         		((JedisBatchCallback)(this.jedisUtils.getJedis())).invoke(new JedisBatchOperation(){
 					@Override
 					public void batchOperation(Pipeline pipeline, Jedis jedis) {
@@ -922,6 +923,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("roles", roles);
 
         resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis));
+
+        if(!resultMap.get("status").equals("2")){
+            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
+                resultMap.put("status",4);
+            }
+        }
         return resultMap;
     }
 
