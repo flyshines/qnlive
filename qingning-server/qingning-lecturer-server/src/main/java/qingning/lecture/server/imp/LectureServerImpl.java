@@ -814,7 +814,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
                 throw new QNLiveException("100005");
             }
-            
+
             String mGroupId = jedis.hget(courseKey,"im_course_id");
             Map<String, Object> userInfo = lectureModuleServer.findUserInfoByUserId(courseOwner);
             Map<String,Object> startLecturerMessageInformation = new HashMap<>();

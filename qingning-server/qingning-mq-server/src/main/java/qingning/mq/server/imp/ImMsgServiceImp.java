@@ -257,7 +257,7 @@ public class ImMsgServiceImp implements ImMsgService {
 			stringMap.put("message_question", MiscUtils.emojiConvertToNormalString(message_question));
 		}
 		stringMap.put("message_id", messageId);
-		stringMap.put("message_imid",messageId);
+		stringMap.put("message_imid",imid);
 		//<editor-fold desc="课程为已结束">
 		if(courseMap.get("status").equals("2") && !information.get("send_type").equals("6")){ //如果课程状态是2结束 消息类型不是6 结束信息
 			if("4".equals(information.get("send_type"))){
