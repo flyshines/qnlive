@@ -4,11 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.solr.common.util.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -2636,45 +2634,92 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         Object errCode = jsonObj.get("errcode");
         if (errCode != null ) {
-            log.error("pcAuthRedirect failure-----------"+jsonObj);
+            log.error("getPCUserAccountInfo failure-----------"+jsonObj);
             return new HashMap<String,Object>();
         }
 
         String unionid = jsonObj.getString("unionid");
+        String accessToken = jsonObj.getString("access_token");
+        String openid = jsonObj.getString("openid");
+        Jedis jedis = jedisUtils.getJedis();
 
-        Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("unionID",unionid);
-        RequestEntity queryOperation = this.generateRequestEntity(null,null, Constants.SYS_READ_USER_BY_UNIONID, queryMap);
-        //TODO 手机号
-        Map<String,String> userInfo = CacheUtils.readUser(null, queryOperation, readUserOperation, null);
+        Map<String,Object> userInfo = lectureModuleServer.getLoginInfoByLoginId(unionid);
+
+        Map<String,Object> result = new HashMap<String,Object>();
         if (userInfo != null) {//用户存在
             //是否有直播间
+            String userID = userInfo.get("user_id").toString();
+            Map<String,Object> lectureInfo = lectureModuleServer.findLectureByLectureId(userID);
+            if (lectureInfo != null) {
 
+                JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accessToken, openid);
 
+                result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_room_url").replace("USERID", userID).replace("NAME", userJson.getString("nickname")));
+            } else { //创建直播间缺少参数
 
+            }
         } else {//用户不存在存在
+
+            //暂不处理 跳转错误页面
+
             //1创建 用户 2创建直播间
+//            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accessToken, openid);
+//            errCode = userJson.get("errcode");
+//            if (errCode != null) {
+//                log.error("getUserInfoByAccessToken failure-----------"+userJson);
+//                return new HashMap<String,Object>();
+//            }
+//            Map<String,Object> userMap = new HashMap<>();
+//            userMap.put("login_type", "0");//0.微信方式登录
+//            userMap.put("login_id", unionid);
+//
+//            String nickname = userJson.getString("nickname");//昵称
+//            String sex = userJson.getString("sex");//性别
+//            String headimgurl = userJson.getString("headimgurl");//头像
+//
+//
+//            //注册IM账号
+//            Map<String,String> imResultMap = null;
+//            try {
+//                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//注册im
+//            }catch (Exception e){
+//                //TODO 暂不处理
+//            }
+//
+//            //初始化数据库相关表
+//            reqMap.put("m_user_id", imResultMap.get("uid"));
+//            reqMap.put("m_pwd", imResultMap.get("password"));
+//            //设置默认用户头像
+//            if(MiscUtils.isEmpty(headimgurl)){
+//                reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address"));//TODO
+//            }else {
+//                String transferAvatarAddress = qiNiuFetchURL(headimgurl);
+//                reqMap.put("avatar_address",transferAvatarAddress);
+//            }
+//
+//            if(MiscUtils.isEmpty(nickname)){
+//                jedis = jedisUtils.getJedis();
+//                reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+//            }else {
+//                reqMap.put("nick_name", nickname);
+//            }
+//
+//            if(MiscUtils.isEmpty(sex)){
+//                reqMap.put("gender","2");//TODO
+//            }
+//
+//            //微信性别与本系统性别转换
+//            //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
+//            if(sex.equals("1")){
+//                reqMap.put("gender","1");//TODO
+//            }
+//            if(sex.equals("2")){
+//                reqMap.put("gender","0");//TODO
+//            }
+//            if(sex.equals("0")){
+//                reqMap.put("gender","2");//TODO
+//            }
         }
-
-//        Jedis jedis = jedisUtils.getJedis();
-//        String openid = jsonObj.getString("openid");
-//        String access_token = jsonObj.getString("access_token");
-//
-//        Map<String,Object> queryParam = new HashMap<String,Object>();
-//        queryParam.put("user_id", userId);
-//        RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
-//        //TODO 手机号
-//        Map<String,String> userInfo = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
-//
-//        //获取accessToken
-//        AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
-//
-//        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-//        //用户是否存在
-//        Map<String,String> userMap = CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
-//
-//        //直播间是否存在
-
 
 //        "access_token":"ACCESS_TOKEN",
 //        "expires_in":7200,
@@ -2682,28 +2727,35 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //        "openid":"OPENID",
 //        "scope":"SCOPE",
 //        "unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
-        //重定向微信URL
-        Map<String,Object> result = new HashMap<String,Object>();
-//        Object errCode = jsonObj.get("errcode");
-//        if (errCode != null ) {
-//            log.error("获取微信用户信息失败-----------"+jsonObj);
-//        } else {
-//            String unionid = jsonObj.getString("unionid");//预授权码 有效期为20分
-//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_room_url").replace("UNIONID", unionid));
-//        }
         return result;
     }
+
 
     @FunctionName("tobindingRoom")
     public Map<String, Object> tobindingRoom(RequestEntity reqEntity) throws Exception {
 
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String unionid = (String) reqMap.get("unionid");
+        String userid = (String) reqMap.get("userid");
+        String appid = (String) reqMap.get("appid");
 
+        Map<String,Object> userInfo = lectureModuleServer.findUserInfoByUserId(userid);
+        Map<String,Object> lectureInfo = lectureModuleServer.findLectureByLectureId(userid);
+
+        //目前只有一个直播间 以后可能会有多个直播间
+        List<Map<String,Object>> roomsInfo = lectureModuleServer.findLiveRoomByLectureId(lectureInfo.get("lecturer_id").toString());
         Map<String,Object> result = new HashMap<String,Object>();
-        //1 取得用户的直播间信息
+        //1 取得用户的直播间信息 返回直播间信息（直播间名称和id）
+        result.put("rooms", roomsInfo);
         //2 是否有绑定 手机号码 （0未绑定 1绑定）
-        //3 返回直播间信息（直播间名称和id） 和 服务号信息(名称和appid) 和 授权的微信号
+        if (userInfo.get("phone_number") != null) {
+            result.put("status", "1");
+        } else  {
+            result.put("status", "1");
+        }
+        //3 服务号信息(名称和appid) 和 授权的微信号(之前重定向的时候已经返回)
+        Map<String,Object> serviceNoInfo = lectureModuleServer.findServiceNoInfoByAppid(appid);
+        result.put("serviceName", serviceNoInfo.get("nick_name"));
+        result.put("appid", serviceNoInfo.get("appid"));
         return result;
     }
 
@@ -2723,9 +2775,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //更新结果
         Map<String,Object> result = new HashMap<String,Object>();
         if (count > 0) {
-
+            result.put("redirectUrl", "http://www.baidu.com");
         } else  {
-
+            result.put("redirectUrl", "http://www.sogou.com");
         }
         return result;
     }
