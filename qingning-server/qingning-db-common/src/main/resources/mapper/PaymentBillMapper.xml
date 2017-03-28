@@ -98,4 +98,7 @@
     select * from t_payment_bill where trade_id = #{tradeId,jdbcType=VARCHAR}
   </select>
 
+  <select id="findTradeIdByPamentid" resultType="hashmap" parameterType="java.lang.String" >
+      select 1 from t_payment_bill where payment_id = #{payment_id,jdbcType=VARCHAR}
+  </select>
 </mapper>

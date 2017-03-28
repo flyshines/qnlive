@@ -21,4 +21,6 @@ public interface PaymentBillMapper {
 	int insertPaymentBill(Map<String,Object> record);
 	int updatePaymentBill(Map<String,Object> record);
 	Map<String,Object> findPaymentBillByTradeId(String tradeId);
+
+	Map<String,Object> findTradeIdByPamentid(String tradeId);
 }
