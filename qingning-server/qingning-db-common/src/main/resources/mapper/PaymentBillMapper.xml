@@ -99,6 +99,6 @@
   </select>
 
   <select id="findTradeBillByPaymentid" resultType="hashmap" parameterType="java.lang.String" >
-      select 1 from t_payment_bill where payment_id = #{payment_id,jdbcType=VARCHAR}
+      select * from t_payment_bill where payment_id = #{payment_id,jdbcType=VARCHAR}
   </select>
 </mapper>
