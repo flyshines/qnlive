@@ -211,6 +211,32 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**微信网站应用登录
+     *
+     *
+     */
+    public void pcLogin(HttpServletRequest request,HttpServletResponse response) throws  Exception{
+        StringBuffer url = request.getRequestURL();//获取路径
+        Map<String, String[]> params = request.getParameterMap();
+        String[] codes = params.get("code");//拿到的code的值
+        String code = codes[0];
+        Map<String,String> map = new HashMap<>();
+        map.put("code",code);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "");
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+        Integer key = Integer.valueOf(resultMap.get("key").toString());
+            //正常跳转到首页
+            String userWeixinAccessToken = (String) resultMap.get("access_token");
+            //TODO  pc重定向的网页url 后面拼接参数 后台安全证书 access_token
+
+    }
+
+
+
+
     /**
      * 获得上传到七牛token
      * @param accessToken
