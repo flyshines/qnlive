@@ -22,5 +22,5 @@ public interface PaymentBillMapper {
 	int updatePaymentBill(Map<String,Object> record);
 	Map<String,Object> findPaymentBillByTradeId(String tradeId);
 
-	Map<String,Object> findTradeBillByPaymentid(String paymentid);
+	Map<String,Object> findTradeBillByPaymentid(String pre_pay_no);
 }

@@ -930,8 +930,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("checkWeixinPayBill")
     public Map<String,String> checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String payment_id = reqMap.get("payment_id").toString();
-        Map<String,Object> billInfo = commonModuleServer.findTradeBillByPaymentid(payment_id);
+        String pre_pay_no = reqMap.get("payment_id").toString();
+        Map<String,Object> billInfo = commonModuleServer.findTradeBillByPaymentid(pre_pay_no);
 
         Map<String, String> result = new HashMap<>();
         if (billInfo != null) {
