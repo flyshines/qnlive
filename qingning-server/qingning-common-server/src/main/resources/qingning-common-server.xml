@@ -95,7 +95,21 @@
 				</outputs>
 			</function>
 
-
+			<function name="pcCodeUserLogin">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="code" type="string"  validate="(code)=>{
+					       		var isEmpty= code==null || code.length == 0;
+					       		return !isEmpty;},000100"/>
+				</inputs>
+				<outputs>
+					<param name="access_token" type="string"/>
+					<param name="key" type="string"/>
+					<param name="name" type="string"/>
+				</outputs>
+			</function>
 
 			<function name="generateWeixinPayBill">
 				<auth>

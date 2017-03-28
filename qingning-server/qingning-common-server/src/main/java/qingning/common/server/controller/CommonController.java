@@ -210,7 +210,29 @@ public class CommonController extends AbstractController {
         return ;
     }
 
+    @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
+    public void pcLogin(HttpServletRequest request,HttpServletResponse response) throws Exception {
+        StringBuffer url = request.getRequestURL();//获取路径
+        Map<String, String[]> params = request.getParameterMap();
+        String[] codes = params.get("code");//拿到的code的值
+        String code = codes[0];
+        Map<String,String> map = new HashMap<>();
+        map.put("code",code);
+        map.put("pc", "Y");
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "");
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
+        Integer key = Integer.valueOf(resultMap.get("key").toString());
+        String accessToken = (String) resultMap.get("access_token");
+        String weName = (String) resultMap.get("name");
+        if (key == 0) { //未绑定手机号
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+accessToken);
+        } else { //绑定过手机号
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+accessToken);
+        }
+    }
     /**
      * 获得上传到七牛token
      * @param accessToken
