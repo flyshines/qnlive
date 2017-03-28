@@ -704,45 +704,11 @@ public class LectureController extends AbstractController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/pcauth/redirectUrl", method = RequestMethod.GET)
-	public void pcAuthRedirect(
+	public String pcAuthRedirect(
 			@RequestParam(value = "code") String code,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "pcAuthRedirect", null, null);
-		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("code", code);
-		requestEntity.setParam(parMap);
-
-		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-
-		Object redirectUrl =  resultMap.get("redirectUrl");
-		if (redirectUrl != null) {
-			resp.sendRedirect(redirectUrl.toString());
-		}
-	}
-
-	/**
-	 * PC端关联直播间与服务号 预处理
-	 * @param userid 用户的userid
-	 * @param req
-	 * @param resp
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/pcauth/tobindingRoom", method = RequestMethod.GET)
-	public @ResponseBody ResponseEntity tobindingRoom(
-			@RequestParam(value = "userid") String userid,
-			@RequestParam(value = "appid") String appid,
-			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
-
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "tobindingRoom", null, null);
-		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("userid", userid);
-		requestEntity.setParam(parMap);
-
-		return this.process(requestEntity, serviceManger, message);
+		return "success";
 	}
 
 	/**

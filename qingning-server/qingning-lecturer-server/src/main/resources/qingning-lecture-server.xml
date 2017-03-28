@@ -697,25 +697,6 @@
 				</outputs>
 			</function>
 
-			<function name="pcAuthRedirect">
-				<auth>
-					<accessToken require="N" />
-				</auth>
-				<inputs>
-				</inputs>
-				<outputs>
-				</outputs>
-			</function>
-
-			<function name="tobindingRoom">
-				<auth>
-					<accessToken require="N" />
-				</auth>
-				<inputs>
-				</inputs>
-				<outputs>
-				</outputs>
-			</function>
 
 			<function name="bindingRoom">
 				<auth>
