@@ -826,9 +826,7 @@ public class CommonController extends AbstractController {
     @RequestMapping(value = "/common/shareUrl", method = RequestMethod.GET)
     public void shareUrl(HttpServletRequest request,
                          HttpServletResponse response,
-            @RequestParam(value = "shareUrl") String shareUrl,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version)throws Exception{
+            @RequestParam(value = "shareUrl") String shareUrl)throws Exception{
         byte[] b = null;
         String result = null;
         if (shareUrl != null) {
