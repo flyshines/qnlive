@@ -62,9 +62,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
 		Map<String,Object> dbResultMap = new HashMap<>();
-		//follow_type 关注操作类型 0关注 1不关注
+		//follow_type 关注操作类型 1关注 0不关注
 		Date now = new Date();
-		if("0".equals(reqMap.get("follow_type"))){
+		if("1".equals(reqMap.get("follow_type"))){
 			try{
 				Map<String,Object> fans = new HashMap<String,Object>();
 				fans.put("fans_id", MiscUtils.getUUId());
