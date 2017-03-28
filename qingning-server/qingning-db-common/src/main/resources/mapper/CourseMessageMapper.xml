@@ -85,7 +85,12 @@
         and  cm.message_type = #{message_type}
       </if>
     </where>
-      order by cm.message_pos
+    <if test="user_type == 0" >
+        order by cm.message_pos
+    </if>
+    <if test="user_type == 1" >
+      order by cm.message_pos desc
+    </if>
       limit #{page_count}
   </select>
 
