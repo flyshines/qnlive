@@ -88,7 +88,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
         //4.更新用户缓存中直播间的关注数
-        //关注操作类型 0关注 1不关注
+        //关注操作类型 1关注 0不关注
         Integer incrementNum = null;
         if (reqMap.get("follow_type").toString().equals("1")) {
             incrementNum = 1;

@@ -841,6 +841,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String startLecturerMessageInformationContent = JSON.toJSONString(startLecturerMessageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, startLecturerMessageInformationContent, "", lectureModuleServer.findLoginInfoByUserId(courseOwner).get("m_user_id").toString());//发送信息
 
+            String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
+//					//1.将聊天信息id插入到redis zsort列表中
+            jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_imid"));
+//					//添加到老师发送的集合中
+            String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+            jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
+
+            String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
+            Map<String,String> result = new HashMap<String,String>();
+            MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
+            jedis.hmset(messageKey, result);
+
+
             //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
             map.clear();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
