@@ -217,6 +217,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> tradeBill = tradeBillMapper.findByOutTradeNo(outTradeNo);
 		return tradeBill;
 	}
+
+	@Override
+	public Map<String,Object> findTradeBillByPaymentid(String pre_pay_no) {
+		Map<String,Object> tradeBill = paymentBillMapper.findTradeBillByPaymentid(pre_pay_no);
+		return tradeBill;
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class)

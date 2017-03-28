@@ -34,6 +34,8 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
 
+	Map<String,Object> findTradeBillByPaymentid(String pre_pay_no);
+
 	Map<String,Object> handleWeixinPayResult(Map<String, Object> requestMapData) throws Exception;
 	
 	Map<String,Object> findByDistributerId(String distributer_id);

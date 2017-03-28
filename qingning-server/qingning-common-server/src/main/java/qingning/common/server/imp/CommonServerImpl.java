@@ -930,22 +930,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("checkWeixinPayBill")
     public Map<String,String> checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, String> payResultMap = TenPayUtils.checkPayResult(reqMap.get("payment_id").toString(), reqMap.get("platform").toString());
+        String pre_pay_no = reqMap.get("payment_id").toString();
+        Map<String,Object> billInfo = commonModuleServer.findTradeBillByPaymentid(pre_pay_no);
 
+        Map<String, String> result = new HashMap<>();
+        if (billInfo != null) {
+            Map<String, String> payResultMap = TenPayUtils.checkPayResult(billInfo.get("trade_id").toString(), reqMap.get("platform").toString());
+
+            result.put("state", payResultMap.get ("trade_state"));
+            if (!"SUCCESS".equals (payResultMap.get ("return_code")) || !"SUCCESS".equals (payResultMap.get ("result_code"))) {
+                result.put("state", "7");
+                result.put("desc", "支付结果查询失败");
+            }
+        } else {
+            result.put("state", "8");
+            result.put("desc", "未查询到订单号");
+        }
+        return result;
 //        SUCCESS (0, "支付成功"), REFUND (1, "转入退款"), NOTPAY (2, "未支付"), CLOSED (3, "已关闭"), REVOKED (4, "已撤销"),
 //        USERPAYING (5, "用户支付中"), PAYERROR (6, "支付失败"), OTHER_ERROR (7, "其它错误");
 
-        Map<String, String> result = new HashMap<>();
-        result.put("state", payResultMap.get ("trade_state"));
-        if ("SUCCESS".equals (payResultMap.get ("return_code")) && "SUCCESS".equals (payResultMap.get ("result_code"))) {
-            //调用支付成功的方法 去处理支付结果
-//            reqEntity.setParam(payResultMap);
-//            handleWeixinPayResult(reqEntity);
-        } else {
-            result.put("state", "7");
-            result.put("desc", payResultMap.get("trade_state_desc"));
-        }
-        return result;
     }
 
     /**
