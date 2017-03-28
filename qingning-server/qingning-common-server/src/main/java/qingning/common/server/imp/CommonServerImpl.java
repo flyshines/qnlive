@@ -503,9 +503,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
-
-
-
             String unionid =  userJson.getString("unionid");
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
@@ -520,7 +517,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     //</editor-fold>
 
     /**
-     * 微信授权code登录
+     * PC端  微信授权code登录
      * @param reqEntity
      * @return
      * @throws Exception
@@ -530,6 +527,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
 
+        String subscribe = "0";
         resultMap.put("key","0");//未绑定手机号码
 
         //1.传递授权code及相关参数，调用微信验证code接口
@@ -544,11 +542,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         String openid = accountJson.getString("openid");
         String union_id = accountJson.getString("union_id");
-        JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid);
+
+        JSONObject userJson = WeiXinUtil.getUserByOpenid(accountJson.getString("access_token"), openid);
         errCode = accountJson.get("errcode");
         if (errCode != null ) {
             throw new QNLiveException("120008");
         }
+        if(userJson.get("subscribe") != null){
+            subscribe = userJson.get("subscribe").toString();
+        }
+
+        String nickname = userJson.getString("nickname");//昵称
+        resultMap.put("name", nickname);
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
         //1.2.1根据 union_id查询数据库
@@ -566,7 +571,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
             return resultMap;
         }else {
-            String nickname = userJson.getString("nickname");//昵称
+
+            userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid);
+            nickname = userJson.getString("nickname");//昵称
+
             String sex = userJson.getString("sex");//性别
             String headimgurl = userJson.getString("headimgurl");//头像
 
@@ -615,7 +623,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
-//            reqMap.put("subscribe",subscribe);
+            reqMap.put("subscribe",subscribe);
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);

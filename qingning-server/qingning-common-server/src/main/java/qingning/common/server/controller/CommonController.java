@@ -216,22 +216,22 @@ public class CommonController extends AbstractController {
         Map<String, String[]> params = request.getParameterMap();
         String[] codes = params.get("code");//拿到的code的值
         String code = codes[0];
-        Map<String,String> map = new HashMap<>();
-        map.put("code",code);
-        map.put("pc", "Y");
+        Map<String, String> map = new HashMap<>();
+        map.put("code", code);
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "");
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
         Integer key = Integer.valueOf(resultMap.get("key").toString());
-        String accessToken = (String) resultMap.get("access_token");
+        String access_token = (String) resultMap.get("access_token");
         String weName = (String) resultMap.get("name");
-        if (key == 0) { //未绑定手机号
-            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+accessToken);
-        } else { //绑定过手机号
-            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+accessToken);
+        if(key == 0){//未绑定
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+access_token);
+        } else { //已绑定
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+access_token);
         }
+
     }
     /**
      * 获得上传到七牛token
