@@ -724,7 +724,7 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * PC端关联直播间与服务号 预处理
-	 * @param unionid 用户的unionid
+	 * @param userid 用户的userid
 	 * @param req
 	 * @param resp
 	 * @return
@@ -732,13 +732,14 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/pcauth/tobindingRoom", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity tobindingRoom(
-			@RequestParam(value = "unionid") String unionid,
+			@RequestParam(value = "userid") String userid,
+			@RequestParam(value = "appid") String appid,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "tobindingRoom", null, null);
 		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("unionid", unionid);
+		parMap.put("userid", userid);
 		requestEntity.setParam(parMap);
 
 		return this.process(requestEntity, serviceManger, message);
