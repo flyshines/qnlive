@@ -219,8 +219,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String,Object> findTradeIdByPamentid(String outTradeNo) {
-		Map<String,Object> tradeBill = tradeBillMapper.findByOutTradeNo(outTradeNo);
+	public Map<String,Object> findTradeBillByPaymentid(String paymentid) {
+		Map<String,Object> tradeBill = paymentBillMapper.findTradeBillByPaymentid(paymentid);
 		return tradeBill;
 	}
 	
