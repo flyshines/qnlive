@@ -536,22 +536,20 @@ public class MessagePushServerImpl extends AbstractMsgService {
             String courseEndMessage = "直播结束于"+str;
             long currentTime = System.currentTimeMillis();
             String mGroupId = jedis.hget(courseKey,"im_course_id");
-            String message = courseEndMessage;
             String sender = "system";
+            String overtimeMessage = MiscUtils.getConfigByKey("over_time_message");
+
+            String message = courseEndMessage;
             Map<String,Object> infomation = new HashMap<>();
             infomation.put("course_id", courseId);
             infomation.put("creator_id", courseMap.get("lecturer_id"));
             infomation.put("message", message);
+            infomation.put("message_id",MiscUtils.getUUId());
+            infomation.put("message_imid",infomation.get("message_id"));
             infomation.put("message_type", "1");
             infomation.put("send_type", "6");//5.结束消息
             infomation.put("create_time", currentTime);
-            Map<String,Object> messageMap = new HashMap<>();
-            messageMap.put("msg_type","1");
-            messageMap.put("send_time",currentTime);
-            messageMap.put("information",infomation);
-            messageMap.put("mid",MiscUtils.getUUId());
-            String content = JSON.toJSONString(messageMap);
-            IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
 
 /*            //1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
@@ -586,6 +584,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 extrasMap.put("im_course_id",courseMap.get("im_course_id"));
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
+                infomation.put("is_force",1);
+                infomation.put("tip",MiscUtils.getConfigByKey("no_timeout_message"));
             }else if(type.equals("2")){
                 //课程直播超时结束
                 //1.9极光推送结束消息
@@ -599,8 +599,16 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 extrasMap.put("im_course_id",courseMap.get("im_course_id"));
                 obj.put("extras_map", extrasMap);
                 JPushHelper.push(obj);
+                infomation.put("is_force",1);
+                infomation.put("tip",MiscUtils.getConfigByKey("over_time_message"));
             }
-
+            Map<String,Object> messageMap = new HashMap<>();
+            messageMap.put("msg_type","1");
+            messageMap.put("send_time",currentTime);
+            messageMap.put("information",infomation);
+            messageMap.put("mid",infomation.get("message_id"));
+            String content = JSON.toJSONString(messageMap);
+            IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
         }
     }
