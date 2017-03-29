@@ -2390,7 +2390,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//判断日期 一天三次
             if(jedis.exists(dayKey)){
                 Map<String,String> redisMap = JSON.parseObject(jedis.get(dayKey), new TypeReference<Map<String, String>>(){});
-                if(Integer.parseInt(redisMap.get("count"))==3){
+                if(Integer.parseInt(redisMap.get("count"))==5){
                     throw new QNLiveException("130007");//发送太频繁
                 }else{
                     int count = Integer.parseInt(redisMap.get("count")) + 1;
