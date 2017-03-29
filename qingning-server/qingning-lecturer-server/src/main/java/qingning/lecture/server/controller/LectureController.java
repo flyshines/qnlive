@@ -738,14 +738,12 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value = "/pcauth/bindingRoom", method = RequestMethod.GET)
 	public void bindingRoom(
 			@RequestHeader("access_token") String access_token,
-			@RequestParam(value = "room_id") String lecturer_id,
 			@RequestParam(value = "appid") String appid,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", access_token, null);
 		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("lecturer_id", lecturer_id);
 		parMap.put("appid", appid);
 		requestEntity.setParam(parMap);
 

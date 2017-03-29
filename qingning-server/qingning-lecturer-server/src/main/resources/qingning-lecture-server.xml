@@ -702,7 +702,6 @@
 					<accessToken require="Y" />
 				</auth>
 				<inputs>
-					<param name="room_id" type="string" />
 					<param name="appid" type="string" />
 				</inputs>
 				<outputs>
