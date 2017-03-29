@@ -412,6 +412,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }catch(Exception e){
             //出现异常不处理
+            logger.debug(""+e.toString());
         }
 
 
