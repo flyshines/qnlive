@@ -583,7 +583,16 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="courseStatus">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="uploadusers">
 				<auth>
 					<accessToken require="N" />
