@@ -157,39 +157,39 @@ public class ImMsgServiceImp implements ImMsgService {
 					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
 					String str = sdf.format( System.currentTimeMillis());
-					String courseStartMessage = "直播开始于"+str;
-					String mGroupId = courseMap.get("im_course_id");
-					String message = courseStartMessage;
-					String sender = "system";
-					Map<String,Object> startInformation = new HashMap<>();
-					startInformation.put("course_id", information.get("course_id").toString());
-					startInformation.put("message", message);
-					startInformation.put("message_type", "1");
-					startInformation.put("send_type", "5");//5.开始/结束消息
-					startInformation.put("message_imid",MiscUtils.getUUId());
-					startInformation.put("message_id",startInformation.get("message_imid"));
-					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
-					Map<String,Object> messageMap = new HashMap<>();
-					messageMap.put("msg_type","1");
-					messageMap.put("send_time", System.currentTimeMillis());
-					messageMap.put("create_time", System.currentTimeMillis());
-					messageMap.put("information",startInformation);
-					messageMap.put("mid",startInformation.get("message_imid"));
-					String content = JSON.toJSONString(messageMap);
-					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
-
-
-					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
-//					//1.将聊天信息id插入到redis zsort列表中
-					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
-//					//添加到老师发送的集合中
-					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startInformation.get("message_imid").toString());
-
-					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
-					Map<String,String> result = new HashMap<String,String>();
-					MiscUtils.converObjectMapToStringMap(startInformation, result);
-					jedis.hmset(messageKey, result);
+//					String courseStartMessage = "直播开始于"+str;
+//					String mGroupId = courseMap.get("im_course_id");
+//					String message = courseStartMessage;
+//					String sender = "system";
+//					Map<String,Object> startInformation = new HashMap<>();
+//					startInformation.put("course_id", information.get("course_id").toString());
+//					startInformation.put("message", message);
+//					startInformation.put("message_type", "1");
+//					startInformation.put("send_type", "5");//5.开始/结束消息
+//					startInformation.put("message_imid",MiscUtils.getUUId());
+//					startInformation.put("message_id",startInformation.get("message_imid"));
+//					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
+//					Map<String,Object> messageMap = new HashMap<>();
+//					messageMap.put("msg_type","1");
+//					messageMap.put("send_time", System.currentTimeMillis());
+//					messageMap.put("create_time", System.currentTimeMillis());
+//					messageMap.put("information",startInformation);
+//					messageMap.put("mid",startInformation.get("message_imid"));
+//					String content = JSON.toJSONString(messageMap);
+//					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
+//
+//
+//					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
+////					//1.将聊天信息id插入到redis zsort列表中
+//					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
+////					//添加到老师发送的集合中
+//					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+//					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startInformation.get("message_imid").toString());
+//
+//					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
+//					Map<String,String> result = new HashMap<String,String>();
+//					MiscUtils.converObjectMapToStringMap(startInformation, result);
+//					jedis.hmset(messageKey, result);
 
 					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 					TemplateData first = new TemplateData();
