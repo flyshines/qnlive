@@ -1,5 +1,6 @@
 package qingning.db.common.mybatis.persistence;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UserMapper {
@@ -8,4 +9,6 @@ public interface UserMapper {
 	int updateLiveRoomNumForUser(Map<String,Object> record);
     Map<String,Object> findByUserId(String user_id);
 	Map<String,Object> findByPhone(String phone);
+
+	List<Map<String,String>> findRobotUsers(String user_role);
 }

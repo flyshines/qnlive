@@ -10,7 +10,9 @@ import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
 import qingning.common.util.*;
-import qingning.db.common.mybatis.persistence.*;
+import qingning.db.common.mybatis.persistence.CoursesMapper;
+import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
+import qingning.db.common.mybatis.persistence.LecturerMapper;
 import qingning.mq.server.entyity.QNQuartzSchedule;
 import qingning.mq.server.entyity.QNSchedule;
 import qingning.mq.server.entyity.ScheduleTask;
@@ -29,6 +31,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     @Autowired
     private CoursesStudentsMapper coursesStudentsMapper;
+
+    @Autowired
+    private LecturerMapper lecturerMapper;
 
 
 /*    private SaveCourseMessageService saveCourseMessageService;
@@ -685,11 +690,37 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
         log.debug("---------------将课程创建的信息推送给服务号的粉丝"+reqMap);
 
-        String accessToken = (String) reqMap.get ("accessToken");
-
-        String templateId = MiscUtils.getConfigByKey("wpush_start_course");//创建课程的模板id
-        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
+        String accessToken = reqMap.get ("accessToken").toString();
+        String type = reqMap.get("pushType").toString();//类型 1 是创建课程 2 是更新课程时间
+        String lecturer_id = reqMap.get("lecturer_id").toString();
         String courseId = reqMap.get("course_id").toString();//课程id
+        //判断是否有模板id
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("lecturer_id", lecturer_id);
+        paramMap.put("template_type", type);
+        Map<String,Object> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
+
+        String templateId = null;
+        //没有 则创建
+        if (templateInfo == null || templateInfo.size() < 1) {
+            JSONObject templateJson = WeiXinUtil.createServiceTemplateInfo(accessToken, type);
+            Object errcode = templateJson.get("errcode");
+            if (errcode != null) {//创建失败 结束 说明没这个行业
+                log.error("创建模板消息出错 +++++ ", templateJson);
+                return;
+            } else {//创建成功 则存到数据库
+                templateId = templateJson.getString("template_id");
+
+                paramMap.put("template_id", templateId);
+                lecturerMapper.insertServiceTemplateInfo(paramMap);
+
+            }
+        } else {
+            templateId = templateInfo.get("template_id").toString();
+        }
+
+        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
+
         String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
 
         String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap);

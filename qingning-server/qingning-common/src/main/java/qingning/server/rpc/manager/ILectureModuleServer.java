@@ -110,11 +110,6 @@ public interface ILectureModuleServer {
 	//根据lecturerId查找服务号信息
 	Map<String, Object> findServiceNoInfoByLecturerId(String lecturerId);
 
-	/**
-	 * 查找机器人
-	 */
-	List<Map<String,String>> findRobotUsers(String user_role);
-
 	int updateUser(Map<String,Object> parameters);
 
 	void updateLoginInfo(Map<String, Object> updateMap);

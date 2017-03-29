@@ -697,19 +697,34 @@ public class LectureController extends AbstractController {
 		}
 	}
 
-	/**
-	 * PC微信登录授权回调URL
-	 * @param  code　url带code
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/pcauth/redirectUrl", method = RequestMethod.GET)
-	public String pcAuthRedirect(
-			@RequestParam(value = "code") String code,
-			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
-		return "success";
-	}
+	//<editor-fold desc="暂时用不上先注释掉">
+//	/**
+//	 * PC微信登录授权回调URL
+//	 * @param  code　url带code
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	@RequestMapping(value = "/pcauth/redirectUrl", method = RequestMethod.GET)
+//	public String pcAuthRedirect(
+//			@RequestParam(value = "code") String code,
+//			HttpServletRequest req,
+//			HttpServletResponse resp) throws Exception {
+//		return "success";
+//	}
+//
+//	/**
+//	 * PC端登录之后 进行绑定 查询直播间信息 只有accessToken
+//	 * @param access_token
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	@RequestMapping(value = "/pcauth/queryRoomBrief", method = RequestMethod.GET)
+//	public @ResponseBody ResponseEntity queryRoomBrief (
+//			@RequestHeader("access_token") String access_token) throws Exception {
+//		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "queryRoomBrief", access_token, null);
+//		return this.process(requestEntity, serviceManger, message);
+//	}
+	//</editor-fold>
 
 	/**
 	 * PC端关联直播间与服务号
@@ -722,12 +737,13 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/pcauth/bindingRoom", method = RequestMethod.GET)
 	public void bindingRoom(
-			@RequestParam(value = "lecturer_id") String lecturer_id,
+			@RequestHeader("access_token") String access_token,
+			@RequestParam(value = "room_id") String lecturer_id,
 			@RequestParam(value = "appid") String appid,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", null, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", access_token, null);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("lecturer_id", lecturer_id);
 		parMap.put("appid", appid);

@@ -194,4 +194,9 @@
        and update_time=#{last_update_time}
     </if>
   </update>
+
+  <select id="findRobotUsers" resultType="hashmap" parameterType="java.lang.String">
+    SELECT * FROM t_user WHERE user_role = #{user_role} limit 500
+  </select>
+
 </mapper>

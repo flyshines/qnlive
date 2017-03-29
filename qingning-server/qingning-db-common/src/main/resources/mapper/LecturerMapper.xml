@@ -230,8 +230,41 @@
     where lecturer_id = #{lecturer_id}
   </select>
 
-  <select id="findRobotUsers" resultType="hashmap" parameterType="java.lang.String">
-    SELECT * FROM t_user WHERE user_role = #{user_role} limit 500
+  <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
+    SELECT * FROM t_wechat_service_template_info
+    where lecturer_id = #{lecturer_id} AND template_type = #{template_type}
   </select>
+
+  <insert id="insertServiceTemplateInfo" parameterType="hashmap">
+    INSERT INTO t_wechat_service_template_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="lecturer_id != null">
+        lecturer_id,
+      </if>
+      <if test="template_id != null">
+        template_id,
+      </if>
+      <if test="template_type != null">
+        template_type,
+      </if>
+      <if test="createtime != null">
+        createtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="lecturer_id != null">
+        #{lecturer_id},
+      </if>
+      <if test="template_id != null">
+        #{template_id},
+      </if>
+      <if test="template_type != null">
+        #{template_type},
+      </if>
+      <if test="createtime != null">
+        #{createtime},
+      </if>
+    </trim>
+  </insert>
 
 </mapper>
