@@ -208,7 +208,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> record = new HashMap<String,Object>();
 		record.put("user_id", updateMap.get("user_id"));
 		record.put("web_openid",updateMap.get("web_openid"));
-		record.put("subscribe",updateMap.get("updateMap"));
+		record.put("subscribe",updateMap.get("subscribe"));
 		loginInfoMapper.updateLoginInfo(record);
 	}
 
