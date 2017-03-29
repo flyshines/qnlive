@@ -14,6 +14,6 @@ public interface LecturerMapper {
     Map<String,Object> findServiceNoInfoByAppid(String authorizer_appid);
     Map<String,Object> findServiceNoInfoByLecturerId(String lecturer_id);
 
-    Map<String,Object> findServiceTemplateInfoByLecturerId(Map<String,Object> query);
+    Map<String,Object> findServiceTemplateInfoByLecturerId(Map<String,String> query);
     int insertServiceTemplateInfo(Map<String, String> map);
 }
