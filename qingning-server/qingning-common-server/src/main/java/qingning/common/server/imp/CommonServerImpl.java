@@ -414,7 +414,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //出现异常不处理
             logger.debug(""+e.toString());
         }
-
+        reqMap.put("subscribe",subscribe);
 
 
         //1.2如果验证成功，则得到用户的union_id和用户的access_token。
@@ -426,6 +426,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //1.2.1.1如果用户存在则进行登录流程
         if(loginInfoMap != null){//有
+            if(!loginInfoMap.get("subscribe").toString().equals(subscribe)){
+                loginInfoMap.put("subscribe",subscribe);
+                commonModuleServer.updateUserWebOpenIdByUserId(loginInfoMap);
+            }
+
+
             processLoginSuccess(2, null, loginInfoMap, resultMap);//获取后台安全证书 access_token
             return resultMap;
         }else {
@@ -506,7 +512,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("unionid",unionid);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
-            reqMap.put("subscribe",subscribe);
+
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);

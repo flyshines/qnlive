@@ -209,7 +209,7 @@
         web_openid=#{web_openid},
       </if>
       <if test="subscribe != null" >
-        subscribe=#{subscribe},
+        subscribe = #{subscribe},
       </if>
     </set>
     where user_id = #{user_id}
