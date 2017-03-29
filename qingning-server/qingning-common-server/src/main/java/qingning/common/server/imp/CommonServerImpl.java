@@ -2480,17 +2480,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//名字 表情
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
-                if(userType == 1){
-                    Collections.reverse(messageList);
-                }
                 resultMap.put("message_list", messageList);
             }
             if(queryMap.containsKey("message_imid")){//如果有imid
                 resultMap.put("this_message",commonModuleServer.findCourseMessageByComm(queryMap));
             }
-
             resultMap.put("message_count", commonModuleServer.findCourseMessageSum(queryMap));
-
             return resultMap;
         }else{ //TODO 查询缓存
             //当前课程没有结束 可以直接查询缓存
@@ -2509,7 +2504,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //初始化下标
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
-            Set<String> messageImIdList = null;//消息集合
+            Set<String> messageImIdList = null;//消息集合你
             //来确定消息集合 0旧 -> 1...新
             if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid 过来
 
