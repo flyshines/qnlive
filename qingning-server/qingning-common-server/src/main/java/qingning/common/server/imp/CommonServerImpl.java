@@ -403,8 +403,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         String openid = getCodeResultJson.getString("openid");
         //判断当前用户是否关注我们公众号
-
-
         Jedis jedis = jedisUtils.getJedis();//获取缓存工具对象
         try{
             AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis);//获取公众号access_token
