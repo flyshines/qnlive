@@ -939,12 +939,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             result.put("state", payResultMap.get ("trade_state"));
             if (!"SUCCESS".equals (payResultMap.get ("return_code")) || !"SUCCESS".equals (payResultMap.get ("result_code"))) {
-                result.put("state", "7");
-                result.put("desc", "支付结果查询失败");
+                throw new QNLiveException("120022");
+            } else {
+                result.put("state", "0");
             }
         } else {
-            result.put("state", "8");
-            result.put("desc", "未查询到订单号");
+            throw new QNLiveException("120022");
         }
         return result;
 //        SUCCESS (0, "支付成功"), REFUND (1, "转入退款"), NOTPAY (2, "未支付"), CLOSED (3, "已关闭"), REVOKED (4, "已撤销"),
@@ -1866,8 +1866,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //查询该用户是否为该直播间的分销员
         resultMap.put("share_url",getLiveRoomShareURL(userId, roomId));
-        if(reqMap.get("png").toString().equals("Y"))
-             resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
+
+        long timeS1 = System.currentTimeMillis();
+        logger.info(String.valueOf(timeS1));
+        if(reqMap.get("png").toString().equals("Y")) {
+            resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
+        }
+        long timeS2 = System.currentTimeMillis();
+        logger.info(String.valueOf(timeS2));
         return resultMap;
     }
  

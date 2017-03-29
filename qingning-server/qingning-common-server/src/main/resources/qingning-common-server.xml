@@ -156,7 +156,6 @@
 			</function>
 
 			<function name="handleWeixinPayResult">
-
 				<inputs>
 				</inputs>
 				<outputs>
