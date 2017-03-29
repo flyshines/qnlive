@@ -936,11 +936,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if (billInfo != null) {
             Map<String, String> payResultMap = TenPayUtils.checkPayResult(billInfo.get("trade_id").toString(), reqMap.get("platform").toString());
 
-            result.put("state", payResultMap.get ("trade_state"));
-            if (!"SUCCESS".equals (payResultMap.get ("return_code")) || !"SUCCESS".equals (payResultMap.get ("result_code"))) {
-                result.put("state", "7");
-            } else {
+            if ("SUCCESS".equals (payResultMap.get ("return_code")) && "SUCCESS".equals (payResultMap.get ("result_code"))) {
                 result.put("state", "0");
+            } else {
+                result.put("state", "7");
             }
         } else {
             result.put("state", "8");
