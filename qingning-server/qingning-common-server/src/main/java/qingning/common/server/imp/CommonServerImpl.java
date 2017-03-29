@@ -2480,6 +2480,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//名字 表情
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
+                if(direction == 1){
+                    Collections.reverse(messageList);
+                }
                 resultMap.put("message_list", messageList);
             }
             if(queryMap.containsKey("message_imid")){//如果有imid
