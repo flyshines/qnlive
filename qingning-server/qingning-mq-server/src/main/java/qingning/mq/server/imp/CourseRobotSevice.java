@@ -48,7 +48,7 @@ public class CourseRobotSevice extends AbstractMsgService {
         synchronized (this) {
             if (didInitRobots) return;
             List<Map<String, String>> robotList = userMapper.findRobotUsers("robot");// 机器人
-            if (robotList != null || robotList.size() > 0) {
+            if (robotList != null && robotList.size() > 0) {
                 notJoinRobots.addAll (robotList);
                 didInitRobots = true;
             }
