@@ -339,9 +339,12 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getUserByOpenid(String accessToken,String openId){
+        log.debug("------微信--获得多媒体URL-请求URL ====================获取当前用户是否关注直播间 ");
         String requestUrl = get_user_by_openid.replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
+        log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
+        log.debug("------微信--通过access_token和openid获得用户详细信息-请求URL  "+requestResult);
         return jsonObject;
     }
 
