@@ -10,7 +10,7 @@ import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.CoursesMapper;
 import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
-import qingning.db.common.mybatis.persistence.LecturerMapper;
+import qingning.db.common.mybatis.persistence.UserMapper;
 import qingning.server.AbstractMsgService;
 import qingning.server.annotation.FunctionName;
 import redis.clients.jedis.Jedis;
@@ -30,7 +30,7 @@ public class CourseRobotSevice extends AbstractMsgService {
     private static Logger log = LoggerFactory.getLogger(ImMsgServiceImp.class);
 
     @Autowired
-    private LecturerMapper lecturerMapper;
+    private UserMapper userMapper;
 
     @Autowired
     private CoursesStudentsMapper coursesStudentsMapper;
@@ -47,7 +47,7 @@ public class CourseRobotSevice extends AbstractMsgService {
     private void robotInit() {
         synchronized (this) {
             if (didInitRobots) return;
-            List<Map<String, String>> robotList = lecturerMapper.findRobotUsers("robot");// 机器人
+            List<Map<String, String>> robotList = userMapper.findRobotUsers("robot");// 机器人
             if (robotList != null || robotList.size() > 0) {
                 notJoinRobots.addAll (robotList);
                 didInitRobots = true;

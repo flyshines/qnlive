@@ -697,12 +697,12 @@
 				</outputs>
 			</function>
 
-
 			<function name="bindingRoom">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
+					<param name="appid" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>

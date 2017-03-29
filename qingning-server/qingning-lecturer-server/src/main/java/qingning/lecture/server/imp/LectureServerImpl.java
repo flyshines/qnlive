@@ -610,6 +610,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //                Map<String, Object> wxPushParam = new HashMap<>();
 //                wxPushParam.put("templateParam", templateMap);//模板消息
 //                wxPushParam.put("courseId", courseId);//课程ID
+//                wxPushParam.put("lecturer_id", userId);//课程ID
 //                wxPushParam.put("accessToken", authorizer_access_token);//课程ID
 //
 //                RequestEntity mqRequestEntity = new RequestEntity();
@@ -2648,13 +2649,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> bindingRoom(RequestEntity reqEntity) throws Exception {
 
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String lecturer_id = (String) reqMap.get("lecturer_id");
+
+        //用户id就是讲师id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String appid = (String) reqMap.get("appid");
 
         //1 进行关联 更新数据库
         Map<String, String> paramMap = new HashMap<String, String>();
-        paramMap.put("authorizer_appid", lecturer_id);
-        paramMap.put("lecturer_id", appid);
+        paramMap.put("authorizer_appid", appid);
+        paramMap.put("lecturer_id", userId);
         int count = lectureModuleServer.updateServiceNoLecturerId(paramMap);
 
         //更新结果

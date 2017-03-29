@@ -65,10 +65,11 @@ public class WeiXinUtil {
     public final static String pre_auth_code_url = MiscUtils.getConfigByKey("service_pre_auth_code");
     public final static String service_auth_url = MiscUtils.getConfigByKey("service_auth_url");
     public final static String service_auth_info_url = MiscUtils.getConfigByKey("service_auth_info_url");
+
     public final static String service_auth_refresh_info_url = MiscUtils.getConfigByKey("service_auth_refresh_info_url");
     public final static String service_auth_account_info_url = MiscUtils.getConfigByKey("service_auth_account_info_url");
 
-
+    public final static String service_template_info_url = MiscUtils.getConfigByKey("");
 
     public final static String service_fans_url1 = MiscUtils.getConfigByKey("service_fans_url1");
     public final static String service_fans_url2 = MiscUtils.getConfigByKey("service_fans_url2");
@@ -240,6 +241,22 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
+    public static JSONObject createServiceTemplateInfo(String accessToken, String type) {
+        String requestUrl = service_template_info_url.replace("ACCESS_TOKEN", accessToken);
+
+        Map<String, String> param = new HashMap<>();
+        String template_id_short = null;
+        if (type.equals("1")) {
+            template_id_short = MiscUtils.getConfigByKey("wpush_start_course_template_id");
+        } else if (type.equals("2")) {
+            template_id_short = null;
+        }
+        param.put("template_id_short", template_id_short);
+
+        String requestResult = HttpTookit.doPost(requestUrl, null, param, null);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        return jsonObject;
+    }
     /**
      * 获取服务号的粉丝的openid
      * @param accessToken 服务号的

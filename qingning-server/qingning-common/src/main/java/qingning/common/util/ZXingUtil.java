@@ -643,14 +643,14 @@ public class ZXingUtil {
         BufferedImage qrImage = createImage(qr_code_content, "", qr_code_size, false);
 
         //合成二维码后的图片
-        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-65*2-270, 1.0f);
+        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
         BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
 
         //
-        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false, false);
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, (36+14)*3, 1.0f, false, false);
         //
-        BufferedImage pressText3 = pressText("推荐一个不错的直播间", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false, false);
+        BufferedImage pressText3 = pressText("推荐一个不错的直播间", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, (36+14+18)*3, 1.0f, false, false);
         //
         BufferedImage pressText4 = pressText(lecturer_name+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4+15, 1.0f, true, true);
 
@@ -659,7 +659,7 @@ public class ZXingUtil {
         BufferedImage convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
         convertImage = convertCircular(convertImage);
 //        int height= (int) (HEIGHT*0.03);
-        BufferedImage waterMark2 = waterMark(pressText4, convertImage, 77*3, 108, 1.0f);
+        BufferedImage waterMark2 = waterMark(pressText4, convertImage, 77*3, 36*3, 1.0f);
 
         return waterMark2;
     }
@@ -685,7 +685,7 @@ public class ZXingUtil {
         BufferedImage qrImage = createImage(qr_code_content, "", qr_code_size, false);
 
         //合成二维码后的图片
-        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-65*2-270, 1.0f);
+        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
         BufferedImage pressText1 = pressText("长按识别二维码进入即可成为直播间分销员", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
 
@@ -739,7 +739,7 @@ public class ZXingUtil {
         BufferedImage qrImage = createImage(qr_code_content, "", qr_code_size, false);
 
         //合成二维码后的图片
-        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-65*2-270, 1.0f);
+        BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
         BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
 
