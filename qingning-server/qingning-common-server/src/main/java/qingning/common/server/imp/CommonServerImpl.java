@@ -943,7 +943,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String, String> payResultMap = TenPayUtils.checkPayResult(billInfo.get("trade_id").toString(), reqMap.get("platform").toString());
 
             if ("SUCCESS".equals (payResultMap.get ("return_code")) && "SUCCESS".equals (payResultMap.get ("result_code"))) {
-                result.put("state", "0");
+                String trade_state = payResultMap.get("trade_state");
+                if ("SUCCESS".equals(trade_state)) {
+                    result.put("state", "0");
+                } else if ("REFUND".equals(trade_state)) {
+                    result.put("state", "1");
+                } else if ("NOTPAY".equals(trade_state)) {
+                    result.put("state", "2");
+                } else if ("CLOSED".equals(trade_state)) {
+                    result.put("state", "3");
+                } else if ("REVOKED".equals(trade_state)) {
+                    result.put("state", "4");
+                } else if ("USERPAYING".equals(trade_state)) {
+                    result.put("state", "5");
+                } else if ("PAYERROR".equals(trade_state)) {
+                    result.put("state", "6");
+                } else  {
+                    result.put("state", "7");
+                }
             } else {
                 result.put("state", "7");
             }
@@ -952,7 +969,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         return result;
 //        SUCCESS (0, "支付成功"), REFUND (1, "转入退款"), NOTPAY (2, "未支付"), CLOSED (3, "已关闭"), REVOKED (4, "已撤销"),
-//        USERPAYING (5, "用户支付中"), PAYERROR (6, "支付失败"), OTHER_ERROR (7, "其它错误");
+//        USERPAYING (5, "用户支付中"), PAYERROR (6, "支付失败"), OTHER_ERROR (7, "其它错误"); (8, 未查询到订单号）
 
     }
 
