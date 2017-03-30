@@ -2502,7 +2502,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//名字 表情
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
-                if(direction == 1){
+                if(direction == 1 ){
+                    Collections.reverse(messageList);
+                }
+                if(reqMap.get("message_imid").toString() != null && direction==0 && userType == 1){
                     Collections.reverse(messageList);
                 }
                 resultMap.put("message_list", messageList);
