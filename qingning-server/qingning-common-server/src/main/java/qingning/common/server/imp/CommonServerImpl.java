@@ -2476,7 +2476,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         int userType =  Integer.parseInt(reqMap.get("user_type").toString());//查询角色类型 0老师/顾问  1用户
         int direction =  Integer.parseInt(reqMap.get("direction").toString());//方向  0旧  1新 默认为1
         String course_id = reqMap.get("course_id").toString();//课程id
-
         Jedis jedis = jedisUtils.getJedis();//获取缓存方法对象
         Map<String, Object> map = new HashMap<>();//map
         map.put(Constants.CACHED_KEY_COURSE_FIELD,course_id);//存入map中
@@ -2504,11 +2503,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
 
-                if(direction == 1){
-                    Collections.reverse(messageList);
-                }else if(reqMap.get("message_imid") != null && direction==0 && userType == 1){
+                if(direction == 1 && reqMap.get("message_imid") == null ){
                     Collections.reverse(messageList);
                 }
+                if(direction == 0 && reqMap.get("message_imid") != null ){
+                    Collections.reverse(messageList);
+                }
+
+//                if( direction == 1 && reqMap.get("message_imid") != null && userType == 0){
+//                    Collections.reverse(messageList);
+//                }else if(direction == 1){
+//                    Collections.reverse(messageList);
+//                }else if(reqMap.get("message_imid") != null && direction==0 && userType == 1){
+//                    Collections.reverse(messageList);
+//                }else if(){
+//
+//                }
 
                 resultMap.put("message_list", messageList);
             }
