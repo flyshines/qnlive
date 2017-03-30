@@ -546,10 +546,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         String openid = accountJson.getString("openid");
-        String union_id = accountJson.getString("union_id");
+        String union_id = accountJson.getString("unionid");
 
         JSONObject userJson = WeiXinUtil.getUserByOpenid(accountJson.getString("access_token"), openid);
-        errCode = accountJson.get("errcode");
+        errCode = userJson.get("errcode");
         if (errCode != null ) {
             throw new QNLiveException("120008");
         }
