@@ -232,7 +232,6 @@ public class CommonController extends AbstractController {
         } else { //已绑定
             response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
         }
-        response.sendRedirect("http://www.baidu.com");
     }
     /**
      * 获得上传到七牛token
