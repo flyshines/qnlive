@@ -140,6 +140,7 @@
 					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 				</inputs>
 				<outputs>
+					<param name="course_list" type="int"/>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>

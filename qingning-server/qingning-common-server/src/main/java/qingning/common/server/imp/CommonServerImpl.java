@@ -427,10 +427,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //1.2.1.1如果用户存在则进行登录流程
         if(loginInfoMap != null){//有
             if(!loginInfoMap.get("subscribe").toString().equals(subscribe)){
-                loginInfoMap.put("subscribe",subscribe);
-                commonModuleServer.updateUserWebOpenIdByUserId(loginInfoMap);
+                Map<String,Object> userMap = new HashMap<>();
+                userMap.put("subscribe",subscribe);
+                userMap.put("web_openid",openid);
+                userMap.put("user_id",loginInfoMap.get("user_id"));
+                commonModuleServer.updateUserWebOpenIdByUserId(userMap);
             }
-
 
             processLoginSuccess(2, null, loginInfoMap, resultMap);//获取后台安全证书 access_token
             return resultMap;
@@ -2403,17 +2405,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
             throw new QNLiveException("130008");
         }
-        String ipAdress = map.get("ipAdress");//ip地址
+      //  String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
             Jedis jedis = jedisUtils.getJedis();
             Map<String,String> userMap = new HashMap<>();
             userMap.put("user_id",userId);
             String userKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_S, userMap);
-            if(jedis.exists(userKey)){//如果key存在那么就抛异常
-                throw new QNLiveException("130005");//发送太频繁
-            }else{
-                jedis.setex(userKey,5*60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
-            }
+            jedis.setex(userKey,5*60,phoneNum);//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
             String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//判断日期 一天三次
             if(jedis.exists(dayKey)){
                 Map<String,String> redisMap = JSON.parseObject(jedis.get(dayKey), new TypeReference<Map<String, String>>(){});
