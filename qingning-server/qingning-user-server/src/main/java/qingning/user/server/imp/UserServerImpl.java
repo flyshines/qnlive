@@ -122,7 +122,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("userCourses")
     public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> values = getPlatformCourses(reqEntity);
-        //消息列表总数
+        //课程列表总数
         values.put("course_amount",jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
         if(!MiscUtils.isEmpty(values)){
         	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
@@ -162,23 +162,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
 
     	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-    	reqMap.put("user_id", userId);
-    	String status = (String)reqMap.get("status");
-    	String course_id = (String)reqMap.get("course_id");
-    	String data_source = (String)reqMap.get("data_source");
-    	//String start_time_str = (String)reqMap.get("start_time");
-    	//long start_time= MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-    	Long query_time = (Long)reqMap.get("query_time");
-    	Long position = (Long)reqMap.get("position");
-    	long currentTime = System.currentTimeMillis();
+    	reqMap.put("user_id", userId);//用户id
+    	String status = (String)reqMap.get("status");//状态 1.预告 2.已结束 4.在直播中
+    	String course_id = (String)reqMap.get("course_id");//课程id
+    	String data_source = (String)reqMap.get("data_source");//数据来源 1.缓存 2.数据库
+    	Long query_time = (Long)reqMap.get("query_time");//分页时使用的时间
+    	Long position = (Long)reqMap.get("position"); //分页的位置
+    	long currentTime = System.currentTimeMillis();//当前时间
     	//进一步参数校验，传递了分页使用的课程id，则需要同时传递课程状态和数据来源信息
     	if(StringUtils.isNotBlank(reqMap.get("course_id").toString())){
     		if(MiscUtils.isEmpty(status) || MiscUtils.isEmpty(data_source) || query_time==null || position==null){
     			throw new QNLiveException("120004");
     		}
     	} else {
-    		status="4";
-    		data_source = "1";
+    		status="4";//正在直播
+    		data_source = "1";//
     	}
 
     	int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
@@ -1138,7 +1136,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         		course.put("query_time", course.get("start_time"));
         	}
         }
-
         resultMap.put("course_list", courseList);
         resultMap.put("course_sum",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
         return resultMap;
