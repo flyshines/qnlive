@@ -203,7 +203,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
  
         resultMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
-        resultMap.put("qr_code",getQrCode(userId,jedis));
+        Map qr_code = getQrCode(userId,jedis);
+        if(qr_code == null){
+            resultMap.put("qr_code","");
+        }else{
+            resultMap.put("qr_code",qr_code);
+        }
         return resultMap;
     }
  
@@ -216,7 +221,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis();
         resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl").get("config_value"));
-        resultMap.put("qr_code",getQrCode(userId,jedis));
+        Map qr_code = getQrCode(userId,jedis);
+        if(qr_code == null){
+            resultMap.put("qr_code","");
+        }else{
+            resultMap.put("qr_code",qr_code);
+        }
         String queryType = reqMap.get("query_type").toString();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
