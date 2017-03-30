@@ -548,16 +548,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         String openid = accountJson.getString("openid");
-        String union_id = accountJson.getString("union_id");
+        String union_id = accountJson.getString("unionid");
 
-        JSONObject userJson = WeiXinUtil.getUserByOpenid(accountJson.getString("access_token"), openid);
-        errCode = accountJson.get("errcode");
+        //PC和公众平台共用的接口 getUserByOpenid是公众平台特有的接口
+        JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid);
+        errCode = userJson.get("errcode");
         if (errCode != null ) {
             throw new QNLiveException("120008");
         }
-        if(userJson.get("subscribe") != null){
-            subscribe = userJson.get("subscribe").toString();
-        }
+//        if(userJson.get("subscribe") != null){
+//            subscribe = userJson.get("subscribe").toString();
+//        }
 
         String nickname = userJson.getString("nickname");//昵称
         resultMap.put("name", nickname);
@@ -577,11 +578,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("key","1");
             }
             return resultMap;
-        }else {
-
-            userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid);
-            nickname = userJson.getString("nickname");//昵称
-
+        } else {
             String sex = userJson.getString("sex");//性别
             String headimgurl = userJson.getString("headimgurl");//头像
 
