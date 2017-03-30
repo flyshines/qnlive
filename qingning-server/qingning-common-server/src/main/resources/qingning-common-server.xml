@@ -558,7 +558,16 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="isphone">
+				<auth>
+					<accessToken require="N"/>
+				</auth>
+				<inputs>
+					<param name="phone_num" type="string"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />

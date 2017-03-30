@@ -954,6 +954,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
         String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
 
+
+
+
         String course_id = (String)reqMap.get("course_id");
         int pageCount = (int)reqMap.get("page_count");
         Long query_time = (Long)reqMap.get("query_time");
@@ -1137,7 +1140,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("course_list", courseList);
-
+        resultMap.put("course_sum",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
         return resultMap;
     }
 
