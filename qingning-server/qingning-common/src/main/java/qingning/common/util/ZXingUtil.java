@@ -225,7 +225,7 @@ public class ZXingUtil {
             g.setFont(new Font(fontName, fontStyle, fontSize));
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,alpha));
             
-            int font_width = WIDTH+200;
+            int font_width = WIDTH;
             String lengthString = getLengthString(pressText,fontSize,font_width);
             if (lengthString.indexOf(",")>0) {
             	String[] split = lengthString.split(",");
@@ -696,7 +696,7 @@ public class ZXingUtil {
         //
         BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60-54, 1.0f, true, true);
         //
-        BufferedImage pressText5 = pressText("成功推荐用户即可获得"+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,false);
+        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,false);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -752,7 +752,7 @@ public class ZXingUtil {
 
         String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
 
-        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, false,false);
+        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -949,6 +949,8 @@ public class ZXingUtil {
 //		 System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null));// TODO
 
 		try {
+
+		    System.out.println(System.currentTimeMillis());
 		 	//通过网络  用户头像
 			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
 	    	//用户名称
@@ -962,11 +964,11 @@ public class ZXingUtil {
 	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
 //            String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
-            String imagePath3= "C:/Users/Administrator/Desktop/LivePng3.png";
+            String imagePath3= "C:/Users/Administrator/Desktop/LivePng1.png";
 //	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
 //            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
             ImageIO.write(createLivePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
-
+            System.out.println(System.currentTimeMillis());
 //            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //            ImageIO.write(createRoomDistributerPng, "png", baos);
 //            byte[] bytes = baos.toByteArray();
