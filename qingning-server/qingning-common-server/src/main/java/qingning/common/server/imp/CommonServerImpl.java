@@ -567,7 +567,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //1.2.1根据 union_id查询数据库
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("login_type","0");//0与union查询
-        queryMap.put("union_id",union_id);
+        queryMap.put("login_id",union_id);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
         //1.2.1.1如果用户存在则进行登录流程
@@ -623,8 +623,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
-            String unionid =  userJson.getString("unionid");
-            reqMap.put("unionid",unionid);
+            union_id =  userJson.getString("unionid");
+            reqMap.put("unionid",union_id);
             reqMap.put("web_openid",openid);
             reqMap.put("login_type","4");
             reqMap.put("subscribe",subscribe);
