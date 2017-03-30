@@ -10,6 +10,7 @@ public interface LecturerMapper {
     List<Map<String,Object>> findLectureId(Map<String,Object> query);
 
     int insertServiceNoInfo(Map<String, String> map);
+    int updateServiceNoInfo(Map<String, String> map);
     int updateServiceNoLecturerId(Map<String, String> map);
     Map<String,Object> findServiceNoInfoByAppid(String authorizer_appid);
     Map<String,Object> findServiceNoInfoByLecturerId(String lecturer_id);
