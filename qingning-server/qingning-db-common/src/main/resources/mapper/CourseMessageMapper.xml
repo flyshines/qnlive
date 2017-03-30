@@ -88,7 +88,7 @@
     <if test="direction != null and direction == 0 and message_imid != null" >
       order by cm.message_pos desc
     </if>
-    <if test="direction != null and direction == 0 and and message_imid == null " >
+    <if test="direction != null and direction == 0 and message_imid == null " >
       order by cm.message_pos
     </if>
     <if test="direction != null and direction == 1" >
