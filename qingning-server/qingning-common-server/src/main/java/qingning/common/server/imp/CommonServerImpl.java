@@ -2503,22 +2503,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
 
-                if(direction == 1 && reqMap.get("message_imid") == null ){
+                if(direction == 1 && reqMap.get("message_imid").toString().equals("")){
                     Collections.reverse(messageList);
                 }
-                if(direction == 0 && reqMap.get("message_imid") != null ){
+                if(direction == 0 && !reqMap.get("message_imid").toString().equals("")){
                     Collections.reverse(messageList);
                 }
 
-//                if( direction == 1 && reqMap.get("message_imid") != null && userType == 0){
-//                    Collections.reverse(messageList);
-//                }else if(direction == 1){
-//                    Collections.reverse(messageList);
-//                }else if(reqMap.get("message_imid") != null && direction==0 && userType == 1){
-//                    Collections.reverse(messageList);
-//                }else if(){
-//
-//                }
 
                 resultMap.put("message_list", messageList);
             }
