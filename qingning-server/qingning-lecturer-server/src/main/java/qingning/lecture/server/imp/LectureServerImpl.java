@@ -829,6 +829,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if (dbResultMap == null || dbResultMap.get("update_count") == null || dbResultMap.get("update_count").toString().equals("0")) {
                 throw new QNLiveException("100005");
             }
+
             //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
             map.clear();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
@@ -843,9 +844,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             //1.4将该课程从平台的预告课程列表 SYS：courses  ：prediction移除。如果存在结束课程列表 SYS：courses ：finish，则增加到课程结束列表
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
-            if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){                	
-                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
-            }
+            jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
 
             //1.5如果课程标记为结束，则清除该课程的禁言缓存数据
             map.put(Constants.CACHED_KEY_COURSE_FIELD, userId);
@@ -939,6 +938,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             messageMap.put("mid",infomation.get("message_id"));
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
         } else {
             Map<String,Object> query = new HashMap<String,Object>();
             query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
