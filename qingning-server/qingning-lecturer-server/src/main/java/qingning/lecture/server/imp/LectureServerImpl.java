@@ -660,7 +660,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //					//1.将聊天信息id插入到redis zsort列表中
         jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_imid"));
 //					//添加到老师发送的集合中
-        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
         jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
 
         String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
@@ -2969,7 +2969,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         Map<String,Object> cystomerHint = lectureModuleServer.findCustomerServiceBySystemConfig("customerHint");//客服二维码提示
         retMap.put("customerHint",cystomerHint.get("config_value"));
-
         return retMap;
     }
 
@@ -3035,17 +3034,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = new HashMap<>();
         map.put("user_id",userid);
         map.put("phone_number",phone);
-
-
-
-
         lectureModuleServer.updateUser(map);
-
         lectureModuleServer.updateLoginInfo(map);
-
-
-
-
     }
 
 
@@ -3069,5 +3059,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return null;
     }
+
+
+
+
+
+
 
 }

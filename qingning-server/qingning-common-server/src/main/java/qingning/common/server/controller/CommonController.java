@@ -836,6 +836,29 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**
+     * 判断手机号是否可以使用
+     * @param phone_num 手机号
+     * @param accessToken 后台安全证书
+     * @param version 版本号
+     * @return 如果可以使用不会返回任何异常信息
+     *           如果失败 会根据失败的状态返回对应的异常信息
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/isphone", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity isphone(
+            @RequestParam("phone_num") String phone_num,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "isphone", accessToken, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("phone_num",phone_num);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 //    /**
 //     * 上传机器人数据
 //     * @param req
