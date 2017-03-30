@@ -533,7 +533,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public int insertServiceNoInfo(Map<String, String> map) {
 		return lecturerMapper.insertServiceNoInfo(map);
 	}
-
+    @Override
+    public int updateServiceNoInfo(Map<String, String> map) {
+        return lecturerMapper.updateServiceNoInfo(map);
+    }
 	@Override
 	public int updateServiceNoLecturerId(Map<String, String> map) {
 		return lecturerMapper.updateServiceNoLecturerId(map);

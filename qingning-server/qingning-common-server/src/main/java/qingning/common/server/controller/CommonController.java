@@ -227,11 +227,11 @@ public class CommonController extends AbstractController {
         Integer key = Integer.valueOf(resultMap.get("key").toString());
         String access_token = (String) resultMap.get("access_token");
         String weName = (String) resultMap.get("name");
-//        if(key == 0){//未绑定
-//            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+access_token);
-//        } else { //已绑定
-//            response.sendRedirect(MiscUtils.getConfigByKey("web_index")+access_token);
-//        }
+        if(key == 0){//未绑定
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
+        } else { //已绑定
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
+        }
         response.sendRedirect("http://www.baidu.com");
     }
     /**

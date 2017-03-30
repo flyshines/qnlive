@@ -100,6 +100,10 @@ public interface ILectureModuleServer {
 	 */
 	int insertServiceNoInfo(Map<String, String> map);
 	/**
+	 * 重复授权 更新服务号的信息
+	 */
+	int updateServiceNoInfo(Map<String, String> map);
+	/**
 	 * 插入服务号的信息 讲师id
 	 */
 	int updateServiceNoLecturerId(Map<String, String> map);

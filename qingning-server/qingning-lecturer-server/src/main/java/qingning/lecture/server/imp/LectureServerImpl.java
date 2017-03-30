@@ -2585,36 +2585,40 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (typeInfo.getString("id").equals("2") && !verifyInfo.getString("id").equals("-1")) {
-//            //存储公众号的授权信息
-//            Map<String, String> authInfoMap = new HashMap<>();
-//
-//            authInfoMap.put("authorizer_appid", authorizer_appid);
-//            authInfoMap.put("authorizer_access_token", authauthorizer_info.getString("authorizer_access_token"));
-//            authInfoMap.put("authorizer_refresh_token", authauthorizer_info.getString("authorizer_refresh_token"));
-//            long expiresIn =  authauthorizer_info.getLong("expires_in")*1000; //*1000;//有效毫秒值
-//            long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
-//            authInfoMap.put("expires_time", String.valueOf(expiresTimeStamp));
-//            authInfoMap.put("create_time", String.valueOf(System.currentTimeMillis()));
-//
-//            authInfoMap.put("nick_name", authauthorizer_info_base.getString("nick_name"));
-//            authInfoMap.put("head_img", authauthorizer_info_base.getString("head_img"));
-//            authInfoMap.put("service_type_info", typeInfo.get("id"));
-//            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qr_code"));
-//
-//            //先获取部分信息 还未和直播间绑定起来
-//            //服务号信息插入数据库
-//            lectureModuleServer.insertServiceNoInfo(authInfoMap);
-//
-//            //重定向成功页面 然后扫码登录 绑定直播间
-//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_success_url"));
-//
+
+            Map<String, Object> oldServiceInfo = lectureModuleServer.findServiceNoInfoByAppid(authorizer_appid);
+            //存储公众号的授权信息
+            Map<String, String> authInfoMap = new HashMap<>();
+
+            authInfoMap.put("authorizer_appid", authorizer_appid);
+            authInfoMap.put("authorizer_access_token", authauthorizer_info.getString("authorizer_access_token"));
+            authInfoMap.put("authorizer_refresh_token", authauthorizer_info.getString("authorizer_refresh_token"));
+            long expiresIn =  authauthorizer_info.getLong("expires_in")*1000; //*1000;//有效毫秒值
+            long expiresTimeStamp = System.currentTimeMillis()+expiresIn;//当前毫秒值+有效毫秒值
+            authInfoMap.put("expires_time", String.valueOf(expiresTimeStamp));
+
+
+            authInfoMap.put("nick_name", authauthorizer_info_base.getString("nick_name"));
+            authInfoMap.put("head_img", authauthorizer_info_base.getString("head_img"));
+            authInfoMap.put("service_type_info", typeInfo.getString("id"));
+            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qr_code"));
+
+            //先获取部分信息 还未和直播间绑定起来
+            //服务号信息插入数据库
+            if (oldServiceInfo != null && oldServiceInfo.size() > 0) {
+                authInfoMap.put("update_time", String.valueOf(System.currentTimeMillis()));
+                lectureModuleServer.updateServiceNoInfo(authInfoMap);
+            } else {
+                authInfoMap.put("create_time", String.valueOf(System.currentTimeMillis()));
+                lectureModuleServer.insertServiceNoInfo(authInfoMap);
+            }
+            //重定向成功页面 然后扫码登录 绑定直播间
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_login_qr_url").replace("APPID", authorizer_appid).replace("APPNAME", authauthorizer_info_base.getString("nick_name")));
             log.info("绑定服务号授权成功 重定向");
-            result.put("redirectUrl", "http://www.baidu.com");
         } else {
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
-
             log.info("绑定服务号授权失败 重定向");
-            result.put("redirectUrl", "http://www.sogou.com");
+            result.put("redirectUrl", "http://www.baidu.com");
         }
         return result;
 
