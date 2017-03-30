@@ -2689,12 +2689,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         resultMap.get("start_time");
         Map qr_code = getQrCode(courseOwner,userId,jedis);
-        if(qr_code == null){
-            resultMap.put("qr_code","");
-        }else{
-            resultMap.put("qr_code",qr_code);
-        }
-
+        resultMap.put("qr_code",getQrCode(courseOwner,userId,jedis));
         resultMap.put("room_id",courseMap.get("room_id"));
         return resultMap;
     }

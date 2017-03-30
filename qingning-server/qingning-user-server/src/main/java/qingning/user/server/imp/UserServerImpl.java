@@ -775,13 +775,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-
-        Map qr_code = getQrCode(infoMap.get("lecturer_id"),userId,jedisUtils.getJedis());
-        if(qr_code == null){
-            resultMap.put("qr_code","");
-        }else{
-            resultMap.put("qr_code",qr_code);
-        }
+        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedisUtils.getJedis()));
         return resultMap;
     }
 
@@ -927,12 +921,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         resultMap.put("roles", roles);
-        Map qr_code = getQrCode(courseMap.get("lecturer_id"),userId,jedis);
-        if(qr_code == null){
-            resultMap.put("qr_code","");
-        }else{
-            resultMap.put("qr_code",qr_code);
-        }
+
+        resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis));
+
         if(!resultMap.get("status").equals("2")){
             if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
                 resultMap.put("status",4);
