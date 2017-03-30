@@ -316,7 +316,7 @@ public class WeiXinUtil {
      * @return
      */
     public static JSONObject getPCUserAccountInfo(String code) {
-        String requestUrl = pc_auth_account_info_url.replace("APPID", pc_no_appid).replace("SECRET", pc_no_appsecret).replace("CODE", code).replace("GRANTTYPE", "");
+        String requestUrl = pc_auth_account_info_url.replace("APPID", pc_no_appid).replace("SECRET", pc_no_appsecret).replace("CODE", code).replace("GRANTTYPE", "authorization_code");
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
