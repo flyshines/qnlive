@@ -631,6 +631,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap);
+
             return resultMap;
         }
     }
