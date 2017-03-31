@@ -206,11 +206,11 @@ public class ZXingUtil {
      * @param x 修正值
      * @param y   修正值
      * @param alpha 透明度：alpha 必须是范围 [0.0, 1.0] 之内（包含边界值）的一个浮点数字
-     * @param flag 是否累计换回高度   默认false 不增加换行
+     * @param center 是否居中  默认false
      * @return
      */
     public final static BufferedImage pressText(String pressText, BufferedImage srcImageFile, String fontName, int fontStyle,
-            int fontSize, Color color, int x, int y, float alpha, Boolean flag, Boolean center)
+            int fontSize, Color color, int x, int y, float alpha, Boolean center)
     {
         try
         {
@@ -225,34 +225,33 @@ public class ZXingUtil {
             g.setFont(new Font(fontName, fontStyle, fontSize));
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,alpha));
             
-            int font_width = WIDTH;
+            int font_width = WIDTH-60;
+
+
             String lengthString = getLengthString(pressText,fontSize,font_width);
-            if (lengthString.indexOf(",")>0) {
+            if (lengthString.indexOf(",")>0) { //需要换行
             	String[] split = lengthString.split(",");
+                font_height = 0;
+                int tempX = 0;
             	if (split!=null && split.length>0) {
-            		
 					for (int i = 0; i < split.length; i++) {
 						if (i == 0 ) {
 							font_height = 0;
-						}
-						g.drawString(split[i], (width - (getLength(split[i]) * fontSize)) / 2 + x, (height - fontSize) / 2 + y+font_height);
+                            tempX = (width - (getLength(split[i]) * fontSize)) / 2 + x;
+                            g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
+						} else {
+                            g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
+                        }
+
 						font_height+=fontSize;
 					}
 				}
-			}else{
+			}else{//不需要换行
 				// 在指定坐标绘制水印文字
-                if (center) {
-                    if (flag) {
-                        g.drawString(pressText, (width - (getLength(pressText) * fontSize)) / 2 + x, (height - fontSize) / 2 + y+font_height);
-                    } else {
-                        g.drawString(pressText, (width - (getLength(pressText) * fontSize)) / 2 + x, (height - fontSize) / 2 + y);
-                    }
+                if (center) { //居中
+                    g.drawString(pressText, (width - (getLength(pressText) * fontSize)) / 2 + x, (height - fontSize) / 2 + y);
                 } else {
-                    if (flag) {
-                        g.drawString(pressText, x, y+font_height);
-                    } else {
-                        g.drawString(pressText, x, y);
-                    }
+                    g.drawString(pressText, x, y);
                 }
 
 			}
@@ -262,8 +261,7 @@ public class ZXingUtil {
 //            ImageIO.write((BufferedImage) image, formatType, new File(destImageFile));// 输出到文件流
             return (BufferedImage) image;
            
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 		return null;
@@ -385,6 +383,7 @@ public class ZXingUtil {
     public final static String getLengthString(String text, int fontSize,int Length)
     {
         int length = 0;
+        fontSize = fontSize*2/3;
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < text.length(); i++)
         {
@@ -645,14 +644,14 @@ public class ZXingUtil {
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
-        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
+        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, true);
 
         //
-        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, (36+14)*3, 1.0f, false, false);
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, (36+14)*3, 1.0f,  false);
         //
-        BufferedImage pressText3 = pressText("推荐一个不错的直播间", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, (36+14+18)*3, 1.0f, false, false);
+        BufferedImage pressText3 = pressText("推荐一个不错的直播间", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, (36+14+18)*3, 1.0f, false);
         //
-        BufferedImage pressText4 = pressText(lecturer_name+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4+15, 1.0f, true, true);
+        BufferedImage pressText4 = pressText(lecturer_name+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4+30, 1.0f, true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -687,16 +686,16 @@ public class ZXingUtil {
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
-        BufferedImage pressText1 = pressText("长按识别二维码进入即可成为直播间分销员", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
+        BufferedImage pressText1 = pressText("长按识别二维码进入即可成为直播间分销员", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, true);
 
         //
-        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false, false);
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false);
         //
-        BufferedImage pressText3 = pressText("直播间分销员邀请", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false, false);
+        BufferedImage pressText3 = pressText("直播间分销员邀请", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false);
         //
-        BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, false, true);
+        BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-30, 1.0f, true);
         //
-        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+75, 1.0f, true,true);
+        BufferedImage pressText5 = pressText("成功推荐用户即可获得"+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+120, 1.0f, true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -721,10 +720,15 @@ public class ZXingUtil {
      */
     public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,String qr_code_content,Long time) throws Exception{
         if(userName.length()>9){
-            userName = userName.substring(0,8)+"...";
+            userName = userName.substring(0,9)+"...";
         }
-        if(course_name.length()>9){
-            course_name = course_name.substring(0,8)+"...";
+
+        boolean twoline = false;
+        if(course_name.length()>14){
+            twoline = true;
+        }
+        if(course_name.length()>24){
+            course_name = course_name.substring(0,24)+"...";
         }
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -741,18 +745,18 @@ public class ZXingUtil {
         //合成二维码后的图片
         BufferedImage waterMark = waterMark(bi, qrImage, 123*3, HEIGHT-44*3-90*3, 1.0f);
         //长按图片识别二维码进入直播间
-        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, false, true);
+        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, true);
 
         //
-        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false, false);
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false);
         //
-        BufferedImage pressText3 = pressText("推荐一个不错的课程", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false, false);
+        BufferedImage pressText3 = pressText("推荐一个不错的课程", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false);
         //
-        BufferedImage pressText4 = pressText(course_name+" ", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, false, true);
+        BufferedImage pressText4 = pressText(course_name, pressText3, FONT_NAME, 1, 54, new Color(90,210,161), -30, twoline?(-HEIGHT/4-60):(-HEIGHT/4-30), 1.0f, true);
 
         String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
 
-        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+75, 1.0f, true,true);
+        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -60, -HEIGHT/4+120, 1.0f, true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -958,8 +962,8 @@ public class ZXingUtil {
 	    	//二维码内容
 	    	String qr_code_content="www.baidu.com";
 	    	long time = 1488160472302l;
-//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字我的", qr_code_content, time);
+	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
+//            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字我的课程名字我的课程名字我的课程名字我的课程名字", qr_code_content, time);
 //            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
 	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
@@ -967,7 +971,7 @@ public class ZXingUtil {
             String imagePath3= "C:/Users/Administrator/Desktop/LivePng5.png";
 //	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
 //            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
-            ImageIO.write(createCoursePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
+            ImageIO.write(createRoomDistributerPng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
             System.out.println(System.currentTimeMillis());
 //            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //            ImageIO.write(createRoomDistributerPng, "png", baos);
