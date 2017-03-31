@@ -724,12 +724,12 @@ public class ZXingUtil {
         }
 
         boolean twoline = false;
-        course_name = "「"+course_name+"」";
+//        course_name = "「"+course_name+"」";
         if(course_name.length()>14){
             twoline = true;
         }
         if(course_name.length()>28){
-            course_name = course_name.substring(0,24)+"...」";
+            course_name = course_name.substring(0,25)+"...";
         }
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
