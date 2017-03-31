@@ -729,7 +729,7 @@ public class ZXingUtil {
             twoline = true;
         }
         if(course_name.length()>28){
-            course_name = course_name.substring(0,25)+"...」";
+            course_name = course_name.substring(0,24)+"...」";
         }
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
