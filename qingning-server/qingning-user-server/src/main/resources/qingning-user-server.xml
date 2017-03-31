@@ -39,6 +39,7 @@
 						<param name="room_id" type="string"/>
 						<param name="start_time" type="long"/>
 						<param name="lecturer_nick_name" type="rstring"/>
+						<param name="lecturer_id" type="string"/>
 						<param name="course_type" type="string"/>
 						<param name="data_source" type="string"/>
 						<param name="query_time" type="long"/>
