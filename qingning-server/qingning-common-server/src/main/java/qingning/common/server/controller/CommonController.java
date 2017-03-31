@@ -828,7 +828,8 @@ public class CommonController extends AbstractController {
             BASE64Decoder decoder = new BASE64Decoder();
             try {
                 b = decoder.decodeBuffer(shareUrl);
-                shareUrl = new String(b, "utf-8");
+                shareUrl = new String(b,"UTF-8");
+               // String a = new String(shareUrl.getBytes("8859_1"),"UTF-8");
                 response.sendRedirect(shareUrl);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -859,6 +860,25 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(map);
         return this.process(requestEntity, serviceManger, message);
     }
+
+
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/delDistribution ", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity delDistribution(
+            @RequestParam("lecture_id") String lecture_id,
+            @RequestParam("distribution_user_id") String distribution_user_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "delDistribution", accessToken, null);
+        Map<String,String> map = new HashMap<>();
+        map.put("lecture_id",lecture_id);
+        map.put("distribution_user_id",distribution_user_id);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
 
 //    /**
 //     * 上传机器人数据
