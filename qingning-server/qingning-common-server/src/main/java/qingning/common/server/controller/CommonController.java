@@ -569,12 +569,15 @@ public class CommonController extends AbstractController {
             @PathVariable("room_id") String room_id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader("version") String version) throws Exception{
+        long startTime = System.currentTimeMillis();
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getRoomInviteCard", access_token, version);
         Map<String, Object> param = new HashMap<>();
         param.put("room_id", room_id);
         param.put("png",png);
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        long endTime = System.currentTimeMillis();
+        logger.debug("==================================================================="+(endTime-startTime)+"==========================================================");
         return responseEntity;
     }
 
