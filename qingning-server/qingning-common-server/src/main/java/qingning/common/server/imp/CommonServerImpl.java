@@ -2252,7 +2252,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String s = null;
         b = share_url.getBytes("utf-8");
         s = new BASE64Encoder().encode(b);
-        resultMap.put("share_url","http://test.qnlive.1758app.com/qingning-common-server/common/shareUrl?"+s);
+        resultMap.put("share_url","http://test.qnlive.1758app.com/qingning-common-server/common/shareUrl?shareUrl="+s);
         if(reqMap.get("png").toString().equals("Y"))
             resultMap.put("png_url",png_url);
 
@@ -3215,6 +3215,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
     }
 
+    /**
+     * 结束分销关系
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("delDistribution")
+    public void delDistribution (RequestEntity reqEntity) throws Exception{
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String lecture_id = map.get("lecture_id");
+        String distribution_user_id = map.get("distribution_user_id");
 
+
+
+
+
+
+    }
 
 }
