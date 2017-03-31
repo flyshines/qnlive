@@ -240,7 +240,7 @@ public class ZXingUtil {
                             tempX = (width - (getLength(split[i]) * fontSize)) / 2 + x;
                             g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
 						} else {
-                            g.drawString(split[i], tempX+30, (height - fontSize) / 2 + y+font_height);
+                            g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
                         }
 
 						font_height+=fontSize+15;
