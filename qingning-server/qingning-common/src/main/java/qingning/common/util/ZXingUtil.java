@@ -696,7 +696,7 @@ public class ZXingUtil {
         //
         BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60-54, 1.0f, true, true);
         //
-        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,false);
+        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -964,7 +964,7 @@ public class ZXingUtil {
 	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
 //            String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
-            String imagePath3= "C:/Users/Administrator/Desktop/LivePng1.png";
+            String imagePath3= "C:/Users/Administrator/Desktop/LivePng3.png";
 //	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
 //            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
             ImageIO.write(createLivePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
