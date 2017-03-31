@@ -1889,12 +1889,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("share_url",getLiveRoomShareURL(userId, roomId));
 
         long timeS1 = System.currentTimeMillis();
-        logger.info(String.valueOf(timeS1));
+        logger.debug(String.valueOf(timeS1));
         if(reqMap.get("png").toString().equals("Y")) {
             resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion()));
         }
         long timeS2 = System.currentTimeMillis();
-        logger.info(String.valueOf(timeS2));
+        logger.debug(String.valueOf(timeS2));
         return resultMap;
     }
  
