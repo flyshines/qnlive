@@ -240,7 +240,7 @@ public class ZXingUtil {
                             tempX = (width - (getLength(split[i]) * fontSize)) / 2 + x;
                             g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
 						} else {
-                            g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
+                            g.drawString(split[i], tempX+30, (height - fontSize) / 2 + y+font_height);
                         }
 
 						font_height+=fontSize+15;
@@ -724,11 +724,12 @@ public class ZXingUtil {
         }
 
         boolean twoline = false;
+        course_name = "「"+course_name+"」";
         if(course_name.length()>14){
             twoline = true;
         }
-        if(course_name.length()>25){
-            course_name = course_name.substring(0,25)+"...";
+        if(course_name.length()>28){
+            course_name = course_name.substring(0,25)+"...」";
         }
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
