@@ -243,7 +243,7 @@ public class ZXingUtil {
                             g.drawString(split[i], tempX, (height - fontSize) / 2 + y+font_height);
                         }
 
-						font_height+=fontSize;
+						font_height+=fontSize+15;
 					}
 				}
 			}else{//不需要换行
@@ -727,8 +727,8 @@ public class ZXingUtil {
         if(course_name.length()>14){
             twoline = true;
         }
-        if(course_name.length()>24){
-            course_name = course_name.substring(0,24)+"...";
+        if(course_name.length()>25){
+            course_name = course_name.substring(0,25)+"...";
         }
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -962,8 +962,8 @@ public class ZXingUtil {
 	    	//二维码内容
 	    	String qr_code_content="www.baidu.com";
 	    	long time = 1488160472302l;
-	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-//            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字我的课程名字我的课程名字我的课程名字我的课程名字", qr_code_content, time);
+//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
+            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字我的课程名字我的课程名字我的课程名字我的课程名字", qr_code_content, time);
 //            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
 	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
@@ -971,7 +971,7 @@ public class ZXingUtil {
             String imagePath3= "C:/Users/Administrator/Desktop/LivePng5.png";
 //	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
 //            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
-            ImageIO.write(createRoomDistributerPng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
+            ImageIO.write(createCoursePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
             System.out.println(System.currentTimeMillis());
 //            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //            ImageIO.write(createRoomDistributerPng, "png", baos);
