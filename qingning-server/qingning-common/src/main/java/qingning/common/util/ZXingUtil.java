@@ -694,9 +694,9 @@ public class ZXingUtil {
         //
         BufferedImage pressText3 = pressText("直播间分销员邀请", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false, false);
         //
-        BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60-54, 1.0f, true, true);
+        BufferedImage pressText4 = pressText(userName+"的直播间", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, true, true);
         //
-        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), 0, -HEIGHT/4+60, 1.0f, true,true);
+        BufferedImage pressText5 = pressText("成功推荐用户即可获得 "+profit_share_rate+"%的提成", pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+75, 1.0f, true,true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -748,11 +748,11 @@ public class ZXingUtil {
         //
         BufferedImage pressText3 = pressText("推荐一个不错的课程", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false, false);
         //
-        BufferedImage pressText4 = pressText(course_name+" ", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-54, 1.0f, true, true);
+        BufferedImage pressText4 = pressText(course_name+" ", pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, true, true);
 
         String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
 
-        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+60, 1.0f, true,true);
+        BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -30, -HEIGHT/4+75, 1.0f, true,true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
