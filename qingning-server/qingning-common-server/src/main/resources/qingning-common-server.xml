@@ -419,9 +419,6 @@
 					<param name="status" type="string" default="2"/>							
 				</inputs>
 				<outputs>
-					<param name="server_time" type="long"/>
-
-
 				</outputs>
 			</function>
 
