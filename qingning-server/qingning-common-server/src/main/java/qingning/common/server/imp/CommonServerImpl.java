@@ -163,7 +163,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        增加下发版本号逻辑
 //        平台：0： 微信 1：andriod 2:IOS
         if(! "0".equals(reqMap.get("plateform"))){
-            Integer plateform = (Integer)reqMap.get("plateform");
+            Integer plateform = Integer.valueOf(reqMap.get("plateform").toString());
             Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedisUtils, true);
             if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //判断有没有信息 判断是否存在总控 总控 0关闭就是不检查 1开启就是检查
                 //1.先判断系统和当前version

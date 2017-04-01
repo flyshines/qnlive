@@ -42,7 +42,7 @@ public class CommonController extends AbstractController {
     @ResponseBody
     ResponseEntity collectClientInformation(HttpEntity<Object> entity,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
-                                            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+             @RequestHeader(value="version", defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "logUserInfo", accessToken, null);
 		Map inputParameters = (Map)entity.getBody();
         inputParameters.put("ip", ServerUtils.getRequestIP());
