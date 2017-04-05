@@ -21,6 +21,7 @@ import sun.misc.BASE64Decoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -229,11 +230,11 @@ public class CommonController extends AbstractController {
 
         Integer key = Integer.valueOf(resultMap.get("key").toString());
         String access_token = (String) resultMap.get("access_token");
-        String weName = (String) resultMap.get("name");
+          String weName = (String) resultMap.get("name");
         if(key == 0){//未绑定
-            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url").replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
         } else if(key == 1) { //登录过 有直播间信息
-            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
         } else { //登录过 没有直播间信息
             //重定向到另一个页面
             response.sendRedirect("http://www.baidu.com");

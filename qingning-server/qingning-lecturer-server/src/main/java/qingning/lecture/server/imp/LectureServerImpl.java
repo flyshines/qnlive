@@ -22,6 +22,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -2613,7 +2614,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 lectureModuleServer.insertServiceNoInfo(authInfoMap);
             }
             //重定向成功页面 然后扫码登录 绑定直播间
-            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_login_qr_url").replace("APPID", authorizer_appid).replace("APPNAME", authauthorizer_info_base.getString("nick_name")));
+            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_login_qr_url").replace("APPID", authorizer_appid).replace("APPNAME", URLEncoder.encode(authauthorizer_info_base.getString("nick_name"), "utf-8")));
 
             //缓存授权信息到jedis
             Map<String,Object> query = new HashMap<String,Object>();
