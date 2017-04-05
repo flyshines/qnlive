@@ -2601,7 +2601,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             authInfoMap.put("nick_name", authauthorizer_info_base.getString("nick_name"));
             authInfoMap.put("head_img", authauthorizer_info_base.getString("head_img"));
             authInfoMap.put("service_type_info", typeInfo.getString("id"));
-            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qr_code"));
+            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qrcode_url"));
 
             //先获取部分信息 还未和直播间绑定起来
             //服务号信息插入数据库
