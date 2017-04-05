@@ -152,7 +152,7 @@
         authorizer_access_token,
       </if>
       <if test="authorizer_refresh_token != null">
-        authorizer_appid,
+        authorizer_refresh_token,
       </if>
       <if test="expires_time != null">
         expires_time,
