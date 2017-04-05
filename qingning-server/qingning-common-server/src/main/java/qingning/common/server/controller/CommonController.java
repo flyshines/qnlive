@@ -232,8 +232,11 @@ public class CommonController extends AbstractController {
         String weName = (String) resultMap.get("name");
         if(key == 0){//未绑定
             response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
-        } else { //已绑定
+        } else if(key == 1) { //登录过 有直播间信息
             response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", weName));
+        } else { //登录过 没有直播间信息
+            //重定向到另一个页面
+            response.sendRedirect("http://www.baidu.com");
         }
     }
     /**

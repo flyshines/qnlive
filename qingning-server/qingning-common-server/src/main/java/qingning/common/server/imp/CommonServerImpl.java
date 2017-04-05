@@ -553,12 +553,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         queryMap.put("login_id",union_id);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
+        Jedis jedis = jedisUtils.getJedis();
+
         //1.2.1.1如果用户存在则进行登录流程
         if(loginInfoMap != null){//有
             processLoginSuccess(2, null, loginInfoMap, resultMap);//获取后台安全证书 access_token
             Object phone = loginInfoMap.get("phone_number");
-            if (phone != null) {
+            if (phone != null) { //有直播间和手机号
                 resultMap.put("key","1");
+            } else {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, loginInfoMap.get("user_id"));
+                String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+                Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
+
+                if(!CollectionUtils.isEmpty(liveRoomsMap)){//登录过 没有直播间信息
+                    resultMap.put("key","3");
+                }
             }
             return resultMap;
         } else {
@@ -584,7 +595,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             if(MiscUtils.isEmpty(nickname)){
-                Jedis jedis = jedisUtils.getJedis();
                 reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);

@@ -2614,6 +2614,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
             //重定向成功页面 然后扫码登录 绑定直播间
             result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_pc_no_login_qr_url").replace("APPID", authorizer_appid).replace("APPNAME", authauthorizer_info_base.getString("nick_name")));
+
+            //缓存授权信息到jedis
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, "lecturer_id");
+            String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
+            jedis.hmset(serviceNoKey, authInfoMap);
+
             log.info("绑定服务号授权成功 重定向");
         } else {
 //            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
@@ -2621,11 +2628,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             result.put("redirectUrl", "http://www.baidu.com");
         }
         return result;
-
-//        Map<String,Object> query = new HashMap<String,Object>();
-//        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, "lecturer_id");
-//        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
-//        jedis.hmset(serviceNoKey, authInfoMap);
     }
 
     @FunctionName("bindServiceNo")
