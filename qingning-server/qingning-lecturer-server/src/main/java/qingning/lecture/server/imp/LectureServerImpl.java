@@ -2670,9 +2670,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //更新结果
         Map<String,Object> result = new HashMap<String,Object>();
         if (count > 0) {
-            result.put("redirectUrl", "http://www.baidu.com");
+            result.put("redirectUrl", "https://www.baidu.com");
         } else  {
-            result.put("redirectUrl", "http://www.sogou.com");
+            result.put("redirectUrl", "https://www.sogou.com");
         }
         return result;
     }
