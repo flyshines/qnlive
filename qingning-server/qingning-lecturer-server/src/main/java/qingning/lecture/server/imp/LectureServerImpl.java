@@ -587,17 +587,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
 
             if (serviceNoMap != null) { //该讲师绑定服务号，推送提醒给粉丝
-                String expiresTimes = (String) serviceNoMap.get("expiresTimes");
-
-                String authorizer_access_token  = (String) serviceNoMap.get("authorizer_access_token");
+                String expiresTimes = serviceNoMap.get("expires_time");
+                String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
 
                 long expiresTimeStamp = Long.parseLong(expiresTimes);
                 //是否快要超时 令牌是存在有效期（2小时）
                 long nowTimeStamp = System.currentTimeMillis();
                 if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
 
-                    String authorizer_appid = (String) serviceNoMap.get("authorizer_appid");
-                    String authorizer_refresh_token  = (String) serviceNoMap.get("authorizer_refresh_token");
+                    String authorizer_appid = serviceNoMap.get("authorizer_appid");
+                    String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
 
                     JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
 
