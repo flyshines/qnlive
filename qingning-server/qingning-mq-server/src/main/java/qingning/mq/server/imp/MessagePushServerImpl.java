@@ -754,7 +754,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 return null;
             }
         }
-        return fansInfo.getString("next_openid");
+        if (fansInfo.getIntValue("count") == 10000) {
+            return fansInfo.getString("next_openid");
+        }
+        return null;
     }
 
 /*    public SaveCourseMessageService getSaveCourseMessageService() {
