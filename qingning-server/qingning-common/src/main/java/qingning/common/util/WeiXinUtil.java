@@ -69,7 +69,7 @@ public class WeiXinUtil {
     public final static String service_auth_refresh_info_url = MiscUtils.getConfigByKey("service_auth_refresh_info_url");
     public final static String service_auth_account_info_url = MiscUtils.getConfigByKey("service_auth_account_info_url");
 
-    public final static String service_template_info_url = MiscUtils.getConfigByKey("");
+    public final static String service_template_info_url = MiscUtils.getConfigByKey("service_template_info_url");
 
     public final static String service_fans_url1 = MiscUtils.getConfigByKey("service_fans_url1");
     public final static String service_fans_url2 = MiscUtils.getConfigByKey("service_fans_url2");
