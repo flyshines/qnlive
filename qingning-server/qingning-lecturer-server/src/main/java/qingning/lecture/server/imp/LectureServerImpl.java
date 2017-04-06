@@ -599,24 +599,28 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
 
                     JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+                    Object errCode = authJsonObj.get("errcode");
+                    if (errCode != null ) {
+                        log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
+                    } else {
+                        authorizer_appid = authJsonObj.getString("authorizer_appid");
+                        authorizer_access_token = authJsonObj.getString("authorizer_access_token");
+                        authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
+                        long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+                        expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
 
-                    authorizer_appid = authJsonObj.getString("authorizer_appid");
-                    authorizer_access_token = authJsonObj.getString("authorizer_access_token");
-                    authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
-                    long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-                    expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
+                        //更新服务号的授权信息
+                        Map<String, String> authInfoMap = new HashMap<>();
+                        authInfoMap.put("lecturer_id", userId);
+                        authInfoMap.put("authorizer_appid", authorizer_appid);
+                        authInfoMap.put("authorizer_access_token", authorizer_access_token);
+                        authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
+                        authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
 
-                    //更新服务号的授权信息
-                    Map<String, String> authInfoMap = new HashMap<>();
-                    authInfoMap.put("lecturer_id", userId);
-                    authInfoMap.put("authorizer_appid", authorizer_appid);
-                    authInfoMap.put("authorizer_access_token", authorizer_access_token);
-                    authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
-                    authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
-
-                    //更新服务号信息插入数据库
-                    authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
-                    lectureModuleServer.updateServiceNoInfo(authInfoMap);
+                        //更新服务号信息插入数据库
+                        authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
+                        lectureModuleServer.updateServiceNoInfo(authInfoMap);
+                    }
                 }
 
                 Map<String, Object> wxPushParam = new HashMap<>();

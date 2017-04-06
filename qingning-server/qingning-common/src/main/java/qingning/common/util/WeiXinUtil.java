@@ -213,7 +213,7 @@ public class WeiXinUtil {
      */
     public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid) {
         String componentAppid = service_no_appid;
-        String requestUrl = service_auth_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
+        String requestUrl = service_auth_refresh_info_url.replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
