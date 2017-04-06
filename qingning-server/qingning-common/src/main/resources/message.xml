@@ -101,6 +101,9 @@
                 <entry key="130008" value="电话号码已绑定直播间"/>
                 <entry key="130009" value="验证码已过时"/>
 				<entry key="140001" value="上传用户数据失败"/>
+
+				<entry key="150001" value="绑定服务号过程失败"/>
+				<entry key="150002" value="非认证服务号"/>
 			</map>
 		</property>
 	</bean>	

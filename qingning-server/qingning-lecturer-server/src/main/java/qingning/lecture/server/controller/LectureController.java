@@ -728,7 +728,6 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * PC端关联直播间与服务号
-	 * @param lecturer_id 用户的讲师id
 	 * @param appid 服务号的appid
 	 * @param req
 	 * @param resp
@@ -736,7 +735,7 @@ public class LectureController extends AbstractController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/pcauth/bindingRoom", method = RequestMethod.GET)
-	public void bindingRoom(
+	public @ResponseBody ResponseEntity bindingRoom(
 			@RequestHeader("access_token") String access_token,
 			@RequestParam(value = "appid") String appid,
 			HttpServletRequest req,
@@ -747,13 +746,6 @@ public class LectureController extends AbstractController {
 		parMap.put("appid", appid);
 		requestEntity.setParam(parMap);
 
-		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-
-		Object redirectUrl =  resultMap.get("redirectUrl");
-		if (redirectUrl != null) {
-			resp.sendRedirect(redirectUrl.toString());
-		}
-
+		return this.process(requestEntity, serviceManger, message);
 	}
 }

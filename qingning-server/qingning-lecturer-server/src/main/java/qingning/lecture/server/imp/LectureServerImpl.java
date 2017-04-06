@@ -2559,7 +2559,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Object errCode = authJsonObj.get("errcode");
         if (errCode != null ) {
             log.error("微信授权回调 获取服务号授权信息失败-----------"+authJsonObj);
-            return new HashMap<String,Object>();
+            throw new QNLiveException("150001");
         }
 
         JSONObject authauthorizer_info = authJsonObj.getJSONObject("authorization_info");
@@ -2571,7 +2571,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         errCode = serviceNoJsonObj.get("errcode");
         if (errCode != null ) {
             log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
-            return new HashMap<String,Object>();
+            throw new QNLiveException("150001");
         }
 
         JSONObject authauthorizer_info_base = serviceNoJsonObj.getJSONObject("authorizer_info");
@@ -2622,11 +2622,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
             jedis.hmset(serviceNoKey, authInfoMap);
 
-            log.info("绑定服务号授权成功 重定向");
+            log.info("绑定服务号授权成功");
         } else {
-//            result.put("redirectUrl", MiscUtils.getConfigByKey("weixin_service_no_failure_url"));
-            log.info("绑定服务号授权失败 重定向");
-            result.put("redirectUrl", "http://www.baidu.com");
+            throw new QNLiveException("150002");
         }
         return result;
     }
@@ -2644,7 +2642,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> result = new HashMap<String,Object>();
         Object errCode = jsonObj.get("errcode");
         if (errCode != null ) {
-            log.error("获取微信预授权码失败-----------"+jsonObj);
+            throw new QNLiveException("150001");
         } else {
             String pre_auth_code = jsonObj.getString("pre_auth_code");//预授权码 有效期为20分
             result.put("redirectUrl", WeiXinUtil.getServiceAuthUrl(pre_auth_code));
@@ -2653,7 +2651,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
     @FunctionName("bindingRoom")
-    public Map<String, Object> bindingRoom(RequestEntity reqEntity) throws Exception {
+    public void bindingRoom(RequestEntity reqEntity) throws Exception {
 
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
 
@@ -2669,12 +2667,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //更新结果
         Map<String,Object> result = new HashMap<String,Object>();
-        if (count > 0) {
-            result.put("redirectUrl", "https://www.baidu.com");
-        } else  {
-            result.put("redirectUrl", "https://www.sogou.com");
+        if (count < 1) {
+            throw new QNLiveException("150001");
         }
-        return result;
     }
 
     private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion,
