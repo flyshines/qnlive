@@ -621,7 +621,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
-                wxPushParam.put("courseId", courseId);//课程ID
+                wxPushParam.put("course_id", courseId);//课程ID
                 wxPushParam.put("lecturer_id", userId);//课程ID
                 wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                 wxPushParam.put("pushType", "1");//1创建课程 2更新课程
