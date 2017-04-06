@@ -268,12 +268,12 @@
   </select>
 
   <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
-    SELECT * FROM t_wechat_service_template_info
+    SELECT * FROM t_wechat_service_template
     where lecturer_id = #{lecturer_id} AND template_type = #{template_type}
   </select>
 
   <insert id="insertServiceTemplateInfo" parameterType="hashmap">
-    INSERT INTO t_wechat_service_template_info
+    INSERT INTO t_wechat_service_template
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="lecturer_id != null">
         lecturer_id,
