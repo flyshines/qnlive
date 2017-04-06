@@ -586,7 +586,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 this.mqUtils.sendMessage(mqRequestEntity);
             }
 
+
             if (serviceNoMap != null) { //该讲师绑定服务号，推送提醒给粉丝
+
+                boolean pushMsg = true;
+
                 String expiresTimes = serviceNoMap.get("expires_time");
                 String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
 
@@ -602,6 +606,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     Object errCode = authJsonObj.get("errcode");
                     if (errCode != null ) {
                         log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
+                        pushMsg = false;
                     } else {
                         authorizer_access_token = authJsonObj.getString("authorizer_access_token");
                         authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
@@ -622,19 +627,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     }
                 }
 
-                Map<String, Object> wxPushParam = new HashMap<>();
-                wxPushParam.put("templateParam", templateMap);//模板消息
-                wxPushParam.put("course_id", courseId);//课程ID
-                wxPushParam.put("lecturer_id", userId);//课程ID
-                wxPushParam.put("accessToken", authorizer_access_token);//课程ID
-                wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                if (pushMsg) {
+                    Map<String, Object> wxPushParam = new HashMap<>();
+                    wxPushParam.put("templateParam", templateMap);//模板消息
+                    wxPushParam.put("course_id", courseId);//课程ID
+                    wxPushParam.put("lecturer_id", userId);//课程ID
+                    wxPushParam.put("accessToken", authorizer_access_token);//课程ID
+                    wxPushParam.put("pushType", "1");//1创建课程 2更新课程
 
-                RequestEntity mqRequestEntity = new RequestEntity();
-                mqRequestEntity.setServerName("MessagePushServer");
-                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                mqRequestEntity.setParam(wxPushParam);
-                this.mqUtils.sendMessage(mqRequestEntity);
+                    RequestEntity mqRequestEntity = new RequestEntity();
+                    mqRequestEntity.setServerName("MessagePushServer");
+                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                    mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+                    mqRequestEntity.setParam(wxPushParam);
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
             }
         }
 
