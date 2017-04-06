@@ -530,7 +530,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
 
         //TODO  关注的直播间有新的课程，推送提醒
-        if (!MiscUtils.isEmpty(findFollowUser)) {
+        if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
         	Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
         	TemplateData first = new TemplateData();
         	first.setColor("#000000");
