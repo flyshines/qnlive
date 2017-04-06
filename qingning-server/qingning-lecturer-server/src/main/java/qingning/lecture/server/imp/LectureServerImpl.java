@@ -603,7 +603,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     if (errCode != null ) {
                         log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
                     } else {
-                        authorizer_appid = authJsonObj.getString("authorizer_appid");
                         authorizer_access_token = authJsonObj.getString("authorizer_access_token");
                         authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
                         long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
