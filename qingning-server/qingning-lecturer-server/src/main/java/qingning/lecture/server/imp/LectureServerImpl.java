@@ -568,7 +568,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),MiscUtils.RecoveryEmoji(nickName)));
         	templateMap.put("remark", remark);
 
-        	if (!MiscUtils.isEmpty(findFollowUser) ) { //青柠服务号 有粉丝关注该讲师
+        	if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
 
