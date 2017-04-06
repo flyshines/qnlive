@@ -612,7 +612,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     authInfoMap.put("authorizer_appid", authorizer_appid);
                     authInfoMap.put("authorizer_access_token", authorizer_access_token);
                     authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
-                    authInfoMap.put("expiresTimeStamp", String.valueOf(nowTimeStamp));
+                    authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
 
                     //更新服务号信息插入数据库
                     authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
