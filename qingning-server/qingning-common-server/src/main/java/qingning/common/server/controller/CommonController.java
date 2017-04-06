@@ -237,7 +237,7 @@ public class CommonController extends AbstractController {
             response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url").replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
         } else { //登录过 没有直播间信息
             //重定向到另一个页面
-            response.sendRedirect("http://www.baidu.com");
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_to_creat_room_ur"));
         }
     }
     /**
