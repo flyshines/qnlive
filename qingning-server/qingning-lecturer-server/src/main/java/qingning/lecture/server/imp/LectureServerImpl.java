@@ -525,7 +525,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
 
         Map<String,Object> queryNo = new HashMap<String,Object>();
-        queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, "lecturer_id");
+        queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
         Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
 
@@ -589,45 +589,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             if (serviceNoMap != null) { //该讲师绑定服务号，推送提醒给粉丝
 
-                boolean pushMsg = true;
+                String authorizer_access_token = getWeServiceNo(serviceNoMap, userId);
 
-                String expiresTimes = serviceNoMap.get("expires_time");
-                String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
-
-                long expiresTimeStamp = Long.parseLong(expiresTimes);
-                //是否快要超时 令牌是存在有效期（2小时）
-                long nowTimeStamp = System.currentTimeMillis();
-                if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
-
-                    String authorizer_appid = serviceNoMap.get("authorizer_appid");
-                    String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
-
-                    JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
-                    Object errCode = authJsonObj.get("errcode");
-                    if (errCode != null ) {
-                        log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
-                        pushMsg = false;
-                    } else {
-                        authorizer_access_token = authJsonObj.getString("authorizer_access_token");
-                        authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
-                        long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-                        expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
-
-                        //更新服务号的授权信息
-                        Map<String, String> authInfoMap = new HashMap<>();
-                        authInfoMap.put("lecturer_id", userId);
-                        authInfoMap.put("authorizer_appid", authorizer_appid);
-                        authInfoMap.put("authorizer_access_token", authorizer_access_token);
-                        authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
-                        authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
-
-                        //更新服务号信息插入数据库
-                        authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
-                        lectureModuleServer.updateServiceNoInfo(authInfoMap);
-                    }
-                }
-
-                if (pushMsg) {
+                if (authorizer_access_token != null) {
                     Map<String, Object> wxPushParam = new HashMap<>();
                     wxPushParam.put("templateParam", templateMap);//模板消息
                     wxPushParam.put("course_id", courseId);//课程ID
@@ -694,27 +658,45 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    //<editor-fold desc="这个没用">
-    //    /**
-//     * 微信推送
-//     * @param followUserList
-//     * @param templateId
-//     * @param templateMap
-//     */
-//    private void weiPush(List<Map<String,Object>> followUserList,String templateId,String url,Map<String, TemplateData> templateMap){
-//    	// 推送   关注的直播间有创建新的课程
-//    	Jedis jedis = jedisUtils.getJedis();
-//    	for (Map<String,Object> user: followUserList) {
-//    		//TODO
-//    		String openId = (String)user.get("web_openid");
-//    		if(!MiscUtils.isEmpty(openId)){
-//    			WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
-//    		}
-//    	}
-//    }
-    //</editor-fold>
-    
-    
+    public String getWeServiceNo(Map<String, String> serviceNoMap, String userId){
+        String expiresTimes = serviceNoMap.get("expires_time");
+        String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
+
+        long expiresTimeStamp = Long.parseLong(expiresTimes);
+        //是否快要超时 令牌是存在有效期（2小时）
+        long nowTimeStamp = System.currentTimeMillis();
+        if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
+
+            String authorizer_appid = serviceNoMap.get("authorizer_appid");
+            String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
+
+            JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+            Object errCode = authJsonObj.get("errcode");
+            if (errCode != null ) {
+                log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
+                return null;
+            } else {
+                authorizer_access_token = authJsonObj.getString("authorizer_access_token");
+                authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
+                long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+                expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
+
+                //更新服务号的授权信息
+                Map<String, String> authInfoMap = new HashMap<>();
+                authInfoMap.put("lecturer_id", userId);
+                authInfoMap.put("authorizer_appid", authorizer_appid);
+                authInfoMap.put("authorizer_access_token", authorizer_access_token);
+                authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
+                authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
+
+                //更新服务号信息插入数据库
+                authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
+                lectureModuleServer.updateServiceNoInfo(authInfoMap);
+            }
+        }
+        return authorizer_access_token;
+    }
+
     @SuppressWarnings("unchecked")
     @FunctionName("courseDetail")
     public Map<String, Object> getCourseDetail(RequestEntity reqEntity) throws Exception {
@@ -1019,98 +1001,127 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	jedis.hmset(courseKey, updateCacheMap);
             }
             
-            if (reqMap.get("start_time") != null) {
-            	String newStartTime = reqMap.get("start_time").toString();
-            	
-            	jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
-            	
+            if (reqMap.get("start_time") != null) { //开课时间修改
+                String newStartTime = reqMap.get("start_time").toString();
+
+                jedis.zadd(lecturerCoursesPredictionKey, Long.parseLong(newStartTime), course_id); //lecturerCoursesPredictionKey
+
                 query.clear();
                 query.put("course_id", course_id);
                 course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedisUtils, true);
-            	long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-                Map<String,Object> timerMap = new HashMap<>();
+                long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+                Map<String, Object> timerMap = new HashMap<>();
                 timerMap.put("course_id", course_id);
                 timerMap.put("start_time", new Date(startTime));
                 timerMap.put("lecturer_id", userId);
-                timerMap.put("course_title", course.get("course_title"));        
+                timerMap.put("course_title", course.get("course_title"));
                 timerMap.put("course_id", course.get("course_id"));
                 timerMap.put("start_time", startTime + "");
                 timerMap.put("position", course.get("position"));
-                
-        		RequestEntity mqRequestEntity = new RequestEntity();
-        		mqRequestEntity.setServerName("MessagePushServer");
-        		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-        		mqRequestEntity.setParam(timerMap);
-        		
-        		mqRequestEntity.setFunctionName("processCourseStartShortNoticeUpdate");
-        		this.mqUtils.sendMessage(mqRequestEntity);
-        		
-        		mqRequestEntity.setFunctionName("processCourseNotStartUpdate");
-        		this.mqUtils.sendMessage(mqRequestEntity);
-        		
-        		mqRequestEntity.setFunctionName("processCourseStartLongNoticeUpdate");
-        		this.mqUtils.sendMessage(mqRequestEntity);
 
-        		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNoticeUpdate");
-        		this.mqUtils.sendMessage(mqRequestEntity);
-        		
+                RequestEntity mqRequestEntity = new RequestEntity();
+                mqRequestEntity.setServerName("MessagePushServer");
+                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqRequestEntity.setParam(timerMap);
+
+                mqRequestEntity.setFunctionName("processCourseStartShortNoticeUpdate");
+                this.mqUtils.sendMessage(mqRequestEntity);
+
+                mqRequestEntity.setFunctionName("processCourseNotStartUpdate");
+                this.mqUtils.sendMessage(mqRequestEntity);
+
+                mqRequestEntity.setFunctionName("processCourseStartLongNoticeUpdate");
+                this.mqUtils.sendMessage(mqRequestEntity);
+
+                mqRequestEntity.setFunctionName("processCourseStartStudentStudyNoticeUpdate");
+                this.mqUtils.sendMessage(mqRequestEntity);
+
                 mqRequestEntity.setFunctionName("processCourseStartLecturerNotShowUpdate");
                 mqUtils.sendMessage(mqRequestEntity);
-        		
+
                 long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());                    
-                Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                TemplateData first = new TemplateData();
-                first.setColor("#000000");
-                first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first"));
-                templateMap.put("first", first);
-                
-                TemplateData wuliu = new TemplateData();
-                wuliu.setColor("#000000");
-                wuliu.setValue(course.get("course_title").toString());
-                templateMap.put("keyword1", wuliu);    
+                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());
 
-                TemplateData name = new TemplateData();
-                name.setColor("#000000");
-                name.setValue("修改部分课程信息！");
-                templateMap.put("keyword2", name);
-                
-                TemplateData orderNo = new TemplateData();
-                orderNo.setColor("#000000");
-                orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date( MiscUtils.convertObjectToLong(original_start_time)) , "yyyy-MM-dd HH:mm:ss"));
-                templateMap.put("keyword3", orderNo);
-                
-                TemplateData nowDate = new TemplateData();
-                nowDate.setColor("#000000");
-                nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
-                templateMap.put("keyword4", nowDate);
-                
-                TemplateData remark = new TemplateData();
-                remark.setColor("#000000");
-                remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark"));
-                templateMap.put("remark", remark);
+
                 //TODO 推送多人  报名的所有人
-                List<Map<String,Object>> userInfo = lectureModuleServer.findCourseStudentListWithLoginInfo(course_id);
+                List<Map<String, Object>> userInfo = lectureModuleServer.findCourseStudentListWithLoginInfo(course_id);
 
-//                String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id");
-                if (!MiscUtils.isEmpty(userInfo)) {
-//                    weiPush(userInfo, MiscUtils.getConfigByKey("wpush_update_course"), url,templateMap);
-                    Map<String, Object> wxPushParam = new HashMap<>();
-                    wxPushParam.put("templateParam", templateMap);
+                //是否存在讲师服务号信息
+                Map<String, Object> queryNo = new HashMap<String, Object>();
+                queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
+                String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
+                Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
 
-                    Date startDate = new Date(startTime);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-                    String str = sdf.format(startDate);
-                    course.put("start_time", str);
-                    wxPushParam.put("courseInfo", course);
-                    wxPushParam.put("pushType", "2");
+                if (!MiscUtils.isEmpty(userInfo) || !MiscUtils.isEmpty(serviceNoMap)) {
 
-                    RequestEntity wxMqRequestEntity = new RequestEntity();
-                    mqRequestEntity.setServerName("MessagePushServer");
-                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
-                    mqRequestEntity.setParam(wxPushParam);
-                    this.mqUtils.sendMessage(wxMqRequestEntity);
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                    TemplateData first = new TemplateData();
+                    first.setColor("#000000");
+                    first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first"));
+                    templateMap.put("first", first);
+
+                    TemplateData wuliu = new TemplateData();
+                    wuliu.setColor("#000000");
+                    wuliu.setValue(course.get("course_title").toString());
+                    templateMap.put("keyword1", wuliu);
+
+                    TemplateData name = new TemplateData();
+                    name.setColor("#000000");
+                    name.setValue("修改部分课程信息！");
+                    templateMap.put("keyword2", name);
+
+                    TemplateData orderNo = new TemplateData();
+                    orderNo.setColor("#000000");
+                    orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date(MiscUtils.convertObjectToLong(original_start_time)), "yyyy-MM-dd HH:mm:ss"));
+                    templateMap.put("keyword3", orderNo);
+
+                    TemplateData nowDate = new TemplateData();
+                    nowDate.setColor("#000000");
+                    nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
+                    templateMap.put("keyword4", nowDate);
+
+                    TemplateData remark = new TemplateData();
+                    remark.setColor("#000000");
+                    remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark"));
+                    templateMap.put("remark", remark);
+
+                    if (!MiscUtils.isEmpty(userInfo)) { //存在关注者信息
+                        Map<String, Object> wxPushParam = new HashMap<>();
+                        wxPushParam.put("templateParam", templateMap);
+
+                        Date startDate = new Date(startTime);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+                        String str = sdf.format(startDate);
+                        course.put("start_time", str);
+                        wxPushParam.put("courseInfo", course);
+                        wxPushParam.put("pushType", "2");
+
+                        RequestEntity wxMqRequestEntity = new RequestEntity();
+                        wxMqRequestEntity.setServerName("MessagePushServer");
+                        wxMqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                        wxMqRequestEntity.setFunctionName("noticeCourseToFollower");
+                        wxMqRequestEntity.setParam(wxPushParam);
+                        this.mqUtils.sendMessage(wxMqRequestEntity);
+                    }
+
+                    if (!MiscUtils.isEmpty(serviceNoMap)) { //存在服务号信息
+                        String authorizer_access_token = getWeServiceNo(serviceNoMap, userId);
+                        if (authorizer_access_token != null) {
+                            Map<String, Object> wxPushParam = new HashMap<>();
+                            wxPushParam.put("templateParam", templateMap);//模板消息
+                            wxPushParam.put("course_id", course_id);//课程ID
+                            wxPushParam.put("lecturer_id", userId);//课程ID
+                            wxPushParam.put("accessToken", authorizer_access_token);//课程ID
+                            wxPushParam.put("pushType", "2");//1创建课程 2更新课程
+
+                            RequestEntity serviceRequestEntity = new RequestEntity();
+                            serviceRequestEntity.setServerName("MessagePushServer");
+                            serviceRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                            serviceRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+                            serviceRequestEntity.setParam(wxPushParam);
+                            this.mqUtils.sendMessage(serviceRequestEntity);
+                        }
+                    }
                 }
             }
 
