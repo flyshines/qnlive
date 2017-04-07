@@ -693,7 +693,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
                 lectureModuleServer.updateServiceNoInfo(authInfoMap);
 
-                jedis.hmset(serviceNoKey, authInfoMap);
+                //access_tokens刷新之后 需要更新redis里的相关数据
+                jedis.hset(serviceNoKey, "authorizer_appid", authorizer_appid);
+                jedis.hset(serviceNoKey, "authorizer_access_token", authorizer_access_token);
+                jedis.hset(serviceNoKey, "authorizer_refresh_token", authorizer_refresh_token);
+                jedis.hset(serviceNoKey, "expiresTimeStamp", String.valueOf(expiresTimeStamp));
             }
         }
         return authorizer_access_token;
