@@ -567,7 +567,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
-                if(!CollectionUtils.isEmpty(liveRoomsMap)){//登录过 没有直播间信息
+                if(CollectionUtils.isEmpty(liveRoomsMap)){//登录过 没有直播间信息
                     resultMap.put("key","3");
                 }
             }
