@@ -2669,7 +2669,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             log.info("绑定服务号授权成功");
         } else {
-            throw new QNLiveException("150002");
+            result.put("redirectUrl", MiscUtils.getConfigByKey("service_auth_no_real_service_no"));
+
+            log.info("非认证服务号 绑定失败");
         }
         return result;
     }
