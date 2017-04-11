@@ -230,7 +230,7 @@ public class CommonController extends AbstractController {
 
         Integer key = Integer.valueOf(resultMap.get("key").toString());
         String access_token = (String) resultMap.get("access_token");
-          String weName = (String) resultMap.get("name");
+        String weName = (String) resultMap.get("name");
         if(key == 0){//未绑定
             response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url").replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
         } else if(key == 1) { //登录过 有直播间信息
