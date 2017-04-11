@@ -269,7 +269,7 @@
 
   <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
     SELECT * FROM t_wechat_service_template
-    where lecturer_id = #{lecturer_id} AND template_type = #{template_type}
+    where authorizer_appid = #{authorizer_appid} AND template_type = #{template_type}
   </select>
 
   <insert id="insertServiceTemplateInfo" parameterType="hashmap">
@@ -277,6 +277,9 @@
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="lecturer_id != null">
         lecturer_id,
+      </if>
+      <if test="authorizer_appid != null">
+        authorizer_appid,
       </if>
       <if test="template_id != null">
         template_id,
@@ -291,6 +294,9 @@
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="lecturer_id != null">
         #{lecturer_id},
+      </if>
+      <if test="authorizer_appid != null">
+        #{authorizer_appid},
       </if>
       <if test="template_id != null">
         #{template_id},

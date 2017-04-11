@@ -595,7 +595,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     Map<String, Object> wxPushParam = new HashMap<>();
                     wxPushParam.put("templateParam", templateMap);//模板消息
                     wxPushParam.put("course_id", courseId);//课程ID
-                    wxPushParam.put("lecturer_id", userId);//课程ID
+                    wxPushParam.put("lecturer_id", userId);
+                    wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));
                     wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                     wxPushParam.put("pushType", "1");//1创建课程 2更新课程
 
@@ -1116,7 +1117,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             Map<String, Object> wxPushParam = new HashMap<>();
                             wxPushParam.put("templateParam", templateMap);//模板消息
                             wxPushParam.put("course_id", course_id);//课程ID
-                            wxPushParam.put("lecturer_id", userId);//课程ID
+                            wxPushParam.put("lecturer_id", userId);
+                            wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));
                             wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                             wxPushParam.put("pushType", "2");//1创建课程 2更新课程
 

@@ -700,11 +700,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
         String accessToken = reqMap.get ("accessToken").toString();
         String type = reqMap.get("pushType").toString();//类型 1 是创建课程 2 是更新课程时间
-        String lecturer_id = reqMap.get("lecturer_id").toString();
+        String authorizer_appid = reqMap.get("authorizer_appid").toString();
         String courseId = reqMap.get("course_id").toString();//课程id
         //判断是否有模板id
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("lecturer_id", lecturer_id);
+        paramMap.put("authorizer_appid", authorizer_appid);
         paramMap.put("template_type", type);
         Map<String,Object> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
 
@@ -720,6 +720,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 templateId = templateJson.getString("template_id");
 
                 paramMap.put("template_id", templateId);
+                paramMap.put("lecturer_id", reqMap.get("lecturer_id").toString());
                 lecturerMapper.insertServiceTemplateInfo(paramMap);
 
             }
