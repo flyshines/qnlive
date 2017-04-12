@@ -706,7 +706,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("authorizer_appid", authorizer_appid);
         paramMap.put("template_type", type);
-        Map<String,String> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
+        Map<String,Object> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
 
         String templateId = null;
         //没有 则创建
@@ -725,7 +725,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
             }
         } else {
-            templateId = templateInfo.get("template_id");
+            templateId = templateInfo.get("template_id").toString();
         }
 
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据

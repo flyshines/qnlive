@@ -12,9 +12,9 @@ public interface LecturerMapper {
     int insertServiceNoInfo(Map<String, String> map);
     int updateServiceNoInfo(Map<String, String> map);
     int updateServiceNoLecturerId(Map<String, String> map);
-    Map<String,String> findServiceNoInfoByAppid(String authorizer_appid);
-    Map<String,String> findServiceNoInfoByLecturerId(String lecturer_id);
+    Map<String,Object> findServiceNoInfoByAppid(String authorizer_appid);
+    Map<String,Object> findServiceNoInfoByLecturerId(String lecturer_id);
 
-    Map<String,String> findServiceTemplateInfoByLecturerId(Map<String,String> query);
+    Map<String,Object> findServiceTemplateInfoByLecturerId(Map<String,String> query);
     int insertServiceTemplateInfo(Map<String, String> map);
 }

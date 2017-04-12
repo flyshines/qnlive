@@ -543,12 +543,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
-	public Map<String, String> findServiceNoInfoByAppid(String authorizer_appid) {
+	public Map<String, Object> findServiceNoInfoByAppid(String authorizer_appid) {
 		return lecturerMapper.findServiceNoInfoByAppid(authorizer_appid);
 	}
 
 	@Override
-	public Map<String, String> findServiceNoInfoByLecturerId(String lectureId) {
+	public Map<String, Object> findServiceNoInfoByLecturerId(String lectureId) {
 		return lecturerMapper.findServiceNoInfoByLecturerId(lectureId);
 	}
 

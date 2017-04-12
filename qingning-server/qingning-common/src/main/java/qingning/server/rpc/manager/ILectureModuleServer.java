@@ -109,10 +109,10 @@ public interface ILectureModuleServer {
 	int updateServiceNoLecturerId(Map<String, String> map);
 
 	//根据appid查找服务号信息
-	Map<String, String> findServiceNoInfoByAppid(String authorizer_appid);
+	Map<String, Object> findServiceNoInfoByAppid(String authorizer_appid);
 
 	//根据lecturerId查找服务号信息
-	Map<String, String> findServiceNoInfoByLecturerId(String lecturerId);
+	Map<String, Object> findServiceNoInfoByLecturerId(String lecturerId);
 
 	int updateUser(Map<String,Object> parameters);
 

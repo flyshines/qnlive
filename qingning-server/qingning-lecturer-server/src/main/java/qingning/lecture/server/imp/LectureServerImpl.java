@@ -529,7 +529,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
         Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
         if (MiscUtils.isEmpty(serviceNoMap)) {
-            serviceNoMap = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+            Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+            MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
         }
 
         //TODO  关注的直播间有新的课程，推送提醒
@@ -1066,7 +1067,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
                 Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
                 if (MiscUtils.isEmpty(serviceNoMap)) {
-                    serviceNoMap = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+                    Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+                    MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
                 }
 
                 if (!MiscUtils.isEmpty(userInfo) || !MiscUtils.isEmpty(serviceNoMap)) {
@@ -2638,7 +2640,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (typeInfo.getString("id").equals("2") && !verifyInfo.getString("id").equals("-1")) {
 
-            Map<String, String> oldServiceInfo = lectureModuleServer.findServiceNoInfoByAppid(authorizer_appid);
+            Map<String, Object> oldServiceInfo = lectureModuleServer.findServiceNoInfoByAppid(authorizer_appid);
             //存储公众号的授权信息
             Map<String, String> authInfoMap = new HashMap<>();
 
@@ -2725,37 +2727,31 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (count < 1) {
             throw new QNLiveException("150001");
         }
-
+        
         //先取出数据库的信息
         Jedis jedis = jedisUtils.getJedis();
-        Map<String, String> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
-        authInfoMap.remove("lecturer_id");
-        //移除两个Long字段 没用
-        authInfoMap.remove("update_time");
-        authInfoMap.remove("create_time");
+        Map<String, Object> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
+        Map<String, String> authInfo = new HashMap<>();
 
-        String expires_time = authInfoMap.get("expires_time").toString();
-        authInfoMap.remove("expires_time");
-        //更新一个Long字段
-        authInfoMap.put("expires_time", expires_time);
+        MiscUtils.converObjectMapToStringMap(authInfoMap, authInfo);
+        authInfo.remove("lecturer_id");
+
+//        authInfo.put("authorizer_appid", authInfoMap.get("authorizer_appid").toString());
+//        authInfo.put("authorizer_access_token", authInfoMap.get("authorizer_access_token").toString());
+//        authInfo.put("authorizer_refresh_token", authInfoMap.get("authorizer_refresh_token").toString());
+//        authInfo.put("qr_code", authInfoMap.get("qr_code").toString());
+//        authInfo.put("expires_time", authInfoMap.get("expires_time").toString());
+//        authInfo.put("create_time", authInfoMap.get("create_time").toString());
+//        authInfo.put("update_time", authInfoMap.get("update_time").toString());
+//        authInfo.put("nick_name", authInfoMap.get("nick_name").toString());
+//        authInfo.put("head_img", authInfoMap.get("head_img").toString());
+//        authInfoMap.put("service_type_info", authInfoMap.get("service_type_info").toString());
 
         //缓存授权信息到jedis
-        Map<String,Object> query = new HashMap<>();
+        Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
-        jedis.hmset(serviceNoKey, authInfoMap);
-
-//        Map<String,Object> serviceNo = new HashMap<>();
-//        serviceNo.put("authorizer_appid", authInfo.get("authorizer_appid"));
-//        serviceNo.put("expires_time", authInfo.get("expires_time"));
-//        serviceNo.put("lecturer_id", paramMap.get("lecturer_id"));
-//
-//        RequestEntity mqRequestEntity = new RequestEntity();
-//        mqRequestEntity.setServerName("MessagePushServer");
-//        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-//        mqRequestEntity.setFunctionName("refreshServiceNoToken");
-//        mqRequestEntity.setParam(serviceNo);
-//        this.mqUtils.sendMessage(mqRequestEntity);
+        jedis.hmset(serviceNoKey, authInfo);
     }
 
     private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion,
