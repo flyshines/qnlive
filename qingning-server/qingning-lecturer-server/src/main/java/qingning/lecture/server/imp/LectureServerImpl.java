@@ -663,7 +663,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
     public String getWeServiceNo(Map<String, String> serviceNoMap, String userId, String serviceNoKey, Jedis jedis){
-        String expiresTimes = serviceNoMap.get("expires_time");
+        String expiresTimes = serviceNoMap.get("expires_time").toString();
         String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
 
         long expiresTimeStamp = Long.parseLong(expiresTimes);
@@ -2730,10 +2730,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();
         Map<String, String> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
         authInfoMap.remove("lecturer_id");
+        //移除两个Long字段 没用
         authInfoMap.remove("update_time");
         authInfoMap.remove("create_time");
-        long expires_time = Long.parseLong(authInfoMap.get("expires_time"));
-        authInfoMap.put("expires_time", String.valueOf(expires_time));
+        //更新一个Long字段
+        authInfoMap.put("expires_time", authInfoMap.get("expires_time").toString());
 
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<>();
