@@ -713,7 +713,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         if (templateInfo == null || templateInfo.size() < 1) {
             JSONObject templateJson = WeiXinUtil.createServiceTemplateInfo(accessToken, type);
             Object errcode = templateJson.get("errcode");
-            if (errcode != null && !errcode.equals("0")) {//创建失败 结束 说明没这个行业
+            if (errcode != null && Integer.parseInt(errcode.toString()) != 0) {//创建失败 结束 说明没这个行业
                 log.error("创建模板消息出错 +++++ ", templateJson);
                 return;
             } else {//创建成功 则存到数据库
