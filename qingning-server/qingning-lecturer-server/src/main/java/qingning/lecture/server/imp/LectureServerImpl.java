@@ -666,7 +666,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long expiresTimeStamp = Long.parseLong(expiresTimes);
         //是否快要超时 令牌是存在有效期（2小时）
         long nowTimeStamp = System.currentTimeMillis();
-//        if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
+        if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
 
             String authorizer_appid = serviceNoMap.get("authorizer_appid");
             String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
@@ -701,7 +701,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hset(serviceNoKey, "authorizer_refresh_token", authorizer_refresh_token);
                 jedis.hset(serviceNoKey, "expiresTimeStamp", String.valueOf(expiresTimeStamp));
             }
-//        }
+        }
         return authorizer_access_token;
 
         //现在开启定时器直接刷新accessToken所以 不需要以上代码

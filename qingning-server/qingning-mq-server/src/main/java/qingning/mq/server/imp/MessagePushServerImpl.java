@@ -761,6 +761,80 @@ public class MessagePushServerImpl extends AbstractMsgService {
         return null;
     }
 
+//    public void refreshServiceNoToken(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+//
+//        Jedis jedis = jedisUtils.getJedis();
+//        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+//        log.debug("---------------刷新服务号的ACCESSTOKEN"+reqMap);
+//        String appid = reqMap.get("authorizer_appid").toString();
+//        String lecturerid = reqMap.get("lecturer_id").toString();
+//        if(qnSchedule.containTask(appid, QNSchedule.TASK_END_COURSE)){
+//            return;
+//        }
+//
+//        long startTime = MiscUtils.convertObjectToLong(reqMap.get("expires_time"));
+//        long taskStartTime = startTime - 10*60*1000;//提前10分钟去刷新
+//
+//        ScheduleTask scheduleTask = new ScheduleTask(){
+//            @Override
+//            public void process() {
+//                log.debug("-----------两小时去刷新服务号的ACCESSTOKEN appid"+this.getId()+"  执行时间"+System.currentTimeMillis());
+//                toRefreshToken(appid, lecturerid, jedisUtils);
+//            }
+//        };
+//        scheduleTask.setId(appid);
+//        scheduleTask.setLecturerId(lecturerid);
+//        scheduleTask.setStartTime(taskStartTime);
+//        scheduleTask.setTaskName(QNSchedule.TASK_REFRESH_SERVICENO);
+//        qnSchedule.add(scheduleTask);
+//    }
+//
+//    private void toRefreshToken(String appid, String lecturerid, JedisUtils jedisUtils) {
+//
+//        Jedis jedis = jedisUtils.getJedis();
+//
+//        Map<String,Object> queryNo = new HashMap<String,Object>();
+//        queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturerid);
+//        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
+//        Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
+//
+//        String authorizer_appid = serviceNoMap.get("authorizer_appid");
+//        String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
+//        String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
+//
+//        JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+//        Object errCode = authJsonObj.get("errcode");
+//        if (errCode != null ) {
+//            log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
+//        } else {
+//            authorizer_access_token = authJsonObj.getString("authorizer_access_token");
+//            authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
+//
+//            long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
+//            long nowTimeStamp = System.currentTimeMillis();
+//            long expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
+//
+//            //更新服务号的授权信息
+//            Map<String, String> authInfoMap = new HashMap<>();
+//
+//            authInfoMap.put("authorizer_appid", authorizer_appid);
+//            authInfoMap.put("authorizer_access_token", authorizer_access_token);
+//            authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
+//            authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
+//            authInfoMap.put("lecturer_id", lecturerid);
+//
+//            //更新服务号信息插入数据库
+//            authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
+//
+//            lecturerMapper.updateServiceNoInfo(authInfoMap);
+//
+//            //access_tokens刷新之后 需要更新redis里的相关数据
+//            jedis.hset(serviceNoKey, "authorizer_appid", authorizer_appid);
+//            jedis.hset(serviceNoKey, "authorizer_access_token", authorizer_access_token);
+//            jedis.hset(serviceNoKey, "authorizer_refresh_token", authorizer_refresh_token);
+//            jedis.hset(serviceNoKey, "expiresTimeStamp", String.valueOf(expiresTimeStamp));
+//    }
+
 /*    public SaveCourseMessageService getSaveCourseMessageService() {
         return saveCourseMessageService;
     }
