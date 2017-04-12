@@ -528,6 +528,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
         Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
+        if (MiscUtils.isEmpty(serviceNoMap)) {
+            serviceNoMap = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+        }
 
         //TODO  关注的直播间有新的课程，推送提醒
         if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
@@ -1062,6 +1065,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
                 String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
                 Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
+                if (MiscUtils.isEmpty(serviceNoMap)) {
+                    serviceNoMap = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+                }
 
                 if (!MiscUtils.isEmpty(userInfo) || !MiscUtils.isEmpty(serviceNoMap)) {
 
@@ -2632,7 +2638,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         if (typeInfo.getString("id").equals("2") && !verifyInfo.getString("id").equals("-1")) {
 
-            Map<String, Object> oldServiceInfo = lectureModuleServer.findServiceNoInfoByAppid(authorizer_appid);
+            Map<String, String> oldServiceInfo = lectureModuleServer.findServiceNoInfoByAppid(authorizer_appid);
             //存储公众号的授权信息
             Map<String, String> authInfoMap = new HashMap<>();
 
@@ -2651,7 +2657,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             //先获取部分信息 还未和直播间绑定起来
             //服务号信息插入数据库
-            if (oldServiceInfo != null && oldServiceInfo.size() > 0) {
+            if (!MiscUtils.isEmpty(oldServiceInfo)) {
                 authInfoMap.put("update_time", String.valueOf(System.currentTimeMillis()));
                 lectureModuleServer.updateServiceNoInfo(authInfoMap);
 
@@ -2720,23 +2726,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //先取出数据库的信息
         Jedis jedis = jedisUtils.getJedis();
-        Map<String, Object> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
-        Map<String, String> authInfo = new HashMap<>();
-        authInfo.put("authorizer_appid", authInfoMap.get("authorizer_appid").toString());
-        authInfo.put("authorizer_access_token", authInfoMap.get("authorizer_access_token").toString());
-        authInfo.put("authorizer_refresh_token", authInfoMap.get("authorizer_refresh_token").toString());
-        authInfo.put("qr_code", authInfoMap.get("qr_code").toString());
-        authInfo.put("expires_time", authInfoMap.get("expires_time").toString());
-        authInfo.put("create_time", authInfoMap.get("create_time").toString());
-        authInfo.put("update_time", authInfoMap.get("update_time").toString());
-        authInfo.put("nick_name", authInfoMap.get("nick_name").toString());
-        authInfo.put("head_img", authInfoMap.get("head_img").toString());
-        authInfoMap.put("service_type_info", authInfoMap.get("service_type_info").toString());
+        Map<String, String> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
+        authInfoMap.remove("lecturer_id");
+
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
-        jedis.hmset(serviceNoKey, authInfo);
+        jedis.hmset(serviceNoKey, authInfoMap);
 
         if (count < 1) {
             throw new QNLiveException("150001");

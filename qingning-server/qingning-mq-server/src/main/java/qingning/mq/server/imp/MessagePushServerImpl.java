@@ -706,11 +706,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("authorizer_appid", authorizer_appid);
         paramMap.put("template_type", type);
-        Map<String,Object> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
+        Map<String,String> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
 
         String templateId = null;
         //没有 则创建
-        if (templateInfo == null || templateInfo.size() < 1) {
+        if (MiscUtils.isEmpty(templateInfo)) {//为空
             JSONObject templateJson = WeiXinUtil.createServiceTemplateInfo(accessToken, type);
             Object errcode = templateJson.get("errcode");
             if (errcode != null && Integer.parseInt(errcode.toString()) != 0) {//创建失败 结束 说明没这个行业
@@ -725,7 +725,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
             }
         } else {
-            templateId = templateInfo.get("template_id").toString();
+            templateId = templateInfo.get("template_id");
         }
 
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
