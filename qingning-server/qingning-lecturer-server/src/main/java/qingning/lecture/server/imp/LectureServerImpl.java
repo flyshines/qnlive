@@ -664,7 +664,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
     public String getWeServiceNo(Map<String, String> serviceNoMap, String userId, String serviceNoKey, Jedis jedis){
-        String expiresTimes = serviceNoMap.get("expires_time").toString();
+        String expiresTimes = serviceNoMap.get("expires_time");
         String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
 
         long expiresTimeStamp = Long.parseLong(expiresTimes);
@@ -2727,7 +2727,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (count < 1) {
             throw new QNLiveException("150001");
         }
-        
+
         //先取出数据库的信息
         Jedis jedis = jedisUtils.getJedis();
         Map<String, Object> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
@@ -2735,18 +2735,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         MiscUtils.converObjectMapToStringMap(authInfoMap, authInfo);
         authInfo.remove("lecturer_id");
-
-//        authInfo.put("authorizer_appid", authInfoMap.get("authorizer_appid").toString());
-//        authInfo.put("authorizer_access_token", authInfoMap.get("authorizer_access_token").toString());
-//        authInfo.put("authorizer_refresh_token", authInfoMap.get("authorizer_refresh_token").toString());
-//        authInfo.put("qr_code", authInfoMap.get("qr_code").toString());
-//        authInfo.put("expires_time", authInfoMap.get("expires_time").toString());
-//        authInfo.put("create_time", authInfoMap.get("create_time").toString());
-//        authInfo.put("update_time", authInfoMap.get("update_time").toString());
-//        authInfo.put("nick_name", authInfoMap.get("nick_name").toString());
-//        authInfo.put("head_img", authInfoMap.get("head_img").toString());
-//        authInfoMap.put("service_type_info", authInfoMap.get("service_type_info").toString());
-
+        
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
