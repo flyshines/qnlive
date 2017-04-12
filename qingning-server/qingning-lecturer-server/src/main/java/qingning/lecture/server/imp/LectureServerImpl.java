@@ -671,7 +671,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String authorizer_appid = serviceNoMap.get("authorizer_appid");
             String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
 
-            JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
+            String component_access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
+            JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(component_access_token, authorizer_refresh_token, authorizer_appid);
             Object errCode = authJsonObj.get("errcode");
             if (errCode != null ) {
                 log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
