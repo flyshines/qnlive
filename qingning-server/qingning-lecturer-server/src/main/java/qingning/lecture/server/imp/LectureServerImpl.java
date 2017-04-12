@@ -666,7 +666,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long expiresTimeStamp = Long.parseLong(expiresTimes);
         //是否快要超时 令牌是存在有效期（2小时）
         long nowTimeStamp = System.currentTimeMillis();
-        if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
+//        if (nowTimeStamp-expiresTimeStamp > 0) {  //accessToken已经过期了
 
             String authorizer_appid = serviceNoMap.get("authorizer_appid");
             String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
@@ -700,8 +700,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.hset(serviceNoKey, "authorizer_refresh_token", authorizer_refresh_token);
                 jedis.hset(serviceNoKey, "expiresTimeStamp", String.valueOf(expiresTimeStamp));
             }
-        }
+//        }
         return authorizer_access_token;
+
+        //现在开启定时器直接刷新accessToken所以 不需要以上代码
+//        return serviceNoMap.get("authorizer_access_token");
     }
 
     @SuppressWarnings("unchecked")
@@ -2737,6 +2740,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (count < 1) {
             throw new QNLiveException("150001");
         }
+
+//        Map<String,Object> serviceNo = new HashMap<>();
+//        serviceNo.put("authorizer_appid", authInfo.get("authorizer_appid"));
+//        serviceNo.put("expires_time", authInfo.get("expires_time"));
+//        serviceNo.put("lecturer_id", paramMap.get("lecturer_id"));
+//
+//        RequestEntity mqRequestEntity = new RequestEntity();
+//        mqRequestEntity.setServerName("MessagePushServer");
+//        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+//        mqRequestEntity.setFunctionName("refreshServiceNoToken");
+//        mqRequestEntity.setParam(serviceNo);
+//        this.mqUtils.sendMessage(mqRequestEntity);
     }
 
     private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion,
