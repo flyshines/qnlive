@@ -2656,18 +2656,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             authInfoMap.put("qr_code", authauthorizer_info_base.getString("qrcode_url"));
 
             //先获取部分信息 还未和直播间绑定起来
-            //服务号信息插入数据库
-            if (!MiscUtils.isEmpty(oldServiceInfo)) {
+            if (!MiscUtils.isEmpty(oldServiceInfo)) { //更新授权信息 重复授权 token会失效
                 authInfoMap.put("update_time", String.valueOf(System.currentTimeMillis()));
                 lectureModuleServer.updateServiceNoInfo(authInfoMap);
 
-                //缓存授权信息到jedis
+                //更新授权信息  缓存到jedis
                 Map<String,Object> query = new HashMap<String,Object>();
                 query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, oldServiceInfo.get("lecturer_id"));
                 String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
                 jedis.hmset(serviceNoKey, authInfoMap);
 
-            } else {
+            } else {  //服务号信息插入数据库
                 //1 插入的时候 不更新缓存
                 //2 更新的时候 更新缓存
                 //3 更新的时候分两种情况 授权完成更新缓存
@@ -2731,6 +2730,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();
         Map<String, String> authInfoMap = lectureModuleServer.findServiceNoInfoByAppid(appid);
         authInfoMap.remove("lecturer_id");
+        authInfoMap.remove("update_time");
+        authInfoMap.remove("create_time");
+        long expires_time = Long.parseLong(authInfoMap.get("expires_time"));
+        authInfoMap.put("expires_time", String.valueOf(expires_time));
 
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<>();
