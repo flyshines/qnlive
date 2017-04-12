@@ -2723,6 +2723,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         paramMap.put("authorizer_appid", appid);
         paramMap.put("lecturer_id", userId);
         int count = lectureModuleServer.updateServiceNoLecturerId(paramMap);
+        if (count < 1) {
+            throw new QNLiveException("150001");
+        }
 
         //先取出数据库的信息
         Jedis jedis = jedisUtils.getJedis();
@@ -2730,14 +2733,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         authInfoMap.remove("lecturer_id");
 
         //缓存授权信息到jedis
-        Map<String,Object> query = new HashMap<String,Object>();
+        Map<String,Object> query = new HashMap<>();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
         jedis.hmset(serviceNoKey, authInfoMap);
-
-        if (count < 1) {
-            throw new QNLiveException("150001");
-        }
 
 //        Map<String,Object> serviceNo = new HashMap<>();
 //        serviceNo.put("authorizer_appid", authInfo.get("authorizer_appid"));
