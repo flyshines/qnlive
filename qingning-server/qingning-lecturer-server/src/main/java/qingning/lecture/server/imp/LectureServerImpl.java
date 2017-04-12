@@ -2733,8 +2733,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //移除两个Long字段 没用
         authInfoMap.remove("update_time");
         authInfoMap.remove("create_time");
+
+        String expires_time = authInfoMap.get("expires_time").toString();
+        authInfoMap.remove("expires_time");
         //更新一个Long字段
-        authInfoMap.put("expires_time", authInfoMap.get("expires_time").toString());
+        authInfoMap.put("expires_time", expires_time);
 
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<>();
