@@ -11,6 +11,15 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Created by 宫洪深 on 2017/2/28.
  * 上传东西到七牛服务器
@@ -29,16 +38,61 @@ public class QiNiuUpUtils {
      * @return
      */
     public static String uploadByIO( byte[] uploadBytes,String fileName)throws Exception{
-        String upToken = auth.uploadToken(MiscUtils.getConfigByKey("qnlive_qrcode_image"),fileName); //生成上传凭证 覆盖上传
+        String upToken = auth.uploadToken(MiscUtils.getConfigByKey("image_space"),fileName); //生成上传凭证 覆盖上传
         Configuration cfg = new Configuration(Zone.zone0());//上传链接
         UploadManager uploadManager = new UploadManager(cfg);//生成上传那工具
         Response response = uploadManager.put(uploadBytes,fileName,upToken);//上传类
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);//上传
-        String url = MiscUtils.getConfigByKey("images_qrcode_domain_name")+"/"+putRet.key;//文件地址
+        String url = MiscUtils.getConfigByKey("images_space_domain_name")+"/"+putRet.key;//文件地址
         CdnManager c = new CdnManager(auth);//刷新缓存工具
         String[] urls = new String[]{url};//要刷新缓存的路径
         CdnResult.RefreshResult result = c.refreshUrls(urls);//刷新缓存
         return url;//返回url
     }
+
+    public static void main(String[] args) throws Exception {
+
+        String url = "http://mmbiz.qpic.cn/mmbiz_jpg/cxIPufbGFZlHfLtUPfMwibEuhFVLnCRUeia90tJw0zuKfu9Q8dyKZJgGJs6WzZJUsVia9nxqNjo0dLzMTxIzslvuQ/0";
+        String result = "";
+        byte[] resByt = null;
+        try {
+            URL urlObj = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
+            // 连接超时
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(25000);
+            // 读取超时 --服务器响应比较慢,增大时间
+            conn.setReadTimeout(25000);
+            conn.setRequestMethod("GET");
+            conn.addRequestProperty("Accept-Language", "zh-cn");
+            conn.addRequestProperty("Content-type", "image/jpeg");
+            conn.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727)");
+            conn.connect();
+
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"), true);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            BufferedImage bufImg = ImageIO.read(conn.getInputStream());
+
+            ImageIO.write(bufImg, "jpg", outputStream);
+            resByt = outputStream.toByteArray();
+            outputStream.close();
+            out.print(resByt);
+            out.flush();
+            out.close();
+            // 断开连接
+            conn.disconnect();
+
+            System.out.println("=============================");
+            System.out.println("Contents of get request ends");
+            System.out.println("=============================");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String qiniuUrl = uploadByIO(resByt, "jz");
+        System.out.println("----------------"+qiniuUrl);
+    }
+
 
 }
