@@ -2655,7 +2655,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             authInfoMap.put("nick_name", authauthorizer_info_base.getString("nick_name"));
             authInfoMap.put("head_img", authauthorizer_info_base.getString("head_img"));
             authInfoMap.put("service_type_info", typeInfo.getString("id"));
-            authInfoMap.put("qr_code", authauthorizer_info_base.getString("qrcode_url"));
+
+            String qr_code = authauthorizer_info_base.getString("qrcode_url");
+            if (!MiscUtils.isEmptyString(qr_code)) {
+                qr_code = QiNiuUpUtils.uploadImage(qr_code, authorizer_appid);
+                authInfoMap.put("qr_code", qr_code);
+            }
 
             //先获取部分信息 还未和直播间绑定起来
             if (!MiscUtils.isEmpty(oldServiceInfo)) { //更新授权信息 重复授权 token会失效
@@ -2735,7 +2740,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         MiscUtils.converObjectMapToStringMap(authInfoMap, authInfo);
         authInfo.remove("lecturer_id");
-        
+
         //缓存授权信息到jedis
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
