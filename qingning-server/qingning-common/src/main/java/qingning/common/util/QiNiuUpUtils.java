@@ -3,10 +3,8 @@ package qingning.common.util;
 import com.google.gson.Gson;
 import com.qiniu.cdn.CdnManager;
 import com.qiniu.cdn.CdnResult;
-import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
-import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
@@ -15,8 +13,6 @@ import com.qiniu.util.Auth;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -37,7 +33,7 @@ public class QiNiuUpUtils {
      * @param fileName 文件名
      * @return
      */
-    public static String uploadByIO( byte[] uploadBytes,String fileName)throws Exception{
+    public static String uploadByIO( byte[] uploadBytes, String fileName) throws Exception {
         String upToken = auth.uploadToken(MiscUtils.getConfigByKey("image_space"),fileName); //生成上传凭证 覆盖上传
         Configuration cfg = new Configuration(Zone.zone0());//上传链接
         UploadManager uploadManager = new UploadManager(cfg);//生成上传那工具
@@ -50,13 +46,10 @@ public class QiNiuUpUtils {
         return url;//返回url
     }
 
-    public static void main(String[] args) throws Exception {
-
-        String url = "http://mmbiz.qpic.cn/mmbiz_jpg/cxIPufbGFZlHfLtUPfMwibEuhFVLnCRUeia90tJw0zuKfu9Q8dyKZJgGJs6WzZJUsVia9nxqNjo0dLzMTxIzslvuQ/0";
-        String result = "";
+    public static String uploadImage(String imgUrl, String fileName) throws Exception {
         byte[] resByt = null;
         try {
-            URL urlObj = new URL(url);
+            URL urlObj = new URL(imgUrl);
             HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
             // 连接超时
             conn.setDoInput(true);
@@ -70,28 +63,26 @@ public class QiNiuUpUtils {
             conn.addRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727)");
             conn.connect();
 
-            PrintWriter out = new PrintWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"), true);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BufferedImage bufImg = ImageIO.read(conn.getInputStream());
 
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(bufImg, "jpg", outputStream);
             resByt = outputStream.toByteArray();
             outputStream.close();
-            out.print(resByt);
-            out.flush();
-            out.close();
             // 断开连接
             conn.disconnect();
 
-            System.out.println("=============================");
-            System.out.println("Contents of get request ends");
-            System.out.println("=============================");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        String qiniuUrl = uploadByIO(resByt, "jz");
-        System.out.println("----------------"+qiniuUrl);
+        return uploadByIO(resByt, fileName);
+    }
+
+    public static void main(String[] args) throws Exception {
+
+//        String url = "http://mmbiz.qpic.cn/mmbiz_jpg/cxIPufbGFZlHfLtUPfMwibEuhFVLnCRUeia90tJw0zuKfu9Q8dyKZJgGJs6WzZJUsVia9nxqNjo0dLzMTxIzslvuQ/0";
+
     }
 
 
