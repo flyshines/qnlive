@@ -49,11 +49,8 @@ public class UserController extends AbstractController{
 	@ResponseBody
 	ResponseEntity getCourse(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "course_id", defaultValue = "") String   course_id,
-			@RequestParam(value = "status", defaultValue = "") String  status,
-			@RequestParam(value = "data_source", defaultValue = "") String  data_source,
-			@RequestParam(value = "query_time", defaultValue = "") String  start_time,
-			@RequestParam(value = "position", defaultValue = "") String  position,
+			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestParam(value = "status", defaultValue = "4") String  status,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version);
@@ -61,9 +58,6 @@ public class UserController extends AbstractController{
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
 		param.put("status", status);
-		param.put("data_source", data_source);
-		param.put("query_time", start_time);
-		param.put("position", position);
 		requestEntity.setParam(param);
 			return this.process(requestEntity, serviceManger, message);
 	}
@@ -219,7 +213,7 @@ public class UserController extends AbstractController{
 	public
 	@ResponseBody ResponseEntity getMessageList(
 			@PathVariable("course_id") String course_id,
-			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "page_count", defaultValue = "5") String page_count,
 			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
 			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
 			@RequestParam(value = "message_id", defaultValue = "") String message_id,
