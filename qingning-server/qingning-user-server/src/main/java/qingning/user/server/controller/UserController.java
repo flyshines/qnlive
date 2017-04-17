@@ -199,36 +199,38 @@ public class UserController extends AbstractController{
 		return responseEntity;
 	}
 
-	/**
-	 * 查询课程消息列表
-	 * @param course_id
-	 * @param page_count
-	 * @param message_pos
-	 * @param accessToken
-	 * @param version
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/user/courses/{course_id}/messages", method = RequestMethod.GET)
-	public
-	@ResponseBody ResponseEntity getMessageList(
-			@PathVariable("course_id") String course_id,
-			@RequestParam(value = "page_count", defaultValue = "5") String page_count,
-			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
-			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
-			@RequestParam(value = "message_id", defaultValue = "") String message_id,
-			@RequestHeader("access_token") String accessToken,
-			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "messageList", accessToken, version);
-		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("course_id", course_id);
-		parMap.put("page_count", page_count);
-		parMap.put("message_pos", message_pos);
-		parMap.put("query_type", query_type);
-		parMap.put("message_id", message_id);
-		requestEntity.setParam(parMap);
-		return this.process(requestEntity, serviceManger, message);
-	}
+	//<editor-fold desc="无用">
+	//	/**
+//	 * 查询课程消息列表
+//	 * @param course_id
+//	 * @param page_count
+//	 * @param message_pos
+//	 * @param accessToken
+//	 * @param version
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	@RequestMapping(value = "/user/courses/{course_id}/messages", method = RequestMethod.GET)
+//	public
+//	@ResponseBody ResponseEntity getMessageList(
+//			@PathVariable("course_id") String course_id,
+//			@RequestParam(value = "page_count", defaultValue = "5") String page_count,
+//			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
+//			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
+//			@RequestParam(value = "message_id", defaultValue = "") String message_id,
+//			@RequestHeader("access_token") String accessToken,
+//			@RequestHeader("version") String version) throws Exception {
+//		RequestEntity requestEntity = this.createResponseEntity("UserServer", "messageList", accessToken, version);
+//		Map<String, Object> parMap = new HashMap<>();
+//		parMap.put("course_id", course_id);
+//		parMap.put("page_count", page_count);
+//		parMap.put("message_pos", message_pos);
+//		parMap.put("query_type", query_type);
+//		parMap.put("message_id", message_id);
+//		requestEntity.setParam(parMap);
+//		return this.process(requestEntity, serviceManger, message);
+//	}
+	//</editor-fold>
 
 	/**
 	 * 查询课程学员列表
@@ -341,5 +343,33 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+
+
+	/**
+	 * 查看 本周推荐课程
+	 * @param page_count
+	 * @param course_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/recommend/courses", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getRecommendCourse(
+			@RequestParam(value = "page_count", defaultValue = "3") String page_count,
+			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "recommendCourses", accessToken, version);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("page_count", page_count);
+		param.put("course_id", course_id);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 
 }
