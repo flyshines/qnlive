@@ -197,12 +197,12 @@ public final class CacheUtils {
 			String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);//获取系统缓存key
 			Long course_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
 			if(course_num != Long.parseLong(result.get("course_num"))){
-				jedis.hincrByFloat(userCacheKey,"course_num",course_num);//修改用户缓存中的数据
+				jedis.hset(userCacheKey,"course_num",course_num.toString());//修改用户缓存中的数据
 			}
 
 			Long room_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query));//查询用户关注直播间总数
 			if(room_num != Long.parseLong(result.get("live_room_num"))){ //如果数据和现在的不同
-				jedis.hincrByFloat(userCacheKey,"live_room_num",room_num);//修改用户缓存中的数据
+				jedis.hset(userCacheKey,"live_room_num",room_num.toString());//修改用户缓存中的数据
 			}
 			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
 		}
