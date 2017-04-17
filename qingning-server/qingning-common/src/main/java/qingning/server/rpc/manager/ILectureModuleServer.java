@@ -117,4 +117,6 @@ public interface ILectureModuleServer {
 	int updateUser(Map<String,Object> parameters);
 
 	void updateLoginInfo(Map<String, Object> updateMap);
+
+	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 }

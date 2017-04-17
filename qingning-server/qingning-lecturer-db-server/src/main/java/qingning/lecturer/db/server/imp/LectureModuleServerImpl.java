@@ -559,4 +559,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Override
 	public void updateLoginInfo(Map<String, Object> updateMap){loginInfoMapper.updateLoginInfo(updateMap);}
+
+	@Override
+	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
+		return fansMapper.findRoomIdByFans(reqMap);
+	}
 }

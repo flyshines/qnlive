@@ -687,4 +687,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String,Object> findByPhone(String phone){
 		return userMapper.findByPhone(phone);
 	}
+
+	@Override
+	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
+		return fansMapper.findRoomIdByFans(reqMap);
+	}
+
 }
