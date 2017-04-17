@@ -59,6 +59,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	private LecturerMapper lecturerMapper;
 	@Autowired(required = true)
 	private SystemConfigMapper systemConfigMapper;
+
+
 	@Override
 	public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
 		Map<String,Object> dbResultMap = new HashMap<>();
@@ -244,6 +246,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public Map<String, Object> findCustomerServiceBySystemConfig(String config_key) {
 		return systemConfigMapper.findCustomerServiceBySystemConfig(config_key);
+	}
+
+	@Override
+	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
+		return fansMapper.findRoomIdByFans(reqMap);
 	}
 
 

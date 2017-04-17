@@ -12,4 +12,6 @@ public interface FansMapper {
 	int insertFans(Map<String,Object> record);
 	List<String> findFollowUserIdsByRoomId(String room_id);
 	List<Map<String,Object>> findRoomFanListWithLoginInfo(Map<String,Object> record);
+
+	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 }

@@ -14,6 +14,8 @@ public final class Constants {
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
+	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";
+
 
 	public static final String SYS_READ_USER_BY_UNIONID = "SYS_READ_USER_BY_UNIONID";
 
@@ -131,7 +133,8 @@ public final class Constants {
 
 	public static final String CACHED_KEY_SYS_DISTRIBUTERS = "SYS:LECTURER:{room_id}:DISTRIBUTERS";
 
-	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";
+	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
+	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
 
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";

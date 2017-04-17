@@ -122,9 +122,10 @@ public final class CacheUtils {
 			Jedis jedis = jedisUtils.getJedis();
 			Map<String,Object> query = new HashMap<String,Object>();
 			query.put(Constants.CACHED_KEY_USER_FIELD, userId);
-			final String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
-			if(jedis.exists(key)){
-				jedis.expire(key, 60*60*72);
+			//<editor-fold desc="用户加入的课程">
+			final String coursesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+			if(jedis.exists(coursesKey)){
+				jedis.expire(coursesKey, 60*60*72);
 			} else {
 				RequestEntity entity = new RequestEntity();
 				entity.setFunctionName(Constants.SYS_READ_USER_COURSE_LIST);
@@ -147,22 +148,63 @@ public final class CacheUtils {
 					} else {
 						readCount = 0;
 					}
-					
-					
-				} while(readCount==Constants.MAX_QUERY_LIMIT);				
+				} while(readCount==Constants.MAX_QUERY_LIMIT);
 				if(!MiscUtils.isEmpty(userCourseSet)){
 					((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 						@Override
 						public void batchOperation(Pipeline pipeline, Jedis jedis) {
 							for(String courseId:userCourseSet){
-								pipeline.sadd(key, courseId);
+								pipeline.sadd(coursesKey, courseId);
 							}
 							pipeline.sync();
 						}						
 					});
-					jedis.expire(key, 60*60*72);
+					jedis.expire(coursesKey, 60*60*72);
 				}
 			}
+			//</editor-fold>
+
+			//<editor-fold desc="用户关注直播间">
+			final String roomsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS,query);//存储用户关注的直播间
+			if(jedis.exists(roomsKey)){//判断当前缓存是否存在
+				jedis.expire(roomsKey, 60*60*72);//修改生命时间
+			} else {
+				RequestEntity entity = new RequestEntity();
+				entity.setFunctionName(Constants.SYS_READ_USER_ROOM_LIST);//加入参数 进行方法调用 获取房间id list
+				entity.setParam(query);
+				final Set<String> userRoomSet = new HashSet<String>();
+				List<Map<String, Object>> list = (List<Map<String, Object>>) operation.invokeProcess(entity);//调用传入的operation对象里的invokeProcess方法
+				if (!MiscUtils.isEmpty(list)) {
+					for (Map<String, Object> course : list) {
+						userRoomSet.add((String) course.get("room_id"));
+					}
+				}
+				if (!MiscUtils.isEmpty(userRoomSet)) {
+					((JedisBatchCallback) jedis).invoke(new JedisBatchOperation() {
+						@Override
+						public void batchOperation(Pipeline pipeline, Jedis jedis) {
+							for (String roomId : userRoomSet) {
+								pipeline.sadd(roomsKey, roomId);
+							}
+							pipeline.sync();
+						}
+					});
+					jedis.expire(roomsKey, 60 * 60 * 72);
+				}
+			}
+			//</editor-fold>
+
+			String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);//获取系统缓存key
+			Long course_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
+			if(course_num != Long.parseLong(result.get("course_num"))){
+				jedis.hincrByFloat(userCacheKey,"course_num",course_num);//修改用户缓存中的数据
+			}
+
+			Long room_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query));//查询用户关注直播间总数
+			if(room_num != Long.parseLong(result.get("live_room_num"))){ //如果数据和现在的不同
+				jedis.hincrByFloat(userCacheKey,"live_room_num",room_num);//修改用户缓存中的数据
+			}
+			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedisUtils, true, 60*60*72);
 		}
 		return result;
 	}

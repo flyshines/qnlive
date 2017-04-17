@@ -84,9 +84,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         		throw new QNLiveException("110003");
         	}
         }
-
-
-
         //4.更新用户缓存中直播间的关注数
         //关注操作类型 1关注 0不关注
         Integer incrementNum = null;
@@ -96,15 +93,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
             incrementNum = -1;
         }
 
+
+
         //5.更新用户信息中的关注直播间数，更新直播间缓存的粉丝数
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
-        if(jedis.exists(userCacheKey)){
-            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
-        }else {
-            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
-            jedis.hincrBy(userCacheKey, "live_room_num", incrementNum);
-        }
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, map);//删除已加入课程的key  在调用
+        jedis.del(key);//删除
 
         jedis.hincrBy(roomKey, "fans_num", incrementNum);
 
@@ -1302,6 +1296,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * 加入课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("joinCourse")
     public Map<String, Object> joinCourse(RequestEntity reqEntity) throws Exception {
@@ -1352,8 +1352,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //5.将学员信息插入到学员参与表中
         courseInfoMap.put("user_id",userId);
         Map<String,Object> insertResultMap = userModuleServer.joinCourse(courseInfoMap);
-		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);
-		jedis.del(key);
+
         //6.修改讲师缓存中的课程参与人数
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id"));
@@ -1387,13 +1386,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //7.修改用户缓存信息中的加入课程数
         map.clear();
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-        String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, map);
-        if(jedis.exists(userCacheKey)){
-            jedis.hincrBy(userCacheKey, "course_num", 1L);
-        }else {
-            CacheUtils.readUser(userId, reqEntity, readUserOperation,jedisUtils);
-            jedis.hincrBy(userCacheKey, "course_num", 1L);
-        }
+
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);//删除已加入课程的key  在之后登录时重新加入
+        jedis.del(key);//删除
 
         nowStudentNum = MiscUtils.convertObjectToLong(courseInfoMap.get("student_num")) + 1;
         String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
