@@ -756,16 +756,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> getUserInfo (RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
- 
+
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //1:个人中心信息 2：个人基本信息
         String queryType = reqMap.get("query_type").toString();
         Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
         if(queryType.equals("1")){
             reqMap.put("user_id", userId);
-            
+
             resultMap.put("avatar_address", values.get("avatar_address"));
-            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));            
+            resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
             resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSDOUBLE, "today_distributer_amount", 0d, true));
