@@ -3,7 +3,6 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public interface ILectureModuleServer {
 	Map<String,Object> createLiveRoom(Map<String, Object> reqMap);
@@ -119,4 +118,8 @@ public interface ILectureModuleServer {
 	void updateLoginInfo(Map<String, Object> updateMap);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
+
+    Map<String,Object> findServiceTemplateInfoByLecturerId(Map<String, String> wxPushParam);
+
+	void insertServiceTemplateInfo(Map<String, String> paramMap);
 }

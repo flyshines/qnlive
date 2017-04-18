@@ -564,4 +564,14 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
 		return fansMapper.findRoomIdByFans(reqMap);
 	}
+
+	@Override
+	public Map<String, Object> findServiceTemplateInfoByLecturerId(Map<String, String> paramMap) {
+		return lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
+	}
+
+	@Override
+	public void insertServiceTemplateInfo(Map<String, String> paramMap) {
+		lecturerMapper.insertServiceTemplateInfo(paramMap);
+	}
 }

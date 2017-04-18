@@ -268,8 +268,8 @@
   </select>
 
   <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="hashmap" >
-    SELECT * FROM t_wechat_service_template
-    where authorizer_appid = #{authorizer_appid} AND template_type = #{template_type}
+    select * from t_wechat_service_template
+    where authorizer_appid = #{authorizer_appid} and template_type = #{template_type}
   </select>
 
   <insert id="insertServiceTemplateInfo" parameterType="hashmap">

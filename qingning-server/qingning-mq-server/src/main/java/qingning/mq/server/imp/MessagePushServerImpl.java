@@ -32,9 +32,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @Autowired
     private CoursesStudentsMapper coursesStudentsMapper;
 
-    @Autowired
-    private LecturerMapper lecturerMapper;
-
 
 /*    private SaveCourseMessageService saveCourseMessageService;
     private SaveCourseAudioService saveCourseAudioService;*/
@@ -702,39 +699,17 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String type = reqMap.get("pushType").toString();//类型 1 是创建课程 2 是更新课程时间
         String authorizer_appid = reqMap.get("authorizer_appid").toString();
         String courseId = reqMap.get("course_id").toString();//课程id
-        //判断是否有模板id
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("authorizer_appid", authorizer_appid);
-        paramMap.put("template_type", type);
-        Map<String,Object> templateInfo = lecturerMapper.findServiceTemplateInfoByLecturerId(paramMap);
+        String templateId = reqMap.get("template_id").toString();
+        if(templateId != null){
+            log.info("===================================微信发送模板消息:"+templateId+"========================================");
+            Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
 
-        String templateId = null;
-        //没有 则创建
-        if (MiscUtils.isEmpty(templateInfo)) {//为空
-            JSONObject templateJson = WeiXinUtil.createServiceTemplateInfo(accessToken, type);
-            Object errcode = templateJson.get("errcode");
-            if (errcode != null && Integer.parseInt(errcode.toString()) != 0) {//创建失败 结束 说明没这个行业
-                log.error("创建模板消息出错 +++++ ", templateJson);
-                return;
-            } else {//创建成功 则存到数据库
-                templateId = templateJson.getString("template_id");
+            String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
 
-                paramMap.put("template_id", templateId);
-                paramMap.put("lecturer_id", reqMap.get("lecturer_id").toString());
-                lecturerMapper.insertServiceTemplateInfo(paramMap);
-
+            String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap);
+            while (next_openid != null) {
+                next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap);
             }
-        } else {
-            templateId = templateInfo.get("template_id").toString();
-        } 
-
-        Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
-
-        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
-
-        String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap);
-        while (next_openid != null) {
-            next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap);
         }
     }
 

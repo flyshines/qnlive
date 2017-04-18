@@ -573,6 +573,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	templateMap.put("remark", remark);
 
         	if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
+
+
+
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
 
@@ -581,6 +584,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                 wxPushParam.put("followers", findFollowUser);//直播间关注者
                 wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+
 
                 RequestEntity mqRequestEntity = new RequestEntity();
                 mqRequestEntity.setServerName("MessagePushServer");
@@ -608,7 +612,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     mqRequestEntity.setServerName("MessagePushServer");
                     mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
                     mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                    mqRequestEntity.setParam(wxPushParam);
+                    mqRequestEntity.setParam(getWeCatTemplateInfo(wxPushParam));
                     this.mqUtils.sendMessage(mqRequestEntity);
                 }
             }
@@ -662,6 +666,44 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         return resultMap;
     }
+
+    /**
+     * 获取微信模板对象
+     * @return
+     */
+    private Map<String,Object> getWeCatTemplateInfo(Map<String, Object> reqMap){
+        String accessToken = reqMap.get ("accessToken").toString();
+        String type = reqMap.get("pushType").toString();//类型 1 是创建课程 2 是更新课程时间
+        String authorizer_appid = reqMap.get("authorizer_appid").toString();
+        //判断是否有模板id
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("authorizer_appid", authorizer_appid);
+        paramMap.put("template_type", type);
+
+        Map<String,Object> templateInfo  = lectureModuleServer.findServiceTemplateInfoByLecturerId(paramMap);//查找微信推送模板
+        String templateId = null;
+        //没有 则创建
+        if (MiscUtils.isEmpty(templateInfo)) {//为空
+            JSONObject templateJson = WeiXinUtil.createServiceTemplateInfo(accessToken, type);//增加推送末班
+            Object errcode = templateJson.get("errcode");
+            if (errcode != null && Integer.parseInt(errcode.toString()) != 0) {//创建失败
+                log.error("创建模板消息出错 +++++ ", templateJson);
+                reqMap.put("template_id",null);
+            } else {//创建成功 则存到数据库
+                templateId = templateJson.getString("template_id");
+                reqMap.put("template_id",templateId);
+                paramMap.put("template_id", templateId);
+                paramMap.put("lecturer_id", reqMap.get("lecturer_id").toString());
+                lectureModuleServer.insertServiceTemplateInfo(paramMap);
+            }
+        } else {
+            templateId = templateInfo.get("template_id").toString();
+            reqMap.put("template_id",templateId);
+        }
+        return reqMap;
+    }
+
+
 
     public String getWeServiceNo(Map<String, String> serviceNoMap, String userId, String serviceNoKey, Jedis jedis){
         String expiresTimes = serviceNoMap.get("expires_time");
@@ -1138,7 +1180,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             serviceRequestEntity.setServerName("MessagePushServer");
                             serviceRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
                             serviceRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                            serviceRequestEntity.setParam(wxPushParam);
+                            serviceRequestEntity.setParam(getWeCatTemplateInfo(wxPushParam));
                             this.mqUtils.sendMessage(serviceRequestEntity);
                         }
                     }
