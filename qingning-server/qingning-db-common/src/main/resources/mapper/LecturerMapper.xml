@@ -267,7 +267,7 @@
     where lecturer_id = #{lecturer_id}
   </select>
 
-  <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findServiceTemplateInfoByLecturerId" resultType="hashmap" parameterType="hashmap" >
     SELECT * FROM t_wechat_service_template
     where authorizer_appid = #{authorizer_appid} AND template_type = #{template_type}
   </select>
