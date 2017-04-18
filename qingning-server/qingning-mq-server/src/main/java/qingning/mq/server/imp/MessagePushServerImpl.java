@@ -726,7 +726,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             }
         } else {
             templateId = templateInfo.get("template_id").toString();
-        }
+        } 
 
         Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
 

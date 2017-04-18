@@ -529,7 +529,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
         Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
         if (MiscUtils.isEmpty(serviceNoMap)) {
-            Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId);
+            Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId); //查找授权信息
             MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
         }
 
@@ -591,10 +591,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
 
 
-            if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝
-
+            if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
+                log.debug("进入讲师有绑定服务号--------------------");
                 String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis);
-
+                log.debug("验证讲师服务号token--------------------");
                 if (authorizer_access_token != null) {
                     Map<String, Object> wxPushParam = new HashMap<>();
                     wxPushParam.put("templateParam", templateMap);//模板消息
@@ -603,7 +603,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));
                     wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                     wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-
+                    log.debug("发送mq消息进行异步处理--------------------");
                     RequestEntity mqRequestEntity = new RequestEntity();
                     mqRequestEntity.setServerName("MessagePushServer");
                     mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
