@@ -33,6 +33,7 @@ public abstract class AbstractController {
 	protected Map<String,Object> rewardConfigurationMap;
 	protected Long rewardConfigurationTime;
 	private List<Map<String,Object>> processRewardConfigurationList;
+	//protected List<Map<String,Object>>  classifyInfoList;
 
 	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version){
 		RequestEntity requestEntity = new RequestEntity();
@@ -125,6 +126,7 @@ public abstract class AbstractController {
 
 	private void generateServerUrlInfoMap() {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
+		//classifyInfoList = iCommonModuleServer.findClassifyInfo();
 		serverUrlInfoList = iCommonModuleServer.getServerUrls();
 		serverUrlInfoMap = new HashMap<String,Object>();
 

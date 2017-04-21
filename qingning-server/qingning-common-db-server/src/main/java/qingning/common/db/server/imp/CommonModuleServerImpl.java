@@ -84,6 +84,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private FansMapper fansMapper;
 
+	@Autowired(required = true)
+	private ClassifyInfoMapper classifyInfoMapper;
+
+	@Autowired(required = true)
+	private BannerInfoMapper bannerInfoMapper;
+
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -692,5 +699,31 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
 		return fansMapper.findRoomIdByFans(reqMap);
 	}
+
+	@Override
+	public List<Map<String, Object>> findClassifyInfo() {
+		return classifyInfoMapper.findClassifyInfo();
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseBySearch(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseBySearch(reqMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findLiveRoomBySearch(Map<String, Object> record) {
+		return liveRoomMapper.findLiveRoomBySearch(record);
+	}
+
+	@Override
+	public List<Map<String, Object>> findBannerInfoAll() {
+		return bannerInfoMapper.findBannerInfoAll();
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseByRecommend(Map<String, Object> record) {
+		return coursesMapper.findCourseByRecommend(record);
+	}
+
 
 }

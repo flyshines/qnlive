@@ -40,9 +40,9 @@ public class QiNiuUpUtils {
         Response response = uploadManager.put(uploadBytes,fileName,upToken);//上传类
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);//上传
         String url = MiscUtils.getConfigByKey("images_space_domain_name")+"/"+putRet.key;//文件地址
-        CdnManager c = new CdnManager(auth);//刷新缓存工具
-        String[] urls = new String[]{url};//要刷新缓存的路径
-        CdnResult.RefreshResult result = c.refreshUrls(urls);//刷新缓存
+//        CdnManager c = new CdnManager(auth);//刷新缓存工具
+//        String[] urls = new String[]{url};//要刷新缓存的路径
+//        CdnResult.RefreshResult result = c.refreshUrls(urls);//刷新缓存
         return url;//返回url
     }
 

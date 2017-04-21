@@ -565,6 +565,41 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="search">
+				<auth>
+					<accessToken require="Y"/>
+				</auth>
+				<inputs>
+					<param name="classify_id" type="string"   require="N" />
+					<param name="search_text" type="string"   require="Y,000100" />
+					<param name="search_type" type="string"   require="Y,000100" />
+					<param name="page_count" type="string"   require="Y,000100" />
+					<param name="page_num" type="string"   require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="recommendCourse">
+				<auth>
+					<accessToken require="Y"/>
+				</auth>
+				<inputs>
+					<param name="select_type" type="string"   require="Y,000100" />
+					<param name="page_count" type="string"   require="Y,000100" />
+					<param name="page_num" type="string"   require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="classifyInfo">
+				<auth>
+					<accessToken require="Y"/>
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />

@@ -530,6 +530,22 @@ public final class MiscUtils {
             }
         }
     }
+
+    /**
+     * 转换课程状态
+     * @param currentTime
+     * @param courseInfoMap
+     */
+    public static void courseTranferState(long currentTime,Map<String, Object> courseInfoMap,String start_time) {
+        //如果课程状不为结束，则判断其开始时间是否大于当前时间，如果大于当前时间，则修改其状态为直播中
+        if(!courseInfoMap.get("status").toString().equals("2")){
+            long courseStartTime = Long.parseLong(start_time);
+            if(currentTime > courseStartTime){
+                courseInfoMap.put("status", "4");
+            }
+        }
+    }
+
  
     public static Date getEndTimeOfToday() {
         Calendar calendar = Calendar.getInstance();

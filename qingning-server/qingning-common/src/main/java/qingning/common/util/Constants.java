@@ -244,4 +244,7 @@ public final class Constants {
 	public static final String CAPTCHA_KEY_CODE = "CAPTCHA:KEY:{user_id}";//存放验证码
 	public static final String CAPTCHA_KEY_PHONE = "CAPTCHA:KEY:{code}";//存放验证码
 
+
+	public static final Integer RECOMMEND_COURSE_NUM = 30;//推荐课程最大数
+
 }

@@ -117,4 +117,14 @@ public interface ICommonModuleServer {
 	Map<String,Object> findByPhone(String phone);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
+
+	List<Map<String,Object>> findClassifyInfo();
+
+	List<Map<String,Object>> findCourseBySearch(Map<String, Object> reqMap);
+
+	List<Map<String, Object>> findLiveRoomBySearch(Map<String,Object> record);
+
+	List<Map<String, Object>> findBannerInfoAll();
+
+	List<Map<String,Object>> findCourseByRecommend(Map<String,Object> record);
 }

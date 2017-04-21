@@ -357,10 +357,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
  
         //1.判断直播间是否属于当前讲师
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
         Jedis jedis = jedisUtils.getJedis();
-        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id",
-                reqEntity, readLiveRoomOperation, jedisUtils, true);
+        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readLiveRoomOperation, jedisUtils, true);
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
@@ -405,14 +404,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }catch (Exception e){
             //TODO  暂时不处理
         }
- 
+        //创建课程url
         if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
             String default_course_cover_url_original = MiscUtils.getConfigByKey("default_course_cover_url");
             JSONArray default_course_cover_url_array = JSON.parseArray(default_course_cover_url_original);
             int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
             reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
         }
-        Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
+        Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);//创建课程到数据库
  
         //4 修改相关缓存
         //4.1修改讲师个人信息缓存中的课程数 讲师个人信息SYS: lecturer:{lecturer_id}     
@@ -596,7 +595,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
             if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
-                log.debug("进入讲师有绑定服务号--------------------");
+                log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
                 String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis);
                 log.debug("验证讲师服务号token--------------------");
                 if (authorizer_access_token != null) {

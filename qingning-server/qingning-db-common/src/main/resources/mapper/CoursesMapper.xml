@@ -121,6 +121,22 @@
     </if>
   </select>
 
+
+  <select id="findCourseBySearch" resultType="hashmap" parameterType="hashmap" >
+    select * from t_courses where 1=1
+    <if test="classify_id != null">
+      and classify_id = #{classify_id}
+    </if>
+    <if test="search_text != null">
+      and course_title like #{search_text}
+    </if>
+    order by start_time limit #{page_num},#{page_count}
+  </select>
+
+  <select id="findCourseByRecommend" resultType="hashmap" parameterType="hashmap" >
+      SELECT * FROM t_courses WHERE recommend_seat != 0 ORDER BY recommend_seat LIMIT #{page_num},#{page_count}
+  </select>
+
   <insert id="insertCourse" parameterType="hashmap" >
     insert into t_courses
     <trim prefix="(" suffix=")" suffixOverrides="," >
@@ -196,6 +212,9 @@
       <if test="click_num != null" >
         click_num,
       </if>
+      <if test="classify_id != null" >
+        classify_id,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -269,6 +288,9 @@
       </if>
       <if test="click_num != null" >
         #{click_num},
+      </if>
+      <if test="classify_id != null" >
+        #{classify_id},
       </if>
     </trim>
   </insert>

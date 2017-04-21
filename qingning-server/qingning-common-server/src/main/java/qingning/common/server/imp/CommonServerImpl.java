@@ -3214,12 +3214,128 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String lecture_id = map.get("lecture_id");
         String distribution_user_id = map.get("distribution_user_id");
         Jedis jedis = jedisUtils.getJedis();
+    }
 
 
+    /**
+     * 搜索/类型
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("search")
+    public Map<String, Object> search (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
+        reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        String search_text = map.get("search_text").toString();//搜索文本
+        if(search_text != null || !search_text.equals("")){
+            search_text = "%"+search_text+"%";//拼接百分号 进行包含查询
+            map.put("search_text",search_text);
+        }
+        int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程
+        Jedis jedis = jedisUtils.getJedis();
 
 
+        //查询所有 或者 查询直播间
+        if(search_type ==0 || search_type == 1){
+            List<Map<String, Object>> liveRoomBySearch = commonModuleServer.findLiveRoomBySearch(map);
+            if(! MiscUtils.isEmpty(liveRoomBySearch)){
+                Map<String,Object> query = new HashMap<String,Object>();
+                query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query);//用来查询当前用户加入了那些课程
+                for(Map<String, Object> liveRoom : liveRoomBySearch){
+                    if(jedis.sismember(key, liveRoom.get("room_id").toString())){//判断当前用户是否有加入这个课程
+                        liveRoom.put("fens", "Y");
+                    } else {
+                        liveRoom.put("fens", "N");
+                    }
+                }
+            }
+        }
 
+        //查询所有 或者 查询课程
+        if(search_type ==0 || search_type == 2){
+            long currentTime = System.currentTimeMillis();//当前时间
+            List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
+            if(! MiscUtils.isEmpty(courseBySearch)){
+                Map<String,Object> query = new HashMap<String,Object>();
+                query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+                for(Map<String, Object> course : courseBySearch ){
+                    MiscUtils.courseTranferState(currentTime,course,course.get("start_time").toString());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    if(jedis.sismember(key, course.get("course_id").toString())){//判断当前用户是否有加入这个课程
+                        course.put("student", "Y");
+                    } else {
+                        course.put("student", "N");
+                    }
+                }
+                resultMap.put("courseList",courseBySearch);
+            }
+        }
+        return resultMap;
 
     }
+
+
+    /**
+     * 分享和广告位
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("recommendCourse")
+    public Map<String, Object> recommendCourse (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型 0搜索推荐课程 和 广告位 1是推荐课程换一换 2推荐课程下拉
+        Jedis jedis = jedisUtils.getJedis();
+        if(select_type == 0){
+            List<Map<String, Object>> bannerInfoAll = commonModuleServer.findBannerInfoAll();//查找广告位
+            if(! MiscUtils.isEmpty(bannerInfoAll)){
+                resultMap.put("banner_info",bannerInfoAll);
+            }
+        }
+        if(select_type == 1){
+            int page_num =  Integer.parseInt(map.get("page_num").toString());
+            if(page_num == Constants.RECOMMEND_COURSE_NUM){ //比较是否是推荐课程的最大值  如果是最大值就归零
+                Integer zero = 0 ;
+                map.put("page_num",zero.toString());
+            }
+        }
+
+        if(select_type == 2 || select_type == 1){
+            List<Map<String, Object>> courseByRecommend = commonModuleServer.findCourseByRecommend(map);//查询推荐课程
+            if(! MiscUtils.isEmpty(courseByRecommend)){
+                resultMap.put("recommend_courses",courseByRecommend);
+            }
+        }
+        return resultMap;
+    }
+
+
+    /**
+     * 获取分类
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("classifyInfo")
+    public Map<String, Object> classifyInfo (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        List<Map<String, Object>> classifyInfo = commonModuleServer.findClassifyInfo();
+        if(! MiscUtils.isEmpty(classifyInfo)){
+            resultMap.put("classifyInfo",classifyInfo);
+        }
+        return resultMap;
+    }
+
+
+
+
+
+
+
 
 }
