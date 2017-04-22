@@ -749,37 +749,9 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-	/**
-	 * 支付宝支付回调
-	 * @param req
-	 * @param resp
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/weii/ali_return_url", method = RequestMethod.GET)
-	public void aliPayReturn(
-			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
 
-		HttpServletRequest tempReq = req;
-		HttpServletResponse tempResp = resp;
 
-	}
 
-	/**
-	 * 支付宝支付回调
-	 * @param req
-	 * @param resp
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/weii/ali_notify_url", method = RequestMethod.GET)
-	public void aliPayNotify(
-			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception {
 
-		HttpServletRequest tempReq = req;
-		HttpServletResponse tempResp = resp;
 
-	}
 }

@@ -11,7 +11,7 @@
       and room_name like #{search_text}
     </if>
     order by create_time limit #{page_num},#{page_count}
-  </select>
+</select>
 
 
   <select id="findLiveRoomByLectureId" resultType="hashmap" parameterType="java.lang.String" >

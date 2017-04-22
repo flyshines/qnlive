@@ -536,11 +536,10 @@ public final class MiscUtils {
      * @param currentTime
      * @param courseInfoMap
      */
-    public static void courseTranferState(long currentTime,Map<String, Object> courseInfoMap,String start_time) {
+    public static void courseTranferState(long currentTime,Map<String, Object> courseInfoMap,Long start_time) {
         //如果课程状不为结束，则判断其开始时间是否大于当前时间，如果大于当前时间，则修改其状态为直播中
         if(!courseInfoMap.get("status").toString().equals("2")){
-            long courseStartTime = Long.parseLong(start_time);
-            if(currentTime > courseStartTime){
+            if(currentTime > start_time){
                 courseInfoMap.put("status", "4");
             }
         }

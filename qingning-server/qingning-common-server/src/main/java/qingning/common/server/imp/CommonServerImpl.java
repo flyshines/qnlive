@@ -39,6 +39,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3234,6 +3235,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             search_text = "%"+search_text+"%";//拼接百分号 进行包含查询
             map.put("search_text",search_text);
         }
+        Integer page_num = Integer.valueOf(map.get("page_num").toString());
+        map.put("page_num",page_num);
+        Integer page_count = Integer.valueOf(map.get("page_count").toString());
+        map.put("page_count",page_count);
         int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程
         Jedis jedis = jedisUtils.getJedis();
 
@@ -3252,6 +3257,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         liveRoom.put("fens", "N");
                     }
                 }
+                resultMap.put("roomList",liveRoomBySearch);
             }
         }
 
@@ -3261,10 +3267,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
             if(! MiscUtils.isEmpty(courseBySearch)){
                 Map<String,Object> query = new HashMap<String,Object>();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
                 query.put(Constants.CACHED_KEY_USER_FIELD, userId);
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
                 for(Map<String, Object> course : courseBySearch ){
-                    MiscUtils.courseTranferState(currentTime,course,course.get("start_time").toString());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    Date date = sdf.parse(course.get("start_time").toString());
+                    MiscUtils.courseTranferState(currentTime,course,date.getTime());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                     if(jedis.sismember(key, course.get("course_id").toString())){//判断当前用户是否有加入这个课程
                         course.put("student", "Y");
                     } else {
@@ -3288,6 +3296,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("recommendCourse")
     public Map<String, Object> recommendCourse (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
+        Integer page_num = Integer.valueOf(map.get("page_num").toString());
+        map.put("page_num",page_num);
+        Integer page_count = Integer.valueOf(map.get("page_count").toString());
+        map.put("page_count",page_count);
         Map<String, Object> resultMap = new HashMap<String, Object>();
         int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型 0搜索推荐课程 和 广告位 1是推荐课程换一换 2推荐课程下拉
         Jedis jedis = jedisUtils.getJedis();
@@ -3298,10 +3310,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         if(select_type == 1){
-            int page_num =  Integer.parseInt(map.get("page_num").toString());
             if(page_num == Constants.RECOMMEND_COURSE_NUM){ //比较是否是推荐课程的最大值  如果是最大值就归零
                 Integer zero = 0 ;
-                map.put("page_num",zero.toString());
+                map.put("page_num",zero);
             }
         }
 

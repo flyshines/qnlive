@@ -907,12 +907,12 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "classify_id",defaultValue = "") String classify_id,
             @RequestParam(value = "search_text",defaultValue = "") String search_text,
             @RequestParam(value = "search_type",defaultValue = "0") String search_type,
-            @RequestParam(value = "page_count", defaultValue = "20") String page_count,
-            @RequestParam(value ="page_num",defaultValue = "0") String page_num,
+            @RequestParam(value = "page_count", defaultValue = "20") int page_count,
+            @RequestParam(value ="page_num",defaultValue = "0") int page_num,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "search", accessToken, null);
-        Map<String,String> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<>();
         map.put("classify_id",classify_id);
         map.put("search_text",search_text);
         map.put("search_type",search_type);
