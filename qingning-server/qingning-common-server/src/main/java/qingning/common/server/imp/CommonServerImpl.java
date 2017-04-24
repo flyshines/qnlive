@@ -3267,6 +3267,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
             if(! MiscUtils.isEmpty(courseBySearch)){
                 Map<String,Object> query = new HashMap<String,Object>();
+
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
                 query.put(Constants.CACHED_KEY_USER_FIELD, userId);
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
@@ -3278,6 +3279,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     } else {
                         course.put("student", "N");
                     }
+
+                }
+                Map<String,String> query1 = new HashMap<>();
+                for(Map<String, Object> course : courseBySearch ){
+                    query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
+                    key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
+                    String lecturer_nick_name = jedis.hget(key,"nick_name");
+                    course.put("lecturer_nick_name",lecturer_nick_name);
                 }
                 resultMap.put("courseList",courseBySearch);
             }
