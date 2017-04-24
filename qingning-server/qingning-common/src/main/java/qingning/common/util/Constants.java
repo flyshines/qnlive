@@ -173,9 +173,10 @@ public final class Constants {
 
 	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";
 
-	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";
-	public static final String CACHED_KEY_PLATFORM_COURSE_FINISH = "SYS:COURSES:FINISH";
+	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";//预告/正在直播
+	public static final String CACHED_KEY_PLATFORM_COURSE_FINISH = "SYS:COURSES:FINISH";//已结束
 	public static final String CACHED_KEY_PLATFORM_COURSE_LIVE = "SYS:COURSES:LIVE";
+	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
 	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";
 	public static final String CACHED_KEY_WEIXIN_JS_API_TIKET="SYS:WEIXIN:JS_API_TIKET";

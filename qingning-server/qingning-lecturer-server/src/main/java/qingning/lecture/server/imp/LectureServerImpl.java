@@ -2023,7 +2023,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             total_amount="0";
         }
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put("total_amount", total_amount);        
+        result.put("total_amount", total_amount);
+        Long cash_in_amount = 1L;
+        //TODO 减去百分之三十
+        result.put("cash_in_amount ", total_amount);
         List<Map<String,String>> courseList = getCourseList(userId,(int)reqMap.get("page_count"), (String)reqMap.get("course_id"), (Long)reqMap.get("query_time"), (Long)reqMap.get("position"), true,true);
         result.put("course_list", courseList);
         return result;
@@ -3128,7 +3131,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(lectureLiveRoomKey)) {//有直播间
             Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);//查找当前用户是否有直播间
             if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有
-                //TODO 把手机号加入user表
                 updateUserPhone(phone,userId);
                 Map<String, Object> param = new HashMap<String, Object>();
                 param.put("query_type", "2");
@@ -3142,7 +3144,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("130004");//直播间已经有手机号
             }
         }else{//创建直播间
-            //TODO 把手机号加入user表
             updateUserPhone(phone,userId);
            return createLiveRoom(reqEntity);
         }
@@ -3179,8 +3180,100 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return null;
     }
 
+    /**
+     * 删除课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("delCourse")
+    public Map<String, Object> delCourse(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Jedis jedis = jedisUtils.getJedis();
+        Date now = new Date();
+        String course_id = reqMap.get("course_id").toString();
+        Map<String,String> queryParam = new HashMap<String,String>();
+        queryParam.put("course_id", course_id);
+        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedisUtils, true);//从缓存中读取课程信息
+        String mGroupId = courseInfoMap.get("im_course_id");//获取课程imid
+        if(! userId.equals(courseInfoMap.get("lecturer_id"))){//判断当前用户是否是 课程的创建人
+            throw new QNLiveException("160003");
+        }
+        MiscUtils.courseTranferState(new Date().getTime(), courseInfoMap);//进行课程转换
+        if(courseInfoMap.get("status").equals("2") || courseInfoMap.get("status").equals("1")){
+            if(Long.valueOf(courseInfoMap.get("course_amount")) > 0 || Long.valueOf(courseInfoMap.get("extra_amount")) > 0){//判断当前课程是否产生收益
+                throw new QNLiveException("160002");
+            }else{//没有产生金钱方面的数据
+                Map<String,Object> course = new HashMap<String,Object>();
+                course.put("course_id", course_id);
+                course.put("status", "5");
+                course.put("update_time", now);
+                if(courseInfoMap.get("status").equals("2")){ //结束
+                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);
+                }else{//预告
+                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);
+                    //1.进行强制结束
+                    course.put("end_time", now);//结束时间
+                    SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+                    String str = sdf.format(now);
+                    String courseEndMessage = "直播结束于"+str;
+                    long currentTime = System.currentTimeMillis();
+                    String message = courseEndMessage;
+                    String sender = "system";
+                    Map<String,Object> infomation = new HashMap<>();
+                    infomation.put("course_id", reqMap.get("course_id").toString());
+                    infomation.put("creator_id", userId);
+                    infomation.put("message", message);
+                    infomation.put("message_type", "1");
+                    infomation.put("send_type", "6");//5.结束消息
+                    infomation.put("message_id",MiscUtils.getUUId());
+                    infomation.put("message_imid",infomation.get("message_id"));
+                    infomation.put("create_time", currentTime);
+                    Map<String,Object> messageMap = new HashMap<>();
+                    messageMap.put("msg_type","1");
+                    messageMap.put("send_time", System.currentTimeMillis());
+                    messageMap.put("create_time", System.currentTimeMillis());
+                    messageMap.put("information",infomation);
+                    messageMap.put("mid",infomation.get("message_id"));
+                    String content = JSON.toJSONString(messageMap);
+                    IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+                }
+                lectureModuleServer.updateCourse(course);//修改数据库数据
+                //把删除课程存入缓存中用于统计
+                String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryParam);
+                long  position = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position"));
+                jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_DEL, MiscUtils.convertInfoToPostion( now.getTime(),position), course_id);//把删除的课程存入缓存用于统计
+                String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryParam);//获取课程在缓存中的key
+                jedis.hset(coursekey,"status","5");//把课程缓存中的状态改为已删除
 
+                //发送删除课程消息 通知前端强制踢人
+                String sender = "system";
+                Map<String,Object> infomation = new HashMap<>();
+                infomation.put("course_id", reqMap.get("course_id").toString());
+                infomation.put("creator_id", userId);
+                infomation.put("message", "");
+                infomation.put("message_type", "1");
+                infomation.put("send_type", "8");//8.删除课程踢人
+                infomation.put("message_id",MiscUtils.getUUId());
+                infomation.put("message_imid",infomation.get("message_id"));
+                infomation.put("create_time", System.currentTimeMillis());
+                Map<String,Object> messageMap = new HashMap<>();
+                messageMap.put("msg_type","1");
+                messageMap.put("send_time", System.currentTimeMillis());
+                messageMap.put("create_time", System.currentTimeMillis());
+                messageMap.put("information",infomation);
+                messageMap.put("mid",infomation.get("message_id"));
+                String content = JSON.toJSONString(messageMap);
+                IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+            }
+        }else{
+            throw new QNLiveException("160001");
+        }
 
+        return reqMap;
+    }
 
 
 

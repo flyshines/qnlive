@@ -749,7 +749,25 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-
+	/**
+	 * 删除课程
+	 * @param course_id 课程id
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/pcauth/delCourse", method = RequestMethod.GET)
+	public @ResponseBody ResponseEntity delCourse(
+			@RequestHeader("course_id")String course_id,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "course_id", access_token, null);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("course_id",course_id);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
 
 
 
