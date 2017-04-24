@@ -610,6 +610,26 @@
 					<param name="page_num" type="string"   require="Y,000100" />
 				</inputs>
 				<outputs>
+					<param name="banner_info" type="list">
+						<param name="banner_img_url" type="string"/>
+						<param name="jump_url" type="string"/>
+						<param name="banner_remarks" type="string"/>
+						<param name="banner_id" type="string"/>
+						<param name="create_time" type="string"/>
+						<param name="status" type="string"/>
+					</param>
+					<param name="recommend_courses" type="list">
+						<param name="course_id" type="string"/>
+						<param name="status" type="string"/>
+						<param name="recommend_seat" type="string"/>
+						<param name="course_url" type="string"/>
+						<param name="course_title" type="rstring"/>
+						<param name="start_time" type="long"/>
+						<param name="lecturer_nick_name" type="rstring"/>
+						<param name="lecturer_id" type="string"/>
+						<param name="course_type" type="string"/>
+						<param name="student" type="string"/>
+					</param>
 				</outputs>
 			</function>
 			<function name="classifyInfo">
@@ -619,6 +639,13 @@
 				<inputs>
 				</inputs>
 				<outputs>
+					<param name="classifyInfo" type="list">
+						<param name="create_time" type="string"/>
+						<param name="classify_name" type="string"/>
+						<param name="classify_id" type="string"/>
+						<param name="is_use" type="string"/>
+						<param name="create_date" type="rstring"/>
+					</param>
 				</outputs>
 			</function>
 			<function name="messageList">

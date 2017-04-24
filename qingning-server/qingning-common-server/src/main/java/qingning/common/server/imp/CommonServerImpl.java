@@ -39,6 +39,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -3263,36 +3264,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //查询所有 或者 查询课程
         if(search_type ==0 || search_type == 2){
-            long currentTime = System.currentTimeMillis();//当前时间
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
-            if(! MiscUtils.isEmpty(courseBySearch)){
-                Map<String,Object> query = new HashMap<String,Object>();
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-                query.put(Constants.CACHED_KEY_USER_FIELD, userId);
-                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
-                for(Map<String, Object> course : courseBySearch ){
-                    Date date = sdf.parse(course.get("start_time").toString());
-                    MiscUtils.courseTranferState(currentTime,course,date.getTime());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                    if(jedis.sismember(key, course.get("course_id").toString())){//判断当前用户是否有加入这个课程
-                        course.put("student", "Y");
-                    } else {
-                        course.put("student", "N");
-                    }
-
-                }
-                Map<String,String> query1 = new HashMap<>();
-                for(Map<String, Object> course : courseBySearch ){
-                    query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
-                    key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
-                    String lecturer_nick_name = jedis.hget(key,"nick_name");
-                    course.put("lecturer_nick_name",lecturer_nick_name);
-                }
-                resultMap.put("courseList",courseBySearch);
-            }
+            resultMap.put("courseList",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis));
         }
         return resultMap;
 
+    }
+
+    private List<Map<String, Object>> setStudentAndLecturerNickName(List<Map<String, Object>> courseBySearch,String userId,Jedis jedis) throws Exception {
+        long currentTime = System.currentTimeMillis();//当前时间
+
+        if(! MiscUtils.isEmpty(courseBySearch)){
+            Map<String,Object> query = new HashMap<String,Object>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+            query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            for(Map<String, Object> course : courseBySearch ){
+                Date date = sdf.parse(course.get("start_time").toString());
+                MiscUtils.courseTranferState(currentTime,course,date.getTime());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                if(jedis.sismember(key, course.get("course_id").toString())){//判断当前用户是否有加入这个课程
+                    course.put("student", "Y");
+                } else {
+                    course.put("student", "N");
+                }
+            }
+            Map<String,String> query1 = new HashMap<>();
+            for(Map<String, Object> course : courseBySearch ){
+                query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
+                key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
+                String lecturer_nick_name = jedis.hget(key,"nick_name");
+                course.put("lecturer_nick_name",lecturer_nick_name);
+            }
+            return courseBySearch;
+        }
+        return null;
     }
 
 
@@ -3305,6 +3310,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("recommendCourse")
     public Map<String, Object> recommendCourse (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Integer page_num = Integer.valueOf(map.get("page_num").toString());
         map.put("page_num",page_num);
         Integer page_count = Integer.valueOf(map.get("page_count").toString());
@@ -3325,10 +3331,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
-        if(select_type == 2 || select_type == 1){
+        if(select_type == 2 || select_type == 0 ){
             List<Map<String, Object>> courseByRecommend = commonModuleServer.findCourseByRecommend(map);//查询推荐课程
             if(! MiscUtils.isEmpty(courseByRecommend)){
-                resultMap.put("recommend_courses",courseByRecommend);
+                resultMap.put("recommend_courses",this.setStudentAndLecturerNickName(courseByRecommend,userId,jedis));
             }
         }
         return resultMap;

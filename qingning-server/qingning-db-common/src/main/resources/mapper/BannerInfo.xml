@@ -4,7 +4,7 @@
 
 
   <select id="findBannerInfoAll" resultType="hashmap"  >
-    select * from t_banner_info
+    select * from t_banner_info where  `status` = 1
   </select>
   
 </mapper>
