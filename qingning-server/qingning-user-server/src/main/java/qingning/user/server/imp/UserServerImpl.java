@@ -651,7 +651,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String getCourseIdKey;
 
             //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
-            if(classify_id != null ){//有分类
+            if(!MiscUtils.isEmpty(classify_id)){//有分类
                 Map<String,Object> map = new HashMap<String,Object>();
                 map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
                 getCourseIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
@@ -689,7 +689,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             long endIndex = -1;   //结束下标
             String getCourseIdKey ;
             //平台的已结束课程列表
-            if(classify_id != null ){//有分类
+            if(!MiscUtils.isEmpty(classify_id)){//有分类
                 Map<String,Object> map = new HashMap<String,Object>();
                 map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
                 getCourseIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
