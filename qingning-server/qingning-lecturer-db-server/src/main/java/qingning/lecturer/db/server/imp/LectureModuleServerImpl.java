@@ -263,6 +263,11 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findCourseAllStudentList(String course_id) {
+		return coursesStudentsMapper.findCourseAllStudentList(course_id);
+	}
+
+	@Override
 	public Map<String, Object> findLoginInfoByUserId(String userId) {
 		return loginInfoMapper.findLoginInfoByUserId(userId);
 	}

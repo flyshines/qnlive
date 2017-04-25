@@ -501,10 +501,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             mqRequestEntity.setParam(timerMap);
             this.mqUtils.sendMessage(mqRequestEntity);
         }
- 
+
+        //<editor-fold desc="Description">
         //向关注者进行极光推送，使用标签进行推送 //TODO
 //        JSONObject obj = new JSONObject();
-        String roomId = course.get("room_id");
+
 //        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
 //        if(MiscUtils.isEmpty(followUserIds)){
 //            return resultMap;
@@ -518,7 +519,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //        extrasMap.put("course_id",dbResultMap.get("course_id").toString());
 //        obj.put("extras_map", extrasMap);
 //        JPushHelper.push(obj);//TODO
-         
+        //</editor-fold>
+        String roomId = course.get("room_id");
         map.clear();
         map.put("lecturer_id", userId);        
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
@@ -558,8 +560,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 content = "";
             }
             wuliu.setValue(content);
-
-        	templateMap.put("keyword2", wuliu);    
+        	templateMap.put("keyword2", wuliu);
 
         	TemplateData orderNo = new TemplateData();
         	orderNo.setColor("#000000");
@@ -578,19 +579,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	templateMap.put("remark", remark);
 
         	if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
-
-
-
                 Map<String, Object> wxPushParam = new HashMap<>();
                 wxPushParam.put("templateParam", templateMap);//模板消息
-
                 course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
                 wxPushParam.put("course", course);//课程ID
-
                 wxPushParam.put("followers", findFollowUser);//直播间关注者
                 wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-
-
                 RequestEntity mqRequestEntity = new RequestEntity();
                 mqRequestEntity.setServerName("MessagePushServer");
                 mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
@@ -598,8 +592,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setParam(wxPushParam);
                 this.mqUtils.sendMessage(mqRequestEntity);
             }
-
-
             if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
                 log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
                 String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis);
@@ -625,7 +617,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         if ("0".equals(course_type)) {//公开课才开启机器人
             log.info("创建课程，开始机器人加入功能");
-
             map.clear();
             map.put("course_id", courseId);
             RequestEntity mqRequestEntity = new RequestEntity();
@@ -3282,6 +3273,46 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }else{
             throw new QNLiveException("160001");
+        }
+
+        //获取当前课程的学生
+        List<Map<String, Object>> courseAllStudentList = lectureModuleServer.findCourseAllStudentList(course_id);
+
+        if(!MiscUtils.isEmpty(courseAllStudentList)){//如果有学生
+            Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();//模板信息
+            TemplateData first = new TemplateData();//针对微信模板{{first.DATA}}
+            first.setColor("#000000");
+            first.setValue(MiscUtils.getConfigByKey("wpush_delete_course_first"));
+            templateMap.put("first", first);
+
+            TemplateData keyword1 = new TemplateData();//针对微信模板 课程名称：{{keyword1.DATA}}
+            keyword1.setColor("#000000");
+            keyword1.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));//课程名称
+            templateMap.put("keyword1", keyword1);
+
+            TemplateData keyword2 = new TemplateData();
+            keyword2.setColor("#000000");
+            keyword2.setValue(MiscUtils.getConfigByKey("wpush_delete_course_keyword2"));
+            templateMap.put("keyword2", keyword2);
+
+
+            TemplateData remark = new TemplateData();
+            remark.setColor("#000000");
+            remark.setValue(MiscUtils.getConfigByKey("wpush_delete_course_remark"));
+            templateMap.put("remark", remark);
+
+            Map<String, Object> wxPushParam = new HashMap<>();
+            wxPushParam.put("templateParam", templateMap);//模板消息
+            wxPushParam.put("course", courseInfoMap);//课程
+            wxPushParam.put("followers", courseAllStudentList);//直播间关注者
+            wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("MessagePushServer");
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+            mqRequestEntity.setFunctionName("noticeCourseToFollower");
+            mqRequestEntity.setParam(wxPushParam);
+            this.mqUtils.sendMessage(mqRequestEntity);
+
         }
 
         return reqMap;

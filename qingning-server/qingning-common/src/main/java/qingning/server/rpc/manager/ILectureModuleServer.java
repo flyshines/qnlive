@@ -35,6 +35,8 @@ public interface ILectureModuleServer {
 
 	List<Map<String,Object>> findCourseStudentList(Map<String, Object> queryMap);
 
+	List<Map<String,Object>> findCourseAllStudentList(String course_id);
+
 	Map<String,Object> findLoginInfoByUserId(String userId);
 
 	List<Map<String,Object>> findBanUserListInfo(Map<String,Object> banUserIdList);

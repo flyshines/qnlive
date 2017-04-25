@@ -22,6 +22,13 @@
     limit #{page_count}
   </select>
 
+
+  <select id="findCourseAllStudentList" resultType="hashmap" parameterType="java.lang.String" >
+    select a.*,b.m_user_id,b.m_pwd,b.web_openid
+    from t_courses_students a , t_login_info b where a.user_id=b.user_id and cs.course_id = #{course_id}
+  </select>
+
+
   <select id="findCourseStudentListWithLoginInfo" resultType="hashmap" parameterType="hashmap" >
     select
     cs.user_id, cs.create_time, cs.student_pos, u.m_user_id, u.m_pwd, u.web_openid 

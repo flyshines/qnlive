@@ -469,7 +469,7 @@ public class WeiXinUtil {
     }
 
 
-	/**
+	/**发送模板消息
 	 * @param openId openId 用户标识
 	 * @param url          详情链接地址
 	 * @param templateId   推送模板信息
