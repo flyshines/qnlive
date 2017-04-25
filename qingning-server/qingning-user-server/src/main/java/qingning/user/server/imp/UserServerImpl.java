@@ -633,6 +633,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param courceStatus 课程状态(前台根据当前页最后一个课程的状态传参) 1预告 2结束 4正在直播
      * @param pageCount 需要几个对象
      * @param courseId 课程id  查找第一页的时候不传 进行分页 必传
+     * @param classify_id 分类id
      */
     @SuppressWarnings({ "unchecked"})
     private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id) throws Exception{

@@ -757,7 +757,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/pcauth/delCourse", method = RequestMethod.GET)
+	@RequestMapping(value = "/lecturer/delCourse", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity delCourse(
 			@RequestHeader("course_id")String course_id,
 			@RequestHeader("access_token") String access_token,

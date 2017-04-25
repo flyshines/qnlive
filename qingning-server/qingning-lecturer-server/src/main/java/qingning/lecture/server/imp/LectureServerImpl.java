@@ -3318,7 +3318,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             this.mqUtils.sendMessage(mqRequestEntity);
 
         }
-
+        reqMap.clear();
         return reqMap;
     }
 
