@@ -59,6 +59,7 @@
 				</auth>
 				<inputs>
 					<param name="course_title" type="rstring" require="Y,000100" />
+					<param name="classify_id" type="string" require="Y,000100" />
 					<param name="start_time" type="long" require="Y,000100"  />
 					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
 					<param name="room_id" type="string" require="Y,000100"  />

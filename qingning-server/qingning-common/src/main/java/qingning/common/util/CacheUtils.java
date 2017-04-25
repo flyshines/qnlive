@@ -229,8 +229,7 @@ public final class CacheUtils {
 		return values;
 	}
 	
-	public static Map<String,String> readCourse(String course_id, RequestEntity requestEntity, 
-			CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
+	public static Map<String,String> readCourse(String course_id, RequestEntity requestEntity, CommonReadOperation operation, JedisUtils jedisUtils,boolean cachedValue) throws Exception{
 		Map<String,String> values = readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedisUtils, cachedValue);
 		String curCourse_id = values.get(Constants.CACHED_KEY_COURSE_FIELD);
 		if(!course_id.equals(curCourse_id)){

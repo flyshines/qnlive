@@ -127,4 +127,6 @@ public interface ICommonModuleServer {
 	List<Map<String, Object>> findBannerInfoAll();
 
 	List<Map<String,Object>> findCourseByRecommend(Map<String,Object> record);
+
+    Integer insertCourseMessageList(List<Map<String, Object>> messageList);
 }

@@ -385,7 +385,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100029");
         }
         */
-        //2.将课程信息插入到数据库
         reqMap.put("user_id", userId);
  
         //2.1创建IM 聊天群组
@@ -402,7 +401,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //2.1.1将讲师加入到该群组中
             IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
         }catch (Exception e){
-            //TODO  暂时不处理
         }
         //创建课程url
         if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
@@ -411,7 +409,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
             reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
         }
-        Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);//创建课程到数据库
+        //创建课程到数据库
+        Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
  
         //4 修改相关缓存
         //4.1修改讲师个人信息缓存中的课程数 讲师个人信息SYS: lecturer:{lecturer_id}     
@@ -421,7 +420,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lectureKey, "course_num", 1);
- 
+
+
         //4.2 修改讲师直播间信息中的课程数  讲师直播间信息SYS: room:{room_id}
         jedis.hincrBy(liveRoomKey, "course_num", 1);
         String course_type = (String)reqMap.get("course_type");
@@ -447,7 +447,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
         String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
         jedis.zadd(platformCourseList, lpos, courseId);
- 
+        //4.6 将课程插入到平台分类列表 分类列表
+        map.clear();
+        String classify_id = reqMap.get("classify_id").toString();
+        map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
+        String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
+        jedis.zadd(classifyCourseKey, lpos, courseId);
+
         resultMap.put("course_id", courseId);
         
         Map<String,Object> timerMap = new HashMap<>();
@@ -911,13 +917,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             map.put(Constants.CACHED_KEY_COURSE_FIELD, userId);
             String banKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
             jedis.del(banKey);
-
             //1.6更新课程缓存信息
             Map<String, String> updateCacheMap = new HashMap<String, String>();
             updateCacheMap.put("update_time", ((Date) dbResultMap.get("update_time")).getTime() + "");
             updateCacheMap.put("end_time", courseEndTime.getTime() + "");
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
+
+
+            //1.7 将该课程从平台分类预告课程列表中 SYS:course:{classify}:prediction 移除 存入SYS:COURSES:{classify_id}:FINISH"
+            map.clear();
+            map.put(Constants.CACHED_KEY_CLASSIFY,reqMap.get("classify_id"));
+            jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), reqMap.get("course_id").toString());//删除预告
+            jedis.zadd(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map), lpos, reqMap.get("course_id").toString());//在结束中增加
 
             //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中            
             //RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());

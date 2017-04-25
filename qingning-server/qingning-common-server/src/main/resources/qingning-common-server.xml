@@ -648,6 +648,15 @@
 					</param>
 				</outputs>
 			</function>
+			<function name="saveMsg">
+				<auth>
+					<accessToken require="N"/>
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />

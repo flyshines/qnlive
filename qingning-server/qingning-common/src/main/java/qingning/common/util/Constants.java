@@ -7,7 +7,7 @@ public final class Constants {
 	public static final String SYS_FIELD_COUNTRY="country";
 	public static final String SYS_FIELD_COUNTRY_SHORT="country_short";
 	public static final String SYS_FIELD_PROVINCE="province";
-	public static final String SYS_FIELD_CITY="city";
+	public static final String SYS_FIELD_CITY="city";//城市
 	public static final String SYS_FIELD_DISTRICT="district";
 	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
 
@@ -71,29 +71,29 @@ public final class Constants {
 	public static final String LAST_VISIT_FUN="LAST_VISIT_FUN";
 	public static final String LAST_VISIT_TIME="LAST_VISIT_TIME";
 
-	public static final String MONGODB_IP="mongodb.ip";
-	public static final String MONGODB_PORT="mongodb.port";
-	public static final String MONGODB_MAXCONNECTTIMEOUT="mongodb.maxConnectTimeout";
-	public static final String MONGODB_MAXCONNECTIONS="mongodb.maxConnections";
-	public static final String MONGODB_MAXWAITTIME="mongodb.maxWaitTime";
-	public static final String MONGODB_MAXWAITTHREADS="mongodb.maxWaitThreads";
-	public static final String MONGODB_MAXIDLETIME="mongodb.maxIdleTime";
-	public static final String MONGODB_MAXLIFETIME="mongodb.maxLifeTime";
-	public static final String MONGODB_SOKETTIMEOUT="mongodb.soketTimeout";
-	public static final String MONGODB_SOKETKEEPALIVE="mongodb.soketKeepAlive";
+//	public static final String MONGODB_IP="mongodb.ip";
+//	public static final String MONGODB_PORT="mongodb.port";
+//	public static final String MONGODB_MAXCONNECTTIMEOUT="mongodb.maxConnectTimeout";
+//	public static final String MONGODB_MAXCONNECTIONS="mongodb.maxConnections";
+//	public static final String MONGODB_MAXWAITTIME="mongodb.maxWaitTime";
+//	public static final String MONGODB_MAXWAITTHREADS="mongodb.maxWaitThreads";
+//	public static final String MONGODB_MAXIDLETIME="mongodb.maxIdleTime";
+//	public static final String MONGODB_MAXLIFETIME="mongodb.maxLifeTime";
+//	public static final String MONGODB_SOKETTIMEOUT="mongodb.soketTimeout";
+//	public static final String MONGODB_SOKETKEEPALIVE="mongodb.soketKeepAlive";
 
 	public static final String FUNCTION = "function";
 	public static final String VALIDATION = "validation";
 	public static final String CONVERTVALUE = "convertValue";
 	public static final String JS_ENGINE = "nashorn";
 
-	public static final String SYS_SINGLE_KEY = "SYS_SINGLE_KEY";
-	public static final String SYS_OUT_TRADE_NO_KEY = "SYS_OUT_TRADE_NO_KEY";
+//	public static final String SYS_SINGLE_KEY = "SYS_SINGLE_KEY";
+//	public static final String SYS_OUT_TRADE_NO_KEY = "SYS_OUT_TRADE_NO_KEY";
 
 	public static final String CACHED_UPDATE_LECTURER_KEY="SYS:UPDATE:LECTURER:KEYS";
 	public static final String CACHED_UPDATE_DISTRIBUTER_KEY="SYS:UPDATE:DISTRIBUTER:KEYS";
-	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS";
-	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
+//	public static final String CACHED_UPDATE_ROOM_DISTRIBUTER_KEY ="SYS:UPDATE:ROOM:DISTRIBUTER:KEYS";
+//	public static final String CACHED_KEY_ROOM_DISTRIBUTER_FIELD = "room_distributer_id";
 	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";
 
 	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE="SYS:ROOM:DISTRIBUTER:RQCODE:{rq_code}";
@@ -108,9 +108,11 @@ public final class Constants {
 	public static final String CACHED_KEY_USER = "SYS:USER:{user_id}";
 	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";
 
-	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";
+	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";//讲师id
 	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";
 	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";
+
+
 
 	//public static final String CACHED_KEY_SPECIAL_LECTURER_ROOM = "SYS:LECTURER:{lecturer_id}:ROOM:{room_id}";
 
@@ -178,7 +180,10 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_LIVE = "SYS:COURSES:LIVE";
 	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
-	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";
+
+
+
+	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";//微信token
 	public static final String CACHED_KEY_WEIXIN_JS_API_TIKET="SYS:WEIXIN:JS_API_TIKET";
 
 	public static final String CACHED_KEY_COURSE_BAN_USER_LIST="COURSE:{course_id}:BAN_USER_LIST";
@@ -186,7 +191,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST="COURSE:{course_id}:MESSAGE_LIST";
 	public static final String FIELD_MESSAGE_ID="message_imid";
 	public static final String CACHED_KEY_COURSE_MESSAGE="COURSE:{course_id}:MESSAGE:{message_imid}";
-	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION = "COURSE:{course_id}:MESSAGE_LIST:QUESTION";
+//	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_QUESTION = "COURSE:{course_id}:MESSAGE_LIST:QUESTION";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_USER = "COURSE:{course_id}:MESSAGE_LIST:USER";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER = "COURSE:{course_id}:MESSAGE_LIST:LECTURER";
 	public static final String CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE = "COURSE:{course_id}:MESSAGE_LIST:LECTURER_VOICE";
@@ -194,7 +199,7 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO = "SYS:USER:{user_id}:LAST_JOIN_COURSE_IM_INFO";
 	public static final String CACHED_KEY_APP_VERSION_INFO_FIELD = "os";
 	public static final String CACHED_KEY_APP_VERSION_INFO = "SYS:APP_VERSION_INFO:{os}";
-	public static final String CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO = "USER:{user_id}:ROOM:DISTRIBUTION:LIST:INFO";
+//	public static final String CACHED_KEY_USER_ROOM_DISTRIBUTION_LIST_INFO = "USER:{user_id}:ROOM:DISTRIBUTION:LIST:INFO";
 
 
 	public static final String USER_ROLE_LECTURER="lecturer";
@@ -225,27 +230,42 @@ public final class Constants {
 	public static final String MONGODB_ROOM_DISTRIBUTER_COLLECTION_FORMAT =   "ROOM_DISTRIBUTER_COLL_%s";
 	public static final String MONGODB_COURSE_DISTRIBUTER_COLLECTION_FORMAT = "COURSE_DISTRIBUTER_COLL_%s";
 
-	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
+//	public static final String JPUSH_TAG_FOLLOW_ROOM = "follow_room_";
 	public static final String JPUSH_SEND_TYPE_ALIAS = "ALIAS";
-	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";
+//	public static final String JPUSH_SEND_TYPE_TAGS = "TAGS";
 
 
 	public static final String CACHED_KEY_COURSE_MESSAGE_ID_INFO = "COURSE:{course_id}:MESSAGE_ID_INFO";
 
-	public static final String WEB_FILE_PRE_FIX = "WEB_FILE/";
+	public static final String WEB_FILE_PRE_FIX = "WEB_FILE/";//web路由
 
 	public static final String FORCE_UPDATE_VERSION = "FORCE_UPDATE_VERSION:{os}";
 
 	public static final String CACHED_KEY_SERVICE_LECTURER_FIELD = "lecturer_id";
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 
-	public static final String SEND_MSG_TIME_S = "CAPTCHA:SEND_MSG_TIME_S:{user_id}";//时间
-	public static final String SEND_MSG_TIME_D = "CAPTCHA:SEND_MSG_TIME_D:{user_id}";
+	public static final String SEND_MSG_TIME_S = "CAPTCHA:SEND_MSG_TIME_S:{user_id}";//时间 秒
+	public static final String SEND_MSG_TIME_D = "CAPTCHA:SEND_MSG_TIME_D:{user_id}";//时间天数
 
 	public static final String CAPTCHA_KEY_CODE = "CAPTCHA:KEY:{user_id}";//存放验证码
 	public static final String CAPTCHA_KEY_PHONE = "CAPTCHA:KEY:{code}";//存放验证码
 
 
+	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION = "SYS:COURSES:{classify_id}:PREDICTION";// 分类 预告/正在直播
+	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH = "SYS:COURSES:{classify_id}:FINISH";//分类 已结束
+	public static final String CACHED_KEY_CLASSIFY = "classify_id";//分类id
+	public static final String CACHED_KEY_CLASSIFY_INFO = "SYS:CLASSIFY:{classify_id}";//分类缓存
+	public static final String CACHED_KEY_CLASSIFY_ALL = "SYS:CLASSIFY:ALL";//存入所有分类id
+
+	public static final String CACHED_KEY_BANNER_ALL = "SYS:BANNER:ALL";//横幅所有id
+	public static final String CACHED_KEY_BANNER_INFO = "SYS:BANNER:{banner_id}";//横幅信息
+	public static final String CACHED_KEY_BANNER = "banner_id";//横幅id
+
 	public static final Integer RECOMMEND_COURSE_NUM = 30;//推荐课程最大数
+	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程
+
+
+
+
 
 }

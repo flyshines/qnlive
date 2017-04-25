@@ -804,21 +804,6 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
-    /**
-     * 设置课程 状态
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/courses/{course_id}/courseStatus", method = RequestMethod.GET)
-    public void setCourseStatus(
-            @PathVariable("course_id") String course_id,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version)throws Exception{
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "courseStatus", accessToken, version);
-        Map<String, Object> param = new HashMap<String, Object>();
-        param.put("course_id", course_id);
-        requestEntity.setParam(param);
-        this.process(requestEntity, serviceManger, message);
-    }
 
 
     /**
@@ -965,7 +950,22 @@ public class CommonController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-
+//    /**
+//     * 保存消息
+//     * @param accessToken
+//     * @param version
+//     * @return
+//     * @throws Exception
+//     */
+//    @SuppressWarnings("unchecked")
+//    @RequestMapping(value = "/common/saveMsg", method = RequestMethod.GET)
+//    public @ResponseBody
+//    ResponseEntity saveMsg(
+//            @RequestHeader("access_token") String accessToken,
+//            @RequestHeader("version") String version)throws Exception{
+//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "saveMsg", accessToken, null);
+//        return this.process(requestEntity, serviceManger, message);
+//    }
 
 
 }

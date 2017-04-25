@@ -91,6 +91,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private BannerInfoMapper bannerInfoMapper;
 
 
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -723,6 +724,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findCourseByRecommend(Map<String, Object> record) {
 		return coursesMapper.findCourseByRecommend(record);
+	}
+
+	@Override
+	public Integer insertCourseMessageList(List<Map<String, Object>> messageList) {
+		return courseMessageMapper.insertCourseMessageList(messageList);
 	}
 
 

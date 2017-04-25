@@ -37,8 +37,9 @@ public class UserController extends AbstractController{
 
 	/**
 	 * 用户-查询课程列表（正在直播（用户查看））
-	 * @param page_count
-	 * @param course_id
+	 * @param page_count 分页数
+	 * @param course_id  课程id
+	 * @param classify_id 分类id
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -51,12 +52,14 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
 			@RequestParam(value = "status", defaultValue = "4") String  status,
+			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
+		param.put("classify_id",classify_id);
 		param.put("status", status);
 		requestEntity.setParam(param);
 			return this.process(requestEntity, serviceManger, message);

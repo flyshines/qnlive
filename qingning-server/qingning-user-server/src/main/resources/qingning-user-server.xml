@@ -25,6 +25,7 @@
 					<param name="page_count" type="long" require="N"/>
 					<param name="course_id" type="string" require="N"/>
 					<param name="status" type="string" require="N"/>
+					<param name="classify_id" type="string" require="N"/>
 					<param name="data_source" type="string" require="N"/>
 					<param name="query_time" type="long" require="N"/>
 					<param name="position" type="long" require="N"/>

@@ -120,7 +120,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         int status =  Integer.parseInt(reqMap.get("status").toString());//状态 1.预告 2.已结束 4.在直播中
         String course_id = (String)reqMap.get("course_id");//课程id
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-        Map<String, Object> values = getPlatformCourses(userId,status,pageCount,course_id);
+        String classify_id = reqMap.get("classify_id").toString();
+        Map<String, Object> values = getPlatformCourses(userId,status,pageCount,course_id,classify_id);
         //Map<String, Object> values = getPlatformCourses(reqEntity);
         //课程列表总数
         values.put("course_amount",jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
@@ -621,99 +622,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }*/
     //</editor-fold>
 
-    private Map<String, Object> findCoursesStartWithPrediction(Jedis jedis, String startIndex, String endIndex, Integer pageCount) {
-        Map<String, Object> resultMap = new HashMap<>();
-        Set<Tuple> predictionList = null;
-        Set<Tuple> finishList = null;
-        List<Map<String, Object>> dbList = new ArrayList<>();
-        List<Map<String, Object>> finishDbList = new ArrayList<>();
-        List<Map<String, Object>> predictionListDbList = new ArrayList<>();
 
-        String startIndexPrediction = startIndex;
-        String endIndexPrediction = endIndex;
-        predictionList = jedis.zrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, startIndexPrediction, endIndexPrediction, 0, pageCount);
-
-        //1.3预告列表为空或者不足，则继续查询结束列表
-        if (predictionList == null || predictionList.size() < pageCount) {
-            if (predictionList != null) {
-                pageCount = pageCount - predictionList.size();
-            }
-
-            if (predictionList == null) {
-                if (jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)) {
-                    //读结束列表，结束列表不足，则读取数据库,直接查询数据库中结束状态的课程
-                    String startIndexFinish = "+inf";
-                    String endIndexFinish = "-inf";
-                    finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0, pageCount);
-
-                    if (finishList.size() < pageCount) {
-                        Map<String, Object> queryMap = new HashMap<>();
-                        queryMap.put("orderType", "2");
-                        queryMap.put("status", "2");
-                        queryMap.put("pageCount", pageCount - finishList.size());
-                        dbList = userModuleServer.findCourseListForLecturer(queryMap);
-                    }
-                } else {
-                    //读取数据库，直接查询结束状态课程
-                    Map<String, Object> queryMap = new HashMap<>();
-                    queryMap.put("orderType", "2");
-                    queryMap.put("status", "2");
-                    queryMap.put("pageCount", pageCount);
-                    dbList = userModuleServer.findCourseListForLecturer(queryMap);
-                }
-            } else {
-                if (jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)) {
-                    //读结束列表，结束列表不足，则读取数据库,直接查询数据库中结束状态的课程
-                    String startIndexFinish = "+inf";
-                    String endIndexFinish = "-inf";
-                    finishList = jedis.zrevrangeByScoreWithScores(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, startIndexFinish, endIndexFinish, 0, pageCount);
-
-                    if (finishList.size() < pageCount) {
-                        Map<String, Object> queryMap = new HashMap<>();
-                        queryMap.put("orderType", "2");
-                        queryMap.put("status", "2");
-                        queryMap.put("pageCount", pageCount - finishList.size());
-                        dbList = userModuleServer.findCourseListForLecturer(queryMap);
-                    }
-
-                } else {
-                    //查询数据库，先读未结束的课程，再读取已经结束的课程
-                    Map<String, Object> queryMap = new HashMap<>();
-                    queryMap.put("orderType", "1");
-                    queryMap.put("status", "1");
-                    queryMap.put("pageCount", pageCount);
-                    predictionListDbList = userModuleServer.findCourseListForLecturer(queryMap);
-
-                    if (CollectionUtils.isEmpty(dbList) || dbList.size() < pageCount) {
-                        if (!CollectionUtils.isEmpty(dbList)) {
-                            pageCount = pageCount - dbList.size();
-                        }
-
-                        queryMap.clear();
-                        queryMap.put("orderType", "2");
-                        queryMap.put("status", "1");
-                        queryMap.put("pageCount", pageCount);
-                        finishDbList = userModuleServer.findCourseListForLecturer(queryMap);
-
-                        if (!CollectionUtils.isEmpty(finishDbList)) {
-                            if (CollectionUtils.isEmpty(predictionListDbList)) {
-                                dbList = finishDbList;
-                            } else {
-                                dbList.addAll(predictionListDbList);
-                                dbList.addAll(finishDbList);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        resultMap.put("predictionList", predictionList);
-        resultMap.put("finishList", finishList);
-        resultMap.put("dbList", dbList);
-        return resultMap;
-
-    }
 
     /**
      * 获取课程列表
@@ -726,7 +635,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param courseId 课程id  查找第一页的时候不传 进行分页 必传
      */
     @SuppressWarnings({ "unchecked"})
-    private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId) throws Exception{
+    private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id) throws Exception{
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         long currentTime = System.currentTimeMillis();//当前时间
         int offset = 0;//偏移值
@@ -739,7 +648,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(courceStatus == 1 || courceStatus == 4){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
-            String getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;//平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序
+            String getCourseIdKey;
+
+            //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+            if(classify_id != null ){//有分类
+                Map<String,Object> map = new HashMap<String,Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
+                getCourseIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
+            }else{ //首页
+                getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+            }
+
+
             if(courseId == null || courseId.equals("")){//如果没有传入courceid 那么就是最开始的查询
                 startIndex = "-inf";//设置起始位置
                 endIndex = "+inf";//设置结束位置
@@ -767,7 +687,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
-            String getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;//平台的已结束课程列表
+            String getCourseIdKey ;
+            //平台的已结束课程列表
+            if(classify_id != null ){//有分类
+                Map<String,Object> map = new HashMap<String,Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
+                getCourseIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
+            }else{ //首页
+                getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+            }
+
             long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
             if(courseId == null){//如果课程ID没有 那么就从最近结束的课程找起
                 endIndex = -1;

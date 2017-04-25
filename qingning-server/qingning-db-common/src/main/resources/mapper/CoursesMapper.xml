@@ -134,7 +134,7 @@
   </select>
 
   <select id="findCourseByRecommend" resultType="hashmap" parameterType="hashmap" >
-      SELECT * FROM t_courses WHERE recommend_seat != 0 ORDER BY recommend_seat LIMIT #{page_num},#{page_count}
+      SELECT * FROM t_courses WHERE recommend_seat != 0 ORDER BY recommend_seat
   </select>
 
   <insert id="insertCourse" parameterType="hashmap" >
