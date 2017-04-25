@@ -253,6 +253,7 @@ public final class Constants {
 
 	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION = "SYS:COURSES:{classify_id}:PREDICTION";// 分类 预告/正在直播
 	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH = "SYS:COURSES:{classify_id}:FINISH";//分类 已结束
+
 	public static final String CACHED_KEY_CLASSIFY = "classify_id";//分类id
 	public static final String CACHED_KEY_CLASSIFY_INFO = "SYS:CLASSIFY:{classify_id}";//分类缓存
 	public static final String CACHED_KEY_CLASSIFY_ALL = "SYS:CLASSIFY:ALL";//存入所有分类id

@@ -3213,10 +3213,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 course.put("course_id", course_id);
                 course.put("status", "5");
                 course.put("update_time", now);
+                Map<String,Object> map = new HashMap<String,Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY,courseInfoMap.get(Constants.CACHED_KEY_CLASSIFY));
                 if(courseInfoMap.get("status").equals("2")){ //结束
                     jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);
+                    jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH,map),course_id);//删除分类信息
                 }else{//预告
                     jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);
+                    jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,map),course_id);//删除分类信息
                     //1.进行强制结束
                     course.put("end_time", now);//结束时间
                     SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");

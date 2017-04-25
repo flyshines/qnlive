@@ -874,8 +874,7 @@ public class CommonController extends AbstractController {
 
 
     /**
-     * 搜索/类型
-     * @param classify_id 类型id
+     * 搜索
      * @param search_text 搜索文本
      * @param search_type 查询类型 0所有 1直播间 2课程
      * @param page_count 分页
@@ -889,7 +888,6 @@ public class CommonController extends AbstractController {
     @RequestMapping(value = "/common/search", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity search(
-            @RequestParam(value = "classify_id",defaultValue = "") String classify_id,
             @RequestParam(value = "search_text",defaultValue = "") String search_text,
             @RequestParam(value = "search_type",defaultValue = "0") String search_type,
             @RequestParam(value = "page_count", defaultValue = "20") int page_count,
@@ -898,7 +896,6 @@ public class CommonController extends AbstractController {
             @RequestHeader("version") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "search", accessToken, null);
         Map<String,Object> map = new HashMap<>();
-        map.put("classify_id",classify_id);
         map.put("search_text",search_text);
         map.put("search_type",search_type);
         map.put("page_count",page_count);
