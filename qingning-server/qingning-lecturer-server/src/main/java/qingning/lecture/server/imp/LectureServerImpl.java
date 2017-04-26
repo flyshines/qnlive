@@ -449,7 +449,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.zadd(platformCourseList, lpos, courseId);
         //4.6 将课程插入到平台分类列表 分类列表
         map.clear();
-        String classify_id = reqMap.get("classify_id").toString();
+        String classify_id = "";
+        if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
+            classify_id= "1";
+        }else{
+            classify_id = reqMap.get("classify_id").toString();
+        }
+
         map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
         String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
         jedis.zadd(classifyCourseKey, lpos, courseId);
@@ -3216,11 +3222,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Map<String,Object> map = new HashMap<String,Object>();
                 map.put(Constants.CACHED_KEY_CLASSIFY,courseInfoMap.get(Constants.CACHED_KEY_CLASSIFY));
                 if(courseInfoMap.get("status").equals("2")){ //结束
-                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);
+                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);//删除平台结束课程
                     jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH,map),course_id);//删除分类信息
+                    map.clear();
+                    map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));
+                    jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_FINISH,map),course_id);//老师结束课程
                 }else{//预告
-                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);
-                    jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,map),course_id);//删除分类信息
+                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);//删除平台预告课程
+                    jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,map),course_id);//删除分类预告信息
+                    map.clear();
+                    map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));
+                    jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_PREDICTION,map),course_id);//老师预告课程
                     //1.进行强制结束
                     course.put("end_time", now);//结束时间
                     SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
@@ -3318,6 +3330,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             this.mqUtils.sendMessage(mqRequestEntity);
 
         }
+
+        //删除学生表中的这个课程的所有学生记录
+
+
         reqMap.clear();
         return reqMap;
     }
