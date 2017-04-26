@@ -3188,6 +3188,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 Map<String,Object> query = new HashMap<String,Object>();
                 query.put(Constants.CACHED_KEY_USER_FIELD, userId);
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query);//用来查询当前用户加入了那些课程
+                if(!jedis.exists(key)){//判断是否存在key
+                    Map<String,Object> queryParam = new HashMap<String,Object>();
+                    queryParam.put("user_id", userId);
+                    RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
+                    CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+                }
                 for(Map<String, Object> liveRoom : liveRoomBySearch){
                     if(jedis.sismember(key, liveRoom.get("room_id").toString())){//判断当前用户是否有加入这个课程
                         liveRoom.put("fens", "Y");
