@@ -3264,47 +3264,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型 0搜索推荐课程 和 广告位 1是推荐课程换一换 2推荐课程下拉
         Jedis jedis = jedisUtils.getJedis();
-        //<editor-fold desc="横幅">
-        if(select_type == 0){
-            List<Map<String, Object>> bannerInfoList = new ArrayList<>();
-            if(jedis.exists(Constants.CACHED_KEY_BANNER_ALL)){//查看是否有banner存在
-                Set<String> bannerInfoIdSet = jedis.zrange(Constants.CACHED_KEY_BANNER_ALL, 0, -1);//获取所有值
-                Map<String,Object> query = new HashMap<>();
-                for(String bannerInfoId : bannerInfoIdSet){
-                    query.put(Constants.CACHED_KEY_BANNER,bannerInfoId);
-                    String bannerInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query);//查找横幅key
-                    if(jedis.exists(bannerInfoKey)){//获取分类
-                        Map<String, String> bannerInfo = jedis.hgetAll(bannerInfoKey);
-                        Map<String,Object> banner_info = new HashMap<>();
-                        banner_info.put("banner_id",bannerInfo.get("banner_id"));
-                        banner_info.put("banner_remarks",bannerInfo.get("banner_remarks"));
-                        banner_info.put("banner_img_url",bannerInfo.get("banner_img_url"));
-                        banner_info.put("jump_url",bannerInfo.get("jump_url"));
-                        banner_info.put("create_time",bannerInfo.get("create_time"));
-                        bannerInfoList.add(banner_info);
-                    }
-                }
-            }else{ //不存在
-                bannerInfoList = commonModuleServer.findBannerInfoAll();//查找广告位
-                if(! MiscUtils.isEmpty(bannerInfoList)){
-                    Map<String,String> banner_info = new HashMap<>();
-                    for(Map<String, Object> bannerInfo : bannerInfoList){
-                        jedis.zadd(Constants.CACHED_KEY_BANNER_ALL,System.currentTimeMillis(),bannerInfo.get("banner_id").toString());
-                        banner_info.put("banner_id",bannerInfo.get("banner_id").toString());
-                        banner_info.put("banner_remarks",bannerInfo.get("banner_remarks").toString());
-                        banner_info.put("banner_img_url",bannerInfo.get("banner_img_url").toString());
-                        banner_info.put("jump_url",bannerInfo.get("jump_url").toString());
-                        banner_info.put("create_time",bannerInfo.get("create_time").toString());
-                        Map<String,Object> query = new HashMap<>();
-                        query.put(Constants.CACHED_KEY_BANNER,bannerInfo.get("banner_id").toString());
-                        jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query),banner_info);
-                    }
-                }
-            }
-            resultMap.put("banner_info",bannerInfoList);
-        }
-        //</editor-fold>
-
         if(select_type == 1){
             if(page_num == Constants.RECOMMEND_COURSE_NUM){ //比较是否是推荐课程的最大值  如果是最大值就归零
                 Integer zero = 0 ;
@@ -3382,6 +3341,61 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(classifyList)){
             resultMap.put("classifyInfo",classifyList);
         }
+        return resultMap;
+    }
+
+
+
+    /**
+     * 推荐和广告位
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("banner")
+    public Map<String, Object> banner (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Jedis jedis = jedisUtils.getJedis();
+        //<editor-fold desc="横幅">
+            List<Map<String, Object>> bannerInfoList = new ArrayList<>();
+            if(jedis.exists(Constants.CACHED_KEY_BANNER_ALL)){//查看是否有banner存在
+                Set<String> bannerInfoIdSet = jedis.zrange(Constants.CACHED_KEY_BANNER_ALL, 0, -1);//获取所有值
+                Map<String,Object> query = new HashMap<>();
+                for(String bannerInfoId : bannerInfoIdSet){
+                    query.put(Constants.CACHED_KEY_BANNER,bannerInfoId);
+                    String bannerInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query);//查找横幅key
+                    if(jedis.exists(bannerInfoKey)){//获取分类
+                        Map<String, String> bannerInfo = jedis.hgetAll(bannerInfoKey);
+                        Map<String,Object> banner_info = new HashMap<>();
+                        banner_info.put("banner_id",bannerInfo.get("banner_id"));
+                        banner_info.put("banner_remarks",bannerInfo.get("banner_remarks"));
+                        banner_info.put("banner_img_url",bannerInfo.get("banner_img_url"));
+                        banner_info.put("jump_url",bannerInfo.get("jump_url"));
+                        banner_info.put("create_time",bannerInfo.get("create_time"));
+                        bannerInfoList.add(banner_info);
+                    }
+                }
+            }else{ //不存在
+                bannerInfoList = commonModuleServer.findBannerInfoAll();//查找广告位
+                if(! MiscUtils.isEmpty(bannerInfoList)){
+                    Map<String,String> banner_info = new HashMap<>();
+                    for(Map<String, Object> bannerInfo : bannerInfoList){
+                        jedis.zadd(Constants.CACHED_KEY_BANNER_ALL,System.currentTimeMillis(),bannerInfo.get("banner_id").toString());
+                        banner_info.put("banner_id",bannerInfo.get("banner_id").toString());
+                        banner_info.put("banner_remarks",bannerInfo.get("banner_remarks").toString());
+                        banner_info.put("banner_img_url",bannerInfo.get("banner_img_url").toString());
+                        banner_info.put("jump_url",bannerInfo.get("jump_url").toString());
+                        banner_info.put("create_time",bannerInfo.get("create_time").toString());
+                        Map<String,Object> query = new HashMap<>();
+                        query.put(Constants.CACHED_KEY_BANNER,bannerInfo.get("banner_id").toString());
+                        jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query),banner_info);
+                    }
+                }
+            }
+            resultMap.put("banner_info",bannerInfoList);
+        //</editor-fold>
         return resultMap;
     }
 

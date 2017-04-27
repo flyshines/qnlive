@@ -905,8 +905,8 @@ public class CommonController extends AbstractController {
     }
 
     /**
-     * 推荐和广告
-     * @param select_type 查询类型 0搜索推荐课程 和 广告位 1是推荐课程换一换 2推荐课程下拉
+     * 推荐
+     * @param select_type 查询类型  1是推荐课程换一换 2推荐课程下拉
      * @param page_count 分页
      * @param page_num 分页参数
      * @param accessToken
@@ -931,6 +931,26 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(map);
         return this.process(requestEntity, serviceManger, message);
     }
+
+
+
+    /**
+     * 广告
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/banner", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity banner(
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "banner", accessToken, null);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 
     /**
      * 获取分类信息
