@@ -721,7 +721,16 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="delCourse">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,00010"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 
 		</default>
 

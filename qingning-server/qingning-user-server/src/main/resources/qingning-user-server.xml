@@ -36,6 +36,7 @@
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>
 						<param name="course_url" type="string"/>
+						<param name="classify_id" type="string"/>
 						<param name="course_title" type="rstring"/>
 						<param name="room_id" type="string"/>
 						<param name="start_time" type="long"/>

@@ -25,7 +25,7 @@
 
   <select id="findCourseAllStudentList" resultType="hashmap" parameterType="java.lang.String" >
     select a.*,b.m_user_id,b.m_pwd,b.web_openid
-    from t_courses_students a , t_login_info b where a.user_id=b.user_id and cs.course_id = #{course_id}
+    from t_courses_students a , t_login_info b where a.user_id=b.user_id and a.course_id = #{course_id}
   </select>
 
 

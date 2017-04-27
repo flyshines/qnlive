@@ -765,7 +765,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
         if(queryType.equals("1")){
             reqMap.put("user_id", userId);
-
             resultMap.put("avatar_address", values.get("avatar_address"));
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
@@ -783,7 +782,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(MiscUtils.isEmpty(loginInfoMap)){
                 throw new QNLiveException("120002");
             }
- 
             resultMap.put("access_token", reqEntity.getAccessToken());
             resultMap.put("im_account_info", encryptIMAccount(loginInfoMap.get("m_user_id").toString(), loginInfoMap.get("m_pwd").toString()));
             resultMap.put("m_user_id", loginInfoMap.get("m_user_id"));
@@ -792,7 +790,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             return resultMap;
         }
- 
         return resultMap;
     }
 

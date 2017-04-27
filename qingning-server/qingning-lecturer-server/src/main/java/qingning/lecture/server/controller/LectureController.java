@@ -759,10 +759,10 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/lecturer/delCourse", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity delCourse(
-			@RequestHeader("course_id")String course_id,
+			@RequestParam("course_id")String course_id,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "course_id", access_token, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "delCourse", access_token, null);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("course_id",course_id);
 		requestEntity.setParam(parMap);
