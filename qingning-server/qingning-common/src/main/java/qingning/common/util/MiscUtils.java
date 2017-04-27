@@ -804,4 +804,69 @@ public final class MiscUtils {
 		}
 		return result;
 	}
+
+
+    private static String CONFIG_PROPERTY_PATH="classpath:appservice.properties";
+    private static Map<String, Object> APP_SERVICE_MAP = null;
+
+    //<editor-fold desc="初始化读取服务配置文件,看一下需要搭配几个服务">
+//    static{
+//        InputStream input = null;
+//        try{
+//            if(CONFIG_PROPERTY_PATH.toLowerCase().startsWith("classpath:")){
+//                String fileName = CONFIG_PROPERTY_PATH.substring("classpath:".length());
+//                input = MiscUtils.class.getClassLoader().getResourceAsStream(fileName);
+//                if(input==null){
+//                    CONFIG_PROPERTY_PATH=MiscUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+//                    CONFIG_PROPERTY_PATH=CONFIG_PROPERTY_PATH.substring(0, CONFIG_PROPERTY_PATH.lastIndexOf(File.separatorChar)+1)+fileName;
+//                }
+//            }
+//            if(input==null){
+//                input = new FileInputStream(CONFIG_PROPERTY_PATH);
+//            }
+//
+//            Properties properties = new Properties();
+//            properties.load(input);
+//            for(String name : properties.stringPropertyNames()){
+//                APP_SERVICE_MAP.put(name, properties.getProperty(name));
+//            }
+//            String app_service = APP_SERVICE_MAP.get("app_service").toString();
+//            String[] split = app_service.split(",");
+//            for(String appName : split){
+//                String path = APP_SERVICE_MAP.get(appName+"_application").toString();
+//                Map<String, String> propertiesMap = convertPropertiesFileToMap(path);
+//                APP_SERVICE_MAP.put(appName,propertiesMap);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally{
+//            if(input!=null){
+//                try {
+//                    input.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
+    //</editor-fold>
+
+//
+
+
+    public static String getConfigByKey(String appName,String key) {
+        String value="";
+        if(appName != null && !appName.equals("")){
+            return null;
+        }
+        try{
+            Map<String,String> map = (Map<String, String>) APP_SERVICE_MAP.get(appName);
+            value = map.get(key);
+        } catch(Exception e){
+            //TODO add log info
+        }
+
+        return value;
+    }
+
 }

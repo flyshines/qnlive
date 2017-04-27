@@ -687,6 +687,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         JPushHelper.push(obj);
     }
 
+
+
+
     /**
      * 把课程创建的模板消息推送给服务号粉丝
      */
@@ -712,6 +715,24 @@ public class MessagePushServerImpl extends AbstractMsgService {
             }
         }
     }
+
+
+    /**
+     * 删除用户加入课程缓存
+     */
+    @FunctionName("delUserAddCourseList")
+    public void delUserAddCourseList(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
+        List<Map<String, Object>> courseAllStudentList = (List<Map<String, Object>>) reqMap.get("courseAllStudentList");
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String,Object> query = new HashMap<String,Object>();
+        for(Map<String, Object> student : courseAllStudentList){
+            query.put(Constants.CACHED_KEY_USER_FIELD,student.get("user_id"));
+            String coursesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
+            jedis.del(coursesKey);
+        }
+    }
+
 
     /**
      * 把课程创建的模板消息推送给服务号粉丝的具体逻辑
