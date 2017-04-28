@@ -3347,7 +3347,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 推荐和广告位
+     * 广告位
      * @param reqEntity
      * @throws Exception
      */

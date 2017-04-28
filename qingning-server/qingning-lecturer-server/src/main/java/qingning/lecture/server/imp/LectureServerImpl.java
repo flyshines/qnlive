@@ -2974,6 +2974,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 course.put("course_id", course_id);
                 course.put("status", "5");
                 course.put("update_time", now);
+                lectureModuleServer.updateCourse(course);//修改数据库数据
                 Map<String,Object> map = new HashMap<String,Object>();
                 map.put(Constants.CACHED_KEY_CLASSIFY,courseInfoMap.get(Constants.CACHED_KEY_CLASSIFY));
                 if(courseInfoMap.get("status").equals("2")){ //结束
@@ -3043,62 +3044,64 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 messageMap.put("mid",infomation.get("message_id"));
                 String content = JSON.toJSONString(messageMap);
                 IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+                //获取当前课程的学生
+                List<Map<String, Object>> courseAllStudentList = lectureModuleServer.findCourseAllStudentList(course_id);
+
+                //<editor-fold desc="微信推送">
+                if(!MiscUtils.isEmpty(courseAllStudentList)){//如果有学生
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();//模板信息
+                    TemplateData first = new TemplateData();//针对微信模板{{first.DATA}}
+                    first.setColor("#000000");
+                    first.setValue(MiscUtils.getConfigByKey("wpush_delete_course_first"));
+                    templateMap.put("first", first);
+
+                    TemplateData keyword1 = new TemplateData();//针对微信模板 课程名称：{{keyword1.DATA}}
+                    keyword1.setColor("#000000");
+                    keyword1.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));//课程名称
+                    templateMap.put("keyword1", keyword1);
+
+                    TemplateData keyword2 = new TemplateData();
+                    keyword2.setColor("#000000");
+                    keyword2.setValue(MiscUtils.getConfigByKey("wpush_delete_course_keyword2"));
+                    templateMap.put("keyword2", keyword2);
+
+
+                    TemplateData remark = new TemplateData();
+                    remark.setColor("#000000");
+                    remark.setValue(MiscUtils.getConfigByKey("wpush_delete_course_remark"));
+                    templateMap.put("remark", remark);
+
+                    Map<String, Object> wxPushParam = new HashMap<>();
+                    wxPushParam.put("templateParam", templateMap);//模板消息
+                    wxPushParam.put("course", courseInfoMap);//课程
+                    wxPushParam.put("followers", courseAllStudentList);//直播间关注者
+                    wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                    RequestEntity mqRequestEntity = new RequestEntity();
+                    mqRequestEntity.setServerName("MessagePushServer");
+                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
+                    mqRequestEntity.setParam(wxPushParam);
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+                //</editor-fold>
+
+                //删除学生表中的这个课程的所有学生记录
+                Map<String, Object> studentMap = new HashMap<>();
+                studentMap.put("courseAllStudentList", courseAllStudentList);//模板消息
+                RequestEntity mqRequestEntity = new RequestEntity();
+                mqRequestEntity.setServerName("MessagePushServer");
+                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                mqRequestEntity.setFunctionName("delUserAddCourseList");
+                mqRequestEntity.setParam(studentMap);
+                this.mqUtils.sendMessage(mqRequestEntity);
             }
         }else{
             throw new QNLiveException("160001");
         }
         //</editor-fold>
 
-        //获取当前课程的学生
-        List<Map<String, Object>> courseAllStudentList = lectureModuleServer.findCourseAllStudentList(course_id);
 
-        //<editor-fold desc="微信推送">
-        if(!MiscUtils.isEmpty(courseAllStudentList)){//如果有学生
-            Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();//模板信息
-            TemplateData first = new TemplateData();//针对微信模板{{first.DATA}}
-            first.setColor("#000000");
-            first.setValue(MiscUtils.getConfigByKey("wpush_delete_course_first"));
-            templateMap.put("first", first);
-
-            TemplateData keyword1 = new TemplateData();//针对微信模板 课程名称：{{keyword1.DATA}}
-            keyword1.setColor("#000000");
-            keyword1.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));//课程名称
-            templateMap.put("keyword1", keyword1);
-
-            TemplateData keyword2 = new TemplateData();
-            keyword2.setColor("#000000");
-            keyword2.setValue(MiscUtils.getConfigByKey("wpush_delete_course_keyword2"));
-            templateMap.put("keyword2", keyword2);
-
-
-            TemplateData remark = new TemplateData();
-            remark.setColor("#000000");
-            remark.setValue(MiscUtils.getConfigByKey("wpush_delete_course_remark"));
-            templateMap.put("remark", remark);
-
-            Map<String, Object> wxPushParam = new HashMap<>();
-            wxPushParam.put("templateParam", templateMap);//模板消息
-            wxPushParam.put("course", courseInfoMap);//课程
-            wxPushParam.put("followers", courseAllStudentList);//直播间关注者
-            wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-            RequestEntity mqRequestEntity = new RequestEntity();
-            mqRequestEntity.setServerName("MessagePushServer");
-            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-            mqRequestEntity.setFunctionName("noticeCourseToFollower");
-            mqRequestEntity.setParam(wxPushParam);
-            this.mqUtils.sendMessage(mqRequestEntity);
-        }
-        //</editor-fold>
-
-        //删除学生表中的这个课程的所有学生记录
-        Map<String, Object> studentMap = new HashMap<>();
-        studentMap.put("courseAllStudentList", courseAllStudentList);//模板消息
-        RequestEntity mqRequestEntity = new RequestEntity();
-        mqRequestEntity.setServerName("MessagePushServer");
-        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-        mqRequestEntity.setFunctionName("delUserAddCourseList");
-        mqRequestEntity.setParam(studentMap);
-        this.mqUtils.sendMessage(mqRequestEntity);
 
         reqMap.clear();
         return reqMap;
