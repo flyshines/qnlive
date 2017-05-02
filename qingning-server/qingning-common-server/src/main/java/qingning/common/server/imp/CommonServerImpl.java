@@ -3265,7 +3265,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型1是推荐课程换一换 2推荐课程下拉
         Jedis jedis = jedisUtils.getJedis();
         if(select_type == 1){
-            if(page_num == Constants.RECOMMEND_COURSE_NUM){ //比较是否是推荐课程的最大值  如果是最大值就归零
+            if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //比较是否是推荐课程的最大值  如果是最大值就归零
                 page_num = 0;
                 map.put("page_num",page_num);
             }
@@ -3274,6 +3274,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
             if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
                 List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(map);//查询推荐课程
+                jedis.set(Constants.RECOMMEND_COURSE_NUM,""+recommendCourseList.size());
                 for(Map<String, Object> recommendCourse : recommendCourseList){
                     jedis.zadd(Constants.CACHED_KEY_RECOMMEND_COURSE, Integer.valueOf( recommendCourse.get("recommend_seat").toString()),recommendCourse.get("course_id").toString());
                     Map<String, String> keyMap = new HashMap<String, String>();
