@@ -3266,8 +3266,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();
         if(select_type == 1){
             if(page_num == Constants.RECOMMEND_COURSE_NUM){ //比较是否是推荐课程的最大值  如果是最大值就归零
-                Integer zero = 0 ;
-                map.put("page_num",zero);
+                page_num = 0;
+                map.put("page_num",page_num);
             }
         }
         if(select_type == 2 || select_type == 1 ){
