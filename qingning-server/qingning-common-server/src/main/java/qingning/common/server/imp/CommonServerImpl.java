@@ -3193,19 +3193,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 for(Map<String, Object> liveRoom : liveRoomBySearch){
                     if(jedis.sismember(key, liveRoom.get("room_id").toString())){//判断当前用户是否有加入这个课程
-                        liveRoom.put("fens", "Y");
+                        liveRoom.put("fens", "1");
                     } else {
-                        liveRoom.put("fens", "N");
+                        liveRoom.put("fens", "0");
                     }
                 }
-                resultMap.put("roomList",liveRoomBySearch);
+                resultMap.put("room_list",liveRoomBySearch);
             }
         }
 
         //查询所有 或者 查询课程
         if(search_type ==0 || search_type == 2){
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
-            resultMap.put("courseList",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
+            resultMap.put("course_list",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
         }
         return resultMap;
 
@@ -3248,7 +3248,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 推荐和广告位
+     * 推荐
      * @param reqEntity
      * @throws Exception
      */
@@ -3343,7 +3343,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         if(!MiscUtils.isEmpty(classifyList)){
-            resultMap.put("classifyInfo",classifyList);
+            resultMap.put("classify_info",classifyList);
         }
         return resultMap;
     }

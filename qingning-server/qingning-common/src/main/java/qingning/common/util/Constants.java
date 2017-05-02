@@ -267,7 +267,7 @@ public final class Constants {
 	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程
 
 
-
+	public static final String COURSE_DEFAULT_CLASSINFY="9";//课程默认属性
 
 
 }
