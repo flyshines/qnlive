@@ -3211,6 +3211,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     }
 
+    /**
+     * 判断课程状态 并 判断用户是否有加入课程
+     * @param courseBySearch 课程list
+     * @param userId 用户id
+     * @param jedis 缓存
+     * @param methodName 方法名称
+     * @return
+     * @throws Exception
+     */
     private List<Map<String, Object>> setStudentAndLecturerNickName(List<Map<String,Object>> courseBySearch,String userId,Jedis jedis,String methodName) throws Exception {
         long currentTime = System.currentTimeMillis();//当前时间
 
@@ -3287,12 +3296,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 int startIndex = page_num;
                 int endIndex = page_num + page_count-1;
                 Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//获取推荐课程
+                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//如果是缓一缓 并且 查询的结果不够
+                    startIndex = 0;
+                    endIndex = page_count - recommendCourseIdSet.size() - 1;
+                    recommendCourseIdSet.addAll(jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex));
+                }
                 Map<String,String> queryParam = new HashMap<String,String>();
-                for(String courseId : recommendCourseIdSet){
+                for(String courseId : recommendCourseIdSet){//循环读取课程信息
                     queryParam.put("course_id", courseId);
                     Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedisUtils, true);//从缓存中读取课程信息
                     courseByRecommendList.add(courseInfoMap);
                 }
+
+
             }
             if(! MiscUtils.isEmpty(courseByRecommendList)){
                 resultMap.put("recommend_courses",this.setStudentAndLecturerNickName(courseByRecommendList,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
