@@ -3273,12 +3273,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型1是推荐课程换一换 2推荐课程下拉
         Jedis jedis = jedisUtils.getJedis();
-        if(select_type == 1){
-            if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //比较是否是推荐课程的最大值  如果是最大值就归零
-                page_num = 0;
-                map.put("page_num",page_num);
-            }
-        }
+
         if(select_type == 2 || select_type == 1 ){
             List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
             if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
@@ -3290,6 +3285,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, recommendCourse.get("course_id").toString());
                     String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
                     jedis.hset(key,"recommend_seat",recommendCourse.get("recommend_seat").toString());
+                }
+            }
+            if(select_type == 1){
+                if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //比较是否是推荐课程的最大值  如果是最大值就归零
+                    page_num = 0;
+                    map.put("page_num",page_num);
                 }
             }
             if(jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//存在
@@ -3307,8 +3308,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedisUtils, true);//从缓存中读取课程信息
                     courseByRecommendList.add(courseInfoMap);
                 }
-
-
             }
             if(! MiscUtils.isEmpty(courseByRecommendList)){
                 resultMap.put("recommend_courses",this.setStudentAndLecturerNickName(courseByRecommendList,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
