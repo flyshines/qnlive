@@ -143,6 +143,12 @@ public class CommonController extends AbstractController {
 
         //根据相关条件将server_url列表信息返回
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
+        if (bodyMap.get("server_url_update_time") == null ||
+                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
+            resultMap.put("server_url_info_list", serverUrlInfoMap.get("qnlive"));
+            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
+        }
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
