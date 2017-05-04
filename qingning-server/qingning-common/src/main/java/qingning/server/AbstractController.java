@@ -129,7 +129,7 @@ public abstract class AbstractController {
 		//classifyInfoList = iCommonModuleServer.findClassifyInfo();
 		serverUrlInfoList = iCommonModuleServer.getServerUrls();
 		serverUrlInfoMap = new HashMap<String,Object>();
-
+		Map<String,Object> serverInfoMap = new HashMap<String,Object>();
 		for(int i = 0; i < serverUrlInfoList.size(); i++){
 			Map<String,Object> infoMap = serverUrlInfoList.get(i);
 
@@ -143,9 +143,9 @@ public abstract class AbstractController {
 			innerMap.put("method", infoMap.get("method"));
 			innerMap.put("protocol", infoMap.get("protocol"));
 			innerMap.put("domain_name", infoMap.get("domain_name"));
-			serverUrlInfoMap.put((String)infoMap.get("server_name"), innerMap);
+			serverInfoMap.put((String)infoMap.get("server_name"), innerMap);
 		}
-
+		serverUrlInfoMap.put("qnlive",serverInfoMap);
 
 		rewardConfigurationList = iCommonModuleServer.findRewardConfigurationList();
 		rewardConfigurationMap = new HashMap<>();

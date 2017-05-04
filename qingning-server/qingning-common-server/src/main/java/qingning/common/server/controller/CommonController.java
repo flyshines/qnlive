@@ -101,7 +101,26 @@ public class CommonController extends AbstractController {
         return  this.process(requestEntity, serviceManger, message);
     }
 
-
+    /**
+     *  获取所有连接
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/serverUrlInfo", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity serverUrlInfo(
+            @RequestHeader("version") String version,
+            @RequestHeader(value = "appName",defaultValue = "qnlive") String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        resultMap.put("server_url_info_list", serverUrlInfoMap.get(appName));
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
 
     /**
      * 用户登录
@@ -124,12 +143,6 @@ public class CommonController extends AbstractController {
 
         //根据相关条件将server_url列表信息返回
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
-        if (bodyMap.get("server_url_update_time") == null ||
-                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
-            resultMap.put("server_url_info_list", serverUrlInfoMap);
-            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
-        }
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
@@ -155,10 +168,7 @@ public class CommonController extends AbstractController {
         //根据相关条件将server_url列表信息返回
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
         Map<String, Object> bodyMap = (Map<String, Object>) entity.getBody();
-        if (bodyMap.get("server_url_update_time") == null || !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
-            resultMap.put("server_url_info_list", serverUrlInfoMap);
-            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
-        }
+
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
@@ -302,13 +312,6 @@ public class CommonController extends AbstractController {
         //根据相关条件将server_url列表信息返回
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        if("2".equals(query_type)){
-	        if (MiscUtils.isEmpty(server_url_info_update_time) ||
-	                !server_url_info_update_time.equals(serverUrlInfoUpdateTime.toString())) {
-	            resultMap.put("server_url_info_list", serverUrlInfoMap);
-	            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
-	        }
-        }
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
