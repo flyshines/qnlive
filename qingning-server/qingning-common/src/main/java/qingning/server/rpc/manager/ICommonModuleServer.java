@@ -129,4 +129,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findCourseByRecommend(Map<String,Object> record);
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
+
+    List<Map<String,Object>> findSystemConfig();
 }

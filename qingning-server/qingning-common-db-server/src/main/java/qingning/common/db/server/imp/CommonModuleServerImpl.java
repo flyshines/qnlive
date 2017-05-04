@@ -90,6 +90,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private BannerInfoMapper bannerInfoMapper;
 
+	@Autowired(required = true)
+	private SystemConfigMapper systemConfigMapper;
 
 
 	@Override
@@ -729,6 +731,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Integer insertCourseMessageList(List<Map<String, Object>> messageList) {
 		return courseMessageMapper.insertCourseMessageList(messageList);
+	}
+
+	@Override
+	public List<Map<String, Object>> findSystemConfig() {
+		return systemConfigMapper.findSystemConfig();
 	}
 
 

@@ -122,6 +122,27 @@ public class CommonController extends AbstractController {
     }
 
     /**
+     *  获取systemConfig
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/systemConfig", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity systemConfig(
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        resultMap.put("system_config", systemConfigMap.get("qnlive"));
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
+
+
+    /**
      * 用户登录
      *
      * @param entity
@@ -188,6 +209,7 @@ public class CommonController extends AbstractController {
         response.sendRedirect(authorizationUrl);
         return;
     }
+
 
 
     /**

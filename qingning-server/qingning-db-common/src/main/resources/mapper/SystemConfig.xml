@@ -5,5 +5,9 @@
   <select id="findCustomerServiceBySystemConfig" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_system_config WHERE config_key = #{config_key}
   </select>
-  
+
+  <select id="findSystemConfig" resultType="hashmap" >
+    select * from t_system_config
+  </select>
+
 </mapper>

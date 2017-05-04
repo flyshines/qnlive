@@ -28,6 +28,10 @@ public abstract class AbstractController {
 
 	protected Map<String,Object> serverUrlInfoMap;
 	private List<Map<String,Object>> serverUrlInfoList;
+
+	protected Map<String,Object> systemConfigMap;
+	private List<Map<String,Object>> systemConfigList;
+
 	protected Long serverUrlInfoUpdateTime;
 	private List<Map<String,Object>> rewardConfigurationList;
 	protected Map<String,Object> rewardConfigurationMap;
@@ -116,8 +120,6 @@ public abstract class AbstractController {
 				processRewardConfigurationList.add(innerMap);
 			}
 		}
-
-
 		if(rewardConfigurationList != null && rewardConfigurationList.size() > 0){
 			rewardConfigurationMap.put("reward_update_time", rewardConfigurationTime);
 			rewardConfigurationMap.put("reward_list", processRewardConfigurationList);
@@ -142,6 +144,20 @@ public abstract class AbstractController {
 			serverInfoMap.put((String)infoMap.get("server_name"), innerMap);
 		}
 		serverUrlInfoMap.put("qnlive",serverInfoMap);
+
+		systemConfigMap = new HashMap<String,Object>();
+		systemConfigList = iCommonModuleServer.findSystemConfig();
+		Map<String,Object>systemConfig = new HashMap<String,Object>();
+		for(int i = 0; i < systemConfigList.size(); i++){
+			Map<String,Object> infoMap = systemConfigList.get(i);
+			Map<String,Object> innerMap = new HashMap<String,Object>();
+			innerMap.put("config_name", infoMap.get("config_name"));
+			innerMap.put("config_key", infoMap.get("config_key"));
+			innerMap.put("config_value", infoMap.get("config_value"));
+			innerMap.put("config_description", infoMap.get("config_description"));
+			systemConfig.put((String)infoMap.get("config_key"), innerMap);
+		}
+		systemConfigMap.put("qnlive",systemConfig);
 
 		rewardConfigurationList = iCommonModuleServer.findRewardConfigurationList();
 		rewardConfigurationMap = new HashMap<>();
