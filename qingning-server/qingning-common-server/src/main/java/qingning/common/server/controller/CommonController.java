@@ -112,12 +112,11 @@ public class CommonController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity serverUrlInfo(
-            @RequestHeader("version") String version,
-            @RequestHeader(value = "appName",defaultValue = "qnlive") String appName) throws Exception {
+            @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        resultMap.put("server_url_info_list", serverUrlInfoMap.get(appName));
+        resultMap.put("server_url_info_list", serverUrlInfoMap.get("qnlive"));
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
