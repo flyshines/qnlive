@@ -126,18 +126,14 @@ public abstract class AbstractController {
 
 	private void generateServerUrlInfoMap() {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
-		//classifyInfoList = iCommonModuleServer.findClassifyInfo();
 		serverUrlInfoList = iCommonModuleServer.getServerUrls();
 		serverUrlInfoMap = new HashMap<String,Object>();
 		Map<String,Object> serverInfoMap = new HashMap<String,Object>();
 		for(int i = 0; i < serverUrlInfoList.size(); i++){
 			Map<String,Object> infoMap = serverUrlInfoList.get(i);
-
 			if(i == 0){
-				Date date = (Date)infoMap.get("update_time");
-				serverUrlInfoUpdateTime = date.getTime();
+				serverUrlInfoUpdateTime = new Date().getTime();
 			}
-
 			Map<String,Object> innerMap = new HashMap<String,Object>();
 			innerMap.put("server_url", infoMap.get("server_url"));
 			innerMap.put("method", infoMap.get("method"));
