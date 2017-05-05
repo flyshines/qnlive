@@ -98,6 +98,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> getServerUrls(String appName) {
+		return serverFunctionMapper.getServerUrls(appName);
+	}
+
+	@Override
 	public Map<String, Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap) {
 		return loginInfoMapper.getLoginInfoByLoginIdAndLoginType(reqMap);
 	}
@@ -117,6 +122,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("gender", reqMap.get("gender"));
 		user.put("create_time", now);
 		user.put("update_time", now);
+		user.put("app_name",reqMap.get("app_name"));
 		user.put("user_role", Constants.USER_ROLE_LISTENER);
 		//位置信息未插入由消息服务处理
 		userMapper.insertUser(user);
@@ -136,6 +142,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			loginInfo.put("union_id",reqMap.get("unionid"));
 			loginInfo.put("web_openid",reqMap.get("web_openid"));
 		}
+
+		loginInfo.put("app_name",reqMap.get("app_name"));
 		loginInfo.put("phone_number", reqMap.get("phone_number"));
 		loginInfo.put("m_user_id", reqMap.get("m_user_id"));
 		loginInfo.put("m_pwd", reqMap.get("m_pwd"));
