@@ -25,7 +25,7 @@
 	<dubbo:registry protocol="zookeeper" address="${zookeeper.address}" />
 
 
-	<dubbo:reference id="commonModuleServer" interface="qingning.server.rpc.manager.ICommonModuleServer" timeout="1200000" version="0.0.1"/>
+	<dubbo:reference id="commonModuleServer" interface="qingning.server.rpc.manager.ICommonModuleServer" timeout="1200000" />
 	 
 </beans>
 
