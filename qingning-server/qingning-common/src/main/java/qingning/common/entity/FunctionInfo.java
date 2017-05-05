@@ -7,6 +7,7 @@ public class FunctionInfo {
 	private String functionName;
 	
 	private boolean accessTokenRequire;
+	private boolean appNameRequire;
 	private long millisecond;
 	private List<InputParameter> inputParameterList = new LinkedList<InputParameter>();
 	private List<OutputParameter> outputParameterList = new LinkedList<OutputParameter>();
@@ -53,4 +54,11 @@ public class FunctionInfo {
 	public List<OutputParameter> getOutputParameterList(){
 		return outputParameterList;
 	}
+
+	public void setAppNameRequire(boolean appNameRequire){this.appNameRequire = appNameRequire;}
+	public boolean isAppNameRequire(){return appNameRequire;}
+
+
+
+
 }
