@@ -166,12 +166,9 @@ public abstract class AbstractController {
 		if(rewardConfigurationList != null){
 			for(int i = 0; i < rewardConfigurationList.size(); i++){
 				Map<String,Object> infoMap = rewardConfigurationList.get(i);
-
 				if(i == 0){
-					Date date = (Date)infoMap.get("update_time");
-					rewardConfigurationTime = date.getTime();
+					rewardConfigurationTime = new Date().getTime();
 				}
-
 				Map<String,Object> innerMap = new HashMap<String,Object>();
 				innerMap.put("reward_id", infoMap.get("reward_id"));
 				innerMap.put("amount", (Long)infoMap.get("amount")/100.0);
@@ -180,13 +177,9 @@ public abstract class AbstractController {
 			}
 		}
 
-
 		if(rewardConfigurationList != null && rewardConfigurationList.size() > 0){
 			rewardConfigurationMap.put("reward_update_time", rewardConfigurationTime);
 			rewardConfigurationMap.put("reward_list", processRewardConfigurationList);
 		}
-
-
-
 	}
 }
