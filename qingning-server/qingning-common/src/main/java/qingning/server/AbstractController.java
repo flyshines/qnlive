@@ -135,8 +135,8 @@ public abstract class AbstractController {
 
 
 	private void generateRewardConfigurationMapByCommonServer(){
-		IUserModuleServer userModuleServer = (IUserModuleServer)applicationContext.getBean("commonModuleServer");
-		rewardConfigurationList = userModuleServer.findRewardConfigurationList();
+		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
+		rewardConfigurationList = iCommonModuleServer.findRewardConfigurationList();
 		rewardConfigurationMap = new HashMap<>();
 		processRewardConfigurationList = new ArrayList<>();
 
