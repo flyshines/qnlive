@@ -87,6 +87,13 @@ public abstract class AbstractController {
 		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(serverUrlInfoMap)){
 			generateServerUrlInfoMap();
 		}
+		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
+			generateRewardConfigurationMapByCommonServer();
+		}
+		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(systemConfigMap)){
+			generateSystemConfigMap();
+		}
+
 		if(reqEntity.getServerName().toString().equals("UserServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
 			generateRewardConfigurationMap();
 		}
@@ -126,6 +133,53 @@ public abstract class AbstractController {
 		}
 	}
 
+
+	private void generateRewardConfigurationMapByCommonServer(){
+		IUserModuleServer userModuleServer = (IUserModuleServer)applicationContext.getBean("commonModuleServer");
+		rewardConfigurationList = userModuleServer.findRewardConfigurationList();
+		rewardConfigurationMap = new HashMap<>();
+		processRewardConfigurationList = new ArrayList<>();
+
+		if(rewardConfigurationList != null){
+			for(int i = 0; i < rewardConfigurationList.size(); i++){
+				Map<String,Object> infoMap = rewardConfigurationList.get(i);
+
+				if(i == 0){
+					Date date = (Date)infoMap.get("update_time");
+					rewardConfigurationTime = date.getTime();
+				}
+
+				Map<String,Object> innerMap = new HashMap<String,Object>();
+				innerMap.put("reward_id", infoMap.get("reward_id"));
+				innerMap.put("amount", (Long)infoMap.get("amount")/100.0);
+				innerMap.put("reward_pos", infoMap.get("reward_pos"));
+				processRewardConfigurationList.add(innerMap);
+			}
+		}
+		if(rewardConfigurationList != null && rewardConfigurationList.size() > 0){
+			rewardConfigurationMap.put("reward_update_time", rewardConfigurationTime);
+			rewardConfigurationMap.put("reward_list", processRewardConfigurationList);
+		}
+	}
+
+	private void generateSystemConfigMap() {
+		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
+		systemConfigMap = new HashMap<String,Object>();
+		systemConfigList = iCommonModuleServer.findSystemConfig();
+		Map<String,Object>systemConfig = new HashMap<String,Object>();
+		for(int i = 0; i < systemConfigList.size(); i++){
+			Map<String,Object> infoMap = systemConfigList.get(i);
+			Map<String,Object> innerMap = new HashMap<String,Object>();
+			innerMap.put("config_name", infoMap.get("config_name"));
+			innerMap.put("config_key", infoMap.get("config_key"));
+			innerMap.put("config_value", infoMap.get("config_value"));
+			innerMap.put("config_description", infoMap.get("config_description"));
+			systemConfig.put((String)infoMap.get("config_key"), innerMap);
+		}
+		systemConfigMap.put("qnlive",systemConfig);
+	}
+
+
 	private void generateServerUrlInfoMap() {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
 		serverUrlInfoList = iCommonModuleServer.getServerUrls();
@@ -144,42 +198,9 @@ public abstract class AbstractController {
 			serverInfoMap.put((String)infoMap.get("server_name"), innerMap);
 		}
 		serverUrlInfoMap.put("qnlive",serverInfoMap);
-
-		systemConfigMap = new HashMap<String,Object>();
-		systemConfigList = iCommonModuleServer.findSystemConfig();
-		Map<String,Object>systemConfig = new HashMap<String,Object>();
-		for(int i = 0; i < systemConfigList.size(); i++){
-			Map<String,Object> infoMap = systemConfigList.get(i);
-			Map<String,Object> innerMap = new HashMap<String,Object>();
-			innerMap.put("config_name", infoMap.get("config_name"));
-			innerMap.put("config_key", infoMap.get("config_key"));
-			innerMap.put("config_value", infoMap.get("config_value"));
-			innerMap.put("config_description", infoMap.get("config_description"));
-			systemConfig.put((String)infoMap.get("config_key"), innerMap);
-		}
-		systemConfigMap.put("qnlive",systemConfig);
-
-		rewardConfigurationList = iCommonModuleServer.findRewardConfigurationList();
-		rewardConfigurationMap = new HashMap<>();
-		processRewardConfigurationList = new ArrayList<>();
-
-		if(rewardConfigurationList != null){
-			for(int i = 0; i < rewardConfigurationList.size(); i++){
-				Map<String,Object> infoMap = rewardConfigurationList.get(i);
-				if(i == 0){
-					rewardConfigurationTime = new Date().getTime();
-				}
-				Map<String,Object> innerMap = new HashMap<String,Object>();
-				innerMap.put("reward_id", infoMap.get("reward_id"));
-				innerMap.put("amount", (Long)infoMap.get("amount")/100.0);
-				innerMap.put("reward_pos", infoMap.get("reward_pos"));
-				processRewardConfigurationList.add(innerMap);
-			}
-		}
-
-		if(rewardConfigurationList != null && rewardConfigurationList.size() > 0){
-			rewardConfigurationMap.put("reward_update_time", rewardConfigurationTime);
-			rewardConfigurationMap.put("reward_list", processRewardConfigurationList);
-		}
 	}
+
+
+
+
 }
