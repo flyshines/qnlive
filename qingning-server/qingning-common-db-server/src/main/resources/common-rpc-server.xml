@@ -44,7 +44,7 @@
 	<bean id="choreographerServer"  class="gcw.manager.db.server.imp.ChoreographerServerImpl"/>
 	<bean id="userManagerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
 	 -->
-	<dubbo:service interface="qingning.server.rpc.manager.ICommonModuleServer" ref="commonModuleServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="qingning.server.rpc.manager.ICommonModuleServer" ref="commonModuleServer"  timeout="1200000" delay="-1" retries="0" version="0.0.1"/>
 	<bean id="commonModuleServer"  class="qingning.common.db.server.imp.CommonModuleServerImpl"/>
 	<import resource="classpath:db-config.xml"/>
 </beans>

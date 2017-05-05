@@ -130,5 +130,5 @@ public interface ICommonModuleServer {
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
 
-    List<Map<String,Object>> findSystemConfig();
+   	public List<Map<String,Object>> findSystemConfig();
 }
