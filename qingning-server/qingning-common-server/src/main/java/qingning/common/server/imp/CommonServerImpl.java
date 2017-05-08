@@ -2989,7 +2989,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 map.put("page_num",zero);
             }
         }
-        if(select_type == 2 || select_type == 0 ){
+        if(select_type == 2 || select_type == 1 ){
             List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
             if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
                 List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(map);//查询推荐课程
