@@ -29,7 +29,7 @@ public class UserController extends AbstractController{
 			HttpEntity<Object> entity,
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userFollowRoom", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
@@ -56,7 +56,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "status", defaultValue = "4") String  status,
 			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -82,7 +82,7 @@ public class UserController extends AbstractController{
 	ResponseEntity getRoomInfo(
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -106,7 +106,7 @@ public class UserController extends AbstractController{
 	ResponseEntity getCourseDetailInfo(
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseDetailInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -134,7 +134,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -165,7 +165,7 @@ public class UserController extends AbstractController{
 			@PathVariable("course_id") String course_id,
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "joinCourse", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
@@ -191,7 +191,7 @@ public class UserController extends AbstractController{
 			@PathVariable("course_id") String course_id,
 			@RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -228,7 +228,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseStudents", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
@@ -247,7 +247,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
@@ -271,7 +271,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "notice_create_time", defaultValue = "") String notice_create_time,
 			@RequestHeader("access_token") String access_token,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "noticeRooms", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
@@ -295,7 +295,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "record_time", defaultValue = "") String record_time,
 			@RequestHeader("access_token") String access_token,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
@@ -320,7 +320,7 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "id", defaultValue = "") String id,
 			@RequestParam(value = "type", defaultValue = "") String type,
 			@RequestHeader("access_token") String access_token,
-			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getCourseOrLiveRoom", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
