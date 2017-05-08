@@ -54,17 +54,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String appName = reqEntity.getAppName();
         reqMap.put("user_id", userId);
 
         //1.更新数据库中关注表的状态
-        Jedis jedis = jedisUtils.getJedis();
+        Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> map = new HashMap<>();
         String roomid = (String)reqMap.get("room_id");
         map.put(Constants.FIELD_ROOM_ID, roomid);
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
         //查询直播间是否存在
         if (!jedis.exists(roomKey)) {
-        	CacheUtils.readLiveRoom(roomid, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedisUtils, true);
+        	CacheUtils.readLiveRoom(roomid, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedis, true);
         	if (!jedis.exists(roomKey)) {
         		throw new QNLiveException("100002");
         	}
@@ -116,19 +117,22 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("userCourses")
     public Map<String, Object> getCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         int status =  Integer.parseInt(reqMap.get("status").toString());//状态 1.预告 2.已结束 4.在直播中
         String course_id = (String)reqMap.get("course_id");//课程id
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
         String classify_id = reqMap.get("classify_id").toString();
-        Map<String, Object> values = getPlatformCourses(userId,status,pageCount,course_id,classify_id);
+        Map<String, Object> values = getPlatformCourses(userId,status,pageCount,course_id,classify_id,appName);
         //Map<String, Object> values = getPlatformCourses(reqEntity);
         //课程列表总数
-        values.put("course_amount",jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedisUtils.getJedis().zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
+        values.put("course_amount",jedis.zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedis.zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
         if(!MiscUtils.isEmpty(values)){
         	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
         	if(!MiscUtils.isEmpty(courseList)){
-        		((JedisBatchCallback)(this.jedisUtils.getJedis())).invoke(new JedisBatchOperation(){
+        		((JedisBatchCallback)(jedis)).invoke(new JedisBatchOperation(){
 					@Override
 					public void batchOperation(Pipeline pipeline, Jedis jedis) {
 						Map<String,Response<String>> nickNames = new HashMap<String,Response<String>>();
@@ -161,7 +165,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings({ "unchecked"})
     private Map<String, Object> getPlatformCourses(RequestEntity reqEntity) throws Exception {
     	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-
+        String appName = reqEntity.getAppName();
     	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
     	reqMap.put("user_id", userId);//用户id
     	String status = (String)reqMap.get("status");//状态 1.预告 2.已结束 4.在直播中
@@ -181,7 +185,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	}
 
     	int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-    	Jedis jedis = jedisUtils.getJedis();
+    	Jedis jedis = jedisUtils.getJedis(appName);
 
     	Set<Tuple> dictionList = null;
     	String startIndexFinish = "+inf";//("+start_time_str;
@@ -245,7 +249,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     			for(int i = 0; i < count; ++i){
     				String courseId = courseList.get(i);
     				queryParam.put("course_id", courseId);
-    				Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+    				Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);
     				MiscUtils.courseTranferState(currentTime, courseInfoMap);
     				cachedCourse.put(courseId, courseInfoMap);
     				if(removePrediction && "4".equals(courseInfoMap.get("status"))){
@@ -300,7 +304,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     				Map<String, String> courseInfoMap = cachedCourse.get(courseId);
     				if(courseInfoMap == null){
     					queryParam.put("course_id", courseId);
-    					courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+    					courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);
     				}
     				if(finishSet.contains(courseId) && !"2".equals(courseInfoMap.get("status"))){
     					queryParam.put("course_id", courseId);
@@ -636,8 +640,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param classify_id 分类id
      */
     @SuppressWarnings({ "unchecked"})
-    private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id) throws Exception{
-        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+    private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id,String appName) throws Exception{
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         long currentTime = System.currentTimeMillis();//当前时间
         int offset = 0;//偏移值
         Set<String> courseIdSet;//查询的课程idset
@@ -668,7 +672,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("course_id", courseId);
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
-                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);//获取当前课程参数
+                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
                 startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
                 endIndex = "+inf";//设置结束位置
@@ -739,7 +743,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
-                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedisUtils, true);//从缓存中读取课程信息
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                 if(jedis.sismember(key, course_id)){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
@@ -768,9 +772,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
-
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         //查询出直播间基本信息
-        Map<String, String> infoMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedisUtils, true);
+        Map<String, String> infoMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedis, true);
         if (CollectionUtils.isEmpty(infoMap)) {
             throw new QNLiveException("100002");
         }
@@ -800,7 +805,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Map<String,Object> queryMap = new HashMap<>();
             queryMap.put("distributer_id", userId);
             queryMap.put("room_id", reqMap.get("room_id").toString());
-            Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, (String)reqMap.get("room_id"), readRoomDistributer, jedisUtils);
+            Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, (String)reqMap.get("room_id"), readRoomDistributer, jedis);
 
             if (! MiscUtils.isEmpty(roomDistributer)) {
                roles.add("4");
@@ -811,17 +816,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedisUtils.getJedis()));
+        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
         return resultMap;
     }
 
-    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap) throws Exception{
+    private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap,String appName,Jedis jedis) throws Exception{
         String share_url ;
         String roomId = courseMap.get("room_id");
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
         queryMap.put("room_id", roomId);
-        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedisUtils);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
 
         boolean isDistributer = false;
         String recommend_code = null;
@@ -829,15 +834,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
             isDistributer = true;
             recommend_code = distributerRoom.get("rq_code");
         }
-
         //是分销员
         if(isDistributer == true){
-            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId + "&recommend_code=" + recommend_code;
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName) + courseId + "&recommend_code=" + recommend_code;
         }else {
             //不是分销员
-            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix") + courseId;
+            share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName) + courseId;
         }
-
         return share_url;
     }
 
@@ -859,7 +862,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
 
-        Jedis jedis = jedisUtils.getJedis();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -893,7 +897,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         queryMap.put("course_id",reqMap.get("course_id").toString());
         resultMap.put("student_list", userModuleServer.findLatestStudentAvatarAddList(queryMap));
         //从缓存中获取直播间信息
-        Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedisUtils, true);
+        Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedis, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
@@ -910,7 +914,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("update_time", courseMap.get("update_time"));
             resultMap.put("course_password", courseMap.get("course_password"));
             resultMap.put("im_course_id", courseMap.get("im_course_id"));
-            resultMap.put("share_url",getCourseShareURL(userId, reqMap.get("course_id").toString(), courseMap));
+            resultMap.put("share_url",getCourseShareURL(userId, reqMap.get("course_id").toString(), courseMap,appName,jedis));
         }else {
             //为用户，则返回用户部分信息
             isStudent = userModuleServer.isStudentOfTheCourse(queryMap);
@@ -946,7 +950,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
 
-        Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedisUtils);
+        Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedis);
         if(! MiscUtils.isEmpty(roomDistributer)){
             if(roomDistributer.get("end_date") != null){
                 Date endDate = new Date(Long.parseLong(roomDistributer.get("end_date")));
@@ -958,7 +962,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         resultMap.put("roles", roles);
 
-        resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis));
+        resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis,appName));
 
         if(!resultMap.get("status").equals("2")){
             if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
@@ -976,7 +980,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getRoomCourses(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         //目前一个讲师仅能创建一个直播间，所以查询的是该讲师发布的课程
-        Jedis jedis = jedisUtils.getJedis();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
@@ -1045,7 +1050,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         		for(Tuple tuple : preDictionSet){
         			String courseId = tuple.getElement();
         			queryParam.put("course_id", courseId);
-        			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+        			Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);
         			MiscUtils.courseTranferState(currentTime, courseInfoMap);
         			cachedCourse.put(courseId, courseInfoMap);
         			String status = (String)courseInfoMap.get("status");
@@ -1102,7 +1107,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             	Map<String,String> courseInfoMap = cachedCourse.get(courseId);
             	queryParam.put("course_id", courseId);
             	if(courseInfoMap==null){
-            		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedisUtils, true);
+            		courseInfoMap = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);
             	}
             	MiscUtils.courseTranferState(currentTime, courseInfoMap);
             	courseList.add(courseInfoMap);
@@ -1153,7 +1158,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_USER_FIELD, userId);
         RequestEntity queryOperation = generateRequestEntity(null, null, null, query);
-        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedisUtils);
+        CacheUtils.readUser(userId, queryOperation, readUserOperation, jedis);
 
 		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
 
@@ -1238,12 +1243,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        Jedis jedis = jedisUtils.getJedis();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         //1.1读取课程信息
         String course_id = (String)reqMap.get("course_id");
         map.put("course_id", course_id);
-        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedisUtils, false);
+        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, false);
         if(MiscUtils.isEmpty(courseInfoMap)){
         	throw new QNLiveException("100004");
         }
@@ -1321,13 +1327,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         jedis.del(key);//删除
 
         nowStudentNum = MiscUtils.convertObjectToLong(courseInfoMap.get("student_num")) + 1;
-        String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
+        String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level",appName);
         JSONArray levelJson = JSON.parseArray(levelString);
         if (levelJson.contains(nowStudentNum + "")) {
             JSONObject obj = new JSONObject();
             //String course_type = courseMap.get("course_type");
             String course_type_content = MiscUtils.convertCourseTypeToContent(course_type);
-            obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content"), course_type_content, MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")), nowStudentNum + ""));
+            obj.put("body", String.format(MiscUtils.getConfigByKey("jpush_course_students_arrive_level_content",appName), course_type_content, MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")), nowStudentNum + ""));
             obj.put("to", courseInfoMap.get("lecturer_id"));
             obj.put("msg_type", "7");
             Map<String, String> extrasMap = new HashMap<>();
@@ -1342,12 +1348,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         	//获取讲师的信息
         	map.clear();
         	map.put("lecturer_id", courseInfoMap.get("lecturer_id"));
-        	Map<String, String> user = CacheUtils.readLecturer(courseInfoMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
+        	Map<String, String> user = CacheUtils.readLecturer(courseInfoMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
 
     		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
     		TemplateData first = new TemplateData();
     		first.setColor("#000000");
-			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first"), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
+			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first",appName), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
     		first.setValue(firstContent);
     		templateMap.put("first", first);
 
@@ -1363,20 +1369,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		templateMap.put("keyword2", orderNo);
 
 			String lastContent;
-			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name") + MiscUtils.RecoveryEmoji(user.get("nick_name"));
+			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name",appName) + MiscUtils.RecoveryEmoji(user.get("nick_name"));
 			String thirdContent = MiscUtils.RecoveryEmoji(courseInfoMap.get("course_remark"));
 			if(! MiscUtils.isEmpty(thirdContent)){
-				lastContent += "\n" + MiscUtils.getConfigByKey("wpush_shop_course_brief") + thirdContent;
+				lastContent += "\n" + MiscUtils.getConfigByKey("wpush_shop_course_brief",appName) + thirdContent;
 			}
-			lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark");
+			lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
     		TemplateData remark = new TemplateData();
     		remark.setColor("#000000");
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
-			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url"), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
-    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course"),url, templateMap, jedis);
+			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
+    		WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course",appName),url, templateMap, jedis,appName);
 		}
 
 		//公开课 执行这段逻辑
@@ -1387,6 +1393,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             map.put("course_id", course_id);
             RequestEntity mqRequestEntity = new RequestEntity();
             mqRequestEntity.setServerName("CourseRobotService");
+            mqRequestEntity.setAppName(appName);
             mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
             mqRequestEntity.setFunctionName("courseHaveStudentIn");
             mqRequestEntity.setParam(map);
@@ -1406,7 +1413,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 
-        Jedis jedis = jedisUtils.getJedis();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -1443,7 +1451,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             //如果存在zsort列表，则从zsort列表中读取
             if (audioIdList != null && audioIdList.size() > 0) {
-                JedisBatchCallback callBack = (JedisBatchCallback) jedisUtils.getJedis();
+                JedisBatchCallback callBack = (JedisBatchCallback)jedis;
                 callBack.invoke(new JedisBatchOperation() {
                     @Override
                     public void batchOperation(Pipeline pipeline, Jedis jedis) {
@@ -1502,13 +1510,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("100004");
             }
 
-            //任意课程都可以免费试听五分钟，不进行是否为该课程学生的校验
-//            Map<String,Object> queryStudentMap = new HashMap<>();
-//            queryStudentMap.put("user_id", userId);
-//            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-//            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
-//                throw new QNLiveException("120007");
-//            }
+
 
             //查询课程PPT列表
             List<Map<String, Object>> pptList = userModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
@@ -1562,13 +1564,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("status",courseMap.get("status"));
         resultMap.put("course_type",courseMap.get("course_type"));
         resultMap.put("course_password",courseMap.get("course_password"));
-        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix")+reqMap.get("course_id").toString());//TODO
+        resultMap.put("share_url",MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+reqMap.get("course_id").toString());//TODO
         resultMap.put("course_update_time",courseMap.get("update_time"));
         resultMap.put("course_title",courseMap.get("course_title"));
         //Map<String,Object> userMap = userModuleServer.findUserInfoByUserId(courseMap.get("lecturer_id"));
         map.clear();
         map.put("lecturer_id", courseMap.get("lecturer_id"));
-        Map<String, String> userMap = CacheUtils.readLecturer(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedisUtils);
+        Map<String, String> userMap = CacheUtils.readLecturer(courseMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
         if(!MiscUtils.isEmpty(userMap)){
         	resultMap.put("lecturer_nick_name",userMap.get("nick_name"));
         	resultMap.put("lecturer_avatar_address",userMap.get("avatar_address"));
@@ -1587,7 +1589,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
         String queryType = reqMap.get("query_type").toString();
 
-        Jedis jedis = jedisUtils.getJedis();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String messageListKey;
@@ -1680,7 +1683,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 					if(messageMap.get("creator_id") != null){
 						Map<String,Object> innerMap = new HashMap<>();
 						innerMap.put("user_id", messageMap.get("creator_id"));
-						Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils);
+						Map<String,String> userMap = CacheUtils.readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
 						if(! MiscUtils.isEmpty(userMap)){
 							if(userMap.get("nick_name") != null){
 								messageMap.put("creator_nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
@@ -1718,6 +1721,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> queryMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
         if(reqMap.get("student_pos") != null && StringUtils.isNotBlank(reqMap.get("student_pos").toString())){
             queryMap.put("student_pos", Long.parseLong(reqMap.get("student_pos").toString()));
@@ -1729,7 +1734,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("student_list", messageList);
         }
 
-        Map<String,String> liveRoomMap = CacheUtils.readCourse(reqMap.get("course_id").toString(),reqEntity,readCourseOperation,jedisUtils,true);
+        Map<String,String> liveRoomMap = CacheUtils.readCourse(reqMap.get("course_id").toString(),reqEntity,readCourseOperation,jedis,true);
         resultMap.put("student_num",liveRoomMap.get("student_num"));
         return resultMap;
 
@@ -1741,7 +1746,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> queryMap = new HashMap<>();
-
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         //获得用户id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         queryMap.put("user_id", userId);
@@ -1756,7 +1762,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(! CollectionUtils.isEmpty(records)){
             Map<String,Object> cacheQueryMap = new HashMap<>();
 
-            JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
             //从缓存中查询讲师的名字
             callBack.invoke(new JedisBatchOperation(){
                 @Override
@@ -1791,12 +1797,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         @SuppressWarnings("unchecked")
 		Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
         final List<Map<String,Object>> list = userModuleServer.findFanInfoByUserId(reqMap);
         resultMap.put("live_room_list", list);
         if(!MiscUtils.isEmpty(list)){
-    		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+    		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
     			@Override
     			public void batchOperation(Pipeline pipeline, Jedis jedis) {
     				Map<String,Response<Set<Tuple>>> courseInfoDictMap = new HashMap<String,Response<Set<Tuple>>>();
@@ -1896,7 +1904,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
     	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
     	reqMap.put("user_id", userId);
-    	Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils);
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+    	Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
     	long course_num = 0;
     	try{
     		course_num = Long.parseLong(values.get("course_num").toString());
@@ -1914,7 +1924,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 	    	final List<Map<String,Object>> list = userModuleServer.findCourseListOfStudent(queryMap);
 	    	result.put("course_list", list);
 	    	if(!MiscUtils.isEmpty(list)){
-	    		((JedisBatchCallback)this.jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+	    		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 	    			@Override
 	    			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 	    	    		long currentTime= System.currentTimeMillis();
@@ -1949,24 +1959,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * TODO 有复用的方法 以后重构是需要进行合并
      * 获取讲师二维码/青柠二维码
      */
-    public Map getQrCode(String lectureId, String userId, Jedis jedis) {
+    public Map getQrCode(String lectureId, String userId, Jedis jedis,String appName) {
         Map<String, String> query = new HashMap();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lectureId);
         //1.判断讲师是否有公众号 有就直接返回
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
         if (jedis.exists(serviceNoKey)) {//判断当前是否有这个缓存
             query.put("qr_code_url",jedis.hgetAll(serviceNoKey).get("qr_code"));
-            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_lecturer"));
-            query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message"));
-            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
+            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_lecturer",appName));
+            query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message",appName));
+            query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_ad",appName));
             return query;
         } else {//2.判断是否有关注我们公众号
             Map<String,Object> map = userModuleServer.findLoginInfoByUserId(userId);
             if(Integer.parseInt(map.get("subscribe").toString())==0){//没有关注
-                query.put("qr_code_url", MiscUtils.getConfigByKey("weixin_qr_code"));
-                query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_qingning"));
-                query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message"));
-                query.put("qr_code_ad", MiscUtils.getConfigByKey("weixin_qr_code_ad"));
+                query.put("qr_code_url", MiscUtils.getConfigByKey("weixin_qr_code",appName));
+                query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_qingning",appName));
+                query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message",appName));
+                query.put("qr_code_ad", MiscUtils.getConfigByKey("weixin_qr_code_ad",appName));
                 return query;
             }
         }
@@ -1988,10 +1998,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }else{
             throw new QNLiveException("000100");
         }
-
-
-
-
       return null;
     }
 

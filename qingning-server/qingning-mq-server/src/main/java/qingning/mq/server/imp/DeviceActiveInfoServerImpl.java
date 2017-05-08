@@ -38,7 +38,7 @@ public class DeviceActiveInfoServerImpl extends AbstractMsgService {
 	}
 	
     @Override
-    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
     	MongoClient mongoClient = mongoDB.getMongoClient();
     	MongoDatabase dataBase = mongoClient.getDatabase(Constants.MONGODB_DEVICE_ACTIVE_DATABASE);    	    	
     	long time = MiscUtils.getDate(System.currentTimeMillis());    	

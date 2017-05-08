@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.Constants;
 import qingning.server.AbstractController;
 
 import java.util.HashMap;
@@ -28,8 +29,9 @@ public class UserController extends AbstractController{
 			HttpEntity<Object> entity,
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userFollowRoom", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userFollowRoom", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -54,8 +56,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "status", defaultValue = "4") String  status,
 			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
 		param.put("course_id", course_id);
@@ -79,8 +82,9 @@ public class UserController extends AbstractController{
 	ResponseEntity getRoomInfo(
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomInfo", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("room_id", room_id);
 		requestEntity.setParam(param);
@@ -102,8 +106,9 @@ public class UserController extends AbstractController{
 	ResponseEntity getCourseDetailInfo(
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseDetailInfo", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseDetailInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("course_id", course_id);
 		requestEntity.setParam(param);
@@ -129,8 +134,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "roomCourses", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("room_id", room_id);
 		param.put("page_count", page_count);
@@ -159,8 +165,9 @@ public class UserController extends AbstractController{
 			@PathVariable("course_id") String course_id,
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "joinCourse", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "joinCourse", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -184,8 +191,9 @@ public class UserController extends AbstractController{
 			@PathVariable("course_id") String course_id,
 			@RequestParam(value = "reward_update_time", defaultValue = "") String reward_update_time,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseInfo", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseInfo", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("course_id", course_id);
 		param.put("reward_update_time", reward_update_time);
@@ -202,38 +210,6 @@ public class UserController extends AbstractController{
 		return responseEntity;
 	}
 
-	//<editor-fold desc="无用">
-	//	/**
-//	 * 查询课程消息列表
-//	 * @param course_id
-//	 * @param page_count
-//	 * @param message_pos
-//	 * @param accessToken
-//	 * @param version
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	@RequestMapping(value = "/user/courses/{course_id}/messages", method = RequestMethod.GET)
-//	public
-//	@ResponseBody ResponseEntity getMessageList(
-//			@PathVariable("course_id") String course_id,
-//			@RequestParam(value = "page_count", defaultValue = "5") String page_count,
-//			@RequestParam(value = "message_pos", defaultValue = "") String message_pos,
-//			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
-//			@RequestParam(value = "message_id", defaultValue = "") String message_id,
-//			@RequestHeader("access_token") String accessToken,
-//			@RequestHeader("version") String version) throws Exception {
-//		RequestEntity requestEntity = this.createResponseEntity("UserServer", "messageList", accessToken, version);
-//		Map<String, Object> parMap = new HashMap<>();
-//		parMap.put("course_id", course_id);
-//		parMap.put("page_count", page_count);
-//		parMap.put("message_pos", message_pos);
-//		parMap.put("query_type", query_type);
-//		parMap.put("message_id", message_id);
-//		requestEntity.setParam(parMap);
-//		return this.process(requestEntity, serviceManger, message);
-//	}
-	//</editor-fold>
 
 	/**
 	 * 查询课程学员列表
@@ -252,8 +228,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseStudents", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "courseStudents", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("course_id", course_id);
 		parMap.put("page_count", page_count);
@@ -270,8 +247,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("position", position);
@@ -293,8 +271,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "notice_create_time", defaultValue = "") String notice_create_time,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "noticeRooms", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "noticeRooms", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("notice_create_time", notice_create_time);
@@ -316,8 +295,9 @@ public class UserController extends AbstractController{
 			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "record_time", defaultValue = "") String record_time,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("record_time", record_time);
@@ -340,39 +320,15 @@ public class UserController extends AbstractController{
 			@RequestParam(value = "id", defaultValue = "") String id,
 			@RequestParam(value = "type", defaultValue = "") String type,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getCourseOrLiveRoom", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getCourseOrLiveRoom", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
 
 
-
-	/**
-	 * 查看 本周推荐课程
-	 * @param page_count
-	 * @param course_id
-	 * @param accessToken
-	 * @param version
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/user/recommend/courses", method = RequestMethod.GET)
-	public
-	@ResponseBody
-	ResponseEntity getRecommendCourse(
-			@RequestParam(value = "page_count", defaultValue = "3") String page_count,
-			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-			@RequestHeader("access_token") String accessToken,
-			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "recommendCourses", accessToken, version);
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("page_count", page_count);
-		param.put("course_id", course_id);
-		requestEntity.setParam(param);
-		return this.process(requestEntity, serviceManger, message);
-	}
 
 
 }

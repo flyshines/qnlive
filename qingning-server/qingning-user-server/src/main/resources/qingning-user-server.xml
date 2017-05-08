@@ -8,6 +8,7 @@
 				<auth>
 					<access_token require="Y" />
 					<timesLimit millisecond="100" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -20,6 +21,7 @@
 			<function name="userCourses">
 				<auth>
 					<access_token require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"/>
@@ -52,6 +54,7 @@
 			<function name="roomInfo">
 				<auth>
 					<access_token require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -77,6 +80,7 @@
 			<function name="courseDetailInfo">
 				<auth>
 					<access_token require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -117,6 +121,7 @@
 			<function name="roomCourses">
 				<auth>
 					<access_token require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
@@ -170,6 +175,7 @@
 			<function name="joinCourse">
 				<auth>
 					<access_token require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="50" />
 				</auth>
 				<inputs>
@@ -182,6 +188,7 @@
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -243,6 +250,7 @@
 			<function name="courseStudents">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -264,6 +272,7 @@
 			<function name="getUserConsumeRecords">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
@@ -295,6 +304,7 @@
 			<function name="noticeRooms">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -319,6 +329,7 @@
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="10" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -343,6 +354,7 @@
 			<function name="getCourseOrLiveRoom">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="id" type="string" require="Y,000100"/>

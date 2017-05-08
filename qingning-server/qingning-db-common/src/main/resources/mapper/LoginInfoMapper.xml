@@ -98,6 +98,9 @@
       <if test="subscribe != null" >
         subscribe,
       </if>
+      <if test="app_name != null" >
+        app_name,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="user_id != null" >
@@ -153,7 +156,10 @@
       </if>
       <if test="subscribe != null" >
         #{subscribe},
-      </if>      
+      </if>
+      <if test="app_name != null" >
+        #{app_name},
+      </if>
     </trim>
   </insert>
   

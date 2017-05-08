@@ -33,8 +33,8 @@ public abstract class MessageServer {
 	 * @param objectKeyId  redis 对象的 的key名称
 	 * @param majorKey	   list 的主键名称
 	 */
-	protected void cacheObjectInfo(List<Map<String, Object>> list,String keyIds,String objectKeyId,String majorKey) {
-		JedisBatchCallback jedisBatchCallback=(JedisBatchCallback)jedisUtils.getJedis();
+	protected void cacheObjectInfo(List<Map<String, Object>> list,String keyIds,String objectKeyId,String majorKey,String appName) {
+		JedisBatchCallback jedisBatchCallback=(JedisBatchCallback)jedisUtils.getJedis(appName);
 		jedisBatchCallback.invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {

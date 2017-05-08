@@ -49,7 +49,7 @@ public class MqThreadPool {
 				}
 				AbstractMsgService service = serviceMap.get(requestEntity.getServerName());
 				try {
-					service.invoke(requestEntity, jedisUtils, context);
+					service.invoke(requestEntity, jedisUtils, context,requestEntity.getAppName());
 				} catch (Exception e) {
 					log.error(e.getMessage());
 				}

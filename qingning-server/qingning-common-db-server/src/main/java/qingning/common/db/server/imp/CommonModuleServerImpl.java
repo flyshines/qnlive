@@ -90,7 +90,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private BannerInfoMapper bannerInfoMapper;
 
-
+	@Autowired(required = true)
+	private SystemConfigMapper systemConfigMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -98,8 +99,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> getServerUrls(String appName) {
-		return serverFunctionMapper.getServerUrls(appName);
+	public List<Map<String, Object>> getServerUrlByAppName(String appName) {
+		return serverFunctionMapper.getServerUrlByAppName(appName);
 	}
 
 	@Override
@@ -365,7 +366,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);			
 		}
-//TODO 定时任务处理，需更新缓存
+		//<editor-fold desc="Description">
+		//TODO 定时任务处理，需更新缓存
 /*		//更新收益表信息
 		Map<String,Object> courses = coursesMapper.findCourseByCourseId(tradeBill.getCourseId());
 		PaymentBill paymentBill = paymentBillMapper.selectByTradeId(tradeBill.getTradeId());
@@ -453,6 +455,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				}
 			}
 		}*/
+		//</editor-fold>
 		return profitRecord;
 	}
 
@@ -739,5 +742,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return courseMessageMapper.insertCourseMessageList(messageList);
 	}
 
+	@Override
+	public List<Map<String, Object>> findSystemConfig() {
+		return systemConfigMapper.findSystemConfig();
+	}
+
+	@Override
+	public List<Map<String, Object>> findSystemConfigByAppName(String appName) {
+		return systemConfigMapper.findSystemConfigByAppName(appName);
+	}
 
 }

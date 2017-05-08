@@ -55,7 +55,7 @@ public class TenPayUtils {
         return sb.toString ();
     }
 
-    public static String getSign(Map<String, String> params, String type){
+    public static String getSign(Map<String, String> params, String type,String appName){
         StringBuilder sb = new StringBuilder ();
         Set es = params.entrySet();//所有参与传参的参数按照accsii排序（升序）
         Iterator it = es.iterator();
@@ -67,48 +67,48 @@ public class TenPayUtils {
         }
         String app_key = null;
         if (type == null || type.equals("0") || type.equals(3)) { //web
-            app_key = TenPayConstant.APP_KEY;
+            app_key = TenPayConstant.getAppKey(appName);
         } else { //app
-            app_key = TenPayConstant.APP_APP_KEY;
+            app_key = TenPayConstant.getAppAppKey(appName);
         }
         System.out.println (sb.toString () + "key=" + app_key);
         return MD5Util.getMD5(sb.toString() + "key=" + app_key).toUpperCase ();
     }
 
-    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid, String type) throws IOException,ParserConfigurationException,SAXException{
-        Map<String, String> params = createParams (goodName, totalFee, terminalIp, outTradeNo, openid, type);
-        params.put ("sign", getSign (params, type));
+    public static Map<String, String> sendPrePay(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid, String type,String appName) throws IOException,ParserConfigurationException,SAXException{
+        Map<String, String> params = createParams (goodName, totalFee, terminalIp, outTradeNo, openid, type,appName);
+        params.put ("sign", getSign (params, type,appName));
         logger.debug("-----微信预支付请求参数"+ params);
-        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.PRE_PAY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
+        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.getPrePayUrl(appName)), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
         logger.debug("-----生成微信预支付单结果"+ payResultMap.toString());
         return payResultMap;
     }
 
-    public static Map<String, String> checkPayResult(String outTradeNo, String type) throws Exception {
+    public static Map<String, String> checkPayResult(String outTradeNo, String type,String appName) throws Exception {
         Map<String, String> params = new TreeMap<String, String> ();
         params.put ("nonce_str", getRandomStr ());
         params.put ("out_trade_no", outTradeNo);
         if (type == null || type.equals("0") || type.equals(3)) {//web
-            params.put ("appid", TenPayConstant.APP_ID);
-            params.put ("mch_id", TenPayConstant.MCH_ID);
+            params.put ("appid", TenPayConstant.getAppId(appName));
+            params.put ("mch_id", TenPayConstant.getMchId(appName));
         } else {//app
-            params.put("appid", TenPayConstant.APP_APP_ID);
-            params.put("mch_id", TenPayConstant.APP_MCH_ID);
+            params.put("appid", TenPayConstant.getAppAppId(appName));
+            params.put("mch_id", TenPayConstant.getAppMchId(appName));
         }
-        params.put ("sign", getSign (params, type));
+        params.put ("sign", getSign (params, type,appName));
 
-        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.ORDER_QUERY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
+        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.getOrderQueryUrl(appName)), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> payResultMap = TenPayXmlUtil.doXMLParse(response);
 
         return payResultMap;
     }
 
-    public static Map<String, String> sendRefundApply(String outTradeNo, String outRefundNo, Integer totalFee,Integer refundFee,String opUserId, String refundAccount) throws Exception {
-        Map<String, String> params = createRefundParams(outTradeNo, outRefundNo, totalFee, refundFee, opUserId, refundAccount);
-        params.put ("sign", getSign (params, "1"));
-        String weixin_refund_url = MiscUtils.getConfigByKey("weixin_refund_url");
-        CloseableHttpClient httpclient = TenPayHttpClientUtil.getWinxinRefundHttpClient(MiscUtils.getConfigByKey("weixin_pay_mch_id"));
+    public static Map<String, String> sendRefundApply(String outTradeNo, String outRefundNo, Integer totalFee,Integer refundFee,String opUserId, String refundAccount,String appName) throws Exception {
+        Map<String, String> params = createRefundParams(outTradeNo, outRefundNo, totalFee, refundFee, opUserId, refundAccount,appName);
+        params.put ("sign", getSign (params, "1",appName));
+        String weixin_refund_url = MiscUtils.getConfigByKey("weixin_refund_url",appName);
+        CloseableHttpClient httpclient = TenPayHttpClientUtil.getWinxinRefundHttpClient(MiscUtils.getConfigByKey("weixin_pay_mch_id",appName));
         String sendContent = TenPayXmlUtil.doXMLCreate(params);
         logger.debug("------发起微信退款请求参数"+ params);
         String response = TenPayHttpClientUtil.doPost(weixin_refund_url, sendContent, httpclient);
@@ -119,10 +119,10 @@ public class TenPayUtils {
     }
 
 
-    private static Map<String, String> createRefundParams(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee, String opUserId, String refundAccount) {
+    private static Map<String, String> createRefundParams(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee, String opUserId, String refundAccount,String appName) {
         Map<String, String> params = new TreeMap<String, String> ();
-        params.put ("appid", TenPayConstant.APP_ID);
-        params.put ("mch_id", TenPayConstant.MCH_ID);
+        params.put ("appid", TenPayConstant.getAppId(appName));
+        params.put ("mch_id", TenPayConstant.getMchId(appName));
         params.put ("nonce_str", getRandomStr ());
         params.put ("out_trade_no", outTradeNo);
         params.put ("nonce_str", getRandomStr ());
@@ -130,7 +130,7 @@ public class TenPayUtils {
         params.put ("total_fee", totalFee.toString());
         params.put ("refund_fee", refundFee.toString());
         if(StringUtils.isBlank(opUserId)){
-            params.put ("op_user_id", TenPayConstant.MCH_ID);
+            params.put ("op_user_id", TenPayConstant.getMchId(appName));
         }else {
             params.put ("op_user_id", opUserId);
         }
@@ -143,33 +143,33 @@ public class TenPayUtils {
     }
 
     public static void main(String[] args) throws Exception {
-        String outTradeNo = "201612230100015";
-        String outRefundNo = MiscUtils.getUUId();
-        Integer totalFee = 1001;
-        Integer refundFee=1001;
-        sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null,null);
+//        String outTradeNo = "201612230100015";
+//        String outRefundNo = MiscUtils.getUUId();
+//        Integer totalFee = 1001;
+//        Integer refundFee=1001;
+//        sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null,null);
     }
 
 
 
-    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid,String type){
+    private static Map<String, String> createParams(String goodName,Integer totalFee,String terminalIp,String outTradeNo,String openid,String type,String appName){
         Map<String, String> params = new TreeMap<String, String> ();
         params.put ("body", goodName);
         params.put ("nonce_str", getRandomStr ());
-        params.put ("notify_url", TenPayConstant.NOTIFY_URL);
+        params.put ("notify_url", TenPayConstant.getNotifyUrl(appName));
         params.put ("out_trade_no", outTradeNo);
         params.put ("spbill_create_ip", terminalIp);
         params.put ("total_fee", totalFee.toString ());
 
         if (type == null || type.equals("0") || type.equals(3)) {//web
             params.put ("openid", openid);
-            params.put ("appid", TenPayConstant.APP_ID);
+            params.put ("appid", TenPayConstant.getAppId(appName));
             params.put ("trade_type", "JSAPI");
-            params.put ("mch_id", TenPayConstant.MCH_ID);
+            params.put ("mch_id", TenPayConstant.getMchId(appName));
         } else {//app
-            params.put("appid", TenPayConstant.APP_APP_ID);
+            params.put("appid", TenPayConstant.getAppAppId(appName));
             params.put("trade_type", "APP");
-            params.put("mch_id", TenPayConstant.APP_MCH_ID);
+            params.put("mch_id", TenPayConstant.getAppMchId(appName));
         }
 
         return params;
@@ -180,15 +180,15 @@ public class TenPayUtils {
         return true;
     }
 
-    public static TradeState queryOrder(String transactionId,String outTradeNo) throws IOException,ParserConfigurationException,SAXException{
+    public static TradeState queryOrder(String transactionId,String outTradeNo,String appName) throws IOException,ParserConfigurationException,SAXException{
         String tradeState = "";
         Map<String, String> params = new TreeMap<String, String> ();
-        params.put ("appid", TenPayConstant.APP_ID);
-        params.put ("mch_id", TenPayConstant.MCH_ID);
+        params.put ("appid", TenPayConstant.getAppId(appName));
+        params.put ("mch_id", TenPayConstant.getMchId(appName));
         params.put ("nonce_str", getRandomStr ());
         params.put ("out_trade_no", outTradeNo);
-        params.put ("sign", getSign (params, "0"));
-        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.ORDER_QUERY_URL), TenPayXmlUtil.doXMLCreate(params).getBytes());
+        params.put ("sign", getSign (params, "0",appName));
+        String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.getOrderQueryUrl(appName)), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> returnMap = TenPayXmlUtil.doXMLParse (response);
         if ("SUCCESS".equals (returnMap.get ("return_code")) && "SUCCESS".equals (returnMap.get ("result_code"))) {
             tradeState = returnMap.get ("trade_state");
@@ -253,7 +253,7 @@ public class TenPayUtils {
      * @return
      * @throws Exception
      */
-    public static boolean isValidSign(SortedMap<String, String> requestMapData) throws Exception {
+    public static boolean isValidSign(SortedMap<String, String> requestMapData,String appName) throws Exception {
         StringBuffer sb = new StringBuffer();
         for (Map.Entry<String, String> entry : requestMapData.entrySet()) {
             if(!"sign".equalsIgnoreCase(entry.getKey())){
@@ -263,9 +263,9 @@ public class TenPayUtils {
         }
         String trade_type = requestMapData.get("trade_type");
         if (trade_type.equals("APP")) {
-            sb.append("key=" + TenPayConstant.APP_APP_KEY);
+            sb.append("key=" + TenPayConstant.getAppAppKey(appName));
         } else  {
-            sb.append("key=" + TenPayConstant.APP_KEY);
+            sb.append("key=" + TenPayConstant.getAppKey(appName));
         }
 
         String sign = MD5Util.getMD5(sb.toString());

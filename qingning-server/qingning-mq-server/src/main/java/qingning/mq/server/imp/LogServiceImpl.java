@@ -94,7 +94,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		Map<String,Object> clientSideInfo = (Map<String,Object>)requestEntity.getParam();
     		if(MiscUtils.isEmpty(clientSideInfo)) return;
     		
-    		preparedLoginUserInfoData(clientSideInfo, jedisUtils);
+    		preparedLoginUserInfoData(clientSideInfo, jedisUtils,requestEntity.getAppName());
     		
     		Map<String,String> clientSideInfoStrMap = new HashMap<String,String>();
     		MiscUtils.converObjectMapToStringMap(clientSideInfo, clientSideInfoStrMap);
@@ -102,7 +102,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		if("0".equals(clientSideInfo.get("status"))){
     			insertActiveDeviceDB(clientSideInfoStrMap);
     		} else if(!"2".equals(clientSideInfo.get("status"))){
-    			insertUserDB(clientSideInfoStrMap,jedisUtils);
+    			insertUserDB(clientSideInfoStrMap,jedisUtils,requestEntity.getAppName());
     		}
     		
     	}catch(Exception e){
@@ -110,12 +110,12 @@ public class LogServiceImpl extends AbstractMsgService {
     	}
     }
     
-    private void preparedLoginUserInfoData(Map<String,Object> map, JedisUtils jedisUtils){
+    private void preparedLoginUserInfoData(Map<String,Object> map, JedisUtils jedisUtils,String appName){
     	if("2".equals(map.get("status"))){
     		return;
     	}
     	
-    	Jedis jedis = jedisUtils.getJedis();
+    	Jedis jedis = jedisUtils.getJedis(appName);
     	String web_country=null;
     	String web_province=null;
     	String web_city=null;
@@ -124,7 +124,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		do{
     			try{
     				JSONObject jsonObject = WeiXinUtil.getBaseUserInfoByAccessToken(
-    						WeiXinUtil.getAccessToken(null, null, jedis).getToken(), (String) map.get("web_openid"));
+    						WeiXinUtil.getAccessToken(null, null, jedis,appName).getToken(), (String) map.get("web_openid"),appName);
     				map.put("subscribe", jsonObject.getString("subscribe"));
     				web_country = (String)map.get("country");
     				web_province = (String)map.get("province");
@@ -197,7 +197,8 @@ public class LogServiceImpl extends AbstractMsgService {
 		}
     }
     
-    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils){
+    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils,String appName){
+    	Jedis jedis = jedisUtils.getJedis(appName);
     	String user_id = (String)values.get("user_id");
     	if(MiscUtils.isEmpty(user_id)){
     		return;
@@ -270,11 +271,11 @@ public class LogServiceImpl extends AbstractMsgService {
     				}
     				return result;
     			}
-    		}, jedisUtils);
+    		}, jedis);
     		Map<String,Object> query = new HashMap<String,Object>();
     		query.put("user_id", user_id);
     		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
-    		jedisUtils.getJedis().hmset(key, info);
+			jedis.hmset(key, info);
 
     	} catch (Exception e) {
     		log.error("read user["+user_id+"]:"+e.getMessage());

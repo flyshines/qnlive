@@ -6,6 +6,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.common.util.wxEncrypt.WXBizMsgCrypt;
 import qingning.server.AbstractController;
@@ -38,8 +39,9 @@ public class LectureController extends AbstractController {
 	@ResponseBody ResponseEntity createLiveRoom(
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createLiveRoom", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createLiveRoom", accessToken, version,appName);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
@@ -60,8 +62,9 @@ public class LectureController extends AbstractController {
 			HttpEntity<Object> entity,
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateLiveRoom", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateLiveRoom", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -82,9 +85,10 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "query_type",defaultValue = "") String query_type,
 			@RequestParam(value = "room_id",defaultValue = "") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version
 	) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "liveRoom", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "liveRoom", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("query_type", query_type);
 		param.put("room_id", room_id);
@@ -108,8 +112,9 @@ public class LectureController extends AbstractController {
 			HttpEntity<Object> entity,
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createCourse", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createCourse", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -129,8 +134,9 @@ public class LectureController extends AbstractController {
 	@ResponseBody ResponseEntity getCourseDetail(
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseDetail", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseDetail", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("course_id", course_id);
 		requestEntity.setParam(param);
@@ -153,8 +159,9 @@ public class LectureController extends AbstractController {
 			HttpEntity<Object> entity,
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateCourse", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateCourse", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -180,8 +187,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseList", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseList", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<String, Object>();
 		parMap.put("page_count", page_count);
 		parMap.put("room_id", room_id);
@@ -208,8 +216,9 @@ public class LectureController extends AbstractController {
 			@PathVariable("course_id") String course_id,
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "processCoursePPTs", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "processCoursePPTs", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
@@ -229,8 +238,9 @@ public class LectureController extends AbstractController {
 	@ResponseBody ResponseEntity getCourseInfo(
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseInfo", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseInfo", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<String, Object>();
 		parMap.put("course_id", course_id);
 		requestEntity.setParam(parMap);
@@ -256,8 +266,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "query_type", defaultValue = "0") String query_type,
 			@RequestParam(value = "message_id", defaultValue = "") String message_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "messageList", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("course_id", course_id);
 		parMap.put("page_count", page_count);
@@ -286,8 +297,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "student_pos", defaultValue = "") String student_pos,
 			@RequestParam(value = "data_source", defaultValue = "") String data_source,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStudents", accessToken, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStudents", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("course_id", course_id);
 		parMap.put("page_count", page_count);
@@ -316,8 +328,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomProfitList", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomProfitList", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("room_id", room_id);
 		parMap.put("page_count", page_count);
@@ -348,8 +361,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value ="position", defaultValue ="") String position,
 			@RequestParam(value ="profit_type", defaultValue ="2") String profit_type,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseProfitList", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseProfitList", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("room_id", room_id);
 		parMap.put("course_id", course_id);
@@ -370,16 +384,17 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value="/lecturer/distribution",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getDistributionInfo(			
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "distributionInfo", access_token, version);		
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "distributionInfo", access_token, version,appName);
 		return this.process(requestEntity, serviceManger, message);
 	}
 	
 	/**
 	 * 获取直播间分销员信息
 	 * @param room_id
-	 * @param page_count 
-	 * @param position 
+	 * @param page_count
+	 * @param position
 	 * @param access_token
 	 * @param version
 	 * @return
@@ -391,8 +406,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
 			@RequestParam(value ="position", defaultValue ="") String position,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerInfo", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerInfo", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("room_id", room_id);
 		parMap.put("page_count", page_count);
@@ -418,8 +434,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
 			@RequestParam(value ="start_time", defaultValue ="") String start_time,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerCoursesInfo", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "roomDistributerCoursesInfo", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("room_id", room_id);
 		parMap.put("distributer_id", distributer_id);
@@ -442,8 +459,9 @@ public class LectureController extends AbstractController {
 			@PathVariable("room_id") String room_id,
 			HttpEntity<Object> entity,			
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomShareCode", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomShareCode", access_token, version,appName);
 		Map<String, Object> parMap = (Map<String, Object>)entity.getBody();
 		parMap.put("room_id", room_id);
 		requestEntity.setParam(parMap);		
@@ -463,8 +481,9 @@ public class LectureController extends AbstractController {
 	public @ResponseBody ResponseEntity createRoomDistributer(
 			HttpEntity<Object> entity,			
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomDistributer", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createRoomDistributer", access_token, version,appName);
 		Map<String, Object> parMap = (Map<String, Object>)entity.getBody();		
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
@@ -485,8 +504,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value ="course_id", defaultValue ="") String course_id,
 			@RequestParam(value ="position", defaultValue ="") String position,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStatistics", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStatistics", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("query_time", start_time);
@@ -511,8 +531,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "fanList", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "fanList", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("room_id", room_id);
 		parMap.put("page_count", page_count);
@@ -531,8 +552,9 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value="/lecturer/customerService",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getCustomerService(
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getCustomerService", access_token, version);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getCustomerService", access_token, version,appName);
 		return this.process(requestEntity, serviceManger, message);
 	}
 
@@ -548,8 +570,9 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "verification_code") String verification_code,
 			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version)throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "verifyVerificationCode", accessToken, null,appName);
 		Map<String,String> map = new HashMap<>();
 		map.put("verification_code",verification_code);
 		map.put("room_id",room_id);
@@ -566,6 +589,7 @@ public class LectureController extends AbstractController {
 			@RequestParam(value = "msg_signature") String msg_signature,
 			@RequestParam(value = "timestamp") String timestamp,
 			@RequestParam(value = "nonce") String nonce,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		//解析XML文件
@@ -577,9 +601,9 @@ public class LectureController extends AbstractController {
 		}
 		if (cryptUtil == null) {
 			cryptUtil = new WXBizMsgCrypt(
-					MiscUtils.getConfigByKey("weixin_service_no_token"),
-					MiscUtils.getConfigByKey("weixin_service_no_aeskey"),
-					MiscUtils.getConfigByKey("weixin_service_no_appid"));
+					MiscUtils.getConfigByKey("weixin_service_no_token",appName),
+					MiscUtils.getConfigByKey("weixin_service_no_aeskey",appName),
+					MiscUtils.getConfigByKey("weixin_service_no_appid",appName));
 		}
 		//微信消息解密
 
@@ -637,7 +661,7 @@ public class LectureController extends AbstractController {
             appidOrTicket = appidNodeL.item(0).getFirstChild().getNodeValue();
 		}
 
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatTicketNotify", null, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatTicketNotify", null, null,appName);
 		Map<String, Object> parMap = new HashMap<>();
         parMap.put("type", type);
 		parMap.put("appidOrTicket", appidOrTicket);
@@ -657,10 +681,11 @@ public class LectureController extends AbstractController {
 	public void wechatAuthRedirect(
 			@RequestParam(value = "auth_code") String auth_code,
 			@RequestParam(value = "expires_in") String expires_in,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatAuthRedirect", null, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatAuthRedirect", null, null,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("auth_code", auth_code);
 		parMap.put("expires_in", expires_in);
@@ -684,9 +709,10 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value="/lecturer/wechat/tobinding",method=RequestMethod.GET)
 	public void tobindServiceNo (
 			HttpServletRequest req,
-			HttpServletResponse resp) throws Exception{
+			HttpServletResponse resp,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception{
 
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindServiceNo", null, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindServiceNo", null, null,appName);
 
 		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
@@ -738,10 +764,11 @@ public class LectureController extends AbstractController {
 	public @ResponseBody ResponseEntity bindingRoom(
 			@RequestHeader("access_token") String access_token,
 			@RequestParam(value = "appid") String appid,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", access_token, null);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "bindingRoom", access_token, null,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("appid", appid);
 		requestEntity.setParam(parMap);
@@ -751,21 +778,20 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * 删除课程
-	 * @param course_id 课程id
+	 * @param entity 课程id
 	 * @param access_token
 	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/lecturer/delCourse", method = RequestMethod.GET)
+	@RequestMapping(value = "/lecturer/course", method = RequestMethod.DELETE)
 	public @ResponseBody ResponseEntity delCourse(
-			@RequestParam("course_id")String course_id,
+			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "appName",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "delCourse", access_token, null);
-		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("course_id",course_id);
-		requestEntity.setParam(parMap);
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "delCourse", access_token, null,appName);
+		requestEntity.setParam(((Map<String,Object>)entity.getBody()));
 		return this.process(requestEntity, serviceManger, message);
 	}
 

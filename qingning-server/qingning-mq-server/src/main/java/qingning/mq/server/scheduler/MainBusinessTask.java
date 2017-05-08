@@ -123,21 +123,21 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	//@Scheduled(cron = "*/5 * * * * ? ")
 	//@Scheduled(cron = "0 */30 * * * ? ")
 	@Scheduled(cron = "0 0 1 * * ?")
-	public void backstageMethod(){
+	public void backstageMethod(String appName){
 		init();
 		logger.info("=====> 主业务定时任务驱动开始  ====");
 		for(AbstractMsgService server : list){
 			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
 			try {
-				server.process(null, jedisUtils, context);
+				server.process(null, jedisUtils, context,appName);
 			} catch (Exception e) {
 				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
 			}
 		}
 	}
 
-	public void loadLecturerID(){
-		Jedis jedis = jedisUtils.getJedis();
+	public void loadLecturerID(String appName){
+		Jedis jedis = jedisUtils.getJedis(appName);
 		if(!jedis.exists(Constants.CACHED_LECTURER_KEY)){
 			int start_pos = 0;
 			int page_count =50000;
@@ -189,8 +189,15 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	
 	@Override
 	public void start() {
-		loadLecturerID();
-		backstageMethod();
+		try {
+            String[] appNames = MiscUtils.getAppName();
+            for(String appName : appNames){
+                backstageMethod(appName);
+                loadLecturerID(appName);
+            }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -213,8 +220,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			return;
 		}
 		if(Constants.REFRESH.equals(event.getAction())){
-			backstageMethod();
-			loadLecturerID();
+            this.start();
 		}
 	}
 

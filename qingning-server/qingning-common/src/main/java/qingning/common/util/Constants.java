@@ -49,6 +49,7 @@ public final class Constants {
 	public static final String INPUTS = "inputs";
 	public static final String OUTPUTS = "outputs";
 	public static final String ACCESSTOKEN = "accessToken";
+	public static final String APP_NAME = "appname";
 	public static final String REQUIRE = "require";
 	public static final String TIMESLIMIT = "timesLimit";
 	public static final String MILLISECOND = "millisecond";
@@ -267,7 +268,62 @@ public final class Constants {
 	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程
 
 
+	public static final String APP_REDIS_INDEX = "app_redis";//配置文件 app的redis 的分区index
 
+
+	// 获取access_token的接口地址（GET） 限2000（次/天）#微信api  获取微信公众号获取全局 access token
+	public final static String ACCESS_TOKEN_URL = "access_token_url";
+	//微信API 通过用户code换取网页授权access_token
+	public final static String GET_USER_INFO_BY_CODE_URL = "get_user_info_by_code_url";
+	//微信API ：拉取用户信息
+	public final static String GET_USER_INFO_BY_ACCESS_TOKEN = "get_user_info_by_access_token";
+
+	public final static String GET_BASE_USER_INFO_BY_ACCESS_TOKEN = "get_base_user_info_by_access_token";
+	//微信api 获取用户基本信息（包括UnionID机制）
+	public final static String GET_USER_BY_OPENID = "get_user_by_openid";
+	//获取JSAPI_Ticket
+	public static String JSAPI_TICKET_URL = "jsapi_ticket_url";
+	//获得微信素材多媒体URL
+	public static String GET_MEDIA_URL = "get_media_url";
+	//微信appid
+	public static final String APPID = "appid";
+	//微信appsecret
+	public static final String APPSECRET = "appsecret";
+	//微信app 支付的appid
+	public static final String APP_APP_ID = "app_app_id";
+	//#微信api 模板消息推送
+	public final static String WEIXIN_TEMPLATE_PUSH_URL = "weixin_template_push_url";//"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
+	//#开放平台中AppID
+	public static final String SERVICE_NO_APPID = "weixin_service_no_appid";
+	//#开放平台中AppSecret
+	public static final String SERVICE_NO_APPSECRET = "weixin_service_no_secret";
+	//#微信api 获取第三方平台access_token POST
+	public final static String COMPONENT_ACCESS_TOKEN_URL = "service_component_access_token_url";
+	//#微信api 获取预授权码  POST
+	public final static String PRE_AUTH_CODE_URL = "service_pre_auth_code";
+	//#微信api 引导进入授权页面 该网址中第三方平台方需要提供第三方平台方appid、预授权码和回调URI
+	public final static String SERVICE_AUTH_URL = "service_auth_url";
+	//#微信api 使用授权码换取公众号的授权信息 POST
+	public final static String SERVICE_AUTH_INFO_URL = "service_auth_info_url";
+	//#微信api 获取（刷新）授权公众号的令牌
+	public final static String SERVICE_AUTH_REFRESH_INFO_URL = "service_auth_refresh_info_url";
+	//#微信api 获取授权方的账户信息
+	public final static String SERVICE_AUTH_ACCOUNT_INFO_URL = "service_auth_account_info_url";
+	//
+	public final static String SERVICE_TEMPLATE_INFO_URL = "service_template_info_url";
+	//#微信api 获取用户列表
+	public final static String SERVICE_FANS_URL1 = "service_fans_url1";
+	//#微信api  关注者数量超过10000时当公众号关注者数量超过10000时，可通过填写next_openid的值，从而多次拉取列表的方式来满足需求。
+	//##具体而言，就是在调用接口时，将上一次调用得到的返回中的next_openid值，作为下一次调用中的next_openid值。
+	public final static String SERVICE_FANS_URL2 = "service_fans_url2";
+	//微信pcappid
+	public static final String PC_NO_APPID = "weixin_pc_no_appid";
+	//微信pcappsectet
+	public static final String PC_NO_APPSECRET = "weixin_pc_no_secret";
+	//
+	public static final String PC_AUTH_ACCOUNT_INFO_URL = "pc_auth_account_info_url";
+
+	public static final String HEADER_APP_NAME = "qnlive";
 
 
 }

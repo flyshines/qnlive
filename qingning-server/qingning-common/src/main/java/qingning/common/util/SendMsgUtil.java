@@ -14,8 +14,10 @@ import java.util.*;
 public class SendMsgUtil {
 
     public static void main(String[] args) {
-        sendMsgCode("18676365713", "短信测试青柠！");
+       // sendMsgCode("18676365713", "短信测试青柠！");
 //    	getMsgDeliver();
+        //sendMsgCodeByDlive();
+        System.out.println("3a01dda81e8cada809b70f33677b43e3".length());
     }
     private static ResourceBundle bundle = null;
 
@@ -33,9 +35,9 @@ public class SendMsgUtil {
         }
         //短信接口验证
         Map<String, String> params = new HashMap<String, String>();
-        String msgUrl = "http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
-        params.put("userId", "H11559");//msg_user_id=J03219
-        params.put("password", "262247");//msg_password=262241
+        String msgUrl = MiscUtils.getConfigKey("msg_url");//"http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
+        params.put("userId", MiscUtils.getConfigKey("msg_user_id"));//msg_user_id=J03219
+        params.put("password", MiscUtils.getConfigKey("msg_pass_word"));//msg_password=262241
 
         params.put("pszMobis", phone);
         params.put("pszMsg", content);
@@ -54,6 +56,27 @@ public class SendMsgUtil {
 
         return str;
     }
+
+    /**
+     * 发短信验证码
+     */
+    public static String sendMsgCodeByDlive() {
+        String str = "";
+        List<String> list = new ArrayList<String>();
+
+        //短信接口验证
+        Map<String, String> params = new HashMap<String, String>();
+        String msgUrl ="https://www.opercenter.com/oppf/service/dtalkv/notice/send_verificationcode";
+        params.put("notice_type ","1");
+        params.put("notice_obj", "18676365713");//msg_password=262241
+        params.put("notice_msg", "123456");//msg_password=262241
+        params.put("business_id", "qnlive18676365713");//msg_password=262241
+
+        String postData = HttpTookit.doPost(msgUrl, params);
+        return str;
+    }
+
+
 
 
 //    /**

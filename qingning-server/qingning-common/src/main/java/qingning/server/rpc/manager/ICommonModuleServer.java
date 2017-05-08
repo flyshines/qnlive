@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public interface ICommonModuleServer {
-	public List<Map<String, Object>> getServerUrls();
-
+	List<Map<String, Object>> getServerUrls();
+	List<Map<String, Object>> getServerUrlByAppName(String appName);
 	Map<String,Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap);
 
 	Map<String,String> initializeRegisterUser(Map<String, Object> reqMap);
@@ -129,4 +129,8 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findCourseByRecommend(Map<String,Object> record);
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
+
+	public List<Map<String,Object>> findSystemConfig();
+
+	public List<Map<String,Object>> findSystemConfigByAppName(String appName);
 }

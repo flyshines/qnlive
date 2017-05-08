@@ -339,7 +339,7 @@ public final class MiscUtils {
     }
  
     public static String getUUId() {
-        return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
+        return getConfigKey("server.number")+UUID.randomUUID().toString().replace("-", "");
         //return UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -389,7 +389,7 @@ public final class MiscUtils {
         return oddBuilder.reverse().toString()+evenbuilder.toString();
     }
  
-    public static String getConfigByKey(String key) {
+    public static String getConfigKey(String key) {
         String value="";
         if(isEmptyString(key)){
             return null;
@@ -402,7 +402,6 @@ public final class MiscUtils {
         } catch(Exception e){
             //TODO add log info
         }
- 
         return value;
     }
     
@@ -717,7 +716,7 @@ public final class MiscUtils {
     /**
      * 生成[min, max]之间的随机数
      * @param min
-     * @param value2
+     * @param max
      * @return
      */
     public static int getRandomIntNum(int min, int max){
@@ -805,68 +804,79 @@ public final class MiscUtils {
 		return result;
 	}
 
+    private static String CONFIG_PROPERTY_PATH="classpath:application.properties";//共有的配置文件路径
+    private static String CONFIG_PROPERTY_APP_PATH="classpath:appservice.properties";//接入几个app
+    private static  Map<String, Map<String, String>> APP_SERVICE_MAP = null;//存入的map
+    private static String[] APP_NAME = null;
 
-    private static String CONFIG_PROPERTY_PATH="classpath:appservice.properties";
-    private static Map<String, Object> APP_SERVICE_MAP = null;
+    public static String[] getAppName() throws Exception {
+        if(!isEmpty(APP_NAME)){
+            Map<String, String> appMap = convertPropertiesFileToMap(CONFIG_PROPERTY_APP_PATH);//先读取app配置 介入几个app
+            String app_service = appMap.get("app_service").toString();//获取总共接入几个app
+            APP_NAME = app_service.split(",");//切分
+        }
+        return APP_NAME;
+    }
 
-    //<editor-fold desc="初始化读取服务配置文件,看一下需要搭配几个服务">
-//    static{
-//        InputStream input = null;
-//        try{
-//            if(CONFIG_PROPERTY_PATH.toLowerCase().startsWith("classpath:")){
-//                String fileName = CONFIG_PROPERTY_PATH.substring("classpath:".length());
-//                input = MiscUtils.class.getClassLoader().getResourceAsStream(fileName);
-//                if(input==null){
-//                    CONFIG_PROPERTY_PATH=MiscUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-//                    CONFIG_PROPERTY_PATH=CONFIG_PROPERTY_PATH.substring(0, CONFIG_PROPERTY_PATH.lastIndexOf(File.separatorChar)+1)+fileName;
-//                }
-//            }
-//            if(input==null){
-//                input = new FileInputStream(CONFIG_PROPERTY_PATH);
-//            }
-//
-//            Properties properties = new Properties();
-//            properties.load(input);
-//            for(String name : properties.stringPropertyNames()){
-//                APP_SERVICE_MAP.put(name, properties.getProperty(name));
-//            }
-//            String app_service = APP_SERVICE_MAP.get("app_service").toString();
-//            String[] split = app_service.split(",");
-//            for(String appName : split){
-//                String path = APP_SERVICE_MAP.get(appName+"_application").toString();
-//                Map<String, String> propertiesMap = convertPropertiesFileToMap(path);
-//                APP_SERVICE_MAP.put(appName,propertiesMap);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally{
-//            if(input!=null){
-//                try {
-//                    input.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-    //</editor-fold>
+    /**
+     * 解析接入app 的配置文件 读取app相关的配置文件和共有配置文件
+     * @return
+     * @throws Exception
+     */
+    private static Map<String, Map<String, String>> convertAppPropertiesFileToMap() throws Exception {
+        Map<String, String> appMap = convertPropertiesFileToMap(CONFIG_PROPERTY_APP_PATH);//先读取app配置 介入几个app
+        String app_service = appMap.get("app_service").toString();//获取总共接入几个app
+        APP_NAME = app_service.split(",");//切分
 
-//
+        Map<String, String> configPropertyMap =  convertPropertiesFileToMap(CONFIG_PROPERTY_PATH);//共有配置
+        Map<String, Map<String, String>> propertiesMap = new HashMap<>();//返回的参数
+        for(String appName : APP_NAME){
+            String path = appMap.get(appName+"_application").toString();//app配置文件
+            Map<String, String> appConfigMap = convertPropertiesFileToMap(path);//读取app的配置
+            appConfigMap.putAll(configPropertyMap);//加入共有配置
+            propertiesMap.put(appName,appConfigMap);
+        }
+        return propertiesMap;
+    }
 
-
-    public static String getConfigByKey(String appName,String key) {
+    public static String getConfigByKey(String key,String appName) {
         String value="";
-        if(appName != null && !appName.equals("")){
+        if(isEmptyString(key) || isEmptyString(appName) ){
             return null;
         }
         try{
-            Map<String,String> map = (Map<String, String>) APP_SERVICE_MAP.get(appName);
-            value = map.get(key);
+            if(APP_SERVICE_MAP==null){
+                APP_SERVICE_MAP= MiscUtils.convertAppPropertiesFileToMap();
+            }
+            value = APP_SERVICE_MAP.get(appName).get(key);
         } catch(Exception e){
-            //TODO add log info
         }
-
         return value;
     }
+
+    /**
+     * 根据appid 获取appname
+     * @param appId
+     * @return
+     */
+    public static String getAppNameByAppid(String appId){
+        for (Map.Entry<String,Map<String,String>> entry : APP_SERVICE_MAP.entrySet()) {
+            if(entry.getValue().get(Constants.APPID).equals(appId) || entry.getValue().get(Constants.APP_APP_ID).equals(appId)){
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * 判断是否存在appname
+     * @param appName
+     * @return
+     */
+    public static boolean isAppName(String appName){
+        return APP_SERVICE_MAP.containsKey(appName);
+    }
+
 
 }

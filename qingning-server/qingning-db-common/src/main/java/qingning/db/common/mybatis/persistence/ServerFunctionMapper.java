@@ -5,4 +5,5 @@ import java.util.Map;
 
 public interface ServerFunctionMapper {
     List<Map<String,Object>> getServerUrls();
+    List<Map<String,Object>> getServerUrlByAppName(String app_name);
 }

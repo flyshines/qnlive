@@ -37,16 +37,15 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 	
 	/**
 	 * 查询系统级别缓存
-	 * @param jedis
 	 * @param keyIds        id集合的key值
 	 * @param objectKeyId   对象key值的SYS:BILL:前缀  如："SYS:BILL:"+订单号
 	 * @param num 当前页数
 	 * @param pageCount  每页条数
 	 * @return
 	 */
-	protected List<Map<String, String>> sysPagedQuery(String keyIds, String objectKeyId, Long num, Long pageCount) {
+	protected List<Map<String, String>> sysPagedQuery(String keyIds, String objectKeyId, Long num, Long pageCount,String appName) {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-		JedisBatchCallback jedisBatchCallback = (JedisBatchCallback) jedisUtils.getJedis();
+		JedisBatchCallback jedisBatchCallback = (JedisBatchCallback) jedisUtils.getJedis(appName);
 		jedisBatchCallback.invoke(new JedisBatchOperation() {
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
@@ -297,7 +296,7 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void validateRequestParamters(RequestEntity reqEntity) throws Exception {
-		
+		String appName = reqEntity.getAppName();
 		String functionName = reqEntity.getFunctionName();
 		FunctionInfo functionInfo = null;
 		if(!MiscUtils.isEmpty(functionName)){
@@ -307,7 +306,6 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		if(functionInfo == null){
 			throw new QNLiveException("000001");
 		}
-		
 		
 		String accessToken = reqEntity.getAccessToken();
 		Map<String,Object> map = new HashMap<String,Object>();
@@ -321,11 +319,11 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 			}
 			//TODO check accessToken
 			//从redis中获取accessToken，取到则代表验证通过并且顺延时间，取不到则代表验证失败
-			Jedis jedis = jedisUtils.getJedis();
+			Jedis jedis = jedisUtils.getJedis(appName);
 			if(jedis != null){
 				if(jedis.exists(accessTokenKey)){
 					//将accessTokenKey有效期顺延3个小时
-					jedis.expire(accessTokenKey, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time")));
+					jedis.expire(accessTokenKey, Integer.parseInt(MiscUtils.getConfigKey("access_token_expired_time")));
 				}else {
 					throw new QNLiveException("000003");
 				}
@@ -333,10 +331,13 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 				throw new QNLiveException("000005");
 			}
 		}
-		
-
+		if(functionInfo.isAppNameRequire()){
+			if(!MiscUtils.isAppName(appName)){
+				throw new QNLiveException("000007");
+			}
+		}
 		if(functionInfo.isTimesLimitsRequire() && !MiscUtils.isEmpty(accessToken)){
-			Jedis jedis = jedisUtils.getJedis();
+			Jedis jedis = jedisUtils.getJedis(appName);
 			if(jedis != null){
 				long currentTime = System.currentTimeMillis();
 				String funName=reqEntity.getServerName()+"-"+reqEntity.getFunctionName();
@@ -412,9 +413,9 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		}
 	}
 	
-	public String getAutoNumber(String key){
+	public String getAutoNumber(String key,String appName){
 		String result = null;
-		Jedis jedis = jedisUtils.getJedis();
+		Jedis jedis = jedisUtils.getJedis(appName);
 		if(jedis.exists(key)){
 			result = jedis.get(key);
 			jedis.set(key, String.valueOf(Integer.parseInt(result)+1));
@@ -425,8 +426,8 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 		return result;
 	}
 	
-	public void updateCache(String key, Map<String, Object> inMap){
-		Jedis jedis = jedisUtils.getJedis();
+	public void updateCache(String key, Map<String, Object> inMap,String appName){
+		Jedis jedis = jedisUtils.getJedis(appName);
 		Map<String, String> map = new HashMap<String, String>();
 		for(Map.Entry<String, Object> entry : inMap.entrySet()) {
 		   if(!MiscUtils.isEmpty(entry.getValue())){

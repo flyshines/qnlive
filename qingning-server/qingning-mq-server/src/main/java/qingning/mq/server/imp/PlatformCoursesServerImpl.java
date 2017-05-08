@@ -30,14 +30,14 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     private CourseImageMapper courseImageMapper;
 
     @Override
-    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
         //将讲师的课程列表放入缓存中
-        processPlatformCoursesCache(requestEntity, jedisUtils, context);
+        processPlatformCoursesCache(requestEntity, jedisUtils, context,appName);
     }
 
 
-    private void processPlatformCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-    	JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
+    private void processPlatformCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) {
+    	JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
     	callBack.invoke(new JedisBatchOperation(){
     		@Override
     		public void batchOperation(Pipeline pipeline, Jedis jedis) { 

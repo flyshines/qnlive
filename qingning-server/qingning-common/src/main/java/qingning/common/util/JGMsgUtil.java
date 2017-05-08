@@ -36,9 +36,9 @@ public class JGMsgUtil {
 	private static String appKey = null;
 	private static boolean apnsProduction = false;
 	static {
-		masterSecret = MiscUtils.getConfigByKey("jg_master_secret");
-		appKey = MiscUtils.getConfigByKey("jg_app_key");
-		apnsProduction = Boolean.valueOf(MiscUtils.getConfigByKey("apns_production"));
+		masterSecret = MiscUtils.getConfigKey("jg_master_secret");
+		appKey = MiscUtils.getConfigKey("jg_app_key");
+		apnsProduction = Boolean.valueOf(MiscUtils.getConfigKey("apns_production"));
 	}
 	
 	public static void sendMsg(String plat, List<String> audiences, String contents,  Integer count,

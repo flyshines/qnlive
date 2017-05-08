@@ -39,7 +39,34 @@ public final class JedisUtils {
 		this.config=config;
 	}
 
-	public Jedis getJedis(){
+
+//	public Jedis getJedis(int index){
+//		Jedis jedis = null;
+//		JedisPool pool = getJedisPool();
+//		if(pool!=null){
+//			if(jedisProxy==null){
+//				jedisProxy = new JedisProxy(this);
+//			}
+//			jedis= jedisProxy.getJedis();
+//			jedis.select(index);
+//		}
+//		return jedis;
+//	}
+
+	public Jedis getJedis(String appName){
+		Jedis jedis = null;
+		JedisPool pool = getJedisPool();
+		if(pool!=null){
+			if(jedisProxy==null){
+				jedisProxy = new JedisProxy(this);
+			}
+			jedis= jedisProxy.getJedis();
+			jedis.select(Integer.valueOf(MiscUtils.getConfigByKey(Constants.APP_REDIS_INDEX,appName)));
+		}
+		return jedis;
+	}
+
+	public Jedis getJedis2(){
 		Jedis jedis = null;
 		JedisPool pool = getJedisPool();
 		if(pool!=null){
@@ -50,7 +77,7 @@ public final class JedisUtils {
 		}
 		return jedis;
 	}
-	
+
 	public String getConfigKeyValue(String key){
 		String value=null;
 		if(!MiscUtils.isEmpty(key) && !MiscUtils.isEmpty(config)){
@@ -132,7 +159,7 @@ public final class JedisUtils {
 			enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
 			enhancer.setCallback(this);
 			jedis = (Jedis)enhancer.create();
-			this.jedisUtils=jedisUtils;			
+			this.jedisUtils=jedisUtils;
 		}
 		
 		public Jedis getJedis(){

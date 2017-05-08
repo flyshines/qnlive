@@ -90,16 +90,16 @@ public class MongoDB {
 	}
 	public MongoClient getMongoClient(String db){
 		MongoClientOptions.Builder buide = new MongoClientOptions.Builder();
-		buide.connectionsPerHost(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.maxConnection")));
-		buide.connectTimeout(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.outTime")));
-		buide.maxWaitTime(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.maxWait")));
-		buide.threadsAllowedToBlockForConnectionMultiplier(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.maxBlockThreads")));
-		buide.maxConnectionIdleTime(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.maxConnIdleTime")));
-		buide.maxConnectionLifeTime(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.maxConnLifeTime")));
-		buide.socketTimeout(Integer.valueOf(MiscUtils.getConfigByKey("mongodb.socketOutTime")));
-		buide.socketKeepAlive(MiscUtils.getConfigByKey("mongodb.socketKeepAlive").equals("Y"));
+		buide.connectionsPerHost(Integer.valueOf(MiscUtils.getConfigKey("mongodb.maxConnection")));
+		buide.connectTimeout(Integer.valueOf(MiscUtils.getConfigKey("mongodb.outTime")));
+		buide.maxWaitTime(Integer.valueOf(MiscUtils.getConfigKey("mongodb.maxWait")));
+		buide.threadsAllowedToBlockForConnectionMultiplier(Integer.valueOf(MiscUtils.getConfigKey("mongodb.maxBlockThreads")));
+		buide.maxConnectionIdleTime(Integer.valueOf(MiscUtils.getConfigKey("mongodb.maxConnIdleTime")));
+		buide.maxConnectionLifeTime(Integer.valueOf(MiscUtils.getConfigKey("mongodb.maxConnLifeTime")));
+		buide.socketTimeout(Integer.valueOf(MiscUtils.getConfigKey("mongodb.socketOutTime")));
+		buide.socketKeepAlive(MiscUtils.getConfigKey("mongodb.socketKeepAlive").equals("Y"));
 		MongoClientOptions options = buide.build();
-		mongoClient = new MongoClient(new ServerAddress(MiscUtils.getConfigByKey("mongodb.ip"),Integer.valueOf(MiscUtils.getConfigByKey("mongodb.port"))), options);
+		mongoClient = new MongoClient(new ServerAddress(MiscUtils.getConfigKey("mongodb.ip"),Integer.valueOf(MiscUtils.getConfigKey("mongodb.port"))), options);
 		return mongoClient;
 	}
 

@@ -7,6 +7,7 @@
 			<function name="createLiveRoom">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
@@ -21,6 +22,7 @@
 			<function name="updateLiveRoom">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
@@ -37,6 +39,7 @@
 			<function name="liveRoom">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  />
@@ -55,6 +58,7 @@
 			<function name="createCourse">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<!--<timesLimit millisecond="100" />-->
 				</auth>
 				<inputs>
@@ -97,6 +101,7 @@
 			<function name="courseDetail">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -126,6 +131,7 @@
 			<function name="updateCourse">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="1500" />
 				</auth>
 				<inputs>
@@ -153,6 +159,7 @@
 			<function name="courseList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
@@ -230,6 +237,7 @@
 			<function name="processCoursePPTs">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
@@ -242,6 +250,7 @@
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -277,6 +286,7 @@
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -302,6 +312,7 @@
 			<function name="courseStudents">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -327,6 +338,7 @@
 			<function name="roomProfitList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
@@ -394,6 +406,7 @@
 			<function name="courseProfitList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -451,6 +464,7 @@
 			<function name="distributionInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>					
 				</inputs>
@@ -469,6 +483,7 @@
 			<function name="roomDistributerInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -517,6 +532,7 @@
 			<function name="roomDistributerCoursesInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string"/>
@@ -541,6 +557,7 @@
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="100" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="type" type="string" default="0"/>
@@ -563,6 +580,7 @@
 			<function name="createRoomDistributer">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
@@ -575,6 +593,7 @@
 			<function name="courseStatistics">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -643,6 +662,7 @@
 			<function name="fanList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" />
@@ -662,6 +682,7 @@
 			<function name="getCustomerService">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -682,6 +703,7 @@
 			<function name="wechatAuthRedirect">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -692,6 +714,7 @@
 			<function name="bindServiceNo">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -702,6 +725,7 @@
 			<function name="bindingRoom">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="appid" type="string" />
@@ -713,6 +737,7 @@
 			<function name="verifyVerificationCode">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="verification_code" type="string" require="Y,00010"/>
@@ -724,6 +749,7 @@
 			<function name="delCourse">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,00010"/>

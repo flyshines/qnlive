@@ -85,6 +85,18 @@ public class ServiceManger {
 							functionInfo.setAccessTokenRequire(true);
 						}
 					}
+					Element appName = auth.getChild(Constants.APP_NAME);
+					if(appName != null){
+						String require = appName.getAttributeValue(Constants.REQUIRE);
+						if(require!=null){
+							require=require.trim().toLowerCase();
+						}
+						if("y".equals(require)){
+							functionInfo.setAppNameRequire(true);
+						}
+					}
+
+
 					Element timesLimit = auth.getChild(Constants.TIMESLIMIT);
 					if(timesLimit!=null){
 						long time = -1;

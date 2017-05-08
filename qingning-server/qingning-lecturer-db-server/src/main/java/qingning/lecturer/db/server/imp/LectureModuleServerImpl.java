@@ -200,7 +200,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		if("2".equals(reqMap.get("status"))){
 			course.put("end_time", now);
 			course.put("status", "2");			
-		}else {
+		}else if("5".equals(reqMap.get("status"))) {
+			course.put("update_time", now);
+			course.put("status", "5");
+		}else{
 			Object course_title = reqMap.get("course_title");
 			Object start_time = reqMap.get("start_time");
 			if(!MiscUtils.isEmpty(course_title)){
@@ -214,7 +217,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			course.put("course_password", reqMap.get("course_password"));
 			if(!MiscUtils.isEmpty(reqMap.get("update_time"))){
 				course.put(Constants.SYS_FIELD_LAST_UPDATE_TIME, new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time"))));
-			}		
+			}
 		}
 		course.put("update_time", now);		
 		updateCount=coursesMapper.updateCourse(course);

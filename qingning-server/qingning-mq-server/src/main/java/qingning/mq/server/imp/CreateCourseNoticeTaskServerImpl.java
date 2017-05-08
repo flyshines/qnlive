@@ -25,21 +25,21 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	private CoursesMapper coursesMapper;
 	private MessagePushServerImpl messagePushServerImpl;
 	@Override
-	public void process(RequestEntity requestEntity, final JedisUtils jedisUtils, ApplicationContext context) throws Exception {
+	public void process(RequestEntity requestEntity, final JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
 		if(messagePushServerImpl==null){
 			messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
 		}
-		((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
+		((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-				processCreateCourseNoticeTask(lecturerSet, pipeline, jedis, jedisUtils, context);
+				processCreateCourseNoticeTask(lecturerSet, pipeline, jedis, jedisUtils, context,appName);
 			}    		 
 		});
 	}
 
     private void processCreateCourseNoticeTask(Set<String> lecturerSet, Pipeline pipeline, 
-    		Jedis jedis, JedisUtils jedisUtils, ApplicationContext context){
+    		Jedis jedis, JedisUtils jedisUtils, ApplicationContext context,String appName){
     	for(String lecturerId : lecturerSet){
     		Map<String,Object> map = new HashMap<>();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
@@ -89,14 +89,14 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
                     if(realStartTime>0){
                     	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
-                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context,appName);
                     	
                     	map.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context,appName);
                     	map.remove(Constants.OVERTIME_NOTICE_TYPE_30);                    	
-                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context,appName);
                     } else {
-                    	messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context,appName);
                     }
             	}
             	if(time>currentTime){
@@ -111,7 +111,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	                    
 	                    //开课时间到但是讲师未出现提醒
 	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
-	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
+	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context,appName);
 	                   
 	            	} else if((date-currentDate)/(1000*60*60*24) == 1){
 	                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   

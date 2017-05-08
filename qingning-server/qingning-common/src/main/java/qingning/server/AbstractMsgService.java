@@ -9,7 +9,7 @@ import qingning.server.annotation.FunctionName;
 
 public abstract class AbstractMsgService {
 	private HashMap<String, Method> methodMap = new HashMap<String, Method>();
-	public void invoke(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception{
+	public void invoke(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception{
 		if(requestEntity==null){
 			return;
 		}
@@ -44,11 +44,11 @@ public abstract class AbstractMsgService {
 			processed=true;
 		}
 		if(!processed){
-			process(requestEntity, jedisUtils, context);
+			process(requestEntity, jedisUtils, context,appName);
 		}
 	}
 
-	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception{
+	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception{
 
 	}
 

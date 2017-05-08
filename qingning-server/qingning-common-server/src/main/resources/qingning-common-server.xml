@@ -16,6 +16,7 @@
 			<function name="userLogin">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="login_id" type="string" require="Y,000100"  />
@@ -48,6 +49,7 @@
 			<function name="qiNiuUploadToken">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 					<param name="upload_type" type="string" require="Y,000100"  />
@@ -59,6 +61,7 @@
 			<function name="weiXinConfiguration">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="url" type="string" require="Y,000100"  />
@@ -70,6 +73,7 @@
 			<function name="weixinCodeUserLogin">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="code" type="string"  validate="(code)=>{
@@ -98,6 +102,7 @@
 			<function name="pcCodeUserLogin">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="code" type="string"  validate="(code)=>{
@@ -114,6 +119,7 @@
 			<function name="generateWeixinPayBill">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
@@ -135,6 +141,7 @@
 			<function name="userInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="query_type" type="string" require="Y,000100"  format="^[1-2]$,120011"/>
@@ -146,6 +153,7 @@
 			<function name="checkWeixinPayBill">
 				<auth>
 					<accessToken require="Y"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="payment_id" type="string"></param>
@@ -175,6 +183,7 @@
 			<function name="commonDistribution">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"/>
@@ -224,6 +233,7 @@
 			<function name="roomDistributerRecommendInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -247,6 +257,7 @@
 			<function name="roomDistributionInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -294,6 +305,7 @@
 			<function name="courseDistributionInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -343,6 +355,7 @@
 			<function name="roomDistributionShareInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"/>
@@ -359,6 +372,7 @@
 			<function name="updateUserInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="100" />
 				</auth>
 				<inputs>
@@ -373,6 +387,7 @@
 			<function name="getCourseInviteCard">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"/>
@@ -385,6 +400,7 @@
 			<function name="getRoomInviteCard">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"/>
@@ -397,6 +413,7 @@
 			<function name="logUserInfo">
 				<auth>
 					<accessToken require="N" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 					<param name="login_id" type="string"/>
@@ -425,6 +442,7 @@
 			<function name="distributorsRecommendUser">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="recommend_code" type="string" require="Y,000100"/>
@@ -436,6 +454,7 @@
 			<function name="createFeedback">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="1000" />
 				</auth>
 				<inputs>
@@ -449,6 +468,7 @@
 			<function name="convertWeixinResource">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 					<timesLimit millisecond="300" />
 				</auth>
 				<inputs>
@@ -462,6 +482,8 @@
 			<function name="getShareInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="png" type="string"  require="N"/>
@@ -489,6 +511,7 @@
 			<function name="getCourseRecommendUsers">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"/>
@@ -525,6 +548,7 @@
 			<function name="getVersion">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="plateform" type="int"  require="Y,000100"/>
@@ -536,6 +560,7 @@
 			<function name="control">
 				<auth>
 					<accessToken require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="plateform" type="int"  require="Y,000100"/>
@@ -547,6 +572,7 @@
 			<function name="sendVerificationCode">
 				<auth>
 					<accessToken require="N"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="phone" type="string"  require="Y,000100"/>
@@ -558,6 +584,7 @@
 			<function name="isphone">
 				<auth>
 					<accessToken require="N"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="phone_num" type="string"  require="Y,000100"/>
@@ -568,6 +595,7 @@
 			<function name="search">
 				<auth>
 					<accessToken require="Y"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="classify_id" type="string"   require="N" />
@@ -603,6 +631,7 @@
 			<function name="recommendCourse">
 				<auth>
 					<accessToken require="Y"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="select_type" type="string"   require="Y,000100" />
@@ -627,6 +656,7 @@
 			<function name="banner">
 				<auth>
 					<accessToken require="Y"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -644,6 +674,7 @@
 			<function name="classifyInfo">
 				<auth>
 					<accessToken require="Y"/>
+					<appName require="Y" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -669,6 +700,7 @@
 			<function name="messageList">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100" />
@@ -681,6 +713,7 @@
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
