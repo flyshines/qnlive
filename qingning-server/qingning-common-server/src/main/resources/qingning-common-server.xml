@@ -7,6 +7,7 @@
 			<function name="serverTime">
 				<auth>
 					<accessToken require="N" />
+					<appName require="N" />
 				</auth>
 
 				<outputs>

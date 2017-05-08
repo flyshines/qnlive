@@ -810,7 +810,7 @@ public final class MiscUtils {
     private static String[] APP_NAME = null;
 
     public static String[] getAppName() throws Exception {
-        if(!isEmpty(APP_NAME)){
+        if(isEmpty(APP_NAME)){
             Map<String, String> appMap = convertPropertiesFileToMap(CONFIG_PROPERTY_APP_PATH);//先读取app配置 介入几个app
             String app_service = appMap.get("app_service").toString();//获取总共接入几个app
             APP_NAME = app_service.split(",");//切分
