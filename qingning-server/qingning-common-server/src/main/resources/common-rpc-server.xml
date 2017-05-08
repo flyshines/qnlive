@@ -23,17 +23,9 @@
 	<context:property-placeholder location="classpath:application.properties" />
 	<dubbo:application name="qingning-common-server"/>
 	<dubbo:registry protocol="zookeeper" address="${zookeeper.address}" />
-	
-	 <!-- 
-	<dubbo:reference id="courseManagerServer" interface="gcw.server.rpc.manager.ICourseManagerServer" timeout="1200000"/>
-	<dubbo:reference id="billsManagerServer" interface="gcw.server.rpc.manager.IBillsManagerServer" timeout="1200000"/>
-	<dubbo:reference id="choreographerServer" interface="gcw.server.rpc.manager.IChoreographerServer" timeout="1200000"/>
-	<dubbo:reference id="userManagerServer" interface="gcw.server.rpc.manager.IUserManagerServer" timeout="1200000"/>
-	<dubbo:reference id="incomeManagerServer" interface="gcw.server.rpc.manager.IIncomeManagerServer" timeout="1200000"/>
-	<dubbo:reference id="distributorManagerServer" interface="gcw.server.rpc.manager.IDistributorManagerServer" timeout="1200000"/>
-	 -->
 
-	<dubbo:reference id="commonModuleServer" interface="qingning.server.rpc.manager.ICommonModuleServer" timeout="1200000"/>
+
+	<dubbo:reference id="commonModuleServer" interface="qingning.server.rpc.manager.ICommonModuleServer" timeout="1200000" />
 	 
 </beans>
 
