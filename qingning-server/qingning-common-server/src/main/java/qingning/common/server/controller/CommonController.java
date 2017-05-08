@@ -150,35 +150,18 @@ public class CommonController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity serverUrlInfo(
+            @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
-        ResponseEntity responseEntity = new ResponseEntity();
-        Map<String, Object> resultMap = new HashMap<>();
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
         resultMap.put("server_url_info_list", serverUrlInfoMap.get(appName));
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
 
-    /**
-     *  获取systemConfig
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/systemConfig", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity systemConfig(
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        resultMap.put("system_config", systemConfigMap.get(appName));
-        responseEntity.setReturnData(resultMap);
-        return responseEntity;
-    }
+
 
 
     /**
@@ -990,6 +973,25 @@ public class CommonController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-
+    /**
+     *  获取systemConfig
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/systemConfig", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity systemConfig(
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        resultMap.put("system_config", systemConfigMap.get(appName));
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
 
 }

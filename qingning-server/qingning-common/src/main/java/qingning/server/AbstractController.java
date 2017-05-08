@@ -175,10 +175,9 @@ public abstract class AbstractController {
 	private void generateSystemConfigMap() throws Exception {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
 		systemConfigMap = new HashMap<String,Object>();
-		Map<String,Object>systemConfig = new HashMap<String,Object>();
 		String[] appNameArray = MiscUtils.getAppName();//获取总共有几个app
 		for(String appName : appNameArray){
-			systemConfig.clear();//清空对象数据
+			Map<String,Object>systemConfig = new HashMap<String,Object>();
 			systemConfigList = iCommonModuleServer.findSystemConfigByAppName(appName);
 			for(int i = 0; i < systemConfigList.size(); i++){
 				Map<String,Object> infoMap = systemConfigList.get(i);
@@ -189,10 +188,10 @@ public abstract class AbstractController {
 				innerMap.put("config_description", infoMap.get("config_description"));
 				systemConfig.put((String)infoMap.get("config_key"), innerMap);
 			}
-			systemConfigMap.put(appName,systemConfig);
+			if(!MiscUtils.isEmpty(systemConfig)){
+				systemConfigMap.put(appName,systemConfig);
+			}
 		}
-
-
 	}
 
 	/**
