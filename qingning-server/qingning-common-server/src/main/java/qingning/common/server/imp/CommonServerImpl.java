@@ -3059,7 +3059,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
         if(!MiscUtils.isEmpty(classifyList)){
-            resultMap.put("classifyInfo",classifyList);
+            resultMap.put("classify_info",classifyList);
         }
         return resultMap;
     }
