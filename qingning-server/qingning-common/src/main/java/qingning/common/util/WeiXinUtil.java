@@ -297,9 +297,14 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
-
+    /**
+     * 微信登录用code 拉去用户信息
+     * @param code
+     * @param appName
+     * @return
+     */
     public static JSONObject getUserInfoByCode(String code,String appName) {
-        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_ACCESS_TOKEN,appName).replace("APPID", MiscUtils.getConfigByKey(Constants.APPID,appName)).replace("APPSECRET",MiscUtils.getConfigByKey(Constants.APPSECRET,appName)).replace("CODE",code);
+        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL,appName).replace("APPID", MiscUtils.getConfigByKey(Constants.APPID,appName)).replace("APPSECRET",MiscUtils.getConfigByKey(Constants.APPSECRET,appName)).replace("CODE",code);
         log.debug("------微信--通过H5传递code获得access_token-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
