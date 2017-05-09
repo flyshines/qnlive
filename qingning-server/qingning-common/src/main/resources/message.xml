@@ -109,6 +109,8 @@
 				<entry key="160001" value="正在直播的课程无法被删除"/>
 				<entry key="160002" value="当前操作的课程已产生收益,删除操作失败"/>
 				<entry key="160003" value="没有权限删除他人创建的课程"/>
+				<entry key="160004" value="当前课程已被删除"/>
+
 			</map>
 		</property>
 	</bean>	

@@ -2492,7 +2492,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.校验该课程是否属于该讲师
         Map<String,String> courseMap = jedis.hgetAll(courseKey);
-
+        if(Integer.valueOf(courseMap.get("status")) == 5){
+            throw new QNLiveException("160004");
+        }
         String courseOwner = courseMap.get("lecturer_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//根据安全证书获取userId
         if(courseOwner.equals(userId)){//判断是否是老师
