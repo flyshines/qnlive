@@ -10,6 +10,7 @@
     <if test="search_text != null">
       and room_name like #{search_text}
     </if>
+      and app_name = #{appName}
     order by create_time limit #{page_num},#{page_count}
 </select>
 

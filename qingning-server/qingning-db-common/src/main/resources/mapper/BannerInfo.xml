@@ -6,5 +6,9 @@
   <select id="findBannerInfoAll" resultType="hashmap"  >
     select * from t_banner_info where  `status` = 1
   </select>
+
+  <select id="findBannerInfoAllByAppName" resultType="hashmap"  >
+    select * from t_banner_info where  `status` = 1 and app_name = #{appName}
+  </select>
   
 </mapper>

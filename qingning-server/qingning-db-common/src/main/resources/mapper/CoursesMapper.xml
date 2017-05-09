@@ -130,11 +130,12 @@
     <if test="search_text != null">
       and course_title like #{search_text}
     </if>
+    and app_name = #{appName}
     order by start_time limit #{page_num},#{page_count}
   </select>
 
-  <select id="findCourseByRecommend" resultType="hashmap" parameterType="hashmap" >
-      SELECT * FROM t_courses WHERE recommend_seat  <![CDATA[ <> ]]> 0 ORDER BY recommend_seat
+  <select id="findCourseByRecommend" resultType="hashmap" parameterType="java.lang.String" >
+      SELECT * FROM t_courses WHERE app_name = #{appName} and recommend_seat  <![CDATA[ <> ]]> 0   ORDER BY recommend_seat
   </select>
 
   <insert id="insertCourse" parameterType="hashmap" >

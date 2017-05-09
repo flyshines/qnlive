@@ -5,4 +5,6 @@ import java.util.Map;
 
 public interface ClassifyInfoMapper {
     List<Map<String, Object>> findClassifyInfo();
+
+    List<Map<String, Object>> findClassifyInfoByAppName(String appName);
 }

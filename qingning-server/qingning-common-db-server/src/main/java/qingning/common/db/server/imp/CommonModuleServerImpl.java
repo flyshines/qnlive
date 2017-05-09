@@ -718,6 +718,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findClassifyInfoByAppName(String appName) {
+		return classifyInfoMapper.findClassifyInfoByAppName(appName);
+	}
+
+	@Override
 	public List<Map<String, Object>> findCourseBySearch(Map<String, Object> reqMap) {
 		return coursesMapper.findCourseBySearch(reqMap);
 	}
@@ -733,8 +738,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findCourseByRecommend(Map<String, Object> record) {
-		return coursesMapper.findCourseByRecommend(record);
+	public List<Map<String, Object>> findBannerInfoAllByAppName(String appName) {
+		return bannerInfoMapper.findBannerInfoAllByAppName(appName);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseByRecommend(String appName) {
+		return coursesMapper.findCourseByRecommend(appName);
 	}
 
 	@Override
@@ -751,5 +761,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findSystemConfigByAppName(String appName) {
 		return systemConfigMapper.findSystemConfigByAppName(appName);
 	}
+
+
 
 }

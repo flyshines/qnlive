@@ -5,4 +5,5 @@ import java.util.Map;
 
 public interface BannerInfoMapper {
     List<Map<String, Object>> findBannerInfoAll();
+    List<Map<String, Object>> findBannerInfoAllByAppName(String appName);
 }

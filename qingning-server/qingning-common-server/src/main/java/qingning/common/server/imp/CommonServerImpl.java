@@ -2881,6 +2881,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("search")
     public Map<String, Object> search (RequestEntity reqEntity) throws Exception{
         Map<String, Object> resultMap = new HashMap<String, Object>();
+        String appName = reqEntity.getAppName();
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
         reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
@@ -2894,8 +2895,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Integer page_count = Integer.valueOf(map.get("page_count").toString());
         map.put("page_count",page_count);
         int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
-
+        Jedis jedis = jedisUtils.getJedis(appName);
+        map.put("appName",appName);
 
         //查询所有 或者 查询直播间
         if(search_type ==0 || search_type == 1){
@@ -2912,19 +2913,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 for(Map<String, Object> liveRoom : liveRoomBySearch){
                     if(jedis.sismember(key, liveRoom.get("room_id").toString())){//判断当前用户是否有加入这个课程
-                        liveRoom.put("fens", "Y");
+                        liveRoom.put("fens", "1");
                     } else {
-                        liveRoom.put("fens", "N");
+                        liveRoom.put("fens", "0");
                     }
                 }
-                resultMap.put("roomList",liveRoomBySearch);
+                resultMap.put("room_list",liveRoomBySearch);
             }
         }
 
         //查询所有 或者 查询课程
         if(search_type ==0 || search_type == 2){
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
-            resultMap.put("courseList",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
+            resultMap.put("course_list",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
         }
         return resultMap;
 
@@ -2987,7 +2988,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(select_type == 2 || select_type == 1 ){
             List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
             if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
-                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(map);//查询推荐课程
+                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(appName);//查询推荐课程
                 jedis.set(Constants.RECOMMEND_COURSE_NUM,""+recommendCourseList.size());
                 for(Map<String, Object> recommendCourse : recommendCourseList){
                     jedis.zadd(Constants.CACHED_KEY_RECOMMEND_COURSE, Integer.valueOf( recommendCourse.get("recommend_seat").toString()),recommendCourse.get("course_id").toString());
@@ -3007,7 +3008,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 int startIndex = page_num;
                 int endIndex = page_num + page_count-1;
                 Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//获取推荐课程
-                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//如果是缓一缓 并且 查询的结果不够
+                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//如果是换一换 并且 查询的结果不够
                     startIndex = 0;
                     endIndex = page_count - recommendCourseIdSet.size() - 1;
                     recommendCourseIdSet.addAll(jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex));
@@ -3057,7 +3058,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
         }else{ //没有
-             classifyList = commonModuleServer.findClassifyInfo();//读数据库
+             classifyList = commonModuleServer.findClassifyInfoByAppName(appName);//读数据库
             Map<String,String> classify_info = new HashMap<>();
             for(Map<String, Object>classify : classifyList){
                 jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
@@ -3111,7 +3112,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }else{ //不存在
-                bannerInfoList = commonModuleServer.findBannerInfoAll();//查找广告位
+                bannerInfoList = commonModuleServer.findBannerInfoAllByAppName(appName);//查找广告位
                 if(! MiscUtils.isEmpty(bannerInfoList)){
                     Map<String,String> banner_info = new HashMap<>();
                     for(Map<String, Object> bannerInfo : bannerInfoList){

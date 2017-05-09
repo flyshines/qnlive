@@ -119,14 +119,16 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findClassifyInfo();
+	List<Map<String,Object>> findClassifyInfoByAppName(String appName);
 
 	List<Map<String,Object>> findCourseBySearch(Map<String, Object> reqMap);
 
 	List<Map<String, Object>> findLiveRoomBySearch(Map<String,Object> record);
 
 	List<Map<String, Object>> findBannerInfoAll();
+	List<Map<String,Object>> findBannerInfoAllByAppName(String appName);
 
-	List<Map<String,Object>> findCourseByRecommend(Map<String,Object> record);
+	List<Map<String,Object>> findCourseByRecommend(String appName);
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
 
