@@ -98,7 +98,7 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader(value="version", defaultValue="") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "control", null, null,null);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "control", null, null,appName);
         Map<String,String> map = new HashMap<>();
         map.put("plateform",plateform);
         requestEntity.setParam(map);
