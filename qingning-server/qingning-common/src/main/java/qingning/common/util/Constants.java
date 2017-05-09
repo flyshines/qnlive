@@ -264,8 +264,10 @@ public final class Constants {
 	public static final String CACHED_KEY_BANNER_INFO = "SYS:BANNER:{banner_id}";//横幅信息
 	public static final String CACHED_KEY_BANNER = "banner_id";//横幅id
 
-	public static final Integer RECOMMEND_COURSE_NUM = 30;//推荐课程最大数
+	public static final String RECOMMEND_COURSE_NUM = "SYS:RECOMMEND:COURSE:COUNT";//推荐课程最大数
 	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程
+
+	public static final String COURSE_DEFAULT_CLASSINFY="9";//课程默认属性
 
 
 	public static final String APP_REDIS_INDEX = "app_redis";//配置文件 app的redis 的分区index

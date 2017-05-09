@@ -441,7 +441,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.clear();
         String classify_id = "";
         if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
-            classify_id= "1";
+            classify_id= Constants.COURSE_DEFAULT_CLASSINFY;
         }else{
             classify_id = reqMap.get("classify_id").toString();
         }
