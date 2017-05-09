@@ -184,6 +184,7 @@ public class CommonController extends AbstractController {
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
         map.put("state",state);
+        String appName = state;
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",state);
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -193,13 +194,13 @@ public class CommonController extends AbstractController {
         if(key == 1){
             //正常跳转到首页
             String userWeixinAccessToken = (String) resultMap.get("access_token");
-            response.sendRedirect(MiscUtils.getConfigByKey("web_index",state)+userWeixinAccessToken);
+            response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
             return ;
         }
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url",state);//手动授权url
-        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",state)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",state));//修改参数
+        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url",appName);//手动授权url
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",appName)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",appName)).replace("STATE", appName);//修改参数
         response.sendRedirect(authorizationUrl);
         return ;
     }

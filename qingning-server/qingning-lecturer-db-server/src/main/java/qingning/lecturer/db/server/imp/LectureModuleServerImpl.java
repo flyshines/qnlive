@@ -79,6 +79,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		//1.插入直播间表
 		Map<String,Object> liveRoom = new HashMap<String,Object>();
 		liveRoom.put("room_id", reqMap.get("room_id"));
+		liveRoom.put("appName",reqMap.get("appName"));
 		liveRoom.put("user_id", reqMap.get("user_id"));
 		liveRoom.put("rq_code", reqMap.get("room_id"));
 		liveRoom.put("room_address", reqMap.get("room_address"));
@@ -156,6 +157,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String,Object> createCourse(Map<String, Object> reqMap) {
 		Map<String,Object> course = new HashMap<String,Object>();
 		course.put("course_id", MiscUtils.getUUId());
+		course.put("appName",reqMap.get("appName"));
 		course.put("room_id", reqMap.get("room_id"));
 		course.put("lecturer_id", reqMap.get("user_id"));
 		course.put("course_title", reqMap.get("course_title"));

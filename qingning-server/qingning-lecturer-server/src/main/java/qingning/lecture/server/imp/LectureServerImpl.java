@@ -63,6 +63,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String room_id = MiscUtils.getUUId();
         reqMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName) + room_id);
         reqMap.put("room_id", room_id);
+        reqMap.put("appName",appName);
         //0.目前校验每个讲师仅能创建一个直播间
         //1.缓存中读取直播间信息
         Map<String, Object> map = new HashMap<>();
@@ -355,6 +356,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //1.判断直播间是否属于当前讲师
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
         String appName = reqEntity.getAppName();
+        reqMap.put("appName",appName);
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readLiveRoomOperation, jedis, true);
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {

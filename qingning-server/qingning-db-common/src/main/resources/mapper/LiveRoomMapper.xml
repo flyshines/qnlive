@@ -76,6 +76,9 @@
       <if test="status != null" >
         status,
       </if>
+      <if test="appName != null" >
+        app_name,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="room_id != null" >
@@ -131,6 +134,9 @@
       </if>
       <if test="status != null" >
         #{status},
+      </if>
+      <if test="appName != null" >
+        #{appName},
       </if>
     </trim>  
   </insert>
