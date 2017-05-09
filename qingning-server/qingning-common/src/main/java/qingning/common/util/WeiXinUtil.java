@@ -337,32 +337,19 @@ public class WeiXinUtil {
  
 
     /**
-     * 未关注公众号，已经授权，通过accessToken和union_id获得用户详细信息
+     * 未关注公众号，已经授权，通过accessToken和openid获得用户详细信息
      * @param accessToken
      * @return
      */
     public static JSONObject getUserInfoByAccessToken(String accessToken, String unionId,String appName) {
         String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_ACCESS_TOKEN,appName).replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
-        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestUrl);
+        log.debug("------微信--通过access_token和openid获得用户详细信息-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
-        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestResult);
+        log.debug("------微信--通过access_token和openid获得用户详细信息-请求URL  "+requestResult);
         return jsonObject;
     }
 
-    /**
-     * 获取用户基本信息
-     * @param accessToken
-     * @return
-     */
-    public static JSONObject getBaseUserInfoByAccessToken(String accessToken, String unionId,String appName) {
-        String requestUrl =MiscUtils.getConfigByKey(Constants.GET_BASE_USER_INFO_BY_ACCESS_TOKEN,appName) .replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
-        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestUrl);
-        String requestResult = HttpTookit.doGet(requestUrl);
-        JSONObject jsonObject = JSON.parseObject(requestResult);
-        log.debug("------微信--通过access_token和unionId获得用户详细信息-请求URL  "+requestResult);
-        return jsonObject;
-    }
 
     /**
      * 获取jsapi_ticket

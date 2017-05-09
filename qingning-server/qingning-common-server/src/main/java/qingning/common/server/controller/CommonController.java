@@ -181,11 +181,6 @@ public class CommonController extends AbstractController {
             @RequestParam("code") String code,
             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
-//        StringBuffer url = request.getRequestURL();//获取路径
-//        Map<String, String[]> params = request.getParameterMap();
-//        String[] codes = params.get("code");//拿到的code的值
-//        String code = codes[0];
-//        String state = codes[1];
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
         map.put("state",state);
@@ -213,10 +208,6 @@ public class CommonController extends AbstractController {
     public void pcLogin(     @RequestParam("code") String code,
                              @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
-//        StringBuffer url = request.getRequestURL();//获取路径
-//        Map<String, String[]> params = request.getParameterMap();
-//        String[] codes = params.get("code");//拿到的code的值
-//        String code = codes[0];
         Map<String, String> map = new HashMap<>();
         map.put("code", code);
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "",state);

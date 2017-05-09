@@ -123,7 +123,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		int count = 0;
     		do{
     			try{
-    				JSONObject jsonObject = WeiXinUtil.getBaseUserInfoByAccessToken(
+    				JSONObject jsonObject = WeiXinUtil.getUserByOpenid(
     						WeiXinUtil.getAccessToken(null, null, jedis,appName).getToken(), (String) map.get("web_openid"),appName);
     				map.put("subscribe", jsonObject.getString("subscribe"));
     				web_country = (String)map.get("country");
