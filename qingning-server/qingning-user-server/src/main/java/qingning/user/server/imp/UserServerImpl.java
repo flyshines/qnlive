@@ -871,7 +871,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(courseKey)) {
             Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
             courseMap = courseCacheMap;
-
             room_id = courseCacheMap.get("room_id").toString();
 
         } else {
@@ -966,9 +965,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis,appName));
 
         if(!resultMap.get("status").equals("2")){
-            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//如果课程开始时间小于服务器时间
-                resultMap.put("status",4);
-            }
+            resultMap.put("status",courseMap.get("status"));
         }
         return resultMap;
     }
