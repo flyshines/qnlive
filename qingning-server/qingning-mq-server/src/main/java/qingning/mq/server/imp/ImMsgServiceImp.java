@@ -69,6 +69,9 @@ public class ImMsgServiceImp implements ImMsgService {
 		Map<String,Object> body = imMessage.getBody();
 		String msgType = body.get("msg_type").toString();
 		String appName = body.get("app_name").toString();
+		if(appName == null || appName.equals("")){
+			appName = Constants.HEADER_APP_NAME;
+		}
 		switch (msgType){
 			case "1"://存储聊天消息
 				processSaveCourseMessages(imMessage, jedisUtils, context,appName);
