@@ -25,7 +25,7 @@ public class SendMsgUtil {
     /**
      * 发短信验证码
      */
-    public static String sendMsgCode(String phone, String content) {
+    public static String sendMsgCode(String phone, String content,String appName) {
         String str = "";
         List<String> list = new ArrayList<String>();
 
@@ -35,9 +35,9 @@ public class SendMsgUtil {
         }
         //短信接口验证
         Map<String, String> params = new HashMap<String, String>();
-        String msgUrl = MiscUtils.getConfigKey("msg_url");//"http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
-        params.put("userId", MiscUtils.getConfigKey("msg_user_id"));//msg_user_id=J03219
-        params.put("password", MiscUtils.getConfigKey("msg_pass_word"));//msg_password=262241
+        String msgUrl = MiscUtils.getConfigByKey("msg_url",appName);//"http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateSendSubmit";//;//http://61.145.229.29:9006/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?userId=J01967&password=901882&pszMobis=
+        params.put("userId", MiscUtils.getConfigByKey("msg_user_id",appName));//msg_user_id=J03219
+        params.put("password", MiscUtils.getConfigByKey("msg_pass_word",appName));//msg_password=262241
 
         params.put("pszMobis", phone);
         params.put("pszMsg", content);

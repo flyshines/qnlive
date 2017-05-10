@@ -2270,7 +2270,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);
             jedis.setex(phoneKey,20*60,phoneNum);
 
-            String result = SendMsgUtil.sendMsgCode(phoneNum, message);
+            String result = SendMsgUtil.sendMsgCode(phoneNum, message,appName);
             logger.info("【梦网】（" + phoneNum + "）发送短信内容（" + message + "）返回结果：" + result);
             if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
                 throw new QNLiveException("130006");
