@@ -784,7 +784,7 @@ public class LectureController extends AbstractController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/lecturer/course", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/lecturer/course", method = RequestMethod.PUT)
 	public @ResponseBody ResponseEntity delCourse(
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String access_token,

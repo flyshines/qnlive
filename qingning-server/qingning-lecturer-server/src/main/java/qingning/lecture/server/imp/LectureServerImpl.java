@@ -3049,7 +3049,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Map<String,Object> infomation = new HashMap<>();
                 infomation.put("course_id", reqMap.get("course_id").toString());
                 infomation.put("creator_id", userId);
-                infomation.put("message", "");
+                infomation.put("message", MiscUtils.getConfigByKey("del_cource_message",appName));
                 infomation.put("message_type", "1");
                 infomation.put("send_type", "8");//8.删除课程踢人
                 infomation.put("message_id",MiscUtils.getUUId());
