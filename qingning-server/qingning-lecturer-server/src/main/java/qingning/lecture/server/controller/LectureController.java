@@ -778,7 +778,7 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * 删除课程
-	 * @param cource_id 课程id
+	 * @param course_id 课程id
 	 * @param access_token
 	 * @param version
 	 * @return
@@ -786,13 +786,13 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/lecturer/course", method = RequestMethod.DELETE)
 	public @ResponseBody ResponseEntity delCourse(
-			@RequestParam(value = "cource_id") String cource_id,
+			@RequestParam(value = "course_id") String course_id,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "delCourse", access_token, null,appName);
 		Map<String, Object> parMap = new HashMap<>();
-		parMap.put("cource_id", cource_id);
+		parMap.put("course_id", course_id);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
