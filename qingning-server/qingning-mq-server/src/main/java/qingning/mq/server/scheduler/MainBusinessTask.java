@@ -123,9 +123,28 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	//@Scheduled(cron = "*/5 * * * * ? ")
 	//@Scheduled(cron = "0 */30 * * * ? ")
 	@Scheduled(cron = "0 0 1 * * ?")
-	public void backstageMethod(String appName){
+	public void backstageMethod() {
 		init();
-		logger.info("=====> 主业务定时任务驱动开始  ====");
+		String[] appNames = new String[0];
+		try {
+			appNames = MiscUtils.getAppName();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		for(String appName : appNames){
+			backstageMethod(appName);
+		}
+//		logger.info("=====> 主业务定时任务驱动开始  ====");
+//		for(AbstractMsgService server : list){
+//			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
+//			try {
+//				server.process(null, jedisUtils, context);
+//			} catch (Exception e) {
+//				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
+//			}
+//		}
+	}
+	public void backstageMethod(String appName){
 		for(AbstractMsgService server : list){
 			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
 			try {
@@ -192,7 +211,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		try {
             String[] appNames = MiscUtils.getAppName();
             for(String appName : appNames){
-                backstageMethod(appName);
+                backstageMethod();
                 loadLecturerID(appName);
             }
         } catch (Exception e) {
