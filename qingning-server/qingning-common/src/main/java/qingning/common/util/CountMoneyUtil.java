@@ -1,5 +1,7 @@
 package qingning.common.util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 
 /**
@@ -8,7 +10,9 @@ import java.text.NumberFormat;
  */
 public class CountMoneyUtil {
 
-    public static final double ONE = 1.0;
+    public static final BigDecimal ONE = new BigDecimal(1);
+    public static final BigDecimal OneHundred = new BigDecimal(100);
+
     /**
      * 可提現金額
      * (1 - x) * 直播總收入/分銷總收入
@@ -17,15 +21,21 @@ public class CountMoneyUtil {
      * @return
      */
     public static String getCashInAmount(String total_amount){
-        double totalAmount = Double.valueOf(total_amount);//總額
-        double withdrawalProportion = DoubleUtil.sub(ONE,  Constants.DIVIDED_PROPORTION);//可提現比例
-        double withdrawalAmount = DoubleUtil.mul(withdrawalProportion, totalAmount);//提現總數
+        BigDecimal totalAmount = new BigDecimal(total_amount);
+        totalAmount = totalAmount.multiply(OneHundred);
+        BigDecimal withdrawalProportion = ONE.subtract(new BigDecimal(Constants.DIVIDED_PROPORTION));
+        BigDecimal withdrawalAmount = totalAmount.multiply(withdrawalProportion);
+        int scale = 2;//保留2位小数
+        withdrawalAmount = withdrawalAmount.divide(OneHundred, scale, RoundingMode.HALF_UP);
+
         NumberFormat number = NumberFormat.getNumberInstance();
         String str = number.format(withdrawalAmount);//轉成string 確保不變
         return str;
     }
 
-
+    public static void main(String[] args) {
+        System.out.println(getCashInAmount("0.02"));
+    }
 
 
 
