@@ -2229,7 +2229,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         String phoneNum = map.get("phone");//手机号
-        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
+        Map<String,String> reqMap = new HashMap<>();
+        reqMap.put("phone_num",phoneNum);
+        reqMap.put("app_name",appName);
+        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
             throw new QNLiveException("130008");
         }
       //  String ipAdress = map.get("ipAdress");//ip地址
@@ -2492,9 +2495,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.校验该课程是否属于该讲师
         Map<String,String> courseMap = jedis.hgetAll(courseKey);
-        if(Integer.valueOf(courseMap.get("status")) == 5){
-            throw new QNLiveException("160004");
-        }
+
         String courseOwner = courseMap.get("lecturer_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//根据安全证书获取userId
         if(courseOwner.equals(userId)){//判断是否是老师
@@ -2859,11 +2860,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("isphone")
     public void isphone (RequestEntity reqEntity) throws Exception{
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
         String phoneNum = map.get("phone_num");//手机号
         if(!isMobile(phoneNum)){
             throw new QNLiveException("130001");
         }
-        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(phoneNum))){
+        Map<String,String> reqMap = new HashMap<>();
+        reqMap.put("phone_num",phoneNum);
+        reqMap.put("app_name",appName);
+        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
             throw new QNLiveException("130008");
         }
     }

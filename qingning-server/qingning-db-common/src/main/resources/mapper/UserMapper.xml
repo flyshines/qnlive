@@ -5,8 +5,8 @@
   <select id="findByUserId" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_user where user_id = #{user_id}
   </select>
-  <select id="findByPhone" resultType="hashmap" parameterType="java.lang.String" >
-    select * from t_user where phone_number = #{phone_number}
+  <select id="findByPhone" resultType="hashmap" parameterType="hashmap" >
+    select * from t_user where phone_number = #{phone_number} and app_name = #{appName}
   </select>
   <update id="updateLiveRoomNumForUser" parameterType="hashmap" >
     update t_user

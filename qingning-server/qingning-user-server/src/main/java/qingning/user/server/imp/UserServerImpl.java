@@ -870,9 +870,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
         if (jedis.exists(courseKey)) {
             Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
-            if(Integer.valueOf(courseCacheMap.get("status")) == 5){
-                throw new QNLiveException("160004");
-            }
             courseMap = courseCacheMap;
 
             room_id = courseCacheMap.get("room_id").toString();

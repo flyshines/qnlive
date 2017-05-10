@@ -703,8 +703,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String,Object> findByPhone(String phone){
-		return userMapper.findByPhone(phone);
+	public Map<String,Object> findByPhone(Map<String,String> record){
+		return userMapper.findByPhone(record);
 	}
 
 	@Override

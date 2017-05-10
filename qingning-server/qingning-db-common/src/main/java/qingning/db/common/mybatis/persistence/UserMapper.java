@@ -8,7 +8,7 @@ public interface UserMapper {
 	int updateUser(Map<String,Object> record);
 	int updateLiveRoomNumForUser(Map<String,Object> record);
     Map<String,Object> findByUserId(String user_id);
-	Map<String,Object> findByPhone(String phone);
+	Map<String,Object> findByPhone(Map<String,String> record);
 
 	List<Map<String,String>> findRobotUsers(String user_role);
 }

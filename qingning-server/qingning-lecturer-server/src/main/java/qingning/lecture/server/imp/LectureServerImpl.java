@@ -69,13 +69,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-
-
         if (jedis.exists(lectureLiveRoomKey)) {
             throw new QNLiveException("100006");
         }
-
-
         //2.数据库修改
         //2.如果为新讲师用户，插入讲师表。插入直播间表。更新登录信息表中的用户身份
         map.clear();
@@ -213,7 +209,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl").get("config_value"));
+//        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl").get("config_value"));
         resultMap.put("qr_code",getQrCode(userId,jedis,appName));
         String queryType = reqMap.get("query_type").toString();
         Map<String, Object> map = new HashMap<String, Object>();
@@ -270,19 +266,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                             liveRoomListResult.add(peocessLiveRoomMap);
                         }
                     }
- 
                     if(! CollectionUtils.isEmpty(liveRoomListResult)){
                         resultMap.put("room_list", liveRoomListResult);
                     }
- 
                     return resultMap;
                 }
  
             }else {
                 return resultMap;
             }
- 
- 
         }else {
             //查询单个直播间的详细信息
             if(reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())){
