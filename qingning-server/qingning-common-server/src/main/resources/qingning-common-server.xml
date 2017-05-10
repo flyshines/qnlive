@@ -192,6 +192,7 @@
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" />
+					<param name="cash_in_amount" type="double" />
 					<param name="room_list" type="list">
 						<param name="nick_name" type="rstring" />
 						<param name="avatar_address" type="string" />

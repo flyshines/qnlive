@@ -364,6 +364,7 @@
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
+					<param name="cash_in_amount" type="double" default="0"/>
 					<param name="course_list" type="list">
 						<param name="student" type="string"/>
 						<param name="course_title" type="rstring"/>

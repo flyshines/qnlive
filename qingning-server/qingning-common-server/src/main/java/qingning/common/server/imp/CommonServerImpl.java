@@ -1312,8 +1312,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("120012");
         }
         Map<String,Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("total_amount", distributer.get("total_amount"));
-        
+
+        String cash_in_amount = "";
+        String total_amount = distributer.get("total_amount");
+        if(MiscUtils.isEmpty(total_amount)){ //判斷有沒有錢
+            total_amount="0";
+            cash_in_amount = "0";
+        }else{//如果沒有錢
+            cash_in_amount = CountMoneyUtil.getCashInAmount(total_amount);//可提現的錢
+        }
+        resultMap.put("total_amount", total_amount);
+        resultMap.put("cash_in_amount", cash_in_amount);
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
         if(position != null){

@@ -1703,15 +1703,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
+        String cash_in_amount = "";
         String total_amount = jedis.hget(liveRoomKey, "total_amount");
-        if(MiscUtils.isEmpty(total_amount)){
+        if(MiscUtils.isEmpty(total_amount)){ //判斷有沒有錢
             total_amount="0";
+            cash_in_amount = "0";
+        }else{//如果沒有錢
+            cash_in_amount = CountMoneyUtil.getCashInAmount(total_amount);//可提現的錢
         }
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("total_amount", total_amount);
-        Long cash_in_amount = 1L;
-        //TODO 减去百分之三十
-        result.put("cash_in_amount ", total_amount);
+        result.put("cash_in_amount", cash_in_amount);
         List<Map<String,String>> courseList;
         if(MiscUtils.isEmpty(reqMap.get("course_status"))){
             courseList = getCourseList(userId,(int)reqMap.get("page_count"), (String)reqMap.get("course_id"), (Long)reqMap.get("query_time"), (Long)reqMap.get("position"), true,true,appName);
@@ -1721,7 +1723,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         result.put("course_list", courseList);
         return result;
     }
-    
+
+
+
     @SuppressWarnings("unchecked")
     @FunctionName("courseProfitList")
     public Map<String, Object> getCourseProfitList(RequestEntity reqEntity) throws Exception {

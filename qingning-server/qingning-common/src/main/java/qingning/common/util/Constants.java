@@ -15,7 +15,7 @@ public final class Constants {
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";
-
+	public static final double DIVIDED_PROPORTION = 0.3;//分成比例
 
 	public static final String SYS_READ_USER_BY_UNIONID = "SYS_READ_USER_BY_UNIONID";
 
