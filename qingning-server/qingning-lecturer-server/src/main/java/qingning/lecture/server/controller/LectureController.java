@@ -762,8 +762,8 @@ public class LectureController extends AbstractController {
 	 */
 	@RequestMapping(value = "/pcauth/bindingRoom", method = RequestMethod.GET)
 	public @ResponseBody ResponseEntity bindingRoom(
-			@RequestHeader("access_token") String access_token,
 			@RequestParam(value = "appid") String appid,
+			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
@@ -778,20 +778,22 @@ public class LectureController extends AbstractController {
 
 	/**
 	 * 删除课程
-	 * @param entity 课程id
+	 * @param cource_id 课程id
 	 * @param access_token
 	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/lecturer/course", method = RequestMethod.PUT)
+	@RequestMapping(value = "/lecturer/course", method = RequestMethod.DELETE)
 	public @ResponseBody ResponseEntity delCourse(
-			HttpEntity<Object> entity,
+			@RequestParam(value = "cource_id") String cource_id,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "delCourse", access_token, null,appName);
-		requestEntity.setParam(((Map<String,Object>)entity.getBody()));
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("cource_id", cource_id);
+		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
 
