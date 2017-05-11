@@ -12,6 +12,7 @@ public class CountMoneyUtil {
 
     public static final BigDecimal ONE = new BigDecimal(1);
     public static final BigDecimal OneHundred = new BigDecimal(100);
+    public static final int SCALE = 2;//保留2位小数
 
     /**
      * 可提現金額
@@ -25,16 +26,14 @@ public class CountMoneyUtil {
         totalAmount = totalAmount.multiply(OneHundred);
         BigDecimal withdrawalProportion = ONE.subtract(new BigDecimal(Constants.DIVIDED_PROPORTION));
         BigDecimal withdrawalAmount = totalAmount.multiply(withdrawalProportion);
-        int scale = 2;//保留2位小数
-        withdrawalAmount = withdrawalAmount.divide(OneHundred, scale, RoundingMode.HALF_UP);
-
+        withdrawalAmount = withdrawalAmount.divide(OneHundred, 0, BigDecimal.ROUND_HALF_DOWN );
         NumberFormat number = NumberFormat.getNumberInstance();
         String str = number.format(withdrawalAmount);//轉成string 確保不變
         return str;
     }
 
     public static void main(String[] args) {
-        System.out.println(getCashInAmount("0.02"));
+        System.out.println(getCashInAmount("1.11"));
     }
 
 

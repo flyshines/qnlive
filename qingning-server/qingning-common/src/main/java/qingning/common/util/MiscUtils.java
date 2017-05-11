@@ -154,7 +154,7 @@ public final class MiscUtils {
                     }
                     if(adjust){
                         BigDecimal bigDecimal = new BigDecimal(value.toString());                        
-                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
+                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100L), 2, BigDecimal.ROUND_HALF_UP);
                         ret = bigDecimal.doubleValue();
                     } else {
                         ret = Double.parseDouble(value.toString());
