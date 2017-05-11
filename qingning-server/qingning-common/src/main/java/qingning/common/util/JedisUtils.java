@@ -19,7 +19,7 @@ public final class JedisUtils {
 	private JedisPool jedisPool = null;
 	private Map<String, String> config = null;
 	private JedisProxy jedisProxy = null;
-	private Map<String,JedisProxy> jedisMap= null;
+	private Map<String,Jedis> jedisMap= null;
 
 
 
@@ -66,13 +66,13 @@ public final class JedisUtils {
                     String[] appNames = MiscUtils.getAppName();
                     for(String app_name : appNames){
                         int appRedisDbIndex = Integer.valueOf(MiscUtils.getConfigByKey(Constants.APP_REDIS_INDEX, app_name));
-                        jedisMap.put(app_name,new JedisProxy(this,appRedisDbIndex));
+                        jedisMap.put(app_name,new JedisProxy(this,appRedisDbIndex).getJedis());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-			jedis=jedisMap.get(appName).getJedis();// jedisProxy.getJedis();
+			jedis=jedisMap.get(appName);// jedisProxy.getJedis();
 		}
 		return jedis;
 	}
@@ -151,8 +151,8 @@ public final class JedisUtils {
     /**
      *
      */
-	private class JedisProxy  extends Jedis implements MethodInterceptor{
-		private int selected = 0;
+	private class JedisProxy extends Jedis implements MethodInterceptor{
+		private int selected;
 		private Jedis jedis = null;
 		private JedisUtils jedisUtils = null;
 		private Enhancer enhancer = new Enhancer();	
@@ -160,13 +160,14 @@ public final class JedisUtils {
 
 
         public JedisProxy(JedisUtils jedisUtils,int index){
+            this.selected = index;
             enhancer.setSuperclass(Jedis.class);
             enhancer.setClassLoader(JedisBatchCallback.class.getClassLoader());
             enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
             enhancer.setCallback(this);
             jedis = (Jedis)enhancer.create();
             this.jedisUtils=jedisUtils;
-            this.selected = index;
+
         }
 		
 		public Jedis getJedis(){
