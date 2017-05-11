@@ -389,7 +389,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//获取公众号access_token
             userJson = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//获取是否有关注公众信息
             if(userJson.get("subscribe") != null){
-                subscribe = userJson.get("subscribe").toString();
+
+                if(userJson.get("subscribe").equals("1")){
+                    subscribe = userJson.get("subscribe").toString();
+                }else{
+                    resultMap.put("key","0");
+                    return resultMap;
+                }
             }
         }catch(Exception e){
             throw new QNLiveException("120008");
