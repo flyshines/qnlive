@@ -7,7 +7,7 @@
   </select>
 
   <select id="findClassifyInfoByAppName" resultType="hashmap">
-    select * from t_classify_info where is_use=1 and app_name=#{appName}
+    select * from t_classify_info where is_use=1 and app_names like #{appName}
   </select>
   
 </mapper>

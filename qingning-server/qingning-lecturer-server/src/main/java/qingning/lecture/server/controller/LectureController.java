@@ -559,7 +559,7 @@ public class LectureController extends AbstractController {
 	}
 
 	/**
-	 * 发送手机验证码
+	 * 验证手机验证码
 	 * @param verification_code 验证码
 	 * @param accessToken 用户安全证书
 	 * @param version 版本

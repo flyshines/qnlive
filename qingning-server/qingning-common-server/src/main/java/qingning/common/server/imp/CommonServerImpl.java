@@ -3070,7 +3070,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
         }else{ //没有
-             classifyList = commonModuleServer.findClassifyInfoByAppName(appName);//读数据库
+            String likeAppNmae = "%"+appName+"%";
+             classifyList = commonModuleServer.findClassifyInfoByAppName(likeAppNmae);//读数据库
             Map<String,String> classify_info = new HashMap<>();
             for(Map<String, Object>classify : classifyList){
                 jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
