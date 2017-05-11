@@ -250,7 +250,7 @@ public final class Constants {
 	public static final String SEND_MSG_TIME_D = "CAPTCHA:SEND_MSG_TIME_D:{user_id}";//时间天数
 
 	public static final String CAPTCHA_KEY_CODE = "CAPTCHA:KEY:{user_id}";//存放验证码
-	public static final String CAPTCHA_KEY_PHONE = "CAPTCHA:KEY:{code}";//存放验证码
+	public static final String CAPTCHA_KEY_PHONE = "CAPTCHA:KEY:PHONE:{user_id}";//存放验证码
 
 
 	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION = "SYS:COURSES:{classify_id}:PREDICTION";// 分类 预告/正在直播

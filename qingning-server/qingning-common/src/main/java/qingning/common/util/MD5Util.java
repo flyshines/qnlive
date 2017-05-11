@@ -104,10 +104,7 @@ public class MD5Util {
     public static void main(String[] s) throws Exception {
     	//System.out.println("md5值："+getMD5("appid=testappid1deviceid=testwan").toLowerCase());
         Map<String,String> a = new HashMap<>();
-//        a.put("phone","18676365713");
-//        a.put("content","123456");
-//        a.put("country","86");
-//        a.put("sys_area_code","440100");
+
         a.put("login_name","W44G9WRB");
         a.put("login_pw","3a01dda81e8cada809b70f33677b43e3");
         a.put("country","86");
@@ -141,7 +138,7 @@ public class MD5Util {
      * @param hashIterations 加密次数
      * @return 加密后字符串
      */
-    private static String test(String sour, String salt, int hashIterations) throws Exception {
+    public static String test(String sour, String salt, int hashIterations) throws Exception {
 
         //若带加密字符串为空，直接返回，或抛异常，可根据自己系统处理逻辑来定义
         if(StringUtils.isBlank(sour)){

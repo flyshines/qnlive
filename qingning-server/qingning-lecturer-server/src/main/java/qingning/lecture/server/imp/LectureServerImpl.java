@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import qingning.common.dj.DjSendMsg;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -2903,12 +2904,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!jedis.exists(codeKey)){
             throw new QNLiveException("130009");
         }
-        String code = jedis.get(codeKey);
-        if(!code.equals(verification_code)){//进行判断
-            throw new QNLiveException("130002");
+        String code = jedis.get(codeKey);//拿到值
+        if(appName.equals(Constants.HEADER_APP_NAME)){//如果是qnlive就进行判断
+            if(!code.equals(verification_code)){//进行判断
+                throw new QNLiveException("130002");
+            }
         }
+
         String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);//根据userId 拿到 key
         String phone = jedis.get(phoneKey);//拿到电话
+        if(!appName.equals(Constants.HEADER_APP_NAME)){//不是qnlive
+            boolean key = DjSendMsg.checkVerificationCode(phone, codeKey, verification_code);
+            if(!key){
+                throw new QNLiveException("130002");
+            }
+        }
+
         //判断当前用户是否有直播间
         Map<String, Object> roomMap = new HashMap<>();
         roomMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);

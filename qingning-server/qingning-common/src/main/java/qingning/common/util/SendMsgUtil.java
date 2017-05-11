@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class SendMsgUtil {
 
-    public static void main(String[] args) {
+    public static void mai1n(String[] args) {
         sendMsgCode("18676365713", "短信测试青柠！","");
 //    	getMsgDeliver();
         //sendMsgCodeByDlive();
@@ -221,7 +221,28 @@ public class SendMsgUtil {
         return msg;
     }
 
-    public static void ma1in(String[] s) throws Exception {
+//    public static void main(String[] s) throws Exception {
+//        Map<String, String> contentMap = new HashMap<String, String>();
+//        contentMap.put("login_name", "38T4RBHH");
+//        contentMap.put("login_pw", "c75fbb5e055dcb1902e1b539caa2c240");
+//        contentMap.put("sys_area_code", "zh");
+//        contentMap.put("country", "zh");
+//
+//        Map<String, String> headerMap = new HashMap<String, String>();
+//        headerMap.put("appkey", "027e940e-0ff0-1ae6-92f9-6a9b91e979d8");
+//        headerMap.put("verification", "04c54cb373667cae549f1b541e6b275c");
+//        headerMap.put("version", "1.0");
+//        headerMap.put("language", "zh_CN");
+//        headerMap.put("logincode", "38T4RBHH");
+//        headerMap.put("apptype", "7");
+//
+//        String tokenResultString = HttpTookit.doPost("https://service.blessi.cn/oppf/service/common/sys/user_login", headerMap, contentMap, "UTF-8");
+//
+//        System.out.println(tokenResultString);
+//
+//    }
+
+    public static void main(String[] s) throws Exception {
         Map<String, String> contentMap = new HashMap<String, String>();
         contentMap.put("login_name", "38T4RBHH");
         contentMap.put("login_pw", "c75fbb5e055dcb1902e1b539caa2c240");
@@ -239,6 +260,9 @@ public class SendMsgUtil {
         String tokenResultString = HttpTookit.doPost("https://service.blessi.cn/oppf/service/common/sys/user_login", headerMap, contentMap, "UTF-8");
 
         System.out.println(tokenResultString);
+        // sendVerificationCode("1","18720924103","","123");
 
     }
+
+
 }

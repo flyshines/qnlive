@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import qingning.common.dj.DjSendMsg;
 import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -2276,20 +2277,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             String code = RandomUtil.createRandom(true, 4);   //4位 生成随机的效验码
-            String message = String.format("您的短信验证码:%s，请及时完成验证。",code);
-
             String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, userMap);//存入缓存中
             jedis.setex(codeKey,20*60,code);
 
             Map<String,String> phoneMap = new HashMap<>();
             phoneMap.put("code",code);
+            userMap.put("user_id",userId);
             String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);
             jedis.setex(phoneKey,20*60,phoneNum);
-
-            String result = SendMsgUtil.sendMsgCode(phoneNum, message,appName);
-            logger.info("【梦网】（" + phoneNum + "）发送短信内容（" + message + "）返回结果：" + result);
-            if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
-                throw new QNLiveException("130006");
+            //如果是qnlive 就执行
+            if(appName.equals(Constants.HEADER_APP_NAME)){
+                String message = String.format("您的短信验证码:%s，请及时完成验证。",code);
+                String result = SendMsgUtil.sendMsgCode(phoneNum, message,appName);
+                logger.info("【梦网】（" + phoneNum + "）发送短信内容（" + message + "）返回结果：" + result);
+                if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
+                    throw new QNLiveException("130006");
+                }
+            }else{
+                boolean djMsg = DjSendMsg.sendVerificationCode(phoneNum, code);
+                if(!djMsg){
+                    throw new QNLiveException("130006");
+                }
             }
         }else{
             throw new QNLiveException("130001");
