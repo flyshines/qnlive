@@ -384,12 +384,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         String openid = getCodeResultJson.getString("openid");//拿到openid
         //获取用户信息
-        JSONObject userJson = null;
         try{
             AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//获取公众号access_token
-            userJson = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//获取是否有关注公众信息
-            if(userJson.get("subscribe") != null){
-                subscribe = userJson.get("subscribe").toString();
+            JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//获取是否有关注公众信息
+            if(user.get("subscribe") != null){
+                subscribe = user.get("subscribe").toString();
             }
         }catch(Exception e){
             throw new QNLiveException("120008");
@@ -414,6 +413,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             processLoginSuccess(2, null, loginInfoMap, resultMap,app_name);//获取后台安全证书 access_token
             return resultMap;
         }else {
+            //1.2.1.2 如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
+            String userWeixinAccessToken = getCodeResultJson.getString("access_token");
+            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid,app_name);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
                 if(userJson.getString("unionid") == null){
@@ -422,6 +424,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 throw new QNLiveException("120008");
             }
+
             queryMap.clear();
             queryMap.put("login_type","0");//0.微信方式登录
             queryMap.put("login_id",userJson.getString("unionid"));//unionid 登录
