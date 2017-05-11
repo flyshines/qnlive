@@ -389,13 +389,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//获取公众号access_token
             userJson = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//获取是否有关注公众信息
             if(userJson.get("subscribe") != null){
-
-                if(userJson.get("subscribe").equals("1")){
-                    subscribe = userJson.get("subscribe").toString();
-                }else{
-                    resultMap.put("key","0");
-                    return resultMap;
-                }
+                subscribe = userJson.get("subscribe").toString();
             }
         }catch(Exception e){
             throw new QNLiveException("120008");
@@ -446,6 +440,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String nickname = userJson.getString("nickname");//昵称
             String sex = userJson.getString("sex");//性别
             String headimgurl = userJson.getString("headimgurl");//头像
+            if(sex == null || nickname == null || headimgurl == null){
+                resultMap.put("key","0");
+                return resultMap;
+            }
 
 
             Map<String,String> imResultMap = null;
