@@ -13,6 +13,9 @@
   	<if test="lecturer_id != null" >
   		and lecturer_id = #{lecturer_id}
   	</if>
+    <if test="app_name != null" >
+      and app_name = #{app_name}
+    </if>
   	<if test="position != null"> 
   		and ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) <![CDATA[ < ]]> #{position}
   	</if> 
@@ -111,6 +114,9 @@
 
   <select id="findPlatformCourseList" resultType="hashmap" parameterType="hashmap" >
     select * from t_courses where status = #{status}
+    <if test="app_name != null" >
+      and app_name = #{app_name}
+    </if>
     <if test="pageCount != null" >
       <if test='status == "2" '>
       	order by end_time desc,position limit #{pageCount}

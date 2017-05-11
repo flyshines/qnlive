@@ -333,7 +333,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		if(query_time != null){
     			queryMap.put("position", MiscUtils.convertInfoToPostion(query_time, position));
     		}
-
+            queryMap.put("app_name",appName);
     		List<Map<String, Object>> list = userModuleServer.findFinishCourseListForLecturer(queryMap);
     		if(!MiscUtils.isEmpty(list)){
     			for(Map<String, Object> course:list){
@@ -642,6 +642,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings({ "unchecked"})
     private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id,String appName) throws Exception{
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        jedis.getDB();
         long currentTime = System.currentTimeMillis();//当前时间
         int offset = 0;//偏移值
         Set<String> courseIdSet;//查询的课程idset

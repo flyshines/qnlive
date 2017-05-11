@@ -49,6 +49,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			queryMap.put("status", "1");//已经发布(预告中)
     			long maxCount =  Constants.PLATFORM_PREDICTION_COURSE_LIST_SIZE;
     			queryMap.put("pageCount", maxCount);
+    			queryMap.put("app_name",appName);
     			List<Map<String,Object>> coursePredictionList = coursesMapper.findPlatformCourseList(queryMap);
     			if(!MiscUtils.isEmpty(coursePredictionList)){
     				maxCount=maxCount-coursePredictionList.size();    				
@@ -67,6 +68,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			if(maxCount>0){
     				queryMap.put("status", "2");//已经结束
     				queryMap.put("pageCount", maxCount);
+    				queryMap.put("app_name",appName);
     				List<Map<String,Object>> courseFinishList = coursesMapper.findPlatformCourseList(queryMap);
     				if(!MiscUtils.isEmpty(courseFinishList)){
     					Map<String,Response<Boolean>> checked = new HashMap<String,Response<Boolean>>();

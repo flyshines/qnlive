@@ -1359,6 +1359,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(queryTime != null){                
                 map.put("position", MiscUtils.convertInfoToPostion(queryTime, position));
             }
+            map.put("app_name",appName);
             List<Map<String,Object>> finishCourse = lectureModuleServer.findFinishCourseListForLecturer(map);
             if(!MiscUtils.isEmpty(finishCourse)){               
                 for(Map<String,Object> finish:finishCourse){

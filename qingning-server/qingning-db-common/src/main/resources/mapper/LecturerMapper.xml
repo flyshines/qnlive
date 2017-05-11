@@ -10,7 +10,7 @@
   </select>
 
   <select id="findLectureId" resultType="hashmap" parameterType="hashmap" >
-    select lecturer_id from t_lecturer 
+    select l.lecturer_id from t_lecturer l,t_user u where l.lecturer_id = u.user_id and u.app_name = #{app_name}
     <if test="start_pos != null" >
         limit #{start_pos}
     </if>

@@ -163,7 +163,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			Map<String,Object> query = new HashMap<String,Object>();
 			query.put("start_pos", start_pos);
 			query.put("page_count", page_count);
-			
+			query.put("app_name",appName);
 			List<Map<String,Object>> list = null;
 			do{
 				list = lecturerMapper.findLectureId(query);
