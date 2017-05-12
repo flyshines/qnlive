@@ -2282,7 +2282,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             Map<String,String> phoneMap = new HashMap<>();
             phoneMap.put("code",code);
-            userMap.put("user_id",userId);
+            phoneMap.put("user_id",userId);
             String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);
             jedis.setex(phoneKey,20*60,phoneNum);
             //如果是qnlive 就执行
