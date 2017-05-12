@@ -44,7 +44,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
     
     @Override
-    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
+    	String appName = requestEntity.getAppName();
     	Jedis jedis = jedisUtils.getJedis(appName);
     	
     	((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){

@@ -26,9 +26,9 @@ public class SaveCourseMessageService extends AbstractMsgService{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
+	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-
+		String appName = requestEntity.getAppName();
 		//批量读取缓存中的内容
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());

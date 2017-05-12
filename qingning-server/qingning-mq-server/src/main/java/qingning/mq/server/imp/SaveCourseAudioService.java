@@ -25,9 +25,9 @@ public class SaveCourseAudioService extends AbstractMsgService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName)
+	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context)
 			throws Exception {
-
+		String appName = requestEntity.getAppName();
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
 
 		//批量读取缓存中的内容

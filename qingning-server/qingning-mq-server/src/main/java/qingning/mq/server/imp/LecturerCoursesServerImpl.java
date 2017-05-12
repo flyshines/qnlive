@@ -34,14 +34,14 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
     private MessagePushServerImpl messagePushServerimpl;
 
     @Override
-    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
+    public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
         //将讲师的课程列表放入缓存中
-        processLecturerCoursesCache(requestEntity, jedisUtils, context,appName);
+        processLecturerCoursesCache(requestEntity, jedisUtils, context);
     }
 
 
-    private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) {
-    	
+    private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+    	String appName = requestEntity.getAppName();
         ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
         	private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
 				for(String lecturerId : lecturerSet){

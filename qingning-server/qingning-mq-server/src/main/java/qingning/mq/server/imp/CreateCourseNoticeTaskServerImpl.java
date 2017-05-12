@@ -25,10 +25,11 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	private CoursesMapper coursesMapper;
 	private MessagePushServerImpl messagePushServerImpl;
 	@Override
-	public void process(RequestEntity requestEntity, final JedisUtils jedisUtils, ApplicationContext context,String appName) throws Exception {
+	public void process(RequestEntity requestEntity, final JedisUtils jedisUtils, ApplicationContext context) throws Exception {
 		if(messagePushServerImpl==null){
 			messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
 		}
+		String appName = requestEntity.getAppName();
 		((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {

@@ -148,7 +148,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		for(AbstractMsgService server : list){
 			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
 			try {
-				server.process(null, jedisUtils, context,appName);
+				server.process(null, jedisUtils, context);
 			} catch (Exception e) {
 				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
 			}

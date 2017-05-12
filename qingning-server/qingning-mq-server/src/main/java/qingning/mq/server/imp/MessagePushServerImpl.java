@@ -617,6 +617,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             }
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");
+            messageMap.put("app_name",appName);
             messageMap.put("send_time",currentTime);
             messageMap.put("information",infomation);
             messageMap.put("mid",infomation.get("message_id"));

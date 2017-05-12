@@ -55,7 +55,7 @@ public class RabbitMQMessageListener implements MessageListener {
 				@Override
 				public void run() {
 					try{
-						serviceImp.invoke(requestEntity, jedisUtils, context,appName);
+						serviceImp.invoke(requestEntity, jedisUtils, context);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

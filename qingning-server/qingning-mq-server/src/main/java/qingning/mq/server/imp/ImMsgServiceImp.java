@@ -369,10 +369,12 @@ public class ImMsgServiceImp implements ImMsgService {
             Map<String,Object> processMap = new HashMap<>();
             processMap.put("course_id", (String)information.get("course_id"));
             messageRequestEntity.setParam(processMap);
+			messageRequestEntity.setAppName(appName);
             try {
             	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
+
             	if(saveCourseMessageService != null){
-            		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null,appName);
+            		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
             	log.error("SaveCourseMessageService["+information.get("course_id")+"] error:"+e.getMessage());
@@ -384,7 +386,7 @@ public class ImMsgServiceImp implements ImMsgService {
             try {
             	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
             	if(saveCourseAudioService!=null){
-            		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null,appName);
+            		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
             	}
             } catch (Exception e) {
             	log.error("save SaveCourseAudioService["+information.get("course_id")+"] error:"+e.getMessage());
@@ -399,7 +401,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param jedisUtils
 	 */
 	//<editor-fold desc="暂时还没测试">
-	private void noticeToStudent(Map<String,Object> courseInfo, Map<String,Object> userInfo, JedisUtils jedisUtils) {
+//	private void noticeToStudent(Map<String,Object> courseInfo, Map<String,Object> userInfo, JedisUtils jedisUtils) {
 //		Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
 //		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
 //		String templateId = MiscUtils.getConfigByKey("wpush_update_course");//更新课程的模板id;
@@ -407,7 +409,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //		if(!MiscUtils.isEmpty(openId)){//推送微信模板消息给微信用户
 //			WeiXinUtil.send_template_message(openId, templateId, url, templateMap, jedis);//推送消息
 //		}
-
+//
 //		Jedis jedis = jedisUtils.getJedis();
 //		JSONObject obj = new JSONObject();
 //		Map<String,String> extrasMap = new HashMap<>();
@@ -423,7 +425,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //			obj.put("to", mUserId);
 //			JPushHelper.push(obj);
 //		}
-	}
+//	}
 	//</editor-fold>
 
 	/**

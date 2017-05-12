@@ -959,6 +959,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             startLecturerMessageInformation.put("creator_nick_name",userInfo.get("nick_name"));
             Map<String,Object> startLecturerMessageMap = new HashMap<>();
             startLecturerMessageMap.put("msg_type","1");
+            startLecturerMessageMap.put("app_name",appName);
             startLecturerMessageMap.put("send_time", System.currentTimeMillis());
             startLecturerMessageMap.put("create_time", System.currentTimeMillis());
             startLecturerMessageMap.put("information",startLecturerMessageInformation);
@@ -995,6 +996,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             infomation.put("create_time", currentTime);
             Map<String,Object> messageMap = new HashMap<>();
             messageMap.put("msg_type","1");
+            messageMap.put("app_name",appName);
             messageMap.put("send_time", System.currentTimeMillis());
             messageMap.put("create_time", System.currentTimeMillis());
             messageMap.put("information",infomation);
@@ -3043,6 +3045,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     infomation.put("create_time", currentTime);
                     Map<String,Object> messageMap = new HashMap<>();
                     messageMap.put("msg_type","1");
+                    messageMap.put("app_name",appName);
                     messageMap.put("send_time", System.currentTimeMillis());
                     messageMap.put("create_time", System.currentTimeMillis());
                     messageMap.put("information",infomation);
@@ -3073,6 +3076,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 infomation.put("create_time", System.currentTimeMillis());
                 Map<String,Object> messageMap = new HashMap<>();
                 messageMap.put("msg_type","1");
+                messageMap.put("app_name",appName);
                 messageMap.put("send_time", System.currentTimeMillis());
                 messageMap.put("create_time", System.currentTimeMillis());
                 messageMap.put("information",infomation);
