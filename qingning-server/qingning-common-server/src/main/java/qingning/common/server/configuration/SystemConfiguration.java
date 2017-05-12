@@ -42,7 +42,6 @@ public class SystemConfiguration extends WebMvcConfigurerAdapter {
 		ServiceManger serviceManger= new ServiceManger();
 		serviceManger.initSystem("classpath:application.properties");
 		serviceManger.initServer(new String[]{"classpath:qingning-common-server.xml"});
-		
 		return serviceManger;
 	}
 	@Bean(name="applicationContext")

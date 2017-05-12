@@ -2238,7 +2238,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         extrasMap.put("msg_type","9");
         extrasMap.put("course_id",room_id);
         obj.put("extras_map", extrasMap);
-        JPushHelper.push(obj);
+        JPushHelper.push(obj,appName);
     }
     
     @SuppressWarnings("unchecked")

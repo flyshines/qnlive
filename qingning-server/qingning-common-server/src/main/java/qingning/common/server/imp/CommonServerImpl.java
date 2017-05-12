@@ -1215,7 +1215,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         extrasMap.put("msg_type","7");
                         extrasMap.put("course_id",courseMap.get("course_id"));
                         obj.put("extras_map", extrasMap);
-                        JPushHelper.push(obj);
+                        JPushHelper.push(obj,appName);
                     }
                 }
  
@@ -2276,7 +2276,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 jedis.setex(dayKey,86400,"{'timestamp':'"+System.currentTimeMillis()/1000+"','count':'1'}");//把手机号码和userid还有效验码 存入缓存当中  //一分钟内
             }
 
-            String code = RandomUtil.createRandom(true, 6);   //4位 生成随机的效验码
+            String code = RandomUtil.createRandom(true, 6);   //6位 生成随机的效验码
             String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, userMap);//存入缓存中
             jedis.setex(codeKey,20*60,code);
 

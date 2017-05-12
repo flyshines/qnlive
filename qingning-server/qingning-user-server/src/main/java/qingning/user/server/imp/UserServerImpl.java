@@ -1339,7 +1339,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             extrasMap.put("msg_type", "7");
             extrasMap.put("course_id", courseInfoMap.get("course_id"));
             obj.put("extras_map", extrasMap);
-            JPushHelper.push(obj);
+            JPushHelper.push(obj,appName);
         }
         //course_type 0:公开课程 1:加密课程 2:收费课程',
         //TODO 加入课程推送   收费课程支付成功才推送消息
