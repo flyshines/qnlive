@@ -183,9 +183,7 @@ public abstract class AbstractController {
 				Map<String,Object> infoMap = systemConfigList.get(i);
 				Map<String,Object> innerMap = new HashMap<String,Object>();
 				innerMap.put("config_name", infoMap.get("config_name"));
-				innerMap.put("config_key", infoMap.get("config_key"));
 				innerMap.put("config_value", infoMap.get("config_value"));
-				innerMap.put("config_description", infoMap.get("config_description"));
 				systemConfig.put((String)infoMap.get("config_key"), innerMap);
 			}
 			if(!MiscUtils.isEmpty(systemConfig)){
