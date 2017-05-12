@@ -145,71 +145,57 @@
 
   <update id="updateUser" parameterType="hashmap">
     update t_user
-    set
+    <set>
       <if test="user_name != null" >
         user_name = #{user_name},
       </if>
-
       <if test="nick_name != null" >
         nick_name = #{nick_name},
       </if>
-
       <if test="avatar_address != null" >
         avatar_address = #{avatar_address},
       </if>
-
       <if test="phone_number != null" >
-        phone_number = #{phone_number},
+        phone_number = #{phone_number}, 
       </if>
-
       <if test="gender != null" >
         gender = #{gender},
       </if>
-
       <if test="country != null" >
         country = #{country},
       </if>
-
       <if test="province != null" >
         province = #{province},
       </if>
-
       <if test="city != null" >
         city = #{city},
       </if>
-
       <if test="district != null" >
         district = #{district},
       </if>
-
       <if test="area != null" >
         area = #{area},
       </if>
-
       <if test="courseNum != null" >
         course_num = #{course_num},
       </if>
-
       <if test="liveRoomNum != null" >
         live_room_num = #{live_room_num},
       </if>
-
       <if test="status != null" >
         status=#{status},
       </if>
-
       <if test="plateform != null" >
         plateform = #{plateform},
       </if>
-
       <if test="createTime != null" >
         create_time = #{create_time},
       </if>
-
       <if test="update_time != null" >     
         update_time = #{update_time},
       </if>
-    where 1=1 and user_id = #{user_id}
+    </set>
+    where user_id = #{user_id}
     <if test="last_update_time != null" >
        and update_time=#{last_update_time}
     </if>
