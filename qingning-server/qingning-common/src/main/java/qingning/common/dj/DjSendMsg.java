@@ -168,7 +168,7 @@ public class DjSendMsg {
         headerMap.put("logincode", LOGIN_NAME);
         headerMap.put("apptype", APPTYPE);
         HttpClientUtil httpClientUtil = new HttpClientUtil();
-        return httpClientUtil.doPost(LOGIN_URL,headerMap,contentMap,"UTF-8");
+        return httpClientUtil.doPost(url,headerMap,contentMap,"UTF-8");
     }
 
 
