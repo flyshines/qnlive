@@ -3,13 +3,13 @@
 
 	<server name="CommonServer">
 		<default class="qingning.common.server.imp.CommonServerImpl">
-
 			<function name="serverTime">
 				<auth>
 					<accessToken require="N" />
 					<appName require="N" />
 				</auth>
-
+				<inputs>
+				</inputs>
 				<outputs>
 				</outputs>
 			</function>
