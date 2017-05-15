@@ -212,7 +212,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String,Object> map = new HashMap<>();
         map.put("appName",appName);
-        map.put("config_key","customerQrCodeUrl");
+        map.put("config_key","bindingServiceUrl");
         resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig(map).get("config_value"));
         resultMap.put("qr_code",getQrCode(userId,jedis,appName));
         String queryType = reqMap.get("query_type").toString();
