@@ -2657,6 +2657,22 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
 
         if(pageCount>0){
+            String lecturerCoursesDelKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DEL, map);
+            List<Map<String,String>> finishCourse = null;
+            if(MiscUtils.isEmpty(courseList)){
+                finishCourse = getCourseOnlyFromCached(jedis, lecturerCoursesDelKey,course_id,pageCount, finDesc);
+            } else {
+                finishCourse = getCourseOnlyFromCached(jedis, lecturerCoursesDelKey, course_id, pageCount+1, finDesc);
+            }
+            if(!MiscUtils.isEmpty(finishCourse)){
+                pageCount=pageCount-finishCourse.size();
+                courseList.addAll(finishCourse);
+                finExist=false;
+            }
+        }
+
+
+        if(pageCount>0){
             map.clear();
             map.put("pageCount", pageCount);
             map.put("lecturer_id", userId);
@@ -2869,6 +2885,37 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return CacheUtils.readCourseListInfoOnlyFromCached(jedis, list,readCourseOperation);
     }
+
+    private List<Map<String,String>> getCourseOnlyFromCached(Jedis jedis, String key,String courceid,  int pageCount, boolean desc){
+        long startIndex = 0; //开始下标
+        long endIndex = -1;   //结束下标
+        Map<String,Object> map = new HashMap<String,Object>();
+        long endCourseSum = jedis.zcard(key);//获取总共有多少个课程
+
+        if(courceid == null){//如果课程ID没有 那么就从最近结束的课程找起
+            endIndex = -1;
+            startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+            if(startIndex < 0){
+                startIndex = 0;
+            }
+        }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+            long endRank = jedis.zrank(key, courceid);
+            endIndex = endRank - 1;
+            if(endIndex >= 0){
+                startIndex = endIndex - pageCount + 1;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }
+        }
+        Set<String> courseIdSet = jedis.zrange(key, startIndex, endIndex);
+        List<String> list = new ArrayList<>();
+        for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+            list.add(course_id);
+        }
+        return CacheUtils.readCourseListInfoOnlyFromCached(jedis, list,readCourseOperation);
+    }
+
 
 	@SuppressWarnings("unchecked")
     @FunctionName("getCustomerService")
