@@ -127,29 +127,32 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 
-        //根据相关条件将server_url列表信息返回
-        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        Map<String, Object> serverInfoMap = (Map<String, Object>) serverUrlInfoMap.get(appName);
-        Map<String, Object> map = new HashMap<>();
-        for (Map.Entry<String, Object> entry : serverInfoMap.entrySet()) {
-            String key = entry.getKey();
-            int page = key.indexOf("Page");
-            String methodName = key.substring(page+4);
-            String servicePage = key.substring(0,page+4);
-            String methodNameFirstLetter = methodName.substring(0,1);
-            String methodNameFirstLetterLowerCase = methodNameFirstLetter.toLowerCase();
-            String methodNameOther = methodName.substring(1);
-            String newKey = servicePage + "-" + methodNameFirstLetterLowerCase + methodNameOther;
-            map.put(newKey, entry.getValue());
+        if(Double.valueOf(version)<1.3){
+            //根据相关条件将server_url列表信息返回
+            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+            Map<String, Object> serverInfoMap = (Map<String, Object>) serverUrlInfoMap.get(appName);
+            Map<String, Object> map = new HashMap<>();
+            for (Map.Entry<String, Object> entry : serverInfoMap.entrySet()) {
+                String key = entry.getKey();
+                int page = key.indexOf("Page");
+                String methodName = key.substring(page+4);
+                String servicePage = key.substring(0,page+4);
+                String methodNameFirstLetter = methodName.substring(0,1);
+                String methodNameFirstLetterLowerCase = methodNameFirstLetter.toLowerCase();
+                String methodNameOther = methodName.substring(1);
+                String newKey = servicePage + "-" + methodNameFirstLetterLowerCase + methodNameOther;
+                map.put(newKey, entry.getValue());
+            }
+            resultMap.put("server_url_info_list",map);
+            responseEntity.setReturnData(resultMap);
         }
-        resultMap.put("server_url_info_list",map);
+        return responseEntity;
 //        if (bodyMap.get("server_url_update_time") == null ||
 //                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
 //            resultMap.put("server_url_info_list", serverUrlInfoMap);
 //            resultMap.put("server_url_info_update_time", serverUrlInfoUpdateTime);
 //        }
-        responseEntity.setReturnData(resultMap);
-        return responseEntity;
+
     }
 
     /**
