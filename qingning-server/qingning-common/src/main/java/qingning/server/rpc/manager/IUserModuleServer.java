@@ -64,7 +64,7 @@ public interface IUserModuleServer {
 	/**
 	 * 获取客服信息
 	 */
-	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+	Map<String,Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 }

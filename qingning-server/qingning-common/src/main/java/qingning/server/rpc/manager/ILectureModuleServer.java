@@ -94,7 +94,7 @@ public interface ILectureModuleServer {
 	/**
 	 * 获取客服信息
 	 */
-	Map<String,Object> findCustomerServiceBySystemConfig(String config_key);
+	Map<String,Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap);
 
 	/**
 	 * 插入服务号的信息

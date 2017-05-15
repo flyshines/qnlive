@@ -536,8 +536,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
 	}
 	@Override
-	public Map<String, Object> findCustomerServiceBySystemConfig(String config_key) {
-		return systemConfigMapper.findCustomerServiceBySystemConfig(config_key);
+	public Map<String, Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap) {
+		return systemConfigMapper.findCustomerServiceBySystemConfig(reqMap);
 	}
 	@Override
 	public int insertServiceNoInfo(Map<String, String> map) {

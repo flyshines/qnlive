@@ -244,8 +244,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findCustomerServiceBySystemConfig(String config_key) {
-		return systemConfigMapper.findCustomerServiceBySystemConfig(config_key);
+	public Map<String, Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap) {
+		return systemConfigMapper.findCustomerServiceBySystemConfig(reqMap);
 	}
 
 	@Override

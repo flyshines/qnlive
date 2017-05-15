@@ -2871,17 +2871,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @FunctionName("getCustomerService")
     public Map<String, Object> getCustomerService(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Map<String,Object> map = new HashMap<>();
+        map.put("appName",appName);
         Map<String,Object> retMap = new HashMap<>();
-        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig("customerQrCodeUrl");//获取客服二维码url
+
+        map.put("config_key","customerQrCodeUrl");
+        Map<String,Object> customerQrCodeUrl = lectureModuleServer.findCustomerServiceBySystemConfig(map);//获取客服二维码url
         retMap.put("customerQrCodeUrl",customerQrCodeUrl.get("config_value"));
 
-        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig("customerPhoneNum");//获取客服电话
+        map.put("config_key","customerPhoneNum");
+        Map<String,Object> customerPhoneNum = lectureModuleServer.findCustomerServiceBySystemConfig(map);//获取客服电话
         retMap.put("customerPhoneNum",customerPhoneNum.get("config_value"));
 
-        Map<String,Object> customerTitle = lectureModuleServer.findCustomerServiceBySystemConfig("customerTitle");//标题
+        map.put("config_key","customerTitle");
+        Map<String,Object> customerTitle = lectureModuleServer.findCustomerServiceBySystemConfig(map);//标题
         retMap.put("customerTitle",customerTitle.get("config_value"));
 
-        Map<String,Object> cystomerHint = lectureModuleServer.findCustomerServiceBySystemConfig("customerHint");//客服二维码提示
+        map.put("config_key","customerHint");
+        Map<String,Object> cystomerHint = lectureModuleServer.findCustomerServiceBySystemConfig(map);//客服二维码提示
         retMap.put("customerHint",cystomerHint.get("config_value"));
         return retMap;
     }

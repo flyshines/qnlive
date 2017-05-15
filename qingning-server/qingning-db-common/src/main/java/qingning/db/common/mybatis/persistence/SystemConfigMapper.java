@@ -13,7 +13,7 @@ public interface SystemConfigMapper {
     /**
      * 获取客服信息
      */
-    Map<String,Object> findCustomerServiceBySystemConfig(@Param("config_key")String config_key);
+    Map<String,Object> findCustomerServiceBySystemConfig(Map<String,Object> map);
 
     List<Map<String,Object>> findSystemConfig();
 
