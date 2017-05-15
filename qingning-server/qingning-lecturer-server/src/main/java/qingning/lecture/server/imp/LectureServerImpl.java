@@ -2928,7 +2928,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);//根据userId 拿到 key
         String phone = jedis.get(phoneKey);//拿到电话
         if(!appName.equals(Constants.HEADER_APP_NAME)){//不是qnlive
-            boolean key = DjSendMsg.checkVerificationCode(phone, code, verification_code);
+            boolean key = DjSendMsg.checkVerificationCode(phone, code, verification_code,jedis);
             if(!key){
                 throw new QNLiveException("130002");
             }

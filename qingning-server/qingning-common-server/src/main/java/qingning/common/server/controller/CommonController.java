@@ -135,12 +135,18 @@ public class CommonController extends AbstractController {
             for (Map.Entry<String, Object> entry : serverInfoMap.entrySet()) {
                 String key = entry.getKey();
                 int page = key.indexOf("Page");
-                String methodName = key.substring(page+4);
+
                 String servicePage = key.substring(0,page+4);
-                String methodNameFirstLetter = methodName.substring(0,1);
-                String methodNameFirstLetterLowerCase = methodNameFirstLetter.toLowerCase();
-                String methodNameOther = methodName.substring(1);
-                String newKey = servicePage + "-" + methodNameFirstLetterLowerCase + methodNameOther;
+                String methodName = key.substring(page+4);
+                String newKey = "";
+                if(methodName.equals("RoomProfitList") || methodName.equals("CourseStatistics")){
+                    newKey = servicePage + "-" + methodName;
+                }else{
+                    String methodNameFirstLetter = methodName.substring(0,1);
+                    String methodNameFirstLetterLowerCase = methodNameFirstLetter.toLowerCase();
+                    String methodNameOther = methodName.substring(1);
+                    newKey = servicePage + "-" + methodNameFirstLetterLowerCase + methodNameOther;
+                }
                 map.put(newKey, entry.getValue());
             }
             resultMap.put("server_url_info_list",map);

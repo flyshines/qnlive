@@ -2295,7 +2295,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("130006");
                 }
             }else{
-                boolean djMsg = DjSendMsg.sendVerificationCode(phoneNum, code);
+                boolean djMsg = DjSendMsg.sendVerificationCode(phoneNum, code,jedis);
                 if(!djMsg){
                     throw new QNLiveException("130006");
                 }

@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MD5Util;
 import qingning.common.util.MiscUtils;
+import redis.clients.jedis.Jedis;
 
 /**
  * Created by GHS on 2017/5/11.
@@ -31,21 +32,23 @@ public class DjSendMsg {
     private static String LOGIN_URL = MiscUtils.getConfigByKey("dj_login_url","dlive");
     private static String SEND_VERIFICATIONCODE_URL = MiscUtils.getConfigByKey("dj_send_verificationcode_url","dlive");
     private static String CHECK_VERIFICATIONCODE_URL = MiscUtils.getConfigByKey("dj_check_verificationcode_url","dlive");
+    private static String SYS_DJ_TOKEN = "SYS:DJ:TOKEN";
 
+    public static String djLogin(Jedis jedis) throws Exception {
 
-    public static String djLogin() throws Exception {
         Map<String, String> contentMap = new HashMap<String, String>();
         contentMap.put("login_name", LOGIN_NAME);
         contentMap.put("login_pw", LOGIN_PW);
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country", COUNTRY);
-        String httpOrgCreateTestRtn = httpClient(LOGIN_URL,contentMap,true);
+        String httpOrgCreateTestRtn = httpClient(LOGIN_URL,contentMap,jedis,true);
         Map<String, String> resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {});
         if (resultMap != null && resultMap.get("ret") != null && resultMap.get("ret").equals("0") && resultMap.get("items") != null) {
             List<Map<String, String>> list = JSON.parseObject(resultMap.get("items"), new TypeReference<List<Map<String, String>>>() {});
             if (list != null && list.size() > 0) {
                 Map<String, String> item = list.get(0);
                 if (item != null && item.get("token") != null) {
+                    jedis.set(SYS_DJ_TOKEN,item.get("token"));
                     return item.get("token");
                 }
             }
@@ -66,7 +69,7 @@ public class DjSendMsg {
      * @param phone
      * @param businessId
      */
-    public static boolean sendVerificationCode(String phone,String businessId) throws Exception {
+    public static boolean sendVerificationCode(String phone,String businessId,Jedis jedis) throws Exception {
         Map<String, String> contentMap = new HashMap<String, String>();
         contentMap.put("notice_type", "1");
         contentMap.put("notice_obj", phone);
@@ -74,7 +77,7 @@ public class DjSendMsg {
         contentMap.put("business_id", businessId);
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country",COUNTRY);
-        String httpOrgCreateTestRtn = httpClient(SEND_VERIFICATIONCODE_URL,contentMap,false);
+        String httpOrgCreateTestRtn = httpClient(SEND_VERIFICATIONCODE_URL,contentMap,jedis,false);
         Map<String, String> resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {});
         return resultMap.get("data_string").equals("Y");
     }
@@ -85,7 +88,7 @@ public class DjSendMsg {
      * @param phone
      * @param businessId
      */
-    public static boolean checkVerificationCode(String phone,String businessId,String verification_code) throws Exception {
+    public static boolean checkVerificationCode(String phone,String businessId,String verification_code,Jedis jedis) throws Exception {
         Map<String, String> contentMap = new HashMap<String, String>();
         contentMap.put("notice_type", "1");
         contentMap.put("notice_obj", phone);
@@ -93,28 +96,33 @@ public class DjSendMsg {
         contentMap.put("business_id", businessId);
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country",COUNTRY);
-        String httpOrgCreateTestRtn = httpClient(CHECK_VERIFICATIONCODE_URL,contentMap,false);
+        String httpOrgCreateTestRtn = httpClient(CHECK_VERIFICATIONCODE_URL,contentMap,jedis,false);
         Map<String, String> resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {});
         return resultMap.get("data_string").equals("Y");
     }
 
 
 
-    private static String httpClient(String url,Map<String, String> contentMap,boolean isLogin) throws Exception {
+    private static String httpClient(String url,Map<String, String> contentMap,Jedis jedis,boolean isLogin) throws Exception {
         String josnMd5 = MD5Util.test( JSONObject.toJSONString(contentMap),SECURECODE, 1);
         Map<String, String> headerMap = new HashMap<String, String>();
         headerMap.put("appkey", APPKEY);
         headerMap.put("verification", josnMd5);
         headerMap.put("version", VERSION);
         headerMap.put("language",LANGUAGE);
-        if(!isLogin){
-            headerMap.put("token",djLogin());
+        if(jedis.exists(SYS_DJ_TOKEN)){
+            headerMap.put("token",jedis.get(SYS_DJ_TOKEN));
+        }else{
+            headerMap.put("token",  djLogin(jedis));
         }
+
         headerMap.put("logincode", LOGIN_NAME);
         headerMap.put("apptype", APPTYPE);
         HttpClientUtil httpClientUtil = new HttpClientUtil();
         return httpClientUtil.doPost(url,headerMap,contentMap,"UTF-8");
     }
+
+
 
 
 
@@ -239,8 +247,6 @@ public class DjSendMsg {
 //        }
 //    }
     //</editor-fold>
-
-
 
 
 
