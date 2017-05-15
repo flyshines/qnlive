@@ -902,7 +902,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
             jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
 
-            map.put(Constants.CACHED_KEY_CLASSIFY,reqMap.get("classify_id"));
+            map.put(Constants.CACHED_KEY_CLASSIFY,course.get("classify_id"));
             jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), reqMap.get("course_id").toString());//删除预告
             jedis.zadd(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map), lpos, reqMap.get("course_id").toString());//在结束中增加
 
@@ -3023,9 +3023,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 course.put("course_id", course_id);
                 course.put("status", "5");
                 course.put("update_time", now);
-                lectureModuleServer.updateCourse(course);//修改数据库数据
+                String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//获取课程在缓存中的key
+                jedis.hset(coursekey,"status","5");//把课程缓存中的状态改为已删除
+
                 Map<String,Object> map = new HashMap<String,Object>();
-                map.put(Constants.CACHED_KEY_CLASSIFY,courseInfoMap.get(Constants.CACHED_KEY_CLASSIFY));
+                map.put(Constants.CACHED_KEY_CLASSIFY,courseInfoMap.get(Constants.CACHED_KEY_CLASSIFY));//获取课程分类
+
                 if(courseInfoMap.get("status").equals("2")){ //结束
                     jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);//删除平台结束课程
                     jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH,map),course_id);//删除分类信息
@@ -3072,8 +3075,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_DEL, MiscUtils.convertInfoToPostion( now.getTime(),position), course_id);//把删除的课程存入缓存用于统计
                 jedis.zadd(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_DEL,map), MiscUtils.convertInfoToPostion( now.getTime(),position), course_id);//把课程加入老师删除课程缓存中
 
-                String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryParam);//获取课程在缓存中的key
-                jedis.hset(coursekey,"status","5");//把课程缓存中的状态改为已删除
+
 
                 //发送删除课程消息 通知前端强制踢人
                 String sender = "system";
