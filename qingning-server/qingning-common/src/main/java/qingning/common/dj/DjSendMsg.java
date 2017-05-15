@@ -130,14 +130,16 @@ public class DjSendMsg {
         headerMap.put("verification", josnMd5);
         headerMap.put("version", VERSION);
         headerMap.put("language",LANGUAGE);
-        if(jedis.exists(SYS_DJ_TOKEN)){
-            headerMap.put("token",jedis.get(SYS_DJ_TOKEN));
-        }else{
-            boolean login = djLogin(jedis);
-            if(login){
-                headerMap.put("token", jedis.get(SYS_DJ_TOKEN));
+        if (!isLogin) {
+            if(jedis.exists(SYS_DJ_TOKEN)){
+                headerMap.put("token",jedis.get(SYS_DJ_TOKEN));
             }else{
-                throw new QNLiveException("130006");
+                boolean login = djLogin(jedis);
+                if(login){
+                    headerMap.put("token", jedis.get(SYS_DJ_TOKEN));
+                }else{
+                    throw new QNLiveException("130006");
+                }
             }
         }
         headerMap.put("logincode", LOGIN_NAME);
