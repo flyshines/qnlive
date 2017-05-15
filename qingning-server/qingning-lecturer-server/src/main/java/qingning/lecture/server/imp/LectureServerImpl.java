@@ -210,10 +210,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-//        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig("bindingServiceUrl").get("config_value"));
+        Map<String,Object> map = new HashMap<>();
+        map.put("appName",appName);
+        map.put("config_key","customerQrCodeUrl");
+        resultMap.put("binding_service_url",lectureModuleServer.findCustomerServiceBySystemConfig(map).get("config_value"));
         resultMap.put("qr_code",getQrCode(userId,jedis,appName));
         String queryType = reqMap.get("query_type").toString();
-        Map<String, Object> map = new HashMap<String, Object>();
+        map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
         

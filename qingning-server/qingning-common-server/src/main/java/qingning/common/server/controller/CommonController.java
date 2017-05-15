@@ -127,7 +127,7 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
 
-        if(Double.valueOf(version)<1.3){
+        if(Double.valueOf(version)<1.2){
             //根据相关条件将server_url列表信息返回
             Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
             Map<String, Object> serverInfoMap = (Map<String, Object>) serverUrlInfoMap.get(appName);
