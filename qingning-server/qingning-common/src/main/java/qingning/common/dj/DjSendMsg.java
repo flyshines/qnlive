@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import qingning.common.entity.QNLiveException;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MD5Util;
 import qingning.common.util.MiscUtils;
@@ -34,34 +35,53 @@ public class DjSendMsg {
     private static String CHECK_VERIFICATIONCODE_URL = MiscUtils.getConfigByKey("dj_check_verificationcode_url","dlive");
     private static String SYS_DJ_TOKEN = "SYS:DJ:TOKEN";
 
-    public static String djLogin(Jedis jedis) throws Exception {
+    public static boolean djLogin(Jedis jedis) throws Exception {
 
         Map<String, String> contentMap = new HashMap<String, String>();
         contentMap.put("login_name", LOGIN_NAME);
         contentMap.put("login_pw", LOGIN_PW);
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country", COUNTRY);
-        String httpOrgCreateTestRtn = httpClient(LOGIN_URL,contentMap,jedis,true);
+        String httpOrgCreateTestRtn = httpClient(LOGIN_URL, contentMap, jedis, true);
         Map<String, String> resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {});
         if (resultMap != null && resultMap.get("ret") != null && resultMap.get("ret").equals("0") && resultMap.get("items") != null) {
             List<Map<String, String>> list = JSON.parseObject(resultMap.get("items"), new TypeReference<List<Map<String, String>>>() {});
             if (list != null && list.size() > 0) {
                 Map<String, String> item = list.get(0);
                 if (item != null && item.get("token") != null) {
-                    jedis.set(SYS_DJ_TOKEN,item.get("token"));
-                    return item.get("token");
+                    jedis.setex(SYS_DJ_TOKEN, 27000, item.get("token"));
+                    return true;
                 }
             }
-        }else {
-            ///  logger.info("登录德家助理返回的异常信息!");
-            if(resultMap != null && resultMap.get("ret") != null){
-                //     logger.info("登录德家助理返回的消息码ret:"+resultMap.get("ret"));
-            }
-            if(resultMap != null && StringUtils.isNotBlank(resultMap.get("msg"))){
-                //  logger.info("登录德家助理返回的消息内容msg:"+resultMap.get("msg"));
+        } else {
+            String ret = resultMap.get("ret");
+            if (ret.equals("500004") || ret.equals("200123") || ret.equals("200464")) {
+                httpOrgCreateTestRtn = httpClient(LOGIN_URL, contentMap, jedis, true);
+                resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {
+                });
+                if (resultMap != null && resultMap.get("ret") != null && resultMap.get("ret").equals("0") && resultMap.get("items") != null) {
+                    List<Map<String, String>> list = JSON.parseObject(resultMap.get("items"), new TypeReference<List<Map<String, String>>>() {
+                    });
+                    if (list != null && list.size() > 0) {
+                        Map<String, String> item = list.get(0);
+                        if (item != null && item.get("token") != null) {
+                            jedis.setex(SYS_DJ_TOKEN, 27000, item.get("token"));
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                logger.info("登录德家助理返回的异常信息!");
+                if (resultMap != null && resultMap.get("ret") != null) {
+                    logger.info("登录德家助理返回的消息码ret:" + resultMap.get("ret"));
+                }
+                if (resultMap != null && StringUtils.isNotBlank(resultMap.get("msg"))) {
+                    logger.info("登录德家助理返回的消息内容msg:" + resultMap.get("msg"));
+                }
+                return false;
             }
         }
-        return null;
+        return false;
     }
 
     /**
@@ -113,9 +133,13 @@ public class DjSendMsg {
         if(jedis.exists(SYS_DJ_TOKEN)){
             headerMap.put("token",jedis.get(SYS_DJ_TOKEN));
         }else{
-            headerMap.put("token",  djLogin(jedis));
+            boolean login = djLogin(jedis);
+            if(login){
+                headerMap.put("token", jedis.get(SYS_DJ_TOKEN));
+            }else{
+                throw new QNLiveException("130006");
+            }
         }
-
         headerMap.put("logincode", LOGIN_NAME);
         headerMap.put("apptype", APPTYPE);
         HttpClientUtil httpClientUtil = new HttpClientUtil();
