@@ -94,7 +94,7 @@ public class DjSendMsg {
         contentMap.put("notice_type", "1");
         contentMap.put("notice_obj", phone);
         contentMap.put("notice_msg", "123");
-        contentMap.put("business_id", businessId);
+        contentMap.put("business_id", "123");
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country",COUNTRY);
         String httpOrgCreateTestRtn = httpClient(SEND_VERIFICATIONCODE_URL,contentMap,jedis,false);
@@ -113,7 +113,7 @@ public class DjSendMsg {
         contentMap.put("notice_type", "1");
         contentMap.put("notice_obj", phone);
         contentMap.put("verification_code", verification_code);
-        contentMap.put("business_id", businessId);
+        contentMap.put("business_id", "123");
         contentMap.put("sys_area_code", SYS_AREA_CODE);
         contentMap.put("country",COUNTRY);
         String httpOrgCreateTestRtn = httpClient(CHECK_VERIFICATIONCODE_URL,contentMap,jedis,false);
@@ -153,9 +153,9 @@ public class DjSendMsg {
 
 
 
-
-    //<editor-fold desc="测试广州德家">
-    //    private static void sendMsg(String token){
+//
+//    //<editor-fold desc="测试广州德家">
+//        private static void sendMsg(String token){
 //        Map<String, String> contentMap = new HashMap<String, String>();
 //            contentMap.put("notice_type", "1");
 //	    	contentMap.put("notice_obj", "18676365713");
@@ -184,20 +184,20 @@ public class DjSendMsg {
 //            e.printStackTrace();
 //        }
 //    }
-//
-//
+////
+////
 //    private static void checkVerificationCode(String token){
 //        Map<String, String> contentMap = new HashMap<String, String>();
 //        contentMap.put("notice_type", "1");
 //        contentMap.put("notice_obj", "18676365713");
-//        contentMap.put("verification_code", "369736");
-//        contentMap.put("business_id", "123456");
+//        contentMap.put("verification_code", "978990");
+//        contentMap.put("business_id", "112123312132");
 //        contentMap.put("sys_area_code", "440100");
 //        contentMap.put("country", "86");
 //        try {
 //            String jsonString = JSONObject.toJSONString(contentMap);
 //            System.out.println("json:============"+jsonString);
-//            String md5 = MD5Util.test(jsonString, "d6d3a5e9-3acf-5452-4c30-fbf25ecf852e", 1);
+//            String md5 = MD5Util.test(jsonString, "c291f783-7a43-e2cc-a720-d47c54b4640f", 1);
 //
 //
 //            Map<String, String> headerMap = new HashMap<String, String>();
@@ -209,7 +209,7 @@ public class DjSendMsg {
 //            headerMap.put("apptype", "16");
 //            headerMap.put("token", token);
 //            HttpClientUtil httpClientUtil = new HttpClientUtil();
-//            String httpOrgCreateTestRtn = httpClientUtil.doPost("https://www.opercenter.com/oppf/service/common/notice/check_verificationcode",headerMap,contentMap,"UTF-8");
+//            String httpOrgCreateTestRtn = httpClientUtil.doPost("https://service.blessi.cn/oppf/service/common/notice/check_verificationcode",headerMap,contentMap,"UTF-8");
 //            Map<String, String> resultMap = JSON.parseObject(httpOrgCreateTestRtn, new TypeReference<Map<String, String>>() {});
 //            System.out.println(resultMap.get("data_string").equals("Y"));
 //            System.out.println(httpOrgCreateTestRtn);
@@ -217,7 +217,7 @@ public class DjSendMsg {
 //            e.printStackTrace();
 //        }
 //    }
-//
+////
 //    // https://service.blessi.cn/oppf/service
 //    public static void main(String[] args){
 //        Map<String, String> contentMap = new HashMap<String, String>();
@@ -251,8 +251,8 @@ public class DjSendMsg {
 //                    if (item != null && item.get("token") != null) {
 //                        System.out.println(item.get("token") );
 //                        String token = item.get("token");
-//                        sendMsg(token);
-//                        //  checkVerificationCode(token);
+//                        //sendMsg(token);
+//                          checkVerificationCode(token);
 //                        //sendMsg("18676365713","123456",token);
 //                        //      jedis.setex("serverTokenForAccessingDJZL", 27000, item.get("token"));//serverToken失效时间保守设置为7个小时30分钟
 //                    }
@@ -272,7 +272,7 @@ public class DjSendMsg {
 //            e.printStackTrace();
 //        }
 //    }
-    //</editor-fold>
+//    //</editor-fold>
 
 
 
