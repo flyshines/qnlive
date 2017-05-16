@@ -3100,6 +3100,37 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map),classify_info);
             }
         }
+
+        for(Map<String, Object> classify :classifyList ){
+            String classify_id = classify.get("classify_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("appName",appName);
+            map.put("classify_id",classify_id);
+            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
+            for(Map<String, Object> course : courseByClassifyId){
+                if(course.get("status").equals("2") || course.get("status").equals("1")){
+                    String course_id = course.get("course_id").toString();
+                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
+                    String courseClassifyIdKey = "";
+                    Long time = 0L ;
+                    if(course.get("status").equals("2")){
+                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
+                        time = Long.valueOf(course.get("end_time").toString());
+                    }else{
+                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
+                        time = Long.valueOf(course.get("start_time").toString());
+                    }
+                    if(jedis.zrank(courseClassifyIdKey,course_id) !=  -1 ){
+                        map.put(Constants.CACHED_KEY_COURSE_FIELD, classify_id);//课程id
+                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
+                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
+                        jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
+                    }
+                }
+                map.clear();
+            }
+        }
+
         if(!MiscUtils.isEmpty(classifyList)){
             resultMap.put("classify_info",classifyList);
         }
@@ -3161,5 +3192,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //</editor-fold>
         return resultMap;
     }
+
 
 }
