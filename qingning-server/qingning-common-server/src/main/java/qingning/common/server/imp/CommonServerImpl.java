@@ -3140,6 +3140,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         banner_info.put("banner_img_url",bannerInfo.get("banner_img_url"));
                         banner_info.put("jump_url",bannerInfo.get("jump_url"));
                         banner_info.put("create_time",bannerInfo.get("create_time"));
+                        banner_info.put("status",bannerInfo.get("status"));
+                        banner_info.put("banner_type",bannerInfo.get("banner_type"));
                         bannerInfoList.add(banner_info);
                     }
                 }
@@ -3154,6 +3156,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         banner_info.put("banner_img_url",bannerInfo.get("banner_img_url").toString());
                         banner_info.put("jump_url",bannerInfo.get("jump_url").toString());
                         banner_info.put("create_time",bannerInfo.get("create_time").toString());
+                        banner_info.put("status",bannerInfo.get("status").toString());
+                        banner_info.put("banner_type",bannerInfo.get("banner_type").toString());
                         Map<String,Object> query = new HashMap<>();
                         query.put(Constants.CACHED_KEY_BANNER,bannerInfo.get("banner_id").toString());
                         jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query),banner_info);
