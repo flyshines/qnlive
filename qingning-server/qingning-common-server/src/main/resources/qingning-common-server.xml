@@ -670,6 +670,7 @@
 						<param name="banner_id" type="string"/>
 						<param name="create_time" type="string"/>
 						<param name="status" type="string"/>
+						<param name="banner_type" type="string"/>
 					</param>
 				</outputs>
 			</function>
