@@ -172,7 +172,6 @@ public class CommonController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity serverUrlInfo(
-            @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
@@ -1007,5 +1006,8 @@ public class CommonController extends AbstractController {
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
+
+
+
 
 }
