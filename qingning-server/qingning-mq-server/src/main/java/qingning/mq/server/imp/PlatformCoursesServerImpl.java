@@ -44,6 +44,10 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     		public void batchOperation(Pipeline pipeline, Jedis jedis) { 
     			String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
     			String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+
+    			String classifyPredictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION;
+				String classifyFinishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH;
+    			Map<String,String> classifyKeyMap = new HashMap<>();
     			jedis.del(predictionListKey);
     			jedis.del(finishListKey);
     			Map<String,Object> queryMap = new HashMap<>();
@@ -60,7 +64,19 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     						Date courseStartTime = (Date)values.get("start_time");
     						long position = MiscUtils.convertInfoToPostion(courseStartTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
     						pipeline.zadd(predictionListKey, position,(String)values.get("course_id"));
-    					} catch(Exception e){
+
+							String classify_id = values.get("classify_id").toString();
+							if(classifyKeyMap.containsKey(classify_id)){//存在
+								pipeline.zadd(classifyKeyMap.get(classify_id), position,course_id);
+							}else{//不存在
+								Map<String,String> map = new HashMap<>();
+								map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
+								String classifyPredictionListKeyByClassify_id = MiscUtils.getKeyOfCachedData(classifyPredictionListKey, map);//分类
+								jedis.del(classifyPredictionListKeyByClassify_id);
+								classifyKeyMap.put(classify_id,classifyPredictionListKeyByClassify_id);
+								pipeline.zadd(classifyPredictionListKeyByClassify_id, position,course_id);
+							}
+						} catch(Exception e){
     						log.error("course[id:"+course_id+"]"+e.getMessage());
         				}
     				}    				
@@ -112,6 +128,20 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     							pipeline.expire(courseKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
     							pipeline.expire(pptsKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
     							pipeline.expire(audiosKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
+
+								String classify_id = values.get("classify_id").toString();
+
+
+								if(classifyKeyMap.containsKey(classify_id)){//存在
+									pipeline.zadd(classifyKeyMap.get(classify_id), position,course_id);
+								}else{//不存在
+									Map<String,String> map = new HashMap<>();
+									map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
+									String classifyPredictionListKeyByClassify_id = MiscUtils.getKeyOfCachedData(classifyFinishListKey, map);//分类
+									jedis.del(classifyPredictionListKeyByClassify_id);
+									classifyKeyMap.put(classify_id,classifyPredictionListKeyByClassify_id);
+									pipeline.zadd(classifyPredictionListKeyByClassify_id, position,course_id);
+								}
     						} catch (Exception e){
     							log.warn("The course data["+course_id+"] is abnormal");
     						}
