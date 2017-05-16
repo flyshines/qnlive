@@ -3101,10 +3101,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
+        //进行排序
+        List<Map<String, Object>> resultClassifyList = new ArrayList<>();//返回结果
+        Map<String, Object> ortherClassify = new HashMap<>();//其他
+        for(Map<String, Object>classify : classifyList){
+            if (!classify.get("classify_id").toString().equals("9")) {//不是其他
+                resultClassifyList.add(classify);
+            }else if(classify.get("classify_id").toString().equals("9")){
+                ortherClassify.putAll(classify);//其他
+            }
+        }
 
+        if(!MiscUtils.isEmpty(ortherClassify)){
+            resultClassifyList.add(ortherClassify);
+        }
 
-        if(!MiscUtils.isEmpty(classifyList)){
-            resultMap.put("classify_info",classifyList);
+        if(!MiscUtils.isEmpty(resultClassifyList)){
+            resultMap.put("classify_info",resultClassifyList);
         }
         return resultMap;
     }
