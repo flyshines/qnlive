@@ -684,7 +684,6 @@ public class LectureController extends AbstractController {
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
-
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "wechatAuthRedirect", null, null,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("auth_code", auth_code);

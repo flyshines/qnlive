@@ -704,7 +704,7 @@
 			<function name="wechatAuthRedirect">
 				<auth>
 					<accessToken require="N" />
-					<appName require="Y" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -715,7 +715,7 @@
 			<function name="bindServiceNo">
 				<auth>
 					<accessToken require="N" />
-					<appName require="Y" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 				</inputs>
