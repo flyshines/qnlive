@@ -2892,7 +2892,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = new HashMap<String,Object>();
         long endCourseSum = jedis.zcard(key);//获取总共有多少个课程
 
-        if(courceid == null){//如果课程ID没有 那么就从最近结束的课程找起
+        if(courceid == null || courceid.equals("") || MiscUtils.isEmpty(courceid)){//如果课程ID没有 那么就从最近结束的课程找起
             endIndex = -1;
             startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
             if(startIndex < 0){
