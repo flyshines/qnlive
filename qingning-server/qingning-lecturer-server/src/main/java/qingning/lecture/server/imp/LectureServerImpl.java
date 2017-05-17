@@ -2601,7 +2601,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
         Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
         int courceStatus = 0;
-        if(courseId.equals("") || courseId == null){
+        if(courseId == null || courseId.equals("")){
             courceStatus = 4;
         }else{
             Map<String,String> param = new HashMap<String,String>();
