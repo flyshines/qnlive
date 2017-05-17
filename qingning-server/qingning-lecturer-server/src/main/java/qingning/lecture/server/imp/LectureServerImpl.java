@@ -2893,14 +2893,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long endIndex = -1;   //结束下标
         Map<String,Object> map = new HashMap<String,Object>();
         long endCourseSum = jedis.zcard(key);//获取总共有多少个课程
-
-        if(courceid == null || courceid.equals("") || MiscUtils.isEmpty(courceid)){//如果课程ID没有 那么就从最近结束的课程找起
-            endIndex = -1;
-            startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
-            if(startIndex < 0){
-                startIndex = 0;
-            }
-        }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+        if( courceid !=null && jedis.zrank(key, courceid) != null){//如果有
             long endRank = jedis.zrank(key, courceid);
             endIndex = endRank - 1;
             if(endIndex >= 0){
@@ -2909,6 +2902,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     startIndex = 0;
                 }
             }
+        }else{//如果课程ID没有 那么就从最近结束的课程找起
+            endIndex = -1;
+            startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+
         }
         Set<String> courseIdSet = jedis.zrange(key, startIndex, endIndex);
         List<String> list = new ArrayList<>();
