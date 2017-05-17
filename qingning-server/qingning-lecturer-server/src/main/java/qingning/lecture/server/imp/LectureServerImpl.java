@@ -3181,7 +3181,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     wxPushParam.put("templateParam", templateMap);//模板消息
                     wxPushParam.put("course", courseInfoMap);//课程
                     wxPushParam.put("followers", courseAllStudentList);//直播间关注者
-                    wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                    wxPushParam.put("pushType", "2");//1创建课程 2更新课程
                     RequestEntity mqRequestEntity = new RequestEntity();
                     mqRequestEntity.setServerName("MessagePushServer");
                     mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理

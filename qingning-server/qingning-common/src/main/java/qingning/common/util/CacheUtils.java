@@ -136,8 +136,12 @@ public final class CacheUtils {
 					if(!MiscUtils.isEmpty(list)){
 						readCount = list.size();
 						for(Map<String,Object> course:list){
-							userCourseSet.add((String)course.get("course_id"));
-							student_pos = MiscUtils.convertObjectToLong(course.get("student_pos"));
+							if(course.get("status").equals("2") ||course.get("status").equals("1") ){
+								userCourseSet.add((String)course.get("course_id"));
+								student_pos = MiscUtils.convertObjectToLong(course.get("student_pos"));
+							}else{
+								readCount--;
+							}
 						}
 					} else {
 						readCount = 0;

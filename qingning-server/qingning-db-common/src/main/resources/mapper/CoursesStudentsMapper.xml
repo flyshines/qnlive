@@ -85,8 +85,8 @@
   </select>
   
   <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.course_id, student.student_pos ,course.status from t_courses_students student,t_courses course where student.user_id=#{user_id}
-    and student.course_id=course.course_id and course.status <![CDATA[ <> ]]> 5
+  	select student.course_id, student.student_pos ,course.status from t_courses_students student,t_courses course where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
+    and student.course_id=course.course_id
   	<if test="student_pos != null">
   	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
   	</if> 
