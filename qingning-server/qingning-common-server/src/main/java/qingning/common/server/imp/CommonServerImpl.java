@@ -1328,7 +1328,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             total_amount="0";
             cash_in_amount = "0";
         }else{//如果沒有錢
-            cash_in_amount = CountMoneyUtil.getCashInAmount(total_amount);//可提現的錢
+            cash_in_amount = String.valueOf(CountMoneyUtil.getCashInAmount(total_amount));//可提現的錢
         }
         resultMap.put("total_amount", total_amount);
         resultMap.put("cash_in_amount", cash_in_amount);

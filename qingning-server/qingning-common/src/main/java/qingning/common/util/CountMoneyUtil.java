@@ -21,15 +21,15 @@ public class CountMoneyUtil {
      * @param total_amount 總額
      * @return
      */
-    public static String getCashInAmount(String total_amount){
+    public static double getCashInAmount(String total_amount){
         BigDecimal totalAmount = new BigDecimal(total_amount);
         totalAmount = totalAmount.multiply(OneHundred);
         BigDecimal withdrawalProportion = ONE.subtract(new BigDecimal(Constants.DIVIDED_PROPORTION));
         BigDecimal withdrawalAmount = totalAmount.multiply(withdrawalProportion);
         withdrawalAmount = withdrawalAmount.divide(OneHundred, 0, BigDecimal.ROUND_HALF_DOWN );
         NumberFormat number = NumberFormat.getNumberInstance();
-        String str = number.format(withdrawalAmount);//轉成string 確保不變
-        return str;
+        double ret =withdrawalAmount.doubleValue();// number.format(withdrawalAmount);//轉成string 確保不變
+        return ret;
     }
 
     public static void main(String[] args) {
