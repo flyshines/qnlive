@@ -2891,9 +2891,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("130001");
         }
         Map<String,String> reqMap = new HashMap<>();
-        reqMap.put("phone_num",phoneNum);
-        reqMap.put("app_name",appName);
-        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
+        reqMap.put("phone_number",phoneNum);
+        reqMap.put("appName",appName);
+        if(!MiscUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
             throw new QNLiveException("130008");
         }
     }
@@ -3101,45 +3101,48 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
-//        for(Map<String, Object> classify :classifyList ) {
-//            String classify_id = classify.get("classify_id").toString();
-//            Map<String,Object> map = new HashMap<>();
-//            map.put("appName",appName);
-//            map.put("classify_id",classify_id);
-//           jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//分类
-//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//分类
-//        }
+        for(Map<String, Object> classify :classifyList ) {
+            String classify_id = classify.get("classify_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("appName",appName);
+            map.put("classify_id",classify_id);
+           jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//分类
+            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//分类
+        }
 
 
-//        for(Map<String, Object> classify :classifyList ){
-//            String classify_id = classify.get("classify_id").toString();
-//            Map<String,Object> map = new HashMap<>();
-//            map.put("appName",appName);
-//            map.put("classify_id",classify_id);
-//            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
-//            for(Map<String, Object> course : courseByClassifyId){
-//                if(course.get("status").equals("2") || course.get("status").equals("1")){
-//                    String course_id = course.get("course_id").toString();
-//                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
-//                    String courseClassifyIdKey = "";
-//                    Long time = 0L ;
-//                    if(course.get("status").equals("2")){
-//                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
-//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-//                    }else{
-//                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
-//                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
-//                    }
-//                    if(jedis.zrank(courseClassifyIdKey,course_id) ==  null ){
-//                        map.put(Constants.CACHED_KEY_COURSE_FIELD, classify_id);//课程id
-//                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
-//                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
-//                        jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
-//                    }
-//                }
-//                map.clear();
-//            }
-//        }
+        for(Map<String, Object> classify :classifyList ){
+            String classify_id = classify.get("classify_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("appName",appName);
+            map.put("classify_id",classify_id);
+            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
+            for(Map<String, Object> course : courseByClassifyId){
+                if(course.get("status").equals("2") || course.get("status").equals("1")){
+                    String course_id = course.get("course_id").toString();
+                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
+                    String courseClassifyIdKey = "";
+                    Long time = 0L ;
+                    if(course.get("status").equals("2")){
+                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
+                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                    }else{
+                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
+                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
+                    }
+                    if(jedis.zrank(courseClassifyIdKey,course_id) ==  null ){
+                        map.put(Constants.CACHED_KEY_COURSE_FIELD, classify_id);//课程id
+                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
+                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
+                        jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
+                    }
+                }else if(course.get("status").equals("5")){
+                    String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//获取课程在缓存中的key
+                    jedis.hset(coursekey,"status","5");//把课程缓存中的状态改为已删除
+                }
+                map.clear();
+            }
+        }
 
 
         //进行排序
