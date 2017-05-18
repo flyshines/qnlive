@@ -607,26 +607,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                     wxPushParam.put("pushType", "1");//1创建课程 2更新课程
                     String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
-//                    Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam, appName);
-//                    String template_id = weCatTemplateInfo.get("template_id").toString();
-//
-//
-//                    String next_openid = toServiceNoFollow(null, authorizer_access_token, url, templateId, templateMap,appName);
-//                    while (next_openid != null) {
-//                        next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap,appName);
-//                    }
-
 
                     log.debug("发送mq消息进行异步处理--------------------");
-                    RequestEntity mqRequestEntity = new RequestEntity();
-                    mqRequestEntity.setServerName("MessagePushServer");
-                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                    mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                    mqRequestEntity.setParam(getWeCatTemplateInfo(wxPushParam,appName));
+                    RequestEntity mqRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"noticeCourseToServiceNoFollow",getWeCatTemplateInfo(wxPushParam,appName));
                     mqRequestEntity.setAppName(appName);
-               //     this.mqUtils.sendMessage(mqRequestEntity);
+                    this.mqUtils.sendMessage(mqRequestEntity);
 
-                    noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+//                    noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
 
                 }
             }
