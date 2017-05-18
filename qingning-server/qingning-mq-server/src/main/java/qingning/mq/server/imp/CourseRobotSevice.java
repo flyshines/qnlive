@@ -311,23 +311,23 @@ public class CourseRobotSevice extends AbstractMsgService {
     }
 
     @FunctionName("courseCreateAndRobotStart")
-    public void courseCreateAndRobotStart(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) {
+    public void courseCreateAndRobotStart(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String course_id = (String) reqMap.get("course_id");
         if (!didInitRobots) {
             robotInit();
         }
-        robotManage(course_id, jedisUtils.getJedis(appName));
+        robotManage(course_id, jedisUtils.getJedis(requestEntity.getAppName()));
     }
 
     @FunctionName("courseHaveStudentIn")
-    public void courseHaveStudentIn(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context,String appName) {
+    public void courseHaveStudentIn(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String course_id = (String) reqMap.get("course_id");
         if (!didInitRobots) {
             robotInit();
         }
-        robotInByStudent(course_id, jedisUtils.getJedis(appName));
+        robotInByStudent(course_id, jedisUtils.getJedis(requestEntity.getAppName()));
     }
 
 }
