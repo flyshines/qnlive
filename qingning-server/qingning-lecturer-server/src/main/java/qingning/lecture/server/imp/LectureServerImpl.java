@@ -616,9 +616,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
                     mqRequestEntity.setParam(weCatTemplateInfo);
                     mqRequestEntity.setAppName(appName);
-                    this.mqUtils.sendMessage(mqRequestEntity);
+                   // this.mqUtils.sendMessage(mqRequestEntity);
 
-                 //   noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+                    noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
 
                 }
             }
