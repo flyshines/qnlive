@@ -609,11 +609,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
 
                     log.debug("发送mq消息进行异步处理--------------------");
-                    RequestEntity mqRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"noticeCourseToServiceNoFollow",getWeCatTemplateInfo(wxPushParam,appName));
+                    Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam, appName);
+                    RequestEntity mqRequestEntity = new RequestEntity();
+                    mqRequestEntity.setServerName("MessagePushServer");
+                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                    mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+                    mqRequestEntity.setParam(weCatTemplateInfo);
                     mqRequestEntity.setAppName(appName);
                     this.mqUtils.sendMessage(mqRequestEntity);
 
-//                    noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+                 //   noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
 
                 }
             }
