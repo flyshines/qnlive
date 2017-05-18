@@ -144,17 +144,19 @@ public class ImMsgServiceImp implements ImMsgService {
 					requestEntity.setFunctionName("processCourseLiveOvertime");
 					Map<String,Object> timerMap = new HashMap<>();
 					timerMap.put("course_id", courseMap.get("course_id"));
-					timerMap.put("real_start_time",  System.currentTimeMillis()+"");
+					timerMap.put("real_start_time",  now+"");
 					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
-					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
-					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
+					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context); //课程未开播处理定时任务取消
+					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);  //课程直播超时处理 服务端逻辑
 
 					//进行超时预先提醒定时任务
 					timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 					timerMap.remove(Constants.OVERTIME_NOTICE_TYPE_30);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+
+
 
 					//取消15分钟未开始定时任务
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);

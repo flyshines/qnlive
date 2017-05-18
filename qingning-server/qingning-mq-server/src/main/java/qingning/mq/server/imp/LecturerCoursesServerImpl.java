@@ -2,13 +2,12 @@ package qingning.mq.server.imp;
 
 import com.alibaba.fastjson.JSON;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.Constants;
-import qingning.common.util.JedisUtils;
-import qingning.common.util.MiscUtils;
+import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
@@ -19,6 +18,7 @@ import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -67,6 +67,7 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
 		            Map<String,Response<Boolean>> coursePptsExists = new HashMap<String,Response<Boolean>>();
 		            Map<String,Response<Boolean>> courseAudioExists = new HashMap<String,Response<Boolean>>();
 		            Map<String,Map<String,String>> courseValueMap = new HashMap<String,Map<String,String>>();
+		            long now = System.currentTimeMillis();
 		            do{		            
 		            	if(startTime != null){
 		            		queryMap.put("start_time", startTime);
@@ -79,24 +80,35 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
 		            			String course_id = (String)course.get("course_id");
 		            			try{		            				
 		            				startTime = (Date)course.get("start_time");
-		            				pipeline.zadd(predictionListKey, startTime.getTime(), course_id);
-		            				courseMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
-		            				
-		            				String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseMap);		        		            
-		                            String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseMap);
-		                            String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseMap);
-		                            
-		                            courseExists.put(course_id, pipeline.exists(courseKey));
-		                            coursePptsExists.put(course_id, pipeline.exists(pptsKey));
-		                            courseAudioExists.put(course_id, pipeline.exists(audiosKey));
-		                            
-		                            Map<String,String> valueStrMap = new HashMap<String,String>();
-		                            MiscUtils.converObjectMapToStringMap(course, valueStrMap);
-		                            courseValueMap.put(course_id, valueStrMap);
+									long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
+									long taskStartTime = courseLiveOvertimeMsec + startTime.getTime();//当前课程加上24小时的毫秒值
+									boolean result = (now - taskStartTime)>0;//判断课程是否超过24小时  如果大于就是不超过 如果是小于就是超过
+									if(result){
+										pipeline.zadd(predictionListKey, startTime.getTime(), course_id);
+										courseMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+
+										String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseMap);
+										String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseMap);
+										String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseMap);
+
+										courseExists.put(course_id, pipeline.exists(courseKey));
+										coursePptsExists.put(course_id, pipeline.exists(pptsKey));
+										courseAudioExists.put(course_id, pipeline.exists(audiosKey));
+
+										Map<String,String> valueStrMap = new HashMap<String,String>();
+										MiscUtils.converObjectMapToStringMap(course, valueStrMap);
+										courseValueMap.put(course_id, valueStrMap);
+									}else{
+										messagePushServerimpl.processCourseEnd(coursesMapper,"2",course_id,jedis,appName);
+
+									}
+
+
 		            			} catch(Exception e){
 		            				log.error("Load Course["+course_id+"]:"+e.getMessage());
 		            			}
 		            		}
+
 		            		pipeline.sync();		            		
 		            	} else {
 		            		readCount=0;

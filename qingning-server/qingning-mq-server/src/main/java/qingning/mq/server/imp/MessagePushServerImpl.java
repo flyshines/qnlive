@@ -168,10 +168,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
             return;
         }
-        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
+        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));//真实开课时间
 
         //1440分钟 超时结束
-        long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));
+        long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
         long taskStartTime = courseLiveOvertimeMsec + realStartTime;
 
         if(taskStartTime>0){
@@ -501,7 +501,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
     }
 
     //type 为1则为课程未开播强制结束，type为2则为课程直播超时强制结束
-    private void processCourseEnd(CoursesMapper processCoursesMapper, String type ,String courseId, Jedis jedis,String appName){
+    public void processCourseEnd(CoursesMapper processCoursesMapper, String type ,String courseId, Jedis jedis,String appName){
         Map<String,Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
