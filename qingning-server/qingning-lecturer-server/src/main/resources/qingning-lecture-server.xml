@@ -366,6 +366,7 @@
 					<param name="total_amount" type="double" default="0"/>
 					<param name="cash_in_amount" type="double" default="0"/>
 					<param name="course_list" type="list">
+						<param name="status" type="string"/>
 						<param name="student" type="string"/>
 						<param name="course_title" type="rstring"/>
 						<param name="start_time" type="long"/>
@@ -598,24 +599,7 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
-					<param name="query_time" type="long"  require="N"
-							validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
-					<param name="course_id" type="course_id"  require="N"
-							validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>		
-					<param name="position" type="long"  require="N"
-							validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>					
+					<param name="course_id" type="course_id"  require="N"/>
 				</inputs>
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>

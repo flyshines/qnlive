@@ -491,7 +491,6 @@ public class LectureController extends AbstractController {
 	/**
 	 * 创建直播间分销用户
 	 * @param page_count
-	 * @param start_time
 	 * @param access_token
 	 * @param version
 	 * @return
@@ -500,18 +499,14 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value="/lecturer/courses/statistics",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity getCourseStatistics(			
 			@RequestParam(value ="page_count", defaultValue ="10") String page_count,
-			@RequestParam(value ="query_time", defaultValue ="") String start_time,
 			@RequestParam(value ="course_id", defaultValue ="") String course_id,
-			@RequestParam(value ="position", defaultValue ="") String position,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception{
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseStatistics", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
-		parMap.put("query_time", start_time);
 		parMap.put("course_id", course_id);
-		parMap.put("position", position);
 		requestEntity.setParam(parMap);		
 		return this.process(requestEntity, serviceManger, message);
 	}

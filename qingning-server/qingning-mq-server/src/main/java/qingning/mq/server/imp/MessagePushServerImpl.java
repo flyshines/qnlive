@@ -443,6 +443,22 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     //课程未开播处理定时任务取消
     @SuppressWarnings("unchecked")
+    @FunctionName("processCourseNotStartCancelAll")
+    public void processCourseNotStartCancelAll(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        String courseId = reqMap.get("course_id").toString();
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_END_COURSE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_OVER_TIME_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_24H_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_LECTURER_NOTICE);
+    }
+
+
+
+    //课程未开播处理定时任务取消
+    @SuppressWarnings("unchecked")
 	@FunctionName("processCourseNotStartUpdate")
     public void processCourseNotStartUpdate(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         processCourseNotStartCancel(requestEntity,jedisUtils,context);

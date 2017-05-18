@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 import qingning.common.util.MiscUtils;
 
 public class QNSchedule {
-	public static final String TASK_END_COURSE="task_end_course";
-	public static final String TASK_COURSE_OVER_TIME_NOTICE="course_over_time_notice";
-	public static final String TASK_COURSE_24H_NOTICE="course_24h_notice";
-	public static final String TASK_COURSE_5MIN_NOTICE="course_5min_notice";
-	public static final String TASK_COURSE_15MIN_NOTICE="course_15min_notice";
-	public static final String TASK_LECTURER_NOTICE="lecturer_notice";
+	public static final String TASK_END_COURSE="task_end_course";//结束课程
+	public static final String TASK_COURSE_OVER_TIME_NOTICE="course_over_time_notice";//课程超时
+	public static final String TASK_COURSE_24H_NOTICE="course_24h_notice";//24小时提醒
+	public static final String TASK_COURSE_5MIN_NOTICE="course_5min_notice";//5分钟提醒
+	public static final String TASK_COURSE_15MIN_NOTICE="course_15min_notice";//15分钟提醒
+	public static final String TASK_LECTURER_NOTICE="lecturer_notice";//讲师通知
 	
 	private Map<String, ScheduleTask>  taskEndCourse = new HashMap<String, ScheduleTask>();
 	private Map<String, ScheduleTask>  courseOverTimeNotice = new HashMap<String, ScheduleTask>();

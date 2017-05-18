@@ -944,7 +944,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(jedis.hget(courseKey, "real_start_time") == null){
                 String courseStartTime = jedis.hget(courseKey, "start_time");
                 if(Long.parseLong(courseStartTime) < MiscUtils.getEndTimeOfToday().getTime()){
-
                     RequestEntity timerRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseNotStartCancel",reqEntity.getParam());
                     timerRequestEntity.setAppName(appName);
                    this.mqUtils.sendMessage(timerRequestEntity);
@@ -1405,115 +1404,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         
         return result;
 
-    //<editor-fold desc="暂时无用">
-        /*
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<>();
-        List<Map<String ,String>> courseResultList = new ArrayList<>();
-
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis();
-
-        //TODO 目前只有查询讲师的课程列表，查询直播间的课程列表暂未实现
-        //if (reqMap.get("room_id") == null || StringUtils.isBlank(reqMap.get("room_id").toString())) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-        String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-
-        String startIndex = null;
-        String endIndex = "+inf";
-        String startIndexDB = null;
-        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-        if (reqMap.get("start_time") == null || StringUtils.isBlank(reqMap.get("start_time").toString())) {
-            startIndex = "0";
-        } else {
-            startIndex = "(" + reqMap.get("start_time").toString();
-        }
-
-        Set<Tuple> predictionList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, startIndex, endIndex, 0, pageCount);
-        Set<Tuple> finishList = null;
-        List<Map<String,Object>> dbList = null;
-        Map<String,Object> finishResultMap = new HashMap<>();
-
-        if (predictionList == null || predictionList.isEmpty()) {
-            if(startIndex.equals("0")){
-                endIndex = "-inf";
-                startIndex = "+inf";
-                startIndexDB = null;
-            }else {
-                endIndex = "-inf";
-                startIndexDB = startIndex;
-            }
-
-            finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, startIndexDB, endIndex, 0 , pageCount,userId);
-
-        } else {
-            if (predictionList.size() < pageCount) {
-                startIndex = "+inf";
-                endIndex = "-inf";
-                finishResultMap = findCourseFinishList(jedis, lecturerCoursesFinishKey, startIndex, null, endIndex, 0 , pageCount - predictionList.size(), userId);
-            }
-        }
-
-        //未结束课程列表，结束课程列表，数据库课程列表三者拼接到最终的课程结果列表，即可得到结果
-        //分别迭代这三个列表
-        if(!CollectionUtils.isEmpty(finishResultMap)){
-            if(finishResultMap.get("finishList") != null){
-                finishList = (Set<Tuple>)finishResultMap.get("finishList");
-            }
-
-            if(finishResultMap.get("dbList") != null){
-                dbList = (List<Map<String,Object>>)finishResultMap.get("dbList");
-            }
-        }
-
-
-        long currentTime = System.currentTimeMillis();
-        if(predictionList != null){
-            for (Tuple tuple : predictionList) {
-                ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
-                Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
-                MiscUtils.courseTranferState(currentTime, courseInfoMap);
-                courseResultList.add(courseInfoMap);
-            }
-        }
-
-        if(finishList != null){
-            for (Tuple tuple : finishList) {
-                ((Map<String, Object>) reqEntity.getParam()).put("course_id",tuple.getElement());
-                Map<String ,String> courseInfoMap = CacheUtils.readCourse(tuple.getElement(),reqEntity,readCourseOperation, jedisUtils,true);
-                MiscUtils.courseTranferState(currentTime, courseInfoMap);
-                courseResultList.add(courseInfoMap);
-            }
-        }
-
-        if(dbList != null){
-            for (Map<String,Object> courseDBMap : dbList) {
-                Map<String,String> courseDBMapString = new HashMap<>();
-                MiscUtils.converObjectMapToStringMap(courseDBMap, courseDBMapString);
-                MiscUtils.courseTranferState(currentTime, courseDBMapString);
-                courseResultList.add(courseDBMapString);
-            }
-        }
-
-        //}
-
-        if(! CollectionUtils.isEmpty(courseResultList)){
-            resultMap.put("course_list", courseResultList);
-        }
-
-        //返回课程总数
-        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        String course_num = jedis.hget(lecturerKey, "course_num");//TODO 目前仅查询讲师缓存的课程数，尚未完成查询直播间缓存的课程数
-        if(! MiscUtils.isEmpty(course_num)){
-            resultMap.put("course_num", Long.parseLong(course_num));
-        }else {
-            resultMap.put("course_num", 0);
-        }
-        return resultMap;
-        */
-    //</editor-fold>
 }
 
 
@@ -2678,12 +2568,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Collections.reverse(transfer);
                 courseIdList.addAll(transfer);
             }
+            pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
+                courceStatus = 5;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
         }
-        pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
-        if( pageCount > 0){//如果返回的值不够
-            courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
-            courceStatus = 5;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
-        }
+
         if( courceStatus == 5){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
@@ -3337,6 +3228,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setParam(studentMap);
                 mqRequestEntity.setAppName(appName);
                 this.mqUtils.sendMessage(mqRequestEntity);
+
+
+                RequestEntity timerRequestEntity = generateRequestEntity("MessagePushServer",Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseNotStartCancelAll",reqEntity.getParam());
+                timerRequestEntity.setAppName(appName);
+                this.mqUtils.sendMessage(timerRequestEntity);
+
+
+
             }
         }else{
             throw new QNLiveException("160001");
