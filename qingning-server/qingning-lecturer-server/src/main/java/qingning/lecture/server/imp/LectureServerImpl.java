@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.CollectionUtils;
 import qingning.common.dj.DjSendMsg;
 import qingning.common.entity.QNLiveException;
@@ -602,9 +603,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     wxPushParam.put("templateParam", templateMap);//模板消息
                     wxPushParam.put("course_id", courseId);//课程ID
                     wxPushParam.put("lecturer_id", userId);
-                    wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));
+                    wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));//第三方服务号的
                     wxPushParam.put("accessToken", authorizer_access_token);//课程ID
                     wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                    String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
+//                    Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam, appName);
+//                    String template_id = weCatTemplateInfo.get("template_id").toString();
+//
+//
+//                    String next_openid = toServiceNoFollow(null, authorizer_access_token, url, templateId, templateMap,appName);
+//                    while (next_openid != null) {
+//                        next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap,appName);
+//                    }
+
+
                     log.debug("发送mq消息进行异步处理--------------------");
                     RequestEntity mqRequestEntity = new RequestEntity();
                     mqRequestEntity.setServerName("MessagePushServer");
@@ -612,7 +624,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
                     mqRequestEntity.setParam(getWeCatTemplateInfo(wxPushParam,appName));
                     mqRequestEntity.setAppName(appName);
-                    this.mqUtils.sendMessage(mqRequestEntity);
+               //     this.mqUtils.sendMessage(mqRequestEntity);
+
+                    noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+
                 }
             }
         }
@@ -665,6 +680,53 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         return resultMap;
     }
+
+
+    public void noticeCourseToServiceNoFollow(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();//转换参数
+        log.debug("---------------将课程创建的信息推送给服务号的粉丝"+reqMap);
+        String appName = requestEntity.getAppName();
+        String accessToken = reqMap.get ("accessToken").toString();
+        String type = reqMap.get("pushType").toString();//类型 1 是创建课程 2 是更新课程时间
+        String authorizer_appid = reqMap.get("authorizer_appid").toString();
+        String courseId = reqMap.get("course_id").toString();//课程id
+        String templateId = reqMap.get("template_id").toString();
+        if(templateId != null){
+            log.info("===================================微信发送模板消息:"+templateId+"========================================");
+            Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板数据
+
+            String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
+
+            String next_openid = toServiceNoFollow(null, accessToken, url, templateId, templateMap,appName);
+            while (next_openid != null) {
+                next_openid = toServiceNoFollow(next_openid, accessToken, url, templateId, templateMap,appName);
+            }
+        }
+    }
+
+
+//         * 把课程创建的模板消息推送给服务号粉丝的具体逻辑
+//     */
+    public String toServiceNoFollow(String next_openid, String accessToken, String url, String templateId, Map<String, TemplateData> templateMap,String appName) {
+        //step1 获取粉丝信息 可能多页
+        JSONObject fansInfo = WeiXinUtil.getServiceFansList(accessToken, next_openid,appName);
+        JSONArray fansOpenIDArr = fansInfo.getJSONObject("data").getJSONArray("openid");
+
+        //step2 循环推送模板消息
+        for (Object openID: fansOpenIDArr) {
+            int result = WeiXinUtil.sendTemplateMessageToServiceNoFan(accessToken, String.valueOf(openID), url, templateId, templateMap,appName);
+            if (result != 0) {
+                //step3 出现失败的情况（服务号可能没设置这个行业和模板ID ）就中断发送
+                log.error("给第三方服务号：{} 粉丝推送模板消息出现错误：{}", accessToken, result);
+                return null;
+            }
+        }
+        if (fansInfo.getIntValue("count") == 10000) {
+            return fansInfo.getString("next_openid");
+        }
+        return null;
+    }
+
 
     /**
      * 获取微信模板对象
