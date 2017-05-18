@@ -388,7 +388,7 @@
         click_num=#{click_num},
       </if>
     </set>
-    where course_id = #{course_id}
+    where course_id = #{course_id} and  `status` <![CDATA[ <> ]]> 5
     <if test="last_update_time != null" >
     	and update_time=#{last_update_time}
     </if>
