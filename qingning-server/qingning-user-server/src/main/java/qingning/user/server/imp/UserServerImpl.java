@@ -395,7 +395,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
-        if(courceStatus == 1 || courceStatus == 4){//如果预告或者是正在直播的课程
+        if(courceStatus == 4){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
@@ -429,9 +429,49 @@ public class UserServerImpl extends AbstractQNLiveServer {
             pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
             if( pageCount > 0){//如果返回的值不够
                 courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
+                courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+
+
+        if(courceStatus == 1 ){//如果预告或者是正在直播的课程
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+
+            //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+            if(!MiscUtils.isEmpty(classify_id)){//有分类
+                Map<String,Object> map = new HashMap<String,Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
+                getCourseIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
+            }else{ //首页
+                getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+            }
+            if(courseId == null || courseId.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
+                startIndex =  "+inf";//设置起始位置
+                endIndex ="("+courseScoreByRedis;//设置结束位置
+            }else{//传了courseid
+                Map<String,String> queryParam = new HashMap<String,String>();
+                queryParam.put("course_id", courseId);
+                RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
+                startIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="("+courseScoreByRedis;//设置结束位置
+            }
+            courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                courseIdList.add(course_id);
+            }
+
+            pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
                 courceStatus = 2;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
+
         //=========================下面的缓存使用另外一种方式获取====================================
         if(courceStatus == 2){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法

@@ -148,6 +148,10 @@
     SELECT * FROM t_courses WHERE app_name = #{appName} and classify_id = #{classify_id}
   </select>
 
+  <select id="findCourseByStatus" resultType="hashmap" parameterType="hashmap" >
+    SELECT course_id FROM t_courses WHERE app_name = #{appName} and `status` = #{status}
+  </select>
+
   <insert id="insertCourse" parameterType="hashmap" >
     insert into t_courses
     <trim prefix="(" suffix=")" suffixOverrides="," >

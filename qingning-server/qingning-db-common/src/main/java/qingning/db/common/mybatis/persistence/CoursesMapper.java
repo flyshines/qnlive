@@ -18,4 +18,6 @@ public interface CoursesMapper {
 	List<Map<String,Object>> findCourseBySearch(Map<String,Object> record);
 	List<Map<String,Object>> findCourseByRecommend(String appName);
 	List<Map<String,Object>> findCourseByClassifyId(Map<String,Object> record);
+	List<Map<String, Object>> findCourseByStatus(Map<String,Object> record);
+
 }
