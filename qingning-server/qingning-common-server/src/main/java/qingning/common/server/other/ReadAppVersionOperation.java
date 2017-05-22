@@ -22,7 +22,7 @@ public class ReadAppVersionOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-
+        reqMap.put("app_name",requestEntity.getAppName());
         return iCommonModuleServer.findVersionInfoByOS(reqMap.get("plateform").toString());
     }
 }

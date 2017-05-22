@@ -431,7 +431,6 @@
 					<param name="longitude" type="string"/>
 					<param name="latitude" type="string"/>
 					<param name="download_channel" type="string"/>
-					<param name="version" type="string"/>
 					<param name="net_status" type="string"/>
 					<param name="network_operators" type="string"/>
 					<param name="webchat_authorization" type="string"/>
