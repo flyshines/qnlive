@@ -426,6 +426,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 courseIdList.add(course_id);
             }
+            Collections.reverse(courseIdList);//倒叙
             pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
             if( pageCount > 0){//如果返回的值不够
                 courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
