@@ -1154,10 +1154,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 			String lastContent;
 			lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name",appName) + MiscUtils.RecoveryEmoji(user.get("nick_name"));
-			String thirdContent = MiscUtils.RecoveryEmoji(courseInfoMap.get("course_remark"));
-			if(! MiscUtils.isEmpty(thirdContent)){
-				lastContent += "\n" + MiscUtils.getConfigByKey("wpush_shop_course_brief",appName) + thirdContent;
-			}
+//			String thirdContent = MiscUtils.RecoveryEmoji(courseInfoMap.get("course_remark"));
+//			if(! MiscUtils.isEmpty(thirdContent)){
+//				lastContent += "\n" + MiscUtils.getConfigByKey("wpush_shop_course_brief",appName) + thirdContent;
+//			}
 			lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);

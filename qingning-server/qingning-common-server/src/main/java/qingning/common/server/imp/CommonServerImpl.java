@@ -1277,10 +1277,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         String lastContent;
         lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name",appName) + MiscUtils.RecoveryEmoji(lecturerUser.get("nick_name"));
-        String thirdContent = MiscUtils.RecoveryEmoji(courseByCourseId.get("course_remark"));
-        if(! MiscUtils.isEmpty(thirdContent)){
-            lastContent += "\n" + thirdContent;
-        }
+//        String thirdContent = MiscUtils.RecoveryEmoji(courseByCourseId.get("course_remark"));
+//        if(! MiscUtils.isEmpty(thirdContent)){
+//            lastContent += "\n" + thirdContent;
+//        }
         lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
 
         TemplateData remark = new TemplateData();
