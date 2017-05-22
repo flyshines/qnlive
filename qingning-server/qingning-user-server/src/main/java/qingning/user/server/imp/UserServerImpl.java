@@ -408,25 +408,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }else{ //首页
                 getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
             }
-
-
-            if(courseId == null || courseId.equals("")){//如果没有传入courceid 那么就是最开始的查询
-                startIndex = "-inf";//设置起始位置
-                endIndex = "+inf";//设置结束位置
+            if(courseId == null || courseId.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
+                startIndex = courseScoreByRedis+"";//设置起始位置
+                endIndex = "-inf";//设置结束位置
             }else{//传了courseid
                 Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("course_id", courseId);
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
                 Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
-                endIndex = "+inf";//设置结束位置
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex = "-inf";//设置结束位置
             }
-            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
             for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 courseIdList.add(course_id);
             }
-            Collections.reverse(courseIdList);//倒叙
+
             pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
             if( pageCount > 0){//如果返回的值不够
                 courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
@@ -487,6 +486,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Map<String,Object> query = new HashMap<String,Object>();
             query.put(Constants.CACHED_KEY_USER_FIELD, userId);
             String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
@@ -496,7 +496,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 } else {
                     courseInfoMap.put("student", "N");
                 }
-                courseList.add(courseInfoMap);
+               courseList.add(courseInfoMap);
             }
         }
         //</editor-fold>
