@@ -449,18 +449,18 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
             if(courseId == null || courseId.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-                startIndex =  "+inf";//设置起始位置
-                endIndex ="("+courseScoreByRedis;//设置结束位置
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
             }else{//传了courseid
                 Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("course_id", courseId);
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
                 Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-                startIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
-                endIndex ="("+courseScoreByRedis;//设置结束位置
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
             }
-            courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
             for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 courseIdList.add(course_id);
             }
