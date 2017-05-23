@@ -1259,19 +1259,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
         TemplateData first = new TemplateData();
-        first.setColor("#000000");
+        first.setColor(Constants.WE_CHAT_PUSH_COLOR);
         String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first",appName), MiscUtils.RecoveryEmoji(courseByCourseId.get("course_title")));
         first.setValue(firstContent);
         templateMap.put("first", first);
 
         TemplateData courseTitle = new TemplateData();
-        courseTitle.setColor("#000000");
+        courseTitle.setColor(Constants.WE_CHAT_PUSH_COLOR);
         courseTitle.setValue(MiscUtils.RecoveryEmoji(courseByCourseId.get("course_title")));
         templateMap.put("keyword1", courseTitle);
 
         Date start_time = new Date(Long.parseLong(courseByCourseId.get("start_time")));
         TemplateData orderNo = new TemplateData();
-        orderNo.setColor("#000000");
+        orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
         orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
         templateMap.put("keyword2", orderNo);
 
@@ -1284,7 +1284,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
 
         TemplateData remark = new TemplateData();
-        remark.setColor("#000000");
+        remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
         remark.setValue(lastContent);
         templateMap.put("remark", remark);
         String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId, roomId);
@@ -3087,7 +3087,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map),classify_info);
             }
         }
-
+//
 //        for(Map<String, Object> classify :classifyList ) {
 //            String classify_id = classify.get("classify_id").toString();
 //            Map<String,Object> map = new HashMap<>();
@@ -3138,6 +3138,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            String id = courseid.get("course_id").toString();
 //            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,id);
 //            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
+//
 //        }
 
 

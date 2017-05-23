@@ -205,23 +205,23 @@ public class ImMsgServiceImp implements ImMsgService {
 
 					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 					TemplateData first = new TemplateData();
-					first.setColor("#000000");
+					first.setColor(Constants.WE_CHAT_PUSH_COLOR);
 					first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
 					templateMap.put("first", first);
 
 					TemplateData orderNo = new TemplateData();
-					orderNo.setColor("#000000");
+					orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
 					orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
 					templateMap.put("keyword1", orderNo);
 
 					TemplateData wuliu = new TemplateData();
-					wuliu.setColor("#000000");
+					wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
 					wuliu.setValue(str);
 					templateMap.put("keyword2", wuliu);
 
 
 					TemplateData remark = new TemplateData();
-					remark.setColor("#000000");
+					remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
 					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
 					templateMap.put("remark", remark);
 					//查询报名了的用户id
@@ -564,23 +564,23 @@ public class ImMsgServiceImp implements ImMsgService {
 //
 //		    		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 //		    		TemplateData first = new TemplateData();
-//		    		first.setColor("#000000");
+//		    		first.setColor(Constants.WE_CHAT_PUSH_COLOR);
 //		    		first.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_first"));
 //		    		templateMap.put("first", first);
 //
 //		    		TemplateData orderNo = new TemplateData();
-//		    		orderNo.setColor("#000000");
+//		    		orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
 //		    		orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
 //		    		templateMap.put("keyword1", orderNo);
 //
 //		    		TemplateData wuliu = new TemplateData();
-//		    		wuliu.setColor("#000000");
+//		    		wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
 //		    		wuliu.setValue(str);
 //		    		templateMap.put("keyword2", wuliu);
 //
 //
 //		    		TemplateData remark = new TemplateData();
-//		    		remark.setColor("#000000");
+//		    		remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
 //		    		remark.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_remark"));
 //		    		templateMap.put("remark", remark);
 //		    		//查询报名了的用户id

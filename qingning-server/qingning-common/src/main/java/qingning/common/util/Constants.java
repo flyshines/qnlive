@@ -11,6 +11,9 @@ public final class Constants {
 	public static final String SYS_FIELD_DISTRICT="district";
 	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
 
+
+	public static final String WE_CHAT_PUSH_COLOR = "#000000";
+
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";

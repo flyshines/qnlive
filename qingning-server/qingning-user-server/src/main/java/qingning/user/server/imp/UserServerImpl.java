@@ -1136,19 +1136,19 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     		Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
     		TemplateData first = new TemplateData();
-    		first.setColor("#000000");
+    		first.setColor(Constants.WE_CHAT_PUSH_COLOR);
 			String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first",appName), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
     		first.setValue(firstContent);
     		templateMap.put("first", first);
 
 			TemplateData courseTitle = new TemplateData();
-			courseTitle.setColor("#000000");
+			courseTitle.setColor(Constants.WE_CHAT_PUSH_COLOR);
 			courseTitle.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
 			templateMap.put("keyword1", courseTitle);
 
     		Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
     		TemplateData orderNo = new TemplateData();
-    		orderNo.setColor("#000000");
+    		orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
     		orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
     		templateMap.put("keyword2", orderNo);
 
@@ -1162,7 +1162,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
     		TemplateData remark = new TemplateData();
-    		remark.setColor("#000000");
+    		remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
 			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));

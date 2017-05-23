@@ -265,7 +265,7 @@ public class WeiXinUtil {
         WxTemplate temp = new WxTemplate();
         temp.setUrl(url);
         temp.setTouser(openId);
-        temp.setTopcolor("#000000");
+        temp.setTopcolor(Constants.WE_CHAT_PUSH_COLOR);
         temp.setTemplate_id(templateId);
 
         temp.setData(templateMap);
@@ -451,7 +451,7 @@ public class WeiXinUtil {
 		WxTemplate temp = new WxTemplate();
 		temp.setUrl(url);
 		temp.setTouser(openId);
-		temp.setTopcolor("#000000");
+		temp.setTopcolor(Constants.WE_CHAT_PUSH_COLOR);
 		temp.setTemplate_id(templateId);
 
 		temp.setData(templateMap);

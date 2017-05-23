@@ -327,32 +327,32 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     JPushHelper.push(obj,appName);
 
 
-                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                    TemplateData first = new TemplateData();
-                    first.setColor("#000000");
-                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
-                    templateMap.put("first", first);
-
-                    TemplateData orderNo = new TemplateData();
-                    orderNo.setColor("#000000");
-                    orderNo.setValue(MiscUtils.RecoveryEmoji(course_title));
-                    templateMap.put("keyword1", orderNo);
-
-                    TemplateData wuliu = new TemplateData();
-                    wuliu.setColor("#000000");
-                    wuliu.setValue(str);
-                    templateMap.put("keyword2", wuliu);
-
-                    TemplateData remark = new TemplateData();
-                    remark.setColor("#000000");
-                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
-                    templateMap.put("remark", remark);
-
-                    if (studentIds!=null && studentIds.size()>0) {
-                        String url=String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId,roomId);
-                        Jedis jedis = jedisUtils.getJedis(appName);
-                        weiPush(studentIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
-                    }
+//                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+//                    TemplateData first = new TemplateData();
+//                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+//                    templateMap.put("first", first);
+//
+//                    TemplateData orderNo = new TemplateData();
+//                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    orderNo.setValue(MiscUtils.RecoveryEmoji(course_title));
+//                    templateMap.put("keyword1", orderNo);
+//
+//                    TemplateData wuliu = new TemplateData();
+//                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    wuliu.setValue(str);
+//                    templateMap.put("keyword2", wuliu);
+//
+//                    TemplateData remark = new TemplateData();
+//                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+//                    templateMap.put("remark", remark);
+//
+//                    if (studentIds!=null && studentIds.size()>0) {
+//                        String url=String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId,roomId);
+//                        Jedis jedis = jedisUtils.getJedis(appName);
+//                        weiPush(studentIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+//                    }
 
         		}
         	};

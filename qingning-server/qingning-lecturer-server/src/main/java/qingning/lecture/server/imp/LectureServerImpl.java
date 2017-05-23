@@ -547,17 +547,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
         	Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
         	TemplateData first = new TemplateData();
-        	first.setColor("#000000");
+        	first.setColor(Constants.WE_CHAT_PUSH_COLOR);
         	first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first",appName));
         	templateMap.put("first", first);
 
         	TemplateData name = new TemplateData();
-        	name.setColor("#000000");
+        	name.setColor(Constants.WE_CHAT_PUSH_COLOR);
         	name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
         	templateMap.put("keyword1", name);
 
         	TemplateData wuliu = new TemplateData();
-        	wuliu.setColor("#000000");
+        	wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
             String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
             if(MiscUtils.isEmpty(content)){
                 content = "";
@@ -566,18 +566,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	templateMap.put("keyword2", wuliu);
 
         	TemplateData orderNo = new TemplateData();
-        	orderNo.setColor("#000000");
+        	orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
         	orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
         	templateMap.put("keyword3", orderNo);
 
         	Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
         	TemplateData receiveAddr = new TemplateData();
-        	receiveAddr.setColor("#000000");
+        	receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
         	receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
         	templateMap.put("keyword4", receiveAddr);
 
         	TemplateData remark = new TemplateData();
-        	remark.setColor("#000000");
+        	remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
         	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark",appName),MiscUtils.RecoveryEmoji(nickName)));
         	templateMap.put("remark", remark);
 
@@ -1184,32 +1184,32 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
                     TemplateData first = new TemplateData();
-                    first.setColor("#000000");
+                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     first.setValue(MiscUtils.getConfigByKey("wpush_update_course_first",appName));
                     templateMap.put("first", first);
 
                     TemplateData wuliu = new TemplateData();
-                    wuliu.setColor("#000000");
+                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     wuliu.setValue(course.get("course_title").toString());
                     templateMap.put("keyword1", wuliu);
 
                     TemplateData name = new TemplateData();
-                    name.setColor("#000000");
+                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     name.setValue("修改部分课程信息！");
                     templateMap.put("keyword2", name);
 
                     TemplateData orderNo = new TemplateData();
-                    orderNo.setColor("#000000");
+                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     orderNo.setValue(MiscUtils.parseDateToFotmatString(new Date(MiscUtils.convertObjectToLong(original_start_time)), "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword3", orderNo);
 
                     TemplateData nowDate = new TemplateData();
-                    nowDate.setColor("#000000");
+                    nowDate.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     nowDate.setValue(MiscUtils.parseDateToFotmatString(new Date(Long.parseLong(newStartTime)), "yyyy-MM-dd HH:mm:ss"));
                     templateMap.put("keyword4", nowDate);
 
                     TemplateData remark = new TemplateData();
-                    remark.setColor("#000000");
+                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark",appName));
                     templateMap.put("remark", remark);
 
@@ -3239,23 +3239,23 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(!MiscUtils.isEmpty(courseAllStudentList)){//如果有学生
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();//模板信息
                     TemplateData first = new TemplateData();//针对微信模板{{first.DATA}}
-                    first.setColor("#000000");
+                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     first.setValue(MiscUtils.getConfigByKey("wpush_delete_course_first",appName));
                     templateMap.put("first", first);
 
                     TemplateData keyword1 = new TemplateData();//针对微信模板 课程名称：{{keyword1.DATA}}
-                    keyword1.setColor("#000000");
+                    keyword1.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     keyword1.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));//课程名称
                     templateMap.put("keyword1", keyword1);
 
                     TemplateData keyword2 = new TemplateData();
-                    keyword2.setColor("#000000");
+                    keyword2.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     keyword2.setValue(MiscUtils.getConfigByKey("wpush_delete_course_keyword2",appName));
                     templateMap.put("keyword2", keyword2);
 
 
                     TemplateData remark = new TemplateData();
-                    remark.setColor("#000000");
+                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
                     remark.setValue(MiscUtils.getConfigByKey("wpush_delete_course_remark",appName));
                     templateMap.put("remark", remark);
 
