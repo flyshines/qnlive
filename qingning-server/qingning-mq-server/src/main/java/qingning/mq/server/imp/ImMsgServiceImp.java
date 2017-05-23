@@ -225,7 +225,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
 					templateMap.put("remark", remark);
 					//查询报名了的用户id
-					List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("room_id"));
+					List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("course_id"));
 
 					String url = MiscUtils.getConfigByKey("course_live_room_url",appName);
 					url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
@@ -370,7 +370,7 @@ public class ImMsgServiceImp implements ImMsgService {
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
-		if("6".equals(information.get("send_type"))){
+		if("6".equals(information.get("send_type"))){//结束消息
 			//1.7如果存在课程聊天信息
             RequestEntity messageRequestEntity = new RequestEntity();
             Map<String,Object> processMap = new HashMap<>();
@@ -390,6 +390,7 @@ public class ImMsgServiceImp implements ImMsgService {
             //1.8如果存在课程音频信息
             RequestEntity audioRequestEntity = new RequestEntity();
             audioRequestEntity.setParam(processMap);
+			messageRequestEntity.setAppName(appName);
             try {
             	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
             	if(saveCourseAudioService!=null){
