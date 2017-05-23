@@ -429,6 +429,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //4.4 将课程插入到 我的课程列表
         //预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction
         String courseId = (String)course.get("course_id");
+        String roomId = course.get("room_id");
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
@@ -456,6 +457,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.put("course_id", courseId);
         Map<String,Object> timerMap = new HashMap<>();
         timerMap.put("course_id", courseId);
+        timerMap.put("room_id", roomId);
         //timerMap.put("start_time", new Date(startTime));
         timerMap.put("lecturer_id", userId);
         timerMap.put("course_title", course.get("course_title"));        
@@ -521,7 +523,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //        obj.put("extras_map", extrasMap);
 //        JPushHelper.push(obj);//TODO
         //</editor-fold>
-        String roomId = course.get("room_id");
+
         map.clear();
         map.put("lecturer_id", userId);        
         Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);

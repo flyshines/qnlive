@@ -140,6 +140,7 @@ public class ImMsgServiceImp implements ImMsgService {
 					MessagePushServerImpl messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
 					RequestEntity requestEntity = new RequestEntity();
 					requestEntity.setServerName("MessagePushServer");
+					requestEntity.setAppName(appName);
 					requestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
 					requestEntity.setFunctionName("processCourseLiveOvertime");
 					Map<String,Object> timerMap = new HashMap<>();
@@ -147,17 +148,21 @@ public class ImMsgServiceImp implements ImMsgService {
 					timerMap.put("real_start_time",  now+"");
 					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
-					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context); //课程未开播处理定时任务取消
-					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);  //课程直播超时处理 服务端逻辑
+					//课程未开播处理定时任务取消
+					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+					//课程直播超时处理 服务端逻辑 定时任务
+					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
 
-					//进行超时预先提醒定时任务
+					//进行超时预先提醒定时任务 提前30分钟 提醒课程结束
 					timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
+					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+
+
+					//提前10分钟 提醒课程结束
 					timerMap.remove(Constants.OVERTIME_NOTICE_TYPE_30);
+					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-
-
-
 					//取消15分钟未开始定时任务
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
 
@@ -396,13 +401,16 @@ public class ImMsgServiceImp implements ImMsgService {
 		}
 	}
 
+
+
+//<editor-fold desc="暂时还没测试">
 	/**
 	 * 讲师回复学生或者和学生互动之后 推送消息给学生
 	 * @param courseInfo
 	 * @param userInfo
 	 * @param jedisUtils
 	 */
-	//<editor-fold desc="暂时还没测试">
+
 //	private void noticeToStudent(Map<String,Object> courseInfo, Map<String,Object> userInfo, JedisUtils jedisUtils) {
 //		Map<String, TemplateData> templateMap = (Map<String, TemplateData>) reqMap.get("templateParam");//模板消息
 //		String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+ courseInfo.get("courseId");//推送url
@@ -465,6 +473,7 @@ public class ImMsgServiceImp implements ImMsgService {
 	}
 
 
+	//<editor-fold desc="Description">
 	/**
 	 * 存储讲师讲课音频到缓存
 	 * @param imMessage
@@ -601,6 +610,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //		stringMap.put("audio_id", audioId);
 //		jedis.hmset(messageKey, stringMap);
 //	}
+	//</editor-fold>
 	//</editor-fold>
 
 

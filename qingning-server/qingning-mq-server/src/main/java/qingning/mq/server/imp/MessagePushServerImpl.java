@@ -13,6 +13,7 @@ import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.CoursesMapper;
 import qingning.db.common.mybatis.persistence.CoursesStudentsMapper;
 import qingning.db.common.mybatis.persistence.LecturerMapper;
+import qingning.db.common.mybatis.persistence.LoginInfoMapper;
 import qingning.mq.server.entyity.QNQuartzSchedule;
 import qingning.mq.server.entyity.QNSchedule;
 import qingning.mq.server.entyity.ScheduleTask;
@@ -32,6 +33,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @Autowired
     private CoursesStudentsMapper coursesStudentsMapper;
 
+    @Autowired(required=true)
+    private LoginInfoMapper loginInfoMapper;
 
 /*    private SaveCourseMessageService saveCourseMessageService;
     private SaveCourseAudioService saveCourseAudioService;*/
@@ -290,12 +293,15 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------加入学生上课3min提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
+        String roomId = reqMap.get("room_id").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE)){
         	return;
         }
         String course_title = reqMap.get("course_title").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+        SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+        String str = sdf.format(start_time);
 
         //3分钟
         long noticeTime= 3*60*1000;
@@ -319,6 +325,35 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     extrasMap.put("im_course_id", im_course_id);
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj,appName);
+
+
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                    TemplateData first = new TemplateData();
+                    first.setColor("#000000");
+                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+                    templateMap.put("first", first);
+
+                    TemplateData orderNo = new TemplateData();
+                    orderNo.setColor("#000000");
+                    orderNo.setValue(MiscUtils.RecoveryEmoji(course_title));
+                    templateMap.put("keyword1", orderNo);
+
+                    TemplateData wuliu = new TemplateData();
+                    wuliu.setColor("#000000");
+                    wuliu.setValue(str);
+                    templateMap.put("keyword2", wuliu);
+
+                    TemplateData remark = new TemplateData();
+                    remark.setColor("#000000");
+                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+                    templateMap.put("remark", remark);
+
+                    if (studentIds!=null && studentIds.size()>0) {
+                        String url=String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId,roomId);
+                        Jedis jedis = jedisUtils.getJedis(appName);
+                        weiPush(studentIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+                    }
+
         		}
         	};
         	scheduleTask.setId(courseId);
@@ -328,6 +363,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
             qnSchedule.add(scheduleTask); 
         }
     }
+
+
+
 
     //课程开始讲师未出现 极光推送
     @SuppressWarnings("unchecked")
@@ -794,6 +832,28 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         return null;
     }
+
+
+    /**
+     * 微信推送
+     * @param findFollowUserIds
+     * @param templateId
+     * @param templateMap
+     */
+    @FunctionName("weiPush")
+    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap,Jedis jedis,String appName){
+        // 推送   关注的直播间有创建新的课程
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("list", findFollowUserIds);
+        List<String> findOpenIds = loginInfoMapper.findLoginInfoByUserIds(map);
+        if (findOpenIds!=null && findOpenIds.size()>0) {
+            for (String openId : findOpenIds) {
+                //TODO
+                WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis,appName);
+            }
+        }
+    }
+
 
 //    public void refreshServiceNoToken(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
 //

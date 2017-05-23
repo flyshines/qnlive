@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
@@ -115,6 +116,9 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
 			list.add(createCourseNoticeTaskServerImpl);
 
+
+
+
 			clearMessageLock();
 		}
 	}
@@ -148,7 +152,9 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		for(AbstractMsgService server : list){
 			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
 			try {
-				server.process(null, jedisUtils, context);
+				RequestEntity  req = new RequestEntity();
+				req.setAppName(appName);
+				server.process(req, jedisUtils, context);
 			} catch (Exception e) {
 				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
 			}
