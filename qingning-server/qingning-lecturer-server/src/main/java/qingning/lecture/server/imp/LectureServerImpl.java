@@ -577,7 +577,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	templateMap.put("keyword4", receiveAddr);
 
         	TemplateData remark = new TemplateData();
-        	remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+        	remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
         	remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark",appName),MiscUtils.RecoveryEmoji(nickName)));
         	templateMap.put("remark", remark);
 
@@ -875,7 +875,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return share_url;
     }
- 
+
+
+    /**
+     * 修改课程 删除课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("updateCourse")
     public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
@@ -1038,7 +1045,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
             jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
 
-            String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
+            String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间
             Map<String,String> result = new HashMap<String,String>();
             MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
             jedis.hmset(messageKey, result);
@@ -1209,7 +1216,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     templateMap.put("keyword4", nowDate);
 
                     TemplateData remark = new TemplateData();
-                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
                     remark.setValue(MiscUtils.getConfigByKey("wpush_update_course_remark",appName));
                     templateMap.put("remark", remark);
 
@@ -3255,7 +3262,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
                     TemplateData remark = new TemplateData();
-                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
                     remark.setValue(MiscUtils.getConfigByKey("wpush_delete_course_remark",appName));
                     templateMap.put("remark", remark);
 

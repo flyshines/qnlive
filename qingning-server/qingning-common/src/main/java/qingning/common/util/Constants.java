@@ -12,8 +12,8 @@ public final class Constants {
 	public static final String SYS_FIELD_LAST_UPDATE_TIME ="last_update_time";
 
 
-	public static final String WE_CHAT_PUSH_COLOR = "#000000";//黑色
-	public static final String WE_CHAT_PUSH_COLOR_RED = "#FF0000";//红色
+	public static final String WE_CHAT_PUSH_COLOR = "#595959";
+	public static final String WE_CHAT_PUSH_COLOR_QNCOLOR = "#5AD1A1";
 
 
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";

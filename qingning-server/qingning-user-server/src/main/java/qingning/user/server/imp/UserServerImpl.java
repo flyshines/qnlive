@@ -1162,7 +1162,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
     		TemplateData remark = new TemplateData();
-    		remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+    		remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
 			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));

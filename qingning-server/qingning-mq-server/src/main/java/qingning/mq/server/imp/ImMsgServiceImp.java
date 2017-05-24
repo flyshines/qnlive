@@ -225,7 +225,7 @@ public class ImMsgServiceImp implements ImMsgService {
 
 
 					TemplateData remark = new TemplateData();
-					remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+					remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
 					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
 					templateMap.put("remark", remark);
 					//查询报名了的用户id
