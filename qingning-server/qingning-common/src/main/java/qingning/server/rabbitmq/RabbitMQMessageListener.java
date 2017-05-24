@@ -34,7 +34,6 @@ public class RabbitMQMessageListener implements MessageListener {
 			return;
 		}
 		RequestEntity requestEntity = (RequestEntity)messageConverter.fromMessage(message);
-		String appName = requestEntity.getAppName();
 		boolean asynchronized = Constants.MQ_METHOD_ASYNCHRONIZED.equals(requestEntity.getMethod());
 		AbstractMsgService service = serviceMap.get(requestEntity.getServerName());
 		if(!serviceMap.containsKey(requestEntity.getServerName())){

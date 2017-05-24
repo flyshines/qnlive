@@ -448,6 +448,7 @@ public class WeiXinUtil {
 		AccessToken token = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID,appName),MiscUtils.getConfigByKey(Constants.APPSECRET,appName) ,jedis,appName);
 		String access_token = token.getToken();
 		String accessUrl = MiscUtils.getConfigByKey(Constants.WEIXIN_TEMPLATE_PUSH_URL,appName).replace("ACCESS_TOKEN", access_token);
+        log.info("微信推送url：" + accessUrl);
 		WxTemplate temp = new WxTemplate();
 		temp.setUrl(url);
 		temp.setTouser(openId);
@@ -458,11 +459,12 @@ public class WeiXinUtil {
 		String jsonString="";
 		try {
 			jsonString = com.alibaba.dubbo.common.json.JSON.json(temp);
+            log.info("微信推送发送参数：" + jsonString);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		JSONObject jsonObject = WeiXinUtil.httpRequest(accessUrl, "POST", jsonString);
-		log.info("微信推送消息发送参数：" + jsonObject);
+		log.info("微信推送消息返回参数：" + jsonObject);
 		int result = 0;
 		if (null != jsonObject) {
 			if (0 != jsonObject.getIntValue("errcode")) {
