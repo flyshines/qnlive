@@ -148,23 +148,27 @@ public class ImMsgServiceImp implements ImMsgService {
 					timerMap.put("real_start_time",  now+"");
 					timerMap.put("im_course_id", courseMap.get("im_course_id"));
 					requestEntity.setParam(timerMap);
+					log.debug("取消15分钟未开始定时任务 course_id:"+courseMap.get("course_id"));
+					//取消15分钟未开始定时任务
+					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+					log.debug("课程未开播处理定时任务取消 course_id:"+courseMap.get("course_id"));
 					//课程未开播处理定时任务取消
 					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+					log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseMap.get("course_id"));
 					//课程直播超时处理 服务端逻辑 定时任务
 					messagePushServerImpl.processCourseLiveOvertime(requestEntity,jedisUtils,context);
-
+					log.debug("进行超时预先提醒定时任务 提前30分钟 提醒课程结束 course_id:"+courseMap.get("course_id"));
 					//进行超时预先提醒定时任务 提前30分钟 提醒课程结束
 					timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 
-
+					log.debug("提前10分钟 提醒课程结束 course_id:"+courseMap.get("course_id"));
 					//提前10分钟 提醒课程结束
 					timerMap.remove(Constants.OVERTIME_NOTICE_TYPE_30);
 					requestEntity.setParam(timerMap);
 					messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-					//取消15分钟未开始定时任务
-					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
+
 
 					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
