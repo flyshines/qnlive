@@ -175,8 +175,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         log.debug("---------------課程开课時間"+realStartTime);
         //1440分钟 超时结束
         long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
-        long taskStartTime = (30*60*1000) + realStartTime;
-        log.debug("--------------超时任务处理时间"+taskStartTime);
+        long taskStartTime = (5*60*1000) + realStartTime;
+        log.debug("--------------超时任务处理时间 测试5分钟"+taskStartTime);
 
         ScheduleTask scheduleTask = new ScheduleTask(){
             @Override
@@ -542,6 +542,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     //type 为1则为课程未开播强制结束，type为2则为课程直播超时强制结束
     public void processCourseEnd(CoursesMapper processCoursesMapper, String type ,String courseId, Jedis jedis,String appName){
+
+        log.debug("-----------課程强制结束任务 course_id:"+courseId+" 执行类型:"+ type +"  app:"+ appName +"  执行时间"+System.currentTimeMillis());
+
         Map<String,Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -572,12 +575,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
             //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
             map.clear();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
+
             String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
             jedis.zrem(lecturerCoursesPredictionKey, courseId);
 
             String lecturerCoursesFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-            String courseStartTime = jedis.hget(courseKey, "start_time");
-            
             long  position = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position"));
             jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertInfoToPostion(now.getTime(), position), courseId);
 
@@ -586,7 +588,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){            	
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);
             }
-
+            //将该课程从分类预告课程列表 SYS:COURSES:{classify_id}:PREDICTION 移除. 如果存在判断当前课程是否存在 加入结束列表中 SYS:COURSES:{classify_id}:FINISH
             map.put(Constants.CACHED_KEY_CLASSIFY,courseMap.get("classify_id"));
             jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), courseId);
             if(jedis.zrank(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map),courseId)==null){
@@ -607,15 +609,17 @@ public class MessagePushServerImpl extends AbstractMsgService {
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
+
+
+
             ////发送结束推送消息
             SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
             String str = sdf.format(now);
             String courseEndMessage = "直播结束于"+str;
             long currentTime = System.currentTimeMillis();
             String mGroupId = jedis.hget(courseKey,"im_course_id");
-            String sender = "system";
-            String overtimeMessage = MiscUtils.getConfigKey("over_time_message");
 
+            String sender = "system";
             String message = courseEndMessage;
             Map<String,Object> infomation = new HashMap<>();
             infomation.put("course_id", courseId);
@@ -626,27 +630,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
             infomation.put("message_type", "1");
             infomation.put("send_type", "6");//5.结束消息
             infomation.put("create_time", currentTime);
-
-
-/*            //1.7如果存在课程聊天信息
-            RequestEntity messageRequestEntity = new RequestEntity();
-            Map<String,Object> processMap = new HashMap<>();
-            processMap.put("course_id", courseId);
-            messageRequestEntity.setParam(processMap);
-            try {
-                saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
-            } catch (Exception e) {
-                //TODO 暂时不处理
-            }
-
-            //1.8如果存在课程音频信息
-            RequestEntity audioRequestEntity = new RequestEntity();
-            audioRequestEntity.setParam(processMap);
-            try {
-                saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
-            } catch (Exception e) {
-                //TODO 暂时不处理
-            }*/
 
             //课程未开播强制结束
             if(type.equals("1")){
