@@ -67,48 +67,13 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
 		            Map<String,Response<Boolean>> coursePptsExists = new HashMap<String,Response<Boolean>>();
 		            Map<String,Response<Boolean>> courseAudioExists = new HashMap<String,Response<Boolean>>();
 		            Map<String,Map<String,String>> courseValueMap = new HashMap<String,Map<String,String>>();
-		            long now = System.currentTimeMillis();
 		            do{		            
 		            	if(startTime != null){
 		            		queryMap.put("start_time", startTime);
 		            	}
 		            	List<Map<String,Object>> list = coursesMapper.findLecturerCourseListByStatus(queryMap);
-		            	Map<String,Object> courseMap = new HashMap<String,Object>();
 		            	if(!MiscUtils.isEmpty(list)){
 		            		readCount=list.size();
-		            		for(Map<String,Object> course : list){
-		            			String course_id = (String)course.get("course_id");
-		            			try{		            				
-		            				startTime = (Date)course.get("start_time");
-									long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
-									long taskStartTime = courseLiveOvertimeMsec + startTime.getTime();//当前课程加上24小时的毫秒值
-									boolean result = (now - taskStartTime)>0;//判断课程是否超过24小时  如果大于就是不超过 如果是小于就是超过
-									if(result){
-										pipeline.zadd(predictionListKey, startTime.getTime(), course_id);
-										courseMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
-
-										String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseMap);
-										String pptsKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PPTS, courseMap);
-										String audiosKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, courseMap);
-
-										courseExists.put(course_id, pipeline.exists(courseKey));
-										coursePptsExists.put(course_id, pipeline.exists(pptsKey));
-										courseAudioExists.put(course_id, pipeline.exists(audiosKey));
-
-										Map<String,String> valueStrMap = new HashMap<String,String>();
-										MiscUtils.converObjectMapToStringMap(course, valueStrMap);
-										courseValueMap.put(course_id, valueStrMap);
-									}else{
-										messagePushServerimpl.processCourseEnd(coursesMapper,"2",course_id,jedis,appName);
-
-									}
-
-
-		            			} catch(Exception e){
-		            				log.error("Load Course["+course_id+"]:"+e.getMessage());
-		            			}
-		            		}
-
 		            		pipeline.sync();		            		
 		            	} else {
 		            		readCount=0;
