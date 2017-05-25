@@ -1007,7 +1007,46 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
 
+    /**
+     *  获取systemConfig
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/saveCourseMsgList", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity saveCourseMsgList(
+            @RequestParam(value = "course_id",defaultValue = "0") String course_id,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "saveCourseMsgList", null, version,appName);
+        Map<String,String> map = new HashMap<>();
+        map.put("course_id",course_id);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
+
+    /**
+     *  updateCourse
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/updateCourse", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity userGains(
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userGains", null, version,appName);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 
 }

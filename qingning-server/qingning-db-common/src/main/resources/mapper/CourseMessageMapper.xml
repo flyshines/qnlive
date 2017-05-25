@@ -97,7 +97,9 @@
     <if test="direction == 1 and message_imid != null" >
       order by cm.message_pos
     </if>
+    <if test="page_count != null" >
       limit #{page_count}
+    </if>
   </select>
 
   <select id="findCourseMessageByComm" resultType="hashmap" parameterType="hashmap" >

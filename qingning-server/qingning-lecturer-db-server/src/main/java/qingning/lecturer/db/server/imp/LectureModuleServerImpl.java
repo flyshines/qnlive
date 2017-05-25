@@ -205,6 +205,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}else if("5".equals(reqMap.get("status"))) {
 			course.put("update_time", now);
 			course.put("status", "5");
+		}else if("1".equals(reqMap.get("status"))){
+			course.put("status", "1");
 		}else{
 			Object course_title = reqMap.get("course_title");
 			Object start_time = reqMap.get("start_time");

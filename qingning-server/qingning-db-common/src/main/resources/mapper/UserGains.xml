@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.UserGainsMapper" >
+  
+  <insert id="insertUserGains" parameterType="list">
+    insert into t_user_gains (user_id, live_room_total_amount, live_room_real_incomes,
+    distributer_total_amount, distributer_real_incomes, user_total_amount,
+    user_total_real_incomes )
+    values
+    <foreach collection ="list" item="item" index= "index" separator =",">
+      (#{item.user_id},#{item.live_room_total_amount},
+      #{item.live_room_real_incomes},#{item.distributer_total_amount},#{item.distributer_real_incomes},#{item.user_total_amount},
+      #{item.user_total_real_incomes})
+    </foreach>
+  </insert>
+  
+</mapper>

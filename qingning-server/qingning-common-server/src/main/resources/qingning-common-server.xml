@@ -673,6 +673,18 @@
 					</param>
 				</outputs>
 			</function>
+			<function name="saveCourseMsgList">
+				<auth>
+					<accessToken require="N"/>
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+
 			<function name="classifyInfo">
 				<auth>
 					<accessToken require="Y"/>

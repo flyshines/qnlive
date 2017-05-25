@@ -773,6 +773,40 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return systemConfigMapper.findSystemConfigByAppName(appName);
 	}
 
+	@Override
+	public void updateCourse(Map<String, Object> reqMap) {
+		Integer updateCount = null;
+		Date now = (Date)reqMap.get("now");
+		Map<String,Object> course = new HashMap<String,Object>();
+		course.put("course_id", reqMap.get("course_id"));
+
+		if("2".equals(reqMap.get("status"))){
+			course.put("end_time", now);
+			course.put("status", "2");
+		}else if("5".equals(reqMap.get("status"))) {
+			course.put("update_time", now);
+			course.put("status", "5");
+		}else if("1".equals(reqMap.get("status"))){
+			course.put("status", "1");
+		}else{
+			Object course_title = reqMap.get("course_title");
+			Object start_time = reqMap.get("start_time");
+			if(!MiscUtils.isEmpty(course_title)){
+				course.put("course_title", course_title);
+			}
+			if(!MiscUtils.isEmpty(start_time)){
+				course.put("start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
+			}
+			course.put("course_remark", reqMap.get("course_remark"));
+			course.put("course_url", reqMap.get("course_url"));
+			course.put("course_password", reqMap.get("course_password"));
+			if(!MiscUtils.isEmpty(reqMap.get("update_time"))){
+				course.put(Constants.SYS_FIELD_LAST_UPDATE_TIME, new Date(MiscUtils.convertObjectToLong(reqMap.get("update_time"))));
+			}
+		}
+		course.put("update_time", now);
+		coursesMapper.updateCourse(course);
+	}
 
 
 }

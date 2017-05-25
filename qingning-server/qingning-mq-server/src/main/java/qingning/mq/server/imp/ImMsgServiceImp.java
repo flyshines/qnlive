@@ -360,15 +360,7 @@ public class ImMsgServiceImp implements ImMsgService {
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
 				jedis.hset(key,"message_status","1");
 
-				//<editor-fold desc="暂时还没测试">
-				//给学生发送推送消息
-//				Map<String,Object> courseInfo = coursesMapper.findCourseByCourseId(information.get("course_id").toString());
-//				Map<String,Object> userInfo = null;
-//				noticeToStudent(courseInfo, userInfo, jedisUtils);
-				//</editor-fold>
 			}
-
-
 		}
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
