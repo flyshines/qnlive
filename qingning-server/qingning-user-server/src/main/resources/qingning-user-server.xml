@@ -363,6 +363,24 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="userGains">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="user_id" type="string"/>
+					<param name="live_room_total_amount" type="string"/>
+					<param name="live_room_real_incomes" type="string"/>
+					<param name="distributer_total_amount" type="string"/>
+					<param name="distributer_real_incomes" type="string"/>
+					<param name="user_total_amount" type="string"/>
+					<param name="user_total_real_incomes" type="string"/>
+					<param name="balance" type="string"/>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

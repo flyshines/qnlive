@@ -1785,6 +1785,26 @@ public class UserServerImpl extends AbstractQNLiveServer {
       return null;
     }
 
+    /**
+     * 获取用户收入
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("userGains")
+    public  Map<String, Object> userGains(RequestEntity reqEntity) throws Exception{
+        String appName = reqEntity.getAppName();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> userGainsByUserId = userModuleServer.findUserGainsByUserId(userId);
+        if(MiscUtils.isEmpty(userGainsByUserId)){
+            throw new QNLiveException("170001");
+        }
+        return userGainsByUserId;
+    }
+
+
+
 
 
 }

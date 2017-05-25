@@ -5,13 +5,57 @@
   <insert id="insertUserGains" parameterType="list">
     insert into t_user_gains (user_id, live_room_total_amount, live_room_real_incomes,
     distributer_total_amount, distributer_real_incomes, user_total_amount,
-    user_total_real_incomes )
+    user_total_real_incomes,balance )
     values
     <foreach collection ="list" item="item" index= "index" separator =",">
       (#{item.user_id},#{item.live_room_total_amount},
       #{item.live_room_real_incomes},#{item.distributer_total_amount},#{item.distributer_real_incomes},#{item.user_total_amount},
-      #{item.user_total_real_incomes})
+      #{item.user_total_real_incomes},#{item.balance})
     </foreach>
   </insert>
-  
+
+  <insert id="insertUserGainsByNewUser" parameterType="hashmap">
+    insert into t_user_gains (user_id, live_room_total_amount, live_room_real_incomes,
+    distributer_total_amount, distributer_real_incomes, user_total_amount,
+    user_total_real_incomes,balance )
+    values
+      (#{user_id},#{live_room_total_amount},
+      #{live_room_real_incomes},#{distributer_total_amount},#{distributer_real_incomes},#{user_total_amount},
+      #{user_total_real_incomes},#{balance})
+  </insert>
+
+  <update id="updateUserGains" parameterType="hashmap">
+    update t_user_gains
+    <set>
+      <if test="live_room_total_amount != null" >
+        live_room_total_amount = #{live_room_total_amount},
+      </if>
+      <if test="live_room_real_incomes != null" >
+        live_room_real_incomes = #{live_room_real_incomes},
+      </if>
+      <if test="distributer_total_amount != null" >
+        distributer_total_amount = #{distributer_total_amount},
+      </if>
+      <if test="distributer_real_incomes != null" >
+        distributer_real_incomes = #{distributer_real_incomes},
+      </if>
+      <if test="user_total_amount != null" >
+        user_total_amount = #{user_total_amount},
+      </if>
+      <if test="user_total_real_incomes != null" >
+        user_total_real_incomes = #{user_total_real_incomes},
+      </if>
+      <if test="balance != null" >
+        balance = #{balance},
+      </if>
+    </set>
+    where user_id = #{user_id}
+  </update>
+
+  <select id="findUserGainsByUserId" parameterType="java.lang.String" resultType="hashmap">
+   select * from t_user_gains where user_id = #{user_id}
+  </select>
+
+
+
 </mapper>

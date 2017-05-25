@@ -67,4 +67,13 @@ public interface IUserModuleServer {
 	Map<String,Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
+
+
+	void insertUserGains(List<Map<String ,Object>> list);
+
+	void insertUserGainsByNewUser(Map<String ,Object> reqMap);
+
+	void updateUserGains(Map<String ,Object> reqMap);
+
+	Map<String ,Object> findUserGainsByUserId(String user_id);
 }

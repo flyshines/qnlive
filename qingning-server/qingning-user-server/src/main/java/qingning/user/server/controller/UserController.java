@@ -329,6 +329,24 @@ public class UserController extends AbstractController{
 	}
 
 
+	/**
+	 * 获取用户可提现金额
+	 * @param access_token 后台证书
+	 * @param version 版本
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/gains",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity  userGains(
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userGains", access_token, version,appName);
+		Map<String, Object> parMap = new HashMap<>();
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 
 
 }
