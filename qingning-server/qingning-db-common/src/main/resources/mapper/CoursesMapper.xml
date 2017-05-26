@@ -401,8 +401,8 @@
   <update id="updateAfterStudentBuyCourse" parameterType="hashmap" >
     update t_courses
     set
-    student_num = #{student_num,jdbcType=BIGINT} + student_num,
-    course_amount = #{course_amount,jdbcType=BIGINT} + course_amount
+    student_num = #{student_num,jdbcType=BIGINT} ,
+    course_amount = #{course_amount,jdbcType=BIGINT}
     where course_id = #{course_id,jdbcType=VARCHAR} 
     <if test="last_update_time != null" >
     	and update_time=#{last_update_time}
@@ -412,8 +412,8 @@
   <update id="updateAfterStudentRewardCourse" parameterType="hashmap" >
     update t_courses
     set
-    extra_num = #{extra_num,jdbcType=BIGINT} + extra_num,
-    extra_amount = #{extra_amount,jdbcType=BIGINT} + extra_amount
+    extra_num = #{extra_num,jdbcType=BIGINT},
+    extra_amount = #{extra_amount,jdbcType=BIGINT}
     where course_id = #{course_id,jdbcType=VARCHAR}
     <if test="last_update_time != null" >
     	and update_time=#{last_update_time}
