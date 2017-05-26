@@ -797,8 +797,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         String course_id = (String)reqMap.get("course_id");
         int pageCount = (int)reqMap.get("page_count");
-        Long query_time = (Long)reqMap.get("query_time");
-        Long position = (Long)reqMap.get("position");
         Map <String,Object> resultMap = new HashMap<>();
         int state = 4;
         if(!MiscUtils.isEmpty(course_id)){
