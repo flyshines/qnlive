@@ -386,7 +386,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings({ "unchecked"})
     private  Map<String, Object> getPlatformCourses(String userId,int courceStatus,int pageCount,String courseId,String classify_id,String appName,String lecture_id) throws Exception{
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        jedis.getDB();
+        int pageConts = pageCount;
         long currentTime = System.currentTimeMillis();//当前时间
         int offset = 0;//偏移值
         Set<String> courseIdSet;//查询的课程idset
@@ -430,7 +430,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courseIdList.add(course_id);
             }
 
-            pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            pageCount =  pageConts - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
             if( pageCount > 0){//如果返回的值不够
                 courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
                 courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
@@ -473,7 +473,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courseIdList.add(course_id);
             }
 
-            pageCount =  pageCount - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            pageCount =  pageConts - courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
             if( pageCount > 0){//如果返回的值不够
                 courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
                 courceStatus = 2;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
@@ -805,6 +805,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Map<String,Object> query = new HashMap<>();
             query.put("course_id",course_id);
             Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
+            state = Integer.valueOf(courseMap.get("status").toString());
         }
         Map<String, Object> platformCourses = getPlatformCourses(userId, state, pageCount, course_id, null, appName, lecturerId);
 
@@ -865,6 +866,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("startIndexDB", startIndexDB);
         return resultMap;
     }
+
+
+
 
     /**
      * 加入课程
