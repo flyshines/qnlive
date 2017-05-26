@@ -1293,15 +1293,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, reqMap.get("room_id").toString());
-        String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String lecturerId = jedis.hget(roomKey, "lecturer_id");
+        String lecturerId = userId;
         if(MiscUtils.isEmpty(lecturerId)){
             throw new QNLiveException("120018");
         }
-
-
-
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
