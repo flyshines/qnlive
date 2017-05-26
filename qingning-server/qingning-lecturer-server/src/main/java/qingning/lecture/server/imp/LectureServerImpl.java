@@ -2702,7 +2702,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return courseList;
     }
 
-    private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion, boolean preDesc, boolean finDesc,String appName) throws Exception{
+/*    private List<Map<String,String>> getCourseList(String userId,int pageCount,String course_id, Long queryTime, Long postion, boolean preDesc, boolean finDesc,String appName) throws Exception{
         Map<String,Object> map = new HashMap<String,Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//预告或直播
@@ -2839,7 +2839,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         return courseList;
     }
-    
+    */
     private List<String> getDistributerCourseListFromSys(String room_id, String distributer_id,String distributeCourseKey,
             final Long start_time,String min_time_key, final int page_count,String appName){
         final Map<String, Object> query = new HashMap<String,Object>();
