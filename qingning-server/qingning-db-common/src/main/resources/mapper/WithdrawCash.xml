@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.UserGainsMapper" >
+  
+  <insert id="insertWithdrawCash" parameterType="list">
+    insert into t_withdraw_cash
+    (withdraw_cash_id,
+    user_id,
+    user_name,
+    nick_name,
+    user_phone,
+    alipay_account_number,
+    web_openid,
+    initial_amount,
+    actual_amount,
+    state,
+    remark,
+    create_time,
+    update_time )
+    values
+    <foreach collection ="list" item="item" index= "index" separator =",">
+      (#{item.withdraw_cash_id},
+      #{item.user_id},
+      #{item.user_name},
+      #{item.nick_name},
+      #{item.user_phone},
+      #{item.alipay_account_number},
+      #{item.web_openid},
+      #{item.initial_amount},
+      #{item.actual_amount},
+      #{item.state},
+      #{item.remark},
+      #{item.create_time},
+      #{item.update_time})
+    </foreach>
+  </insert>
+
+  <insert id="insertWithdrawCashByNewUser" parameterType="hashmap">
+    insert into t_withdraw_cash
+    (withdraw_cash_id,
+    user_id,
+    user_name,
+    nick_name,
+    user_phone,
+    <if test="alipay_account_number != null" >
+    alipay_account_number,
+    </if>
+    <if test="web_openid != null" >
+      web_openid,
+    </if>
+    initial_amount,
+    actual_amount,
+    state,
+    remark,
+    create_time,
+    update_time )
+    values
+      (#{withdraw_cash_id},
+      #{user_id},
+      #{user_name},
+      #{nick_name},
+      #{user_phone},
+    <if test="alipay_account_number != null" >
+      #{alipay_account_number},
+    </if>
+    <if test="web_openid != null" >
+      #{web_openid},
+    </if>
+      #{initial_amount},
+      #{actual_amount},
+      #{state},
+      #{remark},
+      #{create_time},
+      #{update_time})
+  </insert>
+
+  <update id="updateWithdrawCash" parameterType="hashmap">
+    update t_withdraw_cash
+    <set>
+      <if test="actual_amount != null" >
+        actual_amount = #{actual_amount},
+      </if>
+      <if test="state != null" >
+        state = #{state},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+    </set>
+    where user_id = #{user_id} and  withdraw_cash_id = #{withdraw_cash_id}
+  </update>
+
+  <select id="findWithdrawCashByUser" parameterType="hashmap" resultType="hashmap">
+   select * from t_withdraw_cash where user_id = #{user_id}
+    <if test="state != null" >
+      and state = #{state}
+    </if>
+    <if test="withdraw_cash_id != null" >
+      and withdraw_cash_id = #{withdraw_cash_id}
+    </if>
+    order by create_time limit #{page_num},#{page_count}
+  </select>
+
+
+
+</mapper>

@@ -14,7 +14,7 @@ public final class Constants {
 
 	public static final String WE_CHAT_PUSH_COLOR = "#595959";
 	public static final String WE_CHAT_PUSH_COLOR_QNCOLOR = "#5AD1A1";
-
+	public static final String WE_CHAT_PUSH_COLOR_DLIVE = "#FD6924";
 
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";

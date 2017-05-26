@@ -140,4 +140,6 @@ public interface ICommonModuleServer {
 	public List<Map<String,Object>> findSystemConfigByAppName(String appName);
 
     void updateCourse(Map<String, Object> course);
+
+    List<Map<String,Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap);
 }
