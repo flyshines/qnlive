@@ -101,4 +101,12 @@
       	and update_time=#{last_update_time}
     </if>
 	</update>
+	
+	<!-- 获得userId列表里分销员总收益 -->
+	<select id="selectDistributerAmount" parameterType="string" resultType="hashmap">
+		select distributer_id, total_amount from t_distributer
+		<foreach collection="list" item="userId" separator="," open=" where distributer_id in (" close=")">
+			#{userId}
+		</foreach>
+	</select>
 </mapper>

@@ -346,6 +346,17 @@
 				<outputs>
 				</outputs>
 			</function>
+		
+			<!-- 判断新增所有用户的gains表 -->
+			<function name="insertAllUserGains">
+				<auth>
+					<access_token require="N" />
+				</auth>
+				<inputs></inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 			<function name="userGains">
 				<auth>
 					<accessToken require="Y" />

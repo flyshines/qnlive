@@ -59,8 +59,12 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	private LecturerMapper lecturerMapper;
 	@Autowired(required = true)
 	private SystemConfigMapper systemConfigMapper;
+	
 	@Autowired(required = true)
 	private UserGainsMapper userGainsMapper;
+	@Autowired(required = true)
+	private WithdrawCashMapper withdrawCashMapper;
+
 
 	@Override
 	public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
@@ -252,6 +256,41 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	@Override
 	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
 		return fansMapper.findRoomIdByFans(reqMap);
+	}
+
+
+	/**
+	 * 获取没有t_user_gains记录的user_id
+	 */
+	@Override
+	public List<String> findNotGainsUserId(int limit) {
+		List<String> result = userMapper.selectNotGainsUserId(limit);
+		return result;
+	}
+
+	/**
+	 * 获得userId列表里用户的直播间收益
+	 */
+	@Override
+	public List<Map<String, Object>> findRoomAmount(List<String> userIdList) {
+		return liveRoomMapper.selectRoomAmount(userIdList);
+	}
+
+	/**
+	 * 获得userId列表里分销员总收益
+	 */
+	@Override
+	public List<Map<String, Object>> findDistributerAmount(List<String> userIdList) {
+		return distributerMapper.selectDistributerAmount(userIdList);
+	}
+
+	/**
+	 * 获取用户提现成功总金额
+	 */
+	@Override
+	public List<Map<String, Object>> findUserWithdrawSum(List<String> userIdList) {
+		List<Map<String, Object>> result = withdrawCashMapper.selectUserWithdrawSum(userIdList);
+		return result;
 	}
 
 	@Override

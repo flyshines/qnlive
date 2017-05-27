@@ -204,5 +204,16 @@
   <select id="findRobotUsers" resultType="hashmap" parameterType="java.lang.String">
     SELECT * FROM t_user WHERE user_role = #{user_role} limit 500
   </select>
+  
+  <!-- 获取没有t_user_gains记录的user_id -->
+  <select id="selectNotGainsUserId" parameterType="int" resultType="string">
+  	select user_id from t_user
+  	where user_id not in(
+  		select user_id from t_user_gains
+  	)
+  	<if test="limit != null">
+  		limit #{limit}
+  	</if>
+  </select>
 
 </mapper>

@@ -68,6 +68,31 @@ public interface IUserModuleServer {
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
+	/**
+	 * 获取没有t_user_gains记录的user_id
+	 * @param limit
+	 * @return
+	 */
+	List<String> findNotGainsUserId(int limit);
+	/**
+	 * 获得userId列表里用户的直播间收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findRoomAmount(List<String> userIdList);
+	/**
+	 * 获得userId列表里分销员总收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findDistributerAmount(List<String> userIdList);
+
+	/**
+	 * 获取用户提现成功总金额
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findUserWithdrawSum(List<String> userIdList);
 
 	void insertUserGains(List<Map<String ,Object>> list);
 
@@ -76,4 +101,5 @@ public interface IUserModuleServer {
 	void updateUserGains(Map<String ,Object> reqMap);
 
 	Map<String ,Object> findUserGainsByUserId(String user_id);
+
 }

@@ -324,6 +324,21 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 判断新增所有用户的gains
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/insertAllUserGains",method=RequestMethod.PUT)
+	public @ResponseBody ResponseEntity  updateAllUserGains(
+			HttpEntity<Object> entity) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "insertAllUserGains", null, null, null);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 
 	/**
 	 * 获取用户可提现金额
