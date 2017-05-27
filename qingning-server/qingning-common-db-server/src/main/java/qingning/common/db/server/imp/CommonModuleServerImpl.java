@@ -808,5 +808,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		coursesMapper.updateCourse(course);
 	}
 
+	@Override
+	public List<Map<String, Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap) {
+		return coursesMapper.findLecturerCourseListByStatus(queryMap);
+	}
+
 
 }

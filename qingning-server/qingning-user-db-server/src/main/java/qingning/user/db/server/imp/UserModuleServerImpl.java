@@ -258,6 +258,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return fansMapper.findRoomIdByFans(reqMap);
 	}
 
+
 	/**
 	 * 获取没有t_user_gains记录的user_id
 	 */
@@ -284,14 +285,6 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	}
 
 	/**
-	 * 批量新增用户收益表记录
-	 */
-	@Override
-	public int insertUserGsinsByList(List<Map<String, Object>> insertGainsList) {
-		return userGainsMapper.insertUserGainsByList(insertGainsList);
-	}
-
-	/**
 	 * 获取用户提现成功总金额
 	 */
 	@Override
@@ -300,8 +293,25 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return result;
 	}
 
+	@Override
+	public void insertUserGains(List<Map<String, Object>> list) {
+		userGainsMapper.insertUserGains(list);
+	}
 
+	@Override
+	public void insertUserGainsByNewUser(Map<String, Object> reqMap) {
+		userGainsMapper.insertUserGainsByNewUser(reqMap);
+	}
 
+	@Override
+	public void updateUserGains(Map<String, Object> reqMap) {
+		userGainsMapper.updateUserGains(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findUserGainsByUserId(String user_id) {
+		return userGainsMapper.findUserGainsByUserId(user_id);
+	}
 
 
 }

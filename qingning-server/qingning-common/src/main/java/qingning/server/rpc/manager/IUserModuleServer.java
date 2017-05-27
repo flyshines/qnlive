@@ -88,16 +88,18 @@ public interface IUserModuleServer {
 	List<Map<String, Object>> findDistributerAmount(List<String> userIdList);
 
 	/**
-	 * 批量新增用户收益表记录
-	 * @param insertGainsList
-	 * @return
-	 */
-	int insertUserGsinsByList(List<Map<String, Object>> insertGainsList);
-	
-	/**
 	 * 获取用户提现成功总金额
 	 * @param userIdList
 	 * @return
 	 */
 	List<Map<String, Object>> findUserWithdrawSum(List<String> userIdList);
+
+	void insertUserGains(List<Map<String ,Object>> list);
+
+	void insertUserGainsByNewUser(Map<String ,Object> reqMap);
+
+	void updateUserGains(Map<String ,Object> reqMap);
+
+	Map<String ,Object> findUserGainsByUserId(String user_id);
+
 }

@@ -126,24 +126,7 @@
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
 					<param name="room_id" type="string" require="N"  />
-					<param name="position" type="long" require="N"  
-					       validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
-					<param name="query_time" type="long" require="N"
-					       validate="(query_time,course_id,position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
-					<param name="course_id" type="string" require="N"  
-					       validate="(query_time,course_id,position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
+					<param name="course_id" type="string" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="course_list" type="list">
@@ -363,7 +346,7 @@
 				<outputs>
 				</outputs>
 			</function>
-			
+		
 			<!-- 判断新增所有用户的gains表 -->
 			<function name="insertAllUserGains">
 				<auth>
@@ -371,6 +354,25 @@
 				</auth>
 				<inputs></inputs>
 				<outputs>
+				</outputs>
+			</function>
+
+			<function name="userGains">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="user_id" type="string"/>
+					<param name="live_room_total_amount" type="string"/>
+					<param name="live_room_real_incomes" type="string"/>
+					<param name="distributer_total_amount" type="string"/>
+					<param name="distributer_real_incomes" type="string"/>
+					<param name="user_total_amount" type="string"/>
+					<param name="user_total_real_incomes" type="string"/>
+					<param name="balance" type="string"/>
 				</outputs>
 			</function>
 		</default>

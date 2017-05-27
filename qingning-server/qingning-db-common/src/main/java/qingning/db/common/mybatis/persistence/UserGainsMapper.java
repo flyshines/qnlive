@@ -5,12 +5,7 @@ import java.util.Map;
 
 public interface UserGainsMapper {
     void insertUserGains(List<Map<String ,Object>> list);
-
-    /**
-     * 批量插入
-     * @param insertGainsList
-     * @return
-     */
-	int insertUserGainsByList(List<Map<String, Object>> insertGainsList);
-
+    void insertUserGainsByNewUser(Map<String ,Object> reqMap);
+    void updateUserGains(Map<String ,Object> reqMap);
+    Map<String ,Object> findUserGainsByUserId(String user_id);
 }
