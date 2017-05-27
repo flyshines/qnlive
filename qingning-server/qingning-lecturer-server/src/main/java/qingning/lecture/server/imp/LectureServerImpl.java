@@ -465,6 +465,35 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         timerMap.put("start_time", startTime + "");
         timerMap.put("position", course.get("position"));
         timerMap.put("im_course_id", course.get("im_course_id"));
+        timerMap.put("real_start_time",  startTime+"");
+
+
+
+
+        if(true){
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("MessagePushServer");
+            mqRequestEntity.setParam(timerMap);
+            mqRequestEntity.setAppName(appName);
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+
+            log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseId);
+            mqRequestEntity.setFunctionName("processCourseLiveOvertime");
+            this.mqUtils.sendMessage(mqRequestEntity);
+
+            log.debug("进行超时预先提醒定时任务 提前30分钟 提醒课程结束 course_id:"+courseId);
+            timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
+            mqRequestEntity.setParam(timerMap);
+            mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+            this.mqUtils.sendMessage(mqRequestEntity);
+
+            log.debug("提前10分钟 提醒课程结束 course_id:"+courseId);
+            //提前10分钟 提醒课程结束
+            timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
+            mqRequestEntity.setParam(timerMap);
+            mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+            this.mqUtils.sendMessage(mqRequestEntity);
+        }
 
         if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
         	//提前五分钟开课提醒        
