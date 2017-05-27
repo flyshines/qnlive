@@ -131,5 +131,11 @@
   <select id="findByOutTradeNo" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_trade_bill where trade_id = #{outTradeNo}
   </select>
-  
+
+  <select id="findUserNumberByCourse" resultType="hashmap" parameterType="hashmap" >
+    select count(distinct user_id) as user_number from t_trade_bill where course_id = #{course_id}
+    and profit_type = #{profit_type}
+  </select>
+
+
 </mapper>

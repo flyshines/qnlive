@@ -171,7 +171,6 @@ public class LectureController extends AbstractController {
 	 * 查询课程列表
 	 * @param page_count
 	 * @param room_id
-	 * @param start_time
 	 * @param course_id
 	 * @param accessToken
 	 * @param version
@@ -183,9 +182,7 @@ public class LectureController extends AbstractController {
 	@ResponseBody ResponseEntity getCourseList(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "room_id", defaultValue = "") String room_id,
-			@RequestParam(value = "query_time", defaultValue = "") String start_time,
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
@@ -193,9 +190,7 @@ public class LectureController extends AbstractController {
 		Map<String, Object> parMap = new HashMap<String, Object>();
 		parMap.put("page_count", page_count);
 		parMap.put("room_id", room_id);
-		parMap.put("query_time", start_time);
 		parMap.put("course_id", course_id);
-		parMap.put("position", position);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

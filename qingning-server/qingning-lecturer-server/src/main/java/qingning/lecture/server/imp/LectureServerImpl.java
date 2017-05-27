@@ -1317,7 +1317,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         resultMap.putAll(platformCourses);
         //  resultMap.put("course_list", courseList);
-        resultMap.put("course_sum",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
+        resultMap.put("course_num",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
         return resultMap;
 //        @SuppressWarnings("unchecked")
 //        String appName = reqEntity.getAppName();

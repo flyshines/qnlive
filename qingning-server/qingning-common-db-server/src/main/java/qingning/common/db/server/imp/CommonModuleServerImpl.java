@@ -780,7 +780,22 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> course = new HashMap<String,Object>();
 		course.put("course_id", reqMap.get("course_id"));
 
-		if("2".equals(reqMap.get("status"))){
+
+		if("0".equals(reqMap.get("status"))){
+			if(!MiscUtils.isEmpty( reqMap.get("course_amount"))){
+				course.put("course_amount", reqMap.get("course_amount"));
+			}
+			if(!MiscUtils.isEmpty( reqMap.get("student_num"))){
+				course.put("student_num", reqMap.get("student_num"));
+			}
+			if(!MiscUtils.isEmpty( reqMap.get("extra_amount"))){
+				course.put("extra_amount", reqMap.get("extra_amount"));
+			}
+			if(!MiscUtils.isEmpty( reqMap.get("extra_num"))){
+				course.put("extra_num", reqMap.get("extra_num"));
+			}
+
+		}else if("2".equals(reqMap.get("status"))){
 			course.put("end_time", now);
 			course.put("status", "2");
 		}else if("5".equals(reqMap.get("status"))) {
@@ -811,6 +826,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap) {
 		return coursesMapper.findLecturerCourseListByStatus(queryMap);
+	}
+
+	@Override
+	public Map<String, Object> findUserNumberByCourse(Map<String, Object> map) {
+		return tradeBillMapper.findUserNumberByCourse(map);
 	}
 
 

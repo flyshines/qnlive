@@ -142,4 +142,6 @@ public interface ICommonModuleServer {
     void updateCourse(Map<String, Object> course);
 
     List<Map<String,Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap);
+
+	Map<String,Object> findUserNumberByCourse(Map<String, Object> map);
 }

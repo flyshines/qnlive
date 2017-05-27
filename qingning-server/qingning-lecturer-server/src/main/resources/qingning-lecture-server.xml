@@ -164,18 +164,6 @@
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
 					<param name="room_id"  type="string" require="N"  />
-					<param name="position" type="long" require="N"
-					        validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
-					<param name="query_time" type="long" require="N"
-					        validate="(query_time,course_id, position)=>{
-					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
-					       		var isTimeEmpty =  query_time == null;
-					       		var isPositionEmpty =  position == null || position == 0;					       		
-					       		return (isCourseEmpty &amp;&amp; isTimeEmpty &amp;&amp; isPositionEmpty) || (!isCourseEmpty &amp;&amp; !isTimeEmpty &amp;&amp; !isPositionEmpty); },000006"/>
 					<param name="course_id" type="string" require="N"  
 					       validate="(query_time,course_id, position)=>{
 					       		var isCourseEmpty = course_id ==null || course_id.length == 0; 
