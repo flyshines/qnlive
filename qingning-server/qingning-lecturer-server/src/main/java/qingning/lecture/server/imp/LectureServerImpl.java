@@ -485,10 +485,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             RequestEntity mqRequestEntity = new RequestEntity();
             mqRequestEntity.setServerName("MessagePushServer");
             mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqRequestEntity.setFunctionName("processCourseNotStart");           
             mqRequestEntity.setParam(timerMap);
             mqRequestEntity.setAppName(appName);
-            this.mqUtils.sendMessage(mqRequestEntity);
+//            mqRequestEntity.setFunctionName("processCourseNotStart");
+//            this.mqUtils.sendMessage(mqRequestEntity);
             
             //开课时间到但是讲师未出现提醒  推送给参加课程者
             mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
@@ -1312,7 +1312,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
             state = Integer.valueOf(courseMap.get("status").toString());
         }
-        Map<String, Object> platformCourses = getPlatformCourses(userId, state, pageCount, course_id, null, appName, lecturerId);
+        Map<String, Object> platformCourses = getPlatformCourses(userId, state, pageCount, course_id, "", appName, lecturerId);
 
 
         resultMap.putAll(platformCourses);
