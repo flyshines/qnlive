@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.WithdrawCashMapper" >
+	<!-- 获取用户提现成功总金额 -->
+	<select id="selectUserWithdrawSum" resultType="hashmap" parameterType="string">
+		select user_id, SUM(actual_amount) sum
+		from t_withdraw_cash
+		where `state` = 1
+			<foreach collection="list" item="userId" open=" and user_id in (" separator="," close=")">
+  				#{userId}
+  			</foreach>
+  		GROUP BY user_id
+	</select>
+
+</mapper>

@@ -1785,6 +1785,39 @@ public class UserServerImpl extends AbstractQNLiveServer {
       return null;
     }
 
-
+    /**
+     * 判断新增所有用户的gains
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("insertAllUserGains")
+    public  Map<String, Object> insertAllUserGains(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//获取参数
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        List<Map<String, Object>> insertGainsList = null;
+        List<String> userIdList = null;
+        
+		/*
+		 * 获得存在与用户表t_user而不存在与t_user_gains的数据
+		 */
+        do{
+			int limit = 100;
+			userIdList = userModuleServer.findNotGainsUserId(limit);
+			if(userIdList == null || userIdList.isEmpty()){
+				break;
+			}
+			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(userIdList);
+			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(userIdList);
+			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(userIdList);
+			
+			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList, 
+					userDistributerAmountList, userWithdrawSumList);
+			userModuleServer.insertUserGsinsByList(insertGainsList);
+        }while(userIdList != null);
+        
+      return resultMap;
+    }
 
 }

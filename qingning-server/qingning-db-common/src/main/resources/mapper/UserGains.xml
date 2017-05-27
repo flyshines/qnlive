@@ -14,4 +14,16 @@
     </foreach>
   </insert>
   
+  
+  <!-- 批量插入 -->
+  <insert id="insertUserGainsByList" parameterType="hashmap">
+  	insert into t_user_gains (user_id, live_room_total_amount, live_room_real_incomes, 
+  		distributer_total_amount, distributer_real_incomes, user_total_amount, 
+  		user_total_real_incomes, balance)
+  		<foreach collection="list" item="item" open=" values" separator=",">
+  			(#{item.user_id}, #{item.live_room_total_amount}, #{item.live_room_real_incomes}, 
+	  			#{item.distributer_total_amount}, #{item.distributer_real_incomes}, #{item.user_total_amount}, 
+	  			#{item.user_total_real_incomes}, #{item.balance})
+  		</foreach>
+  </insert>
 </mapper>

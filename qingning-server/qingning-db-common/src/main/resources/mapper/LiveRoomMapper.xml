@@ -195,5 +195,14 @@
     	and update_time = #{last_update_time}
     </if>
   </update>
+  
+  <!-- 获得userId列表里用户的直播间收益 -->
+  <select id="selectRoomAmount" parameterType="string" resultType="hashmap">
+  	select lecturer_id, total_amount from t_live_room 
+  	<foreach collection="list" item="userId" index="index" open=" where lecturer_id in (" separator="," 
+  		close=")">  
+        #{userId} 
+    </foreach>
+  </select>
 
 </mapper>

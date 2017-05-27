@@ -363,6 +363,16 @@
 				<outputs>
 				</outputs>
 			</function>
+			
+			<!-- 判断新增所有用户的gains表 -->
+			<function name="insertAllUserGains">
+				<auth>
+					<access_token require="N" />
+				</auth>
+				<inputs></inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

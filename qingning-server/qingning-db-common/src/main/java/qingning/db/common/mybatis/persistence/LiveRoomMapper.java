@@ -9,4 +9,11 @@ public interface LiveRoomMapper {
 	int updateLiveRoom(Map<String,Object> record);
 	List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id);
 	List<Map<String, Object>> findLiveRoomBySearch(Map<String,Object> record);
+	
+	/**
+	 * 获得userId列表里用户的直播间收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> selectRoomAmount(List<String> userIdList);
 }

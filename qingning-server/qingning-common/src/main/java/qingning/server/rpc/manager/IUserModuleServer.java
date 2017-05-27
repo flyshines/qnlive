@@ -67,4 +67,37 @@ public interface IUserModuleServer {
 	Map<String,Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
+
+	/**
+	 * 获取没有t_user_gains记录的user_id
+	 * @param limit
+	 * @return
+	 */
+	List<String> findNotGainsUserId(int limit);
+	/**
+	 * 获得userId列表里用户的直播间收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findRoomAmount(List<String> userIdList);
+	/**
+	 * 获得userId列表里分销员总收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findDistributerAmount(List<String> userIdList);
+
+	/**
+	 * 批量新增用户收益表记录
+	 * @param insertGainsList
+	 * @return
+	 */
+	int insertUserGsinsByList(List<Map<String, Object>> insertGainsList);
+	
+	/**
+	 * 获取用户提现成功总金额
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> findUserWithdrawSum(List<String> userIdList);
 }

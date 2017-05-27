@@ -12,4 +12,12 @@ public interface DistributerMapper {
 	List<Map<String,Object>> findCourseWithRoomDistributerCourseInfo(Map<String,Object> parameters);
 	int insertDistributer(Map<String,Object> record);
 	int updateDistributer(Map<String,Object> record);
+	
+	
+	/**
+	 * 获得userId列表里分销员总收益
+	 * @param userIdList
+	 * @return
+	 */
+	List<Map<String, Object>> selectDistributerAmount(List<String> userIdList);
 }
