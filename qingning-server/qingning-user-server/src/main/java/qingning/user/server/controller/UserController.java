@@ -358,6 +358,57 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-
+	/**
+	 * 发起提现申请
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/user/withdraw", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity addWithdraw(
+    		HttpEntity<Object> entity,
+    		@RequestHeader(value="access_token") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader(value="version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "createWithdraw", accessToken, version, appName);
+        
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+	
+	/**
+	 * 获取提现记录
+	 * @param page_count
+	 * @param createTime
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/user/withdraw/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getWithdrawList(
+    		@RequestParam(value="page_count", defaultValue="10") String page_count,
+    		@RequestParam(value="create_time", defaultValue="0") String createTime,
+    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawList", accessToken, version, appName);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("page_count", page_count);
+        paramMap.put("create_time", createTime);
+        
+        requestEntity.setParam(paramMap);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }

@@ -101,7 +101,7 @@
     <if test="withdraw_cash_id != null" >
       and withdraw_cash_id = #{withdraw_cash_id}
     </if>
-    order by create_time limit #{page_num},#{page_count}
+    order by create_time desc limit #{page_num},#{page_count}
   </select>
 
 	<!-- 获取用户提现成功总金额 -->

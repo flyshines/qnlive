@@ -102,4 +102,14 @@ public interface IUserModuleServer {
 
 	Map<String ,Object> findUserGainsByUserId(String user_id);
 
+	/**
+	 * 获得符合条件的首条提现记录
+	 * @param selectMap
+	 * @return
+	 */
+	Map<String, Object> findWithdrawCashByMap(Map<String, Object> selectMap);
+
+	
+
+
 }

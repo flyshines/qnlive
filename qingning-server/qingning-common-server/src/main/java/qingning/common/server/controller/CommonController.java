@@ -1047,6 +1047,6 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
-
+    
 
 }

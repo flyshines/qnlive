@@ -313,5 +313,19 @@ public class UserModuleServerImpl implements IUserModuleServer {
 		return userGainsMapper.findUserGainsByUserId(user_id);
 	}
 
+	/**
+	 * 获得符合条件的首条提现记录
+	 */
+	@Override
+	public Map<String, Object> findWithdrawCashByMap(Map<String, Object> selectMap) {
+		List<Map<String, Object>> resultList = withdrawCashMapper.findWithdrawCashByUser(selectMap);
+		if(resultList != null && !resultList.isEmpty()){
+			return resultList.get(0);
+		}else{
+			return null;
+		}
+	}
+
+
 
 }
