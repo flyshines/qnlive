@@ -376,9 +376,10 @@ public class UserController extends AbstractController{
     		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
     		@RequestHeader(value="version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "createWithdraw", accessToken, version, appName);
-        
-        requestEntity.setParam(entity.getBody());
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		Map<String,String> param = (Map)entity.getBody();
+		param.put("app_name",appName);
+		requestEntity.setParam(entity.getBody());
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
 	
