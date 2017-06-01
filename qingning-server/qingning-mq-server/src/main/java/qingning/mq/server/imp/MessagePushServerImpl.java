@@ -173,9 +173,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));//真实开课时间
         log.debug("---------------課程开课時間"+realStartTime);
-        //1440分钟 超时结束
-        long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
-        long taskStartTime = 60*60*1000 + realStartTime;
+        //6个小时 超时结束
+        long taskStartTime = 6*60*60*1000 + realStartTime;
         log.debug("--------------超时任务处理时间 测试5分钟"+taskStartTime);
 
         ScheduleTask scheduleTask = new ScheduleTask(){
