@@ -227,18 +227,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     		}
     	});
     }
