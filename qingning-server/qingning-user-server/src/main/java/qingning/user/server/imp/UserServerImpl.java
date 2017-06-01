@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -21,6 +23,7 @@ import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class UserServerImpl extends AbstractQNLiveServer {
@@ -33,6 +36,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private ReadRoomDistributer readRoomDistributer;
     private ReadLecturerOperation readLecturerOperation;
     private ReadRoomDistributerOperation readRoomDistributerOperation;
+    private static Logger logger = LoggerFactory.getLogger(UserServerImpl.class);
 
     @Override
     public void initRpcServer() {
@@ -1697,5 +1701,138 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
 
+    /**
+     * 发起提现申请
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("createWithdraw")
+    public Map<String, Object> createWithdraw(RequestEntity reqEntity) throws Exception{
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	String nowStr = sdf.format(new Date());
+    	Map<String, Object> resultMap = new HashMap<>();
+    /*	
+    	1.验证登录用户的手机验证码
+    	2.判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
+    	4.判断用户余额是否大于100
+    	5.判断提现金额是否小于等于余额
+    	6.插入提现申请表
+    */	
+    	/*
+    	 * 获取请求参数
+    	 */
+    	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+    	//获取请求金额
+    	int initialAmount = Integer.parseInt(reqMap.get("initial_amount").toString());
+        /*
+    	 * 判断提现余额是否大于10000
+    	 */
+        if(initialAmount < 10000){
+            logger.error("提现金额小于10000");
+            throw new QNLiveException("170003");
+        }else{
+            reqMap.put("actual_amount",initialAmount);
+        }
+    	//获取登录用户userId
+    	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+    	reqMap.put("user_id", userId);
+    	//获取app_name
+    	String appName = (String) reqMap.get("app_name");
+    	
+
+    	 //  验证登录用户的手机验证码
+
+        String verification_code = reqMap.get("verification_code").toString();//验证码
+        Map<String,String> phoneMap = new HashMap();
+        phoneMap.put("user_id",userId);
+        phoneMap.put("code",verification_code);
+        String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        if(!jedis.exists(codeKey)){
+            throw new QNLiveException("130009");
+        }
+        String code = jedis.get(codeKey);//拿到值
+        if(appName.equals(Constants.HEADER_APP_NAME)){//如果是qnlive就进行判断
+            if(!code.equals(verification_code)){//进行判断
+                throw new QNLiveException("130002");
+            }
+        }
+    	/*
+    	 * 判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
+    	 */
+    	Map<String, Object> selectMap = new HashMap<>();
+    	selectMap.put("user_id", userId);
+    	selectMap.put("state", '0');
+    	selectMap.put("page_num", 0);
+    	selectMap.put("page_count", 1);
+    	//获得该登录用户“提现申请中”的首条记录
+    	Map<String, Object> withdrawingMap = userModuleServer.findWithdrawCashByMap(selectMap);
+    	if(withdrawingMap != null && !withdrawingMap.isEmpty()){
+    	//	logger.error("该用户已经有一条申请中的提现记录");
+    		throw new QNLiveException("170002");
+    	}
+    	/*
+    	 * 判断提现金额是否小于等于余额
+    	 */
+    	//获得登录用户的余额信息
+    	Map<String, Object> loginUserGainsMap = userModuleServer.findUserGainsByUserId(userId);
+    	int balance = 0;
+    	if(loginUserGainsMap != null && !loginUserGainsMap.isEmpty()){
+    		balance = Integer.parseInt(loginUserGainsMap.get("balance").toString());
+    	}
+    	if(initialAmount > balance){
+    	    // logger.error("提现金额大于账户余额");
+    		throw new QNLiveException("180001");
+    	}
+    	
+    	//从缓存中获取用户信息
+    	Map<String, String> loginUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedisUtils.getJedis(appName));
+    	if(loginUserMap == null || loginUserMap.isEmpty()){
+    		//登录用户不存在
+    		throw new QNLiveException("000005");
+    	}
+    	Map<String, Object> insertMap = new HashMap<>();
+    	insertMap.put("withdraw_cash_id", MiscUtils.getUUId());
+    	insertMap.put("user_id", userId);
+    	insertMap.put("user_name", reqMap.get("user_name"));
+    	insertMap.put("nick_name", loginUserMap.get("nick_name"));
+    	insertMap.put("user_phone", loginUserMap.get("phone_number"));
+    	insertMap.put("alipay_account_number", reqMap.get("alipay_account_number"));
+    	insertMap.put("initial_amount", reqMap.get("initial_amount"));
+    	insertMap.put("actual_amount", reqMap.get("actual_amount"));
+    	insertMap.put("state", '0');
+    	insertMap.put("create_time", nowStr);
+    	insertMap.put("update_time", nowStr);
+    	// 插入提现申请表
+        try{
+            balance = balance - initialAmount;
+            userModuleServer.insertWithdrawCash(insertMap,balance);
+        }catch(Exception e){
+            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+initialAmount);
+            throw new QNLiveException("000099");
+        }
+		return resultMap;
+    }
+    
+    /**
+     * 获取提现记录列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawList")
+    public Map<String, Object> getWithdrawList(RequestEntity reqEntity) throws Exception{
+    	Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        param.put("userId",userId);
+    	if(param.get("create_time")!=null){
+            Date time = new Date(Long.valueOf(param.get("create_time").toString()));
+            param.put("create_time",time);
+        }
+        resultMap.put("withdraw_info_list",userModuleServer.findWithdrawList(param));
+		return resultMap;
+    }
 
 }

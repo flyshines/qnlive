@@ -102,4 +102,23 @@ public interface IUserModuleServer {
 
 	Map<String ,Object> findUserGainsByUserId(String user_id);
 
+	/**
+	 * 获得符合条件的首条提现记录
+	 * @param selectMap
+	 * @return
+	 */
+	Map<String, Object> findWithdrawCashByMap(Map<String, Object> selectMap);
+
+	/**
+	 * 插入提现申请表
+	 * @param record
+	 * @param balance
+	 * @return
+	 */
+	int insertWithdrawCash(Map<String, Object> record, int balance);
+	/**分页查询-提现记录
+	 * @param param
+	 * @return
+	 */
+	List<Map<String, Object>> findWithdrawList(Map<String, Object> param);
 }

@@ -112,6 +112,10 @@
 				<entry key="160004" value="当前课程已被删除"/>
 
 				<entry key="170001" value="用户没有收入,尽测试显示"/>
+				<entry key="170002" value="用户已经有一条申请中的提现记录,不能重复提现"/>
+				<entry key="170003" value="提现金额必须大于100元"/>
+
+				<entry key="180001" value="提现金额不能大于账户余额"/>
 			</map>
 		</property>
 	</bean>	
