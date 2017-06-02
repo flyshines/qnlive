@@ -75,6 +75,9 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	private UserMapper userMapper;
 	@Autowired(required=true)
 	private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
+
+	@Autowired(required=true)
+	private ClassifyInfoMapper classifyInfoMapper;
 	
 	public void init(){
 		if(list.isEmpty()){
@@ -116,8 +119,11 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
 			list.add(createCourseNoticeTaskServerImpl);
 
-
-
+			//分类
+			ClassIfyCourseServerImpl classIfyCourseServerImpl = new ClassIfyCourseServerImpl();
+			classIfyCourseServerImpl.setCoursesMapper(coursesMapper);
+			classIfyCourseServerImpl.setClassifyInfoMapper(classifyInfoMapper);
+			list.add(classIfyCourseServerImpl);
 
 			clearMessageLock();
 		}
