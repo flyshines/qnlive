@@ -247,7 +247,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
         String appName = requestEntity.getAppName();
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入开播预先5min提醒定时任务"+reqMap);
+        log.debug("---------------将课程加入开播预先1H提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE)){
         	return;
@@ -257,7 +257,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
-        //5分钟 课程开始5分钟推送提示
+        //提前一个小时提醒
         long noticeTime=  Long.valueOf(MiscUtils.getConfigKey("course_live_overtime_msec"));
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
@@ -551,9 +551,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         long realStartTime = MiscUtils.convertObjectToLong(courseMap.get("real_start_time"));
 
         boolean processFlag = false;
-        if(type.equals("1") && realStartTime < 1){
-        	processFlag = true;
-        }else if(type.equals("2")){
+        if(type.equals("2")){
             if(! courseMap.get("status").equals("2")){
                 processFlag = true;
             }

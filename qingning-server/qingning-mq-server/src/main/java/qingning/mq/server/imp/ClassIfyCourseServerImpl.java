@@ -38,14 +38,14 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
         String appName = requestEntity.getAppName();
         ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
-                log.debug("Ö´ĞĞ¿Î³ÌÁĞ±íË¢ĞÂ¹¤×÷");
-                for(String lecturerId : lecturerSet) {//É¾³ıÀÏÊ¦µÄ
+                log.debug("æ‰§è¡Œè¯¾ç¨‹åˆ—è¡¨åˆ·æ–°å·¥ä½œ");
+                for(String lecturerId : lecturerSet) {//åˆ é™¤è€å¸ˆçš„
                     Map<String, Object> map = new HashMap<>();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                     jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map));
                     jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map));
                 }
-                //É¾³ıÆ½Ì¨
+                //åˆ é™¤å¹³å°
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
 
@@ -61,7 +61,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                         if(course.get("status").equals("2") || course.get("status").equals("1")){
                             String course_id = course.get("course_id").toString();
                             String lecturer_id = course.get("lecturer_id").toString();
-                            map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//?¦Ã?id
+                            map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//?Î³?id
                             map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
                             map.put("course_id",course_id);
                             String courseClassifyIdKey = "";
@@ -92,7 +92,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                         }
                     }
                 }
-                log.debug("Ö´ĞĞ¿Î³ÌÁĞ±íË¢ĞÂ¹¤×÷---------Íê³É");
+                log.debug("æ‰§è¡Œè¯¾ç¨‹åˆ—è¡¨åˆ·æ–°å·¥ä½œ---------å®Œæˆ");
             }
             @Override
             public void batchOperation(Pipeline pipeline, Jedis jedis) {
