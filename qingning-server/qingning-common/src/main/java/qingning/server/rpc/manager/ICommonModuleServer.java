@@ -144,4 +144,6 @@ public interface ICommonModuleServer {
     List<Map<String,Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap);
 
 	Map<String,Object> findUserNumberByCourse(Map<String, Object> map);
+
+	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
 }

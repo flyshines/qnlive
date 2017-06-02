@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /* 
- * 利用HttpClient进行post请求的工具类 
+ * 鍒╃敤HttpClient杩涜post璇锋眰鐨勫伐鍏风被 
  */  
 public class HttpClientUtil {  
     public String doPost(String url,Map<String,String> headerParams,Map<String,String> map,String charset){

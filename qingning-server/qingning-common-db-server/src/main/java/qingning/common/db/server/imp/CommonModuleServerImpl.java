@@ -833,5 +833,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return tradeBillMapper.findUserNumberByCourse(map);
 	}
 
+	@Override
+	public List<Map<String, Object>> findLecturerCourseList(Map<String,Object> record) {
+		return coursesMapper.findLecturerCourseList(record);
+	}
+
 
 }

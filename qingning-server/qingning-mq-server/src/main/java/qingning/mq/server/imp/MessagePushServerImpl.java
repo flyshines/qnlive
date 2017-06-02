@@ -171,12 +171,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
             return;
         }
-        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));//真实开课时间
+        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));//真实开课时间
         log.debug("---------------課程开课時間"+realStartTime);
-        //1440分钟 超时结束
-        long courseLiveOvertimeMsec = MiscUtils.convertObjectToLong(IMMsgUtil.configMap.get("course_live_overtime_msec"));//24小時毫秒值
-        long taskStartTime = 60*60*1000 + realStartTime;
-        log.debug("--------------超时任务处理时间 测试5分钟"+taskStartTime);
+        //6个小时 超时结束
+        long taskStartTime = 6*60*60*1000 + realStartTime;
+        log.debug("--------------超时任务处理时间6小时,当前时间:"+System.currentTimeMillis());
 
         ScheduleTask scheduleTask = new ScheduleTask(){
             @Override
@@ -241,7 +240,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
-    //课程开始前五分钟 极光推送给讲师
+    //课程开始前60分钟 极光推送给讲师
     @FunctionName("processCourseStartShortNotice")
     public void processCourseStartShortNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         @SuppressWarnings("unchecked")
@@ -259,15 +258,15 @@ public class MessagePushServerImpl extends AbstractMsgService {
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
         //5分钟 课程开始5分钟推送提示
-        long noticeTime= 5*60*1000;
+        long noticeTime= 60*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
         		public void process() {
-        			log.debug("-----------开播预先5min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+        			log.debug("-----------开播预先1H提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"5"));
+                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"60"));
                     obj.put("to",lecturer_id);
                     obj.put("msg_type","2");
                     Map<String,String> extrasMap = new HashMap<>();
