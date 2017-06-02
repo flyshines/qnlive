@@ -3668,6 +3668,47 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
 
-
+    /**
+     * 新增轮播
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("addBanner")
+    public Map<String, Object> addBanner(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        
+        /*
+         * TODO 判断后台是否登录
+         */
+        
+        /*
+         * 往t_banner表插入新数据
+         */
+        reqMap.put("banner_id", MiscUtils.getUUId());
+        reqMap.put("create_time", new Date());
+        commonModuleServer.addBanner(reqMap);
+        
+        /*
+         * 删除banner缓存
+         */
+        Jedis jedis = jedisUtils.getJedis(appName);
+        if("1".equals(reqMap.get("status").toString())){
+        	logger.info("新增轮播>>>>新增的轮播需要展示，所以要清除原有banner缓存");
+        	Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+        	for(String key : bannerKeys){
+        		jedis.del(key);
+        	}
+        }
+        
+        return resultMap;
+    }
 
 }

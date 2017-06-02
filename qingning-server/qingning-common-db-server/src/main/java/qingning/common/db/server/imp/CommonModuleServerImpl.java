@@ -838,5 +838,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return coursesMapper.findLecturerCourseList(record);
 	}
 
+	/**
+	 * 新增轮播
+	 */
+	@Override
+	public int addBanner(Map<String, Object> insertMap) {
+		return bannerInfoMapper.insertBanner(insertMap);
+	}
+
 
 }

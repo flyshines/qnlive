@@ -146,4 +146,11 @@ public interface ICommonModuleServer {
 	Map<String,Object> findUserNumberByCourse(Map<String, Object> map);
 
 	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
+	
+	/**
+	 * 新增轮播
+	 * @param reqMap
+	 * @return
+	 */
+	int addBanner(Map<String, Object> insertMap);
 }

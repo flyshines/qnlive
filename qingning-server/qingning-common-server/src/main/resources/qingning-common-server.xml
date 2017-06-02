@@ -760,6 +760,23 @@
 				</outputs>
 			</function>
 			
+			
+			<!-- 新增轮播 -->
+			<function name="addBanner">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="banner_name" type="string" require="Y,000100" />
+					<param name="banner_img_url" type="string" require="Y,000100" />
+					<param name="banner_type" type="int" require="Y,000100" />
+					<param name="status" type="int" require="Y,000100" />
+					<param name="score" type="int" require="N" />
+					<param name="jump_url" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
  
  

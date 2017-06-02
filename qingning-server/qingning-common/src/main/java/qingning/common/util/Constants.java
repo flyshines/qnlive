@@ -268,6 +268,7 @@ public final class Constants {
 	public static final String CACHED_KEY_BANNER_ALL = "SYS:BANNER:ALL";//横幅所有id
 	public static final String CACHED_KEY_BANNER_INFO = "SYS:BANNER:{banner_id}";//横幅信息
 	public static final String CACHED_KEY_BANNER = "banner_id";//横幅id
+	public static final String CACHED_KEY_BANNER_PATTERN = "SYS:BANNER:*";//横幅文件夹匹配模式
 
 	public static final String RECOMMEND_COURSE_NUM = "SYS:RECOMMEND:COURSE:COUNT";//推荐课程最大数
 	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程

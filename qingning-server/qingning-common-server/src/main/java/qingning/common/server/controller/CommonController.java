@@ -1048,5 +1048,28 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
     
+    
+    /**
+     * 新增轮播
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/new", method=RequestMethod.POST)
+    public @ResponseBody ResponseEntity addBanner( 
+		    HttpEntity<Object> entity,
+		    @RequestHeader("access_token") String accessToken,
+		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		    @RequestHeader("version") String version) throws Exception {
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    	
+    }
 
 }
