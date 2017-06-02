@@ -258,7 +258,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
         //5分钟 课程开始5分钟推送提示
-        long noticeTime= 60*60*1000;
+        long noticeTime=  Long.valueOf(MiscUtils.getConfigKey("course_live_overtime_msec"));
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -629,23 +629,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             infomation.put("message_type", "1");
             infomation.put("send_type", "6");//5.结束消息
             infomation.put("create_time", currentTime);
-
-            //课程未开播强制结束
-            if(type.equals("1")){
-                //1.9极光推送结束消息
-                JSONObject obj = new JSONObject();
-                obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_not_start_force_end"),MiscUtils.RecoveryEmoji(courseMap.get("course_title"))));
-                obj.put("to",courseMap.get("lecturer_id"));
-                obj.put("msg_type","6");
-                Map<String,String> extrasMap = new HashMap<>();
-                extrasMap.put("msg_type","6");
-                extrasMap.put("course_id",courseId);
-                extrasMap.put("im_course_id",courseMap.get("im_course_id"));
-                obj.put("extras_map", extrasMap);
-                JPushHelper.push(obj,appName);
-                infomation.put("is_force",1);
-                infomation.put("tip",MiscUtils.getConfigKey("no_timeout_message"));
-            }else if(type.equals("2")){
+            if(type.equals("2")){
                 //课程直播超时结束
                 //1.9极光推送结束消息
                 JSONObject obj = new JSONObject();
