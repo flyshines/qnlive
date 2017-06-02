@@ -44,7 +44,7 @@
   </select>
 
   <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
-    select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time
+    select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time,b.student_num
     from t_courses_students a, t_courses b
     where a.course_id=b.course_id and a.user_id=#{user_id} and b.status <![CDATA[ <> ]]> 5
     <if test="create_time != null">

@@ -327,6 +327,7 @@
 						<param name="course_type" type="string"/>
 						<param name="course_url" type="string"/>
 						<param name="lecturer_id" type="string"/>
+						<param name="student_num" type="string"/>
 						<param name="nick_name" type="rstring"/>
 						<param name="start_time" type="long"/>
 						<param name="status" type="string"/>
