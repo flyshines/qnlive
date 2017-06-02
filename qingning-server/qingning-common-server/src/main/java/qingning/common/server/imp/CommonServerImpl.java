@@ -168,7 +168,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½ï¿½È¡ï¿½æ±¾ï¿½ï¿½Ï¢ ï¿½ï¿½ï¿½İ²ï¿½Í¬ï¿½ï¿½Æ½Ì¨
+     * »ñÈ¡°æ±¾ĞÅÏ¢ ¸ù¾İ²»Í¬µÄÆ½Ì¨
      * @param reqEntity
      * @return
      * @throws Exception
@@ -178,12 +178,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,Object> getVersion (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
-        Integer plateform = (Integer)map.get("plateform");//Æ½Ì¨ 0ï¿½ï¿½Ö±ï¿½Ó·Å¹ï¿½ 1ï¿½Ç°ï¿½×¿ 2ï¿½ï¿½IOS 3ï¿½ï¿½JS
-        if(plateform != 0) {//ï¿½ï¿½×¿ï¿½ï¿½ï¿½ï¿½ios
+        Integer plateform = (Integer)map.get("plateform");//Æ½Ì¨ 0ÊÇÖ±½Ó·Å¹ı 1ÊÇ°²×¿ 2ÊÇIOS 3ÊÇJS
+        if(plateform != 0) {//°²×¿»òÕßios
             Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedis, true);
-            if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //ï¿½Ğ¶ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ï¢ ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿ï¿½ ï¿½Ü¿ï¿½ 0ï¿½Ø±Õ¾ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¼ï¿½ï¿½
-                //1.ï¿½ï¿½ï¿½Ğ¶ï¿½ÏµÍ³ï¿½Íµï¿½Ç°version
-                if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//ï¿½ï¿½Ç°version Ğ¡ï¿½ï¿½ ï¿½ï¿½Ğ¡ï¿½ï¿½Òªï¿½ï¿½ï¿½ÂµÄ°æ±¾
+            if (!MiscUtils.isEmpty(versionInfoMap) && Integer.valueOf(versionInfoMap.get("status")) != 0) { //ÅĞ¶ÏÓĞÃ»ÓĞĞÅÏ¢ ÅĞ¶ÏÊÇ·ñ´æÔÚ×Ü¿Ø ×Ü¿Ø 0¹Ø±Õ¾ÍÊÇ²»¼ì²é 1¿ªÆô¾ÍÊÇ¼ì²é
+                //1.ÏÈÅĞ¶ÏÏµÍ³ºÍµ±Ç°version
+                if (compareVersion(plateform.toString(), versionInfoMap.get("version_no"), map.get("version").toString())) {//µ±Ç°version Ğ¡ÓÚ ×îĞ¡ĞèÒª¸úĞÂµÄ°æ±¾
                     Map<String,Object> reqMap = new HashMap<>();
                     reqMap.put("version_info",versionInfoMap);
                     return reqMap;
@@ -199,10 +199,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = (HashMap<String, Object>) reqEntity.getParam();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
         Map<String,String> retMap = new HashMap<>();
-        Integer plateform = (Integer)map.get("plateform");//Æ½Ì¨ 0ï¿½ï¿½Ö±ï¿½Ó·Å¹ï¿½ 1ï¿½Ç°ï¿½×¿ 2ï¿½ï¿½IOS 3ï¿½ï¿½JS
+        Integer plateform = (Integer)map.get("plateform");//Æ½Ì¨ 0ÊÇÖ±½Ó·Å¹ı 1ÊÇ°²×¿ 2ÊÇIOS 3ÊÇJS
         if(plateform != 0) {
             Map<String, String> versionInfoMap = CacheUtils.readAppVersion(plateform.toString(), reqEntity, readAPPVersionOperation, jedis, true);
-            if (!MiscUtils.isEmpty(versionInfoMap)) { //ï¿½Ğ¶ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ï¢
+            if (!MiscUtils.isEmpty(versionInfoMap)) { //ÅĞ¶ÏÓĞÃ»ÓĞĞÅÏ¢
                 if(versionInfoMap.get("os_audit_version") != null){
                     retMap.put("os_audit_version",versionInfoMap.get("os_audit_version"));
                     return retMap;
@@ -214,9 +214,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
 
-    //ï¿½Í»ï¿½ï¿½æ±¾ï¿½ï¿½Ğ¡ï¿½ï¿½ÏµÍ³ï¿½æ±¾ï¿½ï¿½ trueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Îªfalse
+    //¿Í»§°æ±¾ºÅĞ¡ÓÚÏµÍ³°æ±¾ºÅ true£¬ ·ñÔòÎªfalse
     private boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
-        //1ï¿½ï¿½andriod 2:IOS 3ï¿½ï¿½js
+        //1£ºandriod 2:IOS 3ÊÇjs
         if(plateform.equals("1")){
             if(customerVersion.compareTo(systemVersion) < 0){
                 return true;
@@ -276,20 +276,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         reqMap.put("app_name",appName);
         switch (login_type_input){
 
-            case 0 : //Î¢ï¿½Åµï¿½Â¼
-                //ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½Ï¢Îªï¿½Õ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
+            case 0 : //?????
+                //?????????????????????
                 if(MiscUtils.isEmpty(loginInfoMap)){
-                    //×¢ï¿½ï¿½IM
+                    //???IM
                     Map<String,String> imResultMap = null;
                     try {
                         imResultMap =    IMMsgUtil.createIMAccount(reqMap.get("device_id").toString());
                     }catch (Exception e){
-                        //TODO ï¿½İ²ï¿½ï¿½ï¿½ï¿½ï¿½
+                        //TODO ???????
                     }
-                    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½Ø±ï¿½
+                    //??????????????
                     reqMap.put("m_user_id", imResultMap.get("uid"));
                     reqMap.put("m_pwd", imResultMap.get("password"));
-                    //ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½Ã»ï¿½Í·ï¿½ï¿½
+                    //?????????????
                     String transferAvatarAddress = (String)reqMap.get("avatar_address");
                     if(!MiscUtils.isEmpty(transferAvatarAddress)){
                         try{
@@ -305,32 +305,32 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     reqMap.put("avatar_address",transferAvatarAddress);
 
                     if(reqMap.get("nick_name") == null || StringUtils.isBlank(reqMap.get("nick_name").toString())){
-                        reqMap.put("avatar_address","ï¿½Ã»ï¿½" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+                        reqMap.put("avatar_address","???" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
                     }
                     Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-                    //ï¿½ï¿½ï¿½ï¿½access_tokenï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ë»ºï¿½æ£¬ï¿½ï¿½ï¿½ì·µï¿½Ø²ï¿½ï¿½ï¿½
+                    //????access_token???????????????—¨?????????
                     processLoginSuccess(1, dbResultMap, null, resultMap,appName);
                 }else{
-                    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ TODO
+                    //????????????? TODO
                     processLoginSuccess(2, null, loginInfoMap, resultMap,appName);
                 }
                 break;
 
-            case 1 : //QQï¿½ï¿½Â¼
+            case 1 : //QQ???
                 //TODO
                 break;
-            case 2 : //ï¿½Ö»ï¿½ï¿½Åµï¿½Â¼
+            case 2 : //???????
                 if(MiscUtils.isEmpty(loginInfoMap)){
-                    //ï¿½×³ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                    //????????????
                     throw new QNLiveException("120002");
                 }else {
-                    //Ğ£ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-                    //ï¿½ï¿½Â¼ï¿½É¹ï¿½
+                    //§µ?????????????
+                    //??????
                     if(reqMap.get("certification").toString().equals(loginInfoMap.get("passwd").toString())){
-                        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ TODO
+                        //????????????? TODO
                         processLoginSuccess(2, null, loginInfoMap, resultMap,appName);
                     }else{
-                        //ï¿½×³ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                        //???????????????????
                         throw new QNLiveException("120001");
                     }
                 }
@@ -344,9 +344,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    //<editor-fold desc="Î¢ï¿½ï¿½ï¿½ï¿½È¨codeï¿½ï¿½Â¼">
+    //<editor-fold desc="??????code???">
     /**
-     * Î¢ï¿½ï¿½ï¿½ï¿½È¨codeï¿½ï¿½Â¼
+     * ??????code???
      * @param reqEntity
      * @return
      * @throws Exception
@@ -357,12 +357,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
         String subscribe = "0";
-        resultMap.put("key","1");//Ô¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½controllerï¿½Ğ¶ï¿½ï¿½ï¿½×ªï¿½ï¿½Ò³ï¿½ï¿½
+        resultMap.put("key","1");//Ô¿³× ÓÃÓÚÔÚcontrollerÅĞ¶ÏÌø×ªµÄÒ³Ãæ
 
-        //1.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¨codeï¿½ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½Ö¤codeï¿½Ó¿ï¿½
+        //1.´«µİÊÚÈ¨code¼°Ïà¹Ø²ÎÊı£¬µ÷ÓÃÎ¢ĞÅÑéÖ¤code½Ó¿Ú
         String code = reqMap.get("code").toString();
-        String app_name = reqMap.get("state").toString();//Ğ¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½appname ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
-        Jedis jedis = jedisUtils.getJedis(app_name);//ï¿½ï¿½È¡ï¿½ï¿½ï¿½æ¹¤ï¿½ß¶ï¿½ï¿½ï¿½ db
+        String app_name = reqMap.get("state").toString();//Ğ¯´ø»ØÀ´µÄ²ÎÊı ·µ»Øappname ½øĞĞÓÃ»§Çø·Ö
+        Jedis jedis = jedisUtils.getJedis(app_name);//»ñÈ¡»º´æ¹¤¾ß¶ÔÏó db
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code,app_name);
         if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
             if(getCodeResultJson.getString("openid") == null){
@@ -371,11 +371,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
             throw new QNLiveException("120008");
         }
-        String openid = getCodeResultJson.getString("openid");//ï¿½Ãµï¿½openid
-        //ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½ï¿½Ï¢
+        String openid = getCodeResultJson.getString("openid");//ÄÃµ½openid
+        //»ñÈ¡ÓÃ»§ĞÅÏ¢
         try{
-            AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//ï¿½ï¿½È¡ï¿½ï¿½ï¿½Úºï¿½access_token
-            JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//ï¿½ï¿½È¡ï¿½Ç·ï¿½ï¿½Ğ¹ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//»ñÈ¡¹«ÖÚºÅaccess_token
+            JSONObject user = WeiXinUtil.getUserByOpenid(wei_xin_access_token.getToken(),openid,app_name);//»ñÈ¡ÊÇ·ñÓĞ¹Ø×¢¹«ÖÚĞÅÏ¢
             if(user.get("subscribe") != null){
                 subscribe = user.get("subscribe").toString();
             }
@@ -383,15 +383,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("120008");
         }
         reqMap.put("subscribe",subscribe);
-        //1.2ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½Ã»ï¿½ï¿½ï¿½union_idï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½access_tokenï¿½ï¿½
-        //1.2.1ï¿½ï¿½ï¿½ï¿½ union_idï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½
+        //1.2Èç¹ûÑéÖ¤³É¹¦£¬ÔòµÃµ½ÓÃ»§µÄunion_idºÍÓÃ»§µÄaccess_token¡£
+        //1.2.1¸ù¾İ union_id²éÑ¯Êı¾İ¿â
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("login_type","4");//4.Î¢ï¿½ï¿½codeï¿½ï¿½Ê½ï¿½ï¿½Â¼
+        queryMap.put("login_type","4");//4.Î¢ĞÅcode·½Ê½µÇÂ¼
         queryMap.put("web_openid",openid);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
-        //1.2.1.1ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Â¼ï¿½ï¿½ï¿½ï¿½
-        if(loginInfoMap != null){//ï¿½ï¿½
+        //1.2.1.1Èç¹ûÓÃ»§´æÔÚÔò½øĞĞµÇÂ¼Á÷³Ì
+        if(loginInfoMap != null){//ÓĞ
             if(!loginInfoMap.get("subscribe").toString().equals(subscribe)){
                 Map<String,Object> userMap = new HashMap<>();
                 userMap.put("subscribe",subscribe);
@@ -399,13 +399,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 userMap.put("user_id",loginInfoMap.get("user_id"));
                 commonModuleServer.updateUserWebOpenIdByUserId(userMap);
             }
-            processLoginSuccess(2, null, loginInfoMap, resultMap,app_name);//ï¿½ï¿½È¡ï¿½ï¿½Ì¨ï¿½ï¿½È«Ö¤ï¿½ï¿½ access_token
+            processLoginSuccess(2, null, loginInfoMap, resultMap,app_name);//»ñÈ¡ºóÌ¨°²È«Ö¤Êé access_token
             return resultMap;
         }else {
-            //1.2.1.2 ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½open_idï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½access_tokenï¿½ï¿½ï¿½ï¿½Î¢ï¿½Å²ï¿½Ñ¯ï¿½Ã»ï¿½ï¿½ï¿½Ï¢ï¿½Ó¿Ú£ï¿½ï¿½Ãµï¿½ï¿½Ã»ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ç³Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            //1.2.1.2 Èç¹ûÓÃ»§²»´æÔÚ£¬Ôò¸ù¾İÓÃ»§µÄopen_idºÍÓÃ»§µÄaccess_tokenµ÷ÓÃÎ¢ĞÅ²éÑ¯ÓÃ»§ĞÅÏ¢½Ó¿Ú£¬µÃµ½ÓÃ»§µÄÍ·Ïñ¡¢êÇ³ÆµÈÏà¹ØĞÅÏ¢
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid,app_name);
-            // ï¿½ï¿½ï¿½İµÃµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ï¢×¢ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò½ï¿½ï¿½Ğµï¿½Â¼ï¿½ï¿½ï¿½Ì¡ï¿½
+            // ¸ù¾İµÃµ½µÄÏà¹ØÓÃ»§ĞÅÏ¢×¢²áÓÃ»§£¬²¢ÇÒ½øĞĞµÇÂ¼Á÷³Ì¡£
             if(userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null){
                 if(userJson.getString("unionid") == null){
                     resultMap.put("key","0");
@@ -415,11 +415,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             queryMap.clear();
-            queryMap.put("login_type","0");//0.Î¢ï¿½Å·ï¿½Ê½ï¿½ï¿½Â¼
-            queryMap.put("login_id",userJson.getString("unionid"));//unionid ï¿½ï¿½Â¼
+            queryMap.put("login_type","0");//0.Î¢ĞÅ·½Ê½µÇÂ¼
+            queryMap.put("login_id",userJson.getString("unionid"));//unionid µÇÂ¼
             Map<String,Object> loginInfoMapFromUnionid = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
             if(loginInfoMapFromUnionid != null){
-                //ï¿½ï¿½open_idï¿½ï¿½ï¿½Âµï¿½login_infoï¿½ï¿½ï¿½ï¿½
+                //½«open_id¸üĞÂµ½login_info±íÖĞ
                 Map<String,Object> updateMap = new HashMap<>();
                 updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
                 updateMap.put("web_openid", openid);
@@ -429,9 +429,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 return resultMap;
             }
 
-            String nickname = userJson.getString("nickname");//ï¿½Ç³ï¿½
-            String sex = userJson.getString("sex");//ï¿½Ô±ï¿½
-            String headimgurl = userJson.getString("headimgurl");//Í·ï¿½ï¿½
+            String nickname = userJson.getString("nickname");//êÇ³Æ
+            String sex = userJson.getString("sex");//ĞÔ±ğ
+            String headimgurl = userJson.getString("headimgurl");//Í·Ïñ
             if(sex == null || nickname == null || headimgurl == null){
                 resultMap.put("key","0");
                 return resultMap;
@@ -440,15 +440,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             Map<String,String> imResultMap = null;
             try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//×¢ï¿½ï¿½im
+                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//×¢²áim
             }catch (Exception e){
-                //TODO ï¿½İ²ï¿½ï¿½ï¿½ï¿½ï¿½
+                //TODO Ôİ²»´¦Àí
             }
 
-            //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½Ø±ï¿½
+            //³õÊ¼»¯Êı¾İ¿âÏà¹Ø±í
             reqMap.put("m_user_id", imResultMap.get("uid"));
             reqMap.put("m_pwd", imResultMap.get("password"));
-            //ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½Ã»ï¿½Í·ï¿½ï¿½
+            //ÉèÖÃÄ¬ÈÏÓÃ»§Í·Ïñ
             if(MiscUtils.isEmpty(headimgurl)){
                 reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address",app_name));//TODO
             }else {
@@ -457,7 +457,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             if(MiscUtils.isEmpty(nickname)){
-                reqMap.put("nick_name","ï¿½Ã»ï¿½" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+                reqMap.put("nick_name","ÓÃ»§" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);
             }
@@ -466,8 +466,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
-            //Î¢ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ë±¾ÏµÍ³ï¿½Ô±ï¿½×ªï¿½ï¿½
-            //Î¢ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ô±ï¿½ ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ÖµÎª1Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ÖµÎª2Ê±ï¿½ï¿½Å®ï¿½Ô£ï¿½ÖµÎª0Ê±ï¿½ï¿½Î´Öª
+            //Î¢ĞÅĞÔ±ğÓë±¾ÏµÍ³ĞÔ±ğ×ª»»
+            //Î¢ĞÅÓÃ»§ĞÔ±ğ ÓÃ»§µÄĞÔ±ğ£¬ÖµÎª1Ê±ÊÇÄĞĞÔ£¬ÖµÎª2Ê±ÊÇÅ®ĞÔ£¬ÖµÎª0Ê±ÊÇÎ´Öª
             if(sex.equals("1")){
                 reqMap.put("gender","1");//TODO
             }
@@ -485,7 +485,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("login_type","4");
 
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-            //ï¿½ï¿½ï¿½ï¿½access_tokenï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ë»ºï¿½æ£¬ï¿½ï¿½ï¿½ì·µï¿½Ø²ï¿½ï¿½ï¿½
+            //Éú³Éaccess_token£¬½«Ïà¹ØĞÅÏ¢·ÅÈë»º´æ£¬¹¹Ôì·µ»Ø²ÎÊı
             processLoginSuccess(1, dbResultMap, null, resultMap,app_name);
             return resultMap;
         }
@@ -493,7 +493,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     //</editor-fold>
 
     /**
-     * PCï¿½ï¿½  Î¢ï¿½ï¿½ï¿½ï¿½È¨codeï¿½ï¿½Â¼
+     * PC¶Ë  Î¢ĞÅÊÚÈ¨codeµÇÂ¼
      * @param reqEntity
      * @return
      * @throws Exception
@@ -505,9 +505,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         String subscribe = "0";
-        resultMap.put("key","0");//Î´ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½
+        resultMap.put("key","0");//¦Ä?????????
 
-        //1.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¨codeï¿½ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½Ö¤codeï¿½Ó¿ï¿½
+        //1.???????code????????????????????code???
         String code = reqMap.get("code").toString();
 
         JSONObject accountJson = WeiXinUtil.getPCUserAccountInfo(code,appName);
@@ -520,7 +520,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String openid = accountJson.getString("openid");
         String union_id = accountJson.getString("unionid");
 
-        //PCï¿½Í¹ï¿½ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ÃµÄ½Ó¿ï¿½ getUserByOpenidï¿½Ç¹ï¿½ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ĞµÄ½Ó¿ï¿½
+        //PC?????????????? getUserByOpenid??????????§Ö???
         JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid,appName);
         errCode = userJson.get("errcode");
         if (errCode != null ) {
@@ -530,22 +530,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            subscribe = userJson.get("subscribe").toString();
 //        }
 
-        String nickname = userJson.getString("nickname");//ï¿½Ç³ï¿½
+        String nickname = userJson.getString("nickname");//êÇ³Æ
         resultMap.put("name", nickname);
 
-        //1.2ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½Ã»ï¿½ï¿½ï¿½union_idï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½access_tokenï¿½ï¿½
-        //1.2.1ï¿½ï¿½ï¿½ï¿½ union_idï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½
+        //1.2Èç¹ûÑéÖ¤³É¹¦£¬ÔòµÃµ½ÓÃ»§µÄunion_idºÍÓÃ»§µÄaccess_token¡£
+        //1.2.1¸ù¾İ union_id²éÑ¯Êı¾İ¿â
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("login_type","0");//0ï¿½ï¿½unionï¿½ï¿½Ñ¯
+        queryMap.put("login_type","0");//0Óëunion²éÑ¯
         queryMap.put("login_id",union_id);
         Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
 
-        //1.2.1.1ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Â¼ï¿½ï¿½ï¿½ï¿½
-        if(loginInfoMap != null){//ï¿½ï¿½
-            processLoginSuccess(2, null, loginInfoMap, resultMap,reqEntity.getAppName());//ï¿½ï¿½È¡ï¿½ï¿½Ì¨ï¿½ï¿½È«Ö¤ï¿½ï¿½ access_token
+        //1.2.1.1Èç¹ûÓÃ»§´æÔÚÔò½øĞĞµÇÂ¼Á÷³Ì
+        if(loginInfoMap != null){//ÓĞ
+            processLoginSuccess(2, null, loginInfoMap, resultMap,reqEntity.getAppName());//»ñÈ¡ºóÌ¨°²È«Ö¤Êé access_token
             Object phone = loginInfoMap.get("phone_number");
-            if (phone != null) { //ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½
+            if (phone != null) { //ÓĞÖ±²¥¼äºÍÊÖ»úºÅ
                 resultMap.put("key","1");
             } else {
                 Map<String, Object> map = new HashMap<String, Object>();
@@ -553,26 +553,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
                 Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
-                if(CollectionUtils.isEmpty(liveRoomsMap)){//ï¿½ï¿½Â¼ï¿½ï¿½ Ã»ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+                if(CollectionUtils.isEmpty(liveRoomsMap)){//????? ???????????
                     resultMap.put("key","3");
                 }
             }
             return resultMap;
         } else {
-            String sex = userJson.getString("sex");//ï¿½Ô±ï¿½
-            String headimgurl = userJson.getString("headimgurl");//Í·ï¿½ï¿½
+            String sex = userJson.getString("sex");//???
+            String headimgurl = userJson.getString("headimgurl");//???
 
             Map<String,String> imResultMap = null;
             try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//×¢ï¿½ï¿½im
+                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//???im
             }catch (Exception e){
-                //TODO ï¿½İ²ï¿½ï¿½ï¿½ï¿½ï¿½
+                //TODO ???????
             }
 
-            //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½Ø±ï¿½
+            //??????????????
             reqMap.put("m_user_id", imResultMap.get("uid"));
             reqMap.put("m_pwd", imResultMap.get("password"));
-            //ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½ï¿½Ã»ï¿½Í·ï¿½ï¿½
+            //?????????????
             if(MiscUtils.isEmpty(headimgurl)){
                 reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address",appName));//TODO
             }else {
@@ -581,7 +581,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
 
             if(MiscUtils.isEmpty(nickname)){
-                reqMap.put("nick_name","ï¿½Ã»ï¿½" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+                reqMap.put("nick_name","???" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
             }else {
                 reqMap.put("nick_name", nickname);
             }
@@ -590,8 +590,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 reqMap.put("gender","2");//TODO
             }
 
-            //Î¢ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ë±¾ÏµÍ³ï¿½Ô±ï¿½×ªï¿½ï¿½
-            //Î¢ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ô±ï¿½ ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ÖµÎª1Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ÖµÎª2Ê±ï¿½ï¿½Å®ï¿½Ô£ï¿½ÖµÎª0Ê±ï¿½ï¿½Î´Öª
+            //????????????????
+            //????????? ??????????1??????????2?????????0???¦Ä?
             if(sex.equals("1")){
                 reqMap.put("gender","1");//TODO
             }
@@ -608,7 +608,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             reqMap.put("login_type","4");
             reqMap.put("subscribe",subscribe);
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-            //ï¿½ï¿½ï¿½ï¿½access_tokenï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ë»ºï¿½æ£¬ï¿½ï¿½ï¿½ì·µï¿½Ø²ï¿½ï¿½ï¿½
+            //????access_token???????????????—¨?????????
             processLoginSuccess(1, dbResultMap, null, resultMap,reqEntity.getAppName());
 
             return resultMap;
@@ -617,34 +617,34 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     /**
      *
-     * @param type 1ï¿½ï¿½×¢ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½2ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
-     * @param dbResultMap ï¿½ï¿½typeÎª1Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ÖµÎªï¿½ï¿½ï¿½Ã»ï¿½×¢ï¿½ï¿½ó·µ»Øµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½typeÎª2Ê±ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½null
+     * @param type 1???????????????2??????????
+     * @param dbResultMap ??type?1?????????????????????????????????type?2????????null
      * @param loginInfoMap
-     * @param resultMap serviceÒªï¿½ï¿½ï¿½Øµï¿½map
+     * @param resultMap service??????map
      */
     private void processLoginSuccess(Integer type, Map<String,String> dbResultMap, Map<String,Object> loginInfoMap,
                                      Map<String,Object> resultMap,String appName) throws Exception{
-        Jedis jedis = jedisUtils.getJedis(appName);//ï¿½ï¿½ï¿½ï¿½appname ï¿½ï¿½È¡ï¿½ï¿½Í¬ï¿½ï¿½redis db
+        Jedis jedis = jedisUtils.getJedis(appName);//????appname ????????redis db
         String last_login_date = (new Date()).getTime() + "";
         String user_id = null;
         String m_user_id = null;
         String m_pwd = null;
         Map<String,String> cacheMap = new HashMap<String,String>();
 
-        //ï¿½ï¿½×¢ï¿½ï¿½ï¿½Ã»ï¿½,ï¿½ï¿½ï¿½Â²ï¿½Ñ¯loginInfo
+        //????????,??????loginInfo
         if(type == 1){
             user_id = dbResultMap.get("user_id");
             loginInfoMap = commonModuleServer.findLoginInfoByUserId(user_id);
-            //ï¿½ï¿½ï¿½Ã»ï¿½
+            //?????
         }else if(type == 2){
             user_id = loginInfoMap.get("user_id").toString();
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IMï¿½Ëºï¿½Îªï¿½Õ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â³ï¿½ï¿½ï¿½×¢ï¿½ï¿½IMï¿½Ëºï¿½
+            //???????IM???????????????????IM???
             if(loginInfoMap.get("m_user_id") == null){
                 Map<String,String> imResultMap = null;
                 try {
                     imResultMap = IMMsgUtil.createIMAccount("supply");
                 }catch (Exception e){
-                    //TODO ï¿½İ²ï¿½ï¿½ï¿½ï¿½ï¿½
+                    //TODO ???????
                 }
 
                 if(! MiscUtils.isEmpty(imResultMap)){
@@ -652,7 +652,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     m_pwd = imResultMap.get("password");
 
                     if(!MiscUtils.isEmpty(m_user_id) && !MiscUtils.isEmpty(m_pwd)){
-                        //ï¿½ï¿½ï¿½ï¿½login_infoï¿½ï¿½
+                        //????login_info??
                         Map<String,Object> updateIMAccountMap = new HashMap<>();
                         updateIMAccountMap.put("m_user_id",m_user_id);
                         updateIMAccountMap.put("m_pwd",m_pwd);
@@ -663,12 +663,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
-        //1.ï¿½ï¿½objectMap×ªÎªStringMap
+        //1.??objectMap??StringMap
         m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
         m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
         MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
 
-        //2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½access_token
+        //2.??????????????access_token
         String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("access_token", access_token);
@@ -680,7 +680,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.put("user_id", user_id);
         Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
 
-        //3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½Ø²ï¿½ï¿½ï¿½
+        //3.?????????????
         resultMap.put("access_token", access_token);
         resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
         resultMap.put("m_user_id", m_user_id);
@@ -699,12 +699,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         long expiredTime = 3600;
         String token = null;
         String url = null;
-        if("1".equals (reqMap.get("upload_type"))){ //Í¼Æ¬
+        if("1".equals (reqMap.get("upload_type"))){ //??
             url = IMMsgUtil.configMap.get("images_space_domain_name");
             token = auth.uploadToken(IMMsgUtil.configMap.get("image_space"), null, expiredTime, new StringMap()
                     .putNotEmpty("returnBody", "{\"key\": $(key), \"hash\": $(etag), \"width\": $(imageInfo.width), \"height\": $(imageInfo.height)}"));
 
-        } else if("2".equals (reqMap.get("upload_type"))){ //ï¿½ï¿½Æµ
+        } else if("2".equals (reqMap.get("upload_type"))){ //???
             url = IMMsgUtil.configMap.get("audio_space_domain_name");
             token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, (StringMap)null);
         }
@@ -723,7 +723,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½ï¿½Ñ¯ï¿½Ã»ï¿½ï¿½ï¿½Ï¢
+     * ?????????
      * @param reqEntity
      * @return
      * @throws Exception
@@ -735,7 +735,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<String, Object>();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        //1:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ 2ï¿½ï¿½ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+        //1:??????????? 2????????????
         String queryType = reqMap.get("query_type").toString();
         Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         if(queryType.equals("1")){
@@ -768,9 +768,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    //<editor-fold desc="ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½Î¢ï¿½Å¶ï¿½ï¿½ï¿½">
+    //<editor-fold desc="?????????????">
     /**
-     * ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½Î¢ï¿½Å¶ï¿½ï¿½ï¿½
+     * ?????????????
      * @param reqEntity
      * @return
      * @throws Exception
@@ -781,19 +781,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
-        //1.ï¿½ï¿½ï¿½Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ú£ï¿½ï¿½Î³Ì²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ ï¿½Î³Ì²ï¿½ï¿½ï¿½ï¿½Ú£ï¿½120009ï¿½ï¿½
+        //1.???¦Ã?????????¦Ã???????????????? ?¦Ã???????120009??
         String courseId = reqMap.get("course_id").toString();
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("course_id", courseId);
         Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
 
-        if(MiscUtils.isEmpty(courseMap)){    //ï¿½ï¿½ï¿½ï¿½Î³Ì²ï¿½ï¿½ï¿½ï¿½ï¿½
+        if(MiscUtils.isEmpty(courseMap)){    //????¦Ã??????
             throw new QNLiveException("120009");
         }
-        //2.ï¿½ï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ĞµÄ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½120010ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í²ï¿½ï¿½ï¿½ï¿½Ú£ï¿½
+        //2.????????????????????????§Ö??????????????????????????????????120010????????????????
         String profit_type = reqMap.get("profit_type").toString();
 
-        //3.ï¿½ï¿½ï¿½ï¿½t_trade_billï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½
+        //3.????t_trade_bill?? ?????????
         String goodName = null;
         Integer totalFee = 0;
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -801,7 +801,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         insertMap.put("user_id",userId);
         insertMap.put("room_id",courseMap.get("room_id"));
         insertMap.put("course_id",courseMap.get("course_id"));
-        //ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½Îª 0:ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ 1:ï¿½ï¿½ï¿½ï¿½
+        //?§Ø?????? 0:?¦Ã????? 1:????
         if(profit_type.equals("1")){
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
@@ -821,14 +821,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         query.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, query);
 
-        //4.ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
+        //4.???????????????????
         String terminalIp = reqMap.get("remote_ip_address").toString();
         String outTradeNo = tradeId;
         String platform = (String) reqMap.get("platform");
         String openid = null;
 
         boolean isWeb = false;
-        if (platform == null || platform.equals("3") || platform.equals("0")) {//0web 3ï¿½ï¿½jsï¿½ï¿½ï¿½ï¿½ Ä¬ï¿½ï¿½ï¿½ï¿½js webï¿½ï¿½ï¿½ï¿½
+        if (platform == null || platform.equals("3") || platform.equals("0")) {//0web 3??js???? ?????js web????
             Map<String,String> userMap =jedis.hgetAll(key);
             openid = userMap.get("web_openid");
             isWeb = true;
@@ -836,18 +836,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid, platform,appName);
 
-        //5.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
+        //5.???????????????????
         if (payResultMap.get ("return_code").equals ("FAIL")) {
-            //ï¿½ï¿½ï¿½Â½ï¿½ï¿½×±ï¿½
+            //????????
             Map<String,Object> failUpdateMap = new HashMap<>();
             failUpdateMap.put("status","3");
-            failUpdateMap.put("close_reason","ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½ "+payResultMap.get("return_msg")+ payResultMap.get ("err_code_des"));
+            failUpdateMap.put("close_reason","??????????????? "+payResultMap.get("return_msg")+ payResultMap.get ("err_code_des"));
             failUpdateMap.put("trade_id",tradeId);
             commonModuleServer.closeTradeBill(failUpdateMap);
 
             throw new QNLiveException("120015");
         } else {
-            //ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½
+            //???????????????????
             Map<String,Object> insertPayMap = new HashMap<>();
             insertPayMap.put("trade_id",tradeId);
             insertPayMap.put("payment_id",MiscUtils.getUUId());
@@ -858,7 +858,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertPayMap.put("update_time",new Date());
             commonModuleServer.insertPaymentBill(insertPayMap);
 
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½.
+            //???????????????.
             SortedMap<String,String> resultMap = new TreeMap<>();
             if (isWeb) {
                 resultMap.put("appId",MiscUtils.getConfigByKey("appid",appName));
@@ -927,13 +927,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             result.put("state", "8");
         }
         return result;
-//        SUCCESS (0, "Ö§ï¿½ï¿½ï¿½É¹ï¿½"), REFUND (1, "×ªï¿½ï¿½ï¿½Ë¿ï¿½"), NOTPAY (2, "Î´Ö§ï¿½ï¿½"), CLOSED (3, "ï¿½Ñ¹Ø±ï¿½"), REVOKED (4, "ï¿½Ñ³ï¿½ï¿½ï¿½"),
-//        USERPAYING (5, "ï¿½Ã»ï¿½Ö§ï¿½ï¿½ï¿½ï¿½"), PAYERROR (6, "Ö§ï¿½ï¿½Ê§ï¿½ï¿½"), OTHER_ERROR (7, "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"); (8, Î´ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½
+//        SUCCESS (0, "??????"), REFUND (1, "??????"), NOTPAY (2, "¦Ä???"), CLOSED (3, "????"), REVOKED (4, "?????"),
+//        USERPAYING (5, "????????"), PAYERROR (6, "??????"), OTHER_ERROR (7, "????????"); (8, ¦Ä????????????
 
     }
 
     /**
-     * Î¢ï¿½ï¿½Ö§ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½Øµï¿½ï¿½Ä·ï¿½ï¿½ï¿½
+     * ??????????????????
      * @param reqEntity
      * @return
      * @throws Exception
@@ -941,7 +941,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("handleWeixinPayResult")
     public String handleWeixinPayResult (RequestEntity reqEntity) throws Exception{
-        String resultStr = TenPayConstant.FAIL;//ï¿½ï¿½Ì¬
+        String resultStr = TenPayConstant.FAIL;//???
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
@@ -949,19 +949,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
-            logger.debug("====>ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë®ï¿½ï¿½ï¿½ï¿½: " + outTradeNo);
+            logger.debug("====>????????????, ??????????????????: " + outTradeNo);
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5Ç©ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³Ì´ï¿½ï¿½ï¿½\ï¿½ï¿½ï¿½ï¿½Î³Ìµï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½
+        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5????????????¦Ã????\????¦Ã????????
             //if(true){
-            logger.debug(" ===> Î¢ï¿½ï¿½notify Md5 ï¿½ï¿½Ç©ï¿½É¹ï¿½ <=== ");
+            logger.debug(" ===> ???notify Md5 ?????? <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
                     "SUCCESS".equals(requestMapData.get("result_code"))){
                 String userId = billMap.get("user_id").toString();
 
-                //0.ï¿½È¼ï¿½ï¿½Î³Ì´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
+                //0.????¦Ã???????????
                 String courseId = (String)billMap.get("course_id");
                 Map<String,Object> query = new HashMap<>();
                 query.put("course_id", courseId);
@@ -973,7 +973,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
                 String profit_type = (String)billMap.get("profit_type");
-                //1.1ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½È²ï¿½Ñ¯ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ë¸Ã¿Î³ï¿½
+                //1.1?????????????????????????????¦Ã?
                 Map<String,Object> rewardMap = null;
                 if("1".equals(profit_type)){
                     Map<String,Object> rewardQueryMap = new HashMap<>();
@@ -982,7 +982,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     rewardMap = commonModuleServer.findRewardByUserIdAndCourseId(rewardQueryMap);
                 }
 
-                //2.Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½
+                //2.??????????????????????????????????????
                 Map<String,Object> requestValues = new HashMap<>();
                 for(String key : requestMapData.keySet()){
                     requestValues.put(key, requestMapData.get(key));
@@ -993,7 +993,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 Map<String,Object> userDistributionInfo = null;
                 Map<String,Object> recommendMap = null;
-                if("0".equals(profit_type)){ //profit_type 0 ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                if("0".equals(profit_type)){ //profit_type 0 ?¦Ã????? 1????????
                     //t_room_distributer
                     query.clear();
                     query.put("room_id", billMap.get("room_id"));
@@ -1006,7 +1006,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                                 (String)billMap.get("room_id"), readRoomDistributer, jedis);
                         requestValues.put("roomDistributerCache", distributeRoom);
 
-                        //ï¿½ï¿½ï¿½İ·ï¿½ï¿½ï¿½Ô±idï¿½ï¿½ï¿½Ã»ï¿½idï¿½ï¿½rqCodeï¿½ï¿½room_idï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ò£¬²ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½
+                        //????????id?????id??rqCode??room_id??????????????????????
                         Map<String,Object> queryuserDistribution = new HashMap<>();
                         queryuserDistribution.put("distributer_id", distributeRoom.get("distributer_id"));
                         queryuserDistribution.put("user_id", userId);
@@ -1022,8 +1022,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 query.put(Constants.CACHED_KEY_USER_FIELD, userId);
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
                 jedis.del(key);
-                //3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½
-                //3.4ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½Î³Ì£ï¿½ï¿½Ò´ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½æ´¦ï¿½ï¿½
+                //3.???????§Ö?????
+                //3.4????????¦Ã?????????????????????????›¨??
                 long lecturerProfit = 0L;
                 Map<String,Object> sumInfo = null;
                 if("0".equals(profit_type) && !MiscUtils.isEmpty(distributeRoom)){
@@ -1032,14 +1032,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("distributer_id", distributer_id);
                     query.put("profit_type", "0");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
-                    //3.4.1 ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½t_distributer
+                    //3.4.1 ?????????t_distributer
                     query.clear();
                     query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, distributeRoom.get("distributer_id"));
                     String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, query);
                     jedis.hset(distributerKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("share_amount"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_DISTRIBUTER_KEY, distributeRoom.get("distributer_id"));
 
-                    //3.4.2 Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô± ï¿½ï¿½ï¿½ï¿½t_room_distributerï¿½ï¿½ï¿½ï¿½
+                    //3.4.2 ????????? ????t_room_distributer????
                     query.put("distributer_id", distributeRoom.get("distributer_id"));
                     query.put("room_id", courseMap.get("room_id"));
                     String roomDistributeKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
@@ -1081,7 +1081,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
 
-                //3.1 t_lecturer  ï¿½ï¿½ï¿½ï¿½
+                //3.1 t_lecturer  ????
                 query.clear();
                 query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
@@ -1097,14 +1097,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 jedis.hset(lecturerKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseMap.get("lecturer_id"));
 
-                //3.2 Ö±ï¿½ï¿½ï¿½ä»ºï¿½ï¿½ t_live_room
+                //3.2 ????¨?? t_live_room
                 query.clear();
                 query.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
                 String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
                 sumInfo = commonModuleServer.findCoursesSumInfo(query);
                 jedis.hset(liveRoomKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
 
-                //3.3 ï¿½Î³Ì»ï¿½ï¿½ï¿½ï¿½ï¿½ß±ï¿½ t_courses
+                //3.3 ?¦Ã???????? t_courses
                 if("0".equals(profit_type)){
                     //jedis.hincrBy(courseKey, "student_num", 1);
                     query.clear();
@@ -1125,7 +1125,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else {
-                    //ï¿½ï¿½ï¿½Ö®Ç°ï¿½ï¿½Ã»ï¿½Ğ´ï¿½ï¿½Í¸Ã¿Î³Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                    //?????????§Õ????¦Ã???????
                     if(MiscUtils.isEmpty(rewardMap)){
                         jedis.hincrBy(courseKey, "extra_num", 1);
                     }
@@ -1147,24 +1147,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("user_id", handleResultMap.get("user_id"));
                     Map<String, String> payUserMap = CacheUtils.readUserNoCache((String)handleResultMap.get("user_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
 
-                    //        String message = payUserMap.get("nick_name") + "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "Ôª";
+                    //        String message = payUserMap.get("nick_name") + "??????" + MiscUtils.RecoveryEmoji(lecturerMap.get("nick_name")) +" "+  (Long)handleResultMap.get("profit_amount")/100.0 + "?";
                     HashMap<String,String> payMessageMap = new HashMap<>();
-                    payMessageMap.put("pay_user",payUserMap.get("nick_name"));//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-                    payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message",appName));//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-                    payMessageMap.put("collect_user",lecturerMap.get("nick_name"));//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½
-                    payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");//Ç®
-                    payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit",appName));//ï¿½ï¿½Òµï¿½Ôª
+                    payMessageMap.put("pay_user",payUserMap.get("nick_name"));//??????????
+                    payMessageMap.put("pay_message", MiscUtils.getConfigByKey("pay_message",appName));//???????
+                    payMessageMap.put("collect_user",lecturerMap.get("nick_name"));//?????????????
+                    payMessageMap.put("money_num", ((Long)handleResultMap.get("profit_amount")/100.0)+"");//?
+                    payMessageMap.put("money_unit",MiscUtils.getConfigByKey("money_unit",appName));//?????
                     String message = JSON.toJSONString(payMessageMap);
                     long currentTime = System.currentTimeMillis();
                     String sender = "system";
                     Map<String,Object> infomation = new HashMap<>();
-                    infomation.put("course_id", handleResultMap.get("course_id"));//ï¿½Î³ï¿½id
-                    infomation.put("creator_id", (String)handleResultMap.get("user_id"));//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½id
+                    infomation.put("course_id", handleResultMap.get("course_id"));//?¦Ã?id
+                    infomation.put("creator_id", (String)handleResultMap.get("user_id"));//?????????id
                     //TODO check it , infomation.put("creator_id", lecturerMap.get(handleResultMap.get("lecturer_id").toString()));
-                    infomation.put("message", message);//ï¿½ï¿½Ï¢
-                    infomation.put("send_type", "4");//4.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-                    infomation.put("message_type", "1");//1.ï¿½ï¿½ï¿½ï¿½
-                    infomation.put("create_time", currentTime);//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+                    infomation.put("message", message);//???
+                    infomation.put("send_type", "4");//4.???????
+                    infomation.put("message_type", "1");//1.????
+                    infomation.put("create_time", currentTime);//???????
                     infomation.put("message_id",MiscUtils.getUUId());//
                     infomation.put("message_imid",infomation.get("message_id"));
                     Map<String,Object> messageMap = new HashMap<>();
@@ -1179,7 +1179,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }else if(profit_type.equals("0")){
                     Long nowStudentNum = 0L;
 
-                    //ï¿½Ş¸ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ĞµÄ¼ï¿½ï¿½ï¿½Î³ï¿½ï¿½ï¿½
+                    //??????????????§Ö????¦Ã???
                     query.clear();
                     query.put(Constants.CACHED_KEY_USER_FIELD, userId);
                     String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
@@ -1209,7 +1209,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
 
                 resultStr = TenPayConstant.SUCCESS;
-                logger.debug("====> Î¢ï¿½ï¿½Ö§ï¿½ï¿½ï¿½ï¿½Ë®: " + outTradeNo + " ï¿½ï¿½ï¿½Â³É¹ï¿½, return success === ");
+                logger.debug("====> ?????????: " + outTradeNo + " ??????, return success === ");
 
                 String user_id = (String) billMap.get("user_id");
                 String course_id = (String) billMap.get("course_id");
@@ -1218,19 +1218,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
                     String openId=(String) loginInfoUser.get("web_openid");
-                    //  ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨Öª ï¿½ï¿½Ê¦ ï¿½ï¿½Ê± ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
+                    //  ????????????? ??? ??? ???????
                     //wpushLecture(billMap, jedis, openId, courseByCourseId, user);
-                    //ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½ï¿½Í¨ÖªÑ§ï¿½ï¿½
+                    //???????¦Ã????????
                     if(profit_type.equals("0")){
                         wpushUser(jedis, openId, courseMap, lecturerMap,course_id, room_id,appName);
                     }
                 }
             }else{
-                logger.debug("==> Î¢ï¿½ï¿½Ö§ï¿½ï¿½Ê§ï¿½ï¿½ ,ï¿½ï¿½Ë® ï¿½ï¿½" + outTradeNo);
+                logger.debug("==> ????????? ,??? ??" + outTradeNo);
                 resultStr = TenPayConstant.FAIL;
             }
 
-        }else {// MD5Ç©ï¿½ï¿½Ê§ï¿½ï¿½
+        }else {// MD5??????
             logger.debug("==> fail -Md5 failed");
             resultStr = TenPayConstant.FAIL;
         }
@@ -1238,7 +1238,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
     //</editor-fold>
 
-    //<editor-fold desc="ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½Ñ§ï¿½ï¿½ï¿½ï¿½Í¨Öª">
+    //<editor-fold desc="???? ????????????????????">
 
 //    private void jpushUser(Map<String,String> courseInfo, String user_id, String msg_type) {
 //        JSONObject obj = new JSONObject();
@@ -1312,11 +1312,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         String cash_in_amount = "";
         String total_amount = distributer.get("total_amount");
-        if(MiscUtils.isEmpty(total_amount)){ //ï¿½Ğ”ï¿½ï¿½Ğ›]ï¿½ï¿½ï¿½X
+        if(MiscUtils.isEmpty(total_amount)){ //?§¥??§­]???X
             total_amount="0";
             cash_in_amount = "0";
-        }else{//ï¿½ï¿½ï¿½ï¿½]ï¿½ï¿½ï¿½X
-            cash_in_amount = String.valueOf(CountMoneyUtil.getCashInAmount(total_amount));//ï¿½ï¿½ï¿½ï¿½Fï¿½ï¿½ï¿½X
+        }else{//????]???X
+            cash_in_amount = String.valueOf(CountMoneyUtil.getCashInAmount(total_amount));//????F???X
         }
         resultMap.put("total_amount", total_amount);
         resultMap.put("cash_in_amount", cash_in_amount);
@@ -1409,7 +1409,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½ï¿½Ê¦ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½Ã»ï¿½/ï¿½Ã»ï¿½ï¿½ï¿½Ñ¯ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½Ã»ï¿½
+     * ???????????????????/?????????????????
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1446,7 +1446,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100028");
         }
 
-        //2.ï¿½ï¿½Ñ¯Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
+        //2.????????????????????????
         long roomDistributerRecommendNum = 0l;
         if(!MiscUtils.isEmpty(roomDistributerMap)){
             roomDistributerRecommendNum = Long.parseLong(roomDistributerMap.get("recommend_num"));
@@ -1454,7 +1454,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         resultMap.put("recommend_num", roomDistributerRecommendNum);
 
-        //3.ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½Ğ±ï¿½
+        //3.?????????????????0???????§Ò?
         if(roomDistributerRecommendNum > 0){
             if(MiscUtils.isEmpty(reqMap.get("position"))){
                 reqMap.remove("position");
@@ -1487,7 +1487,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /*
-    	 * ï¿½Ã»ï¿½ï¿½ï¿½Ñ¯ï¿½Ô¼ï¿½ï¿½ï¿½Ó¦Ö¸ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    	 * ?????????????????????????????
      */
     @FunctionName("roomDistributionInfo")
     public Map<String,Object> getRoomDistributionInfo(RequestEntity reqEntity) throws Exception{
@@ -1714,7 +1714,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
 
-        //ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ç·ï¿½Îªï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½Ô±
+        //????????????????????????
         resultMap.put("share_url",getLiveRoomShareURL(userId, roomId,jedis,appName));
 
         long timeS1 = System.currentTimeMillis();
@@ -1741,11 +1741,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             recommend_code = distributerRoom.get("rq_code");
         }
 
-        //ï¿½Ç·ï¿½ï¿½ï¿½Ô±
+        //??????
         if(isDistributer == true){
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId+"&recommend_code="+recommend_code;
         }else {
-            //ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô±
+            //????????
             share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId;
         }
         return share_url;
@@ -1766,10 +1766,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             recommend_code = distributerRoom.get("rq_code");
         }
 
-        //ï¿½Ç·ï¿½ï¿½ï¿½Ô±
+        //??????
         if(isDistributer == true){
             share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName) + courseId + "&recommend_code=" + recommend_code;
-        }else {  //ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô±
+        }else {  //????????
             share_url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName) + courseId;
         }
         return share_url;
@@ -1785,7 +1785,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String rqCode = reqMap.get("recommend_code").toString();
-        //0.ï¿½ï¿½È¡Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½Ï¢
+        //0.???????????????
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
         Map<String,Object> queryParam = new HashMap<String,Object>();
         queryParam.put(Constants.CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD, rqCode);
@@ -1810,7 +1810,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 Map<String,String> query = new HashMap<String,String>();
                 query.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD,(String)roomDistributerMap.get(Constants.CACHED_KEY_DISTRIBUTER_FIELD));
                 query.put(Constants.FIELD_ROOM_ID, (String)roomDistributerMap.get(Constants.FIELD_ROOM_ID));
-                //TODO RQ_CODEÊ§Ğ§ï¿½ï¿½ÒªÉ¾ï¿½ï¿½
+                //TODO RQ_CODE?§¹??????
                 jedis.hmset(key, query);
                 key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, queryParam);
                 jedis.hmset(key, distributerRoom);
@@ -1824,7 +1824,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if("0".equals(distributerRoom.get("effective_time")) && end_date == 0){
                 isValidate = true;
             }else {
-                //1.ï¿½Ğ¶Ï¸Ã·ï¿½ï¿½ï¿½Ô±ï¿½Ç·ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ö¤
+                //1.?§Ø?¡Â?????????§¹????§¹?????????????
                 if(end_date >= todayEnd.getTime()){
                     isValidate = true;
                 }
@@ -1839,14 +1839,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 query.put(Constants.FIELD_ROOM_ID, room_id);
                 String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM_DISTRIBUTER, query);
 
-                //2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¸ï¿½ï¿½Æ¹ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ç½ï¿½Ê¦,ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½Ã»ï¿½Ä¿Ç°ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½Ô±
+                //2.?????????????????????????,???????????????????????????????????????????????§¹?????
                 if((! userId.equals(lecturerId)) && (! userId.equals(distributer_id))){
                     Map<String,Object> queryMap = new HashMap<>();
                     queryMap.put("room_id", room_id);
                     queryMap.put("user_id", userId);
                     Map<String,Object> roomDistributerRecommendMap = commonModuleServer.findRoomDistributerRecommendItem(queryMap);
 
-                    //3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ã»ï¿½Ğ³ï¿½Îªï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Îªï¿½Ã·ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½
+                    //3.??????????§Ô????§¹?????????????????????????¡Â????????????
                     if(MiscUtils.isEmpty(roomDistributerRecommendMap)){
                         Map<String,Object> insertMap = new HashMap<>();
                         insertMap.put("distributer_recommend_id", MiscUtils.getUUId());
@@ -1859,13 +1859,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         insertMap.put("now", now);
                         commonModuleServer.insertRoomDistributerRecommend(insertMap);
 
-                        //4.Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»
+                        //4.???????????????????????
                         jedis.hincrBy(distributerKey, "click_num", 1);
                         jedis.hincrBy(distributerKey, "recommend_num", 1);
                         jedis.hincrBy(distributerKey, "last_recommend_num", 1);
                         jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
 
-                        //5.ï¿½Ş¸Ä½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½
+                        //5.??????????§Ö?????????
                         Map<String,Object> cacheKeyMap = new HashMap<>();
                         cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheKeyMap);
@@ -1883,7 +1883,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         } else {
                             roomDistributerRecommendMap.put("end_date",distributerRoom.get("end_date"));
                         }
-                        //ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Â³ï¿½Îªï¿½Æ¼ï¿½ï¿½Ã»ï¿½
+                        //?§Ø????????????????????????????§¹?????????????????????????
                         if(roomDistributerRecommendMap.get("end_date") != null){
                             Date endDate = (Date) roomDistributerRecommendMap.get("end_date");
                             if(endDate.getTime() < todayEnd.getTime()){
@@ -1907,13 +1907,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                                 commonModuleServer.updateRoomDistributerRecommend(insertMap);
 
-                                //4.Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»
+                                //4.???????????????????????
                                 jedis.hincrBy(distributerKey, "click_num", 1);
                                 jedis.hincrBy(distributerKey, "recommend_num", 1);
                                 jedis.hincrBy(distributerKey, "last_recommend_num", 1);
                                 jedis.sadd(Constants.CACHED_UPDATE_RQ_CODE_KEY, rqCode);
 
-                                //5.ï¿½Ş¸Ä½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½Æ¼ï¿½ï¿½Ã»ï¿½ï¿½ï¿½
+                                //5.??????????§Ö?????????
                                 Map<String,Object> cacheKeyMap = new HashMap<>();
                                 cacheKeyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheKeyMap);
@@ -1951,9 +1951,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<>();
 
 //        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        //1.ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½server_idÍ¨ï¿½ï¿½Î¢ï¿½Å½Ó¿Ú£ï¿½ï¿½Ãµï¿½Î¢ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //1.???????server_id??????????????????????????
         String mediaUrl = WeiXinUtil.getMediaURL(reqMap.get("media_id").toString(),jedisUtils.getJedis(appName),appName);
-        //2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£fetchï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½Å£Í¼Æ¬ï¿½ï¿½ï¿½ï¿½
+        //2.???????fetch?????????????????????????????
         String fetchURL = qiNiuFetchURL(mediaUrl,appName);
 
         resultMap.put("url", fetchURL);
@@ -1986,27 +1986,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String share_url = null;
         String png_url = null;
 
-        //1.ï¿½Î³Ì·ï¿½ï¿½ï¿½ 2.Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 3.ï¿½ï¿½ï¿½ï¿½Ò³ï¿½ï¿½ï¿½ï¿½ï¿½ 4.ï¿½ï¿½ÎªÖ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½
+        //1.?¦Ã???? 2.???????? 3.?????????? 4.????????????????
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         switch (query_type){
             case "1":
-                ((Map<String, Object>) reqEntity.getParam()).put("course_id",id);//ï¿½ï¿½ï¿½type==1 ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½ï¿½ï¿½course_id
+                ((Map<String, Object>) reqEntity.getParam()).put("course_id",id);//???type==1 ????????id????course_id
                 Map<String,String> courseMap = CacheUtils.readCourse(id, reqEntity, readCourseOperation, jedis, true);
                 if(MiscUtils.isEmpty(courseMap)){
                     throw new QNLiveException("120009");
                 }
                 MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
                 title = courseMap.get("course_title");
-                ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//ï¿½ï¿½roomid ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//??roomid ????????? ????????
                 Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedis, true);
                 if("2".equals(courseMap.get("status"))){
                     content = liveRoomMap.get("room_name")+"\n";
                 }else if("1".equals(courseMap.get("status"))){
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
-                        content  = liveRoomMap.get("room_name") + "\n"+ MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyyï¿½ï¿½MMï¿½ï¿½ddï¿½ï¿½ HH:mm");
+                        content  = liveRoomMap.get("room_name") + "\n"+ MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy??MM??dd?? HH:mm");
                     }else {
-                        content += "\n" + liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyyï¿½ï¿½MMï¿½ï¿½ddï¿½ï¿½ HH:mm");
+                        content += "\n" + liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy??MM??dd?? HH:mm");
                     }
                 }else if("4".equals(courseMap.get("status"))){
                     content  = liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_content",appName);
@@ -2020,7 +2020,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 break;
 
             case "2":
-                ((Map<String, Object>) reqEntity.getParam()).put("room_id",id);//ï¿½ï¿½ï¿½ï¿½ï¿½2 ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½roomidï¿½ï¿½ï¿½ï¿½
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",id);//?????2 ??????????????? ??roomid????
                 Map<String,String> liveRoomInfoMap =  CacheUtils.readLiveRoom(id, reqEntity, readLiveRoomOperation, jedis, true);
                 if(MiscUtils.isEmpty(liveRoomInfoMap)){
                     throw new QNLiveException("120018");
@@ -2101,13 +2101,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        //1.ï¿½ï¿½ï¿½Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+        //1.???¦Ã???????
         Map<String,String> courseMap = CacheUtils.readCourse(reqMap.get("course_id").toString(), reqEntity, readCourseOperation, jedis, false);
         if(MiscUtils.isEmpty(courseMap)){
             throw new QNLiveException("120009");
         }
 
-        //2.ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //2.?????????????????
         if(MiscUtils.isEmpty(reqMap.get("distributer_id"))){
             reqMap.put("distributer_id", userId);
         }
@@ -2174,85 +2174,85 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½ï¿½ï¿½É¶ï¿½Î¬ï¿½ï¿½
-     * @param course_id ï¿½Î³ï¿½
-     * @param room_id Ö±ï¿½ï¿½ï¿½ï¿½
-     * @param access_token ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
+     * ????????
+     * @param course_id ?¦Ã?
+     * @param room_id ?????
+     * @param access_token ???????
      * @param room_share_code
-     * @param effective_time ï¿½Â·ï¿½
-     * @param profit_share_rate ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-     * @param version ï¿½æ±¾
-     * @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+     * @param effective_time ?¡¤?
+     * @param profit_share_rate ????????
+     * @param version ?·Ú
+     * @return ?????????
      * @throws Exception
      */
     public String CreateRqPage(String course_id,String room_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version,Jedis jedis,String appName)throws Exception{
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(access_token);//ï¿½Ã°ï¿½È«Ö¤ï¿½ï¿½ï¿½ï¿½userId
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(access_token);//?????????userId
         RequestEntity reqEntity = new RequestEntity();
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id",userId);//
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
-        String user_head_portrait = userMap.get("avatar_address");//ï¿½Ã»ï¿½Í·ï¿½ï¿½
-        String userName = userMap.get("nick_name");//ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
-        BufferedImage png = null;//ï¿½ï¿½ï¿½Øµï¿½Í¼Æ¬
+        String user_head_portrait = userMap.get("avatar_address");//??????
+        String userName = userMap.get("nick_name");//???????
+        BufferedImage png = null;//???????
 
 
-        if(room_share_code!=null){//ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if(room_share_code!=null){//????????????
             String share_url = String.format(MiscUtils.getConfigByKey("be_distributer_url_pre_fix",appName),room_share_code,room_id,profit_share_rate,effective_time);
-            png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url,profit_share_rate,appName);//ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
+            png = ZXingUtil.createRoomDistributerPng(user_head_portrait,userName,share_url,profit_share_rate,appName);//??????
 
-        }else if(room_id != null){ //ï¿½Ğ¶Ï·ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½
+        }else if(room_id != null){ //?§Ø?????????
 
-            Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedis,true);//ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+            Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedis,true);//?????????id???????
             query.put("user_id",liveRoomMap.get("lecturer_id"));
             Map<String, String> lecturerMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
             String share_url = getLiveRoomShareURL(userId, room_id,jedis,appName);
             String lecturerName = lecturerMap.get("nick_name");
-            png = ZXingUtil.createLivePng(user_head_portrait,userName,lecturerName,share_url,appName);//ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
+            png = ZXingUtil.createLivePng(user_head_portrait,userName,lecturerName,share_url,appName);//??????
 
-        }else if(course_id != null){//ï¿½ï¿½ï¿½ï¿½Î³ï¿½
+        }else if(course_id != null){//????¦Ã?
             Map<String,String> courseMap =  CacheUtils.readCourse(course_id, reqEntity, readCourseOperation, jedis, false);
             String share_url = getCourseShareURL(userId,course_id, courseMap,jedis,appName);
-            png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis(),appName);//ï¿½ï¿½ï¿½ï¿½Í¼Æ¬
+            png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis(),appName);//??????
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();//ioï¿½ï¿½
-        ImageIO.write(png, "png", baos);//Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-        byte[] bytes = baos.toByteArray();//×ªï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();//io??
+        ImageIO.write(png, "png", baos);//§Õ??????
+        byte[] bytes = baos.toByteArray();//????????
         BASE64Encoder encoder = new BASE64Encoder();
-        String png_base64 =  encoder.encodeBuffer(bytes).trim();//×ªï¿½ï¿½ï¿½ï¿½base64ï¿½ï¿½
-        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//É¾ï¿½ï¿½ \r\n
+        String png_base64 =  encoder.encodeBuffer(bytes).trim();//?????base64??
+        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//??? \r\n
         return png_base64;
     }
 
     /**
-     *  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½
+     *  ?????????
      * @param reqEntity
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
     @FunctionName("sendVerificationCode")
     public void sendVerificationCode (RequestEntity reqEntity) throws Exception{
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//ï¿½Ã°ï¿½È«Ö¤ï¿½ï¿½ï¿½ï¿½userId
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//?????????userId
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
-        String phoneNum = map.get("phone");//ï¿½Ö»ï¿½ï¿½ï¿½
+        String phoneNum = map.get("phone");//?????
         Map<String,String> reqMap = new HashMap<>();
         reqMap.put("phone_num",phoneNum);
         reqMap.put("app_name",appName);
         if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
             throw new QNLiveException("130008");
         }
-        //  String ipAdress = map.get("ipAdress");//ipï¿½ï¿½Ö·
-        if(isMobile(phoneNum)){ //Ğ§ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½
+        //  String ipAdress = map.get("ipAdress");//ip???
+        if(isMobile(phoneNum)){ //§¹?????????
             Jedis jedis = jedisUtils.getJedis(appName);
             Map<String,String> userMap = new HashMap<>();
             userMap.put("user_id",userId);
             String userKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_S, userMap);
-            jedis.setex(userKey,5*60,phoneNum);//ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½useridï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ë»ºï¿½æµ±ï¿½ï¿½  //Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-            String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½ Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            jedis.setex(userKey,5*60,phoneNum);//??????????userid????§¹???? ?????›Ì??  //???????
+            String dayKey =  MiscUtils.getKeyOfCachedData(Constants.SEND_MSG_TIME_D, userMap);//?§Ø????? ???????
             if(jedis.exists(dayKey)){
                 Map<String,String> redisMap = JSON.parseObject(jedis.get(dayKey), new TypeReference<Map<String, String>>(){});
                 if(Integer.parseInt(redisMap.get("count"))==5){
-                    throw new QNLiveException("130007");//ï¿½ï¿½ï¿½ï¿½Ì«Æµï¿½ï¿½
+                    throw new QNLiveException("130007");//????????
                 }else{
                     int count = Integer.parseInt(redisMap.get("count")) + 1;
 
@@ -2262,11 +2262,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             86410 - expireTime , "{'timestamp':'"+redisMap.get("timestamp")+"','count':'"+count+"'}");
                 }
             }else{
-                jedis.setex(dayKey,86400,"{'timestamp':'"+System.currentTimeMillis()/1000+"','count':'1'}");//ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½useridï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ë»ºï¿½æµ±ï¿½ï¿½  //Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                jedis.setex(dayKey,86400,"{'timestamp':'"+System.currentTimeMillis()/1000+"','count':'1'}");//??????????userid????§¹???? ?????›Ì??  //???????
             }
 
-            String code = RandomUtil.createRandom(true, 6);   //6Î» ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½
-            String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, userMap);//ï¿½ï¿½ï¿½ë»ºï¿½ï¿½ï¿½ï¿½
+            String code = RandomUtil.createRandom(true, 6);   //6¦Ë ?????????§¹????
+            String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, userMap);//????????
             jedis.setex(codeKey,20*60,code);
 
             Map<String,String> phoneMap = new HashMap<>();
@@ -2274,11 +2274,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             phoneMap.put("user_id",userId);
             String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);
             jedis.setex(phoneKey,20*60,phoneNum);
-            //ï¿½ï¿½ï¿½ï¿½ï¿½qnlive ï¿½ï¿½Ö´ï¿½ï¿½
+            //?????qnlive ?????
             if(appName.equals(Constants.HEADER_APP_NAME)){
-                String message = String.format("ï¿½ï¿½ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½:%sï¿½ï¿½ï¿½ë¼°Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½",code);
+                String message = String.format("????????????:%s?????????????",code);
                 String result = SendMsgUtil.sendMsgCode(phoneNum, message,appName);
-                logger.info("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" + phoneNum + "ï¿½ï¿½ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½" + message + "ï¿½ï¿½ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½ï¿½" + result);
+                logger.info("??????????" + phoneNum + "??????????????" + message + "??????????" + result);
                 if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
                     throw new QNLiveException("130006");
                 }
@@ -2298,7 +2298,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Pattern p = null;
         Matcher m = null;
         boolean b = false;
-        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // ï¿½ï¿½Ö¤ï¿½Ö»ï¿½ï¿½ï¿½
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // ????????
         m = p.matcher(str);
         b = m.matches();
         return b;
@@ -2306,7 +2306,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * ï¿½ï¿½È¡ï¿½Î³ï¿½ï¿½ï¿½Ï¢ï¿½Ğ±ï¿½
+     * ????¦Ã?????§Ò?
      * @param reqEntity
      * @return
      * @throws Exception
@@ -2316,34 +2316,34 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
-        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());//ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-        int userType =  Integer.parseInt(reqMap.get("user_type").toString());//ï¿½ï¿½Ñ¯ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½Ê¦/ï¿½ï¿½ï¿½ï¿½  1ï¿½Ã»ï¿½
-        int direction =  Integer.parseInt(reqMap.get("direction").toString());//ï¿½ï¿½ï¿½ï¿½  0ï¿½ï¿½  1ï¿½ï¿½ Ä¬ï¿½ï¿½Îª1
-        String course_id = reqMap.get("course_id").toString();//ï¿½Î³ï¿½id
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//ï¿½ï¿½È¡ï¿½ï¿½ï¿½æ·½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());//?????????
+        int userType =  Integer.parseInt(reqMap.get("user_type").toString());//?????????? 0???/????  1???
+        int direction =  Integer.parseInt(reqMap.get("direction").toString());//????  0??  1?? ????1
+        String course_id = reqMap.get("course_id").toString();//?¦Ã?id
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//??????œ]??????
         Map<String, Object> map = new HashMap<>();//map
-        map.put(Constants.CACHED_KEY_COURSE_FIELD,course_id);//ï¿½ï¿½ï¿½ï¿½mapï¿½ï¿½
-        String messageListKey = null;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½key
+        map.put(Constants.CACHED_KEY_COURSE_FIELD,course_id);//????map??
+        String messageListKey = null;//??????????key
         Map<String, Object> queryMap = new HashMap<>();
         queryMap.put("course_id",course_id);
-        queryMap.put("page_count", pageCount);//Òªï¿½ï¿½Ñ¯ï¿½Ä¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½
-        queryMap.put("user_type", userType);//ï¿½ï¿½Ñ¯ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
-        queryMap.put("direction", direction);//ï¿½ï¿½ï¿½ï¿½
-        if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){ //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Î»ï¿½ï¿½
+        queryMap.put("page_count", pageCount);//????????????
+        queryMap.put("user_type", userType);//??????????
+        queryMap.put("direction", direction);//????
+        if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){ //???????????¦Ë??
             queryMap.put("message_imid", reqMap.get("message_imid").toString());
         }
         Map<String,String> courseMap = jedis.hgetAll(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map));
-        if(courseMap.get("status").equals("2")){ //ï¿½ï¿½Ñ¯ï¿½ï¿½Ç°ï¿½Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+        if(courseMap.get("status").equals("2")){ //???????¦Ã???????
             List<Map<String,Object>> messageList = commonModuleServer.findCourseMessageListByComm(queryMap);
             if(! CollectionUtils.isEmpty(messageList)){
                 for(Map<String,Object> messageMap : messageList){
-                    if(! MiscUtils.isEmpty(messageMap.get("message")))//ï¿½ï¿½Ï¢
+                    if(! MiscUtils.isEmpty(messageMap.get("message")))//???
                         messageMap.put("message",MiscUtils.RecoveryEmoji(messageMap.get("message").toString()));
 
-                    if(! MiscUtils.isEmpty(messageMap.get("message_question")))//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                    if(! MiscUtils.isEmpty(messageMap.get("message_question")))//???? ????
                         messageMap.put("message_question",MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
 
-                    if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                    if(!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//???? ????
                         messageMap.put("creator_nick_name",MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
                 }
 
@@ -2357,55 +2357,55 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 resultMap.put("message_list", messageList);
             }
-            if(queryMap.containsKey("message_imid")){//ï¿½ï¿½ï¿½ï¿½ï¿½imid
+            if(queryMap.containsKey("message_imid")){//?????imid
                 resultMap.put("this_message",commonModuleServer.findCourseMessageByComm(queryMap));
             }
             resultMap.put("message_count", commonModuleServer.findCourseMessageSum(queryMap));
             return resultMap;
-        }else{ //TODO ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
-            //ï¿½ï¿½Ç°ï¿½Î³ï¿½Ã»ï¿½Ğ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó²ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
-            if(userType == 0){//ï¿½ï¿½Ñ¯ï¿½ï¿½Ê¦
+        }else{ //TODO ???????
+            //????¦Ã???§ß??? ?????????????
+            if(userType == 0){//??????
                 if(reqMap.get("message_type") != null && reqMap.get("message_type").toString().equals("0")){
                     messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
                 }else{
                     messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
                 }
-            }else if(userType == 1){//ï¿½ï¿½Ñ¯ï¿½Ã»ï¿½
+            }else if(userType == 1){//??????
                 messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
             }
-            long message_sum = jedis.zcard(messageListKey);//ï¿½Ü¹ï¿½ï¿½Ğ¶ï¿½ï¿½Ù¸ï¿½ï¿½ï¿½ï¿½ï¿½
+            long message_sum = jedis.zcard(messageListKey);//????§Ø????????
             resultMap.put("message_count", message_sum);
-            //ï¿½ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½
-            //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Â±ï¿½
-            long startIndex = 0; //ï¿½ï¿½Ê¼ï¿½Â±ï¿½
-            long endIndex = -1;   //ï¿½ï¿½ï¿½ï¿½ï¿½Â±ï¿½
-            Set<String> messageImIdList = null;//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-            //ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ -> 1...ï¿½ï¿½
-            if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid ï¿½ï¿½ï¿½ï¿½
+            //?????§Õ?????????????§Ö?????
+            //??????¡À?
+            long startIndex = 0; //????¡À?
+            long endIndex = -1;   //?????¡À?
+            Set<String> messageImIdList = null;//?????????
+            //???????????? 0?? -> 1...??
+            if(reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())){   //message_imid ????
 
-                long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid ï¿½Ú»ï¿½ï¿½ï¿½zsetï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½
-                if(direction==0){ //ï¿½ï¿½È¡ï¿½Èµï¿½Ç°messageï¿½Éµï¿½ï¿½ï¿½Ï¢
+                long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid ?????zset?§Ö?????
+                if(direction==0){ //???????message??????
                     endIndex = endRank - 1;
                     if(endIndex >= 0){
                         startIndex = endIndex - pageCount + 1;
                         if(startIndex < 0){
                             startIndex = 0;
                         }
-                        messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
+                        messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//???????
                     }else{
-                        messageImIdList = null;//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
+                        messageImIdList = null;//???????
                     }
-                }else{//ï¿½ï¿½È¡ï¿½Èµï¿½Ç°messageï¿½ï¿½ï¿½ï¿½Ï¢
+                }else{//???????message?????
                     startIndex = endRank + 1;
-                    endIndex = startIndex + pageCount - 1; //ï¿½ï¿½Ï¢Î»ï¿½ï¿½
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
+                    endIndex = startIndex + pageCount - 1; //???¦Ë??
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//???????
                 }
 
                 String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, queryMap);
 
                 if(jedis.exists(messageKey)){
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
-                    //ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç³ï¿½
+                    //??????????????
                     if(!MiscUtils.isEmpty(messageMap)){
                         if(messageMap.get("creator_id") != null){
                             Map<String,Object> innerMap = new HashMap<>();
@@ -2431,31 +2431,31 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
 
-            }else{// ï¿½ï¿½ï¿½Ã»ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½message_id
-                //ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½Âµï¿½ï¿½ï¿½Ï¢ ï¿½ï¿½ï¿½Ç¾Íµï¿½ï¿½ï¿½Ï¢
-                if(direction == 0){//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ê¼
+            }else{// ?????§Õ?????message_id
+                //?§Ø?????????????? ?????????
+                if(direction == 0){//?????????????
                     startIndex = 0;
                     endIndex = pageCount-1;
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
-                }else{//ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ê¼
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//???????
+                }else{//?????????????
                     endIndex = -1;
                     startIndex = message_sum - pageCount;
                     if(startIndex < 0){
                         startIndex = 0;
                     }
-                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//???????
                 }
             }
 
             if(! CollectionUtils.isEmpty(messageImIdList)){
-                //ï¿½ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                //?????§Õ???????????????
                 List<Map<String,String>> messageListCache = new ArrayList<>();
                 for(String messageImId : messageImIdList){
                     map.put(Constants.FIELD_MESSAGE_ID, messageImId);
                     String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
                     Map<String,String> messageMap = jedis.hgetAll(messageKey);
                     messageMap.put("message_pos", startIndex+"");
-                    //ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç³ï¿½
+                    //??????????????
                     if(MiscUtils.isEmpty(messageMap)){
                         continue;
                     }
@@ -2489,7 +2489,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½ï¿½È¡ï¿½Î³ï¿½ï¿½ï¿½Ï¢
+     * ????¦Ã????
      * @param reqEntity
      * @return
      * @throws Exception
@@ -2501,25 +2501,25 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
-        String courseId = reqMap.get("course_id").toString();//ï¿½Î³ï¿½id
+        String courseId = reqMap.get("course_id").toString();//?¦Ã?id
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        //0.Ğ£ï¿½ï¿½Ã¿Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ú¸Ã½ï¿½Ê¦
+        //0.§µ???¦Ã???????????
         Map<String,String> courseMap = jedis.hgetAll(courseKey);
 
         String courseOwner = courseMap.get("lecturer_id");
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//ï¿½ï¿½ï¿½İ°ï¿½È«Ö¤ï¿½ï¿½ï¿½È¡userId
-        if(courseOwner.equals(userId)){//ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ê¦
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¦
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//???????????userId
+        if(courseOwner.equals(userId)){//?§Ø?????????
+            //????????
             resultMap = getCourseInfoByLecture(reqEntity);
             resultMap.put("user_type","0");
-        }else{//Ñ§ï¿½ï¿½
+        }else{//???
             resultMap = getCourseInfoByUser(reqEntity);
-            resultMap.put("user_type","1");//ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
+            resultMap.put("user_type","1");//???????
             Map<String,Object> roomMap = new HashMap<>();
-            roomMap.put("room_id",courseMap.get("room_id"));//ï¿½Î³ï¿½Ö±ï¿½ï¿½ï¿½ï¿½
-            roomMap.put("user_id",userId);//ï¿½Ã»ï¿½id
+            roomMap.put("room_id",courseMap.get("room_id"));//?¦Ã??????
+            roomMap.put("user_id",userId);//???id
             Map<String, Object> fansMap = commonModuleServer.findFansByUserIdAndRoomId(roomMap);
             if (CollectionUtils.isEmpty(fansMap)) {
                 resultMap.put("follow_status", "0");
@@ -2529,7 +2529,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         if(!resultMap.get("status").equals("2")){
-            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//ï¿½ï¿½ï¿½ï¿½Î³Ì¿ï¿½Ê¼Ê±ï¿½ï¿½Ğ¡ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+            if(Long.parseLong(resultMap.get("start_time").toString())<=System.currentTimeMillis()){//????¦Ã??????§³??????????
                 resultMap.put("status",4);
             }
         }
@@ -2551,14 +2551,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
-        //0.Ğ£ï¿½ï¿½Ã¿Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ú¸Ã½ï¿½Ê¦
+        //0.§µ???¦Ã???????????
         String courseOwner = jedis.hget(courseKey, "lecturer_id");
         if(courseOwner == null || !userId.equals(courseOwner)){
             throw new QNLiveException("100013");
         }
 
         Map<String,String> courseMap = new HashMap<>();
-        //1.ï¿½È¼ï¿½ï¿½Ã¿Î³ï¿½ï¿½Ç·ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½ï¿½
+        //1.?????¦Ã???????????
         if(jedis.exists(courseKey)){
             courseMap = jedis.hgetAll(courseKey);
             JSONArray pptList = null;
@@ -2576,7 +2576,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String audioJsonStringKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
             Set<String> audioIdList = jedis.zrange(audioListKey, 0 , -1);
 
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zsortï¿½Ğ±ï¿½ï¿½ï¿½ï¿½zsortï¿½Ğ±ï¿½ï¿½Ğ¶ï¿½È¡
+            //???????zsort?§Ò????zsort?§Ò??§Ø??
             if(audioIdList != null && audioIdList.size() > 0){
                 JedisBatchCallback callBack = (JedisBatchCallback)jedis;
                 callBack.invoke(new JedisBatchOperation(){
@@ -2600,7 +2600,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 resultMap.put("audio_list", audioObjectMapList);
 
-                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½jsonï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµjsonï¿½Ö·ï¿½ï¿½ï¿½
+                //???????????????json??????????????????json?????
             } else if(jedis.exists(audioJsonStringKey)){
                 resultMap.put("audio_list", JSONObject.parse(jedis.get(audioJsonStringKey)));
             }
@@ -2611,7 +2611,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
         }else{
-            //2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½
+            //2.???????????§µ??????????
             Map<String,Object> courseInfoMap = commonModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
             if(courseInfoMap == null){
                 throw new QNLiveException("100004");
@@ -2619,10 +2619,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             courseMap = new HashMap<>();
             MiscUtils.converObjectMapToStringMap(courseInfoMap,courseMap);
 
-            //ï¿½ï¿½Ñ¯ï¿½Î³ï¿½PPTï¿½Ğ±ï¿½
+            //????¦Ã?PPT?§Ò?
             List<Map<String,Object>> pptList = commonModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
 
-            //ï¿½ï¿½Ñ¯ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
+            //????¦Ã??????§Ò?
             List<Map<String,Object>> audioList = commonModuleServer.findAudioListByCourseId(reqMap.get("course_id").toString());
 
             if(! CollectionUtils.isEmpty(pptList)){
@@ -2646,7 +2646,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         try {
-            //ï¿½ï¿½ï¿½Ñ§ï¿½ï¿½ï¿½Ï´Î¼ï¿½ï¿½ï¿½Î³Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³Ì²ï¿½Îªï¿½Õ£ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½Ï´Î¿Î³ï¿½
+            //????????¦Ì???¦Ã?????????¦Ã?????????????¦Ï¦Ã?
             Map<String,String> queryParam = new HashMap<>();
             queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
             String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, queryParam);
@@ -2659,14 +2659,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 IMMsgUtil.delGroupMember(imCourseId, loginInfo.get("m_user_id"), loginInfo.get("m_user_id"));
             }
 
-            //ï¿½ï¿½ï¿½ï¿½ï¿½Â¿Î³ï¿½IMÈºï¿½é£¬ï¿½ï¿½ï¿½Ò½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½Â¼ï¿½ë»ºï¿½ï¿½ï¿½ï¿½
+            //??????¦Ã?IM??ï…?????????????????????
             IMMsgUtil.joinGroup(courseMap.get("im_course_id"), loginInfo.get("m_user_id"), loginInfo.get("m_user_id"));
             jedis.set(courseIMKey, courseMap.get("im_course_id"));
         }catch (Exception e){
-            //TODO ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            //TODO ?????????
         }
 
-        //ï¿½ï¿½ï¿½Ó·ï¿½ï¿½Ø¿Î³ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Ï¢
+        //???????¦Ã???????
         MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
         resultMap.put("student_num",courseMap.get("student_num"));
         resultMap.put("start_time",courseMap.get("start_time"));
@@ -2691,7 +2691,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
         Map<String, String> courseMap = new HashMap<>();
-        //1.ï¿½È¼ï¿½ï¿½Ã¿Î³ï¿½ï¿½Ç·ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½ï¿½
+        //1.?????¦Ã???????????
         if (jedis.exists(courseKey)) {
             courseMap = jedis.hgetAll(courseKey);
             JSONArray pptList = null;
@@ -2708,7 +2708,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String audioJsonStringKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_AUDIOS_JSON_STRING, map);
             Set<String> audioIdList = jedis.zrange(audioListKey, 0, -1);
 
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zsortï¿½Ğ±ï¿½ï¿½ï¿½ï¿½zsortï¿½Ğ±ï¿½ï¿½Ğ¶ï¿½È¡
+            //???????zsort?§Ò????zsort?§Ò??§Ø??
             if (audioIdList != null && audioIdList.size() > 0) {
                 JedisBatchCallback callBack = (JedisBatchCallback)jedis;
                 callBack.invoke(new JedisBatchOperation() {
@@ -2732,7 +2732,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 resultMap.put("audio_list", audioObjectMapList);
 
-                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½jsonï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµjsonï¿½Ö·ï¿½ï¿½ï¿½
+                //???????????????json??????????????????json?????
             } else if (jedis.exists(audioJsonStringKey)) {
                 resultMap.put("audio_list", JSONObject.parse(jedis.get(audioJsonStringKey)));
             }
@@ -2743,9 +2743,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("im_course_id", jedis.hget(courseKey, "im_course_id"));
 
-            //ï¿½Ğ¶Ï¸Ã¿Î³ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÖ±ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½é¿ªï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ú£ï¿½
-            //ï¿½ï¿½ï¿½éµ±Ç°ï¿½ï¿½Ñ¯ï¿½Ç·ï¿½ï¿½ï¿½Úµï¿½Ç°Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½Ã»ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mapï¿½Ğ£ï¿½
-            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ò½«¸ï¿½Ñ§Ô±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mapï¿½Ğ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş¸Ä¿Î³Ì»ï¿½ï¿½ï¿½real_student_numÊµï¿½Ê¿Î³ï¿½ï¿½ï¿½ï¿½ï¿½(Ä¬ï¿½Ï¿Î³ï¿½ï¿½ï¿½ï¿½ï¿½)
+            //?§Ø??¦Ã?????????????§µ???????????????????????????????
+            //???ùn??????????????????????????????????????????map?§µ?
+            //????????????????????????map?§µ????????¦Ã????real_student_num???¦Ã?????(???¦Ã?????)
             String realStudentNum = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_REAL_STUDENT_NUM, map);
             boolean hasStudent = jedis.hexists(realStudentNum, userId);
             if (hasStudent == false) {
@@ -2761,15 +2761,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
         } else {
-            //2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½İ¿ï¿½
+            //2.???????????§µ??????????
             Map<String, Object> courseInfoMap = commonModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
             MiscUtils.converObjectMapToStringMap(courseInfoMap, courseMap);
             if (courseInfoMap == null) {
                 throw new QNLiveException("100004");
             }
-            //ï¿½ï¿½Ñ¯ï¿½Î³ï¿½PPTï¿½Ğ±ï¿½
+            //????¦Ã?PPT?§Ò?
             List<Map<String, Object>> pptList = commonModuleServer.findPPTListByCourseId(reqMap.get("course_id").toString());
-            //ï¿½ï¿½Ñ¯ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
+            //????¦Ã??????§Ò?
             List<Map<String, Object>> audioList = commonModuleServer.findAudioListByCourseId(reqMap.get("course_id").toString());
 
             if (!CollectionUtils.isEmpty(pptList)) {
@@ -2784,9 +2784,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         }
 
-        //4.ï¿½ï¿½Ñ§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿Î³Ìµï¿½IMÈºï¿½ï¿½
+        //4.??????????¦Ã??IM???
         try {
-            //ï¿½ï¿½ï¿½Ñ§ï¿½ï¿½ï¿½Ï´Î¼ï¿½ï¿½ï¿½Î³Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³Ì²ï¿½Îªï¿½Õ£ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½Ï´Î¿Î³ï¿½
+            //????????¦Ì???¦Ã?????????¦Ã?????????????¦Ï¦Ã?
             Map<String,Object> studentUserMap = commonModuleServer.findLoginInfoByUserId(userId);
             map.put(Constants.CACHED_KEY_USER_FIELD, userId);
             String courseIMKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_LAST_JOIN_COURSE_IM_INFO, map);
@@ -2795,11 +2795,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 IMMsgUtil.delGroupMember(imCourseId, studentUserMap.get("m_user_id").toString(), studentUserMap.get("m_user_id").toString());
             }
 
-            //ï¿½ï¿½ï¿½ï¿½ï¿½Â¿Î³ï¿½IMÈºï¿½é£¬ï¿½ï¿½ï¿½Ò½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½Â¼ï¿½ë»ºï¿½ï¿½ï¿½ï¿½
+            //??????¦Ã?IM??ï…?????????????????????
             IMMsgUtil.joinGroup(courseMap.get("im_course_id"), studentUserMap.get("m_user_id").toString(),studentUserMap.get("m_user_id").toString());
             jedis.set(courseIMKey, courseMap.get("im_course_id"));
         }catch (Exception e){
-            //TODO ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            //TODO ?????????
         }
 
         map.clear();
@@ -2812,7 +2812,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("ban_status", "1");
         }
 
-        //ï¿½ï¿½ï¿½Ó·ï¿½ï¿½Ø¿Î³ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Ï¢
+        //???????¦Ã???????
         resultMap.put("student_num",courseMap.get("student_num"));
         resultMap.put("start_time",courseMap.get("start_time"));
         resultMap.put("status",courseMap.get("status"));
@@ -2835,23 +2835,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * TODO ï¿½Ğ¸ï¿½ï¿½ÃµÄ·ï¿½ï¿½ï¿½ ï¿½Ôºï¿½ï¿½Ø¹ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ĞºÏ²ï¿½
-     * ï¿½ï¿½È¡ï¿½ï¿½Ê¦ï¿½ï¿½Î¬ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½
+     * TODO ?§Ú??????? ??????????????§Ü??
+     * ???????????/?????????
      */
     public Map getQrCode(String lectureId, String userId, Jedis jedis,String appName) {
         Map<String, String> query = new HashMap();
         query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lectureId);
-        //1.ï¿½Ğ¶Ï½ï¿½Ê¦ï¿½Ç·ï¿½ï¿½Ğ¹ï¿½ï¿½Úºï¿½ ï¿½Ğ¾ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½
+        //1.?§Ø???????§Û???? ?§à???????
         String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, query);
-        if (jedis.exists(serviceNoKey)) {//ï¿½Ğ¶Ïµï¿½Ç°ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (jedis.exists(serviceNoKey)) {//?§Ø???????????????
             query.put("qr_code_url",jedis.hgetAll(serviceNoKey).get("qr_code"));
             query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_lecturer",appName));
             query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message",appName));
             query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_ad",appName));
             return query;
-        } else {//2.ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½Ğ¹ï¿½×¢ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½Úºï¿½
+        } else {//2.?§Ø?????§Û??????????
             Map<String,Object> map = commonModuleServer.findLoginInfoByUserId(userId);
-            if(Integer.parseInt(map.get("subscribe").toString())==0){//Ã»ï¿½Ğ¹ï¿½×¢
+            if(Integer.parseInt(map.get("subscribe").toString())==0){//??§Û??
                 query.put("qr_code_url", MiscUtils.getConfigByKey("weixin_qr_code",appName));
                 query.put("qr_code_title", MiscUtils.getConfigByKey("weixin_qr_code_title_qingning",appName));
                 query.put("qr_code_message", MiscUtils.getConfigByKey("weixin_qr_code_message",appName));
@@ -2864,7 +2864,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * ï¿½Ğ¶ï¿½ï¿½Ö»ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
+     * ?§Ø?????????????
      * @param reqEntity
      * @throws Exception
      */
@@ -2873,7 +2873,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public void isphone (RequestEntity reqEntity) throws Exception{
         Map<String,String> map = (Map<String, String>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
-        String phoneNum = map.get("phone_num");//ï¿½Ö»ï¿½ï¿½ï¿½
+        String phoneNum = map.get("phone_num");//?????
         if(!isMobile(phoneNum)){
             throw new QNLiveException("130001");
         }
@@ -2888,7 +2888,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½
+     * ????/????
      * @param reqEntity
      * @throws Exception
      */
@@ -2899,35 +2899,35 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
         reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//ï¿½Ã°ï¿½È«Ö¤ï¿½ï¿½ï¿½ï¿½userId
-        String search_text = map.get("search_text").toString();//ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//?????????userId
+        String search_text = map.get("search_text").toString();//???????
         if(search_text != null || !search_text.equals("")){
-            search_text = "%"+search_text+"%";//Æ´ï¿½Ó°Ù·Öºï¿½ ï¿½ï¿½ï¿½Ğ°ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¯
+            search_text = "%"+search_text+"%";//?????? ???§Ñ??????
             map.put("search_text",search_text);
         }
         Integer page_num = Integer.valueOf(map.get("page_num").toString());
         map.put("page_num",page_num);
         Integer page_count = Integer.valueOf(map.get("page_count").toString());
         map.put("page_count",page_count);
-        int search_type = Integer.valueOf(map.get("search_type").toString()); //ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½ 1Ö±ï¿½ï¿½ï¿½ï¿½ 2ï¿½Î³ï¿½
+        int search_type = Integer.valueOf(map.get("search_type").toString()); //??????? 0???? 1????? 2?¦Ã?
         Jedis jedis = jedisUtils.getJedis(appName);
         map.put("appName",appName);
 
-        //ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ñ¯Ö±ï¿½ï¿½ï¿½ï¿½
+        //??????? ???? ????????
         if(search_type ==0 || search_type == 1){
             List<Map<String, Object>> liveRoomBySearch = commonModuleServer.findLiveRoomBySearch(map);
             if(! MiscUtils.isEmpty(liveRoomBySearch)){
                 Map<String,Object> query = new HashMap<String,Object>();
                 query.put(Constants.CACHED_KEY_USER_FIELD, userId);
-                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½ï¿½Ç°ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ©ï¿½Î³ï¿½
-                if(!jedis.exists(key)){//ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½key
+                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, query);//?????????????????????§»?¦Ã?
+                if(!jedis.exists(key)){//?§Ø???????key
                     Map<String,Object> queryParam = new HashMap<String,Object>();
                     queryParam.put("user_id", userId);
                     RequestEntity queryOperation = this.generateRequestEntity(null,null, null, queryParam);
                     CacheUtils.readUser(userId, queryOperation, readUserOperation, jedis);
                 }
                 for(Map<String, Object> liveRoom : liveRoomBySearch){
-                    if(jedis.sismember(key, liveRoom.get("room_id").toString())){//ï¿½Ğ¶Ïµï¿½Ç°ï¿½Ã»ï¿½ï¿½Ç·ï¿½ï¿½Ğ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
+                    if(jedis.sismember(key, liveRoom.get("room_id").toString())){//?§Ø??????????§Ş???????¦Ã?
                         liveRoom.put("fens", "1");
                     } else {
                         liveRoom.put("fens", "0");
@@ -2937,9 +2937,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }
         }
 
-        //ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ñ¯ï¿½Î³ï¿½
+        //??????? ???? ????¦Ã?
         if(search_type ==0 || search_type == 2){
-            List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½
+            List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//???????
             resultMap.put("course_list",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
         }
         return resultMap;
@@ -2947,23 +2947,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     private List<Map<String, Object>> setStudentAndLecturerNickName(List<Map<String,Object>> courseBySearch,String userId,Jedis jedis,String methodName) throws Exception {
-        long currentTime = System.currentTimeMillis();//ï¿½ï¿½Ç°Ê±ï¿½ï¿½
+        long currentTime = System.currentTimeMillis();//??????
 
         if(! MiscUtils.isEmpty(courseBySearch)){
             Map<String,Object> query = new HashMap<String,Object>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
             query.put(Constants.CACHED_KEY_USER_FIELD, userId);
-            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¯ï¿½ï¿½Ç°ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ©ï¿½Î³ï¿½
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//?????????????????????§»?¦Ã?
             for(Map<String, Object> course : courseBySearch ){
                 if("recommendCourse".equals(methodName)){
                     MiscUtils.courseTranferState(currentTime,course,Long.valueOf(course.get("start_time").toString()));
                 }else{
                     Date date = sdf.parse(course.get("start_time").toString());
-                    MiscUtils.courseTranferState(currentTime,course,date.getTime());//ï¿½ï¿½ï¿½Ğ¿Î³ï¿½Ê±ï¿½ï¿½ï¿½Ğ¶ï¿½,ï¿½ï¿½ï¿½ï¿½Î³Ì¿ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½Úµï¿½Ç°Ê±ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ½ï¿½ï¿½ï¿½ï¿½Ä¿Î³ï¿½  ï¿½ï¿½Ã´ï¿½Í¸ï¿½ï¿½Ä¿Î³Ìµï¿½×´Ì¬ ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
+                    MiscUtils.courseTranferState(currentTime,course,date.getTime());//???§á¦Ã?????§Ø?,????¦Ã?????????????? ?????????????¦Ã?  ????????¦Ã???? ??????????
                 }
 
 
-                if(jedis.sismember(key, course.get("course_id").toString())){//ï¿½Ğ¶Ïµï¿½Ç°ï¿½Ã»ï¿½ï¿½Ç·ï¿½ï¿½Ğ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
+                if(jedis.sismember(key, course.get("course_id").toString())){//?§Ø??????????§Ş???????¦Ã?
                     course.put("student", "Y");
                 } else {
                     course.put("student", "N");
@@ -2982,7 +2982,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * ï¿½Æ¼ï¿½
+     * ???
      * @param reqEntity
      * @throws Exception
      */
@@ -2991,19 +2991,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> recommendCourse (RequestEntity reqEntity) throws Exception{
         String appName = reqEntity.getAppName();
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//ï¿½Ã°ï¿½È«Ö¤ï¿½ï¿½ï¿½ï¿½userId
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//?????????userId
         Integer page_num = Integer.valueOf(map.get("page_num").toString());
         map.put("page_num",page_num);
         Integer page_count = Integer.valueOf(map.get("page_count").toString());
         map.put("page_count",page_count);
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        int select_type = Integer.parseInt(map.get("select_type").toString());//ï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Î³Ì»ï¿½Ò»ï¿½ï¿½ 2ï¿½Æ¼ï¿½ï¿½Î³ï¿½ï¿½ï¿½ï¿½ï¿½
+        int select_type = Integer.parseInt(map.get("select_type").toString());//???????1??????¦Ã????? 2????¦Ã?????
         Jedis jedis = jedisUtils.getJedis(appName);
 
         if(select_type == 2 || select_type == 1 ){
             List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
-            if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//ï¿½é¿´ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Î³ï¿½
-                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(appName);//ï¿½ï¿½Ñ¯ï¿½Æ¼ï¿½ï¿½Î³ï¿½
+            if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//???????????¦Ã?
+                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(appName);//???????¦Ã?
                 jedis.set(Constants.RECOMMEND_COURSE_NUM,""+recommendCourseList.size());
                 for(Map<String, Object> recommendCourse : recommendCourseList){
                     jedis.zadd(Constants.CACHED_KEY_RECOMMEND_COURSE, Integer.valueOf( recommendCourse.get("recommend_seat").toString()),recommendCourse.get("course_id").toString());
@@ -3014,24 +3014,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }
             if(select_type == 1){
-                if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //ï¿½È½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Î³Ìµï¿½ï¿½ï¿½ï¿½Öµ  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Í¹ï¿½ï¿½ï¿½
+                if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //????????????¦Ã??????  ??????????????
                     page_num = 0;
                     map.put("page_num",page_num);
                 }
             }
-            if(jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//ï¿½ï¿½ï¿½ï¿½
+            if(jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//????
                 int startIndex = page_num;
                 int endIndex = page_num + page_count-1;
-                Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//ï¿½ï¿½È¡ï¿½Æ¼ï¿½ï¿½Î³ï¿½
-                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//ï¿½ï¿½ï¿½ï¿½Ç»ï¿½Ò»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ñ¯ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//???????¦Ã?
+                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//????????? ???? ???????????
                     startIndex = 0;
                     endIndex = page_count - recommendCourseIdSet.size() - 1;
                     recommendCourseIdSet.addAll(jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex));
                 }
                 Map<String,String> queryParam = new HashMap<String,String>();
-                for(String courseId : recommendCourseIdSet){//Ñ­ï¿½ï¿½ï¿½ï¿½È¡ï¿½Î³ï¿½ï¿½ï¿½Ï¢
+                for(String courseId : recommendCourseIdSet){//???????¦Ã????
                     queryParam.put("course_id", courseId);
-                    Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//ï¿½Ó»ï¿½ï¿½ï¿½ï¿½Ğ¶ï¿½È¡ï¿½Î³ï¿½ï¿½ï¿½Ï¢
+                    Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//??????§Ø???¦Ã????
                     courseByRecommendList.add(courseInfoMap);
                 }
             }
@@ -3045,7 +3045,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+     * ???????
      * @param reqEntity
      * @throws Exception
      */
@@ -3056,13 +3056,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         List<Map<String, Object>> classifyList = new ArrayList<>();
-        if(jedis.exists(Constants.CACHED_KEY_CLASSIFY_ALL)){ //ï¿½Ğ¶Ïµï¿½Ç°ï¿½Ç·ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½key ï¿½ï¿½ï¿½ï¿½
-            Set<String> classifyIdSet = jedis.zrange(Constants.CACHED_KEY_CLASSIFY_ALL, 0, -1);//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµ
+        if(jedis.exists(Constants.CACHED_KEY_CLASSIFY_ALL)){ //?§Ø???????§İ???key ????
+            Set<String> classifyIdSet = jedis.zrange(Constants.CACHED_KEY_CLASSIFY_ALL, 0, -1);//????????
             Map<String,Object> map = new HashMap<>();
             for(String classify_id : classifyIdSet){
                 map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
-                String classifyInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map);//ï¿½ï¿½ï¿½É²ï¿½ï¿½Ò·ï¿½ï¿½ï¿½ï¿½key
-                if(jedis.exists(classifyInfoKey)){//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+                String classifyInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map);//???????????key
+                if(jedis.exists(classifyInfoKey)){//???????
                     Map<String, String> classifyInfo = jedis.hgetAll(classifyInfoKey);
                     Map<String,Object> classify_info = new HashMap<>();
                     classify_info.put("classify_id",classifyInfo.get("classify_id"));
@@ -3072,9 +3072,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     classifyList.add(classify_info);
                 }
             }
-        }else{ //Ã»ï¿½ï¿½
+        }else{ //???
             String likeAppNmae = "%"+appName+"%";
-            classifyList = commonModuleServer.findClassifyInfoByAppName(likeAppNmae);//ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½
+            classifyList = commonModuleServer.findClassifyInfoByAppName(likeAppNmae);//???????
             Map<String,String> classify_info = new HashMap<>();
             for(Map<String, Object>classify : classifyList){
                 jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
@@ -3093,14 +3093,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            Map<String,Object> map = new HashMap<>();
 //            map.put("appName",appName);
 //            map.put("classify_id",classify_id);
-//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//ï¿½ï¿½ï¿½ï¿½
-//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//ï¿½ï¿½ï¿½ï¿½
+//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//????
+//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//????
 //        }
 //
 //        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
 //        if(!MiscUtils.isEmpty(lecturerSet)){
 //            for(String lecturerId : lecturerSet) {
-//                //É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ĞµÄ¾ÉµÄ¿Î³ï¿½ï¿½Ğ±ï¿½ï¿½Î³ï¿½ï¿½ï¿½Ï¢Êµï¿½ï¿½
+//                //????????§Ö???¦Ã??§Ò??¦Ã???????
 //                Map<String, Object> map = new HashMap<>();
 //                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 //                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
@@ -3111,8 +3111,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            }
 //        }
 //
-//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);//ï¿½ï¿½ï¿½ï¿½
-//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);//ï¿½ï¿½ï¿½ï¿½
+//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);//????
+//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);//????
 //
 //        for(Map<String, Object> classify :classifyList ){
 //            String classify_id = classify.get("classify_id").toString();
@@ -3125,7 +3125,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                if(course.get("status").equals("2") || course.get("status").equals("1")){
 //                    String course_id = course.get("course_id").toString();
 //                    String lecturer_id = course.get("lecturer_id").toString();
-//                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//ï¿½Î³ï¿½id
+//                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//?¦Ã?id
 //                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
 //                    map.put("course_id",course_id);
 //                    String courseClassifyIdKey = "";
@@ -3134,20 +3134,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                    Long time = 0L ;
 //                    if(course.get("status").equals("2")){
 //                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
-////                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//ï¿½ï¿½ï¿½ï¿½
+////                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//????
 ////                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
 //                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
 //
 //                    }else{
 //                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-////                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//ï¿½ï¿½ï¿½ï¿½
+////                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
 ////                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
 //                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
 //
 //                    }
 ////                    if(jedis.zrank(courseClassifyIdKey,course_id) ==  null ){
 ////
-////                        map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);//ï¿½Î³ï¿½id
+////                        map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);//?¦Ã?id
 //
 //                    String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
 //                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
@@ -3165,15 +3165,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 ////                            }
 //                    }else{
 //
-////                        jedis.zadd(courseClassifyIdKey, lpos,course_id);//ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-////                        jedis.zadd(courseLectureKey, lpos,course_id);//ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+////                        jedis.zadd(courseClassifyIdKey, lpos,course_id);//???????????
+////                        jedis.zadd(courseLectureKey, lpos,course_id);//???????????
 //                        jedis.zadd(courseListKey, lpos,course_id);
 //                    }
 //
 //                }
 ////                }else if(course.get("status").equals("5")){
-////                    String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//ï¿½ï¿½È¡ï¿½Î³ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ğµï¿½key
-////                    jedis.hset(coursekey,"status","5");//ï¿½Ñ¿Î³Ì»ï¿½ï¿½ï¿½ï¿½Ğµï¿½×´Ì¬ï¿½ï¿½Îªï¿½ï¿½É¾ï¿½ï¿½
+////                    String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//????¦Ã???????§Ö?key
+////                    jedis.hset(coursekey,"status","5");//??¦Ã?????§Ö???????????
 ////                }
 //
 //
@@ -3229,14 +3229,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 ////            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
 ////        }
 
-        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-        List<Map<String, Object>> resultClassifyList = new ArrayList<>();//ï¿½ï¿½ï¿½Ø½ï¿½ï¿½
-        Map<String, Object> ortherClassify = new HashMap<>();//ï¿½ï¿½ï¿½ï¿½
+        //????????
+        List<Map<String, Object>> resultClassifyList = new ArrayList<>();//??????
+        Map<String, Object> ortherClassify = new HashMap<>();//????
         for(Map<String, Object>classify : classifyList){
-            if (!classify.get("classify_id").toString().equals("9")) {//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            if (!classify.get("classify_id").toString().equals("9")) {//????????
                 resultClassifyList.add(classify);
             }else if(classify.get("classify_id").toString().equals("9")){
-                ortherClassify.putAll(classify);//ï¿½ï¿½ï¿½ï¿½
+                ortherClassify.putAll(classify);//????
             }
         }
 
@@ -3254,7 +3254,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * ï¿½ï¿½ï¿½Î»
+     * ???¦Ë
      * @param reqEntity
      * @throws Exception
      */
@@ -3262,19 +3262,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("banner")
     public Map<String, Object> banner (RequestEntity reqEntity) throws Exception{
         Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//ï¿½Ã°ï¿½È«Ö¤ï¿½ï¿½ï¿½ï¿½userId
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//?????????userId
         String appName = reqEntity.getAppName();
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Jedis jedis = jedisUtils.getJedis(appName);
-        //<editor-fold desc="ï¿½ï¿½ï¿½">
+        //<editor-fold desc="???">
         List<Map<String, Object>> bannerInfoList = new ArrayList<>();
-        if(jedis.exists(Constants.CACHED_KEY_BANNER_ALL)){//ï¿½é¿´ï¿½Ç·ï¿½ï¿½ï¿½bannerï¿½ï¿½ï¿½ï¿½
-            Set<String> bannerInfoIdSet = jedis.zrange(Constants.CACHED_KEY_BANNER_ALL, 0, -1);//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Öµ
+        if(jedis.exists(Constants.CACHED_KEY_BANNER_ALL)){//???????banner????
+            Set<String> bannerInfoIdSet = jedis.zrange(Constants.CACHED_KEY_BANNER_ALL, 0, -1);//????????
             Map<String,Object> query = new HashMap<>();
             for(String bannerInfoId : bannerInfoIdSet){
                 query.put(Constants.CACHED_KEY_BANNER,bannerInfoId);
-                String bannerInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query);//ï¿½ï¿½ï¿½Òºï¿½ï¿½key
-                if(jedis.exists(bannerInfoKey)){//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
+                String bannerInfoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query);//??????key
+                if(jedis.exists(bannerInfoKey)){//???????
                     Map<String, String> bannerInfo = jedis.hgetAll(bannerInfoKey);
                     Map<String,Object> banner_info = new HashMap<>();
                     banner_info.put("banner_id",bannerInfo.get("banner_id"));
@@ -3287,8 +3287,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     bannerInfoList.add(banner_info);
                 }
             }
-        }else{ //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-            bannerInfoList = commonModuleServer.findBannerInfoAllByAppName(appName);//ï¿½ï¿½ï¿½Ò¹ï¿½ï¿½Î»
+        }else{ //??????
+            bannerInfoList = commonModuleServer.findBannerInfoAllByAppName(appName);//??????¦Ë
             if(! MiscUtils.isEmpty(bannerInfoList)){
                 Map<String,String> banner_info = new HashMap<>();
                 for(Map<String, Object> bannerInfo : bannerInfoList){
@@ -3323,7 +3323,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
 
-        //<editor-fold desc="Ç¿ï¿½Æ½ï¿½ï¿½ï¿½">
+        //<editor-fold desc="??????">
         Map<String,Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
@@ -3339,11 +3339,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            }
 //        }
 
-        //ï¿½ï¿½ï¿½ÎªÎ´ï¿½ï¿½ï¿½ï¿½ï¿½Î³Ì£ï¿½ï¿½ï¿½Ô¿Î³Ì½ï¿½ï¿½Ğ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //????¦Ä?????¦Ã?????¦Ã???§ß???????
         if(processFlag){
-            //1.1ï¿½ï¿½ï¿½Îªï¿½Î³Ì½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ç°Ê±ï¿½ï¿½Îªï¿½Î³Ì½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+            //1.1?????¦Ã?????????????????¦Ã???????
             Date now = new Date();
-            //1.2ï¿½ï¿½ï¿½Â¿Î³ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½Îªï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            //1.2????¦Ã?????????????¦Ã???????????
             Map<String,Object> course = new HashMap<String,Object>();
 //            course.put("course_id", courseId);
 //            course.put("end_time", now);
@@ -3351,7 +3351,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            course.put("status", "2");
 //            commonModuleServer.updateCourse(course);
 
-            //1.3ï¿½ï¿½ï¿½Ã¿Î³Ì´Ó½ï¿½Ê¦ï¿½ï¿½Ô¤ï¿½ï¿½Î³ï¿½ï¿½Ğ±ï¿½ SYS: lecturer:{ lecturer_id }ï¿½ï¿½courses  ï¿½ï¿½predictionï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½Ğ±ï¿½ SYS: lecturer:{ lecturer_id }ï¿½ï¿½courses  ï¿½ï¿½finish
+            //1.3????¦Ã?????????¦Ã??§Ò? SYS: lecturer:{ lecturer_id }??courses  ??prediction??????????¦Ã??§Ò? SYS: lecturer:{ lecturer_id }??courses  ??finish
             map.clear();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
 
@@ -3362,42 +3362,42 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             long  position = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position"));
             jedis.zadd(lecturerCoursesFinishKey, MiscUtils.convertInfoToPostion(now.getTime(), position), courseId);
 
-            //1.4ï¿½ï¿½ï¿½Ã¿Î³Ì´ï¿½Æ½Ì¨ï¿½ï¿½Ô¤ï¿½ï¿½Î³ï¿½ï¿½Ğ±ï¿½ SYSï¿½ï¿½courses  ï¿½ï¿½predictionï¿½Æ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½Ğ±ï¿½ SYSï¿½ï¿½courses ï¿½ï¿½finishï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½Î³Ì½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
+            //1.4????¦Ã?????????¦Ã??§Ò? SYS??courses  ??prediction????????????????¦Ã??§Ò? SYS??courses ??finish??????????¦Ã?????§Ò?
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, courseId);
             if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);
             }
-            //ï¿½ï¿½ï¿½Ã¿Î³Ì´Ó·ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½Î³ï¿½ï¿½Ğ±ï¿½ SYS:COURSES:{classify_id}:PREDICTION ï¿½Æ³ï¿½. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¶Ïµï¿½Ç°ï¿½Î³ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½ï¿½ï¿½ SYS:COURSES:{classify_id}:FINISH
+            //????¦Ã????????¦Ã??§Ò? SYS:COURSES:{classify_id}:PREDICTION ???. ????????§Ø????¦Ã??????? ????????§Ò??? SYS:COURSES:{classify_id}:FINISH
             map.put(Constants.CACHED_KEY_CLASSIFY,courseMap.get("classify_id"));
             jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), courseId);
             if(jedis.zrank(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map),courseId)==null){
-                jedis.zadd(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map),  MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);//ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                jedis.zadd(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map),  MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);//???????????
             }
 
 
 
-            //1.5ï¿½ï¿½ï¿½ï¿½Î³Ì±ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿Î³ÌµÄ½ï¿½ï¿½Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            //1.5????¦Ã?????????????????¦Ã????????????
             map.put(Constants.CACHED_KEY_COURSE_FIELD, courseMap.get("lecturer_id"));
             String banKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_BAN_USER_LIST, map);
             jedis.del(banKey);
 
-            //1.6ï¿½ï¿½ï¿½Â¿Î³Ì»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            //1.6????¦Ã???????
             Map<String, String> updateCacheMap = new HashMap<String, String>();
             updateCacheMap.put("update_time", MiscUtils.convertObjectToLong(course.get("end_time")) + "");
             updateCacheMap.put("end_time", MiscUtils.convertObjectToLong(course.get("end_time")) + "");
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
-            Date courseEndTime = new Date();//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+            Date courseEndTime = new Date();//???????
             reqMap.put("now",courseEndTime);
             reqMap.put("status","2");
             commonModuleServer.updateCourse(reqMap);
 
 
-            ////ï¿½ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-            SimpleDateFormat sdf =   new SimpleDateFormat("yyyyï¿½ï¿½MMï¿½ï¿½ddï¿½ï¿½HH:mm");
+            ////??????????????
+            SimpleDateFormat sdf =   new SimpleDateFormat("yyyy??MM??dd??HH:mm");
             String str = sdf.format(now);
-            String courseEndMessage = "Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"+str;
+            String courseEndMessage = "?????????"+str;
             long currentTime = System.currentTimeMillis();
             String mGroupId = jedis.hget(courseKey,"im_course_id");
 
@@ -3410,13 +3410,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             infomation.put("message_id",MiscUtils.getUUId());
             infomation.put("message_imid",infomation.get("message_id"));
             infomation.put("message_type", "1");
-            infomation.put("send_type", "6");//5.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            infomation.put("send_type", "6");//5.???????
             infomation.put("create_time", currentTime);
 
 
 
-            //ï¿½Î³ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
-            //1.9ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+            //?¦Ã???????????
+            //1.9??????????????
             JSONObject obj = new JSONObject();
             obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_live_overtime_force_end"),MiscUtils.RecoveryEmoji(courseMap.get("course_title"))));
             obj.put("to",courseMap.get("lecturer_id"));
@@ -3471,26 +3471,26 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        }
 
 
-    //<editor-fold desc="ï¿½Î³ï¿½ï¿½ï¿½Ï¢ï¿½Ø¸ï¿½">
+    //<editor-fold desc="?¦Ã???????">
 //        Map<String, Object> map = new HashMap<>();
 //        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
 //        Map<String,Object> course = new HashMap<String,Object>();
 //        course.put("course_id", course_id);
 //        course.put("status", "1");
-//        String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//ï¿½ï¿½È¡ï¿½Î³ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ğµï¿½key
-//        jedis.hset(coursekey,"status","1");//ï¿½Ñ¿Î³Ì»ï¿½ï¿½ï¿½ï¿½Ğµï¿½×´Ì¬ï¿½ï¿½Îªï¿½ï¿½É¾ï¿½ï¿½
+//        String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//????¦Ã???????§Ö?key
+//        jedis.hset(coursekey,"status","1");//??¦Ã?????§Ö???????????
 //        commonModuleServer.updateCourse(course);
-//        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, course), readCourseOperation, jedis, true);//ï¿½Ó»ï¿½ï¿½ï¿½ï¿½Ğ¶ï¿½È¡ï¿½Î³ï¿½ï¿½ï¿½Ï¢
-//        jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);//É¾ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
-//        jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH,courseInfoMap),course_id);//É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-//        jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_FINISH,courseInfoMap),course_id);//ï¿½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
-//        jedis.zrem(Constants.CACHED_KEY_COURSE_PREDICTION,course_id);//É¾ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
-//        jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,courseInfoMap),course_id);//É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-//        jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,courseInfoMap),course_id);//ï¿½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½ï¿½Î³ï¿½
+//        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, course), readCourseOperation, jedis, true);//??????§Ø???¦Ã????
+//        jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,course_id);//??????????¦Ã?
+//        jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH,courseInfoMap),course_id);//??????????
+//        jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_FINISH,courseInfoMap),course_id);//????????¦Ã?
+//        jedis.zrem(Constants.CACHED_KEY_COURSE_PREDICTION,course_id);//??????????¦Ã?
+//        jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,courseInfoMap),course_id);//??????????
+//        jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,courseInfoMap),course_id);//????????¦Ã?
 //
-//        jedis.zadd(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_PREDICTION,courseInfoMap), MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¦Ô¤ï¿½ï¿½Î³ï¿½
-//        jedis.zadd(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,courseInfoMap),MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//ï¿½ï¿½ï¿½ï¿½
-//        jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//Æ½Ì¨
+//        jedis.zadd(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_PREDICTION,courseInfoMap), MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//??????????¦Ã?
+//        jedis.zadd(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,courseInfoMap),MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//????
+//        jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, MiscUtils.convertInfoToPostion( Long.valueOf(courseInfoMap.get("start_time")),Long.valueOf(courseInfoMap.get("position"))), course_id);//??
 //
 //        Map <String,Object> queryMap = new HashMap<>();
 //        queryMap.put("course_id",course_id);
@@ -3499,23 +3499,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //            double createTime = Double.parseDouble(format.parse(information.get("create_time").toString()).getTime()+"");
 //            String imid = information.get("message_imid").toString();
-//            if(information.get("send_type").equals("3") || information.get("send_type").equals("2")){//ï¿½Ã»ï¿½ï¿½ï¿½Ï¢
+//            if(information.get("send_type").equals("3") || information.get("send_type").equals("2")){//??????
 //                String messageQuestionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
 //                jedis.zadd(messageQuestionListKey,createTime,imid);
-//                //3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Îªï¿½ï¿½Ê¦ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢-ï¿½ï¿½Ê¦ï¿½Ğ±ï¿½
-//            }else if(information.get("send_type").equals("0") ||	//ï¿½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½
-//                    information.get("send_type").equals("1")  ||	//ï¿½ï¿½Ê¦ï¿½Ø´ï¿½
-//                    information.get("send_type").equals("4")  ||	//ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
-//                    information.get("send_type").equals("5")  ||	//ï¿½Î³Ì¿ï¿½Ê¼
-//                    information.get("send_type").equals("6")  ||	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-//                    information.get("send_type").equals("7")){		//ï¿½ï¿½Ê¦ï¿½Ø¸ï¿½
+//                //3.????????????????????????????????-????§Ò?
+//            }else if(information.get("send_type").equals("0") ||	//???????
+//                    information.get("send_type").equals("1")  ||	//??????
+//                    information.get("send_type").equals("4")  ||	//???????
+//                    information.get("send_type").equals("5")  ||	//?¦Ã???
+//                    information.get("send_type").equals("6")  ||	//???????
+//                    information.get("send_type").equals("7")){		//??????
 //                String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 //                jedis.zadd(messageLecturerListKey, createTime, imid);
-//                if(information.get("send_type").equals("0") && information.get("message_type").equals("0")){//ï¿½ï¿½Ê¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+//                if(information.get("send_type").equals("0") && information.get("message_type").equals("0")){//????????????
 //                    String messageLecturerVoiceListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
 //                    jedis.zadd(messageLecturerVoiceListKey, createTime, imid);
 //                }
-//                if(information.get("send_type").equals("1") || information.get("send_type").equals("7")){//ï¿½ï¿½Ê¦ï¿½Ø´ï¿½ ï¿½ï¿½ ï¿½ï¿½Ê¦ï¿½Ø¸ï¿½
+//                if(information.get("send_type").equals("1") || information.get("send_type").equals("7")){//?????? ?? ??????
 //                    Map<String, Object> map1 = JSON.parseObject(information.get("message_question").toString(), HashMap.class);
 //                    map1.put("course_id",information.get("course_id"));
 //                    String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
@@ -3533,21 +3533,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
 
-    //<editor-fold desc="ï¿½ï¿½Ê¦ï¿½Î³ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½">
+    //<editor-fold desc="????¦Ã???????">
     //        Map<String, Object> map = new HashMap<>();
 //        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
 //        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);//COURSE:{course_id}:MESSAGE_LIST
 //
 //        Jedis jedisObject = jedisUtils.getJedis(appName);
 //
-//        //1.ï¿½Ó»ï¿½ï¿½ï¿½ï¿½Ğ²ï¿½Ñ¯ï¿½Ã¿Î³Ìµï¿½ï¿½ï¿½Ï¢ï¿½Ğ±ï¿½
+//        //1.??????§Ó????¦Ã??????§Ò?
 //        Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
 //        if(messageIdList == null || messageIdList.size() == 0){
 //
 //            throw new QNLiveException("000001");
 //        }
 //
-//        //2.ï¿½ï¿½ï¿½ï¿½ï¿½Ó»ï¿½ï¿½ï¿½ï¿½Ğ¶ï¿½È¡ï¿½ï¿½Ï¢ï¿½ï¿½Ï¸ï¿½ï¿½Ï¢
+//        //2.??????????§Ø???????????
 //        List<Map<String,Object>> messageList = new ArrayList<>();
 //        List<String> messageKeyList = new ArrayList<>();
 //        JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
@@ -3635,12 +3635,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                }
 //            }
 //        });
-//        //3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ëµ½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½
+//        //3.???????????????
 //        Integer insertResult = commonModuleServer.insertCourseMessageList(messageList);
 //
-//        //4.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½
+//        //4.????????????????????????????§Ö?????
 //        if(insertResult != null && insertResult > 0){
-//            //É¾ï¿½ï¿½redisï¿½Ğµï¿½key
+//            //???redis?§Ö?key
 //            String[] messageKeyArray = new String[messageKeyList.size()];
 //            messageKeyList.toArray(messageKeyArray);
 //            jedis.del(messageKeyArray);
@@ -3654,7 +3654,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        }
     //</editor-fold>
     /**
-     * ï¿½Ö¸ï¿½ï¿½Î³ï¿½
+     * ????¦Ã?
      * @param reqEntity
      * @throws Exception
      */
