@@ -3056,7 +3056,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         List<Map<String, Object>> classifyList = new ArrayList<>();
-        if(jedis.exists(Constants.CACHED_KEY_CLASSIFY_ALL)){ //判断当前是否有缓存key 存在
+        if(jedis.exists(Constants.CACHED_KEY_CLASSIFY_ALL+"1")){ //判断当前是否有缓存key 存在
             Set<String> classifyIdSet = jedis.zrange(Constants.CACHED_KEY_CLASSIFY_ALL, 0, -1);//获取所有值
             Map<String,Object> map = new HashMap<>();
             for(String classify_id : classifyIdSet){
@@ -3075,6 +3075,22 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }else{ //没有
             String likeAppNmae = "%"+appName+"%";
              classifyList = commonModuleServer.findClassifyInfoByAppName(likeAppNmae);//读数据库
+            /*Collections.sort(classifyList,new Comparator (){
+                @Override
+                public int compare(Object o1, Object o2) {
+                    int position1 = 0;
+                    int position2 = 0;
+                    Map<String, Object> map1 = (Map)o1;
+                    Map<String, Object> map2 = (Map)o2;
+                    if(map1.get("position")!=null&&StringUtils.isNotEmpty(map1.get("position")+"")){
+                        position1 = Integer.valueOf(map1.get("position").toString());
+                    }
+                    if(map2.get("position")!=null&&StringUtils.isNotEmpty(map2.get("position")+"")){
+                        position2 = Integer.valueOf(map2.get("position").toString());
+                    }
+                    return position1-position2;
+                }
+            });*/
             Map<String,String> classify_info = new HashMap<>();
             for(Map<String, Object>classify : classifyList){
                 jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
