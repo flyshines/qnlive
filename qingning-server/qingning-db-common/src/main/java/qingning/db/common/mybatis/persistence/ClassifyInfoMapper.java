@@ -9,4 +9,8 @@ public interface ClassifyInfoMapper {
     List<Map<String, Object>> findClassifyInfo();
 
     List<Map<String, Object>> findClassifyInfoByAppName(@Param("appName")String appName);
+
+    int insertSelective(Map<String, Object> record);
+
+    int updateByPrimaryKeySelective(Map<String, Object> record);
 }

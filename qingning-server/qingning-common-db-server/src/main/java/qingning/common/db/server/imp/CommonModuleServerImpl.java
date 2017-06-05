@@ -838,5 +838,15 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return coursesMapper.findLecturerCourseList(record);
 	}
 
+	@Override
+	public void insertClassify(Map<String, Object> record) {
+		classifyInfoMapper.insertSelective(record);
+	}
+
+	@Override
+	public void updateClassify(Map<String, Object> record) {
+		classifyInfoMapper.updateByPrimaryKeySelective(record);
+	}
+
 
 }

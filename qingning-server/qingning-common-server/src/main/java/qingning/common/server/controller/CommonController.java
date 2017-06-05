@@ -985,7 +985,40 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "classifyInfo", accessToken, null,appName);
         return this.process(requestEntity, serviceManger, message);
     }
-
+    /**
+     * 添加分类信息
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/classify/add", method = RequestMethod.POST)
+    public @ResponseBody
+    ResponseEntity addClassify(
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addClassify", accessToken, version,appName);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 编辑分类信息
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/classify/edit", method = RequestMethod.POST)
+    public @ResponseBody
+    ResponseEntity editClassify(
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "editClassify", accessToken, version,appName);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
     /**
      *  获取systemConfig
      * @param version

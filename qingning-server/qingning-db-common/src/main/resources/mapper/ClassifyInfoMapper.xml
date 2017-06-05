@@ -9,5 +9,77 @@
   <select id="findClassifyInfoByAppName" resultType="hashmap">
     select * from t_classify_info where is_use=1 and app_names like #{appName}
   </select>
-  
+  <insert id="insertSelective" parameterType="hashmap" >
+    insert into t_classify_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="classify_id != null" >
+        classify_id,
+      </if>
+      <if test="classify_name != null" >
+        classify_name,
+      </if>
+      <if test="is_use != null" >
+        is_use,
+      </if>
+      <if test="create_date != null" >
+        create_date,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="app_names != null" >
+        app_names,
+      </if>
+      <if test="position != null" >
+        position,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="classify_id != null" >
+        #{classify_id,jdbcType=INTEGER},
+      </if>
+      <if test="classify_name != null" >
+        #{classify_name,jdbcType=VARCHAR},
+      </if>
+      <if test="is_use != null" >
+        #{is_use,jdbcType=INTEGER},
+      </if>
+      <if test="create_date != null" >
+        #{create_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=BIGINT},
+      </if>
+      <if test="app_names != null" >
+        #{app_names,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null" >
+        #{position,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="hashmap" >
+    update t_classify_info
+    <set >
+      <if test="classify_name != null" >
+        classify_name = #{classify_name,jdbcType=VARCHAR},
+      </if>
+      <if test="is_use != null" >
+        is_use = #{is_use,jdbcType=INTEGER},
+      </if>
+      <if test="create_date != null" >
+        create_date = #{create_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=BIGINT},
+      </if>
+      <if test="app_names != null" >
+        app_names = #{app_names,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null" >
+        position = #{position,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where classify_id = #{classify_id,jdbcType=INTEGER}
+  </update>
 </mapper>

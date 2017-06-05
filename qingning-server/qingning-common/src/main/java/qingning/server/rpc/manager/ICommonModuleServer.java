@@ -146,4 +146,13 @@ public interface ICommonModuleServer {
 	Map<String,Object> findUserNumberByCourse(Map<String, Object> map);
 
 	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
+
+	/**新增-分类
+	 * @param record
+	 */
+	void insertClassify(Map<String, Object> record);
+	/**更新-分类
+	 * @param param
+	 */
+	void updateClassify(Map<String, Object> record);
 }
