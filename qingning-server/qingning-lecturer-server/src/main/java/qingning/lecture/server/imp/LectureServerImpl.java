@@ -940,7 +940,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(course)){//如果没有课程
         	throw new QNLiveException("100004");//课程不存在 抛异常
         }
-        
+
         String status = course.get("status");//状态
         if("2".equals(status)){//如果查出来的课程是结束
         	if(reqMap.get("start_time") != null){
@@ -970,7 +970,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         String original_start_time = course.get("start_time");//课程开课时间
-        
+
+        //<editor-fold desc="结束课程">
         if ("2".equals(newStatus)) {
             //1.1如果为课程结束，则取当前时间为课程结束时间
             //1.2更新课程详细信息(dubble服务)
@@ -994,7 +995,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
 
             //1.3将该课程从讲师的预告课程列表 SYS: lecturer:{ lecturer_id }：courses  ：prediction移动到结束课程列表 SYS: lecturer:{ lecturer_id }：courses  ：finish
-            map.clear();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
             String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
             jedis.zrem(lecturerCoursesPredictionKey, reqMap.get("course_id").toString());
@@ -1025,22 +1025,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             updateCacheMap.put("status", "2");
             jedis.hmset(courseKey, updateCacheMap);
 
-
-            //1.7 将该课程从平台分类预告课程列表中 SYS:course:{classify}:prediction 移除 存入SYS:COURSES:{classify_id}:FINISH"
-            map.clear();
-
-
-            //1.7如果存在课程聊天信息，则将聊天信息使用MQ，保存到数据库中            
-            //RequestEntity mqRequestEntity = generateRequestEntity("SaveCourseMessageServer",Constants.MQ_METHOD_ASYNCHRONIZED, null ,reqEntity.getParam());
-            //this.mqUtils.sendMessage(mqRequestEntity);
-
-
-            //1.8如果存在课程音频信息，则将课程音频信息使用MQ，保存到数据库
-            //RequestEntity mqAudioRequestEntity = new RequestEntity();
-            //mqAudioRequestEntity.setServerName("SaveAudioMessageServer");
-            //mqAudioRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            //mqAudioRequestEntity.setParam(reqEntity.getParam());
-            //this.mqUtils.sendMessage(mqAudioRequestEntity);
 
             //1.9如果该课程没有真正开播，并且开播时间在今天之内，则需要取消课程超时未开播定时任务
             if(jedis.hget(courseKey, "real_start_time") == null){
@@ -1114,7 +1098,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
-        } else {
+        }
+        //</editor-fold>
+
+
+        //<editor-fold desc="不是结束课程,编辑课程其他操作">
+        if(!"2".equals(newStatus)){
             Map<String,Object> query = new HashMap<String,Object>();
             query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
             String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
@@ -1308,6 +1297,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             resultMap.put("update_time", updateCacheMap.get("update_time"));
         }
+        //</editor-fold>
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
         return resultMap;
     }
