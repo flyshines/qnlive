@@ -82,4 +82,31 @@
 	  	</trim>	
   </insert>
   
+  <!-- 根据map中的参数查询banner -->
+  <select id="selectBannerInfoByMap" resultType="hashmap" parameterType="hashmap">
+    SELECT * FROM t_banner_info
+	<where>
+		app_name = #{app_name}
+		<if test="banner_name != null and banner_name != ''">
+			and banner_name like '%${banner_name}%'
+		</if>
+		<if test="status != null and status != -1"><!-- -1标识搜索全部 -->
+			and status = #{status}
+		</if>
+		<if test="banner_type != null and banner_type != -1"><!-- -1标识搜索全部 -->
+			and banner_type = #{banner_type}
+		</if>
+		<if test="score != null and score != -1 and score != 0"><!-- score=-1表示获取首页；score=0表示上一页最后的数据没有优先级 -->
+			and score <![CDATA[ > ]]> #{score} or score = 0
+		</if>
+		<if test="(score == null or score == -1 or score == 0) and create_time != null">
+			and create_time <![CDATA[ < ]]> #{create_time}
+		</if>
+	</where>
+	order by score=0 asc, score asc, create_time desc
+	<if test="page_count != null">
+		limit #{page_count}
+	</if>
+  </select>
+  
 </mapper>

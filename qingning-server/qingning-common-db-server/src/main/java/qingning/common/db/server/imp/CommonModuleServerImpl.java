@@ -846,5 +846,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return bannerInfoMapper.insertBanner(insertMap);
 	}
 
+	/**
+	 * 根据map中的参数查询banner
+	 */
+	@Override
+	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
+	}
+
 
 }

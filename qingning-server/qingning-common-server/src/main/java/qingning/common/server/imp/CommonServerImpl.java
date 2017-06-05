@@ -3864,5 +3864,44 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         
         return resultMap;
     }
+    
+    /**
+     * 搜索banner列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getBannerListBySearch")
+    public Map<String, Object> getBannerListBySearch(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        //将前端long类型的create_time转换成date类型
+        long createTime = (long) reqMap.get("create_time");
+        Date createDate = null;
+        if(createTime != 0){
+        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        	createDate = new Date(createTime);
+        	reqMap.put("create_time", sdf.format(createDate));
+        }
+        
+        reqMap.put("app_name", reqEntity.getAppName());
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 查询t_banner_info表
+         */
+        List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
+        
+        resultMap.put("banner_info_list", bannerList);
+        return resultMap;
+    }
 
 }

@@ -153,4 +153,10 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	int addBanner(Map<String, Object> insertMap);
+	/**
+	 * 根据map中的参数查询banner
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap);
 }
