@@ -7,8 +7,10 @@
     select * from t_banner_info where  `status` = 1
   </select>
 
-  <select id="findBannerInfoAllByAppName" resultType="hashmap"  >
-    select * from t_banner_info where  `status` = 1 and app_name = #{appName}
+  <select id="findBannerInfoAllByAppName" resultType="hashmap">
+    SELECT * FROM t_banner_info
+	WHERE `status` = 1 AND app_name = #{appName}
+	ORDER BY score ASC, create_time DESC 
   </select>
   
   <!-- 新增轮播 -->
