@@ -3823,7 +3823,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * �����ֲ�
+     * 新增轮播
      * @param reqEntity
      * @return
      * @throws Exception
@@ -3833,29 +3833,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> addBanner(RequestEntity reqEntity) throws Exception{
         Map<String, Object> resultMap = new HashMap<String, Object>();
         /*
-         * ��ȡ�������
+         * 获取请求参数
          */
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
         
         /*
-         * TODO �жϺ�̨�Ƿ��¼
+         * TODO 验证后台用户是否登录
          */
         
         /*
-         * ��t_banner�����������
+         * 新增t_banner表记录
          */
         reqMap.put("banner_id", MiscUtils.getUUId());
         reqMap.put("create_time", new Date());
         commonModuleServer.addBanner(reqMap);
         
         /*
-         * ɾ��banner����
+         * 判断是否需要删除banner缓存
          */
         Jedis jedis = jedisUtils.getJedis(appName);
         if("1".equals(reqMap.get("status").toString())){
-        	logger.info("�����ֲ�>>>>�������ֲ���Ҫչʾ������Ҫ���ԭ��banner����");
+        	logger.info("新增轮播>>>>新增的轮播需要展示，所以要删除已有的轮播缓存");
         	Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
         	for(String key : bannerKeys){
         		jedis.del(key);
