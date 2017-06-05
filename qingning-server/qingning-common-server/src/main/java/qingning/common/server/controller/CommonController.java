@@ -126,32 +126,6 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLogin", null, version,appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-
-        if(Double.valueOf(version)<1.2){
-            //根据相关条件将server_url列表信息返回
-            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-            Map<String, Object> serverInfoMap = (Map<String, Object>) serverUrlInfoMap.get(appName);
-            Map<String, Object> map = new HashMap<>();
-            for (Map.Entry<String, Object> entry : serverInfoMap.entrySet()) {
-                String key = entry.getKey();
-                int page = key.indexOf("Page");
-
-                String servicePage = key.substring(0,page+4);
-                String methodName = key.substring(page+4);
-                String newKey = "";
-                if(methodName.equals("RoomProfitList") || methodName.equals("CourseStatistics")){
-                    newKey = servicePage + "-" + methodName;
-                }else{
-                    String methodNameFirstLetter = methodName.substring(0,1);
-                    String methodNameFirstLetterLowerCase = methodNameFirstLetter.toLowerCase();
-                    String methodNameOther = methodName.substring(1);
-                    newKey = servicePage + "-" + methodNameFirstLetterLowerCase + methodNameOther;
-                }
-                map.put(newKey, entry.getValue());
-            }
-            resultMap.put("server_url_info_list",map);
-            responseEntity.setReturnData(resultMap);
-        }
         return responseEntity;
 //        if (bodyMap.get("server_url_update_time") == null ||
 //                !bodyMap.get("server_url_update_time").toString().equals(serverUrlInfoUpdateTime.toString())) {
