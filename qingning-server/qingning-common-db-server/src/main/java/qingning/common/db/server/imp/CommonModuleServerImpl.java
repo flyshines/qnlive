@@ -838,6 +838,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return coursesMapper.findLecturerCourseList(record);
 	}
 
+	@Override
+	public void insertClassify(Map<String, Object> record) {
+		classifyInfoMapper.insertSelective(record);
+	}
+
+	@Override
+	public void updateClassify(Map<String, Object> record) {
+		classifyInfoMapper.updateByPrimaryKeySelective(record);
+	}
+
 	/**
 	 * 新增轮播
 	 */
@@ -853,6 +863,4 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
 		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
 	}
-
-
 }

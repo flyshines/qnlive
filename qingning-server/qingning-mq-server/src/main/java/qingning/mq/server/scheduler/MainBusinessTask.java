@@ -27,12 +27,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 定时任务类 每次服务器重启 和 每日零时都会执行
+ */
 public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendEvent>{
 
 	private static final Logger logger = LoggerFactory.getLogger(MainBusinessTask.class);
 	private List<AbstractMsgService> list = new ArrayList<>();
 
 
+	//<editor-fold desc="依赖注入">
 	@Autowired
 	private ApplicationContext context;
 
@@ -78,6 +82,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 
 	@Autowired(required=true)
 	private ClassifyInfoMapper classifyInfoMapper;
+	//</editor-fold>
 	
 	public void init(){
 		if(list.isEmpty()){
@@ -119,7 +124,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
 			list.add(createCourseNoticeTaskServerImpl);
 
-			//分类
+			//分类 执行分类课程列表讲师列表等
 			ClassIfyCourseServerImpl classIfyCourseServerImpl = new ClassIfyCourseServerImpl();
 			classIfyCourseServerImpl.setCoursesMapper(coursesMapper);
 			classIfyCourseServerImpl.setClassifyInfoMapper(classifyInfoMapper);
@@ -132,7 +137,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	//本地测试 5秒执行一次，开发服30分钟执行一次，正式每天凌晨1点执行
 	//@Scheduled(cron = "*/5 * * * * ? ")
 	//@Scheduled(cron = "0 */30 * * * ? ")
-	@Scheduled(cron = "0 0 1 * * ?")
+	@Scheduled(cron = "0 0 4 * * ?")//每日凌晨4点执行任务
 	public void backstageMethod() {
 		init();
 		String[] appNames = new String[0];
@@ -141,7 +146,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		for(String appName : appNames){
+		for(String appName : appNames){//根据不同的app 执行功能不同的任务
 			backstageMethod(appName);
 		}
 //		logger.info("=====> 主业务定时任务驱动开始  ====");
@@ -167,9 +172,14 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		}
 	}
 
+
+	/**
+	 * 查询讲师信息
+	 * @param appName app
+	 */
 	public void loadLecturerID(String appName){
 		Jedis jedis = jedisUtils.getJedis(appName);
-		if(!jedis.exists(Constants.CACHED_LECTURER_KEY)){
+		if(!jedis.exists(Constants.CACHED_LECTURER_KEY)){//如果不存在
 			int start_pos = 0;
 			int page_count =50000;
 			Map<String,Object> query = new HashMap<String,Object>();
