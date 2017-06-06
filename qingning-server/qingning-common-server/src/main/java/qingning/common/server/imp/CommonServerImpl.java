@@ -3091,90 +3091,91 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     else return 1;
                 }
             });
-            Map<String,String> classify_info = new HashMap<>();
-            for(Map<String, Object>classify : classifyList){
-                jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
-                classify_info.put("classify_id",classify.get("classify_id").toString());
-                classify_info.put("classify_name",classify.get("classify_name").toString());
-                classify_info.put("is_use",classify.get("is_use").toString());
-                classify_info.put("create_time",classify.get("create_time").toString());
-                Map<String,Object> map = new HashMap<>();
-                map.put("classify_id",classify.get("classify_id").toString());
-                jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map),classify_info);
-            }
         }
-
-        for(Map<String, Object> classify :classifyList ) {
-            String classify_id = classify.get("classify_id").toString();
-            Map<String,Object> map = new HashMap<>();
-            map.put("appName",appName);
-            map.put("classify_id",classify_id);
-            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//分类
-            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//分类
-        }
-
-        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-        if(!MiscUtils.isEmpty(lecturerSet)){
-            for(String lecturerId : lecturerSet) {
-                //删除缓存中的旧的课程列表及课程信息实体
-                Map<String, Object> map = new HashMap<>();
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-
-                jedis.del(predictionListKey);
-                jedis.del(finishListKey);
-            }
-        }
-
-        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);//分类
-        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);//分类
-
-        for(Map<String, Object> classify :classifyList ){
-            String classify_id = classify.get("classify_id").toString();
-            Map<String,Object> map = new HashMap<>();
-            map.put("appName",appName);
-            map.put("classify_id",classify_id);
-            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
-            for(Map<String, Object> course : courseByClassifyId){
-
-                if(course.get("status").equals("2") || course.get("status").equals("1")){
-                    String course_id = course.get("course_id").toString();
-                    String lecturer_id = course.get("lecturer_id").toString();
-                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
-                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
-                    map.put("course_id",course_id);
-                    String courseClassifyIdKey = "";
-                    String courseLectureKey = "";
-                    String courseListKey = "";
-                    Long time = 0L ;
-                    if(course.get("status").equals("2")){
-                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
-                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
-                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-
-                    }else{
-                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
-                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
-
-                    }
-                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get( "position")));
-                    jedis.zadd(courseLectureKey, lpos,course_id);
-                    jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
-                    jedis.zadd(courseLectureKey, lpos,course_id);//在结束中增加
-                    jedis.zadd(courseListKey, lpos,course_id);
-                }
-
-
-
-
-
-                map.clear();
-            }
-        }
+//            Map<String,String> classify_info = new HashMap<>();
+//            for(Map<String, Object>classify : classifyList){
+//                jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
+//                classify_info.put("classify_id",classify.get("classify_id").toString());
+//                classify_info.put("classify_name",classify.get("classify_name").toString());
+//                classify_info.put("is_use",classify.get("is_use").toString());
+//                classify_info.put("create_time",classify.get("create_time").toString());
+//                Map<String,Object> map = new HashMap<>();
+//                map.put("classify_id",classify.get("classify_id").toString());
+//                jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map),classify_info);
+//            }
+//        }
+//
+//        for(Map<String, Object> classify :classifyList ) {
+//            String classify_id = classify.get("classify_id").toString();
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("appName",appName);
+//            map.put("classify_id",classify_id);
+//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//分类
+//            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//分类
+//        }
+//
+//        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+//        if(!MiscUtils.isEmpty(lecturerSet)){
+//            for(String lecturerId : lecturerSet) {
+//                //删除缓存中的旧的课程列表及课程信息实体
+//                Map<String, Object> map = new HashMap<>();
+//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+//
+//                jedis.del(predictionListKey);
+//                jedis.del(finishListKey);
+//            }
+//        }
+//
+//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);//分类
+//        jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);//分类
+//
+//        for(Map<String, Object> classify :classifyList ){
+//            String classify_id = classify.get("classify_id").toString();
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("appName",appName);
+//            map.put("classify_id",classify_id);
+//            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
+//            for(Map<String, Object> course : courseByClassifyId){
+//
+//                if(course.get("status").equals("2") || course.get("status").equals("1")){
+//                    String course_id = course.get("course_id").toString();
+//                    String lecturer_id = course.get("lecturer_id").toString();
+//                    map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
+//                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+//                    map.put("course_id",course_id);
+//                    String courseClassifyIdKey = "";
+//                    String courseLectureKey = "";
+//                    String courseListKey = "";
+//                    Long time = 0L ;
+//                    if(course.get("status").equals("2")){
+//                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+//                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
+//                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+//
+//                    }else{
+//                        courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+//                        courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
+//                        courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
+//
+//                    }
+//                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get( "position")));
+//                    jedis.zadd(courseLectureKey, lpos,course_id);
+//                    jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
+//                    jedis.zadd(courseLectureKey, lpos,course_id);//在结束中增加
+//                    jedis.zadd(courseListKey, lpos,course_id);
+//                }
+//
+//
+//
+//
+//
+//                map.clear();
+//            }
+//        }
 
         List<Map<String, Object>> resultClassifyList = new ArrayList<>();//返回结果
         Map<String, Object> ortherClassify = new HashMap<>();//其他
