@@ -3960,16 +3960,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
-        //将前端long类型的create_time转换成date类型
-        long createTime = (long) reqMap.get("create_time");
-        Date createDate = null;
-        if(createTime != 0){
-        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        	createDate = new Date(createTime);
-        	reqMap.put("create_time", sdf.format(createDate));
-        }
-        
-        reqMap.put("app_name", reqEntity.getAppName());
+        //计算页码，用于sql的limit语句
+        long pageNum = (long) reqMap.get("page_num");
+        long pageCount = (long) reqMap.get("page_count");
+        reqMap.put("page_num", (pageNum-1)*pageCount);
         
         /*
          * TODO 验证后台用户是否登录
@@ -3979,7 +3973,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
          * 查询t_banner_info表
          */
         List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
-        
+        if(bannerList != null){
+        	logger.info("后台搜索banner列表>>>>获得" + bannerList.size() + "条banner数据");
+        }
+        //循环为其附上对应的直播间名字或课程名字
+        int bannerType = 0;
+        Jedis jedis = jedisUtils.getJedis(appName);
+        for(Map<String, Object> bannerMap : bannerList){
+        	bannerType = (int) bannerMap.get("banner_type");
+        	if(1 == bannerType){	//跳转至直播间
+        		//从缓存中查询直播间名称
+        		String roomId = bannerMap.get("jump_url").toString();
+        		reqMap.put("room_id", roomId);
+        		String roomName = CacheUtils.readLiveRoomInfoFromCached(roomId, 
+        				"room_name", reqEntity, readLiveRoomOperation, jedis, true);
+        		bannerMap.put("jump_remark", roomName);
+        	}else if(2 == bannerType){	//跳转至课程
+        		//从缓存中查询课程名称
+        		String courseId = bannerMap.get("jump_url").toString();
+        		reqMap.put("course_id", courseId);
+        		Map<String, String> course = CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+        		bannerMap.put("jump_remark", course.get("course_title"));
+        	}
+        }
         
         resultMap.put("banner_info_list", bannerList);
         resultMap.put("total_num", commonModuleServer.findBannerCountByMap(reqMap));

@@ -1100,8 +1100,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="status", defaultValue="-1") int status,
     		@RequestParam(value="banner_type", defaultValue="-1") int bannerType,
     		@RequestParam(value="page_count", defaultValue="20") long pageCount,
-    		@RequestParam(value="create_time", defaultValue="0") long createTime,
-    		@RequestParam(value="score", defaultValue="-1") int score,
+    		@RequestParam(value="page_num", defaultValue="1") long pageNum,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
     		@RequestHeader("version") String version) throws Exception {
@@ -1111,8 +1110,7 @@ public class CommonController extends AbstractController {
         param.put("status", status);
         param.put("banner_type", bannerType);
         param.put("page_count", pageCount);
-        param.put("create_time", createTime);
-        param.put("score", score);
+        param.put("page_num", pageNum);
         requestEntity.setParam(param);
         
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);

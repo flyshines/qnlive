@@ -816,8 +816,7 @@
 					<param name="status" type="int" require="N" />
 					<param name="banner_type" type="int" require="N" />
 					<param name="page_count" type="long" require="N" />
-					<param name="create_time" type="long" require="N" />
-					<param name="score" type="int" require="N" />
+					<param name="page_num" type="long" require="N" />
 				</inputs>
 				<outputs>
 					<param name="banner_info_list" type="list">
@@ -826,6 +825,7 @@
 						<param name="banner_img_url" type="string" />
 						<param name="banner_type" type="int" />
 						<param name="jump_url" type="string" />
+						<param name="jump_remark" type="string" />
 						<param name="create_time" type="long" />
 						<param name="score" type="int" />
 						<param name="status" type="int" />
