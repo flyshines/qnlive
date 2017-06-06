@@ -3197,7 +3197,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-//                String course_id = course.get("course_id").toString();
+    //<editor-fold desc="Description">
+    //                String course_id = course.get("course_id").toString();
 //
 //                Map<String,Object> updateCourse = new HashMap<>();
 //                updateCourse.put("course_id",course_id);
@@ -3376,6 +3377,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 ////            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,id);
 ////            jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
 ////        }
+    //</editor-fold>
 
     //进行排序
     /**
@@ -3445,6 +3447,33 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseId = reqMap.get("course_id").toString();
         Jedis jedis = jedisUtils.getJedis(appName);
 
+        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+        if(!MiscUtils.isEmpty(lecturerSet)){
+            for(String lecturerId : lecturerSet) {
+                //删除缓存中的旧的课程列表及课程信息实体
+                Map<String, Object> map = new HashMap<>();
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+                jedis.del(predictionListKey);
+                jedis.del(finishListKey);
+                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+                for(Map<String, Object> course : lecturerCourseList){
+                    Long time = 0L ;
+                    if(course.get("status").toString().equals("2")){
+                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                        jedis.zadd(finishListKey, lpos,course.get("course_id").toString());//在结束中增加
+                    }else if(course.get("status").toString().equals("1")){
+                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                        jedis.zadd(predictionListKey, lpos,course.get("course_id").toString());//在结束中增加
+                    }
+                }
+            }
+        }
+
+
         //<editor-fold desc="单个讲师">
 //                Map<String,Object> query = new HashMap<>();
 //        query.put("course_id", courseId);
@@ -3457,6 +3486,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
 //        jedis.del(predictionListKey);
 //        jedis.del(finishListKey);
+//
+//
+//
+//
 //
 //        List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
 //        for(Map<String, Object> course : lecturerCourseList){
@@ -3599,7 +3632,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-//        Map<String,Object> map = new HashMap<>();
+    //<editor-fold desc="Description">
+    //        Map<String,Object> map = new HashMap<>();
 //        map.put("course_id",courseId);
 //        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
 //        jedis.del(courseKey);
@@ -3620,6 +3654,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        if(!MiscUtils.isEmpty(updateCourse)){
 //            commonModuleServer.updateCourse(updateCourse);
 //        }
+    //</editor-fold>
 
 
     //<editor-fold desc="课程消息回复">
@@ -3807,7 +3842,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 获取分类
+     * 添加分类信息
      * @param reqEntity
      * @throws Exception
      */
@@ -3828,7 +3863,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取分类
+     * 编辑分类信息
      * @param reqEntity
      * @throws Exception
      */
