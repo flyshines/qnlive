@@ -71,11 +71,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入未开播处理定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
-        
+
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
         	return;
         }
-        
+
         long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
         //15分钟没出现会结束
@@ -93,7 +93,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         scheduleTask.setCourseId(courseId);
         scheduleTask.setStartTime(taskStartTime);
         scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
-        qnSchedule.add(scheduleTask); 
+        qnSchedule.add(scheduleTask);
     }
 
     //课程直播超时 极光推送
@@ -441,10 +441,68 @@ public class MessagePushServerImpl extends AbstractMsgService {
             scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
             qnSchedule.add(scheduleTask); 
         }
-    } 
-    
+    }
 
-    
+    //课程开始讲师未出现 极光推送
+    @SuppressWarnings("unchecked")
+    @FunctionName("processCourseStartIM")
+    public void processCourseStartIM(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        String appName = requestEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        log.debug("---------------将课程加入直播开始但是讲师未出现提醒定时任务"+reqMap);
+        String courseId = reqMap.get("course_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
+            return;
+        }
+        String lecturer_id = reqMap.get("lecturer_id").toString();
+        //课程开始时间
+        long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+
+        if(taskStartTime > 0){
+            ScheduleTask scheduleTask = new ScheduleTask(){
+                @Override
+                public void process() {
+                    log.debug("----------发送上课开始的im消息 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+                    Map<String,Object> courseCacheMap = new HashMap<>();
+                    courseCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+                    String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
+                    Map<String,String> courseMap = jedis.hgetAll(courseKey);
+                    ////发送结束推送消息
+                    long currentTime = System.currentTimeMillis();
+                    String mGroupId = jedis.hget(courseKey,"im_course_id");
+                    String sender = "system";
+                    Map<String,Object> infomation = new HashMap<>();
+                    infomation.put("course_id", courseId);
+                    infomation.put("creator_id", courseMap.get("lecturer_id"));
+                    infomation.put("message",  MiscUtils.getConfigKey("course_start_msg"));
+                    infomation.put("message_id",MiscUtils.getUUId());
+                    infomation.put("message_imid",infomation.get("message_id"));
+                    infomation.put("message_type", "1");
+                    infomation.put("send_type", "5");//5开始
+                    infomation.put("create_time", currentTime);
+                    Map<String,Object> messageMap = new HashMap<>();
+                    messageMap.put("msg_type","1");
+                    messageMap.put("app_name",appName);
+                    messageMap.put("send_time",currentTime);
+                    messageMap.put("information",infomation);
+                    messageMap.put("mid",infomation.get("message_id"));
+                    String content = JSON.toJSONString(messageMap);
+                    IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+                }
+            };
+            scheduleTask.setId(courseId);
+            scheduleTask.setCourseId(courseId);
+            scheduleTask.setLecturerId(lecturer_id);
+            scheduleTask.setStartTime(taskStartTime);
+            scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
+            qnSchedule.add(scheduleTask);
+        }
+    }
+
+
+
+
     //开播预先24H提醒定时任务取消
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseStartLongNoticeCancel")
