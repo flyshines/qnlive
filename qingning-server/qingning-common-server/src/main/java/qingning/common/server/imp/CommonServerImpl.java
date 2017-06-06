@@ -1131,6 +1131,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
 
+                switch (courseMap.get("status")){
+                    case "1":
+                        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+                        if(courseMap.get("status").equals("4")){
+                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,courseId);
+                        }else{
+                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,courseId);
+                        }
+                        break;
+                    case "2":
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,courseId);
+                        break;
+                }
                 query.clear();
                 String lecturerId = courseMap.get("lecturer_id");
                 query.put("lecturer_id", lecturerId);
@@ -2985,55 +2998,68 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @FunctionName("recommendCourse")
     public Map<String, Object> recommendCourse (RequestEntity reqEntity) throws Exception{
         String appName = reqEntity.getAppName();
-        Map<String,Object> map = (Map<String, Object>) reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
-        Integer page_num = Integer.valueOf(map.get("page_num").toString());
-        map.put("page_num",page_num);
-        Integer page_count = Integer.valueOf(map.get("page_count").toString());
-        map.put("page_count",page_count);
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        int select_type = Integer.parseInt(map.get("select_type").toString());//查询类型1是推荐课程换一换 2推荐课程下拉
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        Integer page_count = Integer.valueOf(reqMap.get("page_count").toString());
+        Integer select_type = Integer.parseInt(reqMap.get("select_type").toString());//查询类型1是推荐课程换一换 2推荐课程下拉
+        String status = reqMap.get("status").toString();
+        String course_id = reqMap.get("course_id").toString();//课程id
         Jedis jedis = jedisUtils.getJedis(appName);
+        if(status.equals("4")){
+            if(MiscUtils.isEmpty(course_id)){
+                
+            }else{
 
-        if(select_type == 2 || select_type == 1 ){
-            List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
-            if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
-                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(appName);//查询推荐课程
-                jedis.set(Constants.RECOMMEND_COURSE_NUM,""+recommendCourseList.size());
-                for(Map<String, Object> recommendCourse : recommendCourseList){
-                    jedis.zadd(Constants.CACHED_KEY_RECOMMEND_COURSE, Integer.valueOf( recommendCourse.get("recommend_seat").toString()),recommendCourse.get("course_id").toString());
-                    Map<String, String> keyMap = new HashMap<String, String>();
-                    keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, recommendCourse.get("course_id").toString());
-                    String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
-                    jedis.hset(key,"recommend_seat",recommendCourse.get("recommend_seat").toString());
-                }
             }
-            if(select_type == 1){
-                if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //比较是否是推荐课程的最大值  如果是最大值就归零
-                    page_num = 0;
-                    map.put("page_num",page_num);
-                }
-            }
-            if(jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//存在
-                int startIndex = page_num;
-                int endIndex = page_num + page_count-1;
-                Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//获取推荐课程
-                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//如果是换一换 并且 查询的结果不够
-                    startIndex = 0;
-                    endIndex = page_count - recommendCourseIdSet.size() - 1;
-                    recommendCourseIdSet.addAll(jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex));
-                }
-                Map<String,String> queryParam = new HashMap<String,String>();
-                for(String courseId : recommendCourseIdSet){//循环读取课程信息
-                    queryParam.put("course_id", courseId);
-                    Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
-                    courseByRecommendList.add(courseInfoMap);
-                }
-            }
-            if(! MiscUtils.isEmpty(courseByRecommendList)){
-                resultMap.put("recommend_courses",this.setStudentAndLecturerNickName(courseByRecommendList,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
-            }
+
+
         }
+
+
+
+
+
+
+//        if(select_type == 2 || select_type == 1 ){
+//            List<Map<String, Object>> courseByRecommendList = new ArrayList<>();
+//            if(!jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//查看有没有推荐课程
+//                List<Map<String, Object>> recommendCourseList = commonModuleServer.findCourseByRecommend(appName);//查询推荐课程
+//                jedis.set(Constants.RECOMMEND_COURSE_NUM,""+recommendCourseList.size());
+//                for(Map<String, Object> recommendCourse : recommendCourseList){
+//                    jedis.zadd(Constants.CACHED_KEY_RECOMMEND_COURSE, Integer.valueOf( recommendCourse.get("recommend_seat").toString()),recommendCourse.get("course_id").toString());
+//                    Map<String, String> keyMap = new HashMap<String, String>();
+//                    keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, recommendCourse.get("course_id").toString());
+//                    String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+//                    jedis.hset(key,"recommend_seat",recommendCourse.get("recommend_seat").toString());
+//                }
+//            }
+//            if(select_type == 1){
+//                if(page_num == Integer.valueOf(jedis.get(Constants.RECOMMEND_COURSE_NUM))){ //比较是否是推荐课程的最大值  如果是最大值就归零
+//                    page_num = 0;
+//                    map.put("page_num",page_num);
+//                }
+//            }
+//            if(jedis.exists(Constants.CACHED_KEY_RECOMMEND_COURSE)){//存在
+//                int startIndex = page_num;
+//                int endIndex = page_num + page_count-1;
+//                Set<String> recommendCourseIdSet = jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex);//获取推荐课程
+//                if(select_type == 1 && recommendCourseIdSet.size() < page_count){//如果是换一换 并且 查询的结果不够
+//                    startIndex = 0;
+//                    endIndex = page_count - recommendCourseIdSet.size() - 1;
+//                    recommendCourseIdSet.addAll(jedis.zrange(Constants.CACHED_KEY_RECOMMEND_COURSE, startIndex, endIndex));
+//                }
+//                Map<String,String> queryParam = new HashMap<String,String>();
+//                for(String courseId : recommendCourseIdSet){//循环读取课程信息
+//                    queryParam.put("course_id", courseId);
+//                    Map<String, Object> courseInfoMap =(Map)CacheUtils.readCourse(courseId, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+//                    courseByRecommendList.add(courseInfoMap);
+//                }
+//            }
+//            if(! MiscUtils.isEmpty(courseByRecommendList)){
+//                resultMap.put("recommend_courses",this.setStudentAndLecturerNickName(courseByRecommendList,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
+//            }
+//        }
         return resultMap;
     }
 

@@ -89,7 +89,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	if(time<=currentTime || isTheSameDate){
                     RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
 					requestEntity.setAppName(appName);
-                    if(realStartTime>0){
+                    if(time>0){
                     	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
                     	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
                     	
@@ -118,7 +118,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
 	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
 
-						requestEntityTask.setFunctionName("processCourseStartIM");
+						requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
 						messagePushServerImpl.processCourseStartIM(requestEntityTask,jedisUtils,context);
 
 	            	} else if((date-currentDate)/(1000*60*60*24) == 1){

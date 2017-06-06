@@ -637,7 +637,8 @@
 				<inputs>
 					<param name="select_type" type="string"   require="Y,000100" />
 					<param name="page_count" type="string"   require="Y,000100" />
-					<param name="page_num" type="string"   require="Y,000100" />
+					<param name="course_id" type="string"   />
+					<param name="status" type="string"   />
 				</inputs>
 				<outputs>
 					<param name="recommend_courses" type="list">

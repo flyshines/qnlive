@@ -466,6 +466,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     messageMap.put("mid",infomation.get("message_id"));
                     String content = JSON.toJSONString(messageMap);
                     IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_PREDICTION,courseId);//从热门推荐预告列表删除
+                    long lops = Long.valueOf(courseMap.get("student_num"))+ Long.valueOf(courseMap.get("extra_num"));
+                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,courseId);//加入热门推荐正在直播列表
                 }
             };
             scheduleTask.setId(courseId);

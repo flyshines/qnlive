@@ -941,6 +941,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.clear();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
         Long nowStudentNum = 0L;
         if(jedis.exists(courseKey)){
             //jedis.hincrBy(courseKey, "student_num", 1);
@@ -952,10 +953,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
         	}
         	jedis.hset(courseKey, "student_num", num+"");
-        	//long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
-        	//if(lastNum<num){
-        	//	jedis.hset(courseKey, "student_num", num+"");
-        	//}
+            Map<String, String> courseMap = jedis.hgetAll(courseKey);
+            switch (courseMap.get("status")){
+                case "1":
+                    MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+                    if(courseMap.get("status").equals("4")){
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,course_id);
+                    }else{
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,course_id);
+                    }
+                    break;
+                case "2":
+                    jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,course_id);
+                    break;
+            }
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
         }

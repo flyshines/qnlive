@@ -448,9 +448,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.zadd(platformCourseList, lpos, courseId);
 
 
+        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 0, courseId);//热门推荐 预告
+
         map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
         String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
         jedis.zadd(classifyCourseKey, lpos, courseId);
+
+
+
 
         //4.6 将课程插入到平台分类列表 分类列表
         map.clear();
@@ -538,24 +543,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             this.mqUtils.sendMessage(mqRequestEntity);
         }
 
-        //<editor-fold desc="Description">
-        //向关注者进行极光推送，使用标签进行推送 //TODO
-//        JSONObject obj = new JSONObject();
-
-//        List<String> followUserIds = lectureModuleServer.findFollowUserIdsByRoomId(roomId);
-//        if(MiscUtils.isEmpty(followUserIds)){
-//            return resultMap;
-//        }
-//        String roomName = jedis.hget(liveRoomKey,"room_name");
-//        obj.put("body",String.format(MiscUtils.getConfigByKey("jpush_room_follow_new_course"), roomName,reqMap.get("course_title").toString()));
-//        obj.put("user_ids", followUserIds);
-//        obj.put("msg_type","11");
-//        Map<String,String> extrasMap = new HashMap<>();
-//        extrasMap.put("msg_type","11");
-//        extrasMap.put("course_id",dbResultMap.get("course_id").toString());
-//        obj.put("extras_map", extrasMap);
-//        JPushHelper.push(obj);//TODO
-        //</editor-fold>
 
         map.clear();
         map.put("lecturer_id", userId);        
@@ -690,12 +677,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         startLecturerMessageInformation.put("send_type","0");
         startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
         startLecturerMessageInformation.put("creator_nick_name",userInfo.get("nick_name"));
-//        Map<String,Object> startLecturerMessageMap = new HashMap<>();
-//        startLecturerMessageMap.put("msg_type","1");
-//        startLecturerMessageMap.put("send_time", System.currentTimeMillis());
-//        startLecturerMessageMap.put("create_time", System.currentTimeMillis());
-//        startLecturerMessageMap.put("information",startLecturerMessageInformation);
-//        startLecturerMessageMap.put("mid",startLecturerMessageInformation.get("message_id"));
 
         String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
 //					//1.将聊天信息id插入到redis zsort列表中
@@ -1013,10 +994,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, reqMap.get("course_id").toString());
             jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, lpos, reqMap.get("course_id").toString());
 
+            jedis.zrem(Constants.SYS_COURSES_RECOMMEND_LIVE,course_id);//从热门推荐正在直播列表删除
+            long lops = Long.valueOf(course.get("student_num"))+ Long.valueOf(course.get("extra_num"));
+            jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);//加入热门推荐结束列表
+
+
             map.put(Constants.CACHED_KEY_CLASSIFY,course.get("classify_id"));
             jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), reqMap.get("course_id").toString());//删除预告
             jedis.zadd(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map), lpos, reqMap.get("course_id").toString());//在结束中增加
-
 
             //1.5如果课程标记为结束，则清除该课程的禁言缓存数据
             map.put(Constants.CACHED_KEY_COURSE_FIELD, userId);
