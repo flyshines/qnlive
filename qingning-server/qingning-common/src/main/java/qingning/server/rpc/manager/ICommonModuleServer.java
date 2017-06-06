@@ -167,4 +167,10 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 根据map中的参数查询banner总数量
+	 * @param reqMap
+	 * @return
+	 */
+	int findBannerCountByMap(Map<String, Object> reqMap);
 }

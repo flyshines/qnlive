@@ -1069,7 +1069,7 @@ public class CommonController extends AbstractController {
     @RequestMapping(value="/common/banner/new", method=RequestMethod.POST)
     public @ResponseBody ResponseEntity addBanner( 
 		    HttpEntity<Object> entity,
-		    @RequestHeader("access_token") String accessToken,
+		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 		    @RequestHeader("version") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version, appName);
@@ -1102,7 +1102,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="page_count", defaultValue="20") long pageCount,
     		@RequestParam(value="create_time", defaultValue="0") long createTime,
     		@RequestParam(value="score", defaultValue="-1") int score,
-    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
     		@RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getBannerListBySearch", accessToken, version, appName);

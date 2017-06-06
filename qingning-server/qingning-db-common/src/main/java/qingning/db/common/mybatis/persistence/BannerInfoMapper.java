@@ -18,4 +18,10 @@ public interface BannerInfoMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> selectBannerInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 根据map中的参数查询banner总数量
+	 * @param reqMap
+	 * @return
+	 */
+	int selectBannerCountByMap(Map<String, Object> reqMap);
 }
