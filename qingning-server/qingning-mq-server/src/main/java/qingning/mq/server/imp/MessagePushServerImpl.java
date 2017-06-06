@@ -411,27 +411,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj,appName);
 
-                    ////发送结束推送消息
-                    long currentTime = System.currentTimeMillis();
-                    String mGroupId = jedis.hget(courseKey,"im_course_id");
-                    String sender = "system";
-                    Map<String,Object> infomation = new HashMap<>();
-                    infomation.put("course_id", courseId);
-                    infomation.put("creator_id", courseMap.get("lecturer_id"));
-                    infomation.put("message",  MiscUtils.getConfigKey("course_start_msg"));
-                    infomation.put("message_id",MiscUtils.getUUId());
-                    infomation.put("message_imid",infomation.get("message_id"));
-                    infomation.put("message_type", "1");
-                    infomation.put("send_type", "5");//5开始
-                    infomation.put("create_time", currentTime);
-                    Map<String,Object> messageMap = new HashMap<>();
-                    messageMap.put("msg_type","1");
-                    messageMap.put("app_name",appName);
-                    messageMap.put("send_time",currentTime);
-                    messageMap.put("information",infomation);
-                    messageMap.put("mid",infomation.get("message_id"));
-                    String content = JSON.toJSONString(messageMap);
-                    IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
         		}
         	};
         	scheduleTask.setId(courseId);
@@ -450,7 +429,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入直播开始但是讲师未出现提醒定时任务"+reqMap);
+        log.debug("---------------将课程加发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
             return;
@@ -493,7 +472,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
             };
             scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
-            scheduleTask.setLecturerId(lecturer_id);
             scheduleTask.setStartTime(taskStartTime);
             scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
             qnSchedule.add(scheduleTask);
