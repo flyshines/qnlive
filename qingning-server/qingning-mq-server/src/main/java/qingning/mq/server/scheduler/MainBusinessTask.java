@@ -149,15 +149,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 		for(String appName : appNames){//根据不同的app 执行功能不同的任务
 			backstageMethod(appName);
 		}
-//		logger.info("=====> 主业务定时任务驱动开始  ====");
-//		for(AbstractMsgService server : list){
-//			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
-//			try {
-//				server.process(null, jedisUtils, context);
-//			} catch (Exception e) {
-//				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
-//			}
-//		}
+
 	}
 	public void backstageMethod(String appName){
 		for(AbstractMsgService server : list){

@@ -637,7 +637,8 @@
 				<inputs>
 					<param name="select_type" type="string"   require="Y,000100" />
 					<param name="page_count" type="string"   require="Y,000100" />
-					<param name="page_num" type="string"   require="Y,000100" />
+					<param name="course_id" type="string"   />
+					<param name="status" type="string"   />
 				</inputs>
 				<outputs>
 					<param name="recommend_courses" type="list">
@@ -786,6 +787,51 @@
 					<param name="app_names" type="string" format="dlive|qnlive,000004" require="Y,000100"/>
 				</inputs>
 				<outputs>
+				</outputs>
+			</function>
+			
+			<!-- 新增轮播 -->
+			<function name="addBanner">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_name" type="string" require="Y,000100" />
+					<param name="banner_img_url" type="string" require="Y,000100" />
+					<param name="banner_type" type="int" require="Y,000100" />
+					<param name="status" type="int" require="Y,000100" />
+					<param name="score" type="int" require="N" />
+					<param name="jump_url" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			
+			<!-- 搜索banner列表 -->
+			<function name="getBannerListBySearch">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_name" type="string" require="N" />
+					<param name="status" type="int" require="N" />
+					<param name="banner_type" type="int" require="N" />
+					<param name="page_count" type="long" require="N" />
+					<param name="create_time" type="long" require="N" />
+					<param name="score" type="int" require="N" />
+				</inputs>
+				<outputs>
+					<param name="banner_info_list" type="list">
+						<param name="banner_id" type="string" />
+						<param name="banner_name" type="string" />
+						<param name="banner_img_url" type="string" />
+						<param name="banner_type" type="int" />
+						<param name="jump_url" type="string" />
+						<param name="create_time" type="long" />
+						<param name="score" type="int" />
+						<param name="status" type="int" />
+					</param>
+					<param name="total_num" type="long" />
 				</outputs>
 			</function>
 		</default>

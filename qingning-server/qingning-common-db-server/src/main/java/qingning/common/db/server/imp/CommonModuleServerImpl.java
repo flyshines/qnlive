@@ -848,5 +848,27 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		classifyInfoMapper.updateByPrimaryKeySelective(record);
 	}
 
+	/**
+	 * 新增轮播
+	 */
+	@Override
+	public int addBanner(Map<String, Object> insertMap) {
+		return bannerInfoMapper.insertBanner(insertMap);
+	}
 
+	/**
+	 * 根据map中的参数查询banner
+	 */
+	@Override
+	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
+	}
+	
+	/**
+	 * 根据map中的参数查询banner总数量
+	 */
+	@Override
+	public int findBannerCountByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerCountByMap(reqMap);
+	}
 }

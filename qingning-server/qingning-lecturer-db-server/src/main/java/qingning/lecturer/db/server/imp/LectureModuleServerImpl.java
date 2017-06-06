@@ -164,6 +164,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		course.put("course_url", reqMap.get("course_url"));
 		Date startTime = new Date(MiscUtils.convertObjectToLong(reqMap.get("start_time")));
 		course.put("start_time", startTime);
+		course.put("real_start_time", startTime);
 		String course_type = (String)reqMap.get("course_type");
 		course.put("course_type", reqMap.get("course_type"));
 		course.put("status", "1");
@@ -215,6 +216,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			}
 			if(!MiscUtils.isEmpty(start_time)){
 				course.put("start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
+				course.put("real_start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
 			}
 			course.put("course_remark", reqMap.get("course_remark"));
 			course.put("course_url", reqMap.get("course_url"));
