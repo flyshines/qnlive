@@ -68,7 +68,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        updateLiveRoomData(lecturerSet,pipeline);
 			        //同步课程数据
 			        updateCourseData(lecturerSet,pipeline);
-			        
+			        //更新讲师分销信息
 			        updateLecturerDistributionLink(lecturerSet, jedis);
 				}
 				

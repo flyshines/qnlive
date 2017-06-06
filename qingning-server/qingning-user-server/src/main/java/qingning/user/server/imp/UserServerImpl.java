@@ -22,6 +22,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -941,6 +942,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.clear();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
         Long nowStudentNum = 0L;
         if(jedis.exists(courseKey)){
             //jedis.hincrBy(courseKey, "student_num", 1);
@@ -952,10 +954,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         		num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
         	}
         	jedis.hset(courseKey, "student_num", num+"");
-        	//long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
-        	//if(lastNum<num){
-        	//	jedis.hset(courseKey, "student_num", num+"");
-        	//}
+            Map<String, String> courseMap = jedis.hgetAll(courseKey);
+            switch (courseMap.get("status")){
+                case "1":
+                    MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+                    if(courseMap.get("status").equals("4")){
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,course_id);
+                    }else{
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,course_id);
+                    }
+                    break;
+                case "2":
+                    jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,course_id);
+                    break;
+            }
         }else {
             userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
         }
@@ -1694,6 +1706,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String, Object> userGainsByUserId = userModuleServer.findUserGainsByUserId(userId);
+        Map<String,Object> innerMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        innerMap.put("user_id", userId);
+        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
+        userGainsByUserId.put("phone",userMap.get("phone_number"));
         if(MiscUtils.isEmpty(userGainsByUserId)){
             throw new QNLiveException("170001");
         }
@@ -1712,24 +1729,25 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     	String nowStr = sdf.format(new Date());
     	Map<String, Object> resultMap = new HashMap<>();
-    /*	
+        /*
     	1.验证登录用户的手机验证码
     	2.判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
     	4.判断用户余额是否大于100
     	5.判断提现金额是否小于等于余额
     	6.插入提现申请表
-    */	
+        */
     	/*
     	 * 获取请求参数
     	 */
     	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
     	//获取请求金额
-    	int initialAmount = Integer.parseInt(reqMap.get("initial_amount").toString());
+        BigDecimal amount = BigDecimal.valueOf(DoubleUtil.mul(Double.valueOf(reqMap.get("initial_amount").toString()),100D));
+        Integer initialAmount = amount.intValue();
         /*
     	 * 判断提现余额是否大于10000
     	 */
         if(initialAmount < 10000){
-            logger.error("提现金额小于10000");
+            logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
         }else{
             reqMap.put("actual_amount",initialAmount);
@@ -1749,7 +1767,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         phoneMap.put("code",verification_code);
         String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        if(!jedis.exists(codeKey)){
+        /*if(!jedis.exists(codeKey)){
             throw new QNLiveException("130009");
         }
         String code = jedis.get(codeKey);//拿到值
@@ -1757,7 +1775,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(!code.equals(verification_code)){//进行判断
                 throw new QNLiveException("130002");
             }
-        }
+        }*/
     	/*
     	 * 判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
     	 */

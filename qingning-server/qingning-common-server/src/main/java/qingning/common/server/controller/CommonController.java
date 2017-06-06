@@ -898,7 +898,8 @@ public class CommonController extends AbstractController {
      * 推荐
      * @param select_type 查询类型  1是推荐课程换一换 2推荐课程下拉
      * @param page_count 分页
-     * @param page_num 分页参数
+     * @param course_id 课程id
+     * @param status 课程状态
      * @param accessToken
      * @param version
      * @return
@@ -910,7 +911,8 @@ public class CommonController extends AbstractController {
     ResponseEntity recommendCourse(
             @RequestParam(value = "select_type",defaultValue = "0") String select_type,
             @RequestParam(value = "page_count", defaultValue = "20") String page_count,
-            @RequestParam(value ="page_num",defaultValue = "0") String page_num,
+            @RequestParam(value ="course_id",defaultValue = "") String course_id,
+            @RequestParam(value ="status",defaultValue = "4") String status,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version)throws Exception{
@@ -918,7 +920,8 @@ public class CommonController extends AbstractController {
         Map<String,String> map = new HashMap<>();
         map.put("select_type",select_type);
         map.put("page_count",page_count);
-        map.put("page_num",page_num);
+        map.put("course_id",course_id);
+        map.put("status",status);
         requestEntity.setParam(map);
         return this.process(requestEntity, serviceManger, message);
     }
@@ -1113,6 +1116,28 @@ public class CommonController extends AbstractController {
         param.put("page_num", pageNum);
         requestEntity.setParam(param);
         
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 更新banner
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/update", method=RequestMethod.PUT)
+    public @ResponseBody ResponseEntity updateBannerInfo( 
+		    HttpEntity<Object> entity,
+		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
+		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		    @RequestHeader("version") String version) throws Exception {
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "updateBannerInfo", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }

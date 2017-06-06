@@ -261,6 +261,9 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION = "SYS:COURSES:{classify_id}:PREDICTION";// 分类 预告/正在直播
 	public static final String CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH = "SYS:COURSES:{classify_id}:FINISH";//分类 已结束
 
+
+
+
 	public static final String CACHED_KEY_CLASSIFY = "classify_id";//分类id
 	public static final String CACHED_KEY_CLASSIFY_INFO = "SYS:CLASSIFY:{classify_id}";//分类缓存
 	public static final String CACHED_KEY_CLASSIFY_ALL = "SYS:CLASSIFY:ALL";//存入所有分类id
@@ -272,6 +275,15 @@ public final class Constants {
 
 	public static final String RECOMMEND_COURSE_NUM = "SYS:RECOMMEND:COURSE:COUNT";//推荐课程最大数
 	public static final String CACHED_KEY_RECOMMEND_COURSE="SYS:RECOMMEND:COURSE";//推荐课程
+
+
+	//zset 按照学生人数和打赏人数进行排列
+	public static final String SYS_COURSES_RECOMMEND_LIVE = "SYS:COURSES:RECOMMEND:LIVE";//热门推荐正在直播
+	public static final String SYS_COURSES_RECOMMEND_PREDICTION = "SYS:COURSES:RECOMMEND:PREDICTION";//热门推荐预告
+	public static final String SYS_COURSES_RECOMMEND_FINISH = "SYS:COURSES:RECOMMEND:FINISH";//热门推荐结束
+
+
+
 
 	public static final String COURSE_DEFAULT_CLASSINFY="9";//课程默认属性
 

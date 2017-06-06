@@ -637,7 +637,8 @@
 				<inputs>
 					<param name="select_type" type="string"   require="Y,000100" />
 					<param name="page_count" type="string"   require="Y,000100" />
-					<param name="page_num" type="string"   require="Y,000100" />
+					<param name="course_id" type="string"   />
+					<param name="status" type="string"   />
 				</inputs>
 				<outputs>
 					<param name="recommend_courses" type="list">
@@ -831,6 +832,23 @@
 						<param name="status" type="int" />
 					</param>
 					<param name="total_num" type="long" />
+				</outputs>
+			</function>
+			
+			<!-- 更新banner -->
+			<function name="updateBannerInfo">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_id" type="string" require="Y,000100" />
+					<param name="banner_name" type="string" require="N" />
+					<param name="banner_img_url" type="string" require="N" />
+					<param name="status" type="int" require="N" />
+					<param name="banner_type" type="int" require="N" />
+					<param name="score" type="int" require="N" />
+				</inputs>
+				<outputs>
 				</outputs>
 			</function>
 		</default>

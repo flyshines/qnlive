@@ -290,79 +290,78 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseStartStudentStudyNotice")
     public void processCourseStartStudentStudyNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        String appName = requestEntity.getAppName();
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------加入学生上课3min提醒定时任务"+reqMap);
-        String courseId = reqMap.get("course_id").toString();
-        String roomId = reqMap.get("room_id").toString();
-        String im_course_id = reqMap.get("im_course_id").toString();
-        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE)){
-        	return;
-        }
-        String course_title = reqMap.get("course_title").toString();
-        long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-        SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-        String str = sdf.format(start_time);
-
-        //3分钟
-        long noticeTime= 3*60*1000;
-        long taskStartTime = start_time - noticeTime;
-        if(taskStartTime > 0){
-        	ScheduleTask scheduleTask = new ScheduleTask(){
-        		@Override
-        		public void process() {
-                    log.debug("-----------加入学生上课3min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
-                    JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_study_notice"), MiscUtils.RecoveryEmoji(course_title)));
-                    List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
-                    if(MiscUtils.isEmpty(studentIds)){
-                    	return;
-                    }
-                    obj.put("user_ids",studentIds);
-                    obj.put("msg_type","10");
-                    Map<String,String> extrasMap = new HashMap<>();
-                    extrasMap.put("msg_type","10");
-                    extrasMap.put("course_id",courseId);
-                    extrasMap.put("im_course_id", im_course_id);
-                    obj.put("extras_map", extrasMap);
-                    JPushHelper.push(obj,appName);
-
-
-//                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-//                    TemplateData first = new TemplateData();
-//                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
-//                    templateMap.put("first", first);
+//        String appName = requestEntity.getAppName();
+//        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+//        log.debug("---------------加入学生上课3min提醒定时任务"+reqMap);
+//        String courseId = reqMap.get("course_id").toString();
+//        String im_course_id = reqMap.get("im_course_id").toString();
+//        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE)){
+//        	return;
+//        }
+//        String course_title = reqMap.get("course_title").toString();
+//        long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+//        SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+//        String str = sdf.format(start_time);
 //
-//                    TemplateData orderNo = new TemplateData();
-//                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//                    orderNo.setValue(MiscUtils.RecoveryEmoji(course_title));
-//                    templateMap.put("keyword1", orderNo);
-//
-//                    TemplateData wuliu = new TemplateData();
-//                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//                    wuliu.setValue(str);
-//                    templateMap.put("keyword2", wuliu);
-//
-//                    TemplateData remark = new TemplateData();
-//                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
-//                    templateMap.put("remark", remark);
-//
-//                    if (studentIds!=null && studentIds.size()>0) {
-//                        String url=String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId,roomId);
-//                        Jedis jedis = jedisUtils.getJedis(appName);
-//                        weiPush(studentIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+//        //3分钟
+//        long noticeTime= 3*60*1000;
+//        long taskStartTime = start_time - noticeTime;
+//        if(taskStartTime > 0){
+//        	ScheduleTask scheduleTask = new ScheduleTask(){
+//        		@Override
+//        		public void process() {
+//                    log.debug("-----------加入学生上课3min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+//                    JSONObject obj = new JSONObject();
+//                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_study_notice"), MiscUtils.RecoveryEmoji(course_title)));
+//                    List<String> studentIds = coursesStudentsMapper.findUserIdsByCourseId(courseId);
+//                    if(MiscUtils.isEmpty(studentIds)){
+//                    	return;
 //                    }
-
-        		}
-        	};
-        	scheduleTask.setId(courseId);
-            scheduleTask.setCourseId(courseId);
-            scheduleTask.setStartTime(taskStartTime);
-            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_15MIN_NOTICE);
-            qnSchedule.add(scheduleTask); 
-        }
+//                    obj.put("user_ids",studentIds);
+//                    obj.put("msg_type","10");
+//                    Map<String,String> extrasMap = new HashMap<>();
+//                    extrasMap.put("msg_type","10");
+//                    extrasMap.put("course_id",courseId);
+//                    extrasMap.put("im_course_id", im_course_id);
+//                    obj.put("extras_map", extrasMap);
+//                    JPushHelper.push(obj,appName);
+//
+//
+////                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+////                    TemplateData first = new TemplateData();
+////                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+////                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+////                    templateMap.put("first", first);
+////
+////                    TemplateData orderNo = new TemplateData();
+////                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+////                    orderNo.setValue(MiscUtils.RecoveryEmoji(course_title));
+////                    templateMap.put("keyword1", orderNo);
+////
+////                    TemplateData wuliu = new TemplateData();
+////                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+////                    wuliu.setValue(str);
+////                    templateMap.put("keyword2", wuliu);
+////
+////                    TemplateData remark = new TemplateData();
+////                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR);
+////                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+////                    templateMap.put("remark", remark);
+////
+////                    if (studentIds!=null && studentIds.size()>0) {
+////                        String url=String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseId,roomId);
+////                        Jedis jedis = jedisUtils.getJedis(appName);
+////                        weiPush(studentIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+////                    }
+//
+//        		}
+//        	};
+//        	scheduleTask.setId(courseId);
+//            scheduleTask.setCourseId(courseId);
+//            scheduleTask.setStartTime(taskStartTime);
+//            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_15MIN_NOTICE);
+//            qnSchedule.add(scheduleTask);
+//        }
     }
 
 
@@ -411,27 +410,6 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     obj.put("extras_map", extrasMap);
                     JPushHelper.push(obj,appName);
 
-                    ////发送结束推送消息
-                    long currentTime = System.currentTimeMillis();
-                    String mGroupId = jedis.hget(courseKey,"im_course_id");
-                    String sender = "system";
-                    Map<String,Object> infomation = new HashMap<>();
-                    infomation.put("course_id", courseId);
-                    infomation.put("creator_id", courseMap.get("lecturer_id"));
-                    infomation.put("message",  MiscUtils.getConfigKey("course_start_msg"));
-                    infomation.put("message_id",MiscUtils.getUUId());
-                    infomation.put("message_imid",infomation.get("message_id"));
-                    infomation.put("message_type", "1");
-                    infomation.put("send_type", "5");//5开始
-                    infomation.put("create_time", currentTime);
-                    Map<String,Object> messageMap = new HashMap<>();
-                    messageMap.put("msg_type","1");
-                    messageMap.put("app_name",appName);
-                    messageMap.put("send_time",currentTime);
-                    messageMap.put("information",infomation);
-                    messageMap.put("mid",infomation.get("message_id"));
-                    String content = JSON.toJSONString(messageMap);
-                    IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
         		}
         	};
         	scheduleTask.setId(courseId);
@@ -444,13 +422,12 @@ public class MessagePushServerImpl extends AbstractMsgService {
     }
 
     //课程开始讲师未出现 极光推送
-    @SuppressWarnings("unchecked")
     @FunctionName("processCourseStartIM")
     public void processCourseStartIM(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入直播开始但是讲师未出现提醒定时任务"+reqMap);
+        log.debug("---------------将课程加发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
             return;
@@ -489,11 +466,14 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     messageMap.put("mid",infomation.get("message_id"));
                     String content = JSON.toJSONString(messageMap);
                     IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_PREDICTION,courseId);//从热门推荐预告列表删除
+                    long lops = Long.valueOf(courseMap.get("student_num"))+ Long.valueOf(courseMap.get("extra_num"));
+                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,courseId);//加入热门推荐正在直播列表
                 }
             };
             scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
-            scheduleTask.setLecturerId(lecturer_id);
             scheduleTask.setStartTime(taskStartTime);
             scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
             qnSchedule.add(scheduleTask);
@@ -901,93 +881,4 @@ public class MessagePushServerImpl extends AbstractMsgService {
     }
 
 
-//    public void refreshServiceNoToken(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-//
-//        Jedis jedis = jedisUtils.getJedis();
-//        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-//        log.debug("---------------刷新服务号的ACCESSTOKEN"+reqMap);
-//        String appid = reqMap.get("authorizer_appid").toString();
-//        String lecturerid = reqMap.get("lecturer_id").toString();
-//        if(qnSchedule.containTask(appid, QNSchedule.TASK_END_COURSE)){
-//            return;
-//        }
-//
-//        long startTime = MiscUtils.convertObjectToLong(reqMap.get("expires_time"));
-//        long taskStartTime = startTime - 10*60*1000;//提前10分钟去刷新
-//
-//        ScheduleTask scheduleTask = new ScheduleTask(){
-//            @Override
-//            public void process() {
-//                log.debug("-----------两小时去刷新服务号的ACCESSTOKEN appid"+this.getId()+"  执行时间"+System.currentTimeMillis());
-//                toRefreshToken(appid, lecturerid, jedisUtils);
-//            }
-//        };
-//        scheduleTask.setId(appid);
-//        scheduleTask.setLecturerId(lecturerid);
-//        scheduleTask.setStartTime(taskStartTime);
-//        scheduleTask.setTaskName(QNSchedule.TASK_REFRESH_SERVICENO);
-//        qnSchedule.add(scheduleTask);
-//    }
-//
-//    private void toRefreshToken(String appid, String lecturerid, JedisUtils jedisUtils) {
-//
-//        Jedis jedis = jedisUtils.getJedis();
-//
-//        Map<String,Object> queryNo = new HashMap<String,Object>();
-//        queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturerid);
-//        String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
-//        Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
-//
-//        String authorizer_appid = serviceNoMap.get("authorizer_appid");
-//        String authorizer_refresh_token = serviceNoMap.get("authorizer_refresh_token");
-//        String authorizer_access_token = serviceNoMap.get("authorizer_access_token");
-//
-//        JSONObject authJsonObj = WeiXinUtil.refreshServiceAuthInfo(authorizer_access_token, authorizer_refresh_token, authorizer_appid);
-//        Object errCode = authJsonObj.get("errcode");
-//        if (errCode != null ) {
-//            log.error("创建课程推送给讲师的服务号粉丝过程中出现错误----"+authJsonObj);
-//        } else {
-//            authorizer_access_token = authJsonObj.getString("authorizer_access_token");
-//            authorizer_refresh_token = authJsonObj.getString("authorizer_refresh_token");
-//
-//            long expiresIn = authJsonObj.getLongValue("expires_in")*1000;//有效毫秒值
-//            long nowTimeStamp = System.currentTimeMillis();
-//            long expiresTimeStamp = nowTimeStamp+expiresIn;//当前毫秒值+有效毫秒值
-//
-//            //更新服务号的授权信息
-//            Map<String, String> authInfoMap = new HashMap<>();
-//
-//            authInfoMap.put("authorizer_appid", authorizer_appid);
-//            authInfoMap.put("authorizer_access_token", authorizer_access_token);
-//            authInfoMap.put("authorizer_refresh_token", authorizer_refresh_token);
-//            authInfoMap.put("expiresTimeStamp", String.valueOf(expiresTimeStamp));
-//            authInfoMap.put("lecturer_id", lecturerid);
-//
-//            //更新服务号信息插入数据库
-//            authInfoMap.put("update_time", String.valueOf(nowTimeStamp));
-//
-//            lecturerMapper.updateServiceNoInfo(authInfoMap);
-//
-//            //access_tokens刷新之后 需要更新redis里的相关数据
-//            jedis.hset(serviceNoKey, "authorizer_appid", authorizer_appid);
-//            jedis.hset(serviceNoKey, "authorizer_access_token", authorizer_access_token);
-//            jedis.hset(serviceNoKey, "authorizer_refresh_token", authorizer_refresh_token);
-//            jedis.hset(serviceNoKey, "expiresTimeStamp", String.valueOf(expiresTimeStamp));
-//    }
-
-/*    public SaveCourseMessageService getSaveCourseMessageService() {
-        return saveCourseMessageService;
-    }
-
-    public void setSaveCourseMessageService(SaveCourseMessageService saveCourseMessageService) {
-        this.saveCourseMessageService = saveCourseMessageService;
-    }
-
-    public SaveCourseAudioService getSaveCourseAudioService() {
-        return saveCourseAudioService;
-    }
-
-    public void setSaveCourseAudioService(SaveCourseAudioService saveCourseAudioService) {
-        this.saveCourseAudioService = saveCourseAudioService;
-    }*/
 }
