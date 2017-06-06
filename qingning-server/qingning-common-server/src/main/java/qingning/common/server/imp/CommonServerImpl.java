@@ -4029,8 +4029,86 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
     
+    /**
+     * 更新banner所有字段
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @FunctionName("updateBannerInfo")
     public Map<String, Object> updateBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 更新数据库
+         */
+        commonModuleServer.updateBannerByMap(reqMap);
+        /*
+         * 移除缓存
+         */
+        Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+    	for(String key : bannerKeys){
+    		jedis.del(key);
+    	}
+        
+        return resultMap;
+    }
+    
+    /**
+     * 快速更新banner
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("fastUpdateBannerInfo")
+    public Map<String, Object> fastUpdateBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 更新数据库
+         */
+        commonModuleServer.updateBannerByMapNotNull(reqMap);
+        /*
+         * 移除缓存
+         */
+        Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+    	for(String key : bannerKeys){
+    		jedis.del(key);
+    	}
+        
+        return resultMap;
+    }
+    
+    /**
+     * 移除banner
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("removeBannerInfo")
+    public Map<String, Object> removeBannerInfo(RequestEntity reqEntity) throws Exception{
         Map<String, Object> resultMap = new HashMap<String, Object>();
         /*
          * 获取请求参数
@@ -4046,7 +4124,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         /*
          * 更新数据库
          */
-        commonModuleServer.updateBannerByMap(reqMap);
+        commonModuleServer.deleteBannerInfoByMap(reqMap);
+        //移除缓存
         
         return resultMap;
     }

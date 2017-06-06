@@ -1141,5 +1141,49 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+    
+    /**
+     * 快速更新banner
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/fast_update", method=RequestMethod.PUT)
+    public @ResponseBody ResponseEntity fastUpdateBannerInfo( 
+		    HttpEntity<Object> entity,
+		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
+		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		    @RequestHeader("version") String version) throws Exception {
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "fastUpdateBannerInfo", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 移除banner
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/remove", method=RequestMethod.DELETE)
+    public @ResponseBody ResponseEntity removeBannerInfo( 
+		    HttpEntity<Object> entity,
+		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
+		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		    @RequestHeader("version") String version) throws Exception {
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "removeBannerInfo", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }

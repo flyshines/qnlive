@@ -842,11 +842,42 @@
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
+					<param name="banner_name" type="string" require="Y,000100" />
+					<param name="banner_img_url" type="string" require="Y,000100" />
+					<param name="status" type="int" require="Y,000100" />
+					<param name="banner_type" type="int" require="Y,000100" />
+					<param name="score" type="int" require="Y,000100" />
+					<param name="jump_url" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			
+			<!-- 快速更新banner -->
+			<function name="fastUpdateBannerInfo">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_id" type="string" require="Y,000100" />
 					<param name="banner_name" type="string" require="N" />
 					<param name="banner_img_url" type="string" require="N" />
 					<param name="status" type="int" require="N" />
 					<param name="banner_type" type="int" require="N" />
 					<param name="score" type="int" require="N" />
+					<param name="jump_url" type="string" require="N" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			
+			<!-- 移除banner -->
+			<function name="removeBannerInfo">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_id" type="string" require="Y,000100" />
 				</inputs>
 				<outputs>
 				</outputs>

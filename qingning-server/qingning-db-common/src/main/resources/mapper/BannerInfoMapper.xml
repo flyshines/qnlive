@@ -118,4 +118,43 @@
 	</where>
   </select>
   
+  <!-- 根据map中非空字段更新banner -->
+  <update id="updateBannerInfoByMapNotNull" parameterType="hashmap">
+  	update t_banner_info
+  	<set>
+  		<if test="banner_name != null and banner_name != ''">
+  			banner_name = #{banner_name},
+  		</if>
+  		<if test="banner_img_url != null and banner_img_url != ''">
+  			banner_img_url = #{banner_img_url},
+  		</if>
+  		<if test="banner_type != null">
+  			banner_type = #{banner_type},
+  		</if>
+  		<if test="status != null">
+  			status = #{status},
+  		</if>
+  		<if test="score != null">
+  			score = #{score},
+  		</if>
+  		<if test="jump_url != null and jump_url != ''">
+  			jump_url = #{jump_url},
+  		</if>
+  	</set>
+  	where banner_id = #{banner_id} and app_name = #{app_name}
+  </update>
+  
+  <!-- 更新banner所有字段 -->
+  <update id="updateBannerInfoByMap" parameterType="hashmap">
+  	update t_banner_info set banner_name = #{banner_name}, banner_img_url = #{banner_img_url}, 
+  		banner_type = #{banner_type}, status = #{status}, score = #{score}, jump_url = #{jump_url}
+  	where banner_id = #{banner_id} and app_name = #{app_name}
+  </update>
+  
+  <!-- 移除banner -->
+  <delete id="delectBannerInfoByMap" parameterType="hashmap">
+  	delete from t_banner_info
+  	where banner_id = #{banner_id} and app_name = #{app_name}
+  </delete>
+  
 </mapper>
