@@ -5,3 +5,7 @@
 target/
 
 /qingning-server/*/.settings
+/qingning-server/.settings
+/qingning-server/*/.project
+/qingning-server/*/.classpath
+/qingning-server/.project
