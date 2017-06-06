@@ -792,7 +792,7 @@
 			<!-- 新增轮播 -->
 			<function name="addBanner">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="Y,000100" />
@@ -809,7 +809,7 @@
 			<!-- 搜索banner列表 -->
 			<function name="getBannerListBySearch">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="N" />
@@ -830,6 +830,7 @@
 						<param name="score" type="int" />
 						<param name="status" type="int" />
 					</param>
+					<param name="total_num" type="long" />
 				</outputs>
 			</function>
 		</default>

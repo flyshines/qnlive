@@ -3980,7 +3980,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
          */
         List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
         
+        
         resultMap.put("banner_info_list", bannerList);
+        resultMap.put("total_num", commonModuleServer.findBannerCountByMap(reqMap));
         return resultMap;
     }
 

@@ -863,4 +863,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
 		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
 	}
+	
+	/**
+	 * 根据map中的参数查询banner总数量
+	 */
+	@Override
+	public int findBannerCountByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerCountByMap(reqMap);
+	}
 }
