@@ -3418,18 +3418,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             bannerInfoList = commonModuleServer.findBannerInfoAllByAppName(appName);//查找广告位
             if(! MiscUtils.isEmpty(bannerInfoList)){
                 Map<String,String> banner_info = new HashMap<>();
+                List<Map<String, Object>> noScoreBannerList = new ArrayList<>();	//未设置优先级的banner集合
                 for(Map<String, Object> bannerInfo : bannerInfoList){
-                    jedis.zadd(Constants.CACHED_KEY_BANNER_ALL,System.currentTimeMillis(),bannerInfo.get("banner_id").toString());
+                	/*
+                	 * 因为查询数据库order by的原因，未设置优先级但需要展示的banner会在结果集前面，所以需要进行判断写入缓存
+                	 */
+                	if("0".equals(bannerInfo.get("score").toString())){
+                		//循环到未设置优先级的banner，先暂时保存进noScoreBannerList中，后续在循环noScoreBannerList进行写入缓存
+                		noScoreBannerList.add(bannerInfo);
+                	}else{
+                		//循环到设置了优先级的banner，直接写入进行写入缓存
+                		jedis.zadd(Constants.CACHED_KEY_BANNER_ALL,System.currentTimeMillis(),bannerInfo.get("banner_id").toString());
+                	}
+                	
                     banner_info.put("banner_id",bannerInfo.get("banner_id").toString());
-                    banner_info.put("banner_remarks",bannerInfo.get("banner_remarks").toString());
+                    banner_info.put("banner_name",bannerInfo.get("banner_name").toString());
+                    String bannerRemarks = (String) bannerInfo.get("banner_remarks");
+                    if(!MiscUtils.isEmptyString(bannerRemarks)){
+                    	banner_info.put("banner_remarks",bannerRemarks);
+                    }
                     banner_info.put("banner_img_url",bannerInfo.get("banner_img_url").toString());
                     banner_info.put("jump_url",bannerInfo.get("jump_url").toString());
                     banner_info.put("create_time",bannerInfo.get("create_time").toString());
                     banner_info.put("status",bannerInfo.get("status").toString());
-                    banner_info.put("banner_type",bannerInfo.get("banner_type").toString());
+                    String bannerType = (String) bannerInfo.get("banner_type");
+                    if(!MiscUtils.isEmptyString(bannerType)){
+                    	banner_info.put("banner_type",bannerType);
+                    }
                     Map<String,Object> query = new HashMap<>();
                     query.put(Constants.CACHED_KEY_BANNER,bannerInfo.get("banner_id").toString());
                     jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_BANNER_INFO, query),banner_info);
+                }
+                //循环未设置优先级的banner集合
+                for(Map<String, Object> noScoreBanner : noScoreBannerList){
+                	jedis.zadd(Constants.CACHED_KEY_BANNER_ALL,System.currentTimeMillis(),noScoreBanner.get("banner_id").toString());
                 }
             }
         }
@@ -3876,6 +3898,89 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         commonModuleServer.updateClassify(param);
         //清除缓存
         jedis.del(Constants.CACHED_KEY_CLASSIFY_ALL);
+        return resultMap;
+    }
+
+
+    /**
+     * 新增轮播
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("addBanner")
+    public Map<String, Object> addBanner(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 新增t_banner表记录
+         */
+        reqMap.put("banner_id", MiscUtils.getUUId());
+        reqMap.put("create_time", new Date());
+        commonModuleServer.addBanner(reqMap);
+        
+        /*
+         * 判断是否需要删除banner缓存
+         */
+        Jedis jedis = jedisUtils.getJedis(appName);
+        if("1".equals(reqMap.get("status").toString())){
+        	logger.info("新增轮播>>>>新增的轮播需要展示，所以要删除已有的轮播缓存");
+        	Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+        	for(String key : bannerKeys){
+        		jedis.del(key);
+        	}
+        }
+        
+        return resultMap;
+    }
+    
+    /**
+     * 搜索banner列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getBannerListBySearch")
+    public Map<String, Object> getBannerListBySearch(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        //将前端long类型的create_time转换成date类型
+        long createTime = (long) reqMap.get("create_time");
+        Date createDate = null;
+        if(createTime != 0){
+        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        	createDate = new Date(createTime);
+        	reqMap.put("create_time", sdf.format(createDate));
+        }
+        
+        reqMap.put("app_name", reqEntity.getAppName());
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 查询t_banner_info表
+         */
+        List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
+        
+        resultMap.put("banner_info_list", bannerList);
         return resultMap;
     }
 

@@ -1055,5 +1055,68 @@ public class CommonController extends AbstractController {
         return responseEntity;
     }
     
+    
+    /**
+     * 新增轮播
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/new", method=RequestMethod.POST)
+    public @ResponseBody ResponseEntity addBanner( 
+		    HttpEntity<Object> entity,
+		    @RequestHeader("access_token") String accessToken,
+		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		    @RequestHeader("version") String version) throws Exception {
+    	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 搜索banner列表
+     * @param bannerName
+     * @param status
+     * @param bannerType
+     * @param pageCount
+     * @param createTime
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/banner/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getBannerListBySearch(
+    		@RequestParam(value="banner_name", defaultValue="") String bannerName,
+    		@RequestParam(value="status", defaultValue="-1") int status,
+    		@RequestParam(value="banner_type", defaultValue="-1") int bannerType,
+    		@RequestParam(value="page_count", defaultValue="20") long pageCount,
+    		@RequestParam(value="create_time", defaultValue="0") long createTime,
+    		@RequestParam(value="score", defaultValue="-1") int score,
+    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getBannerListBySearch", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("banner_name", bannerName);
+        param.put("status", status);
+        param.put("banner_type", bannerType);
+        param.put("page_count", pageCount);
+        param.put("create_time", createTime);
+        param.put("score", score);
+        requestEntity.setParam(param);
+        
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }
