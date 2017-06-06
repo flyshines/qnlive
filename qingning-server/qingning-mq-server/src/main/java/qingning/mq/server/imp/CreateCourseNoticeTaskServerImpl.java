@@ -97,6 +97,8 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
                     	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
                     	map.remove(Constants.OVERTIME_NOTICE_TYPE_30);                    	
                     	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+
+						messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
                     } else {
                     	//messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
                     }
@@ -115,7 +117,10 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	                    //开课时间到但是讲师未出现提醒
 	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
 	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
-	                   
+
+						requestEntityTask.setFunctionName("processCourseStartIM");
+						messagePushServerImpl.processCourseStartIM(requestEntityTask,jedisUtils,context);
+
 	            	} else if((date-currentDate)/(1000*60*60*24) == 1){
 	                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
 	                    messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
