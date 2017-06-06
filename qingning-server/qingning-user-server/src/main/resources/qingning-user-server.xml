@@ -375,6 +375,7 @@
 					<param name="user_total_amount" type="double"/>
 					<param name="user_total_real_incomes" type="double"/>
 					<param name="balance" type="double"/>
+					<param name="phone" type="string"/>
 				</outputs>
 			</function>
 			
@@ -387,7 +388,7 @@
 				</auth>
 				<inputs>
 					<param name="user_name" type="string" require="true, 000100"/>
-					<param name="initial_amount" type="long" require="true, 000100"/>
+					<param name="initial_amount" type="string" require="true, 000100"/>
 					<param name="alipay_account_number" type="string" require="true, 000100"/>
 					<param name="verification_code" type="string" require="true, 000100"/>
 				</inputs>
