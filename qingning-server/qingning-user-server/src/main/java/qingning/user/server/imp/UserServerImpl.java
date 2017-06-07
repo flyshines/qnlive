@@ -1758,25 +1758,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	reqMap.put("user_id", userId);
     	//获取app_name
     	String appName = (String) reqMap.get("app_name");
-    	
 
     	 //  验证登录用户的手机验证码
 
         String verification_code = reqMap.get("verification_code").toString();//验证码
-        Map<String,String> phoneMap = new HashMap();
+       /* Map<String,String> phoneMap = new HashMap();
         phoneMap.put("user_id",userId);
         phoneMap.put("code",verification_code);
-        String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
+        String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key*/
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        if(!jedis.exists(codeKey)){
-            throw new QNLiveException("130009");
-        }
-        String code = jedis.get(codeKey);//拿到值
-        if(appName.equals(Constants.HEADER_APP_NAME)){//如果是qnlive就进行判断
-            if(!code.equals(verification_code)){//进行判断
-                throw new QNLiveException("130002");
-            }
-        }
+        CodeVerifyficationUtil.verifyVerificationCode(reqEntity.getAppName(),userId,verification_code,jedis);
     	/*
     	 * 判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
     	 */
