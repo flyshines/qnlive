@@ -3030,7 +3030,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             }else{
                 Long endRank = jedis.zrank(recommendCourseListKey, course_id);
-                if(endRank != null){
+                if(endRank != null && endRank != 0){
                     endIndex = endRank - 1;
                     if(endIndex >= 0) {
                         startIndex = endIndex - page_count + 1;
@@ -3038,6 +3038,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             startIndex = 0;
                         }
                     }
+                }else if(endRank != null && endRank == 0 ){//最后一个
+                    if(courseIdList.size()<page_number){//如果课程不够
+                        if(status.equals("4")){
+                            status = "1";
+                        }else  if(status.equals("1")){
+                            status = "2";
+                        }
+                    }
+                    continue;
                 }else{
                     endIndex = -1;
                     startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
