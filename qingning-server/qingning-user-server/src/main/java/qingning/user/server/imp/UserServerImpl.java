@@ -1853,4 +1853,30 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		return resultMap;
     }
 
+    /**
+     * 获取提现记录列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("handleWithDrawResult")
+    public Map<String, Object> handleWithDrawResult(RequestEntity reqEntity) throws Exception{
+    	Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        String withdrawId = param.get("withdraw_cash_id").toString();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String remark = param.get("remark").toString();
+        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(withdrawId);
+        //long actual_amount = Long.valueOf(withdraw.get("actual_amount").toString());
+        String result = param.get("result").toString();
+        if(withdraw==null||!"0".equals(withdraw.get("state"))){
+            //未找到提现记录或重复提现
+            throw new QNLiveException("170004");
+        }else {
+            //同意提现，更新提现记录，用户余额
+            userModuleServer.updateWithdraw(withdrawId,remark,userId,result);
+        }
+		return resultMap;
+    }
+
 }

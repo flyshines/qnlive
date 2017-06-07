@@ -346,4 +346,28 @@ public class UserModuleServerImpl implements IUserModuleServer {
     public List<Map<String, Object>> findWithdrawList(Map<String, Object> param) {
         return withdrawCashMapper.selectWithdrawList(param);
     }
+
+    @Override
+    public Map<String, Object> selectWithdrawSizeById(String withdrawId) {
+        return withdrawCashMapper.selectWithdrawSizeById(withdrawId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateWithdraw(String withdrawId,String remark,String userId,String result) {
+        //更新提现记录
+        Map<String,Object> paramMap = new HashMap<>();
+        if("1".equals(result)){
+            //同意提现
+            paramMap.put("state",1);
+        }else{
+            //驳回提现
+            paramMap.put("state",2);
+        }
+        paramMap.put("withdraw_cash_id",withdrawId);
+        paramMap.put("update_time",new Date());
+        paramMap.put("remark",remark);
+        int i = withdrawCashMapper.updateWithdrawCash(paramMap);
+        return i;
+    }
 }

@@ -90,7 +90,7 @@
         update_time = #{update_time},
       </if>
     </set>
-    where user_id = #{user_id} and  withdraw_cash_id = #{withdraw_cash_id}
+    where  withdraw_cash_id = #{withdraw_cash_id}
   </update>
 
   <select id="findWithdrawCashByUser" parameterType="hashmap" resultType="hashmap">
@@ -129,6 +129,15 @@
       </if>
       ORDER BY t.create_time DESC
       limit #{page_count}
+	</select>
+  <!-- 查询-提现记录 -->
+	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="string">
+      SELECT
+          actual_amount,user_id,initial_amount,state
+      FROM
+          `t_withdraw_cash` t
+      WHERE
+        t.withdraw_cash_id = #{withdraw_cash_id}
 	</select>
 
 </mapper>

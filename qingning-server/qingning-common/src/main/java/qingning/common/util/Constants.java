@@ -345,5 +345,7 @@ public final class Constants {
 
 	public static final String HEADER_APP_NAME = "qnlive";
 
+	public static final double USER_RATE = 0.3;
+
 
 }

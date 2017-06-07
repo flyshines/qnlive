@@ -13,7 +13,11 @@ public interface WithdrawCashMapper {
 	
     void insertWithdrawCash(List<Map<String ,Object>> list);
     int insertWithdrawCashByNewUser(Map<String ,Object> reqMap);
-    void updateWithdrawCash(Map<String ,Object> reqMap);
+	/**更新-提醒记录
+	 * @param reqMap
+	 * @return
+	 */
+    int updateWithdrawCash(Map<String ,Object> reqMap);
     List<Map<String ,Object>> findWithdrawCashByUser(Map<String ,Object> reqMap);
 
 	/**分页查询-提现记录
@@ -21,4 +25,12 @@ public interface WithdrawCashMapper {
 	 * @return
 	 */
 	List<Map<String,Object>> selectWithdrawList(Map<String, Object> param);
+
+	/**根据ID查询条数
+	 * @param withdraw_cash_id
+	 * @return
+	 */
+	Map<String,Object> selectWithdrawSizeById(String withdraw_cash_id);
+
+
 }

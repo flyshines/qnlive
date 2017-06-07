@@ -415,7 +415,23 @@
 					</param>
 				</outputs>
 			</function>
+
+			<!-- 处理提现 -->
+			<function name="handleWithDrawResult">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="withdraw_cash_id" type="string" require="true, 000100"/>
+					<param name="result" type="string" format="0|1,000004" require="Y,000100"/>
+					<param name="remark" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
+
 
 		<version num="1.0.0" class="">
 		</version>

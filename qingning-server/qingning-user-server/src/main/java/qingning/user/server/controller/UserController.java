@@ -412,4 +412,26 @@ public class UserController extends AbstractController{
         return responseEntity;
     }
 
+	/**
+	 *
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/user/withdraw/result", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity getWithdrawList(
+			HttpEntity<Object> entity,
+    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "handleWithDrawResult", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
 }

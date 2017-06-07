@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
+import qingning.common.util.DoubleUtil;
 import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ICommonModuleServer;
@@ -92,6 +93,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private SystemConfigMapper systemConfigMapper;
+	@Autowired(required = true)
+	private UserGainsMapper userGainsMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -256,7 +259,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(tradeBillMapper.updateTradeBill(updateTradeBill) < 1){			
 			throw new QNLiveException("000105");			
 		}
-
 		//2.更新t_payment_bill 支付信息表
 		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
 		String status = (String)paymentBill.get("status");
@@ -274,6 +276,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
 			throw new QNLiveException("000105");
 		}
+		Map<String,Object> userGains = new HashMap<>();
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", profitId);
@@ -349,6 +352,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
 					roomDistributerCoursesMapper.afterStudentBuyCourse(roomDistributerCourseInsertMap);
 				}
+				//用户分销收益
+				userGains.put("distributer_total_amount",tradeBill.get("amount"));
+				userGains.put("distributer_real_incomes", DoubleUtil.mul(Double.valueOf(tradeBill.get("amount").toString()),Constants.USER_RATE));
 			}
 			//t_courses_students
 			Map<String,Object> student = new HashMap<String,Object>();
@@ -366,6 +372,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);			
 		}
+		//更新t_user_gains 用户收益统计表
+		userGainsMapper.updateUserGains(userGains);
 		//<editor-fold desc="Description">
 		//TODO 定时任务处理，需更新缓存
 /*		//更新收益表信息

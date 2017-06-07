@@ -121,4 +121,18 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findWithdrawList(Map<String, Object> param);
+	/**查询-提现记录数
+	 * @param withdrawId
+	 * @return
+	 */
+	Map<String, Object> selectWithdrawSizeById(String withdrawId);
+
+	/**完成提现记录
+	 * @param withdrawId
+	 * @param remark
+	 * @param userId
+	 * @param result
+	 * @return
+	 */
+	int updateWithdraw(String withdrawId,String remark,String userId,String result);
 }
