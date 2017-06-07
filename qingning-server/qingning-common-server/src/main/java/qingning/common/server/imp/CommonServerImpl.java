@@ -3002,7 +3002,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
         Integer page_count = Integer.valueOf(reqMap.get("page_count").toString());
-        Integer select_type = Integer.parseInt(reqMap.get("select_type").toString());//查询类型1是推荐课程换一换 2推荐课程下拉
         String status = reqMap.get("status").toString();
         String course_id = reqMap.get("course_id").toString();//课程id
         Jedis jedis = jedisUtils.getJedis(appName);
