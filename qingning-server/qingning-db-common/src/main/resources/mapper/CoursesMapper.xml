@@ -140,9 +140,7 @@
     order by start_time limit #{page_num},#{page_count}
   </select>
 
-  <select id="findCourseByRecommend" resultType="hashmap" parameterType="java.lang.String" >
-      SELECT * FROM t_courses WHERE app_name = #{appName} and recommend_seat  <![CDATA[ <> ]]> 0   ORDER BY recommend_seat
-  </select>
+
 
   <select id="findCourseByClassifyId" resultType="hashmap" parameterType="hashmap" >
     SELECT * FROM t_courses WHERE app_name = #{appName} and classify_id = #{classify_id}
