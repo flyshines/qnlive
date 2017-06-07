@@ -3006,18 +3006,98 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String status = reqMap.get("status").toString();
         String course_id = reqMap.get("course_id").toString();//课程id
         Jedis jedis = jedisUtils.getJedis(appName);
-        if(status.equals("4")){
-            if(MiscUtils.isEmpty(course_id)){
-                
-            }else{
+        List<String> courseIdList = new ArrayList<>();//课程id列表
 
+
+
+
+
+
+        boolean key = true;
+        do{
+            String recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_LIVE;
+            switch (status){
+                case "2":
+                    recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_FINISH;
+                    break;
+                case "1":
+                    recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_PREDICTION;
+                    break;
+            }
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            long endCourseSum = jedis.zcard(recommendCourseListKey);//获取多少个课程
+            if(MiscUtils.isEmpty(course_id)){
+                endIndex = -1;
+                startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{
+                Long endRank = jedis.zrank(recommendCourseListKey, course_id);
+                if(endRank != null){
+                    endIndex = endRank - 1;
+                    if(endIndex >= 0) {
+                        startIndex = endIndex - page_count + 1;
+                        if (startIndex < 0) {
+                            startIndex = 0;
+                        }
+                    }
+                }else{
+                    endIndex = -1;
+                    startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }
+            }
+
+            Set<String> courseIdSet = jedis.zrange(recommendCourseListKey, startIndex, endIndex);
+            List<String> transfer = new ArrayList<>();
+            for(String courseid : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                transfer.add(courseid);
+            }
+            Collections.reverse(transfer);
+            page_count = page_count-transfer.size();
+            courseIdList.addAll(transfer);
+
+            if(status.equals("2")){
+                key = false;
+            }
+            if(courseIdList.size()<page_count){//如果课程不够
+                if(status.equals("4")){
+                    status = "1";
+                }else  if(status.equals("1")){
+                    status = "2";
+                }
             }
 
 
+
+        }while ( key && courseIdList.size()<page_count);
+        List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
+        if(courseIdList.size() > 0){
+            Map<String,String> queryParam = new HashMap<String,String>();
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            for(String courseid : courseIdList){
+                queryParam.put("course_id", courseid);
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(courseid, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                if(jedis.sismember(courseKey, courseid)){//判断当前用户是否有加入这个课程
+                    courseInfoMap.put("student", "Y");
+                } else {
+                    courseInfoMap.put("student", "N");
+                }
+                queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id").toString());
+                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
+                String lecturer_nick_name = jedis.hget(lecturerKey,"nick_name");
+                courseInfoMap.put("lecturer_nick_name",lecturer_nick_name);
+                courseList.add(courseInfoMap);
+            }
         }
-
-
-
+        resultMap.put("recommend_courses",courseList);
 
 
 
@@ -3118,6 +3198,38 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             });
         }
+
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
+        for(Map<String, Object>classify : classifyList){
+            String classify_id = classify.get("classify_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("appName",appName);
+            map.put("classify_id",classify_id);
+            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
+            for(Map<String, Object> course : courseByClassifyId){
+                Long student_num = Long.valueOf(course.get("student_num").toString());
+                Long extra_num = Long.valueOf(course.get("extra_num").toString());
+                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
+                Long lops = student_num + extra_num;
+                String course_id = course.get("course_id").toString();
+                switch (course.get("status").toString()){
+                    case "1":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
+                        break;
+                    case "2":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
+                        break;
+                    case "4":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
+                        break;
+                }
+            }
+        }
+
+
 //            Map<String,String> classify_info = new HashMap<>();
 //            for(Map<String, Object>classify : classifyList){
 //                jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
@@ -3194,11 +3306,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                    jedis.zadd(courseLectureKey, lpos,course_id);//在结束中增加
 //                    jedis.zadd(courseListKey, lpos,course_id);
 //                }
-//
-//
-//
-//
-//
 //                map.clear();
 //            }
 //        }
