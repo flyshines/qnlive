@@ -3164,35 +3164,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             });
         }
 
-//        jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
-//        jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
-//        jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
-//        for(Map<String, Object>classify : classifyList){
-//            String classify_id = classify.get("classify_id").toString();
-//            Map<String,Object> map = new HashMap<>();
-//            map.put("appName",appName);
-//            map.put("classify_id",classify_id);
-//            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
-//            for(Map<String, Object> course : courseByClassifyId){
-//                Long student_num = Long.valueOf(course.get("student_num").toString());
-//                Long extra_num = Long.valueOf(course.get("extra_num").toString());
-//                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
-//                MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
-//                Long lops = student_num + extra_num;
-//                String course_id = course.get("course_id").toString();
-//                switch (course.get("status").toString()){
-//                    case "1":
-//                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
-//                        break;
-//                    case "2":
-//                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
-//                        break;
-//                    case "4":
-//                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
-//                        break;
-//                }
-//            }
-//        }
+
 
 
 //            Map<String,String> classify_info = new HashMap<>();

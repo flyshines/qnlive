@@ -2925,8 +2925,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     map.clear();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));
                     jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_FINISH,map),course_id);//老师结束课程
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_FINISH,course_id);//删除热门推荐
+
+
                 }else{//预告
                     jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);//删除平台预告课程
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_PREDICTION,course_id);//删除热门推荐
                     jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,map),course_id);//删除分类预告信息
                     map.clear();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));
