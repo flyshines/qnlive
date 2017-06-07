@@ -24,4 +24,22 @@ public interface BannerInfoMapper {
 	 * @return
 	 */
 	int selectBannerCountByMap(Map<String, Object> reqMap);
+	/**
+	 * 更新banner所有字段
+	 * @param reqMap 非null字段为要更新的参数
+	 * @return
+	 */
+	int updateBannerInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 移除banner
+	 * @param reqMap
+	 * @return
+	 */
+	int delectBannerInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 根据map中非空字段更新banner
+	 * @param reqMap
+	 * @return
+	 */
+	int updateBannerInfoByMapNotNull(Map<String, Object> reqMap);
 }

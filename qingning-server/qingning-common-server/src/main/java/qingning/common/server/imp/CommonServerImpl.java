@@ -3006,18 +3006,98 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String status = reqMap.get("status").toString();
         String course_id = reqMap.get("course_id").toString();//课程id
         Jedis jedis = jedisUtils.getJedis(appName);
-        if(status.equals("4")){
-            if(MiscUtils.isEmpty(course_id)){
-                
-            }else{
+        List<String> courseIdList = new ArrayList<>();//课程id列表
 
+
+
+
+
+
+        boolean key = true;
+        do{
+            String recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_LIVE;
+            switch (status){
+                case "2":
+                    recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_FINISH;
+                    break;
+                case "1":
+                    recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_PREDICTION;
+                    break;
+            }
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            long endCourseSum = jedis.zcard(recommendCourseListKey);//获取多少个课程
+            if(MiscUtils.isEmpty(course_id)){
+                endIndex = -1;
+                startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{
+                Long endRank = jedis.zrank(recommendCourseListKey, course_id);
+                if(endRank != null){
+                    endIndex = endRank - 1;
+                    if(endIndex >= 0) {
+                        startIndex = endIndex - page_count + 1;
+                        if (startIndex < 0) {
+                            startIndex = 0;
+                        }
+                    }
+                }else{
+                    endIndex = -1;
+                    startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }
+            }
+
+            Set<String> courseIdSet = jedis.zrange(recommendCourseListKey, startIndex, endIndex);
+            List<String> transfer = new ArrayList<>();
+            for(String courseid : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                transfer.add(courseid);
+            }
+            Collections.reverse(transfer);
+            page_count = page_count-transfer.size();
+            courseIdList.addAll(transfer);
+
+            if(status.equals("2")){
+                key = false;
+            }
+            if(courseIdList.size()<page_count){//如果课程不够
+                if(status.equals("4")){
+                    status = "1";
+                }else  if(status.equals("1")){
+                    status = "2";
+                }
             }
 
 
+
+        }while ( key && courseIdList.size()<page_count);
+        List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
+        if(courseIdList.size() > 0){
+            Map<String,String> queryParam = new HashMap<String,String>();
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            for(String courseid : courseIdList){
+                queryParam.put("course_id", courseid);
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(courseid, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                if(jedis.sismember(courseKey, courseid)){//判断当前用户是否有加入这个课程
+                    courseInfoMap.put("student", "Y");
+                } else {
+                    courseInfoMap.put("student", "N");
+                }
+                queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id").toString());
+                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, queryParam);
+                String lecturer_nick_name = jedis.hget(lecturerKey,"nick_name");
+                courseInfoMap.put("lecturer_nick_name",lecturer_nick_name);
+                courseList.add(courseInfoMap);
+            }
         }
-
-
-
+        resultMap.put("recommend_courses",courseList);
 
 
 
@@ -3118,6 +3198,38 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
             });
         }
+
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
+        jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
+        for(Map<String, Object>classify : classifyList){
+            String classify_id = classify.get("classify_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("appName",appName);
+            map.put("classify_id",classify_id);
+            List<Map<String, Object>> courseByClassifyId = commonModuleServer.findCourseByClassifyId(map);
+            for(Map<String, Object> course : courseByClassifyId){
+                Long student_num = Long.valueOf(course.get("student_num").toString());
+                Long extra_num = Long.valueOf(course.get("extra_num").toString());
+                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
+                Long lops = student_num + extra_num;
+                String course_id = course.get("course_id").toString();
+                switch (course.get("status").toString()){
+                    case "1":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
+                        break;
+                    case "2":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
+                        break;
+                    case "4":
+                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
+                        break;
+                }
+            }
+        }
+
+
 //            Map<String,String> classify_info = new HashMap<>();
 //            for(Map<String, Object>classify : classifyList){
 //                jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
@@ -3194,11 +3306,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                    jedis.zadd(courseLectureKey, lpos,course_id);//在结束中增加
 //                    jedis.zadd(courseListKey, lpos,course_id);
 //                }
-//
-//
-//
-//
-//
 //                map.clear();
 //            }
 //        }
@@ -3987,16 +4094,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
-        //将前端long类型的create_time转换成date类型
-        long createTime = (long) reqMap.get("create_time");
-        Date createDate = null;
-        if(createTime != 0){
-        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        	createDate = new Date(createTime);
-        	reqMap.put("create_time", sdf.format(createDate));
-        }
-        
-        reqMap.put("app_name", reqEntity.getAppName());
+        //计算页码，用于sql的limit语句
+        long pageNum = (long) reqMap.get("page_num");
+        long pageCount = (long) reqMap.get("page_count");
+        reqMap.put("page_num", (pageNum-1)*pageCount);
         
         /*
          * TODO 验证后台用户是否登录
@@ -4006,10 +4107,133 @@ public class CommonServerImpl extends AbstractQNLiveServer {
          * 查询t_banner_info表
          */
         List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
-        
+        if(bannerList != null){
+        	logger.info("后台搜索banner列表>>>>获得" + bannerList.size() + "条banner数据");
+        }
+        //循环为其附上对应的直播间名字或课程名字
+        int bannerType = 0;
+        Jedis jedis = jedisUtils.getJedis(appName);
+        for(Map<String, Object> bannerMap : bannerList){
+        	bannerType = (int) bannerMap.get("banner_type");
+        	if(1 == bannerType){	//跳转至直播间
+        		//从缓存中查询直播间名称
+        		String roomId = bannerMap.get("jump_url").toString();
+        		reqMap.put("room_id", roomId);
+        		String roomName = CacheUtils.readLiveRoomInfoFromCached(roomId, 
+        				"room_name", reqEntity, readLiveRoomOperation, jedis, true);
+        		bannerMap.put("jump_remark", roomName);
+        	}else if(2 == bannerType){	//跳转至课程
+        		//从缓存中查询课程名称
+        		String courseId = bannerMap.get("jump_url").toString();
+        		reqMap.put("course_id", courseId);
+        		Map<String, String> course = CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+        		bannerMap.put("jump_remark", course.get("course_title"));
+        	}
+        }
         
         resultMap.put("banner_info_list", bannerList);
         resultMap.put("total_num", commonModuleServer.findBannerCountByMap(reqMap));
+        return resultMap;
+    }
+    
+    /**
+     * 更新banner所有字段
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("updateBannerInfo")
+    public Map<String, Object> updateBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 更新数据库
+         */
+        commonModuleServer.updateBannerByMap(reqMap);
+        /*
+         * 移除缓存
+         */
+        Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+    	for(String key : bannerKeys){
+    		jedis.del(key);
+    	}
+        
+        return resultMap;
+    }
+    
+    /**
+     * 快速更新banner
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("fastUpdateBannerInfo")
+    public Map<String, Object> fastUpdateBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 更新数据库
+         */
+        commonModuleServer.updateBannerByMapNotNull(reqMap);
+        /*
+         * 移除缓存
+         */
+        Set<String> bannerKeys = jedis.keys(Constants.CACHED_KEY_BANNER_PATTERN);
+    	for(String key : bannerKeys){
+    		jedis.del(key);
+    	}
+        
+        return resultMap;
+    }
+    
+    /**
+     * 移除banner
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("removeBannerInfo")
+    public Map<String, Object> removeBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 更新数据库
+         */
+        commonModuleServer.deleteBannerInfoByMap(reqMap);
+        //移除缓存
+        
         return resultMap;
     }
 

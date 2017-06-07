@@ -879,4 +879,28 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public int findBannerCountByMap(Map<String, Object> reqMap) {
 		return bannerInfoMapper.selectBannerCountByMap(reqMap);
 	}
+
+	/**
+	 * 更新banner所有字段
+	 */
+	@Override
+	public int updateBannerByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.updateBannerInfoByMap(reqMap);
+	}
+
+	/**
+	 * 移除banner
+	 */
+	@Override
+	public int deleteBannerInfoByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.delectBannerInfoByMap(reqMap);
+	}
+
+	/**
+	 * 根据map中非空字段更新banner
+	 */
+	@Override
+	public int updateBannerByMapNotNull(Map<String, Object> reqMap) {
+		return bannerInfoMapper.updateBannerInfoByMapNotNull(reqMap);
+	}
 }
