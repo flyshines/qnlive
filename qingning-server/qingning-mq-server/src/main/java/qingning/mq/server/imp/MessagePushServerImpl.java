@@ -111,9 +111,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
 
-    	String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
-    	long taskStartTime = MiscUtils.convertObjectToLong(courseOvertime) + real_start_time ;
-        taskStartTime -= 60*60*1000;//提前60分钟 提醒课程结束
+    	//String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
+    	long taskStartTime = 5*60*60*1000 + real_start_time ;
+        //taskStartTime -= 60*60*1000;//提前60分钟 提醒课程结束
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
