@@ -3008,11 +3008,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         List<String> courseIdList = new ArrayList<>();//课程id列表
 
-
-
-
-
-
         boolean key = true;
         do{
             String recommendCourseListKey = Constants.SYS_COURSES_RECOMMEND_LIVE;
