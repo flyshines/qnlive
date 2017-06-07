@@ -3022,15 +3022,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
             long endCourseSum = jedis.zcard(recommendCourseListKey);//获取多少个课程
-            if(MiscUtils.isEmpty(course_id)){
+            //判断有没有课程id
+            if(MiscUtils.isEmpty(course_id)){//没有
                 endIndex = -1;
                 startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
                 if(startIndex < 0){
                     startIndex = 0;
                 }
-            }else{
-                Long endRank = jedis.zrank(recommendCourseListKey, course_id);
-                if(endRank != null && endRank != 0){
+            }else{//有
+                Long endRank = jedis.zrank(recommendCourseListKey, course_id);//判断当前zset中有没有这个课程
+                if(endRank != null && endRank != 0){//有
                     endIndex = endRank - 1;
                     if(endIndex >= 0) {
                         startIndex = endIndex - page_count + 1;
@@ -3047,7 +3048,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         }
                     }
                     continue;
-                }else{
+                }else{//没有
                     endIndex = -1;
                     startIndex = endCourseSum - page_count;//利用总数减去我这边需要获取的数
                     if(startIndex < 0){
@@ -3539,7 +3540,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     banner_info.put("jump_url",bannerInfo.get("jump_url").toString());
                     banner_info.put("create_time",bannerInfo.get("create_time").toString());
                     banner_info.put("status",bannerInfo.get("status").toString());
-                    String bannerType = (String) bannerInfo.get("banner_type");
+                    String bannerType =  bannerInfo.get("banner_type").toString();
                     if(!MiscUtils.isEmptyString(bannerType)){
                     	banner_info.put("banner_type",bannerType);
                     }
