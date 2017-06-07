@@ -490,18 +490,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             mqRequestEntity.setFunctionName("processCourseLiveOvertime");
             this.mqUtils.sendMessage(mqRequestEntity);
 
-            log.debug("进行超时预先提醒定时任务 提前30分钟 提醒课程结束 course_id:"+courseId);
-            timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-            mqRequestEntity.setParam(timerMap);
+            log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
             mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
             this.mqUtils.sendMessage(mqRequestEntity);
 
-            log.debug("提前10分钟 提醒课程结束 course_id:"+courseId);
-            //提前10分钟 提醒课程结束
-            timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-            mqRequestEntity.setParam(timerMap);
-            mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
-            this.mqUtils.sendMessage(mqRequestEntity);
         }
 
         if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
@@ -1184,18 +1176,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setFunctionName("processCourseLiveOvertime");
                 this.mqUtils.sendMessage(mqRequestEntity);
 
-                log.debug("进行超时预先提醒定时任务 提前30分钟 提醒课程结束 course_id:"+course_id);
-                timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-                mqRequestEntity.setParam(timerMap);
+                log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+course_id);
                 mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
                 this.mqUtils.sendMessage(mqRequestEntity);
 
-                log.debug("提前10分钟 提醒课程结束 course_id:"+course_id);
-                //提前10分钟 提醒课程结束
-                timerMap.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-                mqRequestEntity.setParam(timerMap);
-                mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
-                this.mqUtils.sendMessage(mqRequestEntity);
+
 
                 long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());
@@ -2940,8 +2925,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     map.clear();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));
                     jedis.zrem(MiscUtils.getKeyOfCachedData( Constants.CACHED_KEY_COURSE_FINISH,map),course_id);//老师结束课程
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_FINISH,course_id);//删除热门推荐
+
+
                 }else{//预告
                     jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,course_id);//删除平台预告课程
+                    jedis.zrem(Constants.SYS_COURSES_RECOMMEND_PREDICTION,course_id);//删除热门推荐
                     jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION,map),course_id);//删除分类预告信息
                     map.clear();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfoMap.get("lecturer_id"));

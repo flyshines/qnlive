@@ -66,34 +66,34 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @SuppressWarnings("unchecked")
 	@FunctionName("processCourseNotStart")
     public void processForceEndCourse(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        String appName = requestEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入未开播处理定时任务"+reqMap);
-        String courseId = reqMap.get("course_id").toString();
-
-        if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
-        	return;
-        }
-
-        long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
-
-        //15分钟没出现会结束
-        String processCourseNotStartTime = IMMsgUtil.configMap.get("course_not_start_time_msec");
-        long taskStartTime = MiscUtils.convertObjectToLong(processCourseNotStartTime) + startTime;
-
-        ScheduleTask scheduleTask = new ScheduleTask(){
-			@Override
-			public void process() {
-                log.debug("-----------课程未开播处理定时任务 课程id"+this.getCourseId()+"  执行时间"+System.currentTimeMillis());
-                processCourseEnd(coursesMapper, "1", courseId, jedis,appName);
-			}
-        };
-        scheduleTask.setId(courseId);
-        scheduleTask.setCourseId(courseId);
-        scheduleTask.setStartTime(taskStartTime);
-        scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
-        qnSchedule.add(scheduleTask);
+//        String appName = requestEntity.getAppName();
+//        Jedis jedis = jedisUtils.getJedis(appName);
+//        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+//        log.debug("---------------将课程加入未开播处理定时任务"+reqMap);
+//        String courseId = reqMap.get("course_id").toString();
+//
+//        if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
+//        	return;
+//        }
+//
+//        long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+//
+//        //15分钟没出现会结束
+//        String processCourseNotStartTime = IMMsgUtil.configMap.get("course_not_start_time_msec");
+//        long taskStartTime = MiscUtils.convertObjectToLong(processCourseNotStartTime) + startTime;
+//
+//        ScheduleTask scheduleTask = new ScheduleTask(){
+//			@Override
+//			public void process() {
+//                log.debug("-----------课程未开播处理定时任务 课程id"+this.getCourseId()+"  执行时间"+System.currentTimeMillis());
+//                processCourseEnd(coursesMapper, "1", courseId, jedis,appName);
+//			}
+//        };
+//        scheduleTask.setId(courseId);
+//        scheduleTask.setCourseId(courseId);
+//        scheduleTask.setStartTime(taskStartTime);
+//        scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
+//        qnSchedule.add(scheduleTask);
     }
 
     //课程直播超时 极光推送
@@ -103,7 +103,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入直播间即将超时预先提醒定时任务=分为 30分钟 和 10分钟"+reqMap);
+        log.debug("---------------将课程加入直播间即将超时预先提醒定时任务60分钟"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
@@ -111,17 +111,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
 
-        //1440分钟 超时结束
-    	String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
-    	long taskStartTime = MiscUtils.convertObjectToLong(courseOvertime) + real_start_time ;
-    	final boolean isThiryNotice = reqMap.containsKey(Constants.OVERTIME_NOTICE_TYPE_30);//判断 提醒类型  true=30  false=10
-
-        if(isThiryNotice){
-            taskStartTime-= 30*60*1000;// 提前30分钟 提醒课程结束
-        } else {
-            taskStartTime-= 10*60*1000;//提前10分钟 提醒课程结束
-        }
-
+    	//String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
+    	long taskStartTime = 5*60*60*1000 + real_start_time ;
+        //taskStartTime -= 60*60*1000;//提前60分钟 提醒课程结束
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
@@ -135,12 +127,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         			}
         			log.debug("-----------课程加入直播超时预先提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
         			JSONObject obj = new JSONObject();
-        			if(isThiryNotice){
-                        obj.put("body",MiscUtils.getConfigKey("jpush_course_live_overtime_per_notice_30"));
-                    } else {
-                        obj.put("body",MiscUtils.getConfigKey("jpush_course_live_overtime_per_notice_10"));
-                    }
-
+                    obj.put("body",MiscUtils.getConfigKey("jpush_course_live_overtime_per_notice_1h"));
         			obj.put("to",courseMap.get("lecturer_id"));
         			obj.put("msg_type","4");
         			Map<String,String> extrasMap = new HashMap<>();
@@ -198,7 +185,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         @SuppressWarnings("unchecked")
         String appName = requestEntity.getAppName();
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入开播预先24H提醒定时任务:测试30分钟结束"+reqMap);
+        log.debug("---------------将课程加入开播预先24H提醒定时任务"+reqMap);
 
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_24H_NOTICE)){
@@ -210,8 +197,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
         //24小时 课程开始24小时时推送提示
-        //long noticeTime= 24*60*60*1000;
-        long noticeTime= 30*60*1000;
+        long noticeTime= 24*60*60*1000;
+        //long noticeTime= 30*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -258,7 +245,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
         //提前一个小时提醒
-        long noticeTime=  Long.valueOf(MiscUtils.getConfigKey("course_live_overtime_msec"));
+        long noticeTime= 60*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){

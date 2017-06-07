@@ -896,7 +896,6 @@ public class CommonController extends AbstractController {
 
     /**
      * 推荐
-     * @param select_type 查询类型  1是推荐课程换一换 2推荐课程下拉
      * @param page_count 分页
      * @param course_id 课程id
      * @param status 课程状态
@@ -909,7 +908,6 @@ public class CommonController extends AbstractController {
     @RequestMapping(value = "/common/recommendCourse", method = RequestMethod.GET)
     public @ResponseBody
     ResponseEntity recommendCourse(
-            @RequestParam(value = "select_type",defaultValue = "0") String select_type,
             @RequestParam(value = "page_count", defaultValue = "20") String page_count,
             @RequestParam(value ="course_id",defaultValue = "") String course_id,
             @RequestParam(value ="status",defaultValue = "4") String status,
@@ -918,7 +916,6 @@ public class CommonController extends AbstractController {
             @RequestHeader("version") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "recommendCourse", accessToken, null,appName);
         Map<String,String> map = new HashMap<>();
-        map.put("select_type",select_type);
         map.put("page_count",page_count);
         map.put("course_id",course_id);
         map.put("status",status);

@@ -82,8 +82,8 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	map.put("course_title", course_title);
             	map.put("position", position);
             	map.put("im_course_id", im_course_id);
-            	if(realStartTime>0){
-            		map.put("real_start_time", realStartTime);
+            	if(time>0){
+            		map.put("real_start_time", time);
             	}
             	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
             	if(time<=currentTime || isTheSameDate){
@@ -92,10 +92,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
                     if(time>0){
                     	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
                     	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
-                    	
-                    	map.put(Constants.OVERTIME_NOTICE_TYPE_30, Constants.OVERTIME_NOTICE_TYPE_30);
-                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-                    	map.remove(Constants.OVERTIME_NOTICE_TYPE_30);                    	
+
                     	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 
 						messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
@@ -107,7 +104,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	            	if(isTheSameDate){
 	                    RequestEntity requestEntityTask = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseStartShortNotice",map);
 						requestEntityTask.setAppName(appName);
-	                     //提前五分钟开课提醒
+	                     //提前60分钟开课提醒
 	                    messagePushServerImpl.processCourseStartShortNotice(requestEntityTask, jedisUtils, context);
 	                    
 	                    //提醒学生参加课程定时任务

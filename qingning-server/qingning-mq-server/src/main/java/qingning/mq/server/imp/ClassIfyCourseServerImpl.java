@@ -48,7 +48,9 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                 //删除平台
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
-
+                jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
+                jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
+                jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
                 String likeAppNmae = "%"+appName+"%";
                 List<Map<String, Object>> classifyList = classifyInfoMapper.findClassifyInfoByAppName(likeAppNmae);
                 for(Map<String, Object> classify :classifyList ){
@@ -89,6 +91,24 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                                     jedis.hset(courseKey,"status","2");
                                 }
                             }
+                        }
+                        //统计热门推荐
+                        Long student_num = Long.valueOf(course.get("student_num").toString());
+                        Long extra_num = Long.valueOf(course.get("extra_num").toString());
+                        Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                        MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
+                        Long lops = student_num + extra_num;
+                        String course_id = course.get("course_id").toString();
+                        switch (course.get("status").toString()){
+                            case "1":
+                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
+                                break;
+                            case "2":
+                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
+                                break;
+                            case "4":
+                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
+                                break;
                         }
                     }
                 }
