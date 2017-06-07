@@ -116,7 +116,7 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	int insertWithdrawCash(Map<String, Object> record, int balance);
-	/**分页查询-提现记录
+	/**分页查询-用户提现记录
 	 * @param param
 	 * @return
 	 */
@@ -136,4 +136,9 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount);
+	/**分页查询-后台提现记录
+	 * @param param
+	 * @return
+	 */
+	List<Map<String, Object>>  findWithdrawListAll(Map<String, Object> param);
 }

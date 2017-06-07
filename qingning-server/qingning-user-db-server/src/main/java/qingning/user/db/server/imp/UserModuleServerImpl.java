@@ -378,4 +378,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
         int i = withdrawCashMapper.updateWithdrawCash(paramMap);
         return i;
     }
+
+    @Override
+    public List<Map<String, Object>> findWithdrawListAll(Map<String, Object> param) {
+        return withdrawCashMapper.selectWithdrawListAll(param);
+    }
 }

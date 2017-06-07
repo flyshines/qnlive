@@ -1,5 +1,6 @@
 package qingning.user.server.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
@@ -327,8 +328,6 @@ public class UserController extends AbstractController{
 	/**
 	 * 判断新增所有用户的gains
 	 * @param entity
-	 * @param accessToken
-	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
@@ -384,7 +383,7 @@ public class UserController extends AbstractController{
     }
 	
 	/**
-	 * 获取提现记录
+	 * 获取提现记录-客户度
 	 * @param page_count
 	 * @param createTime
 	 * @param accessToken
@@ -407,6 +406,40 @@ public class UserController extends AbstractController{
         paramMap.put("page_count", page_count);
         paramMap.put("create_time", createTime);
         
+        requestEntity.setParam(paramMap);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+	/**
+	 * 获取提现记录-后台
+	 * @param page_count
+	 * @param createTime
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/withdraw/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getWithdrawListAll(
+    		@RequestParam(value="page_count", defaultValue="10") String page_count,
+    		@RequestParam(value="create_time", defaultValue="0") String createTime,
+    		@RequestParam(value="user_name",defaultValue="") String user_name,
+    		@RequestParam(value="status",defaultValue="") String status,
+    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListAll", accessToken, version, appName);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("page_count", page_count);
+        paramMap.put("create_time", createTime);
+		if(StringUtils.isNotEmpty(user_name))
+			paramMap.put("user_name", user_name);
+		if(StringUtils.isNotEmpty(status))
+        	paramMap.put("status", status);
         requestEntity.setParam(paramMap);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;

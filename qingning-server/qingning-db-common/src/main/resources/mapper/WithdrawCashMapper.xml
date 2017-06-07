@@ -114,7 +114,7 @@
   			</foreach>
   		GROUP BY user_id
 	</select>
-	<!-- 分页查询-提现记录 -->
+	<!-- 分页查询-用户提现记录 -->
 	<select id="selectWithdrawList" resultType="hashmap" parameterType="string">
       SELECT
           t.actual_amount,
@@ -126,6 +126,33 @@
       WHERE t.user_id = #{userId}
       <if test="create_time != null" >
         AND t.create_time &gt; #{create_time}
+      </if>
+      ORDER BY t.create_time DESC
+      limit #{page_count}
+	</select>
+  <!-- 分页查询-后台提现记录 -->
+	<select id="selectWithdrawListAll" resultType="hashmap" parameterType="string">
+      SELECT
+        t.user_id,
+        t.user_name,
+        t.nick_name,
+        t.actual_amount,
+        t.alipay_account_number,
+        t.create_time,
+        t.state AS status,
+        t.remark,
+      t.handle_name
+      FROM
+          `t_withdraw_cash` t
+      WHERE 1=1
+      <if test="create_time != null" >
+        AND t.create_time &gt; #{create_time}
+      </if>
+      <if test="status != null" >
+        AND t.state = #{status}
+      </if>
+      <if test="user_name != null" >
+        AND (t.user_name like '%${user_name}%' OR t.user_id = #{user_name})
       </if>
       ORDER BY t.create_time DESC
       limit #{page_count}
