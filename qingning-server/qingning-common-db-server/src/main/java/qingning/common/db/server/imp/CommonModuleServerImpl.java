@@ -276,7 +276,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
 			throw new QNLiveException("000105");
 		}
-		Map<String,Object> userGains = new HashMap<>();
+
+		//用户这次产生的实际收益
+		long userIncome = DoubleUtil.mulForLong(Long.valueOf(tradeBill.get("amount").toString()),Constants.USER_RATE);
+		long userTotalIncome = Long.valueOf(tradeBill.get("amount").toString());
+
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", profitId);
@@ -306,7 +310,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
-
+		boolean isDist = false;
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
 			String distributer_id = null;
@@ -352,9 +356,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
 					roomDistributerCoursesMapper.afterStudentBuyCourse(roomDistributerCourseInsertMap);
 				}
-				//用户分销收益
-				userGains.put("distributer_total_amount",tradeBill.get("amount"));
-				userGains.put("distributer_real_incomes", DoubleUtil.mul(Double.valueOf(tradeBill.get("amount").toString()),Constants.USER_RATE));
+				isDist = true;
+			}else{
+
 			}
 			//t_courses_students
 			Map<String,Object> student = new HashMap<String,Object>();
@@ -372,8 +376,50 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);			
 		}
+		Map<String,Object> userGains = new HashMap<>();
+		if(isDist){
+			userGains.put("user_id",roomDistributerCache.get("distributer_id"));
+		}else{
+			userGains.put("user_id",courseMap.get("lecturer_id"));
+		}
+		Map<String,Object> userGainsOld = userGainsMapper.findUserGainsByUserId(userGains.get("user_id").toString());
+		if(userGainsOld == null){
+			//如果统计未找到做规避
+			userGains.put("live_room_total_amount",0);
+			userGains.put("live_room_real_incomes",0);
+			userGains.put("distributer_total_amount",0);
+			userGains.put("distributer_real_incomes",0);
+			userGains.put("user_total_amount",0);
+			userGains.put("user_total_real_incomes",0);
+			userGains.put("balance",0);
+		}
+		if(isDist){
+			//用户分销收益
+			userGains.put("distributer_total_amount",userTotalIncome + Long.valueOf(userGainsOld.get("distributer_total_amount").toString()));
+			userGains.put("distributer_real_incomes", userIncome + Long.valueOf(userGainsOld.get("distributer_real_incomes").toString()));
+		}else{
+			//用户直播间收益
+			userGains.put("live_room_total_amount",userTotalIncome + Long.valueOf(userGainsOld.get("distributer_total_amount").toString()));
+			userGains.put("live_room_real_incomes", userIncome + Long.valueOf(userGainsOld.get("distributer_real_incomes").toString()));
+		}
 		//更新t_user_gains 用户收益统计表
-		userGainsMapper.updateUserGains(userGains);
+		long user_total_amount = Long.valueOf(userGainsOld.get("user_total_amount").toString());
+		long user_total_real_incomes = Long.valueOf(userGainsOld.get("user_total_real_incomes").toString());
+		long balance = Long.valueOf(userGainsOld.get("balance").toString());
+		if(userGains!=null){
+			user_total_amount = user_total_amount + Long.valueOf(tradeBill.get("amount").toString());
+			user_total_real_incomes = user_total_real_incomes + userIncome;
+			balance = balance + userIncome;
+			userGains.put("user_total_amount",user_total_amount);
+			userGains.put("user_total_real_incomes",user_total_real_incomes);
+			userGains.put("balance",balance);
+			userGainsMapper.updateUserGains(userGains);
+		}else{
+			userGains.put("user_total_amount",user_total_amount);
+			userGains.put("user_total_real_incomes",user_total_real_incomes);
+			userGains.put("balance",balance);
+			userGainsMapper.insertUserGainsByNewUser(userGains);
+		}
 		//<editor-fold desc="Description">
 		//TODO 定时任务处理，需更新缓存
 /*		//更新收益表信息

@@ -132,7 +132,8 @@ public interface IUserModuleServer {
 	 * @param remark
 	 * @param userId
 	 * @param result
+	 * @param actual_amount
 	 * @return
 	 */
-	int updateWithdraw(String withdrawId,String remark,String userId,String result);
+	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount);
 }
