@@ -2246,9 +2246,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,String> reqMap = new HashMap<>();
         reqMap.put("phone_num",phoneNum);
         reqMap.put("app_name",appName);
-        if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
+        /*if(!CollectionUtils.isEmpty(commonModuleServer.findByPhone(reqMap))){
             throw new QNLiveException("130008");
-        }
+        }*/
         //  String ipAdress = map.get("ipAdress");//ip地址
         if(isMobile(phoneNum)){ //效验手机号码
             Jedis jedis = jedisUtils.getJedis(appName);
