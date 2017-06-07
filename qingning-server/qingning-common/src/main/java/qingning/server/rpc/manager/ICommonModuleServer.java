@@ -173,4 +173,22 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	int findBannerCountByMap(Map<String, Object> reqMap);
+	/**
+	 * 更新banner
+	 * @param reqMap 所有字段都更新
+	 * @return
+	 */
+	int updateBannerByMap(Map<String, Object> reqMap);
+	/**
+	 * 移除banner
+	 * @param reqMap
+	 * @return
+	 */
+	int deleteBannerInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 更新banner
+	 * @param reqMap 非null字段为要更新的参数
+	 * @return
+	 */
+	int updateBannerByMapNotNull(Map<String, Object> reqMap);
 }
