@@ -227,14 +227,14 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
-    //课程开始前60分钟 极光推送给讲师
+    //课程上课提醒 课程开始前5分钟 提醒老师
     @FunctionName("processCourseStartShortNotice")
     public void processCourseStartShortNotice(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         @SuppressWarnings("unchecked")
 
         String appName = requestEntity.getAppName();
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入开播预先1H提醒定时任务"+reqMap);
+        log.debug("---------------将课程加入开播预先5分钟提醒定时任务"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE)){
         	return;
@@ -244,8 +244,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         String im_course_id = reqMap.get("im_course_id").toString();
         long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
-        //提前一个小时提醒
-        long noticeTime= 60*60*1000;
+        //提前5分钟
+        long noticeTime= 5*60*1000;
         long taskStartTime = start_time - noticeTime;
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -253,7 +253,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         		public void process() {
         			log.debug("-----------开播预先1H提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
-                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"60"));
+                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"5"));
                     obj.put("to",lecturer_id);
                     obj.put("msg_type","2");
                     Map<String,String> extrasMap = new HashMap<>();
