@@ -1768,7 +1768,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         phoneMap.put("code",verification_code);
         String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        /*if(!jedis.exists(codeKey)){
+        if(!jedis.exists(codeKey)){
             throw new QNLiveException("130009");
         }
         String code = jedis.get(codeKey);//拿到值
@@ -1776,7 +1776,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(!code.equals(verification_code)){//进行判断
                 throw new QNLiveException("130002");
             }
-        }*/
+        }
     	/*
     	 * 判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
     	 */
