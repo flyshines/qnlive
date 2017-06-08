@@ -1182,5 +1182,59 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+    
+    /**
+     * 后台_课程搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/course/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCourseListBySearch(
+    		@RequestParam(value="search_param", defaultValue="") String searchParam,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
+    		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseListBySearch", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+        
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 后台_直播间搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/live_room/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getLiveRoomListBySearch(
+    		@RequestParam(value="search_param", defaultValue="") String searchParam,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
+    		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+        
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 }

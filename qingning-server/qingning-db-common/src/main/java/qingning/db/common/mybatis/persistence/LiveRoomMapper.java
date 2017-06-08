@@ -16,4 +16,10 @@ public interface LiveRoomMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> selectRoomAmount(List<String> userIdList);
+	/**
+	 * 后台_搜索课程列表(同时搜索直播间名、直播间id)
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap);
 }

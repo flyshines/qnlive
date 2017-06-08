@@ -4173,5 +4173,94 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         
         return resultMap;
     }
+    
+    /**
+     * 后台_课程搜索查询
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getCourseListBySearch")
+    public Map<String, Object> getCourseListBySearch(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 查询数据库
+         */
+        List<Map<String, Object>> courseList = commonModuleServer.findCourseListBySearch(reqMap);
+        //从缓存中获取直播间名称和讲师名称
+        for(Map<String, Object> courseMap : courseList){
+        	String roomId = (String) courseMap.get("room_id");
+        	String lecturerId = (String) courseMap.get("lecturer_id");
+        	reqMap.put("room_id", roomId);
+        	reqMap.put("lecturer_id", lecturerId);
+        	
+        	String roomName = CacheUtils.readLiveRoomInfoFromCached(roomId, "room_name", reqEntity, 
+        			readLiveRoomOperation, jedis, true);
+        	courseMap.put("room_name", roomName);
+        	Map<String, String> lecturerMap = CacheUtils.readLecturer(lecturerId, reqEntity, 
+        			readLecturerOperation, jedis);
+        	if(lecturerMap != null){
+        		courseMap.put("lecturer_name", lecturerMap.get("nick_name"));
+        	}
+        }
+        
+        resultMap.put("course_info_list", courseList);
+        
+        return resultMap;
+    }
+    
+    /**
+     * 后台_直播间搜索查询
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getLiveRoomListBySearch")
+    public Map<String, Object> getLiveRoomListBySearch(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 验证后台用户是否登录
+         */
+        
+        /*
+         * 查询数据库
+         */
+        List<Map<String, Object>> roomList = commonModuleServer.findLiveRoomListBySearch(reqMap);
+        //从缓存中获取直播间名称和讲师名称
+        for(Map<String, Object> roomMap : roomList){
+        	String lecturerId = (String) roomMap.get("lecturer_id");
+        	reqMap.put("lecturer_id", lecturerId);
+        	
+        	Map<String, String> lecturerMap = CacheUtils.readLecturer(lecturerId, reqEntity, 
+        			readLecturerOperation, jedis);
+        	if(lecturerMap != null){
+        		roomMap.put("lecturer_name", lecturerMap.get("nick_name"));
+        	}
+        }
+        
+        resultMap.put("room_info_list", roomList);
+        
+        return resultMap;
+    }
 
 }

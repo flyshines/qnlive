@@ -945,4 +945,20 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public int updateBannerByMapNotNull(Map<String, Object> reqMap) {
 		return bannerInfoMapper.updateBannerInfoByMapNotNull(reqMap);
 	}
+
+	/**
+	 * 后台_搜索课程列表(同时搜索课程名、课程id)
+	 */
+	@Override
+	public List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseListBySearch(reqMap);
+	}
+
+	/**
+	 * 后台_搜索课程列表(同时搜索直播间名、直播间id)
+	 */
+	@Override
+	public List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap) {
+		return liveRoomMapper.findLiveRoomListBySearch(reqMap);
+	}
 }

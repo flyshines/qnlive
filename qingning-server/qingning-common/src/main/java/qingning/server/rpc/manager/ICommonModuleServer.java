@@ -190,4 +190,16 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	int updateBannerByMapNotNull(Map<String, Object> reqMap);
+	/**
+	 * 后台_搜索课程列表(同时搜索课程名、课程id、直播间id、讲师id)
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap);
+	/**
+	 * 后台_搜索课程列表(同时搜索直播间名、直播间id)
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap);
 }

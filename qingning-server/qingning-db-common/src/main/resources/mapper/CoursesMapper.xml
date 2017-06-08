@@ -425,4 +425,17 @@
     where course_id = #{course_id}
   </update>
   
+  <!-- 后台_搜索课程列表(同时搜索课程名、课程id) -->
+  <select id="findCourseListBySearch" parameterType="hashmap" resultType="hashmap">
+  	SELECT course_id, course_title, course_type, room_id, lecturer_id 
+	FROM t_courses 
+	<where>
+		app_name = #{app_name}
+		<if test="search_param != null and search_param != ''">
+			and (course_title LIKE '%${search_param}%' OR course_id = #{search_param})
+		</if>
+	</where>
+	limit 20
+  </select>
+  
 </mapper>
