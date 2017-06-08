@@ -357,8 +357,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 					roomDistributerCoursesMapper.afterStudentBuyCourse(roomDistributerCourseInsertMap);
 				}
 				isDist = true;
-			}else{
-
 			}
 			//t_courses_students
 			Map<String,Object> student = new HashMap<String,Object>();

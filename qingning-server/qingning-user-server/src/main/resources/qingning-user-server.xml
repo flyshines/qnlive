@@ -422,8 +422,8 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="page_count" type="long" />
-					<param name="create_time" type="long" />
+					<param name="page_count" type="string" />
+					<param name="page_num" type="string" />
 					<param name="user_name" type="string" />
 					<param name="status" type="string" />
 				</inputs>
@@ -440,6 +440,8 @@
 						<param name="remark" type="string" />
 						<param name="handle_name" type="string" />
 					</param>
+					<param name="total_count" type="string" />
+					<param name="total_page" type="string" />
 				</outputs>
 			</function>
 

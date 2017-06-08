@@ -426,7 +426,7 @@ public class UserController extends AbstractController{
     @ResponseBody
     ResponseEntity getWithdrawListAll(
     		@RequestParam(value="page_count", defaultValue="10") String page_count,
-    		@RequestParam(value="create_time", defaultValue="0") String createTime,
+    		@RequestParam(value="page_num", defaultValue="1") String page_num,
     		@RequestParam(value="user_name",defaultValue="") String user_name,
     		@RequestParam(value="status",defaultValue="") String status,
     		@RequestHeader("access_token") String accessToken,
@@ -435,7 +435,7 @@ public class UserController extends AbstractController{
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListAll", accessToken, version, appName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("page_count", page_count);
-        paramMap.put("create_time", createTime);
+        paramMap.put("page_num", page_num);
 		if(StringUtils.isNotEmpty(user_name))
 			paramMap.put("user_name", user_name);
 		if(StringUtils.isNotEmpty(status))

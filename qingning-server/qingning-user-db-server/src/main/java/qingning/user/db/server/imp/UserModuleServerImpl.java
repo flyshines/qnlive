@@ -8,6 +8,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserModuleServer;
 
@@ -380,7 +382,13 @@ public class UserModuleServerImpl implements IUserModuleServer {
     }
 
     @Override
-    public List<Map<String, Object>> findWithdrawListAll(Map<String, Object> param) {
-        return withdrawCashMapper.selectWithdrawListAll(param);
+    public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String,Object>> resout = withdrawCashMapper.selectWithdrawListAll(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("user_list",resout);
+        res.put("total_count",resout.getTotal());
+        res.put("total_page",resout.getPaginator().getTotalPages());
+        return res;
     }
 }

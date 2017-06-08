@@ -146,9 +146,6 @@
       FROM
           `t_withdraw_cash` t
       WHERE 1=1
-      <if test="create_time != null" >
-        AND t.create_time &gt; #{create_time}
-      </if>
       <if test="status != null" >
         AND t.state = #{status}
       </if>
@@ -156,7 +153,6 @@
         AND (t.user_name like '%${user_name}%' OR t.user_id = #{user_name})
       </if>
       ORDER BY t.create_time DESC
-      limit #{page_count}
 	</select>
   <!-- 查询-提现记录 -->
 	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="string">
