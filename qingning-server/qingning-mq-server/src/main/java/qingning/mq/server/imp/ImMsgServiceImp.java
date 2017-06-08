@@ -133,67 +133,8 @@ public class ImMsgServiceImp implements ImMsgService {
 				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigKey("course_ready_start_msec"));
 				long dealine =  Long.parseLong(courseMap.get("start_time")) + 15*60*1000;
 				if(now > ready_start_time &&  now <= dealine){
-					//向缓存中增加课程真实开播时间
-					jedis.hset(courseKey, "real_start_time", now+"");
-
-					//进行直播超时定时任务检查
-//					MessagePushServerImpl messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
-//					RequestEntity requestEntity = new RequestEntity();
-//					requestEntity.setServerName("MessagePushServer");
-//					requestEntity.setAppName(appName);
-//					requestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-//					requestEntity.setFunctionName("processCourseLiveOvertime");
-//					Map<String,Object> timerMap = new HashMap<>();
-//					timerMap.put("course_id", courseMap.get("course_id"));
-//					timerMap.put("real_start_time",  now+"");
-//					timerMap.put("im_course_id", courseMap.get("im_course_id"));
-//					requestEntity.setParam(timerMap);
-//					log.debug("取消15分钟未开始定时任务 course_id:"+courseMap.get("course_id"));
-//					//取消15分钟未开始定时任务
-//					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
-//					log.debug("课程未开播处理定时任务取消 course_id:"+courseMap.get("course_id"));
-//					//课程未开播处理定时任务取消
-//					messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
-
-
-
-					//发送课程开始消息
 					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
 					String str = sdf.format( System.currentTimeMillis());
-//					String courseStartMessage = "直播开始于"+str;
-//					String mGroupId = courseMap.get("im_course_id");
-//					String message = courseStartMessage;
-//					String sender = "system";
-//					Map<String,Object> startInformation = new HashMap<>();
-//					startInformation.put("course_id", information.get("course_id").toString());
-//					startInformation.put("message", message);
-//					startInformation.put("message_type", "1");
-//					startInformation.put("send_type", "5");//5.开始/结束消息
-//					startInformation.put("message_imid",MiscUtils.getUUId());
-//					startInformation.put("message_id",startInformation.get("message_imid"));
-//					startInformation.put("create_time",  System.currentTimeMillis());//5.开始/结束消息
-//					Map<String,Object> messageMap = new HashMap<>();
-//					messageMap.put("msg_type","1");
-//					messageMap.put("send_time", System.currentTimeMillis());
-//					messageMap.put("create_time", System.currentTimeMillis());
-//					messageMap.put("information",startInformation);
-//					messageMap.put("mid",startInformation.get("message_imid"));
-//					String content = JSON.toJSONString(messageMap);
-//					IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);//发送信息
-//
-//
-//					String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startInformation);
-////					//1.将聊天信息id插入到redis zsort列表中
-//					jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startInformation.get("message_imid"));
-////					//添加到老师发送的集合中
-//					String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-//					jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startInformation.get("message_imid").toString());
-//
-//					String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startInformation);//直播间开始于
-//					Map<String,String> result = new HashMap<String,String>();
-//					MiscUtils.converObjectMapToStringMap(startInformation, result);
-//					jedis.hmset(messageKey, result);
-
 					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 					TemplateData first = new TemplateData();
 					first.setColor(Constants.WE_CHAT_PUSH_COLOR);
