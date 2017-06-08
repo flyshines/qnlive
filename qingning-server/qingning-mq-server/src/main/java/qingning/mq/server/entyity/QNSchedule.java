@@ -14,6 +14,7 @@ public class QNSchedule {
 	public static final String TASK_COURSE_5MIN_NOTICE="course_5min_notice";//5分钟提醒
 	public static final String TASK_COURSE_15MIN_NOTICE="course_15min_notice";//15分钟提醒
 	public static final String TASK_LECTURER_NOTICE="lecturer_notice";//讲师通知
+	public static final String TASK_COURSE_START="courase_start";//课程开课提醒
 	
 	private Map<String, ScheduleTask>  taskEndCourse = new HashMap<String, ScheduleTask>();
 	private Map<String, ScheduleTask>  courseOverTimeNotice = new HashMap<String, ScheduleTask>();
@@ -21,6 +22,7 @@ public class QNSchedule {
 	private Map<String, ScheduleTask>  course5MinNotice = new HashMap<String, ScheduleTask>();
 	private Map<String, ScheduleTask>  course15MinNotice = new HashMap<String, ScheduleTask>();
 	private Map<String, ScheduleTask>  lecturerNotice = new HashMap<String, ScheduleTask>();
+	private Map<String, ScheduleTask>  couraseStart = new HashMap<String, ScheduleTask>();
 
 	private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = null;//new ScheduledThreadPoolExecutor(100);
 	
@@ -43,6 +45,8 @@ public class QNSchedule {
 			map = course15MinNotice;
 		} else if(TASK_LECTURER_NOTICE.equals(taskName)){
 			map = lecturerNotice;
+		}else if(TASK_COURSE_START.equals(taskName)){
+			map = couraseStart;
 		}
 		return map;
 	}

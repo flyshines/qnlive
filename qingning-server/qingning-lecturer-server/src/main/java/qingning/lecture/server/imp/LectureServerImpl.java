@@ -506,10 +506,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         		mqRequestEntity.setParam(timerMap);
                 mqRequestEntity.setAppName(appName);
         		this.mqUtils.sendMessage(mqRequestEntity);
-        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
-            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-        		}
+//        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
+//            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
+//            		this.mqUtils.sendMessage(mqRequestEntity);
+//        		}
         	}
             //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务
             RequestEntity mqRequestEntity = new RequestEntity();

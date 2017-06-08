@@ -698,7 +698,7 @@
 						<param name="classify_name" type="string"/>
 						<param name="classify_id" type="string"/>
 						<param name="is_use" type="string"/>
-						<param name="create_date" type="rstring"/>
+						<param name="create_date" type="string"/>
 					</param>
 				</outputs>
 			</function>

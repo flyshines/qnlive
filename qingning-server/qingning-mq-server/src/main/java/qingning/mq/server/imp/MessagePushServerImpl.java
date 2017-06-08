@@ -418,7 +418,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
-        if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_START)){
             return;
         }
         //课程开始时间
@@ -500,8 +500,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
             scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
             scheduleTask.setStartTime(taskStartTime);
-            scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
+            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_START);
             qnSchedule.add(scheduleTask);
+            log.debug("---------------将课程加入发送上课开始的im消息成功"+reqMap);
         }
     }
 
@@ -577,6 +578,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_LECTURER_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_START);
     }
 
 
