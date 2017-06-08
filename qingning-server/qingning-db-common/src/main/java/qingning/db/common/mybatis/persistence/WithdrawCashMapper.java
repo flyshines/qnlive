@@ -1,5 +1,8 @@
 package qingning.db.common.mybatis.persistence;
 
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
+
 import java.util.List;
 import java.util.Map;
 
@@ -36,5 +39,5 @@ public interface WithdrawCashMapper {
 	 * @param param
 	 * @return
 	 */
-	List<Map<String,Object>> selectWithdrawListAll(Map<String, Object> param);
+	PageList<Map<String,Object>> selectWithdrawListAll(Map<String, Object> param, PageBounds pageBounds);
 }

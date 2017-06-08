@@ -140,5 +140,5 @@ public interface IUserModuleServer {
 	 * @param param
 	 * @return
 	 */
-	List<Map<String, Object>>  findWithdrawListAll(Map<String, Object> param);
+	Map<String, Object>  findWithdrawListAll(Map<String, Object> param);
 }
