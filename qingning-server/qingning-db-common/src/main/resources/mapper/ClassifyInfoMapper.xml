@@ -88,4 +88,15 @@
       position = #{position}
       where classify_id = #{classify_id} and app_names = #{app_names}
   </update>
+  
+  <!-- 后台_获取各分类下课程数量 -->
+  <select id="findCourseNumGroupByClassifyId" parameterType="hashmap" resultType="hashmap">
+	SELECT classify_id, COUNT(classify_id) course_num
+	FROM t_courses
+	WHERE app_name = #{app_name} 
+	<if test="classify_ids != null">
+		AND classify_id IN (${classify_ids})
+	</if>
+	GROUP BY classify_id
+  </select>
 </mapper>

@@ -967,4 +967,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap) {
 		return classifyInfoMapper.findClassifyListByMap(reqMap);
 	}
+
+	/**
+	 * 后台_获取各分类下课程数量
+	 */
+	@Override
+	public List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap) {
+		return classifyInfoMapper.findCourseNumGroupByClassifyId(selectMap);
+	}
 }

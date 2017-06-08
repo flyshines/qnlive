@@ -28,4 +28,10 @@ public interface ClassifyInfoMapper {
      * @return
      */
 	List<Map<String, Object>> findClassifyListByMap(Map<String, Object> reqMap);
+	/**
+	 * 后台_获取各分类下课程数量
+	 * @param selectMap
+	 * @return
+	 */
+	List<Map<String, Object>> findCourseNumGroupByClassifyId(Map<String, Object> selectMap);
 }

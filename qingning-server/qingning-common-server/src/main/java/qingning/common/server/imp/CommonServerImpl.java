@@ -3967,10 +3967,43 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = new HashMap();
         reqMap.put("app_names", appName);
         
+        //获取数据库所有的分类信息
         List<Map<String, Object>> classifyList = commonModuleServer.getClassifyList(reqMap);
         
-        //TODO 查询每个分类有多少课程
+        /*
+         * 循环所有分类信息，拼接分类id，用于后面查询课程表统计类目下的课程数量
+         */
+        StringBuilder classSB = new StringBuilder();
+        if(classifyList != null){
+	        for(Map<String, Object> classify : classifyList){
+	        	classSB.append(classify.get("classify_id")).append(",");
+	        }
+	        //去除最后对于的逗号
+	        classSB.deleteCharAt(classSB.length()-1);
+        }
         
+        /*
+         * 查询获得分类对应的课程数量
+         */
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("classify_ids", classSB.toString());
+        selectMap.put("app_name", appName);
+        List<Map<String, Object>> classCourseNumList = commonModuleServer.getCourseNumGroupByClassifyId(selectMap);
+        
+        //循环将其转换成map（例：classify_id:course_num），方便后期查询映射
+        Map<String, Object> classifyIdCourseNumMap = new HashMap<>();
+        for(Map<String, Object> classCourseNum : classCourseNumList){
+        	classifyIdCourseNumMap.put(classCourseNum.get("classify_id").toString(), 
+        			classCourseNum.get("course_num"));
+        }
+        
+        /*
+         * 循环分类列表，进行一一赋值课程数量
+         */
+        for(Map<String, Object> classifyMap : classifyList){
+        	String classId = classifyMap.get("classify_id").toString();
+        	classifyMap.put("course_num", classifyIdCourseNumMap.get(classId));
+        }
         
         resultMap.put("classify_info_list", classifyList);
         return resultMap;

@@ -213,4 +213,10 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap);
+	/**
+	 * 后台_获取各分类下课程数量
+	 * @param selectMap 包含要查询的classify_id字符串集合
+	 * @return
+	 */
+	List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap);
 }
