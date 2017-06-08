@@ -578,6 +578,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_LECTURER_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_START);
     }
 
 
