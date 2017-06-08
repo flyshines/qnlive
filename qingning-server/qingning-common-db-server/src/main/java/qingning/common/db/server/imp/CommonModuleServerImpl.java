@@ -796,10 +796,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return bannerInfoMapper.findBannerInfoAllByAppName(appName);
 	}
 
-	@Override
-	public List<Map<String, Object>> findCourseByRecommend(String appName) {
-		return coursesMapper.findCourseByRecommend(appName);
-	}
 
 	@Override
 	public List<Map<String, Object>> findCourseByClassifyId(Map<String, Object> record) {
