@@ -887,13 +887,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void insertClassify(Map<String, Object> record) {
-		classifyInfoMapper.insertSelective(record);
+	public int insertClassify(Map<String, Object> record) {
+		return classifyInfoMapper.insertClassifyInfo(record);
 	}
 
 	@Override
-	public void updateClassify(Map<String, Object> record) {
-		classifyInfoMapper.updateByPrimaryKeySelective(record);
+	public int updateClassify(Map<String, Object> record) {
+		return classifyInfoMapper.updateClassifyInfo(record);
 	}
 
 	/**
@@ -958,5 +958,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap) {
 		return liveRoomMapper.findLiveRoomListBySearch(reqMap);
+	}
+
+	/**
+	 * 后台_获取分类列表
+	 */
+	@Override
+	public List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap) {
+		return classifyInfoMapper.findClassifyListByMap(reqMap);
 	}
 }

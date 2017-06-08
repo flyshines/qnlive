@@ -267,6 +267,8 @@ public final class Constants {
 	public static final String CACHED_KEY_CLASSIFY = "classify_id";//分类id
 	public static final String CACHED_KEY_CLASSIFY_INFO = "SYS:CLASSIFY:{classify_id}";//分类缓存
 	public static final String CACHED_KEY_CLASSIFY_ALL = "SYS:CLASSIFY:ALL";//存入所有分类id
+	public static final String CACHED_KEY_CLASSIFY_PATTERN = "SYS:CLASSIFY:*";//所有分类匹配模式
+	
 
 	public static final String CACHED_KEY_BANNER_ALL = "SYS:BANNER:ALL";//横幅所有id
 	public static final String CACHED_KEY_BANNER_INFO = "SYS:BANNER:{banner_id}";//横幅信息

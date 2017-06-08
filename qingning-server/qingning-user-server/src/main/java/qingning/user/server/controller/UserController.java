@@ -446,7 +446,7 @@ public class UserController extends AbstractController{
     }
 
 	/**
-	 * 获取提现
+	 * 后台_获取提现
 	 * @param accessToken
 	 * @param version
 	 * @return

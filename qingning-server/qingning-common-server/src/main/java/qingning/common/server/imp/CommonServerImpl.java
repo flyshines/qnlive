@@ -3927,13 +3927,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     //</editor-fold>
 
 
-
-
-
-
-
     /**
-     * 添加分类信息
+     * 后台_添加分类信息
      * @param reqEntity
      * @throws Exception
      */
@@ -3947,14 +3942,42 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         param.put("create_date",now);
         param.put("create_time",now.getTime());
         param.put("is_use","1");
+        param.put("app_names", appName);
         commonModuleServer.insertClassify(param);
         //清除缓存
-        jedis.del(Constants.CACHED_KEY_CLASSIFY_ALL);
+        Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
+        for(String classKey : classKeys){
+        	jedis.del(classKey);
+        }
+        
+        return resultMap;
+    }
+    
+    /**
+     * 后台_获取分类列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getClassifyList")
+    public Map<String, Object> getClassifyList (RequestEntity reqEntity) throws Exception {
+        Map<String, Object> resultMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        Map<String, Object> reqMap = new HashMap();
+        reqMap.put("app_names", appName);
+        
+        List<Map<String, Object>> classifyList = commonModuleServer.getClassifyList(reqMap);
+        
+        //TODO 查询每个分类有多少课程
+        
+        
+        resultMap.put("classify_info_list", classifyList);
         return resultMap;
     }
 
     /**
-     * 编辑分类信息
+     * 后台_编辑分类信息
      * @param reqEntity
      * @throws Exception
      */
@@ -3966,7 +3989,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> param = (Map)reqEntity.getParam();
         commonModuleServer.updateClassify(param);
         //清除缓存
-        jedis.del(Constants.CACHED_KEY_CLASSIFY_ALL);
+        Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
+        for(String classKey : classKeys){
+        	jedis.del(classKey);
+        }
+        
         return resultMap;
     }
 

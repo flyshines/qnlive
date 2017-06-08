@@ -146,14 +146,19 @@ public interface ICommonModuleServer {
 
 	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
 
-	/**新增-分类
+	/**
+	 * 新增分类
 	 * @param record
+	 * @return
 	 */
-	void insertClassify(Map<String, Object> record);
-	/**更新-分类
-	 * @param param
+	int insertClassify(Map<String, Object> record);
+	
+	/**
+	 * 更新分类
+	 * @param record 更新非空字段
+	 * @return
 	 */
-	void updateClassify(Map<String, Object> record);
+	int updateClassify(Map<String, Object> record);
 	/**
 	 * 新增轮播
 	 * @param reqMap
@@ -202,4 +207,10 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap);
+	/**
+	 * 后台_获取分类列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap);
 }
