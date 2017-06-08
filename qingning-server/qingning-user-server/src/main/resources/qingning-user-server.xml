@@ -430,6 +430,7 @@
 				<outputs>
 					<param name="user_list" type="list">
 						<param name="user_id" type="string" />
+						<param name="withdraw_cash_id" type="string" />
 						<param name="nick_name" type="string" />
 						<param name="user_name" type="string" />
 						<param name="actual_amount" type="long" />

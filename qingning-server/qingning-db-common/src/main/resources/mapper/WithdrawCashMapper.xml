@@ -133,6 +133,7 @@
   <!-- 分页查询-后台提现记录 -->
 	<select id="selectWithdrawListAll" resultType="hashmap" parameterType="string">
       SELECT
+        t.withdraw_cash_id,
         t.user_id,
         t.user_name,
         t.nick_name,
