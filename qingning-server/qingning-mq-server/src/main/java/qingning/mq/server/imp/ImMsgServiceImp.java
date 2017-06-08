@@ -127,52 +127,52 @@ public class ImMsgServiceImp implements ImMsgService {
 		//<editor-fold desc="先判断是否有实际开播时间，没有则进行进一步判断  2.没有实际开播时间，判断是否为预告中，
 		// 如果为预告中，且发送者为讲师，且当前时间大于开播时间的前十分钟，如果开课前15分钟讲课，
 		// 则该课程存入实际开播时间，并且进行直播超时定时任务检查">
-		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
-			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
-				long now = System.currentTimeMillis();
-				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigKey("course_ready_start_msec"));
-				long dealine =  Long.parseLong(courseMap.get("start_time")) + 15*60*1000;
-				if(now > ready_start_time &&  now <= dealine){
-					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
-					String str = sdf.format( System.currentTimeMillis());
-					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-					TemplateData first = new TemplateData();
-					first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-					first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
-					templateMap.put("first", first);
-
-					TemplateData orderNo = new TemplateData();
-					orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-					orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
-					templateMap.put("keyword1", orderNo);
-
-					TemplateData wuliu = new TemplateData();
-					wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
-					wuliu.setValue(str);
-					templateMap.put("keyword2", wuliu);
-
-
-					TemplateData remark = new TemplateData();
-					if(appName.equals(Constants.HEADER_APP_NAME)){
-						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
-					}else{
-						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
-					}
-					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
-					templateMap.put("remark", remark);
-					//查询报名了的用户id
-					List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("course_id"));
-
-					String url = MiscUtils.getConfigByKey("course_live_room_url",appName);
-					url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
-					if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
-						weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
-					}
-
-				}
-			}
-		}
-		//</editor-fold>
+//		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
+//			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
+//				long now = System.currentTimeMillis();
+//				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigKey("course_ready_start_msec"));
+//				long dealine =  Long.parseLong(courseMap.get("start_time")) + 15*60*1000;
+//				if(now > ready_start_time &&  now <= dealine){
+//					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+//					String str = sdf.format( System.currentTimeMillis());
+//					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+//					TemplateData first = new TemplateData();
+//					first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//					first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+//					templateMap.put("first", first);
+//
+//					TemplateData orderNo = new TemplateData();
+//					orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//					orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
+//					templateMap.put("keyword1", orderNo);
+//
+//					TemplateData wuliu = new TemplateData();
+//					wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//					wuliu.setValue(str);
+//					templateMap.put("keyword2", wuliu);
+//
+//
+//					TemplateData remark = new TemplateData();
+//					if(appName.equals(Constants.HEADER_APP_NAME)){
+//						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+//					}else{
+//						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+//					}
+//					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+//					templateMap.put("remark", remark);
+//					//查询报名了的用户id
+//					List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("course_id"));
+//
+//					String url = MiscUtils.getConfigByKey("course_live_room_url",appName);
+//					url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
+//					if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
+//						weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+//					}
+//
+//				}
+//			}
+//		}
+//		//</editor-fold>
 
 		//判断课程状态
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃

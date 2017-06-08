@@ -502,6 +502,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             scheduleTask.setStartTime(taskStartTime);
             scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
             qnSchedule.add(scheduleTask);
+            log.debug("---------------将课程加入发送上课开始的im消息成功"+reqMap);
         }
     }
 
