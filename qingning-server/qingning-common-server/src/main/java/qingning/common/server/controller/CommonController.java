@@ -973,7 +973,7 @@ public class CommonController extends AbstractController {
             @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             HttpEntity<Object> entity,
-            @RequestHeader("version") String version)throws Exception{
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addClassify", accessToken, version,appName);
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
@@ -991,7 +991,7 @@ public class CommonController extends AbstractController {
             @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             HttpEntity<Object> entity,
-            @RequestHeader("version") String version)throws Exception{
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "editClassify", accessToken, version,appName);
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
@@ -1011,7 +1011,7 @@ public class CommonController extends AbstractController {
     ResponseEntity getClassifyList(
             @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-            @RequestHeader("version") String version)throws Exception{
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getClassifyList", accessToken, version,appName);
         return this.process(requestEntity, serviceManger, message);
     }
@@ -1094,7 +1094,7 @@ public class CommonController extends AbstractController {
 		    HttpEntity<Object> entity,
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-		    @RequestHeader("version") String version) throws Exception {
+		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -1125,7 +1125,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="page_num", defaultValue="1") long pageNum,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader("version") String version) throws Exception {
+    		@RequestHeader(value="version", defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getBannerListBySearch", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("banner_name", bannerName);
@@ -1154,7 +1154,7 @@ public class CommonController extends AbstractController {
 		    HttpEntity<Object> entity,
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-		    @RequestHeader("version") String version) throws Exception {
+		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "updateBannerInfo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -1176,7 +1176,7 @@ public class CommonController extends AbstractController {
 		    HttpEntity<Object> entity,
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-		    @RequestHeader("version") String version) throws Exception {
+		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "fastUpdateBannerInfo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -1198,7 +1198,7 @@ public class CommonController extends AbstractController {
 		    HttpEntity<Object> entity,
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-		    @RequestHeader("version") String version) throws Exception {
+		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "removeBannerInfo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -1222,7 +1222,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="search_param", defaultValue="") String searchParam,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader("version") String version) throws Exception {
+    		@RequestHeader(value="version", defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseListBySearch", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("search_param", searchParam);
@@ -1249,7 +1249,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="search_param", defaultValue="") String searchParam,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader("version") String version) throws Exception {
+    		@RequestHeader(value="version", defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("search_param", searchParam);

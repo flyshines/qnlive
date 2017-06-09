@@ -350,13 +350,13 @@ public class UserModuleServerImpl implements IUserModuleServer {
     }
 
     @Override
-    public Map<String, Object> selectWithdrawSizeById(String withdrawId) {
-        return withdrawCashMapper.selectWithdrawSizeById(withdrawId);
+    public Map<String, Object> selectWithdrawSizeById(Map<String, Object> selectMap) {
+        return withdrawCashMapper.selectWithdrawSizeById(selectMap);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount,String userName) {
+    public int updateWithdraw(String withdrawId,String remark,String userId,String result,Long initial_amount) {
         //更新提现记录
         Map<String,Object> paramMap = new HashMap<>();
         if("1".equals(result)){
@@ -368,7 +368,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
             //返还用户余额
             Map<String ,Object> user = userGainsMapper.findUserGainsByUserId(userId);
             long balance = Integer.valueOf(user.get("balance").toString());
-            balance = balance + actual_amount;
+            balance = balance + initial_amount;
             Map<String ,Object> reqMap = new HashMap<>();
             reqMap.put("user_id",userId);
             reqMap.put("balance",balance);
@@ -377,12 +377,15 @@ public class UserModuleServerImpl implements IUserModuleServer {
         paramMap.put("withdraw_cash_id",withdrawId);
         paramMap.put("update_time",new Date());
         paramMap.put("remark",remark);
-        paramMap.put("handle_name",userName);
+        
         paramMap.put("handle_id",userId);
         int i = withdrawCashMapper.updateWithdrawCash(paramMap);
         return i;
     }
 
+    /**
+     * 分页查询-后台提现记录
+     */
     @Override
     public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));

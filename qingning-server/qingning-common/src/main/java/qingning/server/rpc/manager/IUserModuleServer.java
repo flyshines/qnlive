@@ -122,21 +122,20 @@ public interface IUserModuleServer {
 	 */
 	List<Map<String, Object>> findWithdrawList(Map<String, Object> param);
 	/**查询-提现记录数
-	 * @param withdrawId
+	 * @param selectMap
 	 * @return
 	 */
-	Map<String, Object> selectWithdrawSizeById(String withdrawId);
+	Map<String, Object> selectWithdrawSizeById(Map<String, Object> selectMap);
 
 	/**完成提现记录
 	 * @param withdrawId
 	 * @param remark
 	 * @param userId
 	 * @param result
-	 * @param actual_amount
-	 * @param userName
+	 * @param initial_amount
 	 * @return
 	 */
-	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount,String userName);
+	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long initial_amount);
 	/**分页查询-后台提现记录
 	 * @param param
 	 * @return

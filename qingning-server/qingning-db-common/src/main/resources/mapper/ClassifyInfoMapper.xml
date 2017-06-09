@@ -86,7 +86,7 @@
         is_use = #{is_use},
       </if>
       position = #{position}
-      where classify_id = #{classify_id} and app_names = #{app_names}
+      where classify_id = #{classify_id} and app_names LIKE '%${app_names}%'
   </update>
   
   <!-- 后台_获取各分类下课程数量 -->

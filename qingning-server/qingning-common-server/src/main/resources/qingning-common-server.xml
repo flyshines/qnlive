@@ -765,6 +765,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="classify_name" type="string" require="Y,000100"/>
@@ -779,6 +780,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -797,6 +799,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="classify_id" type="string" require="Y,000100"/>
@@ -813,6 +816,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="Y,000100" />
@@ -831,6 +835,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="N" />
@@ -846,7 +851,7 @@
 						<param name="banner_img_url" type="string" />
 						<param name="banner_type" type="int" />
 						<param name="jump_url" type="string" />
-						<param name="jump_remark" type="string" />
+						<param name="jump_remark" type="string" fieldname="banner_remark"/>
 						<param name="create_time" type="long" />
 						<param name="score" type="int" />
 						<param name="status" type="int" />
@@ -860,6 +865,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -869,6 +875,7 @@
 					<param name="banner_type" type="int" require="Y,000100" />
 					<param name="score" type="int" require="Y,000100" />
 					<param name="jump_url" type="string" require="Y,000100" />
+					<param name="jump_remark" type="string" require="Y,000100" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -879,6 +886,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -898,6 +906,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -911,6 +920,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />
@@ -931,6 +941,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />
