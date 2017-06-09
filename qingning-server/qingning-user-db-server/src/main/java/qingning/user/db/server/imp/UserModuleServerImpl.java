@@ -377,6 +377,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
         paramMap.put("withdraw_cash_id",withdrawId);
         paramMap.put("update_time",new Date());
         paramMap.put("remark",remark);
+        
+        paramMap.put("handle_id",userId);
         int i = withdrawCashMapper.updateWithdrawCash(paramMap);
         return i;
     }

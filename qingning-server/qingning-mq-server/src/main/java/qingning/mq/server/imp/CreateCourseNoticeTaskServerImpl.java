@@ -87,15 +87,26 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	}
             	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
             	if(time<=currentTime || isTheSameDate){
-                    RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStart", map);
+                    RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStartCancelAll", map);
 					requestEntity.setAppName(appName);
                     if(time>0){
-                    	messagePushServerImpl.processCourseNotStartCancel(requestEntity, jedisUtils, context);
-                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
+                    	messagePushServerImpl.processCourseNotStartCancelAll(requestEntity, jedisUtils, context); //课程未开播处理定时任务取消
 
-                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
+						//提前60分钟开课提醒
+						requestEntity.setFunctionName("processCourseStartShortNotice");
+						messagePushServerImpl.processCourseStartShortNotice(requestEntity, jedisUtils, context);
 
-						messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
+						requestEntity.setFunctionName("processCourseStartShortNotice");
+                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);//课程超时强制结束
+
+						requestEntity.setFunctionName("processCourseStartLecturerNotShow");
+						messagePushServerImpl.processCourseStartLecturerNotShow(requestEntity, jedisUtils, context);//讲师未出现提醒
+
+						requestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+                    	messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);//课程超时提醒
+
+						requestEntity.setFunctionName("processCourseStartIM");
+						messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);//课程开课提醒
                     } else {
                     	//messagePushServerImpl.processForceEndCourse(requestEntity, jedisUtils, context);
                     }
@@ -115,10 +126,11 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
 	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
 
-						requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
+						requestEntityTask.setFunctionName("processCourseStartIM");
 						messagePushServerImpl.processCourseStartIM(requestEntityTask,jedisUtils,context);
 
 	            	} else if((date-currentDate)/(1000*60*60*24) == 1){
+	            		//24小时提醒
 	                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
 	                    messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
 	            	}

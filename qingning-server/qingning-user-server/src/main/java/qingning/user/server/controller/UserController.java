@@ -449,8 +449,13 @@ public class UserController extends AbstractController{
     }
 
 	/**
+<<<<<<< HEAD
 	 * 后台_处理提现申请
 	 * @param accessToken
+=======
+	 * 获取提现
+	 * 后台_获取提现	 * @param accessToken
+>>>>>>> 97242a970bb64fb114c8be34568234e8e3c314de
 	 * @param version
 	 * @return
 	 * @throws Exception

@@ -384,7 +384,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                     Map<String,String> courseMap = jedis.hgetAll(courseKey);
                     //如果课程不是预告中，则不需要执行该定时任务
-                    if(courseMap == null || courseMap.size() == 0 || !courseMap.get("status").equals("1")){                       
+                    if(courseMap == null || courseMap.size() == 0){
                         return;
                     }
                     JSONObject obj = new JSONObject();
@@ -413,16 +413,18 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @SuppressWarnings("unchecked")
     @FunctionName("processCourseStartIM")
     public void processCourseStartIM(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        log.debug("---------------将课程加入发送上课开始的im消息");
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_START)){
+            log.debug("------------已经有任务了:"+QNSchedule.TASK_COURSE_START+"course_id:"+courseId);
             return;
         }
         //课程开始时间
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+        String lecturer_id = reqMap.get("lecturer_id").toString();
 
         if(taskStartTime > 0){
             ScheduleTask scheduleTask = new ScheduleTask(){
@@ -460,6 +462,9 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,courseId);//加入热门推荐正在直播列表
 
 
+
+
+                    log.debug("----------发送上课开始的极光消息 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
                     String str = sdf.format( System.currentTimeMillis());
                     Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
@@ -499,6 +504,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             };
             scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
+            scheduleTask.setLecturerId(lecturer_id);
             scheduleTask.setStartTime(taskStartTime);
             scheduleTask.setTaskName(QNSchedule.TASK_COURSE_START);
             qnSchedule.add(scheduleTask);
@@ -712,7 +718,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             infomation.put("message_id",MiscUtils.getUUId());
             infomation.put("message_imid",infomation.get("message_id"));
             infomation.put("message_type", "1");
-            infomation.put("send_type", "6");//5.结束消息
+            infomation.put("send_type", "6");
             infomation.put("create_time", currentTime);
             if(type.equals("2")){
                 //课程直播超时结束
