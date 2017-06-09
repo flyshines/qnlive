@@ -1674,9 +1674,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<Map<String, Object>> insertGainsList = null;
         List<Map<String,Object>> userIdList = null;
         List<String> ids = new ArrayList<>();
-        for(Map<String,Object> map:userIdList){
-            ids.add(map.get("user_id").toString());
-        }
 		/*
 		 * 获得存在与用户表t_user而不存在与t_user_gains的数据
 		 */
@@ -1686,6 +1683,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
 			if(userIdList == null || userIdList.isEmpty()){
 				break;
 			}
+            for(Map<String,Object> map:userIdList){
+                ids.add(map.get("user_id").toString());
+            }
 			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(ids);
 			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(ids);
 			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(ids);
