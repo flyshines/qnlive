@@ -413,14 +413,13 @@ public class MessagePushServerImpl extends AbstractMsgService {
     @SuppressWarnings("unchecked")
     @FunctionName("processCourseStartIM")
     public void processCourseStartIM(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
+        log.debug("---------------将课程加入发送上课开始的im消息");
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加入发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_START)){
             log.debug("------------已经有任务了:"+QNSchedule.TASK_COURSE_START+"course_id:"+courseId);
-
             return;
         }
         //课程开始时间

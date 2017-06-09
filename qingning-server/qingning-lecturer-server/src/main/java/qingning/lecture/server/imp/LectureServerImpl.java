@@ -459,56 +459,52 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //4.6 将课程插入到平台分类列表 分类列表
         map.clear();
+        //<editor-fold desc="加入定时任务">
         resultMap.put("course_id", courseId);
         Map<String,Object> timerMap = new HashMap<>();
         timerMap.put("course_id", courseId);
         timerMap.put("room_id", roomId);
-        //timerMap.put("start_time", new Date(startTime));
         timerMap.put("lecturer_id", userId);
         timerMap.put("course_title", course.get("course_title"));        
-        //timerMap.put("course_id", dbResultMap.get("course_id").toString());
-        timerMap.put("start_time", startTime.toString());
+        timerMap.put("start_time", startTime);
         timerMap.put("position", course.get("position"));
         timerMap.put("im_course_id", course.get("im_course_id"));
-        timerMap.put("real_start_time",  startTime.toString());
+        timerMap.put("real_start_time",  startTime);
 
+        RequestEntity mqRequestEntity = new RequestEntity();
+        mqRequestEntity.setServerName("MessagePushServer");
+        mqRequestEntity.setParam(timerMap);
+        mqRequestEntity.setAppName(appName);
+        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
 
+        log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseId);
+        mqRequestEntity.setFunctionName("processCourseLiveOvertime");
+        this.mqUtils.sendMessage(mqRequestEntity);
 
+        log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
+        mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+        this.mqUtils.sendMessage(mqRequestEntity);
 
-        if(true){
-            RequestEntity mqRequestEntity = new RequestEntity();
-            mqRequestEntity.setServerName("MessagePushServer");
-            mqRequestEntity.setParam(timerMap);
-            mqRequestEntity.setAppName(appName);
-            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+        if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+            log.debug("提前五分钟开课提醒 course_id:"+courseId);
+            if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+                mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
+            //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+            mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+            this.mqUtils.sendMessage(mqRequestEntity);
 
-            log.debug("直播间开始定时任务 course_id:"+courseId);
+            log.debug("直播间开始发送IM  course_id:"+courseId);
             mqRequestEntity.setFunctionName("processCourseStartIM");
             this.mqUtils.sendMessage(mqRequestEntity);
-
-            log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseId);
-            mqRequestEntity.setFunctionName("processCourseLiveOvertime");
-            this.mqUtils.sendMessage(mqRequestEntity);
-
-            log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
-            mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
-            this.mqUtils.sendMessage(mqRequestEntity);
-            if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
-                //提前五分钟开课提醒
-                if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
-                    mqRequestEntity.setFunctionName("processCourseStartShortNotice");
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                }
-                //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
-                mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
-                this.mqUtils.sendMessage(mqRequestEntity);
-            }
-            //提前24小时开课提醒
-            if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
-                mqRequestEntity.setFunctionName("processCourseStartLongNotice");
-                this.mqUtils.sendMessage(mqRequestEntity);
-            }
         }
+        //提前24小时开课提醒
+        if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+            mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+            this.mqUtils.sendMessage(mqRequestEntity);
+        }
+        //</editor-fold>
 
 
 
