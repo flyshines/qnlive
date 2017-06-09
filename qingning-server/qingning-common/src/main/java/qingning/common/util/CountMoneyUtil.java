@@ -44,7 +44,7 @@ public class CountMoneyUtil {
      * @param userWithdrawSumList 用户提现成功总金额列表，用于计算余额
      * @return 计算后需要插入t_user_gains表的数据列表
      */
-    public static List<Map<String, Object>> getGaoinsList(List<String> userIdList, 
+    public static List<Map<String, Object>> getGaoinsList(List<Map<String, Object>> userIdList,
     		List<Map<String, Object>> userRoomAmountList, 
     		List<Map<String, Object>> userDistributerAmountList, 
     		List<Map<String, Object>> userWithdrawSumList){
@@ -63,13 +63,14 @@ public class CountMoneyUtil {
 		
 		List<Map<String, Object>> insertList = new ArrayList<Map<String, Object>>();
 		try{
-			for(String userId : userIdList){
+			for(Map<String, Object> user : userIdList){
+				boolean isQnlive = Constants.HEADER_APP_NAME.equals(user.get("app_name"));
 				Map<String, Object> gainsMap = new HashMap<>();
-				gainsMap.put("user_id", userId);
+				gainsMap.put("user_id", user.get("user_id"));
 				/*
 				 * 计算直播间总收入
 				 */
-				String live_room_total_amount = String.valueOf(userRoomAmountMap.get(userId));
+				String live_room_total_amount = String.valueOf(userRoomAmountMap.get(user.get("user_id")));
 				if(MiscUtils.isEmptyString(live_room_total_amount) || "null".equals(live_room_total_amount)){
 					live_room_total_amount = "0";
 				}
@@ -78,13 +79,13 @@ public class CountMoneyUtil {
 				 * 计算直播间实际收益
 				 */
 				double roomReal = Double.parseDouble(live_room_total_amount)/100;
-				double live_room_real_incomes = getCashInAmount(String.valueOf(roomReal));
+				double live_room_real_incomes = isQnlive?roomReal:getCashInAmount(String.valueOf(roomReal));
 				gainsMap.put("live_room_real_incomes", (long)(live_room_real_incomes*100));
 				
 				/*
 				 * 分销总收入
 				 */
-				String distributer_total_amount = String.valueOf(userDistributerAmountMap.get(userId));
+				String distributer_total_amount = String.valueOf(userDistributerAmountMap.get(user.get("user_id")));
 				if(MiscUtils.isEmptyString(distributer_total_amount) || "null".equals(distributer_total_amount)){
 					distributer_total_amount = "0";
 				}
@@ -93,7 +94,7 @@ public class CountMoneyUtil {
 				 * 计算分销实际收益
 				 */
 				double distributerReal = Double.parseDouble(distributer_total_amount)/100;
-				double distributer_real_incomes = getCashInAmount(String.valueOf(distributerReal));
+				double distributer_real_incomes = isQnlive?distributerReal:getCashInAmount(String.valueOf(distributerReal));
 				gainsMap.put("distributer_real_incomes", (long)(distributer_real_incomes*100));
 				
 				/*
@@ -110,7 +111,7 @@ public class CountMoneyUtil {
 				/*
 				 * 计算余额
 				 */
-				String user_withdraw_sum = String.valueOf(userWithdrawSumMap.get(userId));
+				String user_withdraw_sum = String.valueOf(userWithdrawSumMap.get(user.get("user_id")));
 				if(MiscUtils.isEmptyString(user_withdraw_sum) || "null".equals(user_withdraw_sum)){
 					user_withdraw_sum = "0";
 				}

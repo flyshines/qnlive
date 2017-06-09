@@ -73,7 +73,7 @@ public interface IUserModuleServer {
 	 * @param limit
 	 * @return
 	 */
-	List<String> findNotGainsUserId(int limit);
+	List<Map<String,Object>> findNotGainsUserId(int limit);
 	/**
 	 * 获得userId列表里用户的直播间收益
 	 * @param userIdList

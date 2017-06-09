@@ -19,5 +19,5 @@ public interface UserMapper {
 	 * @param limit 查询的条数
 	 * @return
 	 */
-	List<String> selectNotGainsUserId(@Param("limit") int limit);
+	List<Map<String,Object>> selectNotGainsUserId(@Param("limit") int limit);
 }

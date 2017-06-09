@@ -206,8 +206,8 @@
   </select>
   
   <!-- 获取没有t_user_gains记录的user_id -->
-  <select id="selectNotGainsUserId" parameterType="int" resultType="string">
-  	select user_id from t_user
+  <select id="selectNotGainsUserId" parameterType="int" resultType="hashmap">
+  	select user_id,app_name from t_user
   	where user_id not in(
   		select user_id from t_user_gains
   	)
