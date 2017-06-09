@@ -106,13 +106,14 @@ public class MessagePushServerImpl extends AbstractMsgService {
         log.debug("---------------将课程加入直播间即将超时预先提醒定时任务60分钟"+reqMap);
         String courseId = reqMap.get("course_id").toString();
         String im_course_id = reqMap.get("im_course_id").toString();
+        String course_title = reqMap.get("course_title").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
         	return;
         }
         long real_start_time = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));
 
     	//String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
-    	long taskStartTime = 5*60*60*1000 + real_start_time ;
+    	long taskStartTime = 5*60*60*1000 + real_start_time ;//上课到5小时
         //taskStartTime -= 60*60*1000;//提前60分钟 提醒课程结束
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -127,7 +128,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         			}
         			log.debug("-----------课程加入直播超时预先提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
         			JSONObject obj = new JSONObject();
-                    obj.put("body",MiscUtils.getConfigKey("jpush_course_live_overtime_per_notice_1h"));
+                    obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_live_overtime_per_notice_5h"), MiscUtils.RecoveryEmoji(course_title)));
         			obj.put("to",courseMap.get("lecturer_id"));
         			obj.put("msg_type","4");
         			Map<String,String> extrasMap = new HashMap<>();
@@ -251,7 +252,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         	ScheduleTask scheduleTask = new ScheduleTask(){
         		@Override
         		public void process() {
-        			log.debug("-----------开播预先1H提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+        			log.debug("-----------开播预先5min提醒定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                     JSONObject obj = new JSONObject();
                     obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"5"));
                     obj.put("to",lecturer_id);
@@ -383,7 +384,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, courseCacheMap);
                     Map<String,String> courseMap = jedis.hgetAll(courseKey);
                     //如果课程不是预告中，则不需要执行该定时任务
-                    if(courseMap == null || courseMap.size() == 0 || !courseMap.get("status").equals("1")){                       
+                    if(courseMap == null || courseMap.size() == 0){
                         return;
                     }
                     JSONObject obj = new JSONObject();
@@ -408,18 +409,19 @@ public class MessagePushServerImpl extends AbstractMsgService {
         }
     }
 
-    //课程开始讲师未出现 极光推送
+    //IM推送
+    @SuppressWarnings("unchecked")
     @FunctionName("processCourseStartIM")
     public void processCourseStartIM(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
         String appName = requestEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        log.debug("---------------将课程加发送上课开始的im消息"+reqMap);
+        log.debug("---------------将课程加入发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
-        if(qnSchedule.containTask(courseId, QNSchedule.TASK_LECTURER_NOTICE)){
+        String lecturer_id = reqMap.get("lecturer_id").toString();
+        if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_START)){
             return;
         }
-        String lecturer_id = reqMap.get("lecturer_id").toString();
         //课程开始时间
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
@@ -457,13 +459,55 @@ public class MessagePushServerImpl extends AbstractMsgService {
                     jedis.zrem(Constants.SYS_COURSES_RECOMMEND_PREDICTION,courseId);//从热门推荐预告列表删除
                     long lops = Long.valueOf(courseMap.get("student_num"))+ Long.valueOf(courseMap.get("extra_num"));
                     jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,courseId);//加入热门推荐正在直播列表
+
+
+
+
+                    log.debug("----------发送上课开始的极光消息 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+                    SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
+                    String str = sdf.format( System.currentTimeMillis());
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                    TemplateData first = new TemplateData();
+                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+                    templateMap.put("first", first);
+
+                    TemplateData orderNo = new TemplateData();
+                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    orderNo.setValue(MiscUtils.RecoveryEmoji(courseMap.get("course_title")));
+                    templateMap.put("keyword1", orderNo);
+
+                    TemplateData wuliu = new TemplateData();
+                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    wuliu.setValue(str);
+                    templateMap.put("keyword2", wuliu);
+
+
+                    TemplateData remark = new TemplateData();
+                    if(appName.equals(Constants.HEADER_APP_NAME)){
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+                    }else{
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+                    }
+                    remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+                    templateMap.put("remark", remark);
+                    //查询报名了的用户id
+                    List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("course_id"));
+
+                    String url = MiscUtils.getConfigByKey("course_live_room_url",appName);
+                    url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
+                    if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
+                        weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+                    }
                 }
             };
             scheduleTask.setId(courseId);
             scheduleTask.setCourseId(courseId);
+            scheduleTask.setLecturerId(lecturer_id);
             scheduleTask.setStartTime(taskStartTime);
-            scheduleTask.setTaskName(QNSchedule.TASK_LECTURER_NOTICE);
+            scheduleTask.setTaskName(QNSchedule.TASK_COURSE_START);
             qnSchedule.add(scheduleTask);
+            log.debug("---------------将课程加入发送上课开始的im消息成功"+reqMap);
         }
     }
 
@@ -539,6 +583,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_5MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_15MIN_NOTICE);
         qnSchedule.cancelTask(courseId, QNSchedule.TASK_LECTURER_NOTICE);
+        qnSchedule.cancelTask(courseId, QNSchedule.TASK_COURSE_START);
     }
 
 
@@ -672,7 +717,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             infomation.put("message_id",MiscUtils.getUUId());
             infomation.put("message_imid",infomation.get("message_id"));
             infomation.put("message_type", "1");
-            infomation.put("send_type", "6");//5.结束消息
+            infomation.put("send_type", "6");
             infomation.put("create_time", currentTime);
             if(type.equals("2")){
                 //课程直播超时结束

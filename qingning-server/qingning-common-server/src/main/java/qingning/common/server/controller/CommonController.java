@@ -959,8 +959,9 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "classifyInfo", accessToken, null,appName);
         return this.process(requestEntity, serviceManger, message);
     }
+    
     /**
-     * 添加分类信息
+     * 后台_添加分类信息
      * @return
      * @throws Exception
      */
@@ -968,7 +969,7 @@ public class CommonController extends AbstractController {
     @RequestMapping(value = "/common/classify/add", method = RequestMethod.POST)
     public @ResponseBody
     ResponseEntity addClassify(
-            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             HttpEntity<Object> entity,
             @RequestHeader("version") String version)throws Exception{
@@ -976,8 +977,9 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
     }
+    
     /**
-     * 编辑分类信息
+     * 后台_编辑分类信息
      * @return
      * @throws Exception
      */
@@ -985,14 +987,34 @@ public class CommonController extends AbstractController {
     @RequestMapping(value = "/common/classify/edit", method = RequestMethod.POST)
     public @ResponseBody
     ResponseEntity editClassify(
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             HttpEntity<Object> entity,
             @RequestHeader("version") String version)throws Exception{
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "editClassify", accessToken, version,appName);
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
     }
+    
+    /**
+     * 后台_获取所有分类列表
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/classify/list", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity getClassifyList(
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getClassifyList", accessToken, version,appName);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
     /**
      *  获取systemConfig
      * @param version
@@ -1057,7 +1079,7 @@ public class CommonController extends AbstractController {
     
     
     /**
-     * 新增轮播
+     * 后台_新增轮播
      * @param entity
      * @param accessToken
      * @param appName
@@ -1079,7 +1101,7 @@ public class CommonController extends AbstractController {
     }
     
     /**
-     * 搜索banner列表
+     * 后台_搜索banner列表
      * @param bannerName
      * @param status
      * @param bannerType
@@ -1118,7 +1140,7 @@ public class CommonController extends AbstractController {
     }
     
     /**
-     * 更新banner
+     * 后台_更新banner
      * @param entity
      * @param accessToken
      * @param appName
@@ -1140,7 +1162,7 @@ public class CommonController extends AbstractController {
     }
     
     /**
-     * 快速更新banner
+     * 后台_快速更新banner
      * @param entity
      * @param accessToken
      * @param appName
@@ -1162,7 +1184,7 @@ public class CommonController extends AbstractController {
     }
     
     /**
-     * 移除banner
+     * 后台_移除banner
      * @param entity
      * @param accessToken
      * @param appName
@@ -1179,6 +1201,60 @@ public class CommonController extends AbstractController {
 		    @RequestHeader("version") String version) throws Exception {
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "removeBannerInfo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 后台_课程搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/course/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCourseListBySearch(
+    		@RequestParam(value="search_param", defaultValue="") String searchParam,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
+    		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseListBySearch", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+        
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    
+    /**
+     * 后台_直播间搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/live_room/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getLiveRoomListBySearch(
+    		@RequestParam(value="search_param", defaultValue="") String searchParam,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
+    		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+        
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }

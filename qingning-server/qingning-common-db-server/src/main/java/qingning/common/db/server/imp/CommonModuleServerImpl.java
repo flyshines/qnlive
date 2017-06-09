@@ -869,13 +869,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void insertClassify(Map<String, Object> record) {
-		classifyInfoMapper.insertSelective(record);
+	public int insertClassify(Map<String, Object> record) {
+		return classifyInfoMapper.insertClassifyInfo(record);
 	}
 
 	@Override
-	public void updateClassify(Map<String, Object> record) {
-		classifyInfoMapper.updateByPrimaryKeySelective(record);
+	public int updateClassify(Map<String, Object> record) {
+		return classifyInfoMapper.updateClassifyInfo(record);
 	}
 
 	/**
@@ -924,5 +924,37 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public int updateBannerByMapNotNull(Map<String, Object> reqMap) {
 		return bannerInfoMapper.updateBannerInfoByMapNotNull(reqMap);
+	}
+
+	/**
+	 * 后台_搜索课程列表(同时搜索课程名、课程id)
+	 */
+	@Override
+	public List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseListBySearch(reqMap);
+	}
+
+	/**
+	 * 后台_搜索课程列表(同时搜索直播间名、直播间id)
+	 */
+	@Override
+	public List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap) {
+		return liveRoomMapper.findLiveRoomListBySearch(reqMap);
+	}
+
+	/**
+	 * 后台_获取分类列表
+	 */
+	@Override
+	public List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap) {
+		return classifyInfoMapper.findClassifyListByMap(reqMap);
+	}
+
+	/**
+	 * 后台_获取各分类下课程数量
+	 */
+	@Override
+	public List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap) {
+		return classifyInfoMapper.findCourseNumGroupByClassifyId(selectMap);
 	}
 }

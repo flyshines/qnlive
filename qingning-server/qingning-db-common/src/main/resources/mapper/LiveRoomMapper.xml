@@ -204,5 +204,19 @@
         #{userId} 
     </foreach>
   </select>
+  
+  <!-- 后台_搜索课程列表(同时搜索直播间名、直播间id) -->
+  <select id="findLiveRoomListBySearch" parameterType="hashmap" resultType="hashmap">
+  	SELECT room_id, room_name, lecturer_id 
+	FROM t_live_room 
+	<where>
+		app_name = #{app_name}
+		<if test="search_param != null and search_param != ''">
+			and (room_name LIKE '%${search_param}%' OR room_id = #{search_param})
+		</if>
+	</where>
+	limit 20
+  </select>
+  
 
 </mapper>

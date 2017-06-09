@@ -146,14 +146,19 @@ public interface ICommonModuleServer {
 
 	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
 
-	/**新增-分类
+	/**
+	 * 新增分类
 	 * @param record
+	 * @return
 	 */
-	void insertClassify(Map<String, Object> record);
-	/**更新-分类
-	 * @param param
+	int insertClassify(Map<String, Object> record);
+	
+	/**
+	 * 更新分类
+	 * @param record 更新非空字段
+	 * @return
 	 */
-	void updateClassify(Map<String, Object> record);
+	int updateClassify(Map<String, Object> record);
 	/**
 	 * 新增轮播
 	 * @param reqMap
@@ -190,4 +195,28 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	int updateBannerByMapNotNull(Map<String, Object> reqMap);
+	/**
+	 * 后台_搜索课程列表(同时搜索课程名、课程id、直播间id、讲师id)
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap);
+	/**
+	 * 后台_搜索课程列表(同时搜索直播间名、直播间id)
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap);
+	/**
+	 * 后台_获取分类列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> getClassifyList(Map<String, Object> reqMap);
+	/**
+	 * 后台_获取各分类下课程数量
+	 * @param selectMap 包含要查询的classify_id字符串集合
+	 * @return
+	 */
+	List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap);
 }

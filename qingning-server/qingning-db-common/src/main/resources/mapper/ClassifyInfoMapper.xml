@@ -9,7 +9,9 @@
   <select id="findClassifyInfoByAppName" resultType="hashmap">
     select * from t_classify_info where is_use=1 and app_names like #{appName}
   </select>
-  <insert id="insertSelective" parameterType="hashmap" >
+  
+  <!-- 后台_新增分类 -->
+  <insert id="insertClassifyInfo" parameterType="hashmap" >
     insert into t_classify_info
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="classify_id != null" >
@@ -58,28 +60,43 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="hashmap" >
+  
+  <!-- 根据条件获取分类列表 -->
+  <select id="findClassifyListByMap" resultType="hashmap" parameterType="hashmap">
+    select * from t_classify_info
+    <where>
+    	app_names like '%${appName}%'
+    	<if test="is_use != null">
+    		and is_use = #{is_use}
+    	</if>
+    </where>
+    order by position = -1 ASC<!-- -1排最后 -->, 
+    	position = 0 ASC<!-- 0排倒数第二 -->, 
+    	position ASC <!-- position递增 -->
+  </select>
+  
+  <!-- 更新分类 -->
+  <update id="updateClassifyInfo" parameterType="hashmap" >
     update t_classify_info
-    <set >
-      <if test="classify_name != null" >
-        classify_name = #{classify_name,jdbcType=VARCHAR},
+    set
+      <if test="classify_name != null and classify_name != '' " >
+		classify_name = #{classify_name},
       </if>
-      <if test="is_use != null" >
-        is_use = #{is_use,jdbcType=INTEGER},
+      <if test="is_use != null and is_use != ''" >
+        is_use = #{is_use},
       </if>
-      <if test="create_date != null" >
-        create_date = #{create_date,jdbcType=TIMESTAMP},
-      </if>
-      <if test="create_time != null" >
-        create_time = #{create_time,jdbcType=BIGINT},
-      </if>
-      <if test="app_names != null" >
-        app_names = #{app_names,jdbcType=VARCHAR},
-      </if>
-      <if test="position != null" >
-        position = #{position,jdbcType=VARCHAR},
-      </if>
-    </set>
-    where classify_id = #{classify_id,jdbcType=INTEGER}
+      position = #{position}
+      where classify_id = #{classify_id} and app_names = #{app_names}
   </update>
+  
+  <!-- 后台_获取各分类下课程数量 -->
+  <select id="findCourseNumGroupByClassifyId" parameterType="hashmap" resultType="hashmap">
+	SELECT classify_id, COUNT(classify_id) course_num
+	FROM t_courses
+	WHERE app_name = #{app_name} 
+	<if test="classify_ids != null">
+		AND classify_id IN (${classify_ids})
+	</if>
+	GROUP BY classify_id
+  </select>
 </mapper>

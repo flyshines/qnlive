@@ -467,10 +467,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         timerMap.put("lecturer_id", userId);
         timerMap.put("course_title", course.get("course_title"));        
         //timerMap.put("course_id", dbResultMap.get("course_id").toString());
-        timerMap.put("start_time", startTime + "");
+        timerMap.put("start_time", startTime.toString());
         timerMap.put("position", course.get("position"));
         timerMap.put("im_course_id", course.get("im_course_id"));
-        timerMap.put("real_start_time",  startTime+"");
+        timerMap.put("real_start_time",  startTime.toString());
 
 
 
@@ -506,10 +506,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         		mqRequestEntity.setParam(timerMap);
                 mqRequestEntity.setAppName(appName);
         		this.mqUtils.sendMessage(mqRequestEntity);
-        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
-            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
-            		this.mqUtils.sendMessage(mqRequestEntity);
-        		}
+//        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
+//            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
+//            		this.mqUtils.sendMessage(mqRequestEntity);
+//        		}
         	}
             //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务
             RequestEntity mqRequestEntity = new RequestEntity();

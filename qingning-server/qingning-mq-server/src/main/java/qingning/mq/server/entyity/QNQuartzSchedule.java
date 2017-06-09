@@ -28,7 +28,9 @@ public class QNQuartzSchedule {
 	public static final String TASK_COURSE_5MIN_NOTICE="course_5min_notice";
 	public static final String TASK_COURSE_15MIN_NOTICE="course_15min_notice";
 	public static final String TASK_LECTURER_NOTICE="lecturer_notice";
-	
+	public static final String TASK_COURSE_START="courase_start";//课程开课提醒
+
+
     private Scheduler scheduler = null;
     private SchedulerFactory factory = null;
 	private Map<String, SimpleTrigger>  taskEndCourse = new HashMap<String, SimpleTrigger>();
@@ -37,7 +39,8 @@ public class QNQuartzSchedule {
 	private Map<String, SimpleTrigger>  course5MinNotice = new HashMap<String, SimpleTrigger>();
 	private Map<String, SimpleTrigger>  course15MinNotice = new HashMap<String, SimpleTrigger>();
 	private Map<String, SimpleTrigger>  lecturerNotice = new HashMap<String, SimpleTrigger>();
-	
+	private Map<String, SimpleTrigger>  couraseStart = new HashMap<String, SimpleTrigger>();
+
     public static class QNSchedulerJob implements Job{
 		@Override
 		public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -83,6 +86,8 @@ public class QNQuartzSchedule {
 			map = course15MinNotice;
 		} else if(TASK_LECTURER_NOTICE.equals(taskName)){
 			map = lecturerNotice;
+		}else if(TASK_COURSE_START.equals(taskName)){
+			map = couraseStart;
 		}
 		return map;
 	}
