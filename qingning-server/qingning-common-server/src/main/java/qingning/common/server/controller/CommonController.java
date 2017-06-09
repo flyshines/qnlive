@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
+import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
@@ -1106,7 +1107,6 @@ public class CommonController extends AbstractController {
      * @param status
      * @param bannerType
      * @param pageCount
-     * @param createTime
      * @param accessToken
      * @param appName
      * @param version
@@ -1258,5 +1258,39 @@ public class CommonController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+
+    /**
+     * 解析二维码
+     * 前端传入公众号文章链接 进行解析 返回二维码链接
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/weChatUrl", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getWeChatQrCode(
+            @RequestParam(value="we_chat_url", defaultValue="") String we_chat_url,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        ResponseEntity responseEntity = new ResponseEntity();
+        HttpClientUtil httpClientUtil = new HttpClientUtil();
+        //"http://mp.weixin.qq.com/s/AZ56baCsh049jQ4C9xF2Ig"
+        String str = httpClientUtil.doPost(we_chat_url, null, null, "UTF-8");
+        String username = " user_name = \"";
+        int user_name = str.indexOf(" user_name = \"");
+        int i = str.indexOf("\"", user_name+username.length()+1);
+        String substring = str.substring(user_name+username.length(), i);
+        String url = "http://open.weixin.qq.com/qr/code/?username="+substring;
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("url",url);
+        responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
+
 
 }

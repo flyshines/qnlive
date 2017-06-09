@@ -493,47 +493,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
             mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
             this.mqUtils.sendMessage(mqRequestEntity);
-
+            if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+                //提前五分钟开课提醒
+                if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+                    mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+                //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+                mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
+            //提前24小时开课提醒
+            if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+                mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
         }
 
-        if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
-        	//提前五分钟开课提醒        
-        	if(startTime-System.currentTimeMillis()> 5 * 60 *1000){        
-        		RequestEntity mqRequestEntity = new RequestEntity();
-        		mqRequestEntity.setServerName("MessagePushServer");
-        		mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-        		mqRequestEntity.setFunctionName("processCourseStartShortNotice");
-        		mqRequestEntity.setParam(timerMap);
-                mqRequestEntity.setAppName(appName);
-        		this.mqUtils.sendMessage(mqRequestEntity);
-//        		if(startTime-System.currentTimeMillis()> 15 * 60 *1000){
-//            		mqRequestEntity.setFunctionName("processCourseStartStudentStudyNotice");
-//            		this.mqUtils.sendMessage(mqRequestEntity);
-//        		}
-        	}
-            //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务
-            RequestEntity mqRequestEntity = new RequestEntity();
-            mqRequestEntity.setServerName("MessagePushServer");
-            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqRequestEntity.setParam(timerMap);
-            mqRequestEntity.setAppName(appName);
-//            mqRequestEntity.setFunctionName("processCourseNotStart");
-//            this.mqUtils.sendMessage(mqRequestEntity);
-            
-            //开课时间到但是讲师未出现提醒  推送给参加课程者
-            mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
-            this.mqUtils.sendMessage(mqRequestEntity);
-        }
-        //提前24小时开课提醒
-        if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
-            RequestEntity mqRequestEntity = new RequestEntity();
-            mqRequestEntity.setServerName("MessagePushServer");
-            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-            mqRequestEntity.setFunctionName("processCourseStartLongNotice");           
-            mqRequestEntity.setParam(timerMap);
-            mqRequestEntity.setAppName(appName);
-            this.mqUtils.sendMessage(mqRequestEntity);
-        }
+
+
 
 
         map.clear();

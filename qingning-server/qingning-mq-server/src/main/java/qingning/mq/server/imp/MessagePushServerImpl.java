@@ -418,12 +418,14 @@ public class MessagePushServerImpl extends AbstractMsgService {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         log.debug("---------------将课程加入发送上课开始的im消息"+reqMap);
         String courseId = reqMap.get("course_id").toString();
-        String lecturer_id = reqMap.get("lecturer_id").toString();
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_COURSE_START)){
+            log.debug("------------已经有任务了:"+QNSchedule.TASK_COURSE_START+"course_id:"+courseId);
+
             return;
         }
         //课程开始时间
         long taskStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+        String lecturer_id = reqMap.get("lecturer_id").toString();
 
         if(taskStartTime > 0){
             ScheduleTask scheduleTask = new ScheduleTask(){
