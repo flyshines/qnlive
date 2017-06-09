@@ -381,6 +381,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
         return i;
     }
 
+    /**
+     * 分页查询-后台提现记录
+     */
     @Override
     public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));

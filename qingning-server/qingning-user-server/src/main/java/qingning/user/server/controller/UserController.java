@@ -428,16 +428,19 @@ public class UserController extends AbstractController{
     		@RequestParam(value="page_count", defaultValue="10") String page_count,
     		@RequestParam(value="page_num", defaultValue="1") String page_num,
     		@RequestParam(value="user_name",defaultValue="") String user_name,
+    		@RequestParam(value="user_id",defaultValue="") String user_id,
     		@RequestParam(value="status",defaultValue="") String status,
-    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value="access_token", defaultValue = "") String accessToken,
     		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader("version") String version) throws Exception {
+    		@RequestHeader(value="version",defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListAll", accessToken, version, appName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("page_count", page_count);
         paramMap.put("page_num", page_num);
 		if(StringUtils.isNotEmpty(user_name))
 			paramMap.put("user_name", user_name);
+		if(StringUtils.isNotEmpty(user_id))
+			paramMap.put("user_id", user_id);
 		if(StringUtils.isNotEmpty(status))
         	paramMap.put("status", status);
         requestEntity.setParam(paramMap);
@@ -446,7 +449,7 @@ public class UserController extends AbstractController{
     }
 
 	/**
-	 * 后台_获取提现
+	 * 后台_处理提现申请
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -460,7 +463,7 @@ public class UserController extends AbstractController{
 			HttpEntity<Object> entity,
     		@RequestHeader("access_token") String accessToken,
     		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader("version") String version) throws Exception {
+    		@RequestHeader(value="version",defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "handleWithDrawResult", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);

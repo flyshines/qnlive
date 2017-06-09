@@ -130,8 +130,9 @@
       ORDER BY t.create_time DESC
       limit #{page_count}
 	</select>
+	
   <!-- 分页查询-后台提现记录 -->
-	<select id="selectWithdrawListAll" resultType="hashmap" parameterType="string">
+	<select id="selectWithdrawListAll" resultType="hashmap" parameterType="hashmap">
       SELECT
         t.withdraw_cash_id,
         t.user_id,
@@ -142,18 +143,22 @@
         t.create_time,
         t.state AS status,
         t.remark,
-      t.handle_name
+      	t.handle_name
       FROM
           `t_withdraw_cash` t
-      WHERE 1=1
-      <if test="status != null" >
-        AND t.state = #{status}
-      </if>
-      <if test="user_name != null" >
-        AND (t.user_name like '%${user_name}%' OR t.user_id = #{user_name})
-      </if>
-      ORDER BY t.create_time DESC
+      WHERE app_name = #{app_name}
+	      <if test="status != null" >
+	        AND t.state = #{status}
+	      </if>
+	      <if test="user_name != null" >
+	        AND t.user_name like '%${user_name}%'
+	      </if>
+	      <if test="user_id != null" >
+	        AND t.user_id = #{user_name}
+	      </if>
+      ORDER BY t.state=0 desc, t.create_time DESC
 	</select>
+	
   <!-- 查询-提现记录 -->
 	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="string">
       SELECT

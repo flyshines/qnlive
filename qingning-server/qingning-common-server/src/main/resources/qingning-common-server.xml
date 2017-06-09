@@ -765,6 +765,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="classify_name" type="string" require="Y,000100"/>
@@ -779,6 +780,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 				</inputs>
@@ -797,6 +799,7 @@
 				<auth>
 					<accessToken require="N"/>
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="classify_id" type="string" require="Y,000100"/>
@@ -813,6 +816,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="Y,000100" />
@@ -831,6 +835,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_name" type="string" require="N" />
@@ -860,6 +865,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -879,6 +885,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -898,6 +905,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="banner_id" type="string" require="Y,000100" />
@@ -911,6 +919,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />
@@ -931,6 +940,7 @@
 				<auth>
 					<accessToken require="N" />
 					<appName require="Y,000100" />
+					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />

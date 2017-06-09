@@ -1852,13 +1852,19 @@ public class UserServerImpl extends AbstractQNLiveServer {
      */
     @FunctionName("getWithdrawListAll")
     public Map<String, Object> getWithdrawListAll(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
         Map<String, Object> param = (Map)reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        param.put("userId",userId);
-    	if(param.get("create_time")!=null){
-            Date time = new Date(Long.valueOf(param.get("create_time").toString()));
-            param.put("create_time",time);
-        }
+        param.put("app_name", reqEntity.getAppName());
+        
+        /*
+         * TODO 判断后台是否登录
+         */
+        
+        /*
+         * 查询提现记录列表
+         */
 		return userModuleServer.findWithdrawListAll(param);
     }
 
