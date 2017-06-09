@@ -89,6 +89,12 @@
       <if test="update_time != null" >
         update_time = #{update_time},
       </if>
+      <if test="handle_id != null" >
+          handle_id = #{handle_id},
+      </if>
+      <if test="handle_name != null" >
+          handle_name = #{handle_name},
+      </if>
     </set>
     where  withdraw_cash_id = #{withdraw_cash_id}
   </update>

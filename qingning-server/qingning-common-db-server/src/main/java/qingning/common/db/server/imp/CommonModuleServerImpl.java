@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
+import qingning.common.util.CountMoneyUtil;
 import qingning.common.util.DoubleUtil;
 import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.*;
@@ -54,7 +55,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private LecturerMapper lecturerMapper;
-	
+
 	@Autowired(required = true)
 	private RoomDistributerRecommendMapper roomDistributerRecommendMapper;
 
@@ -95,7 +96,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private SystemConfigMapper systemConfigMapper;
 	@Autowired(required = true)
 	private UserGainsMapper userGainsMapper;
-
+	@Autowired(required = true)
+	private WithdrawCashMapper withdrawCashMapper;
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -110,7 +112,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap) {
 		return loginInfoMapper.getLoginInfoByLoginIdAndLoginType(reqMap);
 	}
-	
+
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, String> initializeRegisterUser(Map<String, Object> reqMap) {
@@ -137,9 +139,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if("0".equals(login_type)){
 			loginInfo.put("union_id", reqMap.get("login_id"));
 		} else if("1".equals(login_type)){
-			
+
 		} else if("2".equals(login_type)){
-			
+
 		} else if("3".equals(login_type)){
 			loginInfo.put("passwd",reqMap.get("certification"));
 		} else if("4".equals(login_type)){
@@ -188,8 +190,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		//插入t_trade_bill表
 		Date now = new Date();
 		insertMap.put("create_time", now);
-		insertMap.put("update_time", now);	
-		
+		insertMap.put("update_time", now);
+
 		tradeBillMapper.insertTradeBill(insertMap);
 	}
 
@@ -203,7 +205,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		record.put("update_time", now);
 		record.put("close_time", now);
 		record.put("trade_id", failUpdateMap.get("trade_id"));
-	
+
 		tradeBillMapper.updateTradeBill(record);
 	}
 
@@ -243,12 +245,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> tradeBill = paymentBillMapper.findTradeBillByPaymentid(pre_pay_no);
 		return tradeBill;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> handleWeixinPayResult(Map<String, Object> requestMapData) throws Exception{
-	
+
 		Date now = new Date();
 		Map<String,Object> tradeBill = (Map<String,Object>)requestMapData.get("tradeBillInCache");
 		Map<String,Object> updateTradeBill = new HashMap<String,Object>();
@@ -256,14 +258,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		updateTradeBill.put("trade_id", requestMapData.get("out_trade_no"));
 		updateTradeBill.put("status", "2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
 		updateTradeBill.put("update_time", now);
-		if(tradeBillMapper.updateTradeBill(updateTradeBill) < 1){			
-			throw new QNLiveException("000105");			
+		if(tradeBillMapper.updateTradeBill(updateTradeBill) < 1){
+			throw new QNLiveException("000105");
 		}
 		//2.更新t_payment_bill 支付信息表
 		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
 		String status = (String)paymentBill.get("status");
 		if("2".equals(status)){
-			throw new QNLiveException("000105");			
+			throw new QNLiveException("000105");
 		}
 		String profitId = MiscUtils.getUUId();
 		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
@@ -276,10 +278,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(paymentBillMapper.updatePaymentBill(updatePaymentBill) < 1){
 			throw new QNLiveException("000105");
 		}
-
-		//用户这次产生的实际收益
-		long userIncome = DoubleUtil.mulForLong(Long.valueOf(tradeBill.get("amount").toString()),Constants.USER_RATE);
-		long userTotalIncome = Long.valueOf(tradeBill.get("amount").toString());
+		//支付金额
+		long amount = Long.valueOf(tradeBill.get("amount").toString());
 
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
@@ -287,230 +287,212 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
 		profitRecord.put("user_id", tradeBill.get("user_id"));
-		profitRecord.put("profit_amount", tradeBill.get("amount"));
+		profitRecord.put("profit_amount", amount);
 		profitRecord.put("profit_type", tradeBill.get("profit_type"));
 		profitRecord.put("create_time", now);
 		profitRecord.put("create_date", now);
 		profitRecord.put("payment_id", paymentBill.get("payment_id"));
 		profitRecord.put("payment_type", paymentBill.get("payment_type"));
-		
+
 		Map<String,String> courseMap = (Map<String,String>)requestMapData.get("courseInCache");
+		Map<String,Object> roomDistributerCache = null;
+		String lecturerId = courseMap.get("lecturer_id");
+		//分销员分成比例（*10000）
+		long distributeRate = 0;
+		//分销员ID
+		String distributerId = null;
+
 		if(!MiscUtils.isEmpty(courseMap)){
-			profitRecord.put("lecturer_id", courseMap.get("lecturer_id"));
+			profitRecord.put("lecturer_id", lecturerId);
 		}
-		Map<String,Object> roomDistributerCache = null;		
+
+
 		if("0".equals(tradeBill.get("profit_type"))){
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
+				distributeRate = MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"));
+				distributerId=(String)roomDistributerCache.get("distributer_id");
 				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
-				long shareAmount= (MiscUtils.convertObjectToLong(tradeBill.get("amount")) * MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate")))/10000L;
+				long shareAmount= (amount * distributeRate)/10000L;
 				profitRecord.put("share_amount", shareAmount);
-				profitRecord.put("distributer_id", roomDistributerCache.get("distributer_id"));
+				profitRecord.put("distributer_id", distributerId);
 			}
 		}
-		
+
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
-		boolean isDist = false;
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
-			String distributer_id = null;
 			String rqCode = null;
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
 				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新
+				rqCode = (String)roomDistributerCache.get("rq_code");
 				Map<String,Object> roomDistributerRecommendUpdateMap = new HashMap<>();
 				roomDistributerRecommendUpdateMap.put("done_num",1);
 				roomDistributerRecommendUpdateMap.put("course_num",1);
 				roomDistributerRecommendUpdateMap.put("update_time",now);
-				roomDistributerRecommendUpdateMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+				roomDistributerRecommendUpdateMap.put("rq_code", rqCode);
 				roomDistributerRecommendUpdateMap.put("room_id", tradeBill.get("room_id"));
 				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
-				distributer_id=(String)roomDistributerCache.get("distributer_id");
-				rqCode = (String)roomDistributerCache.get("rq_code");
 				//查询是否有t_room_distributer_courses表，如果没有，则插入数据
 				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
-				roomDistributerCourseMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
-				roomDistributerCourseMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+				roomDistributerCourseMap.put("rq_code", rqCode);
+				roomDistributerCourseMap.put("distributer_id", distributerId);
 				roomDistributerCourseMap.put("course_id", tradeBill.get("course_id"));
 				Map<String,Object> roomDistributerCourse = roomDistributerCoursesMapper.findRoomDistributerCourse(roomDistributerCourseMap);
 
 				if(MiscUtils.isEmpty(roomDistributerCourse)){
 					Map<String,Object> roomDistributerCourseInsertMap = new HashMap<>();
 					roomDistributerCourseInsertMap.put("distributer_courses_id", MiscUtils.getUUId());
-					roomDistributerCourseInsertMap.put("distributer_id", roomDistributerCache.get("distributer_id"));
+					roomDistributerCourseInsertMap.put("distributer_id", distributerId);
 					roomDistributerCourseInsertMap.put("room_id", tradeBill.get("room_id"));
 					roomDistributerCourseInsertMap.put("course_id", tradeBill.get("course_id"));
-					roomDistributerCourseInsertMap.put("lecturer_id", courseMap.get("lecturer_id"));
+					roomDistributerCourseInsertMap.put("lecturer_id", lecturerId);
 					roomDistributerCourseInsertMap.put("recommend_num", 1);
 					roomDistributerCourseInsertMap.put("done_num", 1);
-					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
+					roomDistributerCourseInsertMap.put("total_amount", profitRecord.get("share_amount"));
 					roomDistributerCourseInsertMap.put("effective_time", roomDistributerCache.get("effective_time"));
 					roomDistributerCourseInsertMap.put("profit_share_rate", roomDistributerCache.get("profit_share_rate"));
 					roomDistributerCourseInsertMap.put("create_time", now);
 					roomDistributerCourseInsertMap.put("update_time", now);
-					roomDistributerCourseInsertMap.put("rq_code", (String)roomDistributerCache.get("rq_code"));
+					roomDistributerCourseInsertMap.put("rq_code", rqCode);
 					roomDistributerCoursesMapper.insertRoomDistributerCourses(roomDistributerCourseInsertMap);
 				}else {
 					Map<String,Object> roomDistributerCourseInsertMap = new HashMap<>();
 					roomDistributerCourseInsertMap.put("distributer_courses_id", roomDistributerCourse.get("distributer_courses_id"));
-					roomDistributerCourseInsertMap.put("total_amount", (Long)profitRecord.get("share_amount"));
+					roomDistributerCourseInsertMap.put("total_amount", profitRecord.get("share_amount"));
 					roomDistributerCoursesMapper.afterStudentBuyCourse(roomDistributerCourseInsertMap);
 				}
-				isDist = true;
 			}
 			//t_courses_students
-			Map<String,Object> student = new HashMap<String,Object>();
+			Map<String,Object> student = new HashMap<>();
 			student.put("student_id", MiscUtils.getUUId());
 			student.put("user_id", tradeBill.get("user_id"));
-			student.put("distributer_id", distributer_id);
-			student.put("lecturer_id", courseMap.get("lecturer_id"));
+			student.put("distributer_id", distributerId);
+			student.put("lecturer_id", lecturerId);
 			student.put("room_id", courseMap.get("room_id"));
 			student.put("course_id", courseMap.get("course_id"));
-			student.put("payment_amount", tradeBill.get("amount"));
+			student.put("payment_amount", amount);
 			student.put("course_password", courseMap.get("course_password"));
-			student.put("student_type", distributer_id==null? 0 : 1);  //TODO 课程学员待修改
+			student.put("student_type", distributerId==null? 0 : 1);  //TODO 课程学员待修改
 			student.put("rq_code", rqCode);
 			student.put("create_time", now);
 			student.put("create_date", now);
-			coursesStudentsMapper.insertStudent(student);			
+			coursesStudentsMapper.insertStudent(student);
 		}
-		Map<String,Object> userGains = new HashMap<>();
-		if(isDist){
-			userGains.put("user_id",roomDistributerCache.get("distributer_id"));
-		}else{
-			userGains.put("user_id",courseMap.get("lecturer_id"));
-		}
-		Map<String,Object> userGainsOld = userGainsMapper.findUserGainsByUserId(userGains.get("user_id").toString());
-		if(userGainsOld == null){
-			//如果统计未找到做规避
-			userGains.put("live_room_total_amount",0);
-			userGains.put("live_room_real_incomes",0);
-			userGains.put("distributer_total_amount",0);
-			userGains.put("distributer_real_incomes",0);
-			userGains.put("user_total_amount",0);
-			userGains.put("user_total_real_incomes",0);
-			userGains.put("balance",0);
-		}
-		if(isDist){
-			//用户分销收益
-			userGains.put("distributer_total_amount",userTotalIncome + Long.valueOf(userGainsOld.get("distributer_total_amount").toString()));
-			userGains.put("distributer_real_incomes", userIncome + Long.valueOf(userGainsOld.get("distributer_real_incomes").toString()));
-		}else{
-			//用户直播间收益
-			userGains.put("live_room_total_amount",userTotalIncome + Long.valueOf(userGainsOld.get("distributer_total_amount").toString()));
-			userGains.put("live_room_real_incomes", userIncome + Long.valueOf(userGainsOld.get("distributer_real_incomes").toString()));
-		}
-		//更新t_user_gains 用户收益统计表
-		long user_total_amount = Long.valueOf(userGainsOld.get("user_total_amount").toString());
-		long user_total_real_incomes = Long.valueOf(userGainsOld.get("user_total_real_incomes").toString());
-		long balance = Long.valueOf(userGainsOld.get("balance").toString());
-		if(userGains!=null){
-			user_total_amount = user_total_amount + Long.valueOf(tradeBill.get("amount").toString());
-			user_total_real_incomes = user_total_real_incomes + userIncome;
-			balance = balance + userIncome;
-			userGains.put("user_total_amount",user_total_amount);
-			userGains.put("user_total_real_incomes",user_total_real_incomes);
-			userGains.put("balance",balance);
-			userGainsMapper.updateUserGains(userGains);
-		}else{
-			userGains.put("user_total_amount",user_total_amount);
-			userGains.put("user_total_real_incomes",user_total_real_incomes);
-			userGains.put("balance",balance);
-			userGainsMapper.insertUserGainsByNewUser(userGains);
-		}
-		//<editor-fold desc="Description">
-		//TODO 定时任务处理，需更新缓存
-/*		//更新收益表信息
-		Map<String,Object> courses = coursesMapper.findCourseByCourseId(tradeBill.getCourseId());
-		PaymentBill paymentBill = paymentBillMapper.selectByTradeId(tradeBill.getTradeId());
-		LecturerCoursesProfit lcp = new LecturerCoursesProfit();
-		//如果为购买课程，则查询该学员是否属于某个分销员
-		if(tradeBill.getProfitType().equals("0")){
-			Map<String,Object> queryMap = new HashMap<>();
-			queryMap.put("room_id", tradeBill.getRoomId());
-			queryMap.put("user_id", tradeBill.getUserId());
-			queryMap.put("today_end_date", MiscUtils.getEndDateOfToday().getTime());
-			Map<String,Object> recommendMap = roomDistributerRecommendMapper.findRoomDistributerRecommendAllInfo(queryMap);
-
-			//设置相关收益
-			if(! MiscUtils.isEmpty(recommendMap)){
-				lcp.setDistributerId(recommendMap.get("distributer_id").toString());
-				Map<String,Object> distributerMap = roomDistributerMapper.findRoomDistributerInfoByRqCode(recommendMap.get("rq_code").toString());
-				long profit_share_rate = (Long)distributerMap.get("profit_share_rate");
-				long totalProfit = tradeBill.getAmount();
-				long shareAmount = profit_share_rate *  totalProfit / 10000;
-				lcp.setShareAmount(shareAmount);
-
-				//t_room_distributer更新 成交人数+1，分销总收益(分)增加，最后一次成交时间修改
-				Map<String,Object> roomDistributerUpdateMap = new HashMap<>();
-				roomDistributerUpdateMap.put("done_num",1);
-				roomDistributerUpdateMap.put("total_amount",shareAmount);
-				roomDistributerUpdateMap.put("done_time",now);
-				roomDistributerUpdateMap.put("rq_code",recommendMap.get("rq_code").toString());
-				roomDistributerMapper.studentBuyCourseUpdate(roomDistributerUpdateMap);
-
-				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新
-				Map<String,Object> roomDistributerRecommendUpdateMap = new HashMap<>();
-				roomDistributerRecommendUpdateMap.put("done_num",1);
-				roomDistributerRecommendUpdateMap.put("course_num",1);
-				roomDistributerRecommendUpdateMap.put("update_time",now);
-				roomDistributerRecommendUpdateMap.put("rq_code",recommendMap.get("rq_code").toString());
-				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
-
-			}
-		}*/
-//TODO 定时任务处理，需更新缓存
-/*		//0:课程收益 1:打赏
-		if(tradeBill.getProfitType().equals("0")){
-			//如果为购买课程，则插入学员表
-			CoursesStudents students = new CoursesStudents();
-			students.setStudentId(MiscUtils.getUUId());
-			students.setUserId(tradeBill.getUserId());
-			students.setLecturerId(courses.get("lecturer_id").toString());
-			students.setRoomId(courses.get("room_id").toString());
-			students.setCourseId(courses.get("course_id").toString());
-			//students.setPaymentAmount();//todo
-			if(courses.get("course_password") != null){
-				students.setCoursePassword(courses.get("course_password").toString());
-			}
-			//		if(StringUtils.isNotBlank(courseMap.get("course_password"))){
-			//			students.setCoursePassword(courseMap.get("course_password"));
-			//		}
-			students.setStudentType("0");//TODO
-			students.setCreateTime(now);
-			students.setCreateDate(now);
-			coursesStudentsMapper.insert(students);
-
-			//如果缓存中没有课程，则直接更新数据库中的课程信息
-			//1 课程在缓存中  2课程不在缓存中
-			if(requestMapData.get("courseInCache").toString().equals("2")){
-				Map<String,Object> updateCourseMap = new HashMap<>();
-				updateCourseMap.put("course_amount", tradeBill.getAmount());
-				updateCourseMap.put("student_num", 1);
-				updateCourseMap.put("course_id", courses.get("course_id").toString());
-				coursesMapper.updateAfterStudentBuyCourse(updateCourseMap);
-			}
-		}else {
-			//1 课程在缓存中  2课程不在缓存中
-			if(requestMapData.get("courseInCache").toString().equals("2")){
-				//查询该用户是否打赏了该课程
-				Map<String,Object> rewardQueryMap = new HashMap<>();
-				rewardQueryMap.put("course_id",courses.get("course_id").toString());
-				rewardQueryMap.put("user_id",tradeBill.getUserId());
-				Map<String,Object> rewardMap = lecturerCoursesProfitMapper.findRewardByUserIdAndCourseId(rewardQueryMap);
-				if(MiscUtils.isEmpty(rewardMap)){
-					Map<String,Object> updateCourseMap = new HashMap<>();
-					updateCourseMap.put("extra_amount", tradeBill.getAmount());
-					updateCourseMap.put("extra_num", 1);
-					updateCourseMap.put("course_id", courses.get("course_id").toString());
-					coursesMapper.updateAfterStudentRewardCourse(updateCourseMap);
-				}
-			}
-		}*/
-		//</editor-fold>
+		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate);
 		return profitRecord;
 	}
+	private Map<String,Object> initGains(String userId){
+		List<String> ids = new ArrayList<>();
+		ids.add(userId);
+		List<Map<String, Object>> userRoomAmountList = liveRoomMapper.selectRoomAmount(ids);
+		List<Map<String, Object>> userDistributerAmountList = distributerMapper.selectDistributerAmount(ids);
+		List<Map<String, Object>> userWithdrawSumList = withdrawCashMapper.selectUserWithdrawSum(ids);
 
+		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(ids, userRoomAmountList,
+				userDistributerAmountList, userWithdrawSumList);
+		userGainsMapper.insertUserGains(insertGainsList);
+		if(insertGainsList!=null){
+			return insertGainsList.get(0);
+		}
+		return null;
+	}
+	/**
+	 * @param distributerId		分销ID
+	 * @param amount			支付金额
+	 * @param appName			app名称
+	 * @param lecturerId		讲师ID
+	 * @param distributeRate	分销员收益比例
+	 */
+	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate){
+		double rate = DoubleUtil.divide( (double) distributeRate,10000D);
+		//讲师收益
+		Map<String,Object> lectureGains = new HashMap<>();
+		lectureGains.put("user_id",lecturerId);
+		//初始化讲师余额信息
+		Map<String,Object> lectureGainsOld = userGainsMapper.findUserGainsByUserId(lecturerId);
+		if(lectureGainsOld == null){
+			//如果统计未找到做规避
+			lectureGainsOld = initGains(lecturerId);
+		}
+		//讲师收益
+		long lectureTotalAmount = 0L;
+		long lectureRealAmount = 0L;
+
+		//分销员收益
+		long distTotalAmount = 0L;
+		long distRealAmount = 0L;
+
+		//余额统计
+		if(distributerId!=null){
+			//分销课程收益逻辑
+			if(Constants.HEADER_APP_NAME.equals(appName)){
+				//qnlive逻辑
+				//分销员总/实际 收益
+				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
+				distRealAmount = distTotalAmount;
+				//讲师总/实际 收益
+				lectureTotalAmount = amount - distTotalAmount;
+				lectureRealAmount = lectureTotalAmount;
+			}else{
+				//dlive逻辑
+				//分销员总/实际 收益
+				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
+				distRealAmount = DoubleUtil.mulForLong(DoubleUtil.mulForLong(amount,rate),Constants.USER_RATE);
+				//讲师总/实际 收益
+				lectureTotalAmount = amount - distTotalAmount;
+				lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
+			}
+		}else{
+			//店铺收益逻辑
+			if(Constants.HEADER_APP_NAME.equals(appName)){
+				//qnlive逻辑
+				//讲师总收益
+				lectureTotalAmount = amount;
+				//讲师实际收益
+				lectureRealAmount = amount;
+			}else{
+				//dlive逻辑
+				//讲师总收益
+				lectureTotalAmount = amount;
+				//讲师实际收益
+				lectureRealAmount = DoubleUtil.mulForLong(amount,Constants.USER_RATE);
+			}
+		}
+		//更新t_user_gains 讲师收益统计
+		long lectureTotalAmountOld = Long.valueOf(lectureGainsOld.get("user_total_amount").toString());
+		long lectureTotalRealIncomesOld = Long.valueOf(lectureGainsOld.get("user_total_real_incomes").toString());
+		long lectureBalanceOld = Long.valueOf(lectureGainsOld.get("balance").toString());
+		lectureTotalAmountOld = lectureTotalAmountOld + lectureTotalAmount;
+		lectureTotalRealIncomesOld = lectureTotalRealIncomesOld + lectureRealAmount;
+		lectureBalanceOld = lectureBalanceOld + lectureRealAmount;
+		lectureGains.put("user_total_amount",lectureTotalAmountOld);
+		lectureGains.put("user_total_real_incomes",lectureTotalRealIncomesOld);
+		lectureGains.put("balance",lectureBalanceOld);
+		userGainsMapper.updateUserGains(lectureGains);
+		//更新t_user_gains 分销员收益统计
+		if(distributerId!=null){
+			Map<String,Object> distGains = new HashMap<>();
+			distGains.put("user_id",distributerId);
+			//初始化分销员余额信息
+			Map<String,Object> distGainsOld = userGainsMapper.findUserGainsByUserId(distributerId);
+			if(distGainsOld == null){
+				//如果统计未找到做规避
+				distGainsOld = initGains(distributerId);
+			}
+			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
+			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
+			long distBalanceOld = Long.valueOf(distGainsOld.get("balance").toString());
+			distTotalAmountOld = distTotalAmountOld + distTotalAmount;
+			distTotalRealIncomesOld = distTotalRealIncomesOld + distTotalAmount;
+			distBalanceOld = distBalanceOld + distRealAmount;
+			distGains.put("user_total_amount",distTotalAmountOld);
+			distGains.put("user_total_real_incomes",distTotalRealIncomesOld);
+			distGains.put("balance",distBalanceOld);
+			userGainsMapper.updateUserGains(distGains);
+		}
+	}
 	@Override
 	public Map<String, Object> findByDistributerId(String distributer_id) {
 		return distributerMapper.findByDistributerId(distributer_id);
@@ -590,7 +572,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		reqMap.put("update_time", now);
 		reqMap.put("status", "1"); //处理状态，1：未处理 2：已经处理
 		feedbackMapper.insertFeedBack(reqMap);
-	    
+
 	}
 
 	@Override
@@ -603,7 +585,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return versionMapper.findVersionInfoByOS(plateform);
 	}
 	@Override
-	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {		
+	public Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record) {
 		return roomDistributerMapper.findRoomDistributer(record);
 	}
 	@Override
@@ -616,7 +598,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> loginInfo = new HashMap<String,Object>();
 		loginInfo.put("user_id", updateIMAccountMap.get("user_id"));
 		loginInfo.put("m_user_id", updateIMAccountMap.get("m_user_id"));
-		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));		
+		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));
 		return loginInfoMapper.updateLoginInfo(loginInfo);
 	}
 
@@ -662,11 +644,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		roomDistributerRecommendDetailMapper.insertRoomDistributerRecommend(insertMap);
 		long position = roomDistributerRecommendDetailMapper.getLatestPostion((String)insertMap.get("distributer_recommend_detail_id"));
 		insertMap.remove("create_time");
-		
+
 		insertMap.put("update_time", insertMap.get("now"));
 		insertMap.put("position", position);
 		roomDistributerRecommendMapper.updateRoomDistributerRecommend(insertMap);
-		
+
 		insertMap.remove("position");
 		roomDistributerRecommendDetailMapper.updateRoomDistributerRecommend(insertMap);
 
@@ -688,7 +670,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap) {		
+	public Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap) {
 		return roomDistributerDetailsMapper.findDistributionRoomDetail(reqMap);
 	}
 
@@ -698,17 +680,17 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {		
+	public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
 		return coursesStudentsMapper.findCourseIdByStudent(reqMap);
 	}
 
 	@Override
-	public Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap) {		
+	public Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap) {
 		return lecturerCoursesProfitMapper.findCoursesSumInfo(queryMap);
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomRecommendUserListByCode(Map<String, Object> record) {		
+	public List<Map<String, Object>> findRoomRecommendUserListByCode(Map<String, Object> record) {
 		return roomDistributerRecommendMapper.findRoomRecommendUserList(record);
 	}
 	@Override
@@ -911,7 +893,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
 		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
 	}
-	
+
 	/**
 	 * 根据map中的参数查询banner总数量
 	 */
