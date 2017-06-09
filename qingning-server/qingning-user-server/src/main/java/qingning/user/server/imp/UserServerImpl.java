@@ -3,7 +3,6 @@ package qingning.user.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
