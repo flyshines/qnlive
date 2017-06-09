@@ -1869,7 +1869,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取提现记录列表
+     * 后台_处理提现
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1877,19 +1877,39 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("handleWithDrawResult")
     public Map<String, Object> handleWithDrawResult(RequestEntity reqEntity) throws Exception{
     	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
         Map<String, Object> param = (Map)reqEntity.getParam();
         String withdrawId = param.get("withdraw_cash_id").toString();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        String remark = param.get("remark").toString();
-        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(withdrawId);
-        long actual_amount = Long.valueOf(withdraw.get("actual_amount").toString());
+        String remark = "";
+        if(param.get("remark") != null){
+        	remark = param.get("remark").toString();
+        }
+        String appName = reqEntity.getAppName();
+        param.put("app_name", appName);
         String result = param.get("result").toString();
+        
+        /*
+         * TODO 获取登录帐号
+         */
+        
+        /*
+         * 查询提现记录
+         */
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("app_name", appName);
+        selectMap.put("withdraw_cash_id", withdrawId);
+        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(selectMap);
+        
         if(withdraw==null||!"0".equals(withdraw.get("state"))){
             //未找到提现记录或重复提现
             throw new QNLiveException("170004");
         }else {
             //同意提现，更新提现记录，用户余额
-            userModuleServer.updateWithdraw(withdrawId,remark,userId,result,actual_amount);
+        	long initial_amount = Long.valueOf(withdraw.get("initial_amount").toString());
+            userModuleServer.updateWithdraw(withdrawId, remark, 
+            		withdraw.get("user_id").toString(), result, initial_amount);
         }
 		return resultMap;
     }

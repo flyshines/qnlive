@@ -77,9 +77,6 @@
   <update id="updateWithdrawCash" parameterType="hashmap">
     update t_withdraw_cash
     <set>
-      <if test="actual_amount != null" >
-        actual_amount = #{actual_amount},
-      </if>
       <if test="state != null" >
         state = #{state},
       </if>
@@ -138,7 +135,7 @@
         t.user_id,
         t.user_name,
         t.nick_name,
-        t.actual_amount,
+        t.initial_amount,
         t.alipay_account_number,
         t.create_time,
         t.state AS status,
@@ -151,22 +148,22 @@
 	        AND t.state = #{status}
 	      </if>
 	      <if test="user_name != null" >
-	        AND t.user_name like '%${user_name}%'
+	        AND (t.user_name like '%${user_name}%' or t.user_id = #{user_id})
 	      </if>
 	      <if test="user_id != null" >
-	        AND t.user_id = #{user_name}
+	        AND t.user_id = #{user_id}
 	      </if>
       ORDER BY t.state=0 desc, t.create_time DESC
 	</select>
 	
   <!-- 查询-提现记录 -->
-	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="string">
+	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="hashmap">
       SELECT
-          actual_amount,user_id,initial_amount,state
+          user_id,initial_amount,state
       FROM
           `t_withdraw_cash` t
       WHERE
-        t.withdraw_cash_id = #{withdraw_cash_id}
+        t.withdraw_cash_id = #{withdraw_cash_id} and app_name = #{app_name}
 	</select>
 
 </mapper>

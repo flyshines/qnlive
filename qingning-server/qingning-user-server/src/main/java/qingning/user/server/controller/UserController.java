@@ -461,7 +461,7 @@ public class UserController extends AbstractController{
     @ResponseBody
     ResponseEntity getWithdrawList(
 			HttpEntity<Object> entity,
-    		@RequestHeader("access_token") String accessToken,
+    		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
     		@RequestHeader(value="version",defaultValue="") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "handleWithDrawResult", accessToken, version, appName);

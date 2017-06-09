@@ -851,7 +851,7 @@
 						<param name="banner_img_url" type="string" />
 						<param name="banner_type" type="int" />
 						<param name="jump_url" type="string" />
-						<param name="jump_remark" type="string" />
+						<param name="jump_remark" type="string" fieldname="banner_remark"/>
 						<param name="create_time" type="long" />
 						<param name="score" type="int" />
 						<param name="status" type="int" />
@@ -875,6 +875,7 @@
 					<param name="banner_type" type="int" require="Y,000100" />
 					<param name="score" type="int" require="Y,000100" />
 					<param name="jump_url" type="string" require="Y,000100" />
+					<param name="jump_remark" type="string" require="Y,000100" />
 				</inputs>
 				<outputs>
 				</outputs>
