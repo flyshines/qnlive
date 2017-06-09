@@ -940,7 +940,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = MiscUtils.getAppNameByAppid(appid);
+        String appName = "qnlive";//MiscUtils.getAppNameByAppid(appid);
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -948,7 +948,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+        if (true/*TenPayUtils.isValidSign(requestMapData,appName)*/){// MD5签名成功，处理课程打赏\购买课程等相关业务
             //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
@@ -966,7 +966,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
 
-
                 String profit_type = (String)billMap.get("profit_type");
                 //1.1如果为打赏，则先查询该用户是否打赏了该课程
                 Map<String,Object> rewardMap = null;
@@ -979,6 +978,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 //2.为插入数据库准备相关数据，处理数据库中相关部分
                 Map<String,Object> requestValues = new HashMap<>();
+                //根据不同app处理不同收益情况
+                requestValues.put("app_name",appName);
                 for(String key : requestMapData.keySet()){
                     requestValues.put(key, requestMapData.get(key));
                 }

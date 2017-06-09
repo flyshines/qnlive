@@ -3,6 +3,7 @@ package qingning.user.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1863,7 +1864,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取提现记录列表
+     * 处理提现
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1874,6 +1875,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> param = (Map)reqEntity.getParam();
         String withdrawId = param.get("withdraw_cash_id").toString();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,Object> innerMap = new HashMap<>();
+        innerMap.put("user_id", userId);
+        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils.getJedis(Constants.HEADER_APP_NAME));
+        String userName = userMap.get("nick_name");
         String remark = param.get("remark").toString();
         Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(withdrawId);
         long actual_amount = Long.valueOf(withdraw.get("actual_amount").toString());
@@ -1883,7 +1888,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("170004");
         }else {
             //同意提现，更新提现记录，用户余额
-            userModuleServer.updateWithdraw(withdrawId,remark,userId,result,actual_amount);
+            userModuleServer.updateWithdraw(withdrawId,remark,userId,result,actual_amount,userName);
         }
 		return resultMap;
     }

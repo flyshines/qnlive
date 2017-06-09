@@ -79,7 +79,7 @@ public class CountMoneyUtil {
 				 */
 				double roomReal = Double.parseDouble(live_room_total_amount)/100;
 				double live_room_real_incomes = getCashInAmount(String.valueOf(roomReal));
-				gainsMap.put("live_room_real_incomes", live_room_real_incomes*100);
+				gainsMap.put("live_room_real_incomes", (long)(live_room_real_incomes*100));
 				
 				/*
 				 * 分销总收入
@@ -94,19 +94,19 @@ public class CountMoneyUtil {
 				 */
 				double distributerReal = Double.parseDouble(distributer_total_amount)/100;
 				double distributer_real_incomes = getCashInAmount(String.valueOf(distributerReal));
-				gainsMap.put("distributer_real_incomes", distributer_real_incomes*100);
+				gainsMap.put("distributer_real_incomes", (long)(distributer_real_incomes*100));
 				
 				/*
 				 * 计算用户总收入
 				 */
-				gainsMap.put("user_total_amount", 
-						Double.parseDouble(live_room_total_amount) 
-						+ Double.parseDouble(distributer_total_amount));
+				gainsMap.put("user_total_amount",
+						(long)(Double.parseDouble(live_room_total_amount)
+						+ Double.parseDouble(distributer_total_amount)));
 				/*
 				 * 计算用户实际收入
 				 */
 				double user_total_real_incomes = live_room_real_incomes*100 + distributer_real_incomes*100;
-				gainsMap.put("user_total_real_incomes", user_total_real_incomes);
+				gainsMap.put("user_total_real_incomes", (long)user_total_real_incomes);
 				/*
 				 * 计算余额
 				 */
@@ -115,7 +115,7 @@ public class CountMoneyUtil {
 					user_withdraw_sum = "0";
 				}
 				double balance = user_total_real_incomes-Double.parseDouble(user_withdraw_sum);
-				gainsMap.put("balance", balance);
+				gainsMap.put("balance", (long)balance);
 				
 				insertList.add(gainsMap);
 			}

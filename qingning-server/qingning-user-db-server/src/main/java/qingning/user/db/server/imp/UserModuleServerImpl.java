@@ -356,7 +356,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount) {
+    public int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount,String userName) {
         //更新提现记录
         Map<String,Object> paramMap = new HashMap<>();
         if("1".equals(result)){
@@ -377,6 +377,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
         paramMap.put("withdraw_cash_id",withdrawId);
         paramMap.put("update_time",new Date());
         paramMap.put("remark",remark);
+        paramMap.put("handle_name",userName);
+        paramMap.put("handle_id",userId);
         int i = withdrawCashMapper.updateWithdrawCash(paramMap);
         return i;
     }

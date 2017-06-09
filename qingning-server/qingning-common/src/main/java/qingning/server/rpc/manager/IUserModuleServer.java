@@ -133,9 +133,10 @@ public interface IUserModuleServer {
 	 * @param userId
 	 * @param result
 	 * @param actual_amount
+	 * @param userName
 	 * @return
 	 */
-	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount);
+	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long actual_amount,String userName);
 	/**分页查询-后台提现记录
 	 * @param param
 	 * @return
