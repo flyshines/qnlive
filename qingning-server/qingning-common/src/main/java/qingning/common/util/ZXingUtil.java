@@ -755,7 +755,7 @@ public class ZXingUtil {
         //
         BufferedImage pressText4 = pressText(course_name, pressText3, FONT_NAME, 1, 54, new Color(90,210,161), -30, twoline?(-HEIGHT/4-60):(-HEIGHT/4-30), 1.0f, true);
 
-        String format = new SimpleDateFormat("yyyy年MM月dd日 HH:MM").format(new Date(time));
+        String format = new SimpleDateFormat("yyyy年MM月dd日 HH:mm").format(new Date(time));
 
         BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -60, -HEIGHT/4+120, 1.0f, true);
 
