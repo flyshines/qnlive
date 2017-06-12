@@ -160,6 +160,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("update_time", now);
 		loginInfoMapper.insertLoginInfo(loginInfo);
 
+		//初始化用户余额信息
+		Map<String,Object> gainsMap = new HashMap<>();
+		gainsMap.put("user_id",uuid);
+		gainsMap.put("live_room_total_amount","0");
+		gainsMap.put("live_room_real_incomes","0");
+		gainsMap.put("distributer_total_amount","0");
+		gainsMap.put("distributer_real_incomes","0");
+		gainsMap.put("user_total_amount","0");
+		gainsMap.put("user_total_real_incomes","0");
+		gainsMap.put("balance","0");
+		userGainsMapper.insertUserGainsByNewUser(gainsMap);
+
 		Map<String,String> resultMap = new HashMap<String,String>();
 		resultMap.put("user_id", uuid);
 		return resultMap;
