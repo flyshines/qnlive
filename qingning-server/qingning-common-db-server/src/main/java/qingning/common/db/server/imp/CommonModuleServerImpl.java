@@ -160,6 +160,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("update_time", now);
 		loginInfoMapper.insertLoginInfo(loginInfo);
 
+		//初始化用户余额信息
+		Map<String,Object> gainsMap = new HashMap<>();
+		gainsMap.put("user_id",uuid);
+		gainsMap.put("live_room_total_amount","0");
+		gainsMap.put("live_room_real_incomes","0");
+		gainsMap.put("distributer_total_amount","0");
+		gainsMap.put("distributer_real_incomes","0");
+		gainsMap.put("user_total_amount","0");
+		gainsMap.put("user_total_real_incomes","0");
+		gainsMap.put("balance","0");
+		userGainsMapper.insertUserGainsByNewUser(gainsMap);
+
 		Map<String,String> resultMap = new HashMap<String,String>();
 		resultMap.put("user_id", uuid);
 		return resultMap;
@@ -468,6 +480,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			}
 		}
 		//更新t_user_gains 讲师收益统计
+		//直播间收入
+		long lectureRoomTotalAmountOld = Long.valueOf(lectureGainsOld.get("live_room_total_amount").toString());
+		long lectureRoomRealAmountOld = Long.valueOf(lectureGainsOld.get("live_room_real_incomes").toString());
+		lectureRoomTotalAmountOld = lectureTotalAmount + lectureRoomTotalAmountOld;
+		lectureRoomRealAmountOld = lectureRealAmount + lectureRoomRealAmountOld;
+		lectureGains.put("live_room_total_amount",lectureRoomTotalAmountOld);
+		lectureGains.put("live_room_real_incomes",lectureRoomRealAmountOld);
+		//用户收入
 		long lectureTotalAmountOld = Long.valueOf(lectureGainsOld.get("user_total_amount").toString());
 		long lectureTotalRealIncomesOld = Long.valueOf(lectureGainsOld.get("user_total_real_incomes").toString());
 		long lectureBalanceOld = Long.valueOf(lectureGainsOld.get("balance").toString());
@@ -488,11 +508,19 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				//如果统计未找到做规避
 				distGainsOld = initGains(distributerId,appName);
 			}
+			//分销收入
+			long distributerTotalAmountOld = Long.valueOf(lectureGainsOld.get("distributer_total_amount").toString());
+			long distributerRealAmountOld = Long.valueOf(lectureGainsOld.get("distributer_real_incomes").toString());
+			distributerTotalAmountOld = distTotalAmount + distributerTotalAmountOld;
+			distributerRealAmountOld = distRealAmount + distributerRealAmountOld;
+			lectureGains.put("live_room_total_amount",distributerTotalAmountOld);
+			lectureGains.put("live_room_real_incomes",distributerRealAmountOld);
+			//用户收入
 			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
 			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
 			long distBalanceOld = Long.valueOf(distGainsOld.get("balance").toString());
 			distTotalAmountOld = distTotalAmountOld + distTotalAmount;
-			distTotalRealIncomesOld = distTotalRealIncomesOld + distTotalAmount;
+			distTotalRealIncomesOld = distTotalRealIncomesOld + distRealAmount;
 			distBalanceOld = distBalanceOld + distRealAmount;
 			distGains.put("user_total_amount",distTotalAmountOld);
 			distGains.put("user_total_real_incomes",distTotalRealIncomesOld);
