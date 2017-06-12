@@ -53,7 +53,8 @@
     state,
     remark,
     create_time,
-    update_time )
+    update_time,
+    app_name)
     values
       (#{withdraw_cash_id},
       #{user_id},
@@ -71,7 +72,8 @@
       #{state},
       #{remark},
       #{create_time},
-      #{update_time})
+      #{update_time},
+      #{app_name})
   </insert>
 
   <update id="updateWithdrawCash" parameterType="hashmap">

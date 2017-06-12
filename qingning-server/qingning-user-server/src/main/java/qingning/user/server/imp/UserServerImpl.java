@@ -1815,6 +1815,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	insertMap.put("state", '0');
     	insertMap.put("create_time", nowStr);
     	insertMap.put("update_time", nowStr);
+    	insertMap.put("app_name", appName);
     	// 插入提现申请表
         try{
             balance = balance - initialAmount;
