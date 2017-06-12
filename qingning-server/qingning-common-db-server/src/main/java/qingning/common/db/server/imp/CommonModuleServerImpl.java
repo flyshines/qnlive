@@ -513,8 +513,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			long distributerRealAmountOld = Long.valueOf(distGainsOld.get("distributer_real_incomes").toString());
 			distributerTotalAmountOld = distTotalAmount + distributerTotalAmountOld;
 			distributerRealAmountOld = distRealAmount + distributerRealAmountOld;
-			distGains.put("live_room_total_amount",distributerTotalAmountOld);
-			distGains.put("live_room_real_incomes",distributerRealAmountOld);
+			distGains.put("distributer_total_amount",distributerTotalAmountOld);
+			distGains.put("distributer_real_incomes",distributerRealAmountOld);
 			//用户收入
 			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
 			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
