@@ -1672,8 +1672,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//获取参数
         Map<String, Object> resultMap = new HashMap<String, Object>();
         List<Map<String, Object>> insertGainsList = null;
-        List<String> userIdList = null;
-        
+        List<Map<String,Object>> userIdList = null;
+        List<String> ids = new ArrayList<>();
 		/*
 		 * 获得存在与用户表t_user而不存在与t_user_gains的数据
 		 */
@@ -1683,11 +1683,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
 			if(userIdList == null || userIdList.isEmpty()){
 				break;
 			}
-			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(userIdList);
-			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(userIdList);
-			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(userIdList);
-			
-			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList, 
+            for(Map<String,Object> map:userIdList){
+                ids.add(map.get("user_id").toString());
+            }
+			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(ids);
+			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(ids);
+			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(ids);
+			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
 					userDistributerAmountList, userWithdrawSumList);
 			userModuleServer.insertUserGains(insertGainsList);
         }while(userIdList != null);
@@ -1746,8 +1748,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         /*
     	 * 判断提现余额是否大于10000
     	 */
-        //if(initialAmount < 10000){
-        if(initialAmount < 100){
+        if(initialAmount < 10000){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
         }else{
@@ -1809,8 +1810,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	insertMap.put("nick_name", loginUserMap.get("nick_name"));
     	insertMap.put("user_phone", loginUserMap.get("phone_number"));
     	insertMap.put("alipay_account_number", reqMap.get("alipay_account_number"));
-    	insertMap.put("initial_amount", reqMap.get("initial_amount"));
-    	insertMap.put("actual_amount", reqMap.get("actual_amount"));
+    	insertMap.put("initial_amount", amount);
+    	insertMap.put("actual_amount", amount);
     	insertMap.put("state", '0');
     	insertMap.put("create_time", nowStr);
     	insertMap.put("update_time", nowStr);
@@ -1852,18 +1853,24 @@ public class UserServerImpl extends AbstractQNLiveServer {
      */
     @FunctionName("getWithdrawListAll")
     public Map<String, Object> getWithdrawListAll(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
         Map<String, Object> param = (Map)reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        param.put("userId",userId);
-    	if(param.get("create_time")!=null){
-            Date time = new Date(Long.valueOf(param.get("create_time").toString()));
-            param.put("create_time",time);
-        }
+        param.put("app_name", reqEntity.getAppName());
+        
+        /*
+         * TODO 判断后台是否登录
+         */
+        
+        /*
+         * 查询提现记录列表
+         */
 		return userModuleServer.findWithdrawListAll(param);
     }
 
     /**
-     * 处理提现
+     * 后台_处理提现
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1871,23 +1878,39 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("handleWithDrawResult")
     public Map<String, Object> handleWithDrawResult(RequestEntity reqEntity) throws Exception{
     	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
         Map<String, Object> param = (Map)reqEntity.getParam();
         String withdrawId = param.get("withdraw_cash_id").toString();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Map<String,Object> innerMap = new HashMap<>();
-        innerMap.put("user_id", userId);
-        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedisUtils.getJedis(Constants.HEADER_APP_NAME));
-        String userName = userMap.get("nick_name");
-        String remark = param.get("remark").toString();
-        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(withdrawId);
-        long actual_amount = Long.valueOf(withdraw.get("actual_amount").toString());
+        String remark = "";
+        if(param.get("remark") != null){
+        	remark = param.get("remark").toString();
+        }
+        String appName = reqEntity.getAppName();
+        param.put("app_name", appName);
         String result = param.get("result").toString();
+        
+        /*
+         * TODO 获取登录帐号
+         */
+        
+        /*
+         * 查询提现记录
+         */
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("app_name", appName);
+        selectMap.put("withdraw_cash_id", withdrawId);
+        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(selectMap);
+        
         if(withdraw==null||!"0".equals(withdraw.get("state"))){
             //未找到提现记录或重复提现
             throw new QNLiveException("170004");
         }else {
             //同意提现，更新提现记录，用户余额
-            userModuleServer.updateWithdraw(withdrawId,remark,userId,result,actual_amount,userName);
+        	long initial_amount = Long.valueOf(withdraw.get("initial_amount").toString());
+            userModuleServer.updateWithdraw(withdrawId, remark, 
+            		withdraw.get("user_id").toString(), result, initial_amount);
         }
 		return resultMap;
     }

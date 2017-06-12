@@ -29,11 +29,12 @@ public interface WithdrawCashMapper {
 	 */
 	List<Map<String,Object>> selectWithdrawList(Map<String, Object> param);
 
-	/**根据ID查询条数
-	 * @param withdraw_cash_id
+	/**
+	 * 根据ID查询条数
+	 * @param selectMap
 	 * @return
 	 */
-	Map<String,Object> selectWithdrawSizeById(String withdraw_cash_id);
+	Map<String,Object> selectWithdrawSizeById(Map<String, Object> selectMap);
 
 	/**分页查询-后台提现记录
 	 * @param param

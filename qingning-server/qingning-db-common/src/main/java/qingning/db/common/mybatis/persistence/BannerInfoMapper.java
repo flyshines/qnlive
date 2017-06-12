@@ -26,7 +26,7 @@ public interface BannerInfoMapper {
 	int selectBannerCountByMap(Map<String, Object> reqMap);
 	/**
 	 * 更新banner所有字段
-	 * @param reqMap 非null字段为要更新的参数
+	 * @param reqMap 
 	 * @return
 	 */
 	int updateBannerInfoByMap(Map<String, Object> reqMap);

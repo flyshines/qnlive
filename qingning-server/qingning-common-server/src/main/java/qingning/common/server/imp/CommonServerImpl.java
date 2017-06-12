@@ -4023,6 +4023,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> param = (Map)reqEntity.getParam();
+        param.put("app_names", appName);
+        
         commonModuleServer.updateClassify(param);
         //清除缓存
         Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
@@ -4111,7 +4113,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //循环为其附上对应的直播间名字或课程名字
         int bannerType = 0;
         Jedis jedis = jedisUtils.getJedis(appName);
-        for(Map<String, Object> bannerMap : bannerList){
+        /*for(Map<String, Object> bannerMap : bannerList){
         	bannerType = (int) bannerMap.get("banner_type");
         	if(1 == bannerType){	//跳转至直播间
         		//从缓存中查询直播间名称
@@ -4127,7 +4129,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         		Map<String, String> course = CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
         		bannerMap.put("jump_remark", course.get("course_title"));
         	}
-        }
+        }*/
         
         resultMap.put("banner_info_list", bannerList);
         resultMap.put("total_num", commonModuleServer.findBannerCountByMap(reqMap));

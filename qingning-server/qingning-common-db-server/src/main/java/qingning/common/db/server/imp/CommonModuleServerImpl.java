@@ -383,14 +383,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate);
 		return profitRecord;
 	}
-	private Map<String,Object> initGains(String userId){
+	private Map<String,Object> initGains(String userId,String appName){
+		//初始化用户收入信息
 		List<String> ids = new ArrayList<>();
 		ids.add(userId);
 		List<Map<String, Object>> userRoomAmountList = liveRoomMapper.selectRoomAmount(ids);
 		List<Map<String, Object>> userDistributerAmountList = distributerMapper.selectDistributerAmount(ids);
 		List<Map<String, Object>> userWithdrawSumList = withdrawCashMapper.selectUserWithdrawSum(ids);
 
-		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(ids, userRoomAmountList,
+		List<Map<String, Object>> userIdList = new ArrayList<>();
+		Map<String, Object> user = new HashMap<>();
+		user.put("app_name",appName);
+		user.put("user_id",userId);
+		userIdList.add(user);
+
+		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
 				userDistributerAmountList, userWithdrawSumList);
 		userGainsMapper.insertUserGains(insertGainsList);
 		if(insertGainsList!=null){
@@ -414,7 +421,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> lectureGainsOld = userGainsMapper.findUserGainsByUserId(lecturerId);
 		if(lectureGainsOld == null){
 			//如果统计未找到做规避
-			lectureGainsOld = initGains(lecturerId);
+			lectureGainsOld = initGains(lecturerId,appName);
 		}
 		//讲师收益
 		long lectureTotalAmount = 0L;
@@ -479,7 +486,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			Map<String,Object> distGainsOld = userGainsMapper.findUserGainsByUserId(distributerId);
 			if(distGainsOld == null){
 				//如果统计未找到做规避
-				distGainsOld = initGains(distributerId);
+				distGainsOld = initGains(distributerId,appName);
 			}
 			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
 			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
