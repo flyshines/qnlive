@@ -940,7 +940,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = "qnlive";//MiscUtils.getAppNameByAppid(appid);
+        String appName = MiscUtils.getAppNameByAppid(appid);
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -948,7 +948,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (true/*TenPayUtils.isValidSign(requestMapData,appName)*/){// MD5签名成功，处理课程打赏\购买课程等相关业务
+        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
             //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
