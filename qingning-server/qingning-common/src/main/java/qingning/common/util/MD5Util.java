@@ -103,7 +103,7 @@ public class MD5Util {
 
     public static void main(String[] s) throws Exception {
     	//System.out.println("md5值："+getMD5("appid=testappid1deviceid=testwan").toLowerCase());
-        Map<String,String> a = new HashMap<>();
+        /*Map<String,String> a = new HashMap<>();
 
         a.put("login_name","W44G9WRB");
         a.put("login_pw","3a01dda81e8cada809b70f33677b43e3");
@@ -115,7 +115,12 @@ public class MD5Util {
         String json = mapper.writeValueAsString(a);
         System.out.println(json);
         String b = test(json,"securecode",1);
-        System.out.println(b);
+        System.out.println(b);*/
+    	
+    	String testPw = "qnlive_123456789";
+    	String md5Pw = MD5Util.getMD5(testPw);
+    	
+    	System.out.println(md5Pw);
     }
 
 
