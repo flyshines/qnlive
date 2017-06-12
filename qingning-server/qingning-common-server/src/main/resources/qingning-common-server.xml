@@ -954,6 +954,17 @@
 					</param>
 				</outputs>
 			</function>
+			<function name="sendIMError">
+				<auth>
+					<accessToken require="N" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
  
  

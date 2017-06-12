@@ -1293,4 +1293,27 @@ public class CommonController extends AbstractController {
     }
 
 
+    /**
+     * 发送手机验证码
+     * @param phone 电话号码
+
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/sendIMError", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity
+    sendIMError(HttpServletRequest request, @RequestParam(value = "phone") String phone
+                )throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendIMError", "", "","qnlive");
+        String ipAdress = request.getRemoteAddr();// HttpTookit.getIpAdress(request);//获取请求地址
+        Map<String,String> map = new HashMap<>();
+        map.put("phone",phone);
+        map.put("ipAdress",ipAdress);
+        logger.debug("IMERROR ipAdress : "+ipAdress);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
 }
