@@ -121,6 +121,9 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 	                    //提醒学生参加课程定时任务
 	                    requestEntityTask.setFunctionName("processCourseStartStudentStudyNotice");
 	                    messagePushServerImpl.processCourseStartStudentStudyNotice(requestEntityTask, jedisUtils, context);
+
+						requestEntityTask.setFunctionName("processCourseStartShortNotice");
+						messagePushServerImpl.processCourseLiveOvertime(requestEntityTask, jedisUtils, context);//课程超时强制结束
 	                    
 	                    //开课时间到但是讲师未出现提醒
 	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");

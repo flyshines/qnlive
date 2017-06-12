@@ -4339,7 +4339,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         String phoneNum = map.get("phone");//手机号
         String ipAdress = map.get("ipAdress");//ip地址
-        if(!ipAdress.equals("112.74.19.70")){
+        if(!ipAdress.equals("120.25.104.68")){
             throw new QNLiveException("000003");
         }
         //如果是qnlive 就执行
