@@ -103,7 +103,7 @@ public class MD5Util {
 
     public static void main(String[] s) throws Exception {
     	//System.out.println("md5值："+getMD5("appid=testappid1deviceid=testwan").toLowerCase());
-        Map<String,String> a = new HashMap<>();
+        /*Map<String,String> a = new HashMap<>();
 
         a.put("login_name","W44G9WRB");
         a.put("login_pw","3a01dda81e8cada809b70f33677b43e3");
@@ -115,7 +115,20 @@ public class MD5Util {
         String json = mapper.writeValueAsString(a);
         System.out.println(json);
         String b = test(json,"securecode",1);
-        System.out.println(b);
+        System.out.println(b);*/
+    	
+    	/*
+    	 * 生成t_admin_user帐号密码
+    	 */
+    	String userPw = "88888888";	//用户密码（未加密）
+    	String md5Pw = MD5Util.getMD5(userPw);
+    	System.out.println("对原始密码进行第一次加密：" + md5Pw);
+    	md5Pw = md5Pw + "_qnlive";
+    	md5Pw = MD5Util.getMD5(md5Pw);
+    	//输出加密密码
+    	System.out.println("对原始密码进行第二次加密：" + md5Pw);
+    	//输出uuid，用于当作user_id
+    	System.out.println(MiscUtils.getUUId());
     }
 
 

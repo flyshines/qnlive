@@ -875,7 +875,7 @@
 					<param name="banner_type" type="int" require="Y,000100" />
 					<param name="score" type="int" require="Y,000100" />
 					<param name="jump_url" type="string" require="Y,000100" />
-					<param name="jump_remark" type="string" require="Y,000100" />
+					<param name="jump_remark" type="string" require="N" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -939,9 +939,8 @@
 			<!-- 后台_直播间搜索查询 -->
 			<function name="getLiveRoomListBySearch">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
-					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />
@@ -954,6 +953,26 @@
 					</param>
 				</outputs>
 			</function>
+			
+			<!-- 后台_登录 -->
+			<function name="adminUserLogin">
+				<auth>
+					<accessToken require="N" />
+					<appName require="Y,000100" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="mobile" type="string" require="Y,000100" />
+					<param name="password" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+					<param name="access_token" type="string" />
+					<param name="user_id" type="string" />
+					<param name="username" type="string" />
+					<param name="version" type="string" />
+				</outputs>
+			</function>
+
 			<function name="sendIMError">
 				<auth>
 					<accessToken require="N" />

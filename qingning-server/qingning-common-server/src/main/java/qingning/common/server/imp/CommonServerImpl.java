@@ -4343,6 +4343,108 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
     /**
+     * 后台登录
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("adminUserLogin")
+    public Map<String, Object> adminUserLogin(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        String mobile = (String) reqMap.get("mobile");
+        String password = (String) reqMap.get("password");
+        
+        /*
+         * 根据号码查询数据库
+         */
+        Map<String, Object> adminUserMap = commonModuleServer.getAdminUserByMobile(reqMap);
+        if(adminUserMap == null){
+        	logger.info("后台登录>>>>手机号没有关联账户");
+        	throw new QNLiveException("000005");
+        }
+        
+        /*
+         * 验证密码:
+         * 	前端传递的MD5加密字符串后追加appName，在进行MD5加密
+         */
+        String md5Pw = MD5Util.getMD5(password + "_" + appName);
+        if(!md5Pw.equals(adminUserMap.get("password").toString())){
+        	logger.info("后台登录>>>>登录密码错误");
+        	throw new QNLiveException("120001");
+        }
+        
+        /*
+         * 更新后台登录用户统计数据
+         */
+        Date now = new Date();
+        adminUserMap.put("last_login_time", now);
+        adminUserMap.put("last_login_ip", "");
+        adminUserMap.put("login_num", 1);	//用于sql执行+1
+        
+        /*
+         * 判断是否需要生成token
+         */
+        String userId = (String) adminUserMap.get("user_id");
+        String accessToken = (String) adminUserMap.get("token");
+        Map<String, Object> map = new HashMap<String, Object>();
+        String accessTokenKey = null;
+        if(!StringUtils.isBlank(accessToken)){	//数据库中的token不为空
+            map.put("access_token", accessToken);
+            accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, 
+            		map);
+            if(!jedis.exists(accessTokenKey)){	//不在redis中
+            	/*
+            	 * 生成新的accessToken
+            	 */
+            	accessToken = AccessTokenUtil.generateAccessToken(userId, String.valueOf(now.getTime()));
+            	map.put("access_token", accessToken);
+            	accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, 
+                		map);
+            }
+        }else{
+        	/*
+        	 * 生成新的accessToken
+        	 */
+        	accessToken = AccessTokenUtil.generateAccessToken(userId, String.valueOf(now.getTime()));
+        	map.put("access_token", accessToken);
+        	accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, 
+            		map);
+        }
+        
+        adminUserMap.put("token", accessToken);
+        commonModuleServer.updateAdminUserByAllMap(adminUserMap);
+        
+        /*
+         * 将token写入缓存
+         */
+        Map<String, String> tokenCacheMap = new HashMap<>();
+        MiscUtils.converObjectMapToStringMap(adminUserMap, tokenCacheMap);
+
+        if(!tokenCacheMap.isEmpty()){
+        	jedis.hmset(accessTokenKey, tokenCacheMap);
+        }
+        jedis.expire(accessTokenKey, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time", appName)));
+        
+        /*
+         * 返回数据
+         */
+        adminUserMap.put("access_token", accessToken);
+        adminUserMap.put("version", "1.2.0");	//暂时写死
+        resultMap.putAll(adminUserMap);
+        return resultMap;
+    }
+
+
+
+    /**
      *  发送验证码
      * @param reqEntity
      * @throws Exception
