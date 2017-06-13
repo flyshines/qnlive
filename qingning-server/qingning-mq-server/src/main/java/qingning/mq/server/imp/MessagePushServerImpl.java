@@ -163,7 +163,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         log.debug("---------------課程开课時間"+realStartTime);
         //6个小时 超时结束
         long taskStartTime = 6*60*60*1000 + realStartTime;
-        log.debug("--------------超时任务处理时间6小时,当前时间:"+System.currentTimeMillis());
+        log.debug("--------------超时任务处理时间6小时,当前时间:"+System.currentTimeMillis()+"执行时间:"+taskStartTime);
 
         ScheduleTask scheduleTask = new ScheduleTask(){
             @Override
