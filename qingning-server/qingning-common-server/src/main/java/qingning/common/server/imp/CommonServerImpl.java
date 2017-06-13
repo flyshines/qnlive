@@ -359,14 +359,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String app_name = reqMap.get("state").toString();//携带回来的参数 返回appname 进行用户区分
         Jedis jedis = jedisUtils.getJedis(app_name);//获取缓存工具对象 db
         JSONObject getCodeResultJson = WeiXinUtil.getUserInfoByCode(code,app_name);
-        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.getString("openid") == null){
-            if(getCodeResultJson.getString("openid") == null){
+        if(getCodeResultJson == null || getCodeResultJson.getInteger("errcode") != null || getCodeResultJson.get("openid") == null){
+            if(getCodeResultJson.get("openid") == null){
                 resultMap.put("key","0");
                 return resultMap;
             }
             throw new QNLiveException("120008");
         }
-        String openid = getCodeResultJson.getString("openid");//拿到openid
+        String openid = getCodeResultJson.get("openid").toString();//拿到openid
         //获取用户信息
         try{
             AccessToken wei_xin_access_token =  WeiXinUtil.getAccessToken(null,null,jedis,app_name);//获取公众号access_token
@@ -2918,7 +2918,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put("page_num",page_num);
         Integer page_count = Integer.valueOf(map.get("page_count").toString());
         map.put("page_count",page_count);
-        int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程
+        int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程 3系列
         Jedis jedis = jedisUtils.getJedis(appName);
         map.put("appName",appName);
 
@@ -2951,6 +2951,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
             resultMap.put("course_list",this.setStudentAndLecturerNickName(courseBySearch,userId,jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
         }
+
+
+//        //查询所有 或者 查询系列
+//        if(search_type ==0 || search_type == 3){
+//          List<Map<String, Object>> seriesBySearch = commonModuleServer.findSeriesBySearch(map);//查询数据
+//          resultMap.put("series_list",);
+//        }
+
+
         return resultMap;
 
     }
@@ -4452,6 +4461,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("130006");
         }
     }
+
+
+
+
+
 
 
 }

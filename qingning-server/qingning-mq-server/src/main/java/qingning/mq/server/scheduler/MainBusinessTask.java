@@ -147,13 +147,14 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			e.printStackTrace();
 		}
 		for(String appName : appNames){//根据不同的app 执行功能不同的任务
+			logger.debug("执行对应的app定时任务:"+appName);
 			backstageMethod(appName);
 		}
 
 	}
 	public void backstageMethod(String appName){
 		for(AbstractMsgService server : list){
-			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === ");
+			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === APP:"+appName);
 			try {
 				RequestEntity  req = new RequestEntity();
 				req.setAppName(appName);

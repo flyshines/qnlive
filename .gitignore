@@ -5,3 +5,5 @@
 target/
 
 /qingning-server/*/.settings
+/qingning-server/qingning-common/src/main/resources/application.properties
+

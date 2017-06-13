@@ -3017,7 +3017,32 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return reqMap;
     }
 
+    @SuppressWarnings("unchecked")
+    @FunctionName("createSeries")
+    public Map<String, Object> createSeries(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+//        String lecturer_id = reqMap.get("lecturer_id").toString();//讲师id
+//        String classify_id = reqMap.get("classify_id").toString();//分类id
+//        String series_from = reqMap.get("series_from").toString();//来源 0直播 1 saas平台
+//        String series_title = reqMap.get("series_title").toString();//系列名称
+//        String update_plan = reqMap.get("update_plan").toString();//更新计划 期数
+//        String series_type = reqMap.get("series_type").toString();//系列类型 0免费 1收费
+//        String series_price = reqMap.get("series_price").toString();//系列价格 默认 0元
+//        lectureModuleServer.createSeries(reqMap);
+        Jedis jedis = jedisUtils.getJedis(appName);
 
+        //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
+        Map<String, String> series = CacheUtils.readCourse((String)reqMap.get("course_id"),
+                generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedis, true);
+        String updown = reqMap.get("updown").toString();//上下架
+        if(updown.equals("0")){//立即上架
+
+
+
+        }
+        return reqMap ;
+    }
 
 
 }

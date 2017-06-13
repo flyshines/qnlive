@@ -461,6 +461,21 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="userSeries">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y, 000100" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="withdraw_cash_id" type="string" require="true, 000100"/>
+					<param name="result" type="string" format="0|1,000004" require="Y,000100"/>
+					<param name="remark" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
 
 

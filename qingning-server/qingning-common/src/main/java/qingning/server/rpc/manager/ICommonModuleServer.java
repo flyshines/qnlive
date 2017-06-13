@@ -3,7 +3,6 @@ package qingning.server.rpc.manager;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public interface ICommonModuleServer {
 	List<Map<String, Object>> getServerUrls();
@@ -66,7 +65,7 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
 
-	Map<String,Object> findVersionInfoByOS(String plateform);
+	Map<String,Object> findVersionInfoByOS(Map<String, Object> plateform);
 	Map<String,Object> findAvailableRoomDistributer(Map<String,Object> record);
 	Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 

@@ -866,7 +866,7 @@ public class CommonController extends AbstractController {
     /**
      * 搜索
      * @param search_text 搜索文本
-     * @param search_type 查询类型 0所有 1直播间 2课程
+     * @param search_type 查询类型 0所有 1直播间 2课程 3系列
      * @param page_count 分页
      * @param page_num 分页参数
      * @param accessToken
@@ -1038,7 +1038,7 @@ public class CommonController extends AbstractController {
     }
 
     /**
-     *  获取systemConfig
+     *  saveCourseMsgList
      * @param version
      * @return
      * @throws Exception

@@ -18,6 +18,7 @@ public final class Constants {
 
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
+	public static final String SYS_READ_LAST_SERIES ="SYS_READ_LAST_SERIES";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";
 	public static final double DIVIDED_PROPORTION = 0.3;//分成比例
@@ -188,6 +189,13 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
 
+	public static final String CACHED_KEY_PLATFORM_SERIES_FINISH = "SYS:SERIES:FINISH";//平台系列已结束
+	public static final String CACHED_KEY_PLATFORM_SERIES_PREDICTION = "SYS:SERIES:PREDICTION";//平台系列正在更新的
+	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY_PREDICTION = "SYS:SERIES:{classify_id}:PREDICTION";// 分类 预告/正在直播
+	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY_FINISH = "SYS:SERIES:{classify_id}:FINISH";//分类 已结束
+	public static final String CACHED_KEY_SERIES = "SYS:SERIES:SERIES:{series_id}";
+
+
 
 
 	public static final String CACHED_KEY_WEIXIN_TOKEN="SYS:WEIXIN:TOKEN";//微信token
@@ -348,6 +356,9 @@ public final class Constants {
 	public static final String HEADER_APP_NAME = "qnlive";
 
 	public static final double USER_RATE = 0.7;
+
+
+
 
 
 }
