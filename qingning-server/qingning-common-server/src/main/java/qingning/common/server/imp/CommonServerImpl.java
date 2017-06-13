@@ -33,12 +33,14 @@ import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2221,7 +2223,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }else if(course_id != null){//分享课程
             Map<String,String> courseMap =  CacheUtils.readCourse(course_id, reqEntity, readCourseOperation, jedis, false);
             String share_url = getCourseShareURL(userId,course_id, courseMap,jedis,appName);
-            png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,System.currentTimeMillis(),appName);//生成图片
+            Map<String,Object> map = new HashMap<>();
+            map.put("course_id",course_id);
+            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+            Long start_time = Long.valueOf(jedis.hget(courseKey, "start_time"));
+            png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,start_time,appName);//生成图片
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
