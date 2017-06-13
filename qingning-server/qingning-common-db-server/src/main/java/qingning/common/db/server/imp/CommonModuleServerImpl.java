@@ -509,12 +509,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				distGainsOld = initGains(distributerId,appName);
 			}
 			//分销收入
-			long distributerTotalAmountOld = Long.valueOf(lectureGainsOld.get("distributer_total_amount").toString());
-			long distributerRealAmountOld = Long.valueOf(lectureGainsOld.get("distributer_real_incomes").toString());
+			long distributerTotalAmountOld = Long.valueOf(distGainsOld.get("distributer_total_amount").toString());
+			long distributerRealAmountOld = Long.valueOf(distGainsOld.get("distributer_real_incomes").toString());
 			distributerTotalAmountOld = distTotalAmount + distributerTotalAmountOld;
 			distributerRealAmountOld = distRealAmount + distributerRealAmountOld;
-			lectureGains.put("live_room_total_amount",distributerTotalAmountOld);
-			lectureGains.put("live_room_real_incomes",distributerRealAmountOld);
+			distGains.put("distributer_total_amount",distributerTotalAmountOld);
+			distGains.put("distributer_real_incomes",distributerRealAmountOld);
 			//用户收入
 			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
 			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
