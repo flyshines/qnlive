@@ -1249,7 +1249,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="search_param", defaultValue="") String searchParam,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader(value="version", defaultValue="") String version) throws Exception {
+    		@RequestHeader(value="version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("search_param", searchParam);
@@ -1306,12 +1306,34 @@ public class CommonController extends AbstractController {
     @ResponseBody
     ResponseEntity adminUserLogin(
             HttpEntity<Object> entity,
-            @RequestHeader("version") String version,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, version,appName);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, null, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }
+
+
+    /**
+     * 发送手机验证码
+     * @param phone 电话号码
+
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/sendIMError", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity
+    sendIMError(HttpServletRequest request, @RequestParam(value = "phone") String phone
+                )throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendIMError", "", "","qnlive");
+        String ipAdress = request.getRemoteAddr();// HttpTookit.getIpAdress(request);//获取请求地址
+        Map<String,String> map = new HashMap<>();
+        map.put("phone",phone);
+        map.put("ipAdress",ipAdress);
+        logger.debug("IMERROR ipAdress : "+ipAdress);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
     }
 
 

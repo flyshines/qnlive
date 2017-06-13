@@ -98,6 +98,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private UserGainsMapper userGainsMapper;
 	@Autowired(required = true)
 	private WithdrawCashMapper withdrawCashMapper;
+	@Autowired(required = true)
+	private AdminUserMapper adminUserMapper;
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -159,6 +161,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("subscribe",reqMap.get("subscribe"));
 		loginInfo.put("update_time", now);
 		loginInfoMapper.insertLoginInfo(loginInfo);
+
+		//初始化用户余额信息
+		Map<String,Object> gainsMap = new HashMap<>();
+		gainsMap.put("user_id",uuid);
+		gainsMap.put("live_room_total_amount","0");
+		gainsMap.put("live_room_real_incomes","0");
+		gainsMap.put("distributer_total_amount","0");
+		gainsMap.put("distributer_real_incomes","0");
+		gainsMap.put("user_total_amount","0");
+		gainsMap.put("user_total_real_incomes","0");
+		gainsMap.put("balance","0");
+		userGainsMapper.insertUserGainsByNewUser(gainsMap);
 
 		Map<String,String> resultMap = new HashMap<String,String>();
 		resultMap.put("user_id", uuid);
@@ -383,14 +397,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate);
 		return profitRecord;
 	}
-	private Map<String,Object> initGains(String userId){
+	private Map<String,Object> initGains(String userId,String appName){
+		//初始化用户收入信息
 		List<String> ids = new ArrayList<>();
 		ids.add(userId);
 		List<Map<String, Object>> userRoomAmountList = liveRoomMapper.selectRoomAmount(ids);
 		List<Map<String, Object>> userDistributerAmountList = distributerMapper.selectDistributerAmount(ids);
 		List<Map<String, Object>> userWithdrawSumList = withdrawCashMapper.selectUserWithdrawSum(ids);
 
-		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(ids, userRoomAmountList,
+		List<Map<String, Object>> userIdList = new ArrayList<>();
+		Map<String, Object> user = new HashMap<>();
+		user.put("app_name",appName);
+		user.put("user_id",userId);
+		userIdList.add(user);
+
+		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
 				userDistributerAmountList, userWithdrawSumList);
 		userGainsMapper.insertUserGains(insertGainsList);
 		if(insertGainsList!=null){
@@ -414,7 +435,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> lectureGainsOld = userGainsMapper.findUserGainsByUserId(lecturerId);
 		if(lectureGainsOld == null){
 			//如果统计未找到做规避
-			lectureGainsOld = initGains(lecturerId);
+			lectureGainsOld = initGains(lecturerId,appName);
 		}
 		//讲师收益
 		long lectureTotalAmount = 0L;
@@ -461,6 +482,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			}
 		}
 		//更新t_user_gains 讲师收益统计
+		//直播间收入
+		long lectureRoomTotalAmountOld = Long.valueOf(lectureGainsOld.get("live_room_total_amount").toString());
+		long lectureRoomRealAmountOld = Long.valueOf(lectureGainsOld.get("live_room_real_incomes").toString());
+		lectureRoomTotalAmountOld = lectureTotalAmount + lectureRoomTotalAmountOld;
+		lectureRoomRealAmountOld = lectureRealAmount + lectureRoomRealAmountOld;
+		lectureGains.put("live_room_total_amount",lectureRoomTotalAmountOld);
+		lectureGains.put("live_room_real_incomes",lectureRoomRealAmountOld);
+		//用户收入
 		long lectureTotalAmountOld = Long.valueOf(lectureGainsOld.get("user_total_amount").toString());
 		long lectureTotalRealIncomesOld = Long.valueOf(lectureGainsOld.get("user_total_real_incomes").toString());
 		long lectureBalanceOld = Long.valueOf(lectureGainsOld.get("balance").toString());
@@ -479,13 +508,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			Map<String,Object> distGainsOld = userGainsMapper.findUserGainsByUserId(distributerId);
 			if(distGainsOld == null){
 				//如果统计未找到做规避
-				distGainsOld = initGains(distributerId);
+				distGainsOld = initGains(distributerId,appName);
 			}
+			//分销收入
+			long distributerTotalAmountOld = Long.valueOf(distGainsOld.get("distributer_total_amount").toString());
+			long distributerRealAmountOld = Long.valueOf(distGainsOld.get("distributer_real_incomes").toString());
+			distributerTotalAmountOld = distTotalAmount + distributerTotalAmountOld;
+			distributerRealAmountOld = distRealAmount + distributerRealAmountOld;
+			distGains.put("distributer_total_amount",distributerTotalAmountOld);
+			distGains.put("distributer_real_incomes",distributerRealAmountOld);
+			//用户收入
 			long distTotalAmountOld = Long.valueOf(distGainsOld.get("user_total_amount").toString());
 			long distTotalRealIncomesOld = Long.valueOf(distGainsOld.get("user_total_real_incomes").toString());
 			long distBalanceOld = Long.valueOf(distGainsOld.get("balance").toString());
 			distTotalAmountOld = distTotalAmountOld + distTotalAmount;
-			distTotalRealIncomesOld = distTotalRealIncomesOld + distTotalAmount;
+			distTotalRealIncomesOld = distTotalRealIncomesOld + distRealAmount;
 			distBalanceOld = distBalanceOld + distRealAmount;
 			distGains.put("user_total_amount",distTotalAmountOld);
 			distGains.put("user_total_real_incomes",distTotalRealIncomesOld);
@@ -956,5 +993,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap) {
 		return classifyInfoMapper.findCourseNumGroupByClassifyId(selectMap);
+	}
+
+	/**
+	 * 后台_根据手机号码查询后台登录帐号
+	 */
+	@Override
+	public Map<String, Object> getAdminUserByMobile(Map<String, Object> reqMap) {
+		return adminUserMapper.selectAdminUserByMobile(reqMap);
+	}
+
+	/**
+	 * 后台_更新后台账户所有字段
+	 */
+	@Override
+	public int updateAdminUserByAllMap(Map<String, Object> adminUserMap) {
+		return adminUserMapper.updateAdminUserByAllMap(adminUserMap);
 	}
 }

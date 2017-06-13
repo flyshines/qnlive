@@ -117,10 +117,18 @@ public class MD5Util {
         String b = test(json,"securecode",1);
         System.out.println(b);*/
     	
-    	String testPw = "qnlive_123456789";
-    	String md5Pw = MD5Util.getMD5(testPw);
-    	
-    	System.out.println(md5Pw);
+    	/*
+    	 * 生成t_admin_user帐号密码
+    	 */
+    	String userPw = "88888888";	//用户密码（未加密）
+    	String md5Pw = MD5Util.getMD5(userPw);
+    	System.out.println("对原始密码进行第一次加密：" + md5Pw);
+    	md5Pw = md5Pw + "_qnlive";
+    	md5Pw = MD5Util.getMD5(md5Pw);
+    	//输出加密密码
+    	System.out.println("对原始密码进行第二次加密：" + md5Pw);
+    	//输出uuid，用于当作user_id
+    	System.out.println(MiscUtils.getUUId());
     }
 
 

@@ -1672,8 +1672,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//获取参数
         Map<String, Object> resultMap = new HashMap<String, Object>();
         List<Map<String, Object>> insertGainsList = null;
-        List<String> userIdList = null;
-        
+        List<Map<String,Object>> userIdList = null;
+        List<String> ids = new ArrayList<>();
 		/*
 		 * 获得存在与用户表t_user而不存在与t_user_gains的数据
 		 */
@@ -1683,11 +1683,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
 			if(userIdList == null || userIdList.isEmpty()){
 				break;
 			}
-			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(userIdList);
-			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(userIdList);
-			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(userIdList);
-			
-			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList, 
+            for(Map<String,Object> map:userIdList){
+                ids.add(map.get("user_id").toString());
+            }
+			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(ids);
+			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(ids);
+			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(ids);
+			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
 					userDistributerAmountList, userWithdrawSumList);
 			userModuleServer.insertUserGains(insertGainsList);
         }while(userIdList != null);
@@ -1746,8 +1748,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         /*
     	 * 判断提现余额是否大于10000
     	 */
-        //if(initialAmount < 10000){
-        if(initialAmount < 100){
+        if(initialAmount < 10000){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
         }else{
@@ -1809,11 +1810,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	insertMap.put("nick_name", loginUserMap.get("nick_name"));
     	insertMap.put("user_phone", loginUserMap.get("phone_number"));
     	insertMap.put("alipay_account_number", reqMap.get("alipay_account_number"));
-    	insertMap.put("initial_amount", reqMap.get("initial_amount"));
-    	insertMap.put("actual_amount", reqMap.get("actual_amount"));
+    	insertMap.put("initial_amount", amount);
+    	insertMap.put("actual_amount", amount);
     	insertMap.put("state", '0');
     	insertMap.put("create_time", nowStr);
     	insertMap.put("update_time", nowStr);
+    	insertMap.put("app_name", appName);
     	// 插入提现申请表
         try{
             balance = balance - initialAmount;

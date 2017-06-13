@@ -939,9 +939,8 @@
 			<!-- 后台_直播间搜索查询 -->
 			<function name="getLiveRoomListBySearch">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
-					<version require="N" />
 				</auth>
 				<inputs>
 					<param name="search_param" type="string" require="N" />
@@ -973,6 +972,18 @@
 					<param name="version" type="string" />
 				</outputs>
 			</function>
+
+			<function name="sendIMError">
+				<auth>
+					<accessToken require="N" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 		</default>
  
  

@@ -266,8 +266,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
      * 获取没有t_user_gains记录的user_id
      */
     @Override
-    public List<String> findNotGainsUserId(int limit) {
-        List<String> result = userMapper.selectNotGainsUserId(limit);
+    public List<Map<String,Object>> findNotGainsUserId(int limit) {
+        List<Map<String,Object>> result = userMapper.selectNotGainsUserId(limit);
         return result;
     }
 
