@@ -712,6 +712,11 @@ public class MessagePushServerImpl extends AbstractMsgService {
             if(jedis.exists(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH)){            	
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH, MiscUtils.convertInfoToPostion( now.getTime(),position), courseId);
             }
+
+            jedis.zrem(Constants.SYS_COURSES_RECOMMEND_LIVE,courseId);//从热门推荐正在直播列表删除
+            long lops = Long.valueOf(courseMap.get("student_num"))+ Long.valueOf(courseMap.get("extra_num"));
+            jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,courseId);//加入热门推荐结束列表
+
             //将该课程从分类预告课程列表 SYS:COURSES:{classify_id}:PREDICTION 移除. 如果存在判断当前课程是否存在 加入结束列表中 SYS:COURSES:{classify_id}:FINISH
             map.put(Constants.CACHED_KEY_CLASSIFY,courseMap.get("classify_id"));
             jedis.zrem(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map), courseId);
