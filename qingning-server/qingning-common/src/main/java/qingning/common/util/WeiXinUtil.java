@@ -324,6 +324,7 @@ public class WeiXinUtil {
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
+        log.debug("微信推送针对的 openId:"+openId);
         log.debug("------微信--通过access_token和openid获得用户详细信息-请求URL  "+requestResult);
         return jsonObject;
     }
@@ -452,6 +453,7 @@ public class WeiXinUtil {
 		WxTemplate temp = new WxTemplate();
 		temp.setUrl(url);
 		temp.setTouser(openId);
+		log.debug("微信推送针对的 openId:"+openId);
 		temp.setTopcolor(Constants.WE_CHAT_PUSH_COLOR);
 		temp.setTemplate_id(templateId);
 

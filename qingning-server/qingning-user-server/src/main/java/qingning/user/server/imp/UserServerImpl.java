@@ -1916,4 +1916,129 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		return resultMap;
     }
 
+
+
+
+    /**
+     * 用户-查询系列列表（正在直播（用户查看））
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userSeries")
+    public Map<String, Object> userSeries(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        String series_id = reqMap.get("series_id").toString();
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        int series_status = Integer.parseInt(reqMap.get("series_status").toString());
+        String classify_id = reqMap.get("classify_id").toString();
+        Set<String> seriesIdSet;//查询的课程idset
+        List<String> seriesIdList = new ArrayList<>();//课程id列表
+        List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
+        int offset = 0;//偏移值
+        String seriesListKey = "";
+        if(series_status == 0){
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+            if(!MiscUtils.isEmpty(classify_id)) {//有分类
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_SERIES_CLASSIFY_PREDICTION, map);//分类
+            }else{
+                seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PREDICTION;
+            }
+            if(series_id == null || series_id.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
+                startIndex = courseScoreByRedis+"";//设置起始位置
+                endIndex = "-inf";//设置结束位置
+            }else{//传了courseid
+                Map<String,String> queryParam = new HashMap<String,String>();
+                queryParam.put("series_id", series_id);
+                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
+                Map<String, String> series = jedis.hgetAll(seriesKey);
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(series.get("update_course_time")),  MiscUtils.convertObjectToLong(series.get("position")));//拿到当前课程在redis中的score
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex = "-inf";//设置结束位置
+            }
+            seriesIdSet = jedis.zrangeByScore(seriesListKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                seriesIdList.add(seriesId);
+            }
+            pageCount =  pageCount - seriesIdSet.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                series_id = null;//把课程id设置为null  用来在下面的代码中进行判断
+                series_status = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+
+        if(series_status == 1){
+            if(!MiscUtils.isEmpty(classify_id)) {//有分类
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_SERIES_CLASSIFY_FINISH, map);//分类
+            }else{
+                seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_FINISH;
+            }
+            boolean key = true;//作为开关 用于下面是否需要接着执行方法
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            long endCourseSum = jedis.zcard(seriesListKey);
+            if(series_id == null){
+                endIndex = -1;
+                startIndex = endCourseSum - pageCount;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{
+                long endRank = jedis.zrank(seriesListKey, series_id);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }else{
+                    key = false;//因为已经查到最后的课程没有必要往下查了
+                }
+            }
+            if(key){
+                seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
+                List<String> transfer = new ArrayList<>();
+                for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                    transfer.add(seriesId);
+                }
+                Collections.reverse(transfer);
+                seriesIdList.addAll(transfer);
+            }
+        }
+        if(seriesIdList.size() > 0){
+            for(String seriesId : seriesIdList){
+                Map<String,String> queryParam = new HashMap<String,String>();
+                queryParam.put("series_id", seriesId);
+                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
+                Map<String, String> series = jedis.hgetAll(seriesKey);
+                seriesList.add(series);
+            }
+        }
+
+        resultMap.put("series_list",seriesList);
+        return resultMap;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

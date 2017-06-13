@@ -207,18 +207,18 @@ public final class CacheUtils {
 		return result;
 	}
 	
-	public static Map<String,String> readLecturer(String lecturerId, RequestEntity requestEntity, 
+	public static Map<String,String> readLecturer(String lecturerId, RequestEntity requestEntity,
 			CommonReadOperation operation, Jedis jedis) throws Exception{
 		Map<String,String> values = readData(lecturerId, Constants.CACHED_KEY_LECTURER, Constants.CACHED_KEY_LECTURER_FIELD, requestEntity, operation, jedis,true);
 		/*
 		if(jedisUtils != null){
-			Jedis jedis = jedisUtils.getJedis();			
+			Jedis jedis = jedisUtils.getJedis();
 			Map<String, String> keyMap = new HashMap<String, String>();
 			keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, keyMap);
 			if(!jedis.exists(key)){
 				String functionName = requestEntity.getFunctionName();
-				requestEntity.setFunctionName(Constants.LECTURER_ROOM_LOAD);				
+				requestEntity.setFunctionName(Constants.LECTURER_ROOM_LOAD);
 				readListFromDB(Constants.CACHED_KEY_SPECIAL_LECTURER_ROOM, key, Constants.FIELD_CREATE_TIME, Constants.FIELD_ROOM_ID,requestEntity, operation, jedisUtils, true);
 				requestEntity.setFunctionName(functionName);
 			}
@@ -239,7 +239,22 @@ public final class CacheUtils {
 		}
 		return values;
 	}
-	
+
+//	public static Map<String,String> readCourse(String course_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis,boolean cachedValue) throws Exception{
+//		Map<String,String> values = readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedis, cachedValue);
+//		String curCourse_id = values.get(Constants.CACHED_KEY_COURSE_FIELD);
+//		if(!course_id.equals(curCourse_id)){
+//			Map<String, String> keyMap = new HashMap<String, String>();
+//			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+//			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, keyMap);
+//			jedis.del(key);
+//			values = readData(course_id, Constants.CACHED_KEY_COURSE, Constants.CACHED_KEY_COURSE_FIELD, requestEntity, operation, jedis, cachedValue);
+//		}
+//		return values;
+//	}
+
+
+
 	@SuppressWarnings("unchecked")
 	public static Map<String,String> readFullCourseInfo(String course_id, RequestEntity requestEntity, 
 			CommonReadOperation operation, Jedis jedis) throws Exception{

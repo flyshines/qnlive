@@ -788,5 +788,32 @@ public class LectureController extends AbstractController {
 
 
 
+	/**
+	 * 发布课程
+	 * @param entity
+	 * @param room_id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/rooms/series", method = RequestMethod.POST)
+	public
+	@ResponseBody ResponseEntity createSeries(
+			HttpEntity<Object> entity,
+			@PathVariable("room_id") String room_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createSeries", accessToken, version,appName);
+		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+
+
+
 
 }
