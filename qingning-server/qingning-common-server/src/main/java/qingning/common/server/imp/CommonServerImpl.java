@@ -4324,7 +4324,59 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
+    /**
+     * 后台登录
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("adminUserLogin")
+    public Map<String, Object> adminUserLogin(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        /*
+         * 获取请求参数
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        reqMap.put("app_name", appName);
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        String mobile = (String) reqMap.get("mobile");
+        String password = (String) reqMap.get("password");
+        
+        /*
+         * 根据号码查询数据库
+         */
+        Map<String, Object> adminUserMap = commonModuleServer.getAdminUserByMobile(mobile);
+        if(adminUserMap == null){
+        	logger.info("后台登录>>>>手机号没有关联账户");
+        	throw new QNLiveException("000005");
+        }
+        
+        /*
+         * 验证密码:
+         * 	前端传递的MD5加密字符串后追加appName，在进行MD5加密
+         */
+        String md5Pw = MD5Util.getMD5(password + "_" + appName);
+        if(!md5Pw.equals(adminUserMap.get("password").toString())){
+        	logger.info("后台登录>>>>登录密码错误");
+        	throw new QNLiveException("120001");
+        }
+        
+        /*
+         * 密码正确，将token写入缓存
+         */
+        String userId = (String) adminUserMap.get("user_id");
+        String lastLogin
+        Map<String, String> tokenCacheMap = new HashMap<>();
+        MiscUtils.converObjectMapToStringMap(adminUserMap, tokenCacheMap);
+        String access_token = AccessTokenUtil.generateAccessToken(userId, last_login_time)
+        
+        
+        
+        resultMap.putAll(adminUserMap);
+        return resultMap;
+    }
 
 
 

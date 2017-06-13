@@ -1291,6 +1291,28 @@ public class CommonController extends AbstractController {
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }
+    
+    /**
+     * 管理后台登录
+     * @param entity
+     * @param version
+     * @param appName
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity adminUserLogin(
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, version,appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 
 }
