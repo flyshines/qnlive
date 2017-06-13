@@ -114,6 +114,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
     	//String courseOvertime = MiscUtils.getConfigKey("course_live_overtime_msec");
     	long taskStartTime = 5*60*60*1000 + real_start_time ;//上课到5小时
+        log.debug("--------------超时任务处理时间5小时提醒任务,当前时间:"+System.currentTimeMillis()+"执行时间:"+taskStartTime);
         //taskStartTime -= 60*60*1000;//提前60分钟 提醒课程结束
         if(taskStartTime>0){
         	ScheduleTask scheduleTask = new ScheduleTask(){
@@ -159,7 +160,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
         if(qnSchedule.containTask(courseId, QNSchedule.TASK_END_COURSE)){
             return;
         }
-        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));//真实开课时间
+        long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));//真实开课时间
         log.debug("---------------課程开课時間"+realStartTime);
         //6个小时 超时结束
         long taskStartTime = 6*60*60*1000 + realStartTime;
