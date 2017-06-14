@@ -2807,6 +2807,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> keyMap = new HashMap<String, String>();
         keyMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, keyMap);
+        map.put("user_id",userId);
 
         if (jedis.exists(lectureLiveRoomKey)) {//有直播间
             Map<String,String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);//查找当前用户是否有直播间
