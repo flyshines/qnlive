@@ -2778,8 +2778,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         phoneMap.put("user_id",userId);
         phoneMap.put("code",verification_code);
         MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, phoneMap);
-
-
         String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key
         if(!jedis.exists(codeKey)){
             throw new QNLiveException("130009");
@@ -2815,6 +2813,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有
                 updateUserPhone(phone,userId);
                 jedis.del(key);
+                CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
                 Map<String, Object> param = new HashMap<String, Object>();
                 param.put("query_type", "2");
                if(map.get("room_id") == null){
@@ -2827,9 +2826,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("130004");//直播间已经有手机号
             }
         }else{//创建直播间
-            jedis.del(key);
             updateUserPhone(phone,userId);
-           return createLiveRoom(reqEntity);
+            jedis.del(key);
+            CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+            return createLiveRoom(reqEntity);
         }
     }
 
@@ -2840,7 +2840,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("phone_number",phone);
         lectureModuleServer.updateUser(map);
         lectureModuleServer.updateLoginInfo(map);
-
     }
 
 
