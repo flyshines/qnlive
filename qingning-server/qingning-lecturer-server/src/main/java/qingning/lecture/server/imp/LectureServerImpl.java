@@ -3022,7 +3022,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> createSeries(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
-//        String lecturer_id = reqMap.get("lecturer_id").toString();//讲师id
 //        String classify_id = reqMap.get("classify_id").toString();//分类id
 //        String series_from = reqMap.get("series_from").toString();//来源 0直播 1 saas平台
 //        String series_title = reqMap.get("series_title").toString();//系列名称
@@ -3033,14 +3032,52 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
 
         //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
-        Map<String, String> series = CacheUtils.readCourse((String)reqMap.get("course_id"),
-                generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedis, true);
+//        Map<String, String> series = CacheUtils.readSeries((String)reqMap.get("course_id"),
+//                generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedis, true);
         String updown = reqMap.get("updown").toString();//上下架
+
+//        Constants.CACHED_KEY_LECTURER_SERIES;//讲师正在更新的系列
+//        Constants.CACHED_KEY_LECTURER_SERIES_CLASSIFY;//讲师在每个分类的系列 zengzai
         if(updown.equals("0")){//立即上架
 
 
 
         }
+
+
+        return reqMap ;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getLecturerSeries")
+    public Map<String, Object> getLecturerSeries(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        String lecturer_id = reqMap.get("lecturer_id").toString();//讲师id
+        String classify_id = reqMap.get("classify_id").toString();//分类id
+        Jedis jedis = jedisUtils.getJedis(appName);
+//        CACHED_KEY_LECTURER_SERIES = "SYS:LECTURER:{lecturer_id}:SERIES";//讲师所有上架系列
+//       CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//讲师所有下架系列
+//        CACHED_KEY_LECTURER_SERIES_CLASSIFY = "SYS:LECTURER:{lecturer_id}:SERIES:CLASSIFY:{classify_id}";//讲师在每个分类的系列 如果下架直接删掉value
+
+
+
+
+
+        if(MiscUtils.isEmpty(classify_id)){//查找讲师所有
+
+
+
+        }else{
+
+
+        }
+
+
+
+
+
         return reqMap ;
     }
 

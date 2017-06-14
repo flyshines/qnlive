@@ -501,6 +501,27 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-
+	/**
+	 * 用户查询系列课程详情
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 	判断当前用户是否是讲师 如果是展示所有 如果不是展示已上架的
+	 */
+	@RequestMapping(value = "/user/series/{series_id}", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getSeriesDetailInfo(
+			@PathVariable("series_id") String series_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getSeriesDetailInfo", accessToken, version,appName);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("series_id", series_id);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
 
 }
