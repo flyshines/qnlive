@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.AdminUserMapper" >
+	
+	<!-- 根据手机号码查询后台登录帐号 -->
+	<select id="selectAdminUserByMobile" parameterType="hashmap" resultType="hashmap">
+		select * from t_admin_user
+		where mobile = #{mobile} and app_name = #{app_name} and status = 1
+		limit 1
+	</select>
+	
+	<!-- 更新后台账户所有字段 -->
+	<update id="updateAdminUserByAllMap" parameterType="hashmap">
+		update t_admin_user set last_login_time = #{last_login_time}, last_login_ip = #{last_login_ip}, 
+			login_num = login_num + #{login_num}, token = #{token}
+		where user_id = #{user_id} and app_name = #{app_name}
+	</update>
+  
+
+</mapper>

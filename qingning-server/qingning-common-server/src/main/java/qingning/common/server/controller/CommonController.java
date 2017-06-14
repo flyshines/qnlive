@@ -1249,7 +1249,7 @@ public class CommonController extends AbstractController {
     		@RequestParam(value="search_param", defaultValue="") String searchParam,
     		@RequestHeader(value="access_token", defaultValue="") String accessToken,
     		@RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader(value="version", defaultValue="") String version) throws Exception {
+    		@RequestHeader(value="version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("search_param", searchParam);
@@ -1289,6 +1289,27 @@ public class CommonController extends AbstractController {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("url",url);
         responseEntity.setReturnData(resultMap);
+        return responseEntity;
+    }
+    
+    /**
+     * 管理后台登录
+     * @param entity
+     * @param version
+     * @param appName
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity adminUserLogin(
+            HttpEntity<Object> entity,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, null, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
 

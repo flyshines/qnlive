@@ -39,12 +39,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
         ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
                 log.debug("执行课程列表刷新工作");
-                for(String lecturerId : lecturerSet) {//删除老师的
-                    Map<String, Object> map = new HashMap<>();
-                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map));
-                    jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map));
-                }
+
                 //删除平台
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
@@ -67,24 +62,24 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                             map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
                             map.put("course_id",course_id);
                             String courseClassifyIdKey = "";
-                            String courseLectureKey = "";
+//                            String courseLectureKey = "";
                             String courseListKey = "";
                             Long time = 0L ;
                             if(course.get("status").equals("2")){
                                 courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
                                 courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
-                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+//                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
                                 time = MiscUtils.convertObjectToLong(course.get("end_time"));//
                             }else{
                                 courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
                                 courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
-                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
                                 time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
                             }
                             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
                             long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
                             jedis.zadd(courseClassifyIdKey,lpos, course_id);
-                            jedis.zadd(courseLectureKey,lpos, course_id);
+//                            jedis.zadd(courseLectureKey,lpos, course_id);
                             jedis.zadd(courseListKey,lpos, course_id);
                             if(course.get("status").equals("2")){
                                 if(jedis.hget(courseKey, "status").equals("1")){
@@ -113,6 +108,28 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     }
                 }
                 log.debug("执行课程列表刷新工作---------完成");
+                for(String lecturerId : lecturerSet) {
+                    //删除缓存中的旧的课程列表及课程信息实体
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                    String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+                    String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+                    jedis.del(predictionListKey);
+                    jedis.del(finishListKey);
+                    List<Map<String, Object>> lecturerCourseList = coursesMapper.findLecturerCourseList(map);
+                    for(Map<String, Object> course : lecturerCourseList){
+                        Long time = 0L ;
+                        if(course.get("status").toString().equals("2")){
+                            time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                            long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                            jedis.zadd(finishListKey, lpos,course.get("course_id").toString());//在结束中增加
+                        }else if(course.get("status").toString().equals("1")){
+                            time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                            long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                            jedis.zadd(predictionListKey, lpos,course.get("course_id").toString());//在结束中增加
+                        }
+                    }
+                }
             }
             @Override
             public void batchOperation(Pipeline pipeline, Jedis jedis) {

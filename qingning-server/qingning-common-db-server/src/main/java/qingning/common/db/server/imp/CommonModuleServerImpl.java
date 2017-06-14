@@ -98,6 +98,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private UserGainsMapper userGainsMapper;
 	@Autowired(required = true)
 	private WithdrawCashMapper withdrawCashMapper;
+	@Autowired(required = true)
+	private AdminUserMapper adminUserMapper;
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -991,5 +993,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap) {
 		return classifyInfoMapper.findCourseNumGroupByClassifyId(selectMap);
+	}
+
+	/**
+	 * 后台_根据手机号码查询后台登录帐号
+	 */
+	@Override
+	public Map<String, Object> getAdminUserByMobile(Map<String, Object> reqMap) {
+		return adminUserMapper.selectAdminUserByMobile(reqMap);
+	}
+
+	/**
+	 * 后台_更新后台账户所有字段
+	 */
+	@Override
+	public int updateAdminUserByAllMap(Map<String, Object> adminUserMap) {
+		return adminUserMapper.updateAdminUserByAllMap(adminUserMap);
 	}
 }

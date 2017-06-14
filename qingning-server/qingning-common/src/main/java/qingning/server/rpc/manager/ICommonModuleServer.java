@@ -218,4 +218,16 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> getCourseNumGroupByClassifyId(Map<String, Object> selectMap);
+	/**
+	 * 后台_根据手机号码查询后台登录帐号
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String, Object> getAdminUserByMobile(Map<String, Object> reqMap);
+	/**
+	 * 后台_更新后台账户所有字段
+	 * @param adminUserMap
+	 * @return
+	 */
+	int updateAdminUserByAllMap(Map<String, Object> adminUserMap);
 }
