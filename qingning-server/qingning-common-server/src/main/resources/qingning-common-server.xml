@@ -763,7 +763,7 @@
 			<!-- 后台_新增分类 -->
 			<function name="addClassify">
 				<auth>
-					<accessToken require="N"/>
+					<accessToken require="Y"/>
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -778,7 +778,7 @@
 			<!-- 后台_获取分类列表 -->
 			<function name="getClassifyList">
 				<auth>
-					<accessToken require="N"/>
+					<accessToken require="Y"/>
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -797,7 +797,7 @@
 			<!-- 后台_编辑分类信息 -->
 			<function name="editClassify">
 				<auth>
-					<accessToken require="N"/>
+					<accessToken require="Y"/>
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -814,7 +814,7 @@
 			<!-- 新增轮播 -->
 			<function name="addBanner">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -833,7 +833,7 @@
 			<!-- 搜索banner列表 -->
 			<function name="getBannerListBySearch">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -863,7 +863,7 @@
 			<!-- 更新banner -->
 			<function name="updateBannerInfo">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -884,7 +884,7 @@
 			<!-- 快速更新banner -->
 			<function name="fastUpdateBannerInfo">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -904,7 +904,7 @@
 			<!-- 移除banner -->
 			<function name="removeBannerInfo">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
@@ -918,7 +918,7 @@
 			<!-- 后台_课程搜索查询 -->
 			<function name="getCourseListBySearch">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y,000100" />
 					<version require="N" />
 				</auth>
