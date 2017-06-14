@@ -449,7 +449,7 @@
 			<!-- 处理提现 -->
 			<function name="handleWithDrawResult">
 				<auth>
-					<accessToken require="N" />
+					<accessToken require="Y" />
 					<appName require="Y, 000100" />
 					<version require="N" />
 				</auth>

@@ -4360,7 +4360,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         
         String mobile = (String) reqMap.get("mobile");
-        String password = (String) reqMap.get("password");
+        String password = ((String) reqMap.get("password")).toUpperCase();
         
         /*
          * 根据号码查询数据库
