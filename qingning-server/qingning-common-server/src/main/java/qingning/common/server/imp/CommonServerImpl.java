@@ -4067,10 +4067,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
+        int bannerType = (int) reqMap.get("banner_type");
+        String jumpUrl = (String) reqMap.get("jump_url");
         
         /*
-         * TODO 验证后台用户是否登录
+         * 判断拼接完整的jump_url
          */
+        if(1 == bannerType){	//跳转到直播间主页
+        	jumpUrl = reqMap.get("bannerJumpRoomPre").toString() + jumpUrl;
+        }else if(2 == bannerType){	//跳转到课程详情
+        	jumpUrl = reqMap.get("bannerJumpCoursePre").toString() + jumpUrl;
+        }
+        reqMap.put("jump_url", jumpUrl);
         
         /*
          * 新增t_banner表记录
@@ -4115,10 +4123,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         reqMap.put("page_num", (pageNum-1)*pageCount);
         
         /*
-         * TODO 验证后台用户是否登录
-         */
-        
-        /*
          * 查询t_banner_info表
          */
         List<Map<String, Object>> bannerList = commonModuleServer.findBannerInfoByMap(reqMap);
@@ -4126,9 +4130,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         	logger.info("后台搜索banner列表>>>>获得" + bannerList.size() + "条banner数据");
         }
         //循环为其附上对应的直播间名字或课程名字
+        /* 作废：   不用查缓存 ，直接使用banner_remark
         int bannerType = 0;
         Jedis jedis = jedisUtils.getJedis(appName);
-        /*for(Map<String, Object> bannerMap : bannerList){
+        
+          for(Map<String, Object> bannerMap : bannerList){
         	bannerType = (int) bannerMap.get("banner_type");
         	if(1 == bannerType){	//跳转至直播间
         		//从缓存中查询直播间名称
@@ -4167,10 +4173,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
         Jedis jedis = jedisUtils.getJedis(appName);
+        int bannerType = (int) reqMap.get("banner_type");
+        String jumpUrl = (String) reqMap.get("jump_url");
         
         /*
-         * TODO 验证后台用户是否登录
+         * 判断拼接完整的jump_url
          */
+        if(1 == bannerType){	//跳转到直播间主页
+        	jumpUrl = reqMap.get("bannerJumpRoomPre").toString() + jumpUrl;
+        }else if(2 == bannerType){	//跳转到课程详情
+        	jumpUrl = reqMap.get("bannerJumpCoursePre").toString() + jumpUrl;
+        }
+        reqMap.put("jump_url", jumpUrl);
         
         /*
          * 更新数据库
@@ -4203,10 +4217,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         reqMap.put("app_name", appName);
         Jedis jedis = jedisUtils.getJedis(appName);
-        
-        /*
-         * TODO 验证后台用户是否登录
-         */
         
         /*
          * 更新数据库

@@ -1095,8 +1095,22 @@ public class CommonController extends AbstractController {
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+    	/*
+    	 * 先执行获取systemConfig
+    	 */
+    	RequestEntity sysConfigReqEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
+        ResponseEntity sysConfigResponseEntity = this.process(sysConfigReqEntity, serviceManger, message);
+    	
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
+        /*
+         * 获取轮播跳转前缀
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        Map<String, Object> sysConfig = (Map<String, Object>) systemConfigMap.get(appName);
+        reqMap.put("bannerJumpCoursePre", ((Map<String, Object>)sysConfig.get("bannerJumpCoursePre")).get("config_value").toString());
+        reqMap.put("bannerJumpRoomPre", ((Map<String, Object>)sysConfig.get("bannerJumpRoomPre")).get("config_value").toString());
+        
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
@@ -1155,8 +1169,22 @@ public class CommonController extends AbstractController {
 		    @RequestHeader(value="access_token", defaultValue="") String accessToken,
 		    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 		    @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+    	/*
+    	 * 先执行获取systemConfig
+    	 */
+    	RequestEntity sysConfigReqEntity = this.createResponseEntity("CommonServer", "serverTime", null, version,appName);
+        ResponseEntity sysConfigResponseEntity = this.process(sysConfigReqEntity, serviceManger, message);
+    	
     	RequestEntity requestEntity = this.createResponseEntity("CommonServer", "updateBannerInfo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
+        /*
+         * 获取轮播跳转前缀
+         */
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        Map<String, Object> sysConfig = (Map<String, Object>) systemConfigMap.get(appName);
+        reqMap.put("bannerJumpCoursePre", ((Map<String, Object>)sysConfig.get("bannerJumpCoursePre")).get("config_value").toString());
+        reqMap.put("bannerJumpRoomPre", ((Map<String, Object>)sysConfig.get("bannerJumpRoomPre")).get("config_value").toString());
+        
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
