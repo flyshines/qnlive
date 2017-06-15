@@ -789,9 +789,8 @@ public class LectureController extends AbstractController {
 
 
 	/**
-	 * 发布课程
+	 * 发布系列
 	 * @param entity
-	 * @param room_id
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -802,16 +801,43 @@ public class LectureController extends AbstractController {
 	public
 	@ResponseBody ResponseEntity createSeries(
 			HttpEntity<Object> entity,
-			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "createSeries", accessToken, version,appName);
-		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+
+	/**
+	 * 查询讲师创建的系列
+	 * @param lecturer_id 讲师id
+	 * @param classify_id 分类id
+	 * @param series_id 系列id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/series", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getLecturerSeries(
+			@RequestParam("lecturer_id") String lecturer_id,
+			@RequestParam(value = "classify_id",defaultValue = "") String classify_id,
+			@RequestParam(value = "series_id",defaultValue = "") String series_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getLecturerSeries", accessToken, version,appName);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("lecturer_id", lecturer_id);
+		parMap.put("classify_id", classify_id);
+		parMap.put("series_id", series_id);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
 
 
 

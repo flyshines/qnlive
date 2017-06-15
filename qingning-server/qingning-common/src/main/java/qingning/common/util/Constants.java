@@ -159,9 +159,12 @@ public final class Constants {
 	public static final String FIELD_AUDIO_ID="audio_id";
 	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";
 
-	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";
-	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";
-	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";
+	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程成
+	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
+	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程0
+
+
+
 
 	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";
 	public static final String CACHED_KEY_USER_ROOM_SHARE_FIELD = "room_share_code";
@@ -189,11 +192,14 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
 
-	public static final String CACHED_KEY_PLATFORM_SERIES_FINISH = "SYS:SERIES:FINISH";//平台系列已结束
-	public static final String CACHED_KEY_PLATFORM_SERIES_PREDICTION = "SYS:SERIES:PREDICTION";//平台系列正在更新的
-	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY_PREDICTION = "SYS:SERIES:{classify_id}:PREDICTION";// 分类 预告/正在直播
-	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY_FINISH = "SYS:SERIES:{classify_id}:FINISH";//分类 已结束
-	public static final String CACHED_KEY_SERIES = "SYS:SERIES:SERIES:{series_id}";
+	public static final String CACHED_KEY_PLATFORM_SERIES = "SYS:SERIES";//平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用
+	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY = "SYS:SERIES:CLASSIFY:{classify_id}";//平台分类系列 (series_id,最近更新时间+排序)
+
+	public static final String CACHED_KEY_SERIES_FIELD = "series_id";//系列id
+	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
+	public static final String CACHED_KEY_LECTURER_SERIES = "SYS:LECTURER:{lecturer_id}:SERIES";//讲师所有上架系列 (series_id,上架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//讲师所有下架系列 (series_id,下架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_CLASSIFY = "SYS:LECTURER:{lecturer_id}:SERIES:CLASSIFY:{classify_id}";//讲师在每个分类的系列 如果下架直接删掉value (series_id,上架时间)
 
 
 
