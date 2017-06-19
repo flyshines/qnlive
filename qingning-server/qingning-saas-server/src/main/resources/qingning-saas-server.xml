@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+
+	<server name="SaaSServer">
+		<default class="qingning.saas.server.imp.SaaSServerImpl">
+
+
+			<function name="wechatLogin">
+				<auth>
+					<accessToken require="N" />
+					<version require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="shopEdit">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="shop_name" type="string" require="Y,000100"/>
+					<param name="shop_remark" type="string" require="Y,000100"/>
+					<param name="shop_logo" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+
+
+
+
+		</default>
+
+
+		<version num="1.0.0" class="">
+		</version>
+	</server>
+
+</servers>

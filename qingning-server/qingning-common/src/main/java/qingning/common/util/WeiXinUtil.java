@@ -164,6 +164,15 @@ public class WeiXinUtil {
         return requestUrl;
     }
     /**
+     * 获取二维码跳转URL（SaaS登录）
+     * @return
+     */
+    public static String getWechatRqcodeLoginUrl() {
+        String requestUrl = MiscUtils.getConfigByKey("weixin_login_rqcode_url",Constants.HEADER_APP_NAME);
+        log.debug("------微信--二维码跳转URL--  "+requestUrl);
+        return requestUrl;
+    }
+    /**
      * 获取第三方平台授权信息
      * @return
      */
