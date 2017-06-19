@@ -12,108 +12,95 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class SaaSController extends AbstractController{
+public class SaaSController extends AbstractController {
 
-	/**
-	 * 微信扫码 1 登录入口
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/wechat/login/address", method = RequestMethod.GET)
-	public void wechatLogin(HttpServletResponse resp) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatLogin", null, null,null);
-		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-		Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+    /**
+     * 微信扫码 1 登录入口
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/wechat/login/rqcode", method = RequestMethod.GET)
+    public void wechatLogin(HttpServletResponse resp) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatLogin", null, null, null);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-		Object redirectUrl =  resultMap.get("redirectUrl");
-		if (redirectUrl != null) {
-			resp.sendRedirect(redirectUrl.toString());
-		}
-	}
-
-	/**
-	 * 微信扫码登录回调地址
-	 * @param page_count 分页数
-	 * @param course_id  课程id
-	 * @param classify_id 分类id
-	 * @param accessToken
-	 * @param version
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/user/courses", method = RequestMethod.GET)
-	public
-	@ResponseBody
-	ResponseEntity getCourse(
-			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-			@RequestParam(value = "status", defaultValue = "4") String  status,
-			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
-			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userCourses", accessToken, version,appName);
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("page_count", page_count);
-		param.put("course_id", course_id);
-		param.put("classify_id",classify_id);
-		param.put("status", status);
-		requestEntity.setParam(param);
-		return this.process(requestEntity, serviceManger, message);
-	}
+        Object redirectUrl = resultMap.get("redirectUrl");
+        if (redirectUrl != null) {
+            resp.sendRedirect(redirectUrl.toString());
+        }
+    }
 
 
+    /**
+     * 微信扫码 2 微信扫码登录
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/wechat/check_login", method = RequestMethod.GET)
+    public void wechatCheckLogin(HttpServletResponse resp,
+                                 @RequestParam(value = "code", defaultValue = "") String code) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatCheckLogin", null, null, null);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("code", code);
+        requestEntity.setParam(paramCode);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
-	/**
-	 * 用户关注直播间
-	 * @param entity
-	 * @param room_id
-	 * @param accessToken
-	 * @param version
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/user/live_rooms/{room_id}/notice", method = RequestMethod.PUT)
-	public
-	@ResponseBody
-	ResponseEntity userFollowRoom(
-			HttpEntity<Object> entity,
-			@PathVariable("room_id") String room_id,
-			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-			@RequestHeader("version") String version) throws Exception {
-		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userFollowRoom", accessToken, version,appName);
-		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
-		requestEntity.setParam(entity.getBody());
-		return this.process(requestEntity, serviceManger, message);
-	}
+        Object redirectUrl = resultMap.get("redirectUrl");
+        if (redirectUrl != null) {
+            resp.sendRedirect(redirectUrl.toString());
+        }
+    }
 
-
-	/**
-	 * 店铺设置
-	 * @param entity
-	 * @param accessToken
-	 * @param version
-	 * @return
-	 * @throws Exception
-	 */
-    @SuppressWarnings("unchecked")
-	@RequestMapping(value = "/shop/edit", method = RequestMethod.POST)
+    /**
+     * 店铺-轮播图列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/list", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity addWithdraw(
-    		HttpEntity<Object> entity,
-    		@RequestHeader(value="access_token") String accessToken,
-    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-    		@RequestHeader(value="version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopEdit", accessToken, version, appName);
-		Map<String,String> param = (Map)entity.getBody();
-		param.put("app_name",appName);
-		requestEntity.setParam(entity.getBody());
-		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+    ResponseEntity wechatCheckLogin(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_count", pageCount);
+        paramCode.put("page_num", pageNum);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
+    /**
+     * 店铺-添加轮播图
+     *
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/shop/banner/add", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerAdd(
+            HttpEntity<Object> entity,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerAdd", accessToken, version, appName);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
-	
+
 
 }

@@ -2,11 +2,14 @@
 package qingning.saas.db.server.impl;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ISaaSModuleServer;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 
 public class SaaSModuleServerImpl implements ISaaSModuleServer {
@@ -45,6 +48,38 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public void updateShop(Map<String, Object> param) {
         shopMapper.updateByPrimaryKey(param);
+    }
+
+    @Override
+    public Map<String, Object> getShopBannerList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String,Object>> result = bannerMapper.selectListByUserId(param,page);
+        //根据优先级排序
+        Collections.sort(result, new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                int position1;
+                int position2 = 0;
+                Map<String, Object> map1 = (Map) o1;
+                Map<String, Object> map2 = (Map) o2;
+                if (map1.get("position") != null && StringUtils.isNotEmpty(map1.get("position") + "")) {
+                    position1 = Integer.valueOf(map1.get("position").toString());
+                }else{
+                    return 1;
+                }
+                if (map2.get("position") != null && StringUtils.isNotEmpty(map2.get("position") + "")) {
+                    position2 = Integer.valueOf(map2.get("position").toString());
+                }
+                if (position1 > position2) return 1;
+                else if (position1 < position2) return -1;
+                else return 1;
+            }
+        });
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
     }
 
 }

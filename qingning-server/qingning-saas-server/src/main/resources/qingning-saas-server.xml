@@ -16,15 +16,42 @@
 				</outputs>
 			</function>
 
-			<function name="shopEdit">
+			<function name="wechatCheckLogin">
+				<auth>
+					<accessToken require="N" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="code" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="shopBannerAdd">
 				<auth>
 					<accessToken require="Y" />
 					<version require="N" />
 				</auth>
 				<inputs>
-					<param name="shop_name" type="string" require="Y,000100"/>
-					<param name="shop_remark" type="string" require="Y,000100"/>
-					<param name="shop_logo" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="addBanner">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_title" type="string" require="Y,000100"/>
+					<param name="banner_name" type="string" require="Y,000100"/>
+					<param name="banner_name" type="string" require="Y,000100"/>
+					<param name="banner_img" type="string" require="Y,000100"/>
+					<param name="link_type" type="string" require="Y,000100"/>
+					<param name="link_to" type="string" require="Y,000100"/>
+					<param name="position" type="string" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
