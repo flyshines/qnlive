@@ -192,14 +192,17 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
 
-	public static final String CACHED_KEY_PLATFORM_SERIES = "SYS:SERIES";//平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用
-	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY = "SYS:SERIES:CLASSIFY:{classify_id}";//平台分类系列 (series_id,最近更新时间+排序)
-
+	public static final String CACHED_KEY_PLATFORM_SERIES_PLATFORM = "SYS:SERIES:PLATFORM";// zset 平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用  如果下架直接删掉value (series_id,上架时间)
+	public static final String CACHED_KEY_PLATFORM_SERIES_CLASSIFY = "SYS:SERIES:CLASSIFY:{classify_id}";//zset 平台分类系列 (series_id,最近更新时间+排序)  如果下架直接删掉value (series_id,上架时间)
 	public static final String CACHED_KEY_SERIES_FIELD = "series_id";//系列id
 	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
-	public static final String CACHED_KEY_LECTURER_SERIES = "SYS:LECTURER:{lecturer_id}:SERIES";//讲师所有上架系列 (series_id,上架时间)
-	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//讲师所有下架系列 (series_id,下架时间)
-	public static final String CACHED_KEY_LECTURER_SERIES_CLASSIFY = "SYS:LECTURER:{lecturer_id}:SERIES:CLASSIFY:{classify_id}";//讲师在每个分类的系列 如果下架直接删掉value (series_id,上架时间)
+	public static final String CACHED_KEY_SERIES_COURSE_UP = "SYS:SERIES:COURSE:{series_id}:UP";//zset 系列的课程 (series_id,上架时间)
+	public static final String CACHED_KEY_SERIES_COURSE_DOWN = "SYS:SERIES:COURSE:{series_id}:DOWN";//zset 系列的课程 (series_id,下架时间)下架
+
+	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
+
+	public static final String CACHED_KEY_LECTURER_SERIES_CLASSIFY = "SYS:LECTURER:{lecturer_id}:SERIES:CLASSIFY:{classify_id}";//zset 讲师在每个分类的系列 如果下架直接删掉value (series_id,上架时间)
 
 
 

@@ -24,11 +24,6 @@ public class ReadSeriesOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        String functionName = requestEntity.getFunctionName();
-        if(Constants.SYS_READ_LAST_SERIES.equals(functionName)){
-        	return lectureModuleServer.findLastestFinishCourse(reqMap);
-        } else {
-        	return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
-        }
+        return lectureModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
     }
 }

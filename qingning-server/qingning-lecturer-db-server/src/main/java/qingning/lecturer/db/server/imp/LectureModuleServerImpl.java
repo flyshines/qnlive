@@ -69,6 +69,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private SystemConfigMapper systemConfigMapper;
 
+	@Autowired(required = true)
+	private SeriesMapper seriesMapper;
+
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	/**
@@ -587,5 +590,56 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public void insertServiceTemplateInfo(Map<String, String> paramMap) {
 		lecturerMapper.insertServiceTemplateInfo(paramMap);
+	}
+
+
+	/**
+	 * 创建系列
+	 * @param reqMap
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> createSeries(Map<String, Object> reqMap) {
+		Map<String,Object> series = new HashMap<String,Object>();
+		series.put("series_id", MiscUtils.getUUId());
+		series.put("lecturer_id", reqMap.get("user_id"));
+		series.put("series_title", reqMap.get("series_title"));
+		series.put("series_img", reqMap.get("series_img"));
+		series.put("series_remark", reqMap.get("series_remark"));
+		series.put("update_plan", reqMap.get("update_plan"));
+
+		series.put("series_pay_remark", String.format(MiscUtils.getConfigKey("jpush_course_start_per_long_notice"),  reqMap.get("update_plan").toString()));
+		series.put("course_num", 0);
+		series.put("series_type", reqMap.get("series_type"));
+		series.put("series_status", reqMap.get("series_status"));
+		series.put("series_price", reqMap.get("series_price"));
+		series.put("series_amount", 0);
+		series.put("series_student_num", 0);
+		series.put("updown", reqMap.get("updown"));
+		Date now = new Date();
+		series.put("create_time",now);
+		series.put("update_time", now);
+		series.put("update_course_time", now);
+		series.put("rq_code",  series.get("series_id"));
+		series.put("series_course_type", reqMap.get("series_course_type"));
+		series.put("appName",reqMap.get("appName"));
+		seriesMapper.insertSeries(series);
+		return series;
+	}
+
+	@Override
+	public Map<String, Object> findSeriesBySeriesId(String series_id) {
+		return seriesMapper.findSeriesBySeriesId(series_id);
+	}
+
+	@Override
+	public Map<String, Object> updateSeries(Map<String, Object> record) {
+		Date now = new Date();
+		record.put("update_time",now);
+		int updateCount = seriesMapper.updateSeries(record);
+		Map<String, Object> dbResultMap = new HashMap<String, Object>();
+		dbResultMap.put("update_count", updateCount);
+		dbResultMap.put("update_time", now);
+		return dbResultMap;
 	}
 }

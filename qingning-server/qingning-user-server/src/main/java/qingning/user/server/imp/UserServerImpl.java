@@ -1947,7 +1947,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
                 seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_SERIES_CLASSIFY, map);//分类
             }else{
-                seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES;
+                seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM;
             }
             if(series_id == null || series_id.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
@@ -2110,7 +2110,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
 
-
+    /**
+     * 查询系列详情
+     *
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("getSerieCourse")
+    public Map<String, Object> getSerieCourse(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        return resultMap;
+    }
 
 
 

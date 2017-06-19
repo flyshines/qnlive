@@ -725,7 +725,40 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="createSeries">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="series_title" type="rstring" require="Y,000100" />
+					<param name="update_plan" type="long" require="Y,000100"  />
+					<param name="series_type" type="string" require="Y,000100"  format="^[0-1]$,100008"/>
+					<param name="series_price" type="double" require="N" validate="(series_type,series_price)=>{
+					 if(utils.isEqual('1', series_type)){
+							if(utils.isEmpty(series_price)){
+								return false;
+							}
+						}
+						return true;
+					},000100"/>
+					<param name="series_course_type" type="string" require="Y,000100"  format="^[0-3]$,100008"/>
+					<param name="room_id" type="string" require="Y,000100" />
+					<param name="updown" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="updateSeries">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

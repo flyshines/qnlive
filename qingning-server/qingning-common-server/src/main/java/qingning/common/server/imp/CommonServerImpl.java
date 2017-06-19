@@ -1706,6 +1706,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getSeriesInviteCard")
+    public Map<String,Object> getSeriesInviteCard (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        Map<String,Object> resultMap = new HashMap<>();
+
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String series_id = reqMap.get("series_id").toString();
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", userId);
+
+        return resultMap;
+    }
+
+
+
+
+
     @SuppressWarnings("unchecked")
     @FunctionName("getRoomInviteCard")
     public Map<String,Object> getRoomInviteCard (RequestEntity reqEntity) throws Exception{//TODO
@@ -2959,15 +2980,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
 
-//        //查询所有 或者 查询系列
-//        if(search_type ==0 || search_type == 3){
-//          List<Map<String, Object>> seriesBySearch = commonModuleServer.findSeriesBySearch(map);//查询数据
-//          resultMap.put("series_list",);
-//        }
-
+        //查询所有 或者 查询系列
+        if(search_type ==0 || search_type == 3){
+            List<Map<String, Object>> seriesBySearch = commonModuleServer.findSeriesBySearch(map);//查询数据
+            setLecturerNickName(seriesBySearch,jedis);
+            resultMap.put("series_list",seriesBySearch);
+        }
 
         return resultMap;
-
     }
 
     private List<Map<String, Object>> setStudentAndLecturerNickName(List<Map<String,Object>> courseBySearch,String userId,Jedis jedis,String methodName) throws Exception {
@@ -2993,17 +3013,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     course.put("student", "N");
                 }
             }
-            Map<String,String> query1 = new HashMap<>();
-            for(Map<String, Object> course : courseBySearch ){
-                query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
-                key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
-                String lecturer_nick_name = jedis.hget(key,"nick_name");
-                course.put("lecturer_nick_name",lecturer_nick_name);
-            }
+            this.setLecturerNickName(courseBySearch,jedis);
+
             return courseBySearch;
         }
         return null;
     }
+
+    private void setLecturerNickName(List<Map<String,Object>> list,Jedis jedis) throws Exception {
+        Map<String,String> query1 = new HashMap<>();
+        for(Map<String, Object> course : list ){
+            query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
+            String  key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
+            String lecturer_nick_name = jedis.hget(key,"nick_name");
+            course.put("lecturer_nick_name",lecturer_nick_name);
+        }
+    }
+
 
     /**
      * 推荐
@@ -3553,160 +3579,160 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
 
         //<editor-fold desc="刷新所有讲师的课程列表">
-                Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-        if(!MiscUtils.isEmpty(lecturerSet)){
-            for(String lecturerId : lecturerSet) {
-                //删除缓存中的旧的课程列表及课程信息实体
+//                Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+//        if(!MiscUtils.isEmpty(lecturerSet)){
+//            for(String lecturerId : lecturerSet) {
+//                //删除缓存中的旧的课程列表及课程信息实体
+//                Map<String, Object> map = new HashMap<>();
+//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+//                jedis.del(predictionListKey);
+//                jedis.del(finishListKey);
+//                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+//                for(Map<String, Object> course : lecturerCourseList){
+//                    Long time = 0L ;
+//                    if(course.get("status").toString().equals("2")){
+//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+//                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+//                        jedis.zadd(finishListKey, lpos,course.get("course_id").toString());//在结束中增加
+//                    }else if(course.get("status").toString().equals("1")){
+//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+//                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+//                        jedis.zadd(predictionListKey, lpos,course.get("course_id").toString());//在结束中增加
+//                    }
+//                }
+//            }
+//        }
+        //</editor-fold>
+
+        //<editor-fold desc="讲师课程消息落地">
                 Map<String, Object> map = new HashMap<>();
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-                jedis.del(predictionListKey);
-                jedis.del(finishListKey);
-                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
-                for(Map<String, Object> course : lecturerCourseList){
-                    Long time = 0L ;
-                    if(course.get("status").toString().equals("2")){
-                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                        jedis.zadd(finishListKey, lpos,course.get("course_id").toString());//在结束中增加
-                    }else if(course.get("status").toString().equals("1")){
-                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-                        long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                        jedis.zadd(predictionListKey, lpos,course.get("course_id").toString());//在结束中增加
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);//COURSE:{course_id}:MESSAGE_LIST
+
+        Jedis jedisObject = jedisUtils.getJedis(appName);
+
+        //1.从缓存中查询该课程的消息列表
+        Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
+        if(messageIdList == null || messageIdList.size() == 0){
+
+            throw new QNLiveException("000001");
+        }
+
+        //2.批量从缓存中读取消息详细信息
+        List<Map<String,Object>> messageList = new ArrayList<>();
+        List<String> messageKeyList = new ArrayList<>();
+        JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
+        callBack.invoke(new JedisBatchOperation(){
+            @Override
+            public void batchOperation(Pipeline pipeline, Jedis jedis) {
+
+                long messagePos = 0L;
+                List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
+                for(String messageimid : messageIdList){
+                    map.put(Constants.FIELD_MESSAGE_ID, messageimid);
+                    String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
+                    redisResponseList.add(pipeline.hgetAll(messageKey));
+                    messageKeyList.add(messageKey);
+                }
+                pipeline.sync();
+
+                for(Response<Map<String, String>> redisResponse : redisResponseList){
+                    Map<String,String> messageStringMap = redisResponse.get();
+                    Map<String,Object> messageObjectMap = new HashMap<>();
+                    if(messageStringMap.get("message_imid") == null){
+                        return;
                     }
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message_id"))){
+                        messageObjectMap.put("message_id", messageStringMap.get("message_id"));
+                    }
+
+                    messageObjectMap.put("course_id", messageStringMap.get("course_id"));
+
+
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message"))){
+                        messageObjectMap.put("message", messageStringMap.get("message"));
+                    }else{
+                        messageObjectMap.put("message", null);
+                    }
+
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message_url"))){
+                        messageObjectMap.put("message_url", messageStringMap.get("message_url"));
+                    }else{
+                        messageObjectMap.put("message_url",null);
+                    }
+
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message_question"))){
+                        messageObjectMap.put("message_question", messageStringMap.get("message_question"));
+                    }else{
+                        messageObjectMap.put("message_question", null);
+                    }
+
+
+                    if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
+                        messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));
+                    }else {
+                        messageObjectMap.put("audio_time", 0);
+                    }
+
+
+                    messageObjectMap.put("message_type", messageStringMap.get("message_type"));
+                    messageObjectMap.put("send_type", messageStringMap.get("send_type"));
+
+
+                    messageObjectMap.put("creator_id", messageStringMap.get("creator_id"));
+
+                    if(!MiscUtils.isEmpty(messageStringMap.get("create_time"))){
+                        Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
+                        messageObjectMap.put("create_time", createTime);
+                    }
+                    if(!MiscUtils.isEmpty(messageStringMap.get("audio_image"))){
+                        messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
+                    }else{
+                        messageObjectMap.put("audio_image", null);
+                    }
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message_status"))){
+                        messageObjectMap.put("message_status",messageStringMap.get("message_status"));
+                    }else{
+                        messageObjectMap.put("message_status",0);
+                    }
+                    if(!MiscUtils.isEmpty(messageStringMap.get("message_imid"))){
+                        messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
+                    }else{
+                        messageObjectMap.put("message_imid",MiscUtils.getUUId());
+                    }
+
+                    messageObjectMap.put("message_pos", messagePos++);
+                    messageList.add(messageObjectMap);
                 }
             }
+        });
+        //3.批量插入到数据库中
+        Integer insertResult = commonModuleServer.insertCourseMessageList(messageList);
+
+        //4.如果插入数据库正常，则删除缓存中的内容
+        if(insertResult != null && insertResult > 0){
+            //删除redis中的key
+            String[] messageKeyArray = new String[messageKeyList.size()];
+            messageKeyList.toArray(messageKeyArray);
+            jedis.del(messageKeyArray);
+            jedis.del(messageListKey);
+            String messageUserListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
+            String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+            String messageLecturerVoiceListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
+            jedis.del(messageUserListKey);
+            jedis.del(messageLecturerListKey);
+            jedis.del(messageLecturerVoiceListKey);
         }
         //</editor-fold>
 
 
 
 
+
         return resultMap;
     }
-
-    //<editor-fold desc="讲师课程消息落地">
-//                Map<String, Object> map = new HashMap<>();
-//        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-//        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);//COURSE:{course_id}:MESSAGE_LIST
-//
-//        Jedis jedisObject = jedisUtils.getJedis(appName);
-//
-//        //1.从缓存中查询该课程的消息列表
-//        Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
-//        if(messageIdList == null || messageIdList.size() == 0){
-//
-//            throw new QNLiveException("000001");
-//        }
-//
-//        //2.批量从缓存中读取消息详细信息
-//        List<Map<String,Object>> messageList = new ArrayList<>();
-//        List<String> messageKeyList = new ArrayList<>();
-//        JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
-//        callBack.invoke(new JedisBatchOperation(){
-//            @Override
-//            public void batchOperation(Pipeline pipeline, Jedis jedis) {
-//
-//                long messagePos = 0L;
-//                List<Response<Map<String, String>>> redisResponseList = new ArrayList<>();
-//                for(String messageimid : messageIdList){
-//                    map.put(Constants.FIELD_MESSAGE_ID, messageimid);
-//                    String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
-//                    redisResponseList.add(pipeline.hgetAll(messageKey));
-//                    messageKeyList.add(messageKey);
-//                }
-//                pipeline.sync();
-//
-//                for(Response<Map<String, String>> redisResponse : redisResponseList){
-//                    Map<String,String> messageStringMap = redisResponse.get();
-//                    Map<String,Object> messageObjectMap = new HashMap<>();
-//                    if(messageStringMap.get("message_imid") == null){
-//                        return;
-//                    }
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message_id"))){
-//                        messageObjectMap.put("message_id", messageStringMap.get("message_id"));
-//                    }
-//
-//                    messageObjectMap.put("course_id", messageStringMap.get("course_id"));
-//
-//
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message"))){
-//                        messageObjectMap.put("message", messageStringMap.get("message"));
-//                    }else{
-//                        messageObjectMap.put("message", null);
-//                    }
-//
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message_url"))){
-//                        messageObjectMap.put("message_url", messageStringMap.get("message_url"));
-//                    }else{
-//                        messageObjectMap.put("message_url",null);
-//                    }
-//
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message_question"))){
-//                        messageObjectMap.put("message_question", messageStringMap.get("message_question"));
-//                    }else{
-//                        messageObjectMap.put("message_question", null);
-//                    }
-//
-//
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("audio_time"))){
-//                        messageObjectMap.put("audio_time", Long.parseLong(messageStringMap.get("audio_time")));
-//                    }else {
-//                        messageObjectMap.put("audio_time", 0);
-//                    }
-//
-//
-//                    messageObjectMap.put("message_type", messageStringMap.get("message_type"));
-//                    messageObjectMap.put("send_type", messageStringMap.get("send_type"));
-//
-//
-//                    messageObjectMap.put("creator_id", messageStringMap.get("creator_id"));
-//
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("create_time"))){
-//                        Date createTime = new Date(Long.parseLong(messageStringMap.get("create_time")));
-//                        messageObjectMap.put("create_time", createTime);
-//                    }
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("audio_image"))){
-//                        messageObjectMap.put("audio_image", messageStringMap.get("audio_image"));
-//                    }else{
-//                        messageObjectMap.put("audio_image", null);
-//                    }
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message_status"))){
-//                        messageObjectMap.put("message_status",messageStringMap.get("message_status"));
-//                    }else{
-//                        messageObjectMap.put("message_status",0);
-//                    }
-//                    if(!MiscUtils.isEmpty(messageStringMap.get("message_imid"))){
-//                        messageObjectMap.put("message_imid", messageStringMap.get("message_imid"));
-//                    }else{
-//                        messageObjectMap.put("message_imid",MiscUtils.getUUId());
-//                    }
-//
-//                    messageObjectMap.put("message_pos", messagePos++);
-//                    messageList.add(messageObjectMap);
-//                }
-//            }
-//        });
-//        //3.批量插入到数据库中
-//        Integer insertResult = commonModuleServer.insertCourseMessageList(messageList);
-//
-//        //4.如果插入数据库正常，则删除缓存中的内容
-//        if(insertResult != null && insertResult > 0){
-//            //删除redis中的key
-//            String[] messageKeyArray = new String[messageKeyList.size()];
-//            messageKeyList.toArray(messageKeyArray);
-//            jedis.del(messageKeyArray);
-//            jedis.del(messageListKey);
-//            String messageUserListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
-//            String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
-//            String messageLecturerVoiceListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
-//            jedis.del(messageUserListKey);
-//            jedis.del(messageLecturerListKey);
-//            jedis.del(messageLecturerVoiceListKey);
-//        }
-    //</editor-fold>
-
 
 
 
