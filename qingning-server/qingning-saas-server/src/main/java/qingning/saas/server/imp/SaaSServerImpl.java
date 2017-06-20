@@ -23,8 +23,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
     private ReadUserOperation readUserOperation;
 
-    //private ReadLiveRoomOperation readLiveRoomOperation;
-    //private ReadCourseOperation readCourseOperation;
+    private ReadShopOperation readShopOperation;
+    //private ReadShopOperation readCourseOperation;
     //private ReadRoomDistributer readRoomDistributer;
     //private ReadLecturerOperation readLecturerOperation;
     //private ReadRoomDistributerOperation readRoomDistributerOperation;
@@ -35,9 +35,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         if (saaSModuleServer == null) {
             saaSModuleServer = this.getRpcService("saaSModuleServer");
             readUserOperation = new ReadUserOperation(saaSModuleServer);
+            readShopOperation = new ReadShopOperation(saaSModuleServer);
 
-            //readLiveRoomOperation = new ReadLiveRoomOperation(saaSModuleServer);
-            //readCourseOperation = new ReadCourseOperation(saaSModuleServer);
+            //readCourseOperation = new ReadShopOperation(saaSModuleServer);
             //readRoomDistributer = new ReadRoomDistributer(saaSModuleServer);
             //readLecturerOperation = new ReadLecturerOperation(saaSModuleServer);
             //readRoomDistributerOperation = new ReadRoomDistributerOperation(saaSModuleServer);
@@ -110,14 +110,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("shopInfo")
-    public Map<String,Object> shopInfo(RequestEntity reqEntity) throws Exception{
+    public Map<String,String> shopInfo(RequestEntity reqEntity) throws Exception{
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
+        Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
-        Map<String,Object> shop = saaSModuleServer.getShopInfo(param);
+        reqEntity.setParam(param);
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+        Map<String,String> shop = CacheUtils.readShop(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         if(shop == null){
             throw new QNLiveException("190001");
         }
+        shop.put("user_id",userId);
+        shop.put("nick_name",userMap.get("nick_name"));
+        shop.put("phone_num",userMap.get("phone_number"));
         return shop;
     }
     /**

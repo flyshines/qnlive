@@ -147,6 +147,9 @@ public final class Constants {
 
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";
+	//店铺缓存
+	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{shop_id}";
+	public static final String CACHED_KEY_SHOP_FIELD = "shop_id";
 
 	public static final String CACHED_KEY_COURSE_ROBOT = "SYS:COURSEROBOT:{course_id}";
 	public static final String CACHED_KEY_COURSE_ROBOT_FIELD = "course_id";

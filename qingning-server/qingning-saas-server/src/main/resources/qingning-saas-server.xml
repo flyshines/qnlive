@@ -49,15 +49,14 @@
 				<outputs>
 					<param name="user_id" type="string" />
 					<param name="user_name" type="string"/>
-					<param name="nick_name" type="string" />
-					<param name="phone_num" type="string" />
-					<param name="app_name" type="string"/>
 					<param name="shop_name" type="string" />
 					<param name="shop_url" type="string" />
 					<param name="shop_remark" type="string"/>
 					<param name="shop_logo" type="string" />
 					<param name="open_url" type="string" />
 					<param name="weixin_code" type="string"/>
+					<param name="nick_name" type="string" />
+					<param name="phone_num" type="string" />
 				</outputs>
 			</function>
 

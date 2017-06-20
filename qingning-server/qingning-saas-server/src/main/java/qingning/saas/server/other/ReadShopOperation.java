@@ -11,10 +11,10 @@ import java.util.Map;
  * 描 述:
  * 创建日期: 2016/12/4
  */
-public class ReadCourseOperation implements CommonReadOperation {
+public class ReadShopOperation implements CommonReadOperation {
     private ISaaSModuleServer saaSModuleServer;
 
-    public ReadCourseOperation(ISaaSModuleServer saaSModuleServer) {
+    public ReadShopOperation(ISaaSModuleServer saaSModuleServer) {
         this.saaSModuleServer = saaSModuleServer;
     }
 
@@ -23,7 +23,6 @@ public class ReadCourseOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-
-        return null;//saaSModuleServer.findCourseByCourseId((String)reqMap.get("course_id"));
+        return saaSModuleServer.getShopInfo(reqMap);
     }
 }
