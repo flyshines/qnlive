@@ -3083,10 +3083,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             map.put("series_course_type",reqMap.get("series_course_type"));
             String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
             jedis.zadd(lectureSeriesCourseKey, lpos, series_id);
-
             //4.将课程上架到平台
-            jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM, lpos, series_id);
-
+            jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
         }else{ //下架
             //将系列id 加入讲师下架列表
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);

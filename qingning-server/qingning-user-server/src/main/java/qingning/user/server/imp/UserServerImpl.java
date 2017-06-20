@@ -1950,12 +1950,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         String seriesListKey = "";
         String series_id = "";
-        if(MiscUtils.isEmpty(reqMap.get("room_id"))){//查看平台的
-            seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM;
+        if(MiscUtils.isEmpty(reqMap.get("room_id"))){//查看平台的 直播
+            seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM;
             if(seriesIsUp){//系列是上架的
                 series_id = reqMap.get("series_id").toString();
             }else{
-
+                series_id = null;
             }
         }else{//查看直播间的
             String room_id = reqMap.get("room_id").toString();
