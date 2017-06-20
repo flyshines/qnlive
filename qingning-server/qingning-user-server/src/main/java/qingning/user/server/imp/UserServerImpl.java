@@ -1988,11 +1988,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 用户-查询系列列表（正在直播（用户查看））
+     * 用户 直播间系列列表
      * @return
      * @throws Exception
      */
-    @FunctionName("userSeries")
+    @FunctionName("getRoomSeries")
     public Map<String, Object> getRoomSeries(RequestEntity reqEntity) throws Exception{
         Map<String, Object> resultMap = new HashMap<>();
         String appName = reqEntity.getAppName();
@@ -2000,6 +2000,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        String room_id = reqMap.get("room_id").toString();
+
         Set<String> seriesIdSet;//查询的课程idset
         List<String> seriesIdList = new ArrayList<>();//课程id列表
         List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
@@ -2014,31 +2016,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 seriesIsUp = false;
             }
         }
+        Map<String,String> query = new HashMap<String,String>();
+        query.put(Constants.FIELD_ROOM_ID,room_id);
+        String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
+        String lecturer_id = jedis.hget(roomKey,"lecturer_id");
+        boolean isLecturer = false;//是否是讲师
+        if(lecturer_id.equals(user_id)){//是讲师
+            isLecturer = true;
+        }
+
+
+
+
         String seriesListKey = "";
         String series_id = "";
-        if(MiscUtils.isEmpty(reqMap.get("room_id"))){//查看平台的 直播
-            seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM;
-            if(seriesIsUp){//系列是上架的
-                series_id = reqMap.get("series_id").toString();
-            }else{
-                series_id = null;
-            }
-        }else{//查看直播间的
-            String room_id = reqMap.get("room_id").toString();
-            Map<String,String> query = new HashMap<String,String>();
-            query.put(Constants.FIELD_ROOM_ID,room_id);
-            String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
-            Map<String, String> room = jedis.hgetAll(roomKey);
-            String lecturer_id = room.get("lecturer_id");
-            query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,lecturer_id);
-            query.put(Constants.SERIES_COURSE_TYPE,Constants.DEFAULT_SERIES_COURSE_TYPE);
-            if(user_id.equals(lecturer_id)){
 
-            }
-            String series = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, query);
-
-
-        }
 
 
         int offset = 0;//偏移值
