@@ -25,4 +25,11 @@ public interface ISaaSModuleServer {
      * @param param
      */
     Map<String,Object> addShopBanner(Map<String, Object> param);
+
+    /**
+     * 前端获取店铺轮播列表
+     * @param paramMap
+     * @return
+     */
+	List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap);
 }

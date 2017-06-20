@@ -122,5 +122,23 @@
     where user_id = #{user_id,jdbcType=VARCHAR}
     ORDER BY create_time DESC
   </select>
+  
+  <!-- 根据map中的条件查询轮播列表 -->
+  <select id="selectBannerListByMap" resultType="hashmap" parameterType="hashmap" >
+    select <include refid="Base_Column_List" />
+    from t_saas_banner
+    <where>
+    	<if test="shop_id != null and shop_id != ''">
+			and shop_id = #{shop_id}
+    	</if>
+    	<if test="status != null and status != ''">
+			and status = #{status}
+    	</if>
+    	<if test="app_name != null and app_name != ''">
+			and app_name = #{app_name}
+    	</if>
+    </where>
+    order by position asc
+  </select>
 
 </mapper>

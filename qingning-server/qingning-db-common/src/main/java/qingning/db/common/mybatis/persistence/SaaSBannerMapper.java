@@ -4,6 +4,7 @@ package qingning.db.common.mybatis.persistence;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SaaSBannerMapper {
@@ -21,4 +22,11 @@ public interface SaaSBannerMapper {
      * @return
      */
     PageList<Map<String,Object>> selectListByUserId(Map<String, Object> param, PageBounds page);
+
+    /**
+     * 根据map中的条件查询轮播列表
+     * @param paramMap
+     * @return
+     */
+	List<Map<String, Object>> selectBannerListByMap(Map<String, Object> paramMap);
 }

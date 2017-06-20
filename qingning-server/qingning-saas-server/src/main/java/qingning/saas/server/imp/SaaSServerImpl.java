@@ -178,5 +178,33 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return result;
 
     }
+    
+    /**
+     * 获取店铺轮播列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("queryShopBannerList")
+    public Map<String, Object>  queryShopBannerList(RequestEntity reqEntity) throws Exception{
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //添加状态要求：上架
+        reqMap.put("status", "1");
+        reqMap.put("app_name", reqEntity.getAppName());
+        
+        List<Map<String, Object>> bannerList = saaSModuleServer.getShopBannerListForFront(reqMap);
+        
+        resultMap.put("banner_info_list", bannerList);
+        return resultMap;
+    }
 
 }
