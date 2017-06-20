@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.SaaSShopMapper" >
+  <sql id="Base_Column_List" >
+    shop_id, user_id, user_name, shop_name, shop_url, shop_remark, shop_logo, open_url, 
+    weixin_code, status, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_saas_shop
+    where shop_id = #{shop_id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_saas_shop
+    where shop_id = #{shop_id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="hashmap" >
+    insert into t_saas_shop
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="user_name != null" >
+        user_name,
+      </if>
+      <if test="shop_name != null" >
+        shop_name,
+      </if>
+      <if test="shop_url != null" >
+        shop_url,
+      </if>
+      <if test="shop_remark != null" >
+        shop_remark,
+      </if>
+      <if test="shop_logo != null" >
+        shop_logo,
+      </if>
+      <if test="open_url != null" >
+        open_url,
+      </if>
+      <if test="weixin_code != null" >
+        weixin_code,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="shop_id != null" >
+        #{shop_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_id != null" >
+        #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_name != null" >
+        #{user_name,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_name != null" >
+        #{shop_name,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_url != null" >
+        #{shop_url,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_remark != null" >
+        #{shop_remark,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_logo != null" >
+        #{shop_logo,jdbcType=VARCHAR},
+      </if>
+      <if test="open_url != null" >
+        #{open_url,jdbcType=VARCHAR},
+      </if>
+      <if test="weixin_code != null" >
+        #{weixin_code,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="hashmap" >
+    update t_saas_shop
+    <set >
+      <if test="user_id != null" >
+        user_id = #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_name != null" >
+        user_name = #{user_name,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_name != null" >
+        shop_name = #{shop_name,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_url != null" >
+        shop_url = #{shop_url,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_remark != null" >
+        shop_remark = #{shop_remark,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_logo != null" >
+        shop_logo = #{shop_logo,jdbcType=VARCHAR},
+      </if>
+      <if test="open_url != null" >
+        open_url = #{open_url,jdbcType=VARCHAR},
+      </if>
+      <if test="weixin_code != null" >
+        weixin_code = #{weixin_code,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where shop_id = #{shop_id,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

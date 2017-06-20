@@ -39,7 +39,7 @@
 					<param name="banner_img" type="string" require="Y,000100"/>
 					<param name="link_type" type="string" require="Y,000100" format="1|2|3|4,000004" />
 					<param name="link_id" type="string" require="N"/>
-					<param name="position" type="string" require="N"/>
+					<param name="position" type="long" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>

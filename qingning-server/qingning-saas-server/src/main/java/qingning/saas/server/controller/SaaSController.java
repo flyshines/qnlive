@@ -78,7 +78,6 @@ public class SaaSController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-
     /**
      * 店铺-添加轮播图
      *

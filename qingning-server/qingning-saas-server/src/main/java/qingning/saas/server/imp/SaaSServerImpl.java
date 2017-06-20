@@ -14,10 +14,7 @@ import qingning.server.rpc.manager.ISaaSModuleServer;
 import redis.clients.jedis.Jedis;
 
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SaaSServerImpl extends AbstractQNLiveServer {
     private static Logger log = LoggerFactory.getLogger(SaaSServerImpl.class);
@@ -147,10 +144,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
         String linkType = reqMap.get("link_type").toString();
-        String linkTo;
+        String linkTo = null;
         if("1".equals(linkType)){
             //外部链接
-            if(StringUtils.isEmpty(reqMap.get("link_tp")+"")){
+            if(reqMap.get("link_id")==null){
                 //链接为空判断
                 throw new QNLiveException("000004");
             }
@@ -172,9 +169,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             }else if("3".equals(linkType)){
                 //直播
                 linkTo = "/user/courses/"+linkId;
-                reqMap.put("link_to",linkTo);
             }
+            reqMap.put("link_to",linkTo);
         }
+        reqMap.put("create_time",new Date());
+        reqMap.put("app_name",reqEntity.getAppName());
         Map<String, Object> result = saaSModuleServer.addShopBanner(reqMap);
         return result;
 
