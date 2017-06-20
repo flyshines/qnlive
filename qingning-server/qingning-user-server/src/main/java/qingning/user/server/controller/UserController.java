@@ -471,10 +471,10 @@ public class UserController extends AbstractController{
 
 
 	/**
-	 * 用户-查询系列列表（正在直播（用户查看））
+	 * 查询系列列表（正在直播（用户查看））
 	 * @param page_count 分页数
+	 * @param room_id 直播间id
 	 * @param series_id  系列id
-	 * @param classify_id 分类id
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -485,17 +485,17 @@ public class UserController extends AbstractController{
 	@ResponseBody
 	ResponseEntity getSeries(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestParam(value = "series_id", defaultValue = "") String series_id,
 			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
-			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userSeries", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
+		param.put("room_id", room_id);
 		param.put("series_id", series_id);
-		param.put("classify_id",classify_id);
 		param.put("series_status", series_status);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
@@ -507,7 +507,6 @@ public class UserController extends AbstractController{
 	 * @param version
 	 * @return
 	 * @throws Exception
-	 	判断当前用户是否是讲师 如果是展示所有 如果不是展示已上架的
 	 */
 	@RequestMapping(value = "/user/series/{series_id}", method = RequestMethod.GET)
 	public
@@ -523,5 +522,40 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+
+
+
+	/**
+	 * 用户查询系列课程列表
+	 * @param series_id 系列id
+	 * @param course_id 课程id 分页必传
+	 * @param page_count 分页参数
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 * 判断当前用户是否是讲师 如果是展示所有 如果不是展示已上架的
+	 */
+	@RequestMapping(value = "/user/series/course", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getSerieCourse(
+			@RequestParam("series_id") String series_id,
+			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getSerieCourse", accessToken, version,appName);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("series_id", series_id);
+		param.put("course_id", course_id);
+		param.put("page_count", page_count);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 
 }

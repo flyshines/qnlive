@@ -559,6 +559,32 @@ public class CommonController extends AbstractController {
     }
 
     /**
+     * 查询系列邀请卡信息
+     * @param series_id
+     * @param access_token
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/series/{series_id}/card",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getSeriesInviteCard(
+            @PathVariable("series_id") String series_id,
+            @RequestParam(value="png",defaultValue="N") String png,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getSeriesInviteCard", access_token, version,appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("series_id", series_id);
+        param.put("png",png);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+
+    /**
      * 查询直播间邀请卡信息
      * @param room_id
      * @param access_token
@@ -584,6 +610,12 @@ public class CommonController extends AbstractController {
         logger.debug("==================================================================="+(endTime-startTime)+"==========================================================");
         return responseEntity;
     }
+
+
+
+
+
+
 
 
     @RequestMapping(value="/common/distributors/{recommend_code}/user",method=RequestMethod.PUT)

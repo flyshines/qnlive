@@ -230,4 +230,12 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	int updateAdminUserByAllMap(Map<String, Object> adminUserMap);
+
+	/**
+	 * 查询系列课程
+	 * @param record
+	 * @return
+	 */
+	List<Map<String,Object>> findSeriesBySearch(Map<String,Object> record);
+
 }

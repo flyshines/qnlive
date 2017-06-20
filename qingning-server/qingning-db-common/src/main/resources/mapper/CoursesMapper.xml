@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.CoursesMapper" >
   <select id="findLastestFinishCourse" resultType="hashmap" parameterType="java.lang.String" >
-    select * from t_courses where course_id = #{course_id} and room_id = #{room_id} and status='2'
-    order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit 1
-  </select>
+  select * from t_courses where course_id = #{course_id} and room_id = #{room_id} and status='2'
+  order by ((UNIX_TIMESTAMP(end_time)*1000-1487034415000) * 1000000 +position) desc limit 1
+</select>
   <select id="findCourseByCourseId" resultType="hashmap" parameterType="java.lang.String" >
     select * from t_courses where course_id = #{courseId}
   </select>
@@ -228,6 +228,17 @@
       <if test="classify_id != null" >
         classify_id,
       </if>
+
+      <if test="series_id != null" >
+        series_id,
+      </if>
+      <if test="series_course_updown != null" >
+        series_course_updown,
+      </if>
+      <if test="course_updown != null" >
+        course_updown,
+      </if>
+
       <if test="appName != null" >
         app_name,
       </if>
@@ -308,6 +319,17 @@
       <if test="classify_id != null" >
         #{classify_id},
       </if>
+
+      <if test="series_id != null" >
+        #{series_id},
+      </if>
+      <if test="series_course_updown != null" >
+        #{series_course_updown},
+      </if>
+      <if test="course_updown != null" >
+        #{course_updown},
+      </if>
+
       <if test="appName != null" >
         #{appName},
       </if>

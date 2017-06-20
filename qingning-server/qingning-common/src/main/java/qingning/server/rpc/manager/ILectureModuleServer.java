@@ -124,4 +124,26 @@ public interface ILectureModuleServer {
     Map<String,Object> findServiceTemplateInfoByLecturerId(Map<String, String> wxPushParam);
 
 	void insertServiceTemplateInfo(Map<String, String> paramMap);
+
+
+	/**
+	 * 创建系列
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> createSeries(Map<String, Object> reqMap);
+
+	/**
+	 * 根据系列id查询系列
+	 * @param series_id
+	 * @return
+	 */
+	Map<String,Object> findSeriesBySeriesId(String series_id);
+
+	/**
+	 * 编辑系列
+	 * @param record
+	 * @return
+	 */
+	Map<String, Object> updateSeries(Map<String,Object> record);
 }

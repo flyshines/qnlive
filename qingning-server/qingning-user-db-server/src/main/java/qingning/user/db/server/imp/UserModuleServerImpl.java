@@ -67,7 +67,10 @@ public class UserModuleServerImpl implements IUserModuleServer {
     private UserGainsMapper userGainsMapper;
     @Autowired(required = true)
     private WithdrawCashMapper withdrawCashMapper;
-
+    @Autowired(required = true)
+    private SeriesMapper seriesMapper;
+    @Autowired(required = true)
+    private SeriesStudentsMapper seriesStudentsMapper;
 
     @Override
     public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
@@ -395,5 +398,15 @@ public class UserModuleServerImpl implements IUserModuleServer {
         res.put("total_count",resout.getTotal());
         res.put("total_page",resout.getPaginator().getTotalPages());
         return res;
+    }
+
+    @Override
+    public Map<String, Object> findSeriesBySeriesId(String series_id) {
+        return seriesMapper.findSeriesBySeriesId(series_id);
+    }
+
+    @Override
+    public boolean isStudentOfTheSeries(Map<String, Object> queryMap) {
+        return !MiscUtils.isEmpty( seriesStudentsMapper.isStudentOfTheSeries(queryMap));
     }
 }

@@ -811,7 +811,7 @@ public class LectureController extends AbstractController {
 
 
 	/**
-	 * 查询讲师创建的系列
+	 * 选择系列
 	 * @param lecturer_id 讲师id
 	 * @param classify_id 分类id
 	 * @param series_id 系列id
@@ -839,7 +839,72 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+	/**
+	 * 编辑系列
+	 * @param entity
+	 * @param series_id 系列id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/series/{series_id}", method = RequestMethod.PUT)
+	public
+	@ResponseBody ResponseEntity updateSeries(
+			HttpEntity<Object> entity,
+			@PathVariable("series_id") String series_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateSeries", accessToken, version,appName);
+		((Map<String,Object>)entity.getBody()).put("series_id", series_id);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 
+
+	/**
+	 * 上下架
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/updown", method = RequestMethod.PUT)
+	public
+	@ResponseBody ResponseEntity updown(
+			HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updown", accessToken, version,appName);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+	/**
+	 * 编辑系列课程
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/series/course", method = RequestMethod.PUT)
+	public
+	@ResponseBody ResponseEntity updateSeriesCourse(
+			HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateSeriesCourse", accessToken, version,appName);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 
 
 }

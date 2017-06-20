@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.SeriesMapper" >
+	<select id="findLastestFinishSeries" resultType="hashmap" parameterType="hashmap" >
+		select * from t_series where 1=1
+		<if test="series_id != null">
+			and series_id = #{series_id}
+		</if>
+		<if test="lecturer_id != null">
+			and lecturer_id = #{lecturer_id}
+		</if>
+		<if test="classify_id != null">
+			and classify_id = #{classify_id}
+		</if>
+		<if test="series_course_type != null">
+			and series_course_type = #{series_course_type}
+		</if>
+		<if test="appName != null">
+			and appName = #{appName}
+		</if>
+		<if test="updown != null" >
+			and updown = #{updown}
+		</if>
+	</select>
+
+	<select id="findSeriesBySearch" resultType="hashmap" parameterType="hashmap" >
+		select * from t_series where updown=1
+		<if test="search_text != null">
+			and series_title like #{search_text}
+		</if>
+		and app_name = #{appName}
+		order by update_time limit #{page_num},#{page_count}
+	</select>
+
+	<select id="findSeriesBySeriesId" resultType="hashmap" parameterType="java.lang.String" >
+		select * from t_series where series_id = #{series_id}
+	</select>
+	<insert id="insertSeries" parameterType="hashmap" >
+		insert into t_series
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="series_id != null" >
+				series_id,
+			</if>
+			<if test="lecturer_id != null" >
+				lecturer_id,
+			</if>
+			<if test="series_title != null" >
+				series_title,
+			</if>
+			<if test="series_img != null" >
+				series_img,
+			</if>
+			<if test="series_remark != null" >
+				series_remark,
+			</if>
+			<if test="update_plan != null" >
+				update_plan,
+			</if>
+			<if test="series_type != null" >
+				series_type,
+			</if>
+			<if test="series_status != null" >
+				series_status,
+			</if>
+			<if test="series_price != null" >
+				series_price,
+			</if>
+			<if test="updown != null" >
+				updown,
+			</if>
+			<if test="create_time != null" >
+				create_time,
+			</if>
+			<if test="update_time != null" >
+				update_time,
+			</if>
+			<if test="update_course_time != null" >
+				update_course_time,
+			</if>
+			<if test="rq_code != null" >
+				rq_code,
+			</if>
+			<if test="series_course_type != null" >
+				series_course_type,
+			</if>
+			<if test="appName != null" >
+				app_name,
+			</if>
+			<if test="series_pay_remark != null" >
+				series_pay_remark,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="series_id != null" >
+				#{series_id},
+			</if>
+			<if test="lecturer_id != null" >
+				#{lecturer_id},
+			</if>
+			<if test="series_title != null" >
+				#{series_title},
+			</if>
+			<if test="series_img != null" >
+				#{series_img},
+			</if>
+			<if test="series_remark != null" >
+				#{series_remark},
+			</if>
+			<if test="update_plan != null" >
+				#{update_plan},
+			</if>
+			<if test="series_type != null" >
+				#{series_type},
+			</if>
+			<if test="series_status != null" >
+				#{series_status},
+			</if>
+			<if test="series_price != null" >
+				#{series_price},
+			</if>
+			<if test="updown != null" >
+				#{updown},
+			</if>
+			<if test="create_time != null" >
+				#{create_time},
+			</if>
+			<if test="update_time != null" >
+				#{update_time},
+			</if>
+			<if test="update_course_time != null" >
+				#{update_course_time},
+			</if>
+			<if test="rq_code != null" >
+				#{rq_code},
+			</if>
+			<if test="series_course_type != null" >
+				#{series_course_type},
+			</if>
+			<if test="appName != null" >
+				#{appName},
+			</if>
+			<if test="series_pay_remark != null" >
+				#{series_pay_remark},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateSeries" parameterType="hashmap" >
+		update t_series
+		<set >
+			<if test="series_title != null" >
+				series_title=#{series_title},
+			</if>
+			<if test="series_img != null" >
+				series_img=#{series_img},
+			</if>
+			<if test="series_remark != null" >
+				series_remark=#{series_remark},
+			</if>
+			<if test="update_time != null" >
+				update_time=#{update_time},
+			</if>
+			<if test="series_status != null" >
+				series_status=#{series_status},
+			</if>
+			<if test="series_status == 1" >
+				end_time=#{update_time},
+			</if>
+		</set>
+		where series_id = #{series_id}
+	</update>
+	<update id="increaseSeriesStudent" parameterType="string" >
+		update t_series
+		set
+		series_student_num = series_student_num + 1
+		where series_id = #{series_id}
+	</update>
+	<update id="increaseSeriesCourse" parameterType="string" >
+		update t_series
+		set
+		course_num = course_num + 1
+		<if test="update_course_time != null" >
+			,#{update_course_time}=#{update_course_time}
+		</if>
+		where series_id = #{series_id}
+	</update>
+
+
+</mapper>

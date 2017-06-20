@@ -100,6 +100,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private WithdrawCashMapper withdrawCashMapper;
 	@Autowired(required = true)
 	private AdminUserMapper adminUserMapper;
+	@Autowired(required = true)
+	private SeriesMapper seriesMapper;
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -1009,5 +1012,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public int updateAdminUserByAllMap(Map<String, Object> adminUserMap) {
 		return adminUserMapper.updateAdminUserByAllMap(adminUserMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findSeriesBySearch(Map<String, Object> record) {
+		return seriesMapper.findSeriesBySearch(record);
 	}
 }
