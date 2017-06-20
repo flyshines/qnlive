@@ -178,6 +178,16 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}else if("2".equals(course_type)){
 			course.put("course_price", (Long)reqMap.get("course_price"));
 		}
+
+		if(!MiscUtils.isEmpty(reqMap.get("series_id"))){//是系列课
+			course.put("series_id", reqMap.get("series_id"));
+			course.put("course_updown","0");
+			course.put("series_course_updown",reqMap.get("updown"));
+		}else{//不是系列课
+			course.put("series_course_updown","0");
+			course.put("course_updown",reqMap.get("updown"));
+		}
+
 		Date now = new Date();
 		course.put("create_time", now);
 		course.put("create_date", now);
@@ -608,13 +618,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("series_remark", reqMap.get("series_remark"));
 		series.put("update_plan", reqMap.get("update_plan"));
 
-		series.put("series_pay_remark", String.format(MiscUtils.getConfigKey("jpush_course_start_per_long_notice"),  reqMap.get("update_plan").toString()));
-		series.put("course_num", 0);
+		series.put("series_pay_remark", String.format(MiscUtils.getConfigKey("series_pay_remark"),  reqMap.get("update_plan").toString()));
 		series.put("series_type", reqMap.get("series_type"));
 		series.put("series_status", reqMap.get("series_status"));
 		series.put("series_price", reqMap.get("series_price"));
-		series.put("series_amount", 0);
-		series.put("series_student_num", 0);
 		series.put("updown", reqMap.get("updown"));
 		Date now = new Date();
 		series.put("create_time",now);

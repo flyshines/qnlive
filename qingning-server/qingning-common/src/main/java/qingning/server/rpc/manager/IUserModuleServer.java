@@ -141,4 +141,8 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	Map<String, Object>  findWithdrawListAll(Map<String, Object> param);
+
+    Map<String,Object> findSeriesBySeriesId(String course_id);
+
+	boolean isStudentOfTheSeries(Map<String, Object> queryMap);
 }

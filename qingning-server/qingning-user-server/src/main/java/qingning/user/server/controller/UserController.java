@@ -473,9 +473,8 @@ public class UserController extends AbstractController{
 	/**
 	 * 查询系列列表（正在直播（用户查看））
 	 * @param page_count 分页数
-	 * @param lecturer_id 讲师id
+	 * @param room_id 直播间id
 	 * @param series_id  系列id
-	 * @param classify_id 分类id
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -486,19 +485,17 @@ public class UserController extends AbstractController{
 	@ResponseBody
 	ResponseEntity getSeries(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "lecturer_id", defaultValue = "") String lecturer_id,
+			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestParam(value = "series_id", defaultValue = "") String series_id,
 			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
-			@RequestParam(value="classify_id",defaultValue = "") String  classify_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userSeries", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
-		param.put("page_count", lecturer_id);
+		param.put("room_id", room_id);
 		param.put("series_id", series_id);
-		param.put("classify_id",classify_id);
 		param.put("series_status", series_status);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);

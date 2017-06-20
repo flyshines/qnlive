@@ -627,6 +627,16 @@
 						<param name="status" type="string"/>
 						<param name="rq_code" type="string"/>
 					</param>
+					<param name="series_list" type="list">
+						<param name="series_id" type="string"/>
+						<param name="lecturer_id" type="string"/>
+						<param name="series_title" type="rstring"/>
+						<param name="series_img" type="string"/>
+						<param name="course_num" type="string"/>
+						<param name="series_student_num" type="string"/>
+						<param name="series_price" type="string"/>
+						<param name="lecturer_nick_name" type="rstring"/>
+					</param>
 				</outputs>
 			</function>
 			<function name="recommendCourse">

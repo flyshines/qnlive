@@ -1933,7 +1933,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String series_id = reqMap.get("series_id").toString();
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
         int series_status = Integer.parseInt(reqMap.get("series_status").toString());
-        String classify_id = reqMap.get("classify_id").toString();
         Set<String> seriesIdSet;//查询的课程idset
         List<String> seriesIdList = new ArrayList<>();//课程id列表
         List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
@@ -1942,18 +1941,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(series_status == 0){
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
-            if(!MiscUtils.isEmpty(classify_id)) {//有分类
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
-                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_SERIES_CLASSIFY, map);//分类
-            }else{
-                seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM;
-            }
+            seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM;
             if(series_id == null || series_id.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
                 startIndex = courseScoreByRedis+"";//设置起始位置
                 endIndex = "-inf";//设置结束位置
-            }else{//传了courseid
+            }else{//传了series
                 Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("series_id", series_id);
                 String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
@@ -1995,45 +1988,42 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getSeriesDetailInfo(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        Map<String, String> courseMap = new HashMap<String, String>();
+        Map<String, String> seriesMap = new HashMap<String, String>();
         String room_id = null;
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
-
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
         //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
-        if (jedis.exists(courseKey)) {
-            Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
-            courseMap = courseCacheMap;
-            room_id = courseCacheMap.get("room_id").toString();
+        if (jedis.exists(seriesKey)) {
+            Map<String, String> seriesCacheMap = jedis.hgetAll(seriesKey);
+            seriesMap = seriesCacheMap;
+            room_id = seriesCacheMap.get("room_id").toString();
 
         } else {
             //2.如果缓存中没有课程详情，则读取数据库
-            Map<String, Object> courseDBMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            Map<String, Object> seriesDBMap = userModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
 
             //3.如果缓存和数据库中都没有课程详情，则提示课程不存在
-            if (CollectionUtils.isEmpty(courseDBMap)) {
+            if (CollectionUtils.isEmpty(seriesDBMap)) {
                 throw new QNLiveException("100004");
             } else {
-                MiscUtils.converObjectMapToStringMap(courseDBMap, courseMap);
-                room_id = courseDBMap.get("room_id").toString();
+                MiscUtils.converObjectMapToStringMap(seriesDBMap, seriesMap);
+                room_id = seriesDBMap.get("room_id").toString();
             }
         }
-        if (CollectionUtils.isEmpty(courseMap)) {
+        if (CollectionUtils.isEmpty(seriesMap)) {
             throw new QNLiveException("100004");
         }
-        for(String key:courseMap.keySet()){
-            resultMap.put(key, courseMap.get(key));
+        for(String key:seriesMap.keySet()){
+            resultMap.put(key, seriesMap.get(key));
         }
 
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("size",10);
-        queryMap.put("course_id",reqMap.get("course_id").toString());
-        resultMap.put("student_list", userModuleServer.findLatestStudentAvatarAddList(queryMap));
+
         //从缓存中获取直播间信息
         Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedis, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
@@ -2043,42 +2033,30 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         queryMap.clear();
         queryMap.put("user_id", userId);
-        queryMap.put("course_id", courseMap.get("course_id"));
         //判断访问者是普通用户还是讲师
         //如果为讲师，则返回讲师部分特定信息
         boolean isStudent = false;
         List<String> roles = new ArrayList<>();
-        if(userId.equals(courseMap.get("lecturer_id"))){
-            resultMap.put("update_time", courseMap.get("update_time"));
-            resultMap.put("course_password", courseMap.get("course_password"));
-            resultMap.put("im_course_id", courseMap.get("im_course_id"));
-            resultMap.put("share_url",getCourseShareURL(userId, reqMap.get("course_id").toString(), courseMap,appName,jedis));
+        //为用户，则返回用户部分信息
+        isStudent = userModuleServer.isStudentOfTheSeries(queryMap);
+        //返回用户身份
+        //角色数组 1：普通用户、2：学员、3：讲师
+        //加入课程状态 0未加入 1已加入
+        if(isStudent){
+            resultMap.put("series_join_status", "1");
         }else {
-            //为用户，则返回用户部分信息
-            isStudent = userModuleServer.isStudentOfTheCourse(queryMap);
-
-            //返回用户身份
-            //角色数组 1：普通用户、2：学员、3：讲师
-            //加入课程状态 0未加入 1已加入
-            if(isStudent){
-                resultMap.put("join_status", "1");
-            }else {
-                resultMap.put("join_status", "0");
-            }
-
-            //查询关注状态
-            //关注状态 0未关注 1已关注
-            reqMap.put("room_id", liveRoomMap.get("room_id"));
-            Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
-            if (CollectionUtils.isEmpty(fansMap)) {
-                resultMap.put("follow_status", "0");
-            } else {
-                resultMap.put("follow_status", "1");
-            }
-
+            resultMap.put("series_join_status", "0");
         }
-
-        if(userId.equals(courseMap.get("lecturer_id"))){
+        //查询关注状态
+        //关注状态 0未关注 1已关注
+        reqMap.put("room_id", liveRoomMap.get("room_id"));
+        Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
+        if (CollectionUtils.isEmpty(fansMap)) {
+            resultMap.put("follow_status", "0");
+        } else {
+            resultMap.put("follow_status", "1");
+        }
+        if(userId.equals(seriesMap.get("lecturer_id"))){
             roles.add("3");
         }else {
             if(isStudent){
@@ -2087,8 +2065,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 roles.add("1");
             }
         }
-
-        Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedis);
+        Map<String,String> roomDistributer = CacheUtils.readDistributerRoom(userId, seriesMap.get("room_id"), readRoomDistributerOperation, jedis);
         if(! MiscUtils.isEmpty(roomDistributer)){
             if(roomDistributer.get("end_date") != null){
                 Date endDate = new Date(Long.parseLong(roomDistributer.get("end_date")));
@@ -2099,12 +2076,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         resultMap.put("roles", roles);
-
-        resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis,appName));
-
-        if(!resultMap.get("status").equals("2")){
-            resultMap.put("status",courseMap.get("status"));
-        }
+        resultMap.put("qr_code",getQrCode(seriesMap.get("lecturer_id"),userId,jedis,appName));
+        resultMap.put("series_status",seriesMap.get("series_status"));
         return resultMap;
     }
 

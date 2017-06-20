@@ -56,9 +56,6 @@
 			<if test="update_plan != null" >
 				update_plan,
 			</if>
-			<if test="course_num != null" >
-				course_num,
-			</if>
 			<if test="series_type != null" >
 				series_type,
 			</if>
@@ -67,12 +64,6 @@
 			</if>
 			<if test="series_price != null" >
 				series_price,
-			</if>
-			<if test="series_amount != null" >
-				series_amount,
-			</if>
-			<if test="series_student_num != null" >
-				series_student_num,
 			</if>
 			<if test="updown != null" >
 				updown,
@@ -118,9 +109,6 @@
 			<if test="update_plan != null" >
 				#{update_plan},
 			</if>
-			<if test="course_num != null" >
-				#{course_num},
-			</if>
 			<if test="series_type != null" >
 				#{series_type},
 			</if>
@@ -129,12 +117,6 @@
 			</if>
 			<if test="series_price != null" >
 				#{series_price},
-			</if>
-			<if test="series_amount != null" >
-				#{series_amount},
-			</if>
-			<if test="series_student_num != null" >
-				#{series_student_num},
 			</if>
 			<if test="updown != null" >
 				#{updown},
@@ -174,26 +156,14 @@
 			<if test="series_remark != null" >
 				series_remark=#{series_remark},
 			</if>
-			<if test="update_plan != null" >
-				update_plan=#{update_plan},
-			</if>
-			<if test="course_num != null" >
-				course_num=#{course_num},
-			</if>
-			<if test="series_amount != null" >
-				series_amount=#{series_amount},
-			</if>
-			<if test="series_student_num != null" >
-				series_student_num=#{series_student_num},
-			</if>
-			<if test="updown != null" >
-				updown=#{updown},
-			</if>
-			<if test="update_course_time != null" >
-				#{update_course_time}=#{update_course_time},
+			<if test="update_time != null" >
+				update_time=#{update_time},
 			</if>
 			<if test="series_status != null" >
-				#{series_status}=#{series_status},
+				series_status=#{series_status},
+			</if>
+			<if test="series_status == 1" >
+				end_time=#{update_time},
 			</if>
 		</set>
 		where series_id = #{series_id}
@@ -208,6 +178,9 @@
 		update t_series
 		set
 		course_num = course_num + 1
+		<if test="update_course_time != null" >
+			,#{update_course_time}=#{update_course_time}
+		</if>
 		where series_id = #{series_id}
 	</update>
 
