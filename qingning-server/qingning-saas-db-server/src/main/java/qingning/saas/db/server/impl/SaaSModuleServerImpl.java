@@ -88,9 +88,16 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return null;
     }
 
+    /**
+     * 前端获取店铺轮播列表
+     */
+	@Override
+	public List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap) {
+		return bannerMapper.selectBannerListByMap(paramMap);
+	}
+
     @Override
     public Map<String, Object> getShopInfo(Map<String, Object> param) {
         return shopMapper.selectByPrimaryKey(param);
     }
-
 }

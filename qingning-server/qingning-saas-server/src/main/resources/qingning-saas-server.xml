@@ -92,6 +92,51 @@
 				</outputs>
 			</function>
 
+			
+			<!-- 店铺-获取店铺轮播列表 -->
+			<function name="queryShopBannerList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+					<param name="banner_info_list" type="list">
+						<param name="banner_id" type="string" />
+						<param name="banner_img" type="string" />
+						<param name="banner_title" type="string" />
+						<param name="link_type" type="string" />
+						<param name="link_to" type="string" />
+					</param>
+				</outputs>
+			</function>
+
+			<!-- 店铺-获取店铺系列课程列表 -->
+			<function name="findShopSeriesList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100"/>
+					<param name="last_update_time" type="long" require="N"/>
+					<param name="readed_count" type="long" require="N"/>
+					<param name="page_count" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="series_info_list" type="list">
+						<param name="series_id" type="string" />
+						<param name="series_img_url" type="string" />
+						<param name="series_type" type="string" />
+						<param name="buy_status" type="string" />
+						<param name="series_title" type="string" />
+						<param name="series_course_count" type="int" />
+						<param name="buyer_count" type="long" />
+						<param name="price" type="double" />
+					</param>
+					<param name="last_update_time" type="long" />
+				</outputs>
+			</function>
 
 
 
