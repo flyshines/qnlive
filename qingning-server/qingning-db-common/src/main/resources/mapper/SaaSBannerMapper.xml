@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.SaaSBannerMapper" >
+  <sql id="Base_Column_List" >
+    banner_id, banner_img, shop_id , banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
+  </sql>
+  <select id="selectByPrimaryKey" resultType="java.util.Map" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_saas_banner
+    where banner_id = #{banner_id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_saas_banner
+    where banner_id = #{banner_id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into t_saas_banner
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="banner_id != null" >
+        banner_id,
+      </if>
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="banner_img != null" >
+        banner_img,
+      </if>
+      <if test="banner_title != null" >
+        banner_title,
+      </if>
+      <if test="link_to != null" >
+        link_to,
+      </if>
+      <if test="link_id != null" >
+        link_id,
+      </if>
+      <if test="link_type != null" >
+        link_type,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="app_name != null" >
+        app_name,
+      </if>
+      <if test="position != null" >
+        position,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="banner_id != null" >
+        #{banner_id,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_id != null" >
+        #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="banner_img != null" >
+        #{banner_img,jdbcType=VARCHAR},
+      </if>
+      <if test="banner_title != null" >
+        #{banner_title,jdbcType=VARCHAR},
+      </if>
+      <if test="link_to != null" >
+        #{link_to,jdbcType=VARCHAR},
+      </if>
+      <if test="link_id != null" >
+        #{link_id,jdbcType=VARCHAR},
+      </if>
+      <if test="link_type != null" >
+        #{link_type,jdbcType=CHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="app_name != null" >
+        #{app_name,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null" >
+        #{position,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="java.util.Map" >
+    update t_saas_banner
+    <set >
+      <if test="bannerImg != null" >
+        banner_img = #{banner_img,jdbcType=VARCHAR},
+      </if>
+      <if test="banner_title != null" >
+        banner_title = #{bannerTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="link_to != null" >
+        link_to = #{linkTo,jdbcType=VARCHAR},
+      </if>
+      <if test="link_id != null" >
+        link_id = #{link_id,jdbcType=VARCHAR},
+      </if>
+      <if test="link_type != null" >
+        link_type = #{linkType,jdbcType=CHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+      <if test="app_name != null" >
+        app_name = #{app_name,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null" >
+        position = #{position,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where banner_id = #{banner_id,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectListByUserId" resultType="java.util.Map" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from t_saas_banner
+    where user_id = #{user_id,jdbcType=VARCHAR}
+    ORDER BY create_time DESC
+  </select>
+  
+  <!-- 根据map中的条件查询轮播列表 -->
+  <select id="selectBannerListByMap" resultType="hashmap" parameterType="hashmap" >
+    select <include refid="Base_Column_List" />
+    from t_saas_banner
+    <where>
+    	<if test="shop_id != null and shop_id != ''">
+			and shop_id = #{shop_id}
+    	</if>
+    	<if test="status != null and status != ''">
+			and status = #{status}
+    	</if>
+    	<if test="app_name != null and app_name != ''">
+			and app_name = #{app_name}
+    	</if>
+    </where>
+    order by position asc
+  </select>
+
+</mapper>

@@ -1928,25 +1928,58 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> userSeries(RequestEntity reqEntity) throws Exception{
         Map<String, Object> resultMap = new HashMap<>();
         String appName = reqEntity.getAppName();
+        String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用户id
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
-        String series_id = reqMap.get("series_id").toString();
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-        int series_status = Integer.parseInt(reqMap.get("series_status").toString());
         Set<String> seriesIdSet;//查询的课程idset
         List<String> seriesIdList = new ArrayList<>();//课程id列表
         List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
-        int offset = 0;//偏移值
+        boolean seriesIsUp = true;//系列是上架 还是 下架
+        //1.先判断是否有 series_id 如果有判断是不是下架的
+        if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
+            Map<String,String> query = new HashMap<String,String>();
+            query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
+            Map<String, String> series = jedis.hgetAll(seriesKey);
+            if(series.get("updown").equals("2")){
+                seriesIsUp = false;
+            }
+        }
+
+
         String seriesListKey = "";
-        if(series_status == 0){
-            String startIndex ;//坐标起始位
-            String endIndex ;//坐标结束位
+        String series_id = "";
+        if(MiscUtils.isEmpty(reqMap.get("room_id"))){//查看平台的
             seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM;
-            if(series_id == null || series_id.equals("")){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+            if(seriesIsUp){//系列是上架的
+                series_id = reqMap.get("series_id").toString();
+            }else{
+
+            }
+        }else{//查看直播间的
+            String room_id = reqMap.get("room_id").toString();
+            Map<String,String> query = new HashMap<String,String>();
+            query.put(Constants.FIELD_ROOM_ID,room_id);
+            String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
+            Map<String, String> room = jedis.hgetAll(roomKey);
+            String lecturer_id = room.get("lecturer_id");
+            query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,lecturer_id);
+
+
+
+        }
+
+
+        int offset = 0;//偏移值
+        String startIndex ;//坐标起始位
+        String endIndex ;//坐标结束位
+            if(MiscUtils.isEmpty(reqMap.get("series_id"))){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
                 startIndex = courseScoreByRedis+"";//设置起始位置
                 endIndex = "-inf";//设置结束位置
             }else{//传了series
+
                 Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("series_id", series_id);
                 String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
@@ -1959,7 +1992,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 seriesIdList.add(seriesId);
             }
-        }
 
         if(seriesIdList.size() > 0){
             for(String seriesId : seriesIdList){

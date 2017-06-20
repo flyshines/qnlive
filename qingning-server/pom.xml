@@ -15,13 +15,16 @@
   	<module>qingning-user-db-server</module>
   	<module>qingning-user-server</module>
   	<module>qingning-mq-server</module>
+    <module>qingning-saas-db-server</module>
+    <module>qingning-saas-server</module>
+   <!-- <module>qingning-es-search</module>-->
   </modules>
   
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <spring.version>4.1.6.RELEASE</spring.version>
       <junit.version>4.12</junit.version>
-      <jackson.version>2.5.0</jackson.version>
+      <jackson.version>2.8.1</jackson.version>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <java-version>1.8</java-version>
       <javaee-api-version>8.0</javaee-api-version>

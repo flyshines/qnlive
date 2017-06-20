@@ -26,8 +26,8 @@
 	  		<if test="banner_img_url != null">
 	  			banner_img_url,
 	  		</if>
-	  		<if test="banner_remarks != null">
-	  			banner_remarks,
+	  		<if test="jump_remark != null">
+	  			banner_remark,
 	  		</if>
 	  		<if test="jump_url != null">
 	  			jump_url,
@@ -58,8 +58,8 @@
 	  		<if test="banner_img_url != null">
 	  			#{banner_img_url},
 	  		</if>
-	  		<if test="banner_remarks != null">
-	  			#{banner_remarks},
+	  		<if test="jump_remark != null">
+	  			#{jump_remark},
 	  		</if>
 	  		<if test="jump_url != null">
 	  			#{jump_url},

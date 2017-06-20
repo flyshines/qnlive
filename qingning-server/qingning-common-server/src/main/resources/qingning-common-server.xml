@@ -835,6 +835,7 @@
 					<param name="status" type="int" require="Y,000100" />
 					<param name="score" type="int" require="N" />
 					<param name="jump_url" type="string" require="Y,000100" />
+					<param name="jump_remark" type="string" require="N" />
 				</inputs>
 				<outputs>
 				</outputs>
