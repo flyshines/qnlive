@@ -473,7 +473,6 @@ public class UserController extends AbstractController{
 	/**
 	 * 查询系列列表（正在直播（用户查看））
 	 * @param page_count 分页数
-	 * @param room_id 直播间id
 	 * @param series_id  系列id
 	 * @param accessToken
 	 * @param version
@@ -485,7 +484,6 @@ public class UserController extends AbstractController{
 	@ResponseBody
 	ResponseEntity getSeries(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "room_id", defaultValue = "") String room_id,
 			@RequestParam(value = "series_id", defaultValue = "") String series_id,
 			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
 			@RequestHeader("access_token") String accessToken,
@@ -494,12 +492,44 @@ public class UserController extends AbstractController{
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "userSeries", accessToken, version,appName);
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
+		param.put("series_id", series_id);
+		param.put("series_status", series_status);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+
+	/**
+	 * 查询系列列表（正在直播（用户查看））
+	 * @param page_count 分页数
+	 * @param room_id 直播间id
+	 * @param series_id  系列id
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/{room_id}/series", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getRoomSeries(
+			@PathVariable("room_id") String room_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "series_id", defaultValue = "") String series_id,
+			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getRoomSeries", accessToken, version,appName);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("page_count", page_count);
 		param.put("room_id", room_id);
 		param.put("series_id", series_id);
 		param.put("series_status", series_status);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
+
 
 	/**
 	 * 用户查询系列课程详情

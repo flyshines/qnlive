@@ -194,7 +194,6 @@ public final class Constants {
 
 	public static final String DEFAULT_SERIES_COURSE_TYPE = "0";//正在直播 默认
 	public static final String CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM = "SYS:SERIES:APP:PLATFORM";// zset 平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用  如果下架直接删掉value (series_id,上架时间)
-	public static final String CACHED_KEY_PLATFORM_SERIES_SAAS_PLATFORM = "SYS:SERIES:SAAS:PLATFORM";
 	public static final String CACHED_KEY_SERIES_FIELD = "series_id";//系列id
 	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
 
@@ -205,6 +204,7 @@ public final class Constants {
 	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
 	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
 	//讲师不同内容系列
+	public static final String SERIES_COURSE_TYPE = "series_course_type";
 	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:UP";//zset 讲师所有上架系列 (series_id,上架时间)
 	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
 

@@ -3093,7 +3093,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
             jedis.zadd(lectureSeriesCourseKey, lpos, series_id);
         }
-        return reqMap ;
+        return dbSeries ;
     }
 
 
