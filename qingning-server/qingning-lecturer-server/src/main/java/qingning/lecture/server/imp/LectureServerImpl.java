@@ -3079,15 +3079,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //1.将课程加入讲师 系列上架列表
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
             jedis.zadd(lectureSeriesKey, lpos, series_id);
-
-//            //2.将课程加入到讲师 系列上架分类列表
-//            map.put(Constants.CACHED_KEY_CLASSIFY,series.get(Constants.CACHED_KEY_CLASSIFY));
-//            String lectureClassifySeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_CLASSIFY, map);
-//            jedis.zadd(lectureClassifySeriesKey, lpos, series_id);
-//
-//            //3.将课程上架到平台分类
-//            String classifySeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_SERIES_CLASSIFY, map);
-//            jedis.zadd(classifySeriesKey, lpos, series_id);
+            //课程内容分类
+            map.put("series_course_type",reqMap.get("series_course_type"));
+            String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
+            jedis.zadd(lectureSeriesCourseKey, lpos, series_id);
 
             //4.将课程上架到平台
             jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_PLATFORM, lpos, series_id);
@@ -3096,6 +3091,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //将系列id 加入讲师下架列表
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);
             jedis.zadd(lectureSeriesKey, lpos, series_id);
+            map.put("series_course_type",reqMap.get("series_course_type"));
+            String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
+            jedis.zadd(lectureSeriesCourseKey, lpos, series_id);
         }
         return reqMap ;
     }
