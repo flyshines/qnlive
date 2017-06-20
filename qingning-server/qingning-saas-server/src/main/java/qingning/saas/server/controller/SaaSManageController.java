@@ -2,6 +2,7 @@ package qingning.saas.server.controller;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
@@ -12,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
-public class SaaSAdminController extends AbstractController {
+@RequestMapping("/manage")
+public class SaaSManageController extends AbstractController {
 
     /**
      * 微信扫码 1 登录入口
@@ -57,6 +58,45 @@ public class SaaSAdminController extends AbstractController {
     }
 
     /**
+     * 店铺-店铺信息
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity shopInfo() throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopInfo", null, null, null);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 店铺-店铺设置
+     *
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity shopEdit(
+            HttpEntity<Object> entity,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopEdit", accessToken, version, appName);
+        if(((Map)entity.getBody()).isEmpty()){
+            throw new QNLiveException("000100");
+        }
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
      * 店铺-轮播图列表
      *
      * @return
@@ -88,7 +128,6 @@ public class SaaSAdminController extends AbstractController {
      * @return
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/shop/banner/add", method = RequestMethod.POST)
     public
     @ResponseBody

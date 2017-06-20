@@ -25,4 +25,10 @@ public interface ISaaSModuleServer {
      * @param param
      */
     Map<String,Object> addShopBanner(Map<String, Object> param);
+
+    /**获取店铺信息
+     * @param param
+     * @return
+     */
+    Map<String,Object> getShopInfo(Map<String, Object> param);
 }

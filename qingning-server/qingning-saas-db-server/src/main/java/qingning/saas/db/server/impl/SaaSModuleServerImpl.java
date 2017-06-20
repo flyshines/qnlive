@@ -88,4 +88,9 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return null;
     }
 
+    @Override
+    public Map<String, Object> getShopInfo(Map<String, Object> param) {
+        return shopMapper.selectByPrimaryKey(param);
+    }
+
 }

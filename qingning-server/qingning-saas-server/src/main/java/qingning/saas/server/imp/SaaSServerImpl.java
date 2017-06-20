@@ -44,18 +44,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
     }
 
-
-	/**
-	 * 店铺设置
-	 * @param reqEntity
-	 * @return
-	 * @throws Exception
-	 */
-    @FunctionName("shopEdit")
-    public void shopEdit(RequestEntity reqEntity) throws Exception{
-        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
-        saaSModuleServer.updateShop(param);
-    }
 	/**
 	 * 扫码登录 1 获取二维码接口
 	 * @param reqEntity
@@ -114,6 +102,38 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return result;
 
     }
+
+    /**
+     * 店铺-店铺信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopInfo")
+    public Map<String,Object> shopInfo(RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
+        param.put("user_id",userId);
+        Map<String,Object> shop = saaSModuleServer.getShopInfo(param);
+        if(shop == null){
+            throw new QNLiveException("190001");
+        }
+        return shop;
+    }
+    /**
+     * 店铺设置
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopEdit")
+    public void shopEdit(RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
+        param.put("user_id",userId);
+        saaSModuleServer.updateShop(param);
+    }
+
 	/**
 	 * 店铺-轮播图列表
 	 * @param reqEntity
@@ -143,6 +163,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
+        Map<String,Object> shopInfo = saaSModuleServer.getShopInfo(reqMap);
+        //判断店铺存在
+        if(shopInfo == null){
+            throw new QNLiveException("190001");
+        }
+        String shopId = shopInfo.get("shop_id").toString();
         String linkType = reqMap.get("link_type").toString();
         String linkTo = null;
         if("1".equals(linkType)){
@@ -174,9 +200,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         reqMap.put("create_time",new Date());
         reqMap.put("app_name",reqEntity.getAppName());
+        reqMap.put("banner_id",MiscUtils.getUUId());
+        reqMap.put("shop_id",shopId);
         Map<String, Object> result = saaSModuleServer.addShopBanner(reqMap);
         return result;
-
     }
 
 }

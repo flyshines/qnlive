@@ -28,6 +28,53 @@
 				</outputs>
 			</function>
 
+			<function name="shopBannerList">
+				<auth>
+					<accessToken require="Y" />
+					<version require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<function name="shopInfo">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="user_id" type="string" />
+					<param name="user_name" type="string"/>
+					<param name="nick_name" type="string" />
+					<param name="phone_num" type="string" />
+					<param name="app_name" type="string"/>
+					<param name="shop_name" type="string" />
+					<param name="shop_url" type="string" />
+					<param name="shop_remark" type="string"/>
+					<param name="shop_logo" type="string" />
+					<param name="open_url" type="string" />
+					<param name="weixin_code" type="string"/>
+				</outputs>
+			</function>
+
+			<function name="shopEdit">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="shop_name" type="string" require="N"/>
+					<param name="shop_remark" type="string" require="N"/>
+					<param name="shop_logo" type="string" require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
 			<function name="shopBannerAdd">
 				<auth>
 					<accessToken require="Y" />

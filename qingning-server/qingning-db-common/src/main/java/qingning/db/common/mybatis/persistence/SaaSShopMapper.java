@@ -10,7 +10,7 @@ public interface SaaSShopMapper {
 
     int insert(Map<String,Object> record);
 
-    Map<String,Object> selectByPrimaryKey(String shopId);
+    Map<String,Object> selectByPrimaryKey(Map<String,Object> record);
 
     int updateByPrimaryKey(Map<String,Object> record);
 }

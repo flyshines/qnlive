@@ -4,6 +4,13 @@
   <sql id="Base_Column_List" >
     id, shop_id, user_id
   </sql>
+
+
+  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="hashmap" >
+    select * from t_saas_shop_users where shop_id = #{shopId}
+  </select>
+
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from t_saas_shop_users
     where id = #{id,jdbcType=INTEGER}

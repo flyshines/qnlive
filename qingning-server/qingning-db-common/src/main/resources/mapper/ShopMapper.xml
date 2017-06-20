@@ -5,11 +5,17 @@
     shop_id, user_id, user_name, shop_name, shop_url, shop_remark, shop_logo, open_url, 
     weixin_code, status, create_time
   </sql>
-  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="hashmap" >
     select 
     <include refid="Base_Column_List" />
     from t_saas_shop
-    where shop_id = #{shop_id,jdbcType=VARCHAR}
+    where
+    <if test="shop_id != null" >
+      shop_id = #{shop_id,jdbcType=VARCHAR}
+    </if>
+    <if test="user_id != null" >
+      user_id = #{user_id,jdbcType=VARCHAR}
+    </if>
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from t_saas_shop
@@ -122,7 +128,7 @@
         create_time = #{create_time,jdbcType=TIMESTAMP},
       </if>
     </set>
-    where shop_id = #{shop_id,jdbcType=VARCHAR}
+    where user_id = #{user_id,jdbcType=VARCHAR}
   </update>
 
 </mapper>

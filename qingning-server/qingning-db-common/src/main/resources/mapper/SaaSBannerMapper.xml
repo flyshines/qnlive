@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSBannerMapper" >
   <sql id="Base_Column_List" >
-    banner_id, banner_img, banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
+    banner_id, banner_img, shop_id , banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
   </sql>
   <select id="selectByPrimaryKey" resultType="java.util.Map" parameterType="java.lang.String" >
     select 
@@ -17,6 +17,12 @@
   <insert id="insert" parameterType="java.util.Map" >
     insert into t_saas_banner
     <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="banner_id != null" >
+        banner_id,
+      </if>
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
       <if test="user_id != null" >
         user_id,
       </if>
@@ -49,6 +55,12 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="banner_id != null" >
+        #{banner_id,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id,jdbcType=VARCHAR},
+      </if>
       <if test="user_id != null" >
         #{user_id,jdbcType=VARCHAR},
       </if>
@@ -112,7 +124,7 @@
         position = #{position,jdbcType=VARCHAR},
       </if>
     </set>
-    where user_id = #{bannerId,jdbcType=VARCHAR}
+    where banner_id = #{banner_id,jdbcType=VARCHAR}
   </update>
 
   <select id="selectListByUserId" resultType="java.util.Map" parameterType="java.util.Map" >
