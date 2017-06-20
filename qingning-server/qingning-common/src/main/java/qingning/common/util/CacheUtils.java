@@ -513,4 +513,18 @@ public final class CacheUtils {
         }
         return courseInfo;
 	}
+
+
+	public static Map<String,String> readShop(String shop_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis) throws Exception{
+		Map<String,String> values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, true);
+		String curShop_id = values.get(Constants.CACHED_KEY_SHOP_FIELD);
+		if(!shop_id.equals(curShop_id)){
+			Map<String, String> keyMap = new HashMap<String, String>();
+			keyMap.put(Constants.CACHED_KEY_SHOP_FIELD, shop_id);
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, keyMap);
+			jedis.del(key);
+			values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, true);
+		}
+		return values;
+	}
 }

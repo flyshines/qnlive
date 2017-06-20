@@ -66,8 +66,10 @@ public class SaaSManageController extends AbstractController {
     @RequestMapping(value = "/shop/info", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity shopInfo() throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopInfo", null, null, null);
+    ResponseEntity shopInfo(@RequestHeader(value = "access_token") String accessToken,
+                             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+                             @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopInfo", accessToken, version, appName);
         return this.process(requestEntity, serviceManger, message);
     }
 
