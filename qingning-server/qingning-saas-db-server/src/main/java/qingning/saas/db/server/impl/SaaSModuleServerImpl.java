@@ -82,4 +82,10 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return res;
     }
 
+    @Override
+    public Map<String, Object> addShopBanner(Map<String, Object> param) {
+        bannerMapper.insert(param);
+        return null;
+    }
+
 }

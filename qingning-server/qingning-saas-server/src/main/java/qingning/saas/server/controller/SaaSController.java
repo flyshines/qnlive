@@ -98,6 +98,7 @@ public class SaaSController extends AbstractController {
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader(value = "version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerAdd", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }

@@ -133,9 +133,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         String shopId = userInfo.get("shop_id");*/
         Map<String, Object> result = saaSModuleServer.getShopBannerList(reqMap);
-
         return result;
-
     }
 	/**
 	 * 店铺-添加轮播图
@@ -148,10 +146,36 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
-
-
-        Map<String, Object> result = saaSModuleServer.getShopBannerList(reqMap);
-
+        String linkType = reqMap.get("link_type").toString();
+        String linkTo;
+        if("1".equals(linkType)){
+            //外部链接
+            if(StringUtils.isEmpty(reqMap.get("link_tp")+"")){
+                //链接为空判断
+                throw new QNLiveException("000004");
+            }
+            linkTo = reqMap.get("link_type").toString();
+            reqMap.put("link_to",linkTo);
+        }else {
+            if(reqMap.get("link_id")==null){
+                //课程ID为空判断
+                throw new QNLiveException("000004");
+            }
+            //课程，系列ID
+            String linkId = reqMap.get("link_id").toString();
+            if("2".equals(linkType)){
+                //单品ID
+                linkTo = "/course/single/detail/"+linkId;
+            }else if("3".equals(linkType)){
+                //系列ID
+                linkTo = "/course/series/detail/"+linkId;
+            }else if("3".equals(linkType)){
+                //直播
+                linkTo = "/user/courses/"+linkId;
+                reqMap.put("link_to",linkTo);
+            }
+        }
+        Map<String, Object> result = saaSModuleServer.addShopBanner(reqMap);
         return result;
 
     }
