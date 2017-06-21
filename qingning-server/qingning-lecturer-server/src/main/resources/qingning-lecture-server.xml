@@ -749,6 +749,7 @@
 					<param name="updown" type="string" require="Y,000100"  />
 				</inputs>
 				<outputs>
+					<param name="series_id" type="string" />
 				</outputs>
 			</function>
 			<function name="updateSeries">
