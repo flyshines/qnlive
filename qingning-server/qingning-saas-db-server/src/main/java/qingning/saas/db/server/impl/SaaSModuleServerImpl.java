@@ -100,4 +100,19 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String, Object> getShopInfo(Map<String, Object> param) {
         return shopMapper.selectByPrimaryKey(param);
     }
+
+    @Override
+    public void updateBanner(Map<String, Object> param) {
+        bannerMapper.updateByPrimaryKey(param);
+    }
+
+    @Override
+    public void addCourse(Map<String, Object> param) {
+        courseMapper.insert(param);
+    }
+
+    @Override
+    public void updateCourse(Map<String, Object> param) {
+        courseMapper.updateByPrimaryKey(param);
+    }
 }

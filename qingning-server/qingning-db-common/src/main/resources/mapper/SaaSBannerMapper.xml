@@ -96,23 +96,23 @@
   <update id="updateByPrimaryKey" parameterType="java.util.Map" >
     update t_saas_banner
     <set >
-      <if test="bannerImg != null" >
+      <if test="banner_img != null" >
         banner_img = #{banner_img,jdbcType=VARCHAR},
       </if>
       <if test="banner_title != null" >
-        banner_title = #{bannerTitle,jdbcType=VARCHAR},
+        banner_title = #{banner_title,jdbcType=VARCHAR},
       </if>
       <if test="link_to != null" >
-        link_to = #{linkTo,jdbcType=VARCHAR},
+        link_to = #{link_to,jdbcType=VARCHAR},
       </if>
       <if test="link_id != null" >
         link_id = #{link_id,jdbcType=VARCHAR},
       </if>
       <if test="link_type != null" >
-        link_type = #{linkType,jdbcType=CHAR},
+        link_type = #{link_type,jdbcType=CHAR},
       </if>
       <if test="create_time != null" >
-        create_time = #{createTime,jdbcType=TIMESTAMP},
+        create_time = #{create_time,jdbcType=TIMESTAMP},
       </if>
       <if test="status != null" >
         status = #{status,jdbcType=CHAR},
