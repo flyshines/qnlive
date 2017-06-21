@@ -128,7 +128,7 @@ public class MD5Util {
     	//输出加密密码
     	System.out.println("对原始密码进行第二次加密：" + md5Pw);
     	//输出uuid，用于当作user_id
-    	System.out.println(MiscUtils.getUUId());
+    	System.out.println("UUID:" + MiscUtils.getUUId());
     }
 
 

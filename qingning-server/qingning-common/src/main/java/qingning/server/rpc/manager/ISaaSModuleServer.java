@@ -37,4 +37,20 @@ public interface ISaaSModuleServer {
      * @param param
      * @return
      */
-    Map<String,Object> getShopInfo(Map<String, Object> param);}
+    Map<String,Object> getShopInfo(Map<String, Object> param);
+
+    /**
+     * 根据系列id获取系列详情
+     * @param seriesId
+     * @return
+     */
+	Map<String, Object> findSeriesBySeriesId(String seriesId);
+
+	/**
+	 * 根据条件查询系列id
+	 * @param selectSeriesStudentsMap
+	 * @return 
+	 */
+	List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap);
+	
+}

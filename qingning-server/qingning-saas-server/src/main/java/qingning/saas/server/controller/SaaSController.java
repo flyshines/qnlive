@@ -50,8 +50,7 @@ public class SaaSController extends AbstractController {
     @RequestMapping(value = "/shop/course/series/list/{shop_id}", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopSeriesList(
 			@PathVariable("shop_id") String shopId,
-			@RequestParam(value="last_update_time", defaultValue="0")long lastUpdateTime,
-			@RequestParam(value="readed_count", defaultValue="0")long readedCount,
+			@RequestParam(value="last_series_id", defaultValue="0")String lastSeriesId,
 			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
@@ -59,8 +58,7 @@ public class SaaSController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopSeriesList", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
-        param.put("last_update_time", lastUpdateTime);
-        param.put("readed_count", readedCount);
+        param.put("last_series_id", lastSeriesId);
         param.put("page_count", pageCount);
         
         requestEntity.setParam(param);

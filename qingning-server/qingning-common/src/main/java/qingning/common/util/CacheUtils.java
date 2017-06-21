@@ -252,6 +252,36 @@ public final class CacheUtils {
 		}
 		return values;
 	}
+	
+	/**
+	 * 获取讲师已上架的所有系列课程id列表
+	 * @param lecturerId 讲师id
+	 * @param lastSeriesId 上一页最后一条数据的系列id
+	 * @param pageCount 每页数量
+	 * @param jedis
+	 * @return
+	 */
+	public static Set<String> readLecturerSeriesUp(String lecturerId, String lastSeriesId, int pageCount, Jedis jedis){
+		//返回结果集
+		Set<String> seriesSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+        String lecturerSeriesSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, keyMap);
+        if(jedis.exists(lecturerSeriesSetKey)){	//缓存中存在
+        	//获取上一页最后一条数据的score
+            if(lastSeriesId != null && !"0".equals(lastSeriesId)){	//不是获取第一页数据
+    	        Double lastScore = jedis.zscore(lecturerSeriesSetKey, lastSeriesId);
+    	        //分页获取系列课程中的id列表
+    	        seriesSet = jedis.zrangeByScore(lecturerSeriesSetKey, "(" + lastScore, "+inf", 0, pageCount);
+            }else{	//获取第一页数据
+    	        //分页获取系列课程中的id列表
+    	        seriesSet = jedis.zrangeByScore(lecturerSeriesSetKey, "-inf", "+inf", 0, pageCount);
+            }
+        }
+        
+		return seriesSet;
+	}
 
 
 
