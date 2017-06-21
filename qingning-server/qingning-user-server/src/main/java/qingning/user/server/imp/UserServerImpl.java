@@ -1968,16 +1968,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 seriesIdList.add(seriesId);
             }
-        if(seriesIdList.size() > 0){
-            for(String seriesId : seriesIdList){
-                Map<String,String> queryParam = new HashMap<String,String>();
-                queryParam.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
-                Map<String, String> series = jedis.hgetAll(seriesKey);
-                seriesList.add(series);
-            }
-        }
-        resultMap.put("series_list",seriesList);
+        resultMap.put("series_list",seriesList(seriesIdList, jedis));
         return resultMap;
     }
 
@@ -2001,21 +1992,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
         String room_id = reqMap.get("room_id").toString();
-
-        Set<String> seriesIdSet;//查询的课程idset
-        List<String> seriesIdList = new ArrayList<>();//课程id列表
-        List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
-        boolean seriesIsUp = true;//系列是上架 还是 下架
-        //1.先判断是否有 series_id 如果有判断是不是下架的
-        if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
-            Map<String,String> query = new HashMap<String,String>();
-            query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
-            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
-            Map<String, String> series = jedis.hgetAll(seriesKey);
-            if(series.get("updown").equals("2")){
-                seriesIsUp = false;
-            }
-        }
         Map<String,String> query = new HashMap<String,String>();
         query.put(Constants.FIELD_ROOM_ID,room_id);
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
@@ -2024,48 +2000,93 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(lecturer_id.equals(user_id)){//是讲师
             isLecturer = true;
         }
-
-
-
-
-        String seriesListKey = "";
         String series_id = "";
-
-
-
-        int offset = 0;//偏移值
-        String startIndex ;//坐标起始位
-        String endIndex ;//坐标结束位
-        if(MiscUtils.isEmpty(reqMap.get("series_id"))){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
-            long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-            startIndex = courseScoreByRedis+"";//设置起始位置
-            endIndex = "-inf";//设置结束位置
-        }else{//传了series
-
-            Map<String,String> queryParam = new HashMap<String,String>();
-            queryParam.put("series_id", series_id);
-            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
+        boolean seriesIsUp = true;//系列是上架 还是 下架
+        if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
+            series_id = reqMap.get("series_id").toString();
+            //1.先判断是否有 series_id 如果有判断是不是下架的
+            Map<String,String> map = new HashMap<String,String>();
+            query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
             Map<String, String> series = jedis.hgetAll(seriesKey);
-            long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(series.get("update_course_time")),  MiscUtils.convertObjectToLong(series.get("position")));//拿到当前课程在redis中的score
-            startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
-            endIndex = "-inf";//设置结束位置
-        }
-        seriesIdSet = jedis.zrangeByScore(seriesListKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
-        for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
-            seriesIdList.add(seriesId);
-        }
-
-        if(seriesIdList.size() > 0){
-            for(String seriesId : seriesIdList){
-                Map<String,String> queryParam = new HashMap<String,String>();
-                queryParam.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
-                Map<String, String> series = jedis.hgetAll(seriesKey);
-                seriesList.add(series);
+            if(series.get("updown").equals("2")){
+                seriesIsUp = false;
             }
         }
-        resultMap.put("series_list",seriesList);
+        query.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,lecturer_id);
+        query.put(Constants.SERIES_COURSE_TYPE,Constants.DEFAULT_SERIES_COURSE_TYPE);
+        boolean key = true;
+        Set<String> seriesIdSet;//查询的课程idset
+        List<String> seriesIdList = new ArrayList<>();//课程id列表
+        List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
+        do{
+            long startIndex = 0;//坐标起始位
+            long endIndex = -1;//坐标结束位
+            String seriesListKey = "";
+            //判断用哪个缓存
+            if(seriesIsUp){
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, query);//上架
+            }else if(isLecturer){
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, query);//下架
+            }
+            long endSeriesSum = jedis.zcard(seriesListKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(series_id)){//如果课程ID没有 那么就从最近结束的课程找起
+                endIndex = -1;
+                startIndex = endSeriesSum - pageCount;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                long endRank = jedis.zrank(seriesListKey, series_id);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }
+            }
+            seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
+            List<String> transfer = new ArrayList<>();
+            for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                transfer.add(seriesId);
+            }
+            Collections.reverse(transfer);
+            seriesIdList.addAll(transfer);
+            pageCount -= seriesIdSet.size();
+            if(pageCount > 0){
+                if(seriesIsUp){
+                    if(isLecturer){
+                        seriesIsUp = false;
+                        series_id = null;
+                    }else{
+                        key=false;
+                    }
+                }else{
+                    key = false;
+                }
+            }
+        }while (key);
+        resultMap.put("series_list",seriesList(seriesIdList,jedis));
         return resultMap;
+    }
+
+    private List<Map<String,String>> seriesList(List<String> seriesIdList,Jedis jedis){
+        List<Map<String,String>> seriesList = new ArrayList<>();
+        for(String seriesId : seriesIdList){
+            Map<String,String> queryParam = new HashMap<String,String>();
+            queryParam.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
+            Map<String, String> series = jedis.hgetAll(seriesKey);
+            String lecturer_id = series.get("lecturer_id");
+            Map<String,String> query = new HashMap<String,String>();
+            query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
+            String nick_name = jedis.hget(key, "nick_name");
+            series.put("lecturer_nick_name",nick_name);
+            seriesList.add(series);
+        }
+        return seriesList;
     }
 
 
