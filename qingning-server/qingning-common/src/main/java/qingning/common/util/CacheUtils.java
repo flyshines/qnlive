@@ -3,6 +3,7 @@ package qingning.common.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
@@ -547,6 +548,10 @@ public final class CacheUtils {
 
 	public static Map<String,String> readShop(String shop_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis) throws Exception{
 		Map<String,String> values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, true);
+		if(values.isEmpty()){
+			//店铺不存在
+			throw new QNLiveException("190001");
+		}
 		String curShop_id = values.get(Constants.CACHED_KEY_SHOP_FIELD);
 		if(!shop_id.equals(curShop_id)){
 			Map<String, String> keyMap = new HashMap<String, String>();
@@ -554,6 +559,28 @@ public final class CacheUtils {
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, keyMap);
 			jedis.del(key);
 			values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, true);
+		}
+		return values;
+	}
+
+	public static Map<String,String> readShopByUserId(String user_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis) throws Exception{
+		Map<String,String> values = readData(user_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, false);
+		if(!values.isEmpty()){
+			String curShop_id = values.get(Constants.CACHED_KEY_SHOP_FIELD);
+
+			String[] searchKeys={curShop_id};
+			String[] keyFields={Constants.CACHED_KEY_SHOP_FIELD};
+
+			Map<String, String> keyMap = new HashMap<String, String>();
+			int length = searchKeys.length;
+			for(int i = 0; i < length; ++i){
+				keyMap.put(keyFields[i], searchKeys[i]);
+			}
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, keyMap);
+			jedis.hmset(key, values);
+		}else{
+			//店铺不存在
+			throw new QNLiveException("190001");
 		}
 		return values;
 	}

@@ -53,4 +53,19 @@ public interface ISaaSModuleServer {
 	 */
 	List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap);
 	
+    /**更新轮播图
+     * @param param
+     * @return
+     */
+    void updateBanner(Map<String, Object> param);
+    /**新增视频，音频课程
+     * @param param
+     * @return
+     */
+    void addCourse(Map<String, Object> param);
+    /**更新课程
+     * @param param
+     * @return
+     */
+    void updateCourse(Map<String, Object> param);
 }

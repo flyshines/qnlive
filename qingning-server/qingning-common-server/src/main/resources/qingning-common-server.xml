@@ -572,7 +572,7 @@
 			</function>
 			<function name="sendVerificationCode">
 				<auth>
-					<accessToken require="N"/>
+					<accessToken require="Y"/>
 					<appName require="Y" />
 				</auth>
 				<inputs>

@@ -120,4 +120,19 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap) {
 		return seriesStudentsMapper.selectSeriesStudentsByMap(selectSeriesStudentsMap);
 	}
+
+    @Override
+    public void updateBanner(Map<String, Object> param) {
+        bannerMapper.updateByPrimaryKey(param);
+    }
+
+    @Override
+    public void addCourse(Map<String, Object> param) {
+        courseMapper.insert(param);
+    }
+
+    @Override
+    public void updateCourse(Map<String, Object> param) {
+        courseMapper.updateByPrimaryKey(param);
+    }
 }

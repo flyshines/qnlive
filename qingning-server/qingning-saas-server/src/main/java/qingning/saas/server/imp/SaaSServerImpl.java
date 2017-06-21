@@ -119,8 +119,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqEntity.setParam(param);
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
-        Map<String,String> shop = CacheUtils.readShop(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        Map<String,String> shop = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         if(shop == null){
+            //店铺不存在
             throw new QNLiveException("190001");
         }
         shop.put("user_id",userId);
@@ -178,6 +179,25 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         String shopId = shopInfo.get("shop_id").toString();
         String linkType = reqMap.get("link_type").toString();
+        String linkTo = getLinkTo(reqMap,linkType);
+        reqMap.put("link_to",linkTo);
+
+        reqMap.put("create_time",new Date());
+        reqMap.put("app_name",reqEntity.getAppName());
+        reqMap.put("banner_id",MiscUtils.getUUId());
+        reqMap.put("shop_id",shopId);
+        //添加到数据库
+        Map<String, Object> result = saaSModuleServer.addShopBanner(reqMap);
+        return result;
+    }
+
+    /**根据课程类型生成课程链接
+     * @param reqMap
+     * @param linkType
+     * @return
+     * @throws Exception
+     */
+    private String getLinkTo(Map<String, Object> reqMap,String linkType) throws Exception{
         String linkTo = null;
         if("1".equals(linkType)){
             //外部链接
@@ -186,7 +206,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("000004");
             }
             linkTo = reqMap.get("link_type").toString();
-            reqMap.put("link_to",linkTo);
         }else {
             if(reqMap.get("link_id")==null){
                 //课程ID为空判断
@@ -204,14 +223,41 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 //直播
                 linkTo = "/user/courses/"+linkId;
             }
+        }
+        return linkTo;
+    }
+	/**
+	 * 店铺-轮播图编辑
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
+    @FunctionName("shopBannerEdit")
+    public void  shopBannerEdit(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //String bannerId = reqMap.get("banner_id").toString();
+        //根据类型获取课程链接
+        String linkType = reqMap.get("link_type").toString();
+        if(linkType!=null){
+            String linkTo = getLinkTo(reqMap,linkType);
             reqMap.put("link_to",linkTo);
         }
-        reqMap.put("create_time",new Date());
-        reqMap.put("app_name",reqEntity.getAppName());
-        reqMap.put("banner_id",MiscUtils.getUUId());
-        reqMap.put("shop_id",shopId);
-        Map<String, Object> result = saaSModuleServer.addShopBanner(reqMap);
-        return result;
+        saaSModuleServer.updateBanner(reqMap);
+    }
+
+	/**
+	 * 店铺-轮播图上下架
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
+    @FunctionName("shopBannerUpdown")
+    public void  shopBannerUpdown(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        reqMap.put("status",reqMap.get("type"));
+        saaSModuleServer.updateBanner(reqMap);
     }
     
     /**
@@ -241,8 +287,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("banner_info_list", bannerList);
         return resultMap;
     }
-    
-    /**
+
+	/**
      * 店铺-获取店铺系列课程列表
      * @param reqEntity
      * @return
@@ -328,6 +374,61 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         resultMap.put("series_info_list", seriesInfoList);
         return resultMap;
+	}   
+
+	/**
+	 * 店铺-单品-添加视频、音频
+	 * @param reqEntity
+	 * @throws Exception
+	 */
+    @FunctionName("addShopSingleVideo")
+    public void  addShopSingleVideo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        reqMap.put("user_id",userId);
+        //店铺信息
+        Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+
+        String shopId = shopInfo.get("shop_id");
+        reqMap.put("course_id",MiscUtils.getUUId());
+        reqMap.put("shop_id",shopId);
+        reqMap.put("lecturer_id",userId);
+        Date now = new Date();
+        reqMap.put("create_time",now);
+        reqMap.put("create_date",now);
+        //收益初始化
+        reqMap.put("extra_amount",0);
+        reqMap.put("extra_num",0);
+        reqMap.put("goods_type",reqMap.get("type"));
+        reqMap.put("course_amount",0);
+
+        //默认下架
+        reqMap.put("course_updown","2");
+        reqMap.put("series_course_updown","2");
+
+        reqMap.put("app_name",reqEntity.getAppName());
+        //插入课程
+        saaSModuleServer.addCourse(reqMap);
+    }
+
+    /**
+     * 店铺-单品-编辑视频、音频
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("editShopSingleVideo")
+    public void  editShopSingleVideo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        if(reqMap.size()==1){
+            throw new QNLiveException("000100");
+        }
+        Date now = new Date();
+        reqMap.put("update_time",now);
+        reqMap.put("app_name",reqEntity.getAppName());
+        //插入课程
+        saaSModuleServer.updateCourse(reqMap);
     }
 
 }
