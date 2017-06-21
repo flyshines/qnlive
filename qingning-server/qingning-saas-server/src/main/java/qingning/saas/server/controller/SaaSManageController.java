@@ -144,5 +144,122 @@ public class SaaSManageController extends AbstractController {
         return responseEntity;
     }
 
+    /**
+     * 店铺-轮播图编辑
+     *
+     * @param accessToken
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerEdit(
+            HttpEntity<Object> entity,
+            @PathVariable("banner_id") String bannerId,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerEdit", accessToken, version, appName);
+        Map<String,String> param = (Map)entity.getBody();
+        param.put("banner_id",bannerId);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 店铺-轮播图上下架
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/updown/{type}", method = RequestMethod.PUT)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerUpdown(
+            @PathVariable("banner_id") String bannerId,
+            @PathVariable("type") String type,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerUpdown", accessToken, version, appName);
+        Map<String,String> param = new HashMap<>();
+        param.put("banner_id",bannerId);
+        param.put("type",type);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 店铺-单品-添加视频、音频
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/video/add", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity addShopSingleVideo(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
+     * 店铺-单品-编辑视频、音频
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/video/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity editShopSingleVideo(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 店铺-单品-新增图文
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/images/add", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity addShopSingleImages(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleImages", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
 
 }

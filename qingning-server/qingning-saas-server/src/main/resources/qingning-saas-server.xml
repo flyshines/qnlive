@@ -27,7 +27,7 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<!--店铺-轮播图列表-->
 			<function name="shopBannerList">
 				<auth>
 					<accessToken require="Y" />
@@ -38,7 +38,7 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<!--店铺-店铺信息-->
 			<function name="shopInfo">
 				<auth>
 					<accessToken require="Y" />
@@ -59,7 +59,7 @@
 					<param name="phone_num" type="string" />
 				</outputs>
 			</function>
-
+			<!--店铺-店铺设置-->
 			<function name="shopEdit">
 				<auth>
 					<accessToken require="Y" />
@@ -73,7 +73,7 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<!--店铺-添加轮播图-->
 			<function name="shopBannerAdd">
 				<auth>
 					<accessToken require="Y" />
@@ -86,6 +86,70 @@
 					<param name="link_type" type="string" require="Y,000100" format="1|2|3|4,000004" />
 					<param name="link_id" type="string" require="N"/>
 					<param name="position" type="long" require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-轮播图编辑-->
+			<function name="shopBannerEdit">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_title" type="string" require="Y,000100"/>
+					<param name="banner_name" type="string" require="Y,000100"/>
+					<param name="banner_img" type="string" require="Y,000100"/>
+					<param name="link_type" type="string" require="Y,000100" format="1|2|3|4,000004" />
+					<param name="link_id" type="string" require="N"/>
+					<param name="position" type="long" require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-轮播图上下架-->
+			<function name="shopBannerUpdown">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_id" type="string" require="Y,000100"/>
+					<param name="type" type="string" format="1|2,000004"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-单品-添加视频、音频-->
+			<function name="addShopSingleVideo">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="course_title" type="string" require="Y,000100"/>
+					<param name="course_url" type="string"  require="Y,000100"/>
+					<param name="type" type="string" require="Y,000100" format="2|3,000004"/>
+					<param name="course_image" type="string"  require="Y,000100"/>
+					<param name="course_price" type="double"  require="Y,000100"/>
+					<param name="details" type="string"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-单品-编辑视频、音频-->
+			<function name="editShopSingleVideo">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="course_title" type="string" require="N"/>
+					<param name="course_url" type="string"  require="N"/>
+					<param name="course_image" type="string"  require="N"/>
+					<param name="course_price" type="double"  require="N"/>
+					<param name="details" type="string"  require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
