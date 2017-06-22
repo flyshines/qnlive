@@ -53,4 +53,9 @@ public interface ISaaSModuleServer {
      * @return
      */
     void updateCourse(Map<String, Object> param);
+    /**获取单品列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getSingleList(Map<String, Object> param);
 }

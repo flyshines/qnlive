@@ -1,5 +1,6 @@
 package qingning.saas.server.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.QNLiveException;
@@ -109,13 +110,13 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity wechatCheckLogin(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerList", accessToken, version, appName);
         Map<String, Object> paramCode = new HashMap<>();
-        paramCode.put("page_count", pageCount);
+        paramCode.put("page_count", pageSize);
         paramCode.put("page_num", pageNum);
         requestEntity.setParam(paramCode);
         return this.process(requestEntity, serviceManger, message);
@@ -255,10 +256,65 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleImages", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version, appName);
+        Map<String,String> param = (Map)entity.getBody();
+        param.put("type","1");
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
+     * 店铺-单品-编辑图文
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/images/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity editShopSingleImages(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }
+
+    /**
+     * 店铺-轮播图列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSingleList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "status",defaultValue = "") String status,
+            @RequestParam(value = "type",defaultValue = "") String type,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(status))
+            paramCode.put("status", status);
+        if(StringUtils.isNotEmpty(type))
+            paramCode.put("type", type);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
     }
 
 

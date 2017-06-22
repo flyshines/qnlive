@@ -310,6 +310,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
+        reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
 
@@ -329,7 +330,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("editShopSingleVideo")
-    public void  editShopSingleVideo(RequestEntity reqEntity) throws Exception{
+    public void editShopSingleVideo(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         if(reqMap.size()==1){
             throw new QNLiveException("000100");
@@ -341,4 +342,34 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.updateCourse(reqMap);
     }
 
+    /**
+     * 店铺-单品列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSingleList")
+    public Map<String, Object> getSingleList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = (Map)reqEntity.getParam();
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        return saaSModuleServer.getSingleList(reqMap);
+
+    }
+    /**
+     * 店铺-直播列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getLiveList")
+    public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
+        return null;
+    }
 }

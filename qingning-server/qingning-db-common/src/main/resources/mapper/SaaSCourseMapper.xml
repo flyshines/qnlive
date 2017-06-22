@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSCourseMapper" >
   <sql id="Base_Column_List" >
-    course_id, shop_id, classify_id, lecturer_id, series_id, course_title, course_url, 
+    course_id, shop_id, classify_id, lecturer_id, series_id, course_title,course_image, course_url,
     course_remark, course_type, goods_type, rq_code, course_price, student_num, course_amount,
-    extra_num, extra_amount, real_student_num, click_num, series_or_course, series_course_updown, 
+    extra_num, extra_amount, real_student_num, click_num,sale_num, series_or_course, series_course_updown,
     course_updown, app_name,details, create_date, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
@@ -38,6 +38,9 @@
       <if test="course_title != null" >
         course_title,
       </if>
+      <if test="course_image != null" >
+        course_image,
+      </if>
       <if test="course_url != null" >
         course_url,
       </if>
@@ -70,6 +73,9 @@
       </if>
       <if test="real_student_num != null" >
         real_student_num,
+      </if>
+      <if test="sale_num != null" >
+        sale_num,
       </if>
       <if test="click_num != null" >
         click_num,
@@ -118,6 +124,9 @@
       <if test="course_title != null" >
         #{course_title,jdbcType=VARCHAR},
       </if>
+      <if test="course_image != null" >
+        #{course_image,jdbcType=VARCHAR},
+      </if>
       <if test="course_url != null" >
         #{course_url,jdbcType=VARCHAR},
       </if>
@@ -150,6 +159,9 @@
       </if>
       <if test="real_student_num != null" >
         #{real_student_num,jdbcType=BIGINT},
+      </if>
+      <if test="sale_num != null" >
+        #{sale_num,jdbcType=BIGINT},
       </if>
       <if test="click_num != null" >
         #{click_num,jdbcType=BIGINT},
@@ -201,6 +213,9 @@
       <if test="course_url != null" >
         course_url = #{course_url,jdbcType=VARCHAR},
       </if>
+      <if test="course_image != null" >
+        course_image = #{course_image,jdbcType=VARCHAR},
+      </if>
       <if test="course_remark != null" >
         course_remark = #{course_remark,jdbcType=VARCHAR},
       </if>
@@ -230,6 +245,9 @@
       </if>
       <if test="real_student_num != null" >
         real_student_num = #{real_student_num,jdbcType=BIGINT},
+      </if>
+      <if test="sale_num != null" >
+        sale_num = #{sale_num,jdbcType=BIGINT},
       </if>
       <if test="click_num != null" >
         click_num = #{click_num,jdbcType=BIGINT},
@@ -261,4 +279,22 @@
     </set>
     where course_id = #{course_id,jdbcType=VARCHAR}
   </update>
+
+  <!--查询单品列表-->
+  <select id="selectByShop" resultType="hashmap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_saas_course res
+    where res.shop_id = #{shop_id,jdbcType=VARCHAR}
+    <if test="status != null" >
+      and course_updown = #{status,jdbcType=CHAR}
+    </if>
+    <if test="type != null" >
+      and goods_type = #{type,jdbcType=CHAR}
+    </if>
+    <if test="keyword != null" >
+      and course_title like '%${keyword}%'
+    </if>
+
+  </select>
 </mapper>
