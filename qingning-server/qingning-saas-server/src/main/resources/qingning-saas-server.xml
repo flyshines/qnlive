@@ -129,7 +129,7 @@
 				<inputs>
 					<param name="course_title" type="string" require="Y,000100"/>
 					<param name="course_url" type="string"  require="Y,000100"/>
-					<param name="type" type="string" require="Y,000100" format="2|3,000004"/>
+					<param name="type" type="string" format="1|2|3,000004"/>
 					<param name="course_image" type="string"  require="Y,000100"/>
 					<param name="course_price" type="double"  require="Y,000100"/>
 					<param name="details" type="string"  require="Y,000100"/>
@@ -155,7 +155,6 @@
 				</outputs>
 			</function>
 
-			
 			<!-- 店铺-获取店铺轮播列表 -->
 			<function name="queryShopBannerList">
 				<auth>
@@ -182,25 +181,72 @@
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100"/>
-					<param name="last_update_time" type="long" require="N"/>
-					<param name="readed_count" type="long" require="N"/>
+					<param name="last_series_id" type="string" require="N"/>
 					<param name="page_count" type="long" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="series_info_list" type="list">
 						<param name="series_id" type="string" />
-						<param name="series_img_url" type="string" />
-						<param name="series_type" type="string" />
+						<param name="series_img_url" type="string" fieldname="series_img" />
+						<param name="series_type" type="string" fieldname="series_course_type" />
 						<param name="buy_status" type="string" />
 						<param name="series_title" type="string" />
-						<param name="series_course_count" type="int" />
-						<param name="buyer_count" type="long" />
-						<param name="price" type="double" />
+						<param name="series_course_count" type="int" fieldname="course_num" />
+						<param name="buyer_count" type="long" fieldname="series_student_num" />
+						<param name="price" type="double" fieldname="series_price" />
 					</param>
-					<param name="last_update_time" type="long" />
+				</outputs>
+			</function>
+			
+			<!-- 店铺-获取店铺单品课程（直播除外）列表 -->
+			<function name="findShopSingleCourseList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100"/>
+					<param name="last_single_id" type="string" require="N"/>
+					<param name="page_count" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="single_info_list" type="list">
+						<param name="single_id" type="string" fieldname="course_id" />
+						<param name="single_img_url" type="string" fieldname="course_image" />
+						<param name="single_type" type="string" fieldname="course_type" />
+						<param name="buy_status" type="string" />
+						<param name="single_title" type="string" fieldname="course_title" />
+						<param name="browse_count" type="long" fieldname="student_num" />
+						<param name="message_count" type="long" fieldname="" />
+						<param name="price" type="double" fieldname="course_price" />
+					</param>
 				</outputs>
 			</function>
 
+			<!-- 店铺-获取单品列表 -->
+			<function name="getSingleList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="course_title" type="string" />
+						<param name="course_image" type="string" />
+						<param name="type"  fieldname="goods_type" type="string" />
+						<param name="create_time" type="string" />
+						<param name="price" fieldname="course_price" type="double" />
+						<param name="total_income" fieldname="course_amount" type="double" />
+						<param name="sale_num" type="long" />
+						<param name="status" fieldname="course_updown" type="string" />
+						<param name="course_url" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
 
 
 		</default>

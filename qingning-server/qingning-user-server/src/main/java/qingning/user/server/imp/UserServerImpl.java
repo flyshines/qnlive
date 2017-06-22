@@ -2366,7 +2366,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 if(isLecturer){
                     courseIsUp = false;
                 }else{
-                    
+
                 }
             }else if(course.get("series_course_updown").equals("0")){
                 throw new QNLiveException("100004");
