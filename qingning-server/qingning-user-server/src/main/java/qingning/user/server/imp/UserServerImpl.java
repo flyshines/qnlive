@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.omg.PortableInterceptor.InvalidSlot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -1677,22 +1678,152 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 获得存在与用户表t_user而不存在与t_user_gains的数据
 		 */
-        do{
-			int limit = 100;
-			userIdList = userModuleServer.findNotGainsUserId(limit);
-			if(userIdList == null || userIdList.isEmpty()){
-				break;
-			}
-            for(Map<String,Object> map:userIdList){
-                ids.add(map.get("user_id").toString());
+        int page_num = 0;
+        int page_count= 1000;
+		while (true){
+
+            userIdList = userModuleServer.findNotGainsUserId(page_num,page_count);
+            if(userIdList == null || userIdList.isEmpty()){
+                break;
             }
-			List<Map<String, Object>> userRoomAmountList = userModuleServer.findRoomAmount(ids);
-			List<Map<String, Object>> userDistributerAmountList = userModuleServer.findDistributerAmount(ids);
-			List<Map<String, Object>> userWithdrawSumList = userModuleServer.findUserWithdrawSum(ids);
-			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
-					userDistributerAmountList, userWithdrawSumList);
-			userModuleServer.insertUserGains(insertGainsList);
-        }while(userIdList != null);
+            page_num+=page_count;
+            List<Map<String, Object>> insertList = new ArrayList<Map<String, Object>>();
+            try {
+                for (Map<String, Object> user : userIdList) {
+                    boolean isQnlive = Constants.HEADER_APP_NAME.equals(user.get("app_name"));
+                    Map<String, Object> gainsMap = new HashMap<>();
+                    gainsMap.put("user_id", user.get("user_id"));
+				/*
+				 * 计算直播间总收入
+				 */
+                    String live_room_total_amount = user.get("live_room_total_amount").toString();
+                    if (MiscUtils.isEmptyString(live_room_total_amount)) {
+                        live_room_total_amount = "0";
+                    }
+                    gainsMap.put("live_room_total_amount", live_room_total_amount);
+				/*
+				 * 计算直播间实际收益
+				 */
+                    double roomReal = DoubleUtil.divide(Double.valueOf(live_room_total_amount), 100D);
+                    double live_room_real_incomes = isQnlive ? roomReal : CountMoneyUtil.getCashInAmount(String.valueOf(roomReal));
+                    gainsMap.put("live_room_real_incomes", (long) (live_room_real_incomes * 100));
+
+				/*
+				 * 分销总收入
+				 */
+                    String distributer_total_amount = user.get("distributer_total_amount").toString();
+                    if (MiscUtils.isEmptyString(distributer_total_amount) || "null".equals(distributer_total_amount)) {
+                        distributer_total_amount = "0";
+                    }
+                    gainsMap.put("distributer_total_amount", distributer_total_amount);
+				/*
+				 * 计算分销实际收益
+				 */
+                    double distributerReal = DoubleUtil.divide(Double.valueOf(distributer_total_amount), 100D);
+                    double distributer_real_incomes = isQnlive ? distributerReal : CountMoneyUtil.getCashInAmount(String.valueOf(distributerReal));
+                    gainsMap.put("distributer_real_incomes", (long) (distributer_real_incomes * 100));
+
+				/*
+				 * 计算用户总收入
+				 */
+                    gainsMap.put("user_total_amount", user.get("user_total_amount").toString());
+				/*
+				 * 计算用户实际收入
+				 */
+                    double user_total_real_incomes = live_room_real_incomes * 100 + distributer_real_incomes * 100;
+                    gainsMap.put("user_total_real_incomes", (long) user_total_real_incomes);
+				/*
+				 * 计算余额
+				 */
+//                    String user_withdraw_sum = String.valueOf(userWithdrawSumMap.get(user.get("user_id")));
+//                    if(MiscUtils.isEmptyString(user_withdraw_sum) || "null".equals(user_withdraw_sum)){
+//                        user_withdraw_sum = "0";
+//                    }
+//                    double balance = user_total_real_incomes-Double.parseDouble(user_withdraw_sum);
+                    gainsMap.put("balance", (long) user_total_real_incomes);
+                    insertList.add(gainsMap);
+                }
+                userModuleServer.insertUserGains(insertList);
+            }catch(Exception e){
+                e.printStackTrace();
+                throw e;
+            }
+		}
+//        do{
+//			int limit = 100;
+//
+//			if(userIdList == null || userIdList.isEmpty()){
+//				break;
+//			}
+//
+//
+////			insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
+////					userDistributerAmountList, userWithdrawSumList);
+//            List<Map<String, Object>> insertList = new ArrayList<Map<String, Object>>();
+//            try{
+//                for(Map<String, Object> user : userIdList){
+//                    boolean isQnlive = Constants.HEADER_APP_NAME.equals(user.get("app_name"));
+//                    Map<String, Object> gainsMap = new HashMap<>();
+//                    gainsMap.put("user_id", user.get("user_id"));
+//				/*
+//				 * 计算直播间总收入
+//				 */
+//                    String live_room_total_amount = user.get("live_room_total_amount").toString();
+//                    if(MiscUtils.isEmptyString(live_room_total_amount)){
+//                        live_room_total_amount = "0";
+//                    }
+//                    gainsMap.put("live_room_total_amount", live_room_total_amount);
+//				/*
+//				 * 计算直播间实际收益
+//				 */
+//                    double roomReal = DoubleUtil.divide( Double.valueOf(live_room_total_amount),100D);
+//                    double live_room_real_incomes = isQnlive?roomReal:CountMoneyUtil.getCashInAmount(String.valueOf(roomReal));
+//                    gainsMap.put("live_room_real_incomes", (long)(live_room_real_incomes*100));
+//
+//				/*
+//				 * 分销总收入
+//				 */
+//                    String distributer_total_amount = user.get("distributer_total_amount").toString();
+//                    if(MiscUtils.isEmptyString(distributer_total_amount) || "null".equals(distributer_total_amount)){
+//                        distributer_total_amount = "0";
+//                    }
+//                    gainsMap.put("distributer_total_amount", distributer_total_amount);
+//				/*
+//				 * 计算分销实际收益
+//				 */
+//                    double distributerReal = DoubleUtil.divide( Double.valueOf(distributer_total_amount),100D);
+//                    double distributer_real_incomes = isQnlive?distributerReal:CountMoneyUtil.getCashInAmount(String.valueOf(distributerReal));
+//                    gainsMap.put("distributer_real_incomes", (long)(distributer_real_incomes*100));
+//
+//				/*
+//				 * 计算用户总收入
+//				 */
+//                    gainsMap.put("user_total_amount", user.get("user_total_amount").toString());
+//				/*
+//				 * 计算用户实际收入
+//				 */
+//                    double user_total_real_incomes = live_room_real_incomes*100 + distributer_real_incomes*100;
+//                    gainsMap.put("user_total_real_incomes", (long)user_total_real_incomes);
+//				/*
+//				 * 计算余额
+//				 */
+////                    String user_withdraw_sum = String.valueOf(userWithdrawSumMap.get(user.get("user_id")));
+////                    if(MiscUtils.isEmptyString(user_withdraw_sum) || "null".equals(user_withdraw_sum)){
+////                        user_withdraw_sum = "0";
+////                    }
+////                    double balance = user_total_real_incomes-Double.parseDouble(user_withdraw_sum);
+//                    gainsMap.put("balance", (long)user_total_real_incomes);
+//                    insertList.add(gainsMap);
+//                }
+//                userModuleServer.insertUserGains(insertList);
+//            }catch(Exception e){
+//                e.printStackTrace();
+//                throw e;
+//            }
+//
+//
+//        }while(userIdList != null);
+
         
       return resultMap;
     }
@@ -2006,7 +2137,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             series_id = reqMap.get("series_id").toString();
             //1.先判断是否有 series_id 如果有判断是不是下架的
             Map<String,String> map = new HashMap<String,String>();
-            query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
+            map.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
             String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
             Map<String, String> series = jedis.hgetAll(seriesKey);
             if(series.get("updown").equals("2")){
@@ -2199,7 +2330,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 查询系列详情
+     * 查询系列课程
      *
      * @param reqEntity
      * @return
@@ -2209,7 +2340,108 @@ public class UserServerImpl extends AbstractQNLiveServer {
     @FunctionName("getSerieCourse")
     public Map<String, Object> getSerieCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String page_count = reqMap.get("page_count").toString();
+        String series_id = reqMap.get("series_id").toString();
+        Map<String,String> query = new HashMap<String,String>();
+        query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
+        String lecturer_id = jedis.hget(seriesKey, "lecturer_id");
+        boolean isLecturer = false;//是否是讲师
+        if(lecturer_id.equals(user_id)){//是讲师
+            isLecturer = true;
+        }
+        String course_id = "";
+        boolean courseIsUp = true;
+        if(!MiscUtils.isEmpty(reqMap.get("course_id"))){
+            course_id = reqMap.get("course_id").toString();
+            //1.先判断是否有 series_id 如果有判断是不是下架的
+            Map<String,String> map = new HashMap<String,String>();
+            map.put(Constants.CACHED_KEY_COURSE_FIELD,course_id);
+            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+            Map<String, String> course = jedis.hgetAll(courseKey);
+            if(course.get("series_course_updown").equals("2")){//判断课程是否上架
+                if(isLecturer){
+                    courseIsUp = false;
+                }else{
+                    
+                }
+            }else if(course.get("series_course_updown").equals("0")){
+                throw new QNLiveException("100004");
+            }else if(!course.get("series_id").equals(series_id)){ //判断传过来的课程是否是当前系列
+                throw new QNLiveException("210002");
+            }
+        }
+
+
+        Set<String> seriesIdSet;//查询的课程idset
+        List<String> seriesIdList = new ArrayList<>();//课程id列表
+        List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
+        do{
+            long startIndex = 0;//坐标起始位
+            long endIndex = -1;//坐标结束位
+            String seriesListKey = "";
+            //判断用哪个缓存
+            if(seriesIsUp){
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, query);//上架
+            }else if(isLecturer){
+                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, query);//下架
+            }
+            long endSeriesSum = jedis.zcard(seriesListKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(series_id)){//如果课程ID没有 那么就从最近结束的课程找起
+                endIndex = -1;
+                startIndex = endSeriesSum - pageCount;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                long endRank = jedis.zrank(seriesListKey, series_id);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }
+            }
+            seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
+            List<String> transfer = new ArrayList<>();
+            for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                transfer.add(seriesId);
+            }
+            Collections.reverse(transfer);
+            seriesIdList.addAll(transfer);
+            pageCount -= seriesIdSet.size();
+            if(pageCount > 0){
+                if(seriesIsUp){
+                    if(isLecturer){
+                        seriesIsUp = false;
+                        series_id = null;
+                    }else{
+                        key=false;
+                    }
+                }else{
+                    key = false;
+                }
+            }
+        }while (key);
+
+
+
+
+
+
+
+
+
+
         Map<String, Object> resultMap = new HashMap<String, Object>();
+
+
+
+
         return resultMap;
     }
 
