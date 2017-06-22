@@ -327,15 +327,15 @@ public class UserController extends AbstractController{
 
 	/**
 	 * 判断新增所有用户的gains
-	 * @param entity
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value="/user/insertAllUserGains",method=RequestMethod.PUT)
+	@RequestMapping(value="/user/insertAllUserGains",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity  updateAllUserGains(
-			HttpEntity<Object> entity) throws Exception {
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "insertAllUserGains", null, null, null);
-		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
 

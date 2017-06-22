@@ -454,7 +454,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zadd(classifyCourseKey, lpos, courseId);
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
-                jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
+                long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
+                jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
             }
             //4.6 将课程插入到平台分类列表 分类列表
             map.clear();

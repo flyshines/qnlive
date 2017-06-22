@@ -80,4 +80,10 @@ public interface ISaaSModuleServer {
 	 * @return
 	 */
 	Map<String, Object> findCourseByCourseId(String string);
+	/**获取单品列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getSingleList(Map<String, Object> param);
+    
 }

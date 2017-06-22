@@ -80,7 +80,7 @@
   </select>
   
   <select id="isStudentOfTheSeries" resultType="string" parameterType="hashmap" >
-    select '1' from t_series_student
+    select '1' from t_series_students
     where series_id = #{series_id} and user_id = #{user_id} limit 1
   </select>
   
@@ -190,11 +190,11 @@
   </select>
 
   <select id="findCourseRecommendUsers" resultType="hashmap" parameterType="hashmap" >
-  	select b.nick_name, b.avatar_address, a.* from t_courses_students a, t_user b 
+  	select b.nick_name, b.avatar_address, a.* from t_courses_students a, t_user b
   	where a.user_id=b.user_id
   	and a.room_id = #{room_id}
   	<if test="distributer_id !=null">
-  		and a.distributer_id = #{distributer_id} 
+  		and a.distributer_id = #{distributer_id}
   	</if>
   	<if test="rq_code !=null">
   	    and a.rq_code=#{rq_code}

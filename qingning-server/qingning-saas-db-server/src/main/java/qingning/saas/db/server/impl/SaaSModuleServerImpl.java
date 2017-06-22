@@ -153,4 +153,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public Map<String, Object> findCourseByCourseId(String courseId) {
 		return coursesMapper.findCourseByCourseId(courseId);
 	}
-}
+
+	@Override
+    public Map<String, Object> getSingleList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> resout = courseMapper.selectByShop(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",resout);
+        res.put("total_count",resout.getTotal());
+        res.put("total_page",resout.getPaginator().getTotalPages());
+        return res;
+    }}

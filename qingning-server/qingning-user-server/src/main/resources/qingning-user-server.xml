@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <servers>
-
 	<server name="UserServer">
 		<default class="qingning.user.server.imp.UserServerImpl">
-
 			<function name="userFollowRoom">
 				<auth>
 					<access_token require="Y" />
@@ -353,8 +351,10 @@
 			<function name="insertAllUserGains">
 				<auth>
 					<access_token require="N" />
+					<appName require="N" />
 				</auth>
-				<inputs></inputs>
+				<inputs>
+				</inputs>
 				<outputs>
 				</outputs>
 			</function>
@@ -550,12 +550,26 @@
 						<param name="qr_code_ad" type="string"/>
 					</param>
 				</outputs>
+				</function>
+			<function name="getSerieCourse">
+				<auth>
+					<access_token require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"  />
+					<param name="course_id" type="string" />
+					<param name="page_count" type="string" />
+				</inputs>
+				<outputs>
+
+				</outputs>
 			</function>
-		</default>
+			</default>
+		</server>
 
 
 		<version num="1.0.0" class="">
 		</version>
-	</server>
+	</servers>
 
-</servers>

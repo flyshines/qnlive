@@ -128,8 +128,12 @@ public class CountMoneyUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(getCashInAmount("1.11"));
-    }
+
+    	double a = 1.11D;
+    	double b = a*100;
+    	long c = (long)b;
+		System.out.println(c);
+	}
 
 
 

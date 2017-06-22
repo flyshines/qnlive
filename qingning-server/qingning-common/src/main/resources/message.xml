@@ -119,6 +119,7 @@
 				<entry key="180001" value="提现金额不能大于账户余额"/>
 				<entry key="190001" value="没有查到店铺信息"/>
 				<entry key="210001" value="该系列不属于当前用户"/>
+				<entry key="210002" value="课程不属于当前系列"/>
 			</map>
 		</property>
 	</bean>	

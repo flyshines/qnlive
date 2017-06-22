@@ -206,14 +206,16 @@
   </select>
   
   <!-- 获取没有t_user_gains记录的user_id -->
-  <select id="selectNotGainsUserId" parameterType="int" resultType="hashmap">
-  	select user_id,app_name from t_user
-  	where user_id not in(
-  		select user_id from t_user_gains
-  	)
-  	<if test="limit != null">
-  		limit #{limit}
-  	</if>
+  <select id="selectNotGainsUserId"  resultType="hashmap">
+    select t_login_info.user_id as user_id,
+    t_login_info.app_name as app_name,
+    IFNULL(t_live_room.total_amount,0)  as live_room_total_amount,
+    IFNULL(t_distributer.total_amount,0)  as distributer_total_amount,
+    IFNULL((t_live_room.total_amount + t_distributer.total_amount),0) as  user_total_amount
+    from
+    t_login_info LEFT JOIN t_live_room on t_login_info.user_id = t_live_room.lecturer_id LEFT JOIN
+    t_distributer on t_login_info.user_id =  t_distributer.distributer_id
+    limit #{page_num},#{page_count}
   </select>
 
 </mapper>
