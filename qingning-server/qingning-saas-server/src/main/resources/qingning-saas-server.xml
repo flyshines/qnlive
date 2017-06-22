@@ -261,12 +261,12 @@
 				<outputs>
 					<param name="course_info_list" type="list">
 						<param name="course_id" type="string" />
-						<param name="course_img_url" type="string" fieldname="course_img" />
+						<param name="course_img_url" type="string" fieldname="course_image" />
 						<param name="course_url" type="string" />
-						<param name="course_title" type="string" fieldname="" />
-						<param name="browse_count" type="long" fieldname="" />
-						<param name="message_count" type="long" fieldname="" />
-						<param name="put_time" type="long" fieldname="" />
+						<param name="course_title" type="string" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" />
+						<param name="put_time" type="long" fieldname="create_time" />
 					</param>
 				</outputs>
 			</function>
@@ -300,6 +300,31 @@
 					<param name="total_page" type="long" />
 				</outputs>
 			</function>
+			
+			<!-- 课程-获取单品课程详情 -->
+			<function name="findSingleCourseDetail">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="single_id" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+					<param name="single_info" type="map">
+						<param name="single_id" type="string" fieldname="course_id" />
+						<param name="single_img_url" type="string" fieldname="course_image" />
+						<param name="single_title" type="string" fieldname="course_title" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" />
+						<param name="intro" type="string" fieldname="course_remark" />
+						<param name="price" type="double" fieldname="course_price" />
+						<param name="create_time" type="long" />
+					</param>
+					<param name="series_id" type="string" />
+					<param name="is_bought" type="string" />
+				</outputs>
+			</function>
+
 			<!-- 店铺-获取用户列表 -->
 			<function name="getUserList">
 				<auth>
