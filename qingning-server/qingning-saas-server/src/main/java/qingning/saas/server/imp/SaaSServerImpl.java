@@ -627,25 +627,45 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	Map<String, Object> readCourseMap = new HashMap<>();
         	RequestEntity readCourseReqEntity = null;
         	if("0".equals(seriesType)){	//直播类型的系列课，从t_course中查询
+        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
-        	}else{
+        		for(String courseId : courseSet){
+                	readCourseMap.put("course_id", courseId);
+                	//获取系列课程详情
+                	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	/*
+                	 * 对直播课程的返回字段进行重命名
+                	 */
+                	courseMap.put("course_image", courseMap.get("course_url").toString());
+                	courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
+                	
+                	//判断是否购买了该课程
+                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+                		seriesMap.put("buy_status", "0");
+                	}else{	//用户已购买
+                		seriesMap.put("buy_status", "1");
+                	}
+                */	
+                	courseInfoList.add(courseMap);
+                }
+        	}else{	//非直播类型的系列课，从t_saas_course中查询
+        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+        		for(String courseId : courseSet){
+                	readCourseMap.put("course_id", courseId);
+                	//获取系列课程详情
+                	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	
+                	//判断是否购买了该课程
+                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+                		seriesMap.put("buy_status", "0");
+                	}else{	//用户已购买
+                		seriesMap.put("buy_status", "1");
+                	}
+                */	
+                	courseInfoList.add(courseMap);
+                }
         	}
-        	
-            for(String courseId : courseSet){
-            	readCourseMap.put("course_id", courseId);
-            	//获取系列课程详情
-            	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
-            	
-            	//判断是否购买了该课程
-            /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
-            		seriesMap.put("buy_status", "0");
-            	}else{	//用户已购买
-            		seriesMap.put("buy_status", "1");
-            	}
-            */	
-            	courseInfoList.add(courseMap);
-            }
         }
         
         resultMap.put("course_info_list", courseInfoList);
@@ -682,4 +702,50 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
         return null;
     }
+    
+    /**
+     * H5_课程-获取单品课程详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSingleCourseDetail")
+    public Map<String, Object>  findSingleCourseDetail(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的single_id
+        String singleId = (String) reqMap.get("single_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        //生成用于缓存不存在时调用数据库的requestEntity
+    	Map<String, Object> readSingleMap = new HashMap<String, Object>();
+    	//从产品原型上看，调用该接口获取单品课程详情的来源只有非直播课程，所以直接从t_saas_course查找
+    	RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSingleMap);
+    	readSingleMap.put("course_id", singleId);
+		//获取系列课程详情
+		Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSingleReqEntity, readCourseOperation, jedis, true);
+		
+		/*
+         * TODO 判断是否购买了该课程
+         */
+		
+		/*
+		 * TODO 查找是否属于系列课
+		 */
+		
+		//resultMap.put("is_bought", isBought);
+		//resultMap.put("series_id", seriesId);
+        resultMap.put("single_info", singleMap);
+        
+        return resultMap;
+	} 
 }

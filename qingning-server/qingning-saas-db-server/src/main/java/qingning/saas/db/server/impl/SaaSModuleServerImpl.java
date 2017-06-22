@@ -157,7 +157,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	@Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> resout = courseMapper.selectByShop(param,page);
+        PageList<Map<String,Object>> resout = saasCourseMapper.selectByShop(param,page);
         Map<String,Object> res = new HashMap<>();
         res.put("list",resout);
         res.put("total_count",resout.getTotal());
