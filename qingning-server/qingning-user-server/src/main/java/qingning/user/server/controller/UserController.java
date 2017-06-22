@@ -485,7 +485,6 @@ public class UserController extends AbstractController{
 	ResponseEntity getSeries(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "series_id", defaultValue = "") String series_id,
-			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
@@ -493,14 +492,13 @@ public class UserController extends AbstractController{
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("page_count", page_count);
 		param.put("series_id", series_id);
-		param.put("series_status", series_status);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
 
 
 	/**
-	 * 查询系列列表（正在直播（用户查看））
+	 * 查询直播间系列
 	 * @param page_count 分页数
 	 * @param room_id 直播间id
 	 * @param series_id  系列id

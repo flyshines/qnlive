@@ -464,18 +464,56 @@
 			<function name="userSeries">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
-					<version require="N" />
+					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="withdraw_cash_id" type="string" require="true, 000100"/>
-					<param name="result" type="string" format="0|1,000004" require="Y,000100"/>
-					<param name="remark" type="string" />
+					<param name="page_count" type="string" />
+					<param name="series_id" type="string"/>
 				</inputs>
 				<outputs>
+					<param name="series_list" type="list">
+						<param name="series_id" type="string"/>
+						<param name="lecturer_id" type="rstring"/>
+						<param name="series_title" type="double"/>
+						<param name="series_img" type="long"/>
+						<param name="course_num" type="long"/>
+						<param name="series_student_num" type="long"/>
+						<param name="series_price" type="string"/>
+						<param name="series_amount" type="rstring"/>
+						<param name="lecturer_nick_name" type="rstring"/>
+						<param name="series_status" type="rstring"/>
+						<param name="update_plan" type="rstring"/>
+						<param name="updown" type="string"/>
+					</param>
 				</outputs>
 			</function>
-
+			<function name="getRoomSeries">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="string" />
+					<param name="room_id" type="string"  require="Y,000100"  />
+					<param name="series_id" type="string"/>
+				</inputs>
+				<outputs>
+					<param name="series_list" type="list">
+						<param name="series_id" type="string"/>
+						<param name="lecturer_id" type="rstring"/>
+						<param name="series_title" type="double"/>
+						<param name="series_img" type="long"/>
+						<param name="course_num" type="long"/>
+						<param name="series_student_num" type="long"/>
+						<param name="series_price" type="string"/>
+						<param name="series_amount" type="rstring"/>
+						<param name="lecturer_nick_name" type="rstring"/>
+						<param name="series_status" type="rstring"/>
+						<param name="update_plan" type="rstring"/>
+						<param name="updown" type="string"/>
+					</param>
+				</outputs>
+			</function>
 			<function name="getSeriesDetailInfo">
 				<auth>
 					<access_token require="Y" />
@@ -488,6 +526,8 @@
 					<param name="series_type" type="string"/>
 					<param name="series_status" type="string"/>
 					<param name="series_img" type="string"/>
+					<param name="updown" type="string"/>
+					<param name="update_plan" type="string"/>
 					<param name="series_title" type="rstring"/>
 					<param name="series_price" type="double"/>
 					<param name="update_course_time" type="long"/>
@@ -509,7 +549,6 @@
 						<param name="qr_code_title" type="string"/>
 						<param name="qr_code_ad" type="string"/>
 					</param>
-
 				</outputs>
 			</function>
 		</default>

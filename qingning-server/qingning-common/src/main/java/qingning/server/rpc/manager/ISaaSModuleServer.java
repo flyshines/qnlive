@@ -38,6 +38,21 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getShopInfo(Map<String, Object> param);
+
+    /**
+     * 根据系列id获取系列详情
+     * @param seriesId
+     * @return
+     */
+	Map<String, Object> findSeriesBySeriesId(String seriesId);
+
+	/**
+	 * 根据条件查询系列id
+	 * @param selectSeriesStudentsMap
+	 * @return 
+	 */
+	List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap);
+	
     /**更新轮播图
      * @param param
      * @return
@@ -53,9 +68,15 @@ public interface ISaaSModuleServer {
      * @return
      */
     void updateCourse(Map<String, Object> param);
-    /**获取单品列表
+ /**
+     * 根据课程id获取saas课程信息
+     * @param string
+     * @return
+     */
+	Map<String, Object> findCourseByCourseId(String courseId);
+
+   /**获取单品列表
      * @param param
      * @return
      */
-    Map<String,Object> getSingleList(Map<String, Object> param);
-}
+    Map<String,Object> getSingleList(Map<String, Object> param);}

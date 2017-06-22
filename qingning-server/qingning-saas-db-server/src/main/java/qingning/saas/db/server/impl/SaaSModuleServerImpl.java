@@ -27,6 +27,10 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SaaSCourseMapper courseMapper;
     @Autowired(required = true)
     private SaaSShopUserMapper shopUserMapper;
+    @Autowired(required = true)
+    private SeriesMapper seriesMapper;
+    @Autowired(required = true)
+    private SeriesStudentsMapper seriesStudentsMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -100,6 +104,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String, Object> getShopInfo(Map<String, Object> param) {
         return shopMapper.selectByPrimaryKey(param);
     }
+    
+    /**
+     * 根据系列id获取系列详情
+     */
+    @Override
+    public Map<String, Object> findSeriesBySeriesId(String seriesId){
+		return seriesMapper.findSeriesBySeriesId(seriesId);
+    }
+
+    /**
+     * 根据条件查询系列id
+     */
+	@Override
+	public List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap) {
+		return seriesStudentsMapper.selectSeriesStudentsByMap(selectSeriesStudentsMap);
+	}
 
     @Override
     public void updateBanner(Map<String, Object> param) {
@@ -116,7 +136,15 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         courseMapper.updateByPrimaryKey(param);
     }
 
-    @Override
+    /**
+     * 根据课程id获取saas课程信息
+     */
+	@Override
+	public Map<String, Object> findCourseByCourseId(String courseId) {
+		return courseMapper.selectByPrimaryKey(courseId);
+	}
+
+	@Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String,Object>> resout = courseMapper.selectByShop(param,page);
@@ -125,5 +153,4 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_count",resout.getTotal());
         res.put("total_page",resout.getPaginator().getTotalPages());
         return res;
-    }
-}
+    }}
