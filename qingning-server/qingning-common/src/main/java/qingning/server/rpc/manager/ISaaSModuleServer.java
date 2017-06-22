@@ -68,4 +68,10 @@ public interface ISaaSModuleServer {
      * @return
      */
     void updateCourse(Map<String, Object> param);
+    /**
+     * 根据课程id获取saas课程信息
+     * @param string
+     * @return
+     */
+	Map<String, Object> findCourseByCourseId(String courseId);
 }

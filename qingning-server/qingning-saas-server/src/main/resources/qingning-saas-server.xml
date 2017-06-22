@@ -198,6 +198,30 @@
 					</param>
 				</outputs>
 			</function>
+			
+			<!-- 店铺-获取店铺单品课程（直播除外）列表 -->
+			<function name="findShopSingleCourseList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100"/>
+					<param name="last_single_id" type="string" require="N"/>
+					<param name="page_count" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="single_info_list" type="list">
+						<param name="single_id" type="string" fieldname="course_id" />
+						<param name="single_img_url" type="string" fieldname="course_image" />
+						<param name="single_type" type="string" fieldname="course_type" />
+						<param name="buy_status" type="string" />
+						<param name="single_title" type="string" fieldname="course_title" />
+						<param name="browse_count" type="long" fieldname="student_num" />
+						<param name="message_count" type="long" fieldname="" />
+						<param name="price" type="double" fieldname="course_price" />
+					</param>
+				</outputs>
+			</function>
 
 
 

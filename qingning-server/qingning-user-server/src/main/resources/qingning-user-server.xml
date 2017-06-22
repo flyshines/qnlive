@@ -550,7 +550,6 @@
 						<param name="qr_code_ad" type="string"/>
 					</param>
 				</outputs>
-				</outputs>
 			</function>
 		</default>
 

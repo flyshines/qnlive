@@ -135,4 +135,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public void updateCourse(Map<String, Object> param) {
         courseMapper.updateByPrimaryKey(param);
     }
+
+    /**
+     * 根据课程id获取saas课程信息
+     */
+	@Override
+	public Map<String, Object> findCourseByCourseId(String courseId) {
+		return courseMapper.selectByPrimaryKey(courseId);
+	}
 }
