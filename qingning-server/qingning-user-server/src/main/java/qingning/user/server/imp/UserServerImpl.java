@@ -2103,12 +2103,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
-
-
-
-
-
     /**
      * 用户 直播间系列列表
      * @return
@@ -2202,6 +2196,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * 在seriesList 加入讲师名字
+     * @param seriesIdList
+     * @param jedis
+     * @return
+     */
     private List<Map<String,String>> seriesList(List<String> seriesIdList,Jedis jedis){
         List<Map<String,String>> seriesList = new ArrayList<>();
         for(String seriesId : seriesIdList){
@@ -2343,7 +2343,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
-        String page_count = reqMap.get("page_count").toString();
+        long pageCount = Long.valueOf(reqMap.get("page_count").toString());
         String series_id = reqMap.get("series_id").toString();
         Map<String,String> query = new HashMap<String,String>();
         query.put(Constants.CACHED_KEY_SERIES_FIELD,reqMap.get("series_id").toString());
@@ -2366,7 +2366,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 if(isLecturer){
                     courseIsUp = false;
                 }else{
-
+                    course_id = null;
                 }
             }else if(course.get("series_course_updown").equals("0")){
                 throw new QNLiveException("100004");
@@ -2376,28 +2376,29 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
 
-        Set<String> seriesIdSet;//查询的课程idset
-        List<String> seriesIdList = new ArrayList<>();//课程id列表
-        List<Map<String,String>> seriesList = new LinkedList<>();//课程对象列表
+        Set<String> seriesCourseIdSet;//查询的课程idset
+        List<String> seriesCourseIdList = new ArrayList<>();//课程id列表
+        List<Map<String,String>> seriesCourseList = new LinkedList<>();//课程对象列表
+        boolean key=true;
         do{
             long startIndex = 0;//坐标起始位
             long endIndex = -1;//坐标结束位
-            String seriesListKey = "";
+            String seriesCourseListKey = "";
             //判断用哪个缓存
-            if(seriesIsUp){
-                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, query);//上架
+            if(courseIsUp){
+                seriesCourseListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, query);//上架
             }else if(isLecturer){
-                seriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, query);//下架
+                seriesCourseListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, query);//下架
             }
-            long endSeriesSum = jedis.zcard(seriesListKey);//获取总共有多少个结束课程
-            if(MiscUtils.isEmpty(series_id)){//如果课程ID没有 那么就从最近结束的课程找起
+            long endSeriesCourseSum = jedis.zcard(seriesCourseListKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(course_id)){//如果课程ID没有 那么就从最近结束的课程找起
                 endIndex = -1;
-                startIndex = endSeriesSum - pageCount;//利用总数减去我这边需要获取的数
+                startIndex = endSeriesCourseSum - pageCount;//利用总数减去我这边需要获取的数
                 if(startIndex < 0){
                     startIndex = 0;
                 }
             }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
-                long endRank = jedis.zrank(seriesListKey, series_id);
+                long endRank = jedis.zrank(seriesCourseListKey, course_id);
                 endIndex = endRank - 1;
                 if(endIndex >= 0){
                     startIndex = endIndex - pageCount + 1;
@@ -2406,20 +2407,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }
-            seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
+            seriesCourseIdSet = jedis.zrange(seriesCourseListKey, startIndex, endIndex);
             List<String> transfer = new ArrayList<>();
-            for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+            for(String seriesId : seriesCourseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
                 transfer.add(seriesId);
             }
             Collections.reverse(transfer);
-            seriesIdList.addAll(transfer);
-            pageCount -= seriesIdSet.size();
+            seriesCourseIdList.addAll(transfer);
+            pageCount -= seriesCourseIdSet.size();
             if(pageCount > 0){
-                if(seriesIsUp){
+                if(courseIsUp){
                     if(isLecturer){
-                        seriesIsUp = false;
-                        series_id = null;
-                    }else{
+                        courseIsUp = false;
+                        course_id = null;
+                    }else{//学生
                         key=false;
                     }
                 }else{
@@ -2428,20 +2429,31 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }while (key);
 
-
-
-
-
-
-
-
-
-
+        if(seriesCourseIdList.size() > 0){
+            Map<String,String> queryParam = new HashMap<String,String>();
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put(Constants.CACHED_KEY_USER_FIELD, user_id);
+            String userCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, map);//用来查询当前用户加入了那些课程
+            long now = System.currentTimeMillis();
+            for(String courseId : seriesCourseIdList){
+                queryParam.put("course_id", course_id);
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                MiscUtils.courseTranferState(now, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                if(jedis.sismember(userCourseKey, courseId)){//判断当前用户是否有加入这个课程
+                    courseInfoMap.put("student", "Y");
+                } else {
+                    courseInfoMap.put("student", "N");
+                }
+                String lecturerId = courseInfoMap.get("lecturer_id");
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+                String nick_name = jedis.hget(lecturerKey, "nick_name");
+                courseInfoMap.put("lecturer_nick_name",nick_name);
+                seriesCourseList.add(courseInfoMap);
+            }
+        }
         Map<String, Object> resultMap = new HashMap<String, Object>();
-
-
-
-
+        resultMap.put("course_list",seriesCourseList);
         return resultMap;
     }
 
