@@ -23,6 +23,10 @@ public class ReadSeriesOperation implements CommonReadOperation {
 	@Override
 	public Object invokeProcess(RequestEntity requestEntity) throws Exception {
 		Map<String, Object> param = (Map<String, Object>) requestEntity.getParam();
-		return saaSModuleServer.findSeriesBySeriesId(param.get("series_id").toString());
+		String functionName = requestEntity.getFunctionName();
+		if("findSeriesBySeriesId".equals(functionName)){
+			return saaSModuleServer.findSeriesBySeriesId(param.get("series_id").toString());
+		}
+		return null;
 	}
 }

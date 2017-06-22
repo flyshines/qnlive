@@ -24,7 +24,7 @@
 	</select>
 
 	<select id="findSeriesBySearch" resultType="hashmap" parameterType="hashmap" >
-		select * from t_series where updown=1
+		select * from t_series where updown=1 and series_course_type = #{series_course_type}
 		<if test="search_text != null">
 			and series_title like #{search_text}
 		</if>

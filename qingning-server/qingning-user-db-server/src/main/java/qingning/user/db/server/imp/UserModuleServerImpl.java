@@ -2,6 +2,7 @@
 package qingning.user.db.server.imp;
 
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -269,8 +270,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
      * 获取没有t_user_gains记录的user_id
      */
     @Override
-    public List<Map<String,Object>> findNotGainsUserId(int limit) {
-        List<Map<String,Object>> result = userMapper.selectNotGainsUserId(limit);
+    public List<Map<String,Object>> findNotGainsUserId(int page_num, int page_count) {
+        List<Map<String,Object>> result = userMapper.selectNotGainsUserId(page_num,page_count);
         return result;
     }
 

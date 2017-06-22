@@ -68,14 +68,19 @@ public interface ISaaSModuleServer {
      * @return
      */
     void updateCourse(Map<String, Object> param);
- /**
-     * 根据课程id获取saas课程信息
+    /**
+     * 根据课程id获取saas课程信息，从t_saas_course查询
      * @param string
      * @return
      */
-	Map<String, Object> findCourseByCourseId(String courseId);
-
-   /**获取单品列表
+	Map<String, Object> findSaasCourseByCourseId(String courseId);
+	/**
+	 * 根据课程id获取直播课程信息，从t_course查询
+	 * @param string
+	 * @return
+	 */
+	Map<String, Object> findCourseByCourseId(String string);
+	/**获取单品列表
      * @param param
      * @return
      */
@@ -85,4 +90,5 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getShopUsers(Map<String, Object> param);
+
 }

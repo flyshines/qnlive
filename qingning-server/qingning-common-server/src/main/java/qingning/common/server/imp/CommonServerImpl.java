@@ -2982,6 +2982,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //查询所有 或者 查询系列
         if(search_type ==0 || search_type == 3){
+            map.put("series_course_type",Constants.DEFAULT_SERIES_COURSE_TYPE);
             List<Map<String, Object>> seriesBySearch = commonModuleServer.findSeriesBySearch(map);//查询数据
             setLecturerNickName(seriesBySearch,jedis);
             resultMap.put("series_list",seriesBySearch);

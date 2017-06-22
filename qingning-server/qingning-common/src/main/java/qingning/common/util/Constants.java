@@ -116,8 +116,8 @@ public final class Constants {
 	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";
 
 	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";//讲师id
-	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";
-	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";
+	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";//讲师信息
+	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";//讲师直播间列表
 
 
 
@@ -164,7 +164,8 @@ public final class Constants {
 
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程成
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
-	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程0
+	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
+	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程
 
 
 
@@ -212,10 +213,7 @@ public final class Constants {
 	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
 
 
-	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程
-	//讲师所有的单品课程（直播间类型除外）
-	public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE:UP";//zset 讲师所有上架单品（直播课除外） (series_id,上架时间)
-	public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE";//zset 讲师所有下架单品（直播课除外） (series_id,下架时间)
+
 
 
 

@@ -16,8 +16,7 @@ public interface UserMapper {
 	
 	/**
 	 * 获取没有t_user_gains记录的user_id
-	 * @param limit 查询的条数
 	 * @return
 	 */
-	List<Map<String,Object>> selectNotGainsUserId(@Param("limit") int limit);
+	List<Map<String,Object>> selectNotGainsUserId(@Param("page_num") int page_num,@Param("page_count") int page_count);
 }
