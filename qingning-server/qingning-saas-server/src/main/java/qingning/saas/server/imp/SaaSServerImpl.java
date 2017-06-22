@@ -513,5 +513,51 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("single_info_list", singleInfoList);
         return resultMap;
 	}  
+    
+    /**
+     * H5_课程-获取系列课程详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSeriesCourseDetail")
+    public Map<String, Object>  findSeriesCourseDetail(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 逻辑：
+    	 * 1.根据shop_id获得讲师id
+    	 * 2.根据讲师id查询缓存中讲师已上架系列课，需要传递分页标识
+    	 */
+    	
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	Map<String, String> seriesInfo = new HashMap<String, String>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的series_id
+        String seriesId = (String) reqMap.get("series_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        reqMap.put("seried_id", seriesId);
+		//获取系列课程详情
+		Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, reqEntity, readSeriesOperation, jedis, true);
+		
+		//判断是否购买了该课程
+	/*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+			seriesMap.put("buy_status", "0");
+		}else{	//用户已购买
+			seriesMap.put("buy_status", "1");
+		}*/
+		
+		//resultMap.put("is_bought", isBought);
+        resultMap.put("series_info", seriesMap);
+        return resultMap;
+	} 
 
 }

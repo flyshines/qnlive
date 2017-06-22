@@ -222,6 +222,31 @@
 					</param>
 				</outputs>
 			</function>
+			
+			<!-- 课程-获取系列课程详情 -->
+			<function name="getSeriesCourseDetail">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="series_info" type="map">
+						<param name="series_id" type="string" />
+						<param name="series_img_url" type="string" fieldname="series_img" />
+						<param name="series_title" type="string" />
+						<param name="series_course_count" type="int" fieldname="course_num" />
+						<param name="buyer_count" type="long" fieldname="series_student_num" />
+						<param name="series_recommend" type="string" fieldname="series_remark" />
+						<param name="series_type" type="string" fieldname="series_course_type" />
+						<param name="update_cycle" type="string" />
+						<param name="update_course_count" type="long" />
+						<param name="price" type="double" fieldname="series_price" />
+					</param>
+					<param name="is_bought" type="string" />
+				</outputs>
+			</function>
 
 
 
