@@ -2247,7 +2247,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if (jedis.exists(seriesKey)) {
             Map<String, String> seriesCacheMap = jedis.hgetAll(seriesKey);
             seriesMap = seriesCacheMap;
-            room_id = seriesCacheMap.get("room_id").toString();
+            String lecturer_id = seriesCacheMap.get("lecturer_id").toString();
+
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+            String lecturerRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+            Map<String,String> liveRoomsMap = jedis.hgetAll(lecturerRoomKey);
+            for(String roomId :liveRoomsMap.keySet()){
+                room_id = roomId;
+                break;
+            }
 
         } else {
             //2.如果缓存中没有课程详情，则读取数据库

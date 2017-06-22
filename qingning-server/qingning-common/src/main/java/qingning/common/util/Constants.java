@@ -116,8 +116,8 @@ public final class Constants {
 	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";
 
 	public static final String CACHED_KEY_LECTURER_FIELD = "lecturer_id";//讲师id
-	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";
-	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";
+	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";//讲师信息
+	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";//讲师直播间列表
 
 
 
