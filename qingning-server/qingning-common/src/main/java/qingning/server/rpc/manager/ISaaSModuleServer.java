@@ -79,4 +79,10 @@ public interface ISaaSModuleServer {
      * @param param
      * @return
      */
-    Map<String,Object> getSingleList(Map<String, Object> param);}
+    Map<String,Object> getSingleList(Map<String, Object> param);
+
+    /**用户管理-获取店铺用户列表
+     * @return
+     */
+    Map<String,Object> getShopUsers(Map<String, Object> param);
+}

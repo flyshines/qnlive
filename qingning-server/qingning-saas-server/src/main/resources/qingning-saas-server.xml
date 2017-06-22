@@ -230,18 +230,74 @@
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
 					<param name="page_size" type="long" require="N"/>
+					<param name="status" type="string" require="N"/>
+					<param name="type" type="string" require="N"/>
+					<param name="keyword" type="string" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="list" type="list">
+						<param name="course_id" type="string" />
 						<param name="course_title" type="string" />
 						<param name="course_image" type="string" />
 						<param name="type"  fieldname="goods_type" type="string" />
-						<param name="create_time" type="string" />
+						<param name="create_time" type="long" />
 						<param name="price" fieldname="course_price" type="double" />
 						<param name="total_income" fieldname="course_amount" type="double" />
 						<param name="sale_num" type="long" />
 						<param name="status" fieldname="course_updown" type="string" />
 						<param name="course_url" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
+			<!-- 店铺-获取用户列表 -->
+			<function name="getUserList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="type" type="string" require="N"/>
+					<param name="nick_name" type="string" require="N"/>
+					<param name="phone" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="user_id" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="avatar_address"  type="string" />
+						<param name="gender" type="long" />
+						<param name="total_consume" type="double" />
+						<param name="msg_num" type="long" />
+						<param name="user_type" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
+			<!-- 店铺-获取留言板列表 -->
+			<function name="getMessageList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="course_name" type="string" require="N"/>
+					<param name="nick_name" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="user_id" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="avatar_address"  type="string" />
+						<param name="type" type="string" />
+						<param name="course_id" type="string" />
+						<param name="course_name" type="string" />
+						<param name="comment" type="string" />
+						<param name="create_time" type="long" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />

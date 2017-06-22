@@ -286,7 +286,7 @@ public class SaaSManageController extends AbstractController {
     }
 
     /**
-     * 店铺-轮播图列表
+     * 店铺-单品列表
      *
      * @return
      * @throws Exception
@@ -313,6 +313,66 @@ public class SaaSManageController extends AbstractController {
             paramCode.put("type", type);
         if(StringUtils.isNotEmpty(keyword))
             paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 店铺-用户列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/user/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getUserList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "type",defaultValue = "") String type,
+            @RequestParam(value = "nick_name",defaultValue = "") String keyword,
+            @RequestParam(value = "phone",defaultValue = "") String phone,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getUserList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(phone))
+            paramCode.put("phone", phone);
+        if(StringUtils.isNotEmpty(type))
+            paramCode.put("type", type);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("nick_name", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 店铺-留言板列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/message/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getMessageList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "nick_name",defaultValue = "") String keyword,
+            @RequestParam(value = "course_name",defaultValue = "") String courseName,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getMessageList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(courseName))
+            paramCode.put("course_name", courseName);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("nick_name", keyword);
         requestEntity.setParam(paramCode);
         return this.process(requestEntity, serviceManger, message);
     }

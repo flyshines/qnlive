@@ -147,10 +147,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	@Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> resout = courseMapper.selectByShop(param,page);
+        PageList<Map<String,Object>> result = courseMapper.selectByShop(param,page);
         Map<String,Object> res = new HashMap<>();
-        res.put("list",resout);
-        res.put("total_count",resout.getTotal());
-        res.put("total_page",resout.getPaginator().getTotalPages());
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
         return res;
-    }}
+    }
+
+    @Override
+    public Map<String, Object> getShopUsers(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> result = shopUserMapper.selectUsersByShop(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+}
