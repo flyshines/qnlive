@@ -10,7 +10,6 @@
     select * from t_saas_shop_users where shop_id = #{shopId}
   </select>
 
-
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from t_saas_shop_users
     where id = #{id,jdbcType=INTEGER}
@@ -52,4 +51,25 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+
+  <select id="selectUsersByShop" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+        t.shop_id,
+        t.user_id,
+        t.user_type,
+        t.total_consume,
+        t.msg_num,
+        u.nick_name,
+        u.avatar_address,
+        u.gender
+    FROM
+        `t_saas_shop_users` t
+    LEFT JOIN t_user u ON t.user_id = u.user_id
+    WHERE
+        t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    ORDER BY t.create_time desc
+
+  </select>
+
 </mapper>
