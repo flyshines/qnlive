@@ -120,6 +120,29 @@ public class SaaSController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+    
+    /**
+     * 课程-获取系列课程内容课程列表
+     */
+    @RequestMapping(value = "/course/series/course_list/{series_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getSeriesCourseList(
+			@PathVariable("series_id") String seriesId,
+			@RequestParam(value="last_course_id", defaultValue="0")String lastCourseId,
+			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+			@RequestParam(value = "series_type", defaultValue = "") String seriesType,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSeriesCourseList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("series_id", seriesId);
+        param.put("last_course_id", lastCourseId);
+        param.put("page_count", pageCount);
+        param.put("series_type", seriesType);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
 }

@@ -69,9 +69,15 @@ public interface ISaaSModuleServer {
      */
     void updateCourse(Map<String, Object> param);
     /**
-     * 根据课程id获取saas课程信息
+     * 根据课程id获取saas课程信息，从t_saas_course查询
      * @param string
      * @return
      */
-	Map<String, Object> findCourseByCourseId(String courseId);
+	Map<String, Object> findSaasCourseByCourseId(String courseId);
+	/**
+	 * 根据课程id获取直播课程信息，从t_course查询
+	 * @param string
+	 * @return
+	 */
+	Map<String, Object> findCourseByCourseId(String string);
 }

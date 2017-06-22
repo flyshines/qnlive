@@ -24,13 +24,15 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Autowired(required = true)
     private SaaSBannerMapper bannerMapper;
     @Autowired(required = true)
-    private SaaSCourseMapper courseMapper;
+    private SaaSCourseMapper saasCourseMapper;
     @Autowired(required = true)
     private SaaSShopUserMapper shopUserMapper;
     @Autowired(required = true)
     private SeriesMapper seriesMapper;
     @Autowired(required = true)
     private SeriesStudentsMapper seriesStudentsMapper;
+    @Autowired(required = true)
+    private CoursesMapper coursesMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -128,19 +130,27 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public void addCourse(Map<String, Object> param) {
-        courseMapper.insert(param);
+    	saasCourseMapper.insert(param);
     }
 
     @Override
     public void updateCourse(Map<String, Object> param) {
-        courseMapper.updateByPrimaryKey(param);
+    	saasCourseMapper.updateByPrimaryKey(param);
     }
 
     /**
-     * 根据课程id获取saas课程信息
+     * 根据课程id获取saas课程信息，从t_saas_course查询
      */
 	@Override
+	public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+		return saasCourseMapper.selectByPrimaryKey(courseId);
+	}
+	
+	/**
+	 * 根据课程id获取直播课程信息，从t_course查询
+	 */
+	@Override
 	public Map<String, Object> findCourseByCourseId(String courseId) {
-		return courseMapper.selectByPrimaryKey(courseId);
+		return coursesMapper.findCourseByCourseId(courseId);
 	}
 }
