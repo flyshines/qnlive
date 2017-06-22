@@ -349,7 +349,7 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
     /**
-     * 店铺-留言板列表
+     * 店铺-评论列表（用户留言）
      *
      * @return
      * @throws Exception
@@ -376,6 +376,36 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(paramCode);
         return this.process(requestEntity, serviceManger, message);
     }
+
+    /**
+     * 店铺-用户反馈
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/feedback/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getFeedbackList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "nick_name",defaultValue = "") String keyword,
+            @RequestParam(value = "comment",defaultValue = "") String comment,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getFeedbackList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(comment))
+            paramCode.put("comment", comment);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("nick_name", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 
 
 }

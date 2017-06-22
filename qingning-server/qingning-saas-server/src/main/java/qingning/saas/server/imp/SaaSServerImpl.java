@@ -703,7 +703,26 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
-        Map<String, Object> userList = saaSModuleServer.getShopUsers(reqMap);
+        //获取所有课程评论列表
+        Map<String, Object> userList = saaSModuleServer.getCourseComment(reqMap);
+        return userList;
+    }
+    /**
+     * 店铺-消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getFeedbackList")
+    public Map<String, Object> getFeedbackList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //获取所有课程评论列表
+        Map<String, Object> userList = saaSModuleServer.getUserFeedBack(reqMap);
         return userList;
     }
 

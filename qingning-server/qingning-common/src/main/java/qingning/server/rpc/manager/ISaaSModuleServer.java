@@ -87,8 +87,18 @@ public interface ISaaSModuleServer {
     Map<String,Object> getSingleList(Map<String, Object> param);
 
     /**用户管理-获取店铺用户列表
+     * @param param
      * @return
      */
     Map<String,Object> getShopUsers(Map<String, Object> param);
-
+    /**消息管理-获取店铺评论列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getCourseComment(Map<String, Object> param);
+    /**消息管理-获取用户反馈列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getUserFeedBack(Map<String, Object> param);
 }

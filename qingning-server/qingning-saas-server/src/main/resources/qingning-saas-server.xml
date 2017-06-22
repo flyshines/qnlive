@@ -352,6 +352,30 @@
 					<param name="total_page" type="long" />
 				</outputs>
 			</function>
+			<!-- 店铺-获取反馈列表 -->
+			<function name="getFeedbackList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="course_name" type="string" require="N"/>
+					<param name="nick_name" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="user_id" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="avatar_address"  type="string" />
+						<param name="phone" type="string" />
+						<param name="comment" type="string" />
+						<param name="create_time" type="long" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
 
 
 		</default>
