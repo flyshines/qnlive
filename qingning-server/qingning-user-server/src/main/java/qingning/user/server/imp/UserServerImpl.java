@@ -2177,6 +2177,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     if(startIndex < 0){
                         startIndex = 0;
                     }
+                }else{
+                    break;
                 }
             }
             seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
@@ -2198,6 +2200,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }else{
                     key = false;
                 }
+            }else{
+                key = false;
             }
         }while (key);
         resultMap.put("series_list",seriesList(seriesIdList,jedis));
