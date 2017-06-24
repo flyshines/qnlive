@@ -600,7 +600,7 @@ public final class CacheUtils {
 		
 		Map<String, Object> keyMap = new HashMap<>();
         keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-        String lecturerSingleSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, keyMap);
+        String lecturerSingleSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP, keyMap);
         if(jedis.exists(lecturerSingleSetKey)){	//缓存中存在
         	//获取上一页最后一条数据的score
             if(lastSingleId != null && !"0".equals(lastSingleId)){	//不是获取第一页数据
