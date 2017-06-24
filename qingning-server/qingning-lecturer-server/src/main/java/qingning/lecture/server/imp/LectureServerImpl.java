@@ -1470,6 +1470,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Collections.reverse(transfer);
                 courseIdList.addAll(transfer);
             }
+            pageCount =  pageConts - courseIdList.size();
         }
         //</editor-fold>
 

@@ -1355,8 +1355,7 @@ public class CommonController extends AbstractController {
     /**
      * 管理后台登录
      * @param entity
-     * @param version
-     * @param appName
+      * @param appName
      * @return
      * @throws Exception
      */
