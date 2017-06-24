@@ -2446,18 +2446,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }else{
                     key = false;
                 }
+            }else{
+                key = false;
             }
         }while (key);
 
         if(seriesCourseIdList.size() > 0){
-            Map<String,String> queryParam = new HashMap<String,String>();
+
             Map<String,Object> map = new HashMap<String,Object>();
             map.put(Constants.CACHED_KEY_USER_FIELD, user_id);
             String userCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, map);//用来查询当前用户加入了那些课程
             long now = System.currentTimeMillis();
             for(String courseId : seriesCourseIdList){
+                Map<String,String> queryParam = new HashMap<String,String>();
                 queryParam.put("course_id", course_id);
-                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                Map<String, String> courseInfoMap =  CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(now, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                 if(jedis.sismember(userCourseKey, courseId)){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
