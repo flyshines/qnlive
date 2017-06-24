@@ -107,4 +107,6 @@ public interface ISaaSModuleServer {
      * @return
      */
     List<String> findShopUpList(String shop_id);
+
+    
 }

@@ -270,6 +270,9 @@
       <if test="create_date != null" >
         create_date = #{create_date,jdbcType=DATE},
       </if>
+      <if test="click_num != null" >
+        click_num = click_num + #{click_num},
+      </if>
       <if test="create_time != null" >
         create_time = #{create_time,jdbcType=TIMESTAMP},
       </if>

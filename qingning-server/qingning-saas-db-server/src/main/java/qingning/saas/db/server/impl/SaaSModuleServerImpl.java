@@ -205,4 +205,5 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public List<String> findShopUpList(String shop_id) {
         return saasCourseMapper.selectUpListByShopId(shop_id);
     }
+
 }
