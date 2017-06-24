@@ -223,7 +223,7 @@
 			</function>
 			
 			<!-- 课程-获取系列课程详情 -->
-			<function name="getSeriesCourseDetail">
+			<function name="findSeriesCourseDetail">
 				<auth>
 					<accessToken require="Y,000100" />
 				</auth>
@@ -239,8 +239,7 @@
 						<param name="buyer_count" type="long" fieldname="series_student_num" />
 						<param name="series_recommend" type="string" fieldname="series_remark" />
 						<param name="series_type" type="string" fieldname="series_course_type" />
-						<param name="update_cycle" type="string" />
-						<param name="update_course_count" type="long" />
+						<param name="update_course_count" type="long" fieldname="update_plan" />
 						<param name="price" type="double" fieldname="series_price" />
 					</param>
 					<param name="is_bought" type="string" />
@@ -315,7 +314,7 @@
 						<param name="single_img_url" type="string" fieldname="course_image" />
 						<param name="single_title" type="string" fieldname="course_title" />
 						<param name="browse_count" type="long" fieldname="click_num" />
-						<param name="message_count" type="long" />
+						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="intro" type="string" fieldname="course_remark" />
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="create_time" type="long" />
@@ -412,6 +411,55 @@
 					<param name="course_updown" type="string" format="1|2,000004"  require="Y,000100"/>
 				</inputs>
 				<outputs>
+				</outputs>
+			</function>
+			
+			<!-- 课程-获取图文课程内容 -->
+			<function name="vodArticleCourse">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="article_id" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+					<param name="article_info" type="map">
+						<param name="article_id" type="string" fieldname="course_id" />
+						<param name="article_img_url" type="string" fieldname="course_image" />
+						<param name="article_title" type="string" fieldname="course_title" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" fieldname="comment_num" />
+						<param name="content" type="string" fieldname="details" />
+						<param name="put_time" type="long" fieldname="create_time" />
+						<param name="price" type="double" fieldname="course_price" />
+					</param>
+					<param name="series_id" type="string" />
+					<param name="is_bought" type="string" />
+					<param name="share_url" type="string" />
+				</outputs>
+			</function>
+			
+			<!-- 课程-获取课程内容（音频或视频） -->
+			<function name="vodCourse">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+					<param name="course_info" type="map">
+						<param name="course_id" type="string" />
+						<param name="course_title" type="string" />
+						<param name="course_img_url" type="string" fieldname="course_image" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" fieldname="comment_num" />
+						<param name="put_time" type="long" fieldname="create_time" />
+						<param name="course_url" type="string" />
+						<param name="course_duration" type="long" />
+					</param>
+					<param name="series_id" type="string" />
+					<param name="share_url" type="string" />
 				</outputs>
 			</function>
 
