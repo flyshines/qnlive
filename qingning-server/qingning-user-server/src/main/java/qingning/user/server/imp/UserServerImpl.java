@@ -2080,26 +2080,34 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         String seriesListKey = Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM;
-        int offset = 0;//偏移值
-        String startIndex ;//坐标起始位
-        String endIndex ;//坐标结束位
-            if(MiscUtils.isEmpty(reqMap.get("series_id"))){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
-                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-                startIndex = courseScoreByRedis+"";//设置起始位置
-                endIndex = "-inf";//设置结束位置
-            }else{//传了series
-                Map<String,String> queryParam = new HashMap<String,String>();
-                queryParam.put("series_id", series_id);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
-                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(jedis.hget(seriesKey,"update_course_time")),  MiscUtils.convertObjectToLong(jedis.hget(seriesKey,"position")));//拿到当前课程在redis中的score
-                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
-                endIndex = "-inf";//设置结束位置
+
+        long startIndex = 0;//坐标起始位
+        long endIndex = -1;//坐标结束位
+        //判断用哪个缓存
+        long endSeriesSum = jedis.zcard(seriesListKey);//获取总共有多少个结束课程
+        if(MiscUtils.isEmpty(series_id)){//如果课程ID没有 那么就从最近结束的课程找起
+            endIndex = -1;
+            startIndex = endSeriesSum - pageCount;//利用总数减去我这边需要获取的数
+            if(startIndex < 0){
+                startIndex = 0;
             }
-            seriesIdSet = jedis.zrangeByScore(seriesListKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
-            for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
-                seriesIdList.add(seriesId);
+        }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+            long endRank = jedis.zrank(seriesListKey, series_id);
+            endIndex = endRank - 1;
+            if(endIndex >= 0){
+                startIndex = endIndex - pageCount + 1;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
             }
-        resultMap.put("series_list",seriesList(seriesIdList, jedis));
+        }
+        seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
+        for(String seriesId : seriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+            seriesIdList.add(seriesId);
+        }
+        List<Map<String, String>> maps = seriesList(seriesIdList, jedis);
+        Collections.reverse(maps);
+        resultMap.put("series_list",maps);
         return resultMap;
     }
 
@@ -2169,6 +2177,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     if(startIndex < 0){
                         startIndex = 0;
                     }
+                }else{
+                    break;
                 }
             }
             seriesIdSet = jedis.zrange(seriesListKey, startIndex, endIndex);
@@ -2190,6 +2200,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }else{
                     key = false;
                 }
+            }else{
+                key = false;
             }
         }while (key);
         resultMap.put("series_list",seriesList(seriesIdList,jedis));
