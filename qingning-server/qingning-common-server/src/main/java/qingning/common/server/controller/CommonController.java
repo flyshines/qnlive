@@ -167,6 +167,7 @@ public class CommonController extends AbstractController {
      *  如果有就进行正常跳转
      *  如果没有就进行手动授权
      *
+     *  1.3 修改：新增SaaS登录回调逻辑17-06-24
      *
      * @param request
      * @param response
@@ -176,10 +177,12 @@ public class CommonController extends AbstractController {
     public void weixinLogin(
             @RequestParam("code") String code,
             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+            @RequestParam(value="saas_login",defaultValue = "0") String saasLogin,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
         Map<String,String> map = new HashMap<>();
         map.put("code",code);
         map.put("state",state);
+        map.put("saas_login",saasLogin);
         String appName = state;
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",state);
         requestEntity.setParam(map);
@@ -188,9 +191,15 @@ public class CommonController extends AbstractController {
 
         Integer key = Integer.valueOf(resultMap.get("key").toString());
         if(key == 1){
-            //正常跳转到首页
             String userWeixinAccessToken = (String) resultMap.get("access_token");
-            response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
+
+            if("1".equals(saasLogin)){
+                //正常跳转到SaaS首页
+                response.sendRedirect("www.test.com"+userWeixinAccessToken);
+            }else{
+                //正常跳转到首页
+                response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
+            }
             return ;
         }
         //如果没有拿到
@@ -1355,7 +1364,6 @@ public class CommonController extends AbstractController {
     /**
      * 管理后台登录
      * @param entity
-     * @param version
      * @param appName
      * @return
      * @throws Exception

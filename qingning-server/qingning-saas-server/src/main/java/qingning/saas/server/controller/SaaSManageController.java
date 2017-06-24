@@ -35,29 +35,6 @@ public class SaaSManageController extends AbstractController {
         }
     }
 
-
-    /**
-     * 微信扫码 2 微信扫码登录
-     *
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/wechat/check_login", method = RequestMethod.GET)
-    public void wechatCheckLogin(HttpServletResponse resp,
-                                 @RequestParam(value = "code", defaultValue = "") String code) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatCheckLogin", null, null, null);
-        Map<String, Object> paramCode = new HashMap<>();
-        paramCode.put("code", code);
-        requestEntity.setParam(paramCode);
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-
-        Object redirectUrl = resultMap.get("redirectUrl");
-        if (redirectUrl != null) {
-            resp.sendRedirect(redirectUrl.toString());
-        }
-    }
-
     /**
      * 店铺-店铺信息
      *
@@ -431,6 +408,77 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }
+
+
+    /**
+     * 商品-系列-列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSeriesList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "status",defaultValue = "") String status,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(status))
+            paramCode.put("status", status);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 商品-系列-详情
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/{series_id}/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSeriesDetailInfo(
+            @PathVariable("series_id") String series_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesInfo", accessToken, version,appName);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("series_id", series_id);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 商品-系列-子课程列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/{series_id}/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSeriesCourseList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesCourseList", accessToken, version, appName);
+        return this.process(requestEntity, serviceManger, message);
     }
 
 }

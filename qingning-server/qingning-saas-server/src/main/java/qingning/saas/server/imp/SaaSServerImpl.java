@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
@@ -54,47 +55,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         Map<String, Object> result = new HashMap<>();
         result.put("redirectUrl", requestUrl);
-        return result;
-
-    }
-
-	/**
-	 * 扫码登录 2 登录
-	 * @param reqEntity
-	 * @return
-	 * @throws Exception
-	 */
-    @FunctionName("wechatCheckLogin")
-    public Map<String, Object>  wechatCheckLogin(RequestEntity reqEntity) throws Exception{
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String code = (String) reqMap.get("code");
-
-        log.debug("------微信SaaS登录授权回调------"+reqMap);
-
-        //根据微信回调的URL的参数去获取公众号的接口调用凭据和授权信息
-        Jedis jedis = jedisUtils.getJedis(Constants.HEADER_APP_NAME);//获取jedis对象
-
-        String access_token = jedis.hget(Constants.SERVICE_NO_ACCESS_TOKEN, "component_access_token");
-
-        JSONObject authJsonObj = WeiXinUtil.getServiceAuthInfo(access_token, code,Constants.HEADER_APP_NAME );
-        Object errCode = authJsonObj.get("errcode");
-        if (errCode != null ) {
-            log.error("微信授权回调 获取授权信息失败-----------"+authJsonObj);
-            throw new QNLiveException("150001");
-        }
-
-        JSONObject authauthorizer_info = authJsonObj.getJSONObject("authorization_info");
-
-        String authorizer_appid = authauthorizer_info.getString("authorizer_appid");
-
-        //获取公众号的头像 昵称 QRCode等相关信息
-        JSONObject serviceNoJsonObj = WeiXinUtil.getServiceAuthAccountInfo(access_token, authorizer_appid,Constants.HEADER_APP_NAME);
-        errCode = serviceNoJsonObj.get("errcode");
-        if (errCode != null ) {
-            log.error("微信授权回调 获取服务号相关信息失败-----------"+authJsonObj);
-            throw new QNLiveException("150001");
-        }
-        Map<String,Object> result = new HashMap<String,Object>();//返回重定向的url
         return result;
 
     }
@@ -834,5 +794,76 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("update_time",now);
         saaSModuleServer.updateCourse(reqMap);
     }
+
+
+    /**
+     * 店铺-系列列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesList")
+    public Map<String, Object> getSeriesList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取所有课程评论列表
+        Map<String, Object> userList = saaSModuleServer.getSeriesList(reqMap);
+        return userList;
+    }
+
+    /**
+     * 店铺-系列-详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesInfo")
+    public Map<String, String> getSeriesInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, String> resultMap = null;
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+        //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
+        if (jedis.exists(seriesKey)) {
+           resultMap = jedis.hgetAll(seriesKey);
+        } else {
+            //2.如果缓存中没有课程详情，则读取数据库
+            Map<String, Object> seriesDBMap = saaSModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            MiscUtils.converObjectMapToStringMap(seriesDBMap, resultMap);
+        }
+        return resultMap;
+    }
+
+    /**
+     * 店铺-系列-详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesCourseList")
+    public Map<String, String> getSeriesCourseList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, String> resultMap = null;
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+        //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
+        if (jedis.exists(seriesKey)) {
+           resultMap = jedis.hgetAll(seriesKey);
+        } else {
+            //2.如果缓存中没有课程详情，则读取数据库
+            Map<String, Object> seriesDBMap = saaSModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            MiscUtils.converObjectMapToStringMap(seriesDBMap, resultMap);
+        }
+        return resultMap;
+    }
+
 
 }
