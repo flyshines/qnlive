@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
@@ -351,10 +353,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
         	}
         	
+        	//生成用于缓存不存在时调用数据库的requestEntity
+        	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
+        	RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
+        	
             for(String seriesId : seriesSet){
-            	reqMap.put("seried_id", seriesId);
+            	readSeriesMap.put("seried_id", seriesId);
             	//获取系列课程详情
-            	Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, reqEntity, readSeriesOperation, jedis, true);
+            	Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
             	
             	//判断是否购买了该课程
             	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
@@ -495,10 +501,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
         	}
         */	
+        	//生成用于缓存不存在时调用数据库的requestEntity
+        	Map<String, Object> readSaasCourseMap = new HashMap<>();
+        	RequestEntity readSaasCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSaasCourseMap);
             for(String singleId : singleSet){
-            	reqMap.put("course_id", singleId);
+            	readSaasCourseMap.put("course_id", singleId);
             	//获取系列课程详情
-            	Map<String, String> singleMap = CacheUtils.readCourse(singleId, reqEntity, readCourseOperation, jedis, true);
+            	Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSaasCourseReqEntity, readCourseOperation, jedis, true);
             	
             	//判断是否购买了该课程
             /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
@@ -514,6 +523,154 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("single_info_list", singleInfoList);
         return resultMap;
 	}  
+    
+    /**
+     * H5_课程-获取系列课程详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSeriesCourseDetail")
+    public Map<String, Object>  findSeriesCourseDetail(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的series_id
+        String seriesId = (String) reqMap.get("series_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        //生成用于缓存不存在时调用数据库的requestEntity
+    	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
+    	RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
+    	readSeriesMap.put("seried_id", seriesId);
+		//获取系列课程详情
+		Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
+		
+		//判断是否购买了该课程
+	/*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+			seriesMap.put("buy_status", "0");
+		}else{	//用户已购买
+			seriesMap.put("buy_status", "1");
+		}*/
+		
+		//resultMap.put("is_bought", isBought);
+        resultMap.put("series_info", seriesMap);
+        return resultMap;
+	} 
+    
+    /**
+     * H5_课程-获取系列课程内容课程列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSeriesCourseList")
+    public Map<String, Object>  findSeriesCourseList(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	List<Map<String, String>> courseInfoList = new ArrayList<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的series_id
+        String seriesId = (String) reqMap.get("series_id");
+        reqMap.put("seried_id", seriesId);
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        //获取分页标识
+        String lastCourseId = reqMap.get("last_course_id").toString(); 
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //获取前端传递的系列课程类型	0：直播；1：音频；2：视频；3：图文；
+        String seriesType = reqMap.get("series_type").toString();
+        
+        /*
+         * 根据系列id查询缓存中系列内容课程id列表，需要传递分页标识
+         */
+        //TODO 等待调洪深接口：read系列课内容课程列表
+        Set<String> courseSet = null;//CacheUtils.readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount, jedis);
+        if(courseSet != null){
+        	logger.error("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
+        	String courseDetailKey = null;	//获取内容课程详情的key
+        	
+        	/*
+        	 * 获取用户购买的所有单品课程
+        	 * 返回 -> 键course_id；值1
+        	 */
+        /*	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
+        	selectSeriesStudentsMap.put("user_id", userId);
+        	selectSeriesStudentsMap.put("lecturer_id", lecturerId);
+        	List<Map<String, Object>> userSeriesList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
+        	
+        	
+        	 * 对用户购买的所有系列课程进行格式化成map，方便后期用seriesId进行查询
+        	 
+        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
+        	for(Map<String, Object> userSeriesMap : userSeriesList){
+        		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
+        	}
+        */	
+        	//生成用于缓存不存在时调用数据库的requestEntity
+        	Map<String, Object> readCourseMap = new HashMap<>();
+        	RequestEntity readCourseReqEntity = null;
+        	if("0".equals(seriesType)){	//直播类型的系列课，从t_course中查询
+        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
+        		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
+        		for(String courseId : courseSet){
+                	readCourseMap.put("course_id", courseId);
+                	//获取系列课程详情
+                	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	/*
+                	 * 对直播课程的返回字段进行重命名
+                	 */
+                	courseMap.put("course_image", courseMap.get("course_url").toString());
+                	courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
+                	
+                	//判断是否购买了该课程
+                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+                		seriesMap.put("buy_status", "0");
+                	}else{	//用户已购买
+                		seriesMap.put("buy_status", "1");
+                	}
+                */	
+                	courseInfoList.add(courseMap);
+                }
+        	}else{	//非直播类型的系列课，从t_saas_course中查询
+        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
+        		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+        		for(String courseId : courseSet){
+                	readCourseMap.put("course_id", courseId);
+                	//获取系列课程详情
+                	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	
+                	//判断是否购买了该课程
+                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+                		seriesMap.put("buy_status", "0");
+                	}else{	//用户已购买
+                		seriesMap.put("buy_status", "1");
+                	}
+                */	
+                	courseInfoList.add(courseMap);
+                }
+        	}
+        }
+        
+        resultMap.put("course_info_list", courseInfoList);
+        return resultMap;
+	} 
 
     /**
      * 店铺-单品列表
@@ -523,10 +680,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      */
     @FunctionName("getSingleList")
     public Map<String, Object> getSingleList(RequestEntity reqEntity) throws Exception{
-        Map<String, Object> resultMap = (Map)reqEntity.getParam();
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
-
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -535,6 +690,62 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return saaSModuleServer.getSingleList(reqMap);
 
     }
+
+    /**
+     * 店铺-用户列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getUserList")
+    public Map<String, Object> getUserList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        Map<String, Object> userList = saaSModuleServer.getShopUsers(reqMap);
+        return userList;
+    }
+
+    /**
+     * 店铺-消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getMessageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //获取所有课程评论列表
+        Map<String, Object> userList = saaSModuleServer.getCourseComment(reqMap);
+        return userList;
+    }
+    /**
+     * 店铺-消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getFeedbackList")
+    public Map<String, Object> getFeedbackList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //获取所有课程评论列表
+        Map<String, Object> userList = saaSModuleServer.getUserFeedBack(reqMap);
+        return userList;
+    }
+
     /**
      * 店铺-直播列表
      * @param reqEntity
@@ -545,4 +756,50 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
         return null;
     }
+    
+    /**
+     * H5_课程-获取单品课程详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSingleCourseDetail")
+    public Map<String, Object>  findSingleCourseDetail(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的single_id
+        String singleId = (String) reqMap.get("single_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        //生成用于缓存不存在时调用数据库的requestEntity
+    	Map<String, Object> readSingleMap = new HashMap<String, Object>();
+    	//从产品原型上看，调用该接口获取单品课程详情的来源只有非直播课程，所以直接从t_saas_course查找
+    	RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSingleMap);
+    	readSingleMap.put("course_id", singleId);
+		//获取系列课程详情
+		Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSingleReqEntity, readCourseOperation, jedis, true);
+		
+		/*
+         * TODO 判断是否购买了该课程
+         */
+		
+		/*
+		 * TODO 查找是否属于系列课
+		 */
+		
+		//resultMap.put("is_bought", isBought);
+		//resultMap.put("series_id", seriesId);
+        resultMap.put("single_info", singleMap);
+        
+        return resultMap;
+	} 
 }

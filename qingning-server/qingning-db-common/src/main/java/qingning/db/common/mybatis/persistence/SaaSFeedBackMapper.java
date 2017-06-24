@@ -6,17 +6,19 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
 import java.util.Map;
 
-public interface SaaSShopUserMapper {
-    int deleteByPrimaryKey(Integer id);
+public interface SaaSFeedBackMapper {
+    int deleteByPrimaryKey(String backId);
 
     int insert(Map<String,Object> record);
 
+    Map<String,Object> selectByPrimaryKey(String backId);
+
     int updateByPrimaryKey(Map<String,Object> record);
 
-    /**根据用户ID获取该用户店铺的所有用户
+    /**根据店铺获取店铺反馈
      * @param param
      * @param page
      * @return
      */
-    PageList<Map<String,Object>> selectUsersByShop(Map<String, Object> param, PageBounds page);
+    PageList<Map<String,Object>> selectFeedBackByShop(Map<String, Object> param, PageBounds page);
 }

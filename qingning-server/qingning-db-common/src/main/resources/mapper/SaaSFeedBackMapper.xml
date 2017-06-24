@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.SaaSFeedBackMapper" >
+  <sql id="Base_Column_List" >
+    back_id, user_id, avatar_address, nick_name, phone, create_time,content
+  </sql>
+  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_saas_feedback
+    where back_id = #{back_id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_saas_feedback
+    where back_id = #{back_id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="hashmap" >
+    insert into t_saas_feedback
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="back_id != null" >
+        back_id,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address,
+      </if>
+      <if test="nick_name != null" >
+        nick_name,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="back_id != null" >
+        #{back_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_id != null" >
+        #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar_address != null" >
+        #{avatar_address,jdbcType=VARCHAR},
+      </if>
+      <if test="nick_name != null" >
+        #{nick_name,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="hashmap" >
+    update t_saas_feedback
+    <set >
+      <if test="user_id != null" >
+        user_id = #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar_address != null" >
+        avatar_address = #{avatar_address,jdbcType=VARCHAR},
+      </if>
+      <if test="nick_name != null" >
+        nick_name = #{nick_name,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where back_id = #{back_id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectFeedBackByShop" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+        t.user_id,
+        t.nick_name,
+        t.avatar_address,
+        t.phone,
+        t.content AS comment,
+        t.create_time
+    FROM
+        `t_saas_feedback` t
+    WHERE
+        t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    ORDER BY t.create_time DESC
+  </select>
+</mapper>

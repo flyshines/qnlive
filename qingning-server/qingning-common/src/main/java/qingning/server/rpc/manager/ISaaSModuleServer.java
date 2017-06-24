@@ -68,15 +68,37 @@ public interface ISaaSModuleServer {
      * @return
      */
     void updateCourse(Map<String, Object> param);
- /**
-     * 根据课程id获取saas课程信息
+    /**
+     * 根据课程id获取saas课程信息，从t_saas_course查询
      * @param string
      * @return
      */
-	Map<String, Object> findCourseByCourseId(String courseId);
-
-   /**获取单品列表
+	Map<String, Object> findSaasCourseByCourseId(String courseId);
+	/**
+	 * 根据课程id获取直播课程信息，从t_course查询
+	 * @param string
+	 * @return
+	 */
+	Map<String, Object> findCourseByCourseId(String string);
+	/**获取单品列表
      * @param param
      * @return
      */
-    Map<String,Object> getSingleList(Map<String, Object> param);}
+    Map<String,Object> getSingleList(Map<String, Object> param);
+
+    /**用户管理-获取店铺用户列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getShopUsers(Map<String, Object> param);
+    /**消息管理-获取店铺评论列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getCourseComment(Map<String, Object> param);
+    /**消息管理-获取用户反馈列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getUserFeedBack(Map<String, Object> param);
+}
