@@ -297,4 +297,16 @@
     </if>
 
   </select>
+
+  <select id="selectUpListByShopId" parameterType="java.lang.String" resultType="java.lang.String">
+    SELECT
+      t.course_id
+    FROM
+    `t_saas_course` t
+    WHERE
+    t.shop_id = #{shopId,jdbcType=VARCHAR}
+    AND t.course_updown = '1'
+    AND series_or_course = '0'
+    ORDER BY t.update_time DESC
+  </select>
 </mapper>

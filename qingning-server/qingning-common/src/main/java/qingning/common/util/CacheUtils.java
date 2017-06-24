@@ -593,7 +593,7 @@ public final class CacheUtils {
 	 * @param jedis
 	 * @return
 	 */
-	public static Set<String> readLecturerSingleNotLiveUp(String lecturerId, String lastSingleId, int pageCount,
+	public static Set<String> readLecturerSingleNotLiveUp(String lecturerId, String lastSingleId, int pageCount,RequestEntity requestEntity,CommonReadOperation operation,
 			Jedis jedis) {
 		//返回结果集
 		Set<String> singleSet = null;
@@ -611,8 +611,25 @@ public final class CacheUtils {
     	        //分页获取单品课程中的id列表
             	singleSet = jedis.zrangeByScore(lecturerSingleSetKey, "-inf", "+inf", 0, pageCount);
             }
-        }
-        
+        }else{
+			//缓存不存在，更新缓存
+			try {
+				Object obj = operation.invokeProcess(requestEntity);
+				if(obj!=null){
+					List<String> list = (List)obj;
+					long timeStamp = System.currentTimeMillis();
+					//按数据库返回的数据进行排序
+					for(String courseId:list){
+						jedis.zadd(lecturerSingleSetKey,timeStamp++,courseId);
+					}
+				}else{
+					//未查到课程列表
+					return null;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		return singleSet;
 	}
 	

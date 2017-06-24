@@ -1,10 +1,8 @@
 package qingning.saas.server.imp;
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -14,9 +12,6 @@ import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ISaaSModuleServer;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Tuple;
-
-import java.net.URLEncoder;
 import java.util.*;
 
 public class SaaSServerImpl extends AbstractQNLiveServer {
@@ -29,6 +24,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     private ReadShopOperation readShopOperation;
     private ReadSeriesOperation readSeriesOperation;
     private ReadCourseOperation readCourseOperation;
+    private ReadSingleListOperation readSingleListOperation;
     private static Logger logger = LoggerFactory.getLogger(SaaSServerImpl.class);
 
     @Override
@@ -36,6 +32,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         if (saaSModuleServer == null) {
             saaSModuleServer = this.getRpcService("saaSModuleServer");
             readUserOperation = new ReadUserOperation(saaSModuleServer);
+            readSingleListOperation = new ReadSingleListOperation(saaSModuleServer);
             readShopOperation = new ReadShopOperation(saaSModuleServer);
             readSeriesOperation = new ReadSeriesOperation(saaSModuleServer);
             readCourseOperation = new ReadCourseOperation(saaSModuleServer);
@@ -181,6 +178,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         reqMap.put("create_time",new Date());
         reqMap.put("app_name",reqEntity.getAppName());
+        //默认下架
+        reqMap.put("status","2");
         reqMap.put("banner_id",MiscUtils.getUUId());
         reqMap.put("shop_id",shopId);
         //添加到数据库
@@ -401,6 +400,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
+        reqMap.put("series_or_course",0);
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
@@ -479,7 +479,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String lecturerId = shopMap.get("user_id");
         
         //根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
-        Set<String> singleSet = CacheUtils.readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount, jedis);
+        Set<String> singleSet = CacheUtils.readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount,reqEntity,readSingleListOperation,jedis);
         if(singleSet != null){
         	logger.error("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
         	String singleDetailKey = null;	//获取单品课程详情的key
@@ -801,5 +801,38 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("single_info", singleMap);
         
         return resultMap;
-	} 
+	}
+
+    /**
+     * 店铺-单品上下架
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("goodsSingleUpdown")
+    public void  goodsSingleUpdown(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String type = reqMap.get("course_updown").toString();
+        String courseId = reqMap.get("course_id").toString();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Date now = new Date();
+        long timestamp = now.getTime();
+        //该用户ID
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        //该讲师所有上架的单品ID
+        String lecturerSingleSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP, keyMap);
+        if("1".equals(type)){
+            //上架
+            jedis.zadd(lecturerSingleSetKey,timestamp,courseId);
+        }else{
+            //下架
+            jedis.zrem(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP,courseId);
+        }
+        //更新时间
+        reqMap.put("update_time",now);
+        saaSModuleServer.updateCourse(reqMap);
+    }
+
 }
