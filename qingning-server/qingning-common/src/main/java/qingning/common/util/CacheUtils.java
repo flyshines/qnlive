@@ -594,7 +594,7 @@ public final class CacheUtils {
 	 * @return
 	 */
 	public static Set<String> readLecturerSingleNotLiveUp(String lecturerId, String lastSingleId, int pageCount,RequestEntity requestEntity,CommonReadOperation operation,
-			Jedis jedis) {
+			Jedis jedis)  throws Exception{
 		//返回结果集
 		Set<String> singleSet = null;
 		
@@ -613,21 +613,17 @@ public final class CacheUtils {
             }
         }else{
 			//缓存不存在，更新缓存
-			try {
-				Object obj = operation.invokeProcess(requestEntity);
-				if(obj!=null){
-					List<String> list = (List)obj;
-					long timeStamp = System.currentTimeMillis();
-					//按数据库返回的数据进行排序
-					for(String courseId:list){
-						jedis.zadd(lecturerSingleSetKey,timeStamp++,courseId);
-					}
-				}else{
-					//未查到课程列表
-					return null;
+			Object obj = operation.invokeProcess(requestEntity);
+			if(obj!=null){
+				List<String> list = (List)obj;
+				long timeStamp = System.currentTimeMillis();
+				//按数据库返回的数据进行排序
+				for(String courseId:list){
+					jedis.zadd(lecturerSingleSetKey,timeStamp--,courseId);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			}else{
+				//未查到课程列表
+				return null;
 			}
 		}
 		return singleSet;
