@@ -430,32 +430,36 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         		generateRequestEntity(null, null, null, dbResultMap), readCourseOperation, jedis, true);
         if("1".equals(reqMap.get("updown"))){
             //<editor-fold desc="上架">
-            /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
             String courseId = (String)course.get("course_id");
             String roomId = course.get("room_id");
-            map.clear();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-            String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-            String classify_id = "";
-            if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
-                classify_id= Constants.COURSE_DEFAULT_CLASSINFY;
-            }else{
-                classify_id = reqMap.get("classify_id").toString();
-            }
-            double pos = MiscUtils.convertObjectToDouble(course.get("start_time"));
-            jedis.zadd(predictionKey, pos, courseId);
-            long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
-            //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
-            String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-            jedis.zadd(platformCourseList, lpos, courseId);
-            jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 0, courseId);//热门推荐 预告
-            map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
-            String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
-            jedis.zadd(classifyCourseKey, lpos, courseId);
+
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
+                map.clear();
+                map.put("series_id",reqMap.get("series_id"));
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
                 long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
                 jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
+            }else{
+                /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
+                map.clear();
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+                String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+                String classify_id = "";
+                if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
+                    classify_id= Constants.COURSE_DEFAULT_CLASSINFY;
+                }else{
+                    classify_id = reqMap.get("classify_id").toString();
+                }
+                double pos = MiscUtils.convertObjectToDouble(course.get("start_time"));
+                jedis.zadd(predictionKey, pos, courseId);
+                long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+                //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
+                String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+                jedis.zadd(platformCourseList, lpos, courseId);
+                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 0, courseId);//热门推荐 预告
+                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
+                String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
+                jedis.zadd(classifyCourseKey, lpos, courseId);
             }
             //4.6 将课程插入到平台分类列表 分类列表
             map.clear();
@@ -619,7 +623,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //加入讲师下架课程列表
             String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
             jedis.zadd(lectureCourseKey, lpos, course.get("course_id"));
-
+            resultMap.put("course_id", course.get("course_id"));
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                 jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
@@ -1138,23 +1142,35 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
                 mqRequestEntity.setParam(timerMap);
                 mqRequestEntity.setAppName(appName);
+
+                log.debug("清除所有定时任务 course_id:"+course_id);
                 mqRequestEntity.setFunctionName("processCourseNotStartCancelAll"); //课程未开播所有清除所有定时任务
-                this.mqUtils.sendMessage(mqRequestEntity);
-
-
-                log.debug("直播间开始定时任务 course_id:"+course_id);
-                mqRequestEntity.setFunctionName("processCourseStartIM");
                 this.mqUtils.sendMessage(mqRequestEntity);
 
                 log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+course_id);
                 mqRequestEntity.setFunctionName("processCourseLiveOvertime");
                 this.mqUtils.sendMessage(mqRequestEntity);
-
                 log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+course_id);
                 mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
                 this.mqUtils.sendMessage(mqRequestEntity);
-
-
+                if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+                    log.debug("提前五分钟开课提醒 course_id:"+course_id);
+                    if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+                        mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+                        this.mqUtils.sendMessage(mqRequestEntity);
+                    }
+                    //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                    log.debug("直播间开始发送IM  course_id:"+course_id);
+                    mqRequestEntity.setFunctionName("processCourseStartIM");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+                //提前24小时开课提醒
+                if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+                    mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
 
                 long lpos = MiscUtils.convertInfoToPostion(Long.parseLong(newStartTime), MiscUtils.convertObjectToLong(course.get("position")));
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION, lpos, reqMap.get("course_id").toString());
