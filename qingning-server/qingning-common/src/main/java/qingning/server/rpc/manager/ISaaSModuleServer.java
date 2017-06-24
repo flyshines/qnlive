@@ -107,4 +107,11 @@ public interface ISaaSModuleServer {
      * @return
      */
     List<String> findShopUpList(String shop_id);
+
+    /**获取系列课程列表
+     * @param param
+     * @return
+     */
+    Map<String,Object> getSeriesList(Map<String, Object> param);
+
 }

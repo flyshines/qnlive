@@ -238,4 +238,14 @@ public interface ICommonModuleServer {
 	 */
 	List<Map<String,Object>> findSeriesBySearch(Map<String,Object> record);
 
+	/**获取店铺信息
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
+
+	/**插入店铺信息
+	 * @param shop
+	 */
+	void insertShopInfo(Map<String, Object> shop);
 }

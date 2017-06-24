@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
@@ -57,12 +58,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     private ReadForceVersionOperation readForceVersionOperation;
     private ReadLecturerOperation readLecturerOperation;
     private ReadRoomDistributerOperation readRoomDistributerOperation;
+    private ReadShopOperation readShopOperation;
 
     @Override
     public void initRpcServer() {
         if(commonModuleServer == null){
             commonModuleServer = this.getRpcService("commonModuleServer");
             readDistributerOperation = new ReadDistributerOperation(commonModuleServer);
+            readShopOperation = new ReadShopOperation(commonModuleServer);
             readUserOperation = new ReadUserOperation(commonModuleServer);
             readCourseOperation = new ReadCourseOperation(commonModuleServer);
             readLiveRoomOperation = new ReadLiveRoomOperation(commonModuleServer);
@@ -354,6 +357,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<String, Object>();
         String subscribe = "0";
+        //是否是SaaS登录
+        boolean isSaas = "0".equals(reqMap.get("saas_login").toString())?false:true;
         resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
 
         //1.传递授权code及相关参数，调用微信验证code接口
@@ -397,8 +402,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 commonModuleServer.updateUserWebOpenIdByUserId(userMap);
             }
             processLoginSuccess(2, null, loginInfoMap, resultMap,app_name);//获取后台安全证书 access_token
+            if(isSaas){
+                //SaaS登录检查用户店铺逻辑
+                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
+                checkShopInfo(loginInfoMap,reqEntity,jedis);
+            }
             return resultMap;
         }else {
+            if(isSaas){
+                //SaaS登录为找到用户
+                throw new QNLiveException("000005");
+            }
             //1.2.1.2 如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid,app_name);
@@ -486,6 +500,27 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             processLoginSuccess(1, dbResultMap, null, resultMap,app_name);
             return resultMap;
         }
+    }
+
+    private void checkShopInfo(Map<String, Object> loginInfoMap,RequestEntity reqEntity,Jedis jedis) throws Exception{
+        String userId = loginInfoMap.get("user_id").toString();
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
+        if(shopInfo == null){
+            //创建店铺
+            Map<String,Object> shop = new HashMap<>();
+            shop.put("user_id",userId);
+            shop.put("shop_id",MiscUtils.getUUId());
+            shop.put("room_id",loginInfoMap.get("room_id")+"");
+            shop.put("user_name",loginInfoMap.get("user_name")+"");
+            shop.put("shop_name",loginInfoMap.get("user_name")+"的店铺");
+            shop.put("shop_remark","");
+            shop.put("shop_url","");
+            shop.put("status","1");
+            shop.put("create_time",new Date());
+            shop.put("shop_logo",loginInfoMap.get("avatar_address")+"的店铺");
+            commonModuleServer.insertShopInfo(shop);
+        }
+
     }
     //</editor-fold>
 
@@ -686,6 +721,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("avatar_address", userMap.get("avatar_address"));
         //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("nick_name", userMap.get("nick_name"));
+        //注册店铺用到
+        loginInfoMap.put("room_id",userMap.get("room_id"));
+        loginInfoMap.put("user_name",userMap.get("nick_name"));
+        loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
     }
 
     @SuppressWarnings("unchecked")

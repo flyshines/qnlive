@@ -167,5 +167,51 @@ public class SaaSController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    
+    /**
+     * 课程-获取图文课程内容
+     * @param articleId
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/course/article/vod/{article_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity vodArticleCourse(
+			@PathVariable("article_id") String articleId,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodArticleCourse", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("article_id", articleId);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
+    /**
+     * 课程-获取课程内容（音频或视频）
+     * @param courseId
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/course/vod/{course_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity vodCourse(
+			@PathVariable("course_id") String courseId,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodCourse", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("course_id", courseId);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 }

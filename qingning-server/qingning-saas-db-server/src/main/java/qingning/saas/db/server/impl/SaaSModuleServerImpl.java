@@ -205,4 +205,16 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public List<String> findShopUpList(String shop_id) {
         return saasCourseMapper.selectUpListByShopId(shop_id);
     }
+
+    @Override
+    public Map<String, Object> getSeriesList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> result = seriesMapper.selectSeriesListByLecturerId(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+
 }
