@@ -184,5 +184,29 @@
 		where series_id = #{series_id}
 	</update>
 
+	<select id="selectSeriesListByLecturerId" resultType="hashmap" parameterType="hashmap" >
+		SELECT
+			t.series_id,
+			t.series_title,
+			t.series_img,
+			t.series_course_type,
+			t.create_time,
+			t.series_price,
+			t.series_amount,
+			t.series_student_num,
+			t.updown,
+			t.series_status
+		FROM
+			`t_series` t
+		WHERE
+			t.lecturer_id = #{user_id}
+		<if test="status != null" >
+			AND t.updown=#{status}
+		</if>
+		<if test="keyword != null" >
+			AND t.series_title like '%${keyword}%'
+		</if>
+		ORDER BY t.update_course_time DESC
+	</select>
 
 </mapper>

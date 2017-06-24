@@ -102,6 +102,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private AdminUserMapper adminUserMapper;
 	@Autowired(required = true)
 	private SeriesMapper seriesMapper;
+	@Autowired(required = true)
+	private SaaSShopMapper shopMapper;
 
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
@@ -1017,5 +1019,15 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findSeriesBySearch(Map<String, Object> record) {
 		return seriesMapper.findSeriesBySearch(record);
+	}
+
+	@Override
+	public Map<String, Object> getShopInfo(Map<String, Object> reqMap) {
+		return shopMapper.selectByPrimaryKey(reqMap);
+	}
+
+	@Override
+	public void insertShopInfo(Map<String, Object> shop) {
+		shopMapper.insert(shop);
 	}
 }
