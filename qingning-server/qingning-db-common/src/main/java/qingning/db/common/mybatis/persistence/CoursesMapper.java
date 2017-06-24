@@ -25,5 +25,4 @@ public interface CoursesMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap);
-
 }

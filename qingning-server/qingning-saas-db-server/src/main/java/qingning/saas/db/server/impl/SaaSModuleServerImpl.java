@@ -200,4 +200,9 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_page",result.getPaginator().getTotalPages());
         return res;
     }
+
+    @Override
+    public List<String> findShopUpList(String shop_id) {
+        return saasCourseMapper.selectUpListByShopId(shop_id);
+    }
 }

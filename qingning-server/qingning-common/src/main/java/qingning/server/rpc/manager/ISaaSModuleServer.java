@@ -101,4 +101,10 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getUserFeedBack(Map<String, Object> param);
+
+    /**获取店铺已上架的单品列表
+     * @param shop_id
+     * @return
+     */
+    List<String> findShopUpList(String shop_id);
 }

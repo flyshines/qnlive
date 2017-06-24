@@ -459,5 +459,4 @@
 	</where>
 	limit 20
   </select>
-  
 </mapper>
