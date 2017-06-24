@@ -213,7 +213,9 @@ public final class Constants {
 	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
 
 
-
+	//讲师所有的单品课程（直播间类型除外）
+   public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE:UP";//zset 讲师所有上架单品（直播课除外） (series_id,上架时间)
+   public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE";//zset 讲师所有下架单品（直播课除外） (series_id,下架时间)
 
 
 
