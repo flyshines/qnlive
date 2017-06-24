@@ -564,7 +564,20 @@
 					<param name="page_count" type="string" />
 				</inputs>
 				<outputs>
-
+					<param name="course_list" type="list">
+						<param name="course_id" type="string"/>
+						<param name="status" type="string"/>
+						<param name="course_url" type="string"/>
+						<param name="course_title" type="rstring"/>
+						<param name="room_id" type="string"/>
+						<param name="start_time" type="long"/>
+						<param name="student_num" type="string"/>
+						<param name="lecturer_nick_name" type="rstring"/>
+						<param name="lecturer_id" type="string"/>
+						<param name="student" type="string"/>
+						<param name="series_course_updown" type="string"/>
+						<param name="course_updown" type="string"/>
+					</param>
 				</outputs>
 			</function>
 			</default>
