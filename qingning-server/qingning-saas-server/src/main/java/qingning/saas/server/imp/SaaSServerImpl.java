@@ -181,6 +181,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         reqMap.put("create_time",new Date());
         reqMap.put("app_name",reqEntity.getAppName());
+        //默认下架
+        reqMap.put("status","2");
         reqMap.put("banner_id",MiscUtils.getUUId());
         reqMap.put("shop_id",shopId);
         //添加到数据库
