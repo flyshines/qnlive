@@ -907,4 +907,26 @@ public class LectureController extends AbstractController {
 	}
 
 
+	/**
+	 * 设置单品
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/series/{course_id}/course", method = RequestMethod.PUT)
+	public
+	@ResponseBody ResponseEntity updateSeriesCourseLonely(
+			HttpEntity<Object> entity,
+			@PathVariable("course_id") String course_id,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateSeriesCourseLonely", accessToken, version,appName);
+		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 }

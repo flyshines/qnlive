@@ -628,5 +628,35 @@ public final class CacheUtils {
 		}
 		return singleSet;
 	}
+
+	/**
+	 * 读取系列的子课程id列表
+	 * @param seriesId 系列id
+	 * @param lastCourseId 上一页最后一条数据的课程id
+	 * @param pageCount 每页数量
+	 * @param jedis
+	 * @return
+	 */
+	public static Set<String> readSeriesCourseUp(String seriesId, String lastCourseId, int pageCount, Jedis jedis) 
+			throws Exception{
+		//返回结果集
+		Set<String> courseSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
+        String seriesCourseSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, keyMap);
+        if(jedis.exists(seriesCourseSetKey)){	//缓存中存在
+        	//获取上一页最后一条数据的score
+            if(lastCourseId != null && !"0".equals(lastCourseId)){	//不是获取第一页数据
+    	        Double lastScore = jedis.zscore(seriesCourseSetKey, lastCourseId);
+    	        //分页获取系列的课程的id列表
+    	        courseSet = jedis.zrangeByScore(seriesCourseSetKey, "(" + lastScore, "+inf", 0, pageCount);
+            }else{	//获取第一页数据
+    	        //分页获取系列的课程的id列表
+            	courseSet = jedis.zrangeByScore(seriesCourseSetKey, "-inf", "+inf", 0, pageCount);
+            }
+        }
+		return courseSet;
+	}
 	
 }

@@ -146,4 +146,8 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	Map<String, Object> updateSeries(Map<String,Object> record);
+
+	Map<String, Object> updateSeriesCourse(Map<String, Object> course);
+
+	Map<String, Object> updateSaasSeriesCourse(Map<String, Object> course);
 }

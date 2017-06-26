@@ -1355,8 +1355,14 @@ public class CommonController extends AbstractController {
         int i = str.indexOf("\"", user_name+username.length()+1);
         String substring = str.substring(user_name+username.length(), i);
         String url = "http://open.weixin.qq.com/qr/code/?username="+substring;
+
+        String nickename = " nickname = \"";
+        int nicke_name = str.indexOf(" nickname = \"");
+        int a = str.indexOf("\"", nicke_name+nickename.length()+1);
+        String weChatNickeName = str.substring(nicke_name+nickename.length(), a);
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("url",url);
+        resultMap.put("nickname",weChatNickeName);
         responseEntity.setReturnData(resultMap);
         return responseEntity;
     }

@@ -72,6 +72,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private SeriesMapper seriesMapper;
 
+	@Autowired(required = true)
+	private SaaSCourseMapper saaSCourseMapper;
+
+
+
+
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	/**
@@ -178,7 +184,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		}else if("2".equals(course_type)){
 			course.put("course_price", (Long)reqMap.get("course_price"));
 		}
-
 		if(!MiscUtils.isEmpty(reqMap.get("series_id"))){//是系列课
 			course.put("series_id", reqMap.get("series_id"));
 			course.put("course_updown","0");
@@ -187,7 +192,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 			course.put("series_course_updown","0");
 			course.put("course_updown",reqMap.get("updown"));
 		}
-
 		Date now = new Date();
 		course.put("create_time", now);
 		course.put("create_date", now);
@@ -646,6 +650,32 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Date now = new Date();
 		record.put("update_time",now);
 		int updateCount = seriesMapper.updateSeries(record);
+		Map<String, Object> dbResultMap = new HashMap<String, Object>();
+		dbResultMap.put("update_count", updateCount);
+		dbResultMap.put("update_time", now);
+		return dbResultMap;
+	}
+
+	@Override
+	public Map<String, Object> updateSeriesCourse(Map<String, Object> course) {
+		Integer updateCount = null;
+		Date now = new Date();
+		course.put("update_time",now);
+		updateCount=coursesMapper.updateCourse(course);
+
+		Map<String, Object> dbResultMap = new HashMap<String, Object>();
+		dbResultMap.put("update_count", updateCount);
+		dbResultMap.put("update_time", now);
+		return dbResultMap;
+	}
+
+	@Override
+	public Map<String, Object> updateSaasSeriesCourse(Map<String, Object> course) {
+		Integer updateCount = null;
+		Date now = new Date();
+		course.put("update_time",now);
+		updateCount=saaSCourseMapper.updateByPrimaryKey(course);
+
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
 		dbResultMap.put("update_count", updateCount);
 		dbResultMap.put("update_time", now);
