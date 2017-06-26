@@ -114,4 +114,9 @@ public interface ISaaSModuleServer {
      */
     Map<String,Object> getSeriesList(Map<String, Object> param);
 
+    /**获取轮播图信息
+     * @param bannerId
+     * @return
+     */
+    Map<String,Object> getShopBannerInfo(String bannerId);
 }

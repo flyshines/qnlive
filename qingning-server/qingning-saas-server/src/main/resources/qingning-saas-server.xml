@@ -24,6 +24,7 @@
 				<inputs>
 				</inputs>
 				<outputs>
+
 				</outputs>
 			</function>
 			<!--店铺-店铺信息-->
@@ -72,8 +73,9 @@
 					<param name="banner_name" type="string" require="Y,000100"/>
 					<param name="banner_img" type="string" require="Y,000100"/>
 					<param name="link_type" type="string" require="Y,000100" format="1|2|3|4,000004" />
-					<param name="link_id" type="string" require="N"/>
-					<param name="position" type="long" require="N"/>
+					<param name="link_id" type="string" require="N" />
+					<param name="link_to" type="string" require="N" />
+					<param name="position" type="long" require="N" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -93,6 +95,26 @@
 					<param name="position" type="long" require="N"/>
 				</inputs>
 				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-轮播图信息-->
+			<function name="shopBannerInfo">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="banner_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+						<param name="banner_id" type="string" />
+						<param name="banner_img" type="string" />
+						<param name="banner_name" type="string" />
+						<param name="banner_title" type="string" />
+						<param name="link_type" type="string" />
+						<param name="link_to" type="string" />
+						<param name="link_id" type="string" />
+						<param name="position" type="long" require="N"/>
 				</outputs>
 			</function>
 			<!--店铺-轮播图上下架-->
@@ -116,11 +138,11 @@
 				</auth>
 				<inputs>
 					<param name="course_title" type="string" require="Y,000100"/>
-					<param name="course_url" type="string"  require="Y,000100"/>
+					<param name="course_url" type="string" />
 					<param name="type" type="string" format="1|2|3,000004"/>
 					<param name="course_image" type="string"  require="Y,000100"/>
-					<param name="course_price" type="double"  require="Y,000100"/>
-					<param name="details" type="string"  require="Y,000100"/>
+					<param name="price" type="double" default="0" />
+					<param name="details" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -136,7 +158,7 @@
 					<param name="course_title" type="string" require="N"/>
 					<param name="course_url" type="string"  require="N"/>
 					<param name="course_image" type="string"  require="N"/>
-					<param name="course_price" type="double"  require="N"/>
+					<param name="price" type="double"  require="N"/>
 					<param name="details" type="string"  require="N"/>
 				</inputs>
 				<outputs>
@@ -146,7 +168,7 @@
 			<!-- 店铺-获取店铺轮播列表 -->
 			<function name="queryShopBannerList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100" />
@@ -165,7 +187,7 @@
 			<!-- 店铺-获取店铺系列课程列表 -->
 			<function name="findShopSeriesList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100"/>
@@ -189,7 +211,7 @@
 			<!-- 店铺-获取店铺单品课程（直播除外）列表 -->
 			<function name="findShopSingleCourseList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100"/>
@@ -213,7 +235,7 @@
 			<!-- 课程-获取系列课程详情 -->
 			<function name="findSeriesCourseDetail">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y,000100"/>
@@ -237,7 +259,7 @@
 			<!-- 课程-获取系列课程内容课程列表 -->
 			<function name="findSeriesCourseList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y,000100"/>
@@ -261,7 +283,7 @@
 			<!-- 店铺-获取单品列表 -->
 			<function name="getSingleList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
@@ -282,6 +304,7 @@
 						<param name="sale_num" type="long" />
 						<param name="status" fieldname="course_updown" type="string" />
 						<param name="course_url" type="string" />
+						<param name="share_url" type="string" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
@@ -291,7 +314,7 @@
 			<!-- 课程-获取单品课程详情 -->
 			<function name="findSingleCourseDetail">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="single_id" type="string" require="Y"/>
@@ -315,7 +338,7 @@
 			<!-- 店铺-获取用户列表 -->
 			<function name="getUserList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
@@ -341,7 +364,7 @@
 			<!-- 店铺-获取留言板列表 -->
 			<function name="getMessageList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
@@ -367,7 +390,7 @@
 			<!-- 店铺-获取反馈列表 -->
 			<function name="getFeedbackList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
@@ -391,7 +414,8 @@
 			<!-- 店铺-获取系列列表 -->
 			<function name="getSeriesList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
@@ -420,7 +444,8 @@
 			<!-- 店铺-获取系列列表 -->
 			<function name="getSeriesInfo">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y"/>
@@ -444,7 +469,8 @@
 			<!-- 店铺-获取系列子课程列表 -->
 			<function name="getSeriesCourseList">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
+					<timesLimit millisecond="500" />
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y"/>
@@ -461,6 +487,7 @@
 						<param name="comment_num" fieldname="series_amount" default="0" type="long" />
 						<param name="status" fieldname="update_plan" type="string" />
 						<param name="is_single" fieldname="series_student_num" default="0" type="string" />
+						<param name="details"  type="string" />
 					</param>
 				</outputs>
 			</function>
@@ -477,11 +504,35 @@
 				<outputs>
 				</outputs>
 			</function>
+			<!--店铺-单品详情-->
+			<function name="getShopSingleInfo">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+					<param name="course_id" type="string" />
+					<param name="course_title" type="string" />
+					<param name="course_image" type="string" />
+					<param name="type"  fieldname="goods_type" type="string" />
+					<param name="create_time" type="long" />
+					<param name="price" fieldname="course_price" type="double" />
+					<param name="total_income" fieldname="course_amount" type="double" />
+					<param name="sale_num" type="long" />
+					<param name="status" fieldname="course_updown" type="string" />
+					<param name="course_url" type="string" />
+					<param name="share_url" type="string" />
+					<param name="details" type="string" />
+				</outputs>
+			</function>
 			
 			<!-- 课程-获取图文课程内容 -->
 			<function name="vodArticleCourse">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="article_id" type="string" require="Y"/>
@@ -506,7 +557,7 @@
 			<!-- 课程-获取课程内容（音频或视频） -->
 			<function name="vodCourse">
 				<auth>
-					<accessToken require="Y,000100" />
+					<accessToken require="Y" />
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y"/>
