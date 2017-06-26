@@ -70,7 +70,7 @@
     		and is_use = #{is_use}
     	</if>
     </where>
-    order by position = -1 ASC<!-- -1排最后 -->, 
+    order by position = -1 ASC<!-- -1排最后，主要是用于把“其他”放在最后 -->, 
     	position = 0 ASC<!-- 0排倒数第二 -->, 
     	position ASC <!-- position递增 -->
   </select>

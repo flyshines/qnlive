@@ -252,9 +252,6 @@
       <if test="sale_num != null" >
         sale_num = #{sale_num,jdbcType=BIGINT},
       </if>
-      <if test="click_num != null" >
-        click_num = #{click_num,jdbcType=BIGINT},
-      </if>
       <if test="series_or_course != null" >
         series_or_course = #{series_or_course,jdbcType=CHAR},
       </if>
@@ -274,7 +271,7 @@
         create_date = #{create_date,jdbcType=DATE},
       </if>
       <if test="click_num != null" >
-        click_num = click_num + #{click_num},
+        click_num = click_num + #{click_num, jdbcType=BIGINT},
       </if>
       <if test="create_time != null" >
         create_time = #{create_time,jdbcType=TIMESTAMP},

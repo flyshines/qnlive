@@ -1,6 +1,8 @@
 package qingning.saas.server.imp;
 
 import com.alibaba.fastjson.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -441,7 +443,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
         Set<String> singleSet = CacheUtils.readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount,reqEntity,readSingleListOperation,jedis);
         if(singleSet != null){
-        	logger.error("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
+        	logger.info("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
         	String singleDetailKey = null;	//获取单品课程详情的key
         	
         	/*
@@ -565,17 +567,17 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 根据系列id查询缓存中系列内容课程id列表，需要传递分页标识
          */
-        //TODO 等待调洪深接口：read系列课内容课程列表
-        Set<String> courseSet = null;//CacheUtils.readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount, jedis);
+        //等待调洪深接口：read系列课内容课程列表
+        Set<String> courseSet = CacheUtils.readSeriesCourseUp(seriesId, lastCourseId, pageCount, jedis);
         if(courseSet != null){
-        	logger.error("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
+        	logger.info("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
         	String courseDetailKey = null;	//获取内容课程详情的key
         	
         	//生成用于缓存不存在时调用数据库的requestEntity
         	Map<String, Object> readCourseMap = new HashMap<>();
         	RequestEntity readCourseReqEntity = null;
         	if("0".equals(seriesType)){	//直播类型的系列课，从t_course中查询
-        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
+        		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
@@ -590,7 +592,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 	courseInfoList.add(courseMap);
                 }
         	}else{	//非直播类型的系列课，从t_saas_course中查询
-        		logger.error("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
+        		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
@@ -721,7 +723,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     	readSingleMap.put("course_id", singleId);
 		//获取课程详情
 		Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSingleReqEntity, readCourseOperation, jedis, true);
-		if(singleMap == null){
+		if(singleMap == null || singleMap.isEmpty()){
 			logger.error("saas_H5_课程-获取单品课程详情>>>>课程不存在");
 			throw new QNLiveException("100004");
 		}
@@ -742,14 +744,18 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}
 		
 		/*
-         * TODO Saas课程的浏览量+1，更新缓存和数据库
+         * Saas课程的浏览量+1，更新缓存和数据库
          */
         Map<String, Object> updateCourseMap = new HashMap<>();
         updateCourseMap.put("course_id", singleId);
         updateCourseMap.put("click_num", 1);	//点击次数，置1是用于sql执行加1操作
         //更新数据库
         saaSModuleServer.updateCourse(updateCourseMap);
-        //TODO 更新缓存
+        //更新缓存
+        Map<String, Object> readCourseMap = new HashMap<String, Object>();
+        readCourseMap.put(Constants.CACHED_KEY_COURSE_FIELD, singleId);
+        String readCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, readCourseMap);
+        jedis.hincrBy(readCourseKey, "click_num", 1);	//缓存中点击数+1
 		
         resultMap.put("single_info", singleMap);
         
