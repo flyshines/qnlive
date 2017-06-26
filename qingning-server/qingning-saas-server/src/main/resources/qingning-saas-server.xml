@@ -204,7 +204,7 @@
 						<param name="buy_status" type="string" />
 						<param name="single_title" type="string" fieldname="course_title" />
 						<param name="browse_count" type="long" fieldname="student_num" />
-						<param name="message_count" type="long" fieldname="" />
+						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="price" type="double" fieldname="course_price" />
 					</param>
 				</outputs>
@@ -252,7 +252,7 @@
 						<param name="course_url" type="string" />
 						<param name="course_title" type="string" />
 						<param name="browse_count" type="long" fieldname="click_num" />
-						<param name="message_count" type="long" />
+						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="put_time" type="long" fieldname="create_time" />
 					</param>
 				</outputs>
