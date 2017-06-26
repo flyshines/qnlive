@@ -514,15 +514,19 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		//获取系列课程详情
 		Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
 		
-		//TODO 判断是否购买了该课程
-	/*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
-			seriesMap.put("buy_status", "0");
+		/*
+		 * 判断是否购买了该课程
+		 */
+		Map<String, Object> selectSeriesStudentsMap = new HashMap<>();
+		selectSeriesStudentsMap.put("user_id", userId);
+    	selectSeriesStudentsMap.put("series_id", seriesId);
+		List<Map<String, Object>> seriesStudentList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
+		if(seriesStudentList == null || seriesStudentList.size() == 0){	//用户未购买
+			resultMap.put("is_bought", "0");
 		}else{	//用户已购买
-			seriesMap.put("buy_status", "1");
-		}*/
+			resultMap.put("is_bought", "1");
+		}
 		
-		
-		//resultMap.put("is_bought", isBought);
         resultMap.put("series_info", seriesMap);
         return resultMap;
 	} 
@@ -567,23 +571,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	logger.error("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
         	String courseDetailKey = null;	//获取内容课程详情的key
         	
-        	/*
-        	 * 获取用户购买的所有单品课程
-        	 * 返回 -> 键course_id；值1
-        	 */
-        /*	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
-        	selectSeriesStudentsMap.put("user_id", userId);
-        	selectSeriesStudentsMap.put("lecturer_id", lecturerId);
-        	List<Map<String, Object>> userSeriesList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
-        	
-        	
-        	 * 对用户购买的所有系列课程进行格式化成map，方便后期用seriesId进行查询
-        	 
-        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
-        	for(Map<String, Object> userSeriesMap : userSeriesList){
-        		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
-        	}
-        */	
         	//生成用于缓存不存在时调用数据库的requestEntity
         	Map<String, Object> readCourseMap = new HashMap<>();
         	RequestEntity readCourseReqEntity = null;
@@ -592,7 +579,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
-                	//获取系列课程详情
+                	//获取课程详情
                 	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
                 	/*
                 	 * 对直播课程的返回字段进行重命名
@@ -600,13 +587,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 	courseMap.put("course_image", courseMap.get("course_url").toString());
                 	courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
                 	
-                	//判断是否购买了该课程
-                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
-                		seriesMap.put("buy_status", "0");
-                	}else{	//用户已购买
-                		seriesMap.put("buy_status", "1");
-                	}
-                */	
                 	courseInfoList.add(courseMap);
                 }
         	}else{	//非直播类型的系列课，从t_saas_course中查询
@@ -614,16 +594,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
-                	//获取系列课程详情
+                	//获取课程详情
                 	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
                 	
-                	//判断是否购买了该课程
-                /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
-                		seriesMap.put("buy_status", "0");
-                	}else{	//用户已购买
-                		seriesMap.put("buy_status", "1");
-                	}
-                */	
                 	courseInfoList.add(courseMap);
                 }
         	}
@@ -767,6 +740,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			 */
 			resultMap.put("series_id", singleMap.get("series_id"));
 		}
+		
+		/*
+         * TODO Saas课程的浏览量+1，更新缓存和数据库
+         */
+        Map<String, Object> updateCourseMap = new HashMap<>();
+        updateCourseMap.put("course_id", singleId);
+        updateCourseMap.put("click_num", 1);	//点击次数，置1是用于sql执行加1操作
+        //更新数据库
+        saaSModuleServer.updateCourse(updateCourseMap);
+        //TODO 更新缓存
 		
         resultMap.put("single_info", singleMap);
         

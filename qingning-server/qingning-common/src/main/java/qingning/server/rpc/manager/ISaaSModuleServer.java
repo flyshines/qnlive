@@ -114,4 +114,5 @@ public interface ISaaSModuleServer {
      */
     Map<String,Object> getSeriesList(Map<String, Object> param);
 
+
 }

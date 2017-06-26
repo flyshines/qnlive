@@ -526,6 +526,30 @@
 					<param name="share_url" type="string" />
 				</outputs>
 			</function>
+			
+			<!-- 课程-获取课程留言列表 -->
+			<function name="findCourseMessageList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+					<param name="course_info" type="map">
+						<param name="course_id" type="string" />
+						<param name="course_title" type="string" />
+						<param name="course_img_url" type="string" fieldname="course_image" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" fieldname="comment_num" />
+						<param name="put_time" type="long" fieldname="create_time" />
+						<param name="course_url" type="string" />
+						<param name="course_duration" type="long" />
+					</param>
+					<param name="series_id" type="string" />
+					<param name="share_url" type="string" />
+				</outputs>
+			</function>
 
 		</default>
 		<version num="1.0.0" class="">
