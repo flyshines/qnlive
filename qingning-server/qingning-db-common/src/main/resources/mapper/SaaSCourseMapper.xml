@@ -207,6 +207,9 @@
       <if test="series_id != null" >
         series_id = #{series_id,jdbcType=VARCHAR},
       </if>
+      <if test="series_id == null" >
+        series_id = NULL ,
+      </if>
       <if test="course_title != null" >
         course_title = #{course_title,jdbcType=VARCHAR},
       </if>

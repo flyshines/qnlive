@@ -799,9 +799,33 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="query_type" type="string" require="Y,000100" />
 					<param name="course_id" type="string"  require="Y,000100" />
-					<param name="series_id" type="string" />
+					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
+					<param name="classify_id" type="string" require="Y" default="9" />
+					<param name="course_price" type="double" require="N" validate="(course_type,course_price,course_password)=>{
+						if(utils.isEqual('1', course_type)){
+							if(utils.isEmpty(course_password)){
+								return false;
+							}
+						} else if(utils.isEqual('2', course_type)){
+							if(utils.isEmpty(course_price)){
+								return false;
+							}
+						}
+						return true;
+					},000100"/>
+					<param name="course_password" type="string" require="N" validate="(course_type,course_price,course_password)=>{
+						if(utils.isEqual('1', course_type)){
+							if(utils.isEmpty(course_password)){
+								return false;
+							}
+						} else if(utils.isEqual('2', course_type)){
+							if(utils.isEmpty(course_price)){
+								return false;
+							}
+						}
+						return true;
+					},000100"/>
 				</inputs>
 				<outputs>
 				</outputs>

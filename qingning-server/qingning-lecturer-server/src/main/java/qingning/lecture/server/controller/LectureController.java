@@ -923,7 +923,7 @@ public class LectureController extends AbstractController {
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-			@RequestHeader("version") String version) throws Exception {
+		@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "updateSeriesCourseLonely", accessToken, version,appName);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
 		requestEntity.setParam(entity.getBody());
