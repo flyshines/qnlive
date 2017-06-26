@@ -3,6 +3,7 @@ package qingning.lecture.server.imp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import javafx.beans.binding.ObjectBinding;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -436,6 +437,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
                 map.clear();
                 map.put("series_id",reqMap.get("series_id"));
+                map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,userId);
+                String lecturerSeriesUp = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
+                String lecturerSeriesDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);
+                if(jedis.zrank(lecturerSeriesUp,reqMap.get("series_id").toString()) == null && jedis.zrank(lecturerSeriesDown,reqMap.get("series_id").toString()) == null ){
+                    throw new QNLiveException("210001");
+                }
+
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
                 long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
                 jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
@@ -3202,6 +3210,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         String query_type = reqMap.get("query_type").toString();//查询类型 0 课程 1系列
+
+
         String course_id = reqMap.get("course_id").toString();//课程id
         String series_id = reqMap.get("series_id").toString();//系列id
 
@@ -3223,15 +3233,109 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateSeriesCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
+        String user_id =  AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> resltMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(appName);
         String query_type = reqMap.get("query_type").toString();//查询类型 0 课程 1系列
-        String id = reqMap.get("id").toString();//根据查询类型进行判断 是课程id 还是系列id
+        String course_id = reqMap.get("course_id").toString();
+        Map<String,Object> map = new HashMap<>();
+        map.put("course_id",course_id);
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        Map<String, String> courseInfo = jedis.hgetAll(courseKey);
+        jedis.del(courseKey);
+        if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
+            throw new QNLiveException("100013");
+        }
+        Map<String,Object> course = new HashMap<>();
+        course.put("course_id",course_id);
+        if(query_type.equals("1")){//移除系列
+            map.clear();
+            String oldSeriesId =courseInfo.get("series_id");
+            map.put("series_id",oldSeriesId);
+            String series_course_updown = courseInfo.get("series_course_updown");
+            String course_updown =courseInfo.get("course_updown");
 
+            course.put("series_course_updown","0");
+            course.put("series_id","");
+            course.put("course_updown","2");
+            resltMap = lectureModuleServer.updateSeriesCourse(course);
+            //删除系列缓存中的课程
+            if(series_course_updown.equals("1")){
+                String lecturerSeriesCourseUp = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+                jedis.zrem(lecturerSeriesCourseUp,course_id);
+            }else if(series_course_updown.equals("2")){
+                String lecturerSeriesCourseDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
+                jedis.zrem(lecturerSeriesCourseDown,course_id);
+            }
 
+            if(course_updown.equals("0")){//之前没有在单品上架
+                //先默认设置成下架
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfo.get(Constants.CACHED_KEY_LECTURER_FIELD));
+                long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(courseInfo.get("position")));
+                //加入讲师下架课程列表
+                String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+                jedis.zadd(lectureCourseKey, lpos, course_id);
+            }
+            Map<String,Object> query = new HashMap<>();
+            query.put("course_id", course_id);
+            CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, true);
 
+        }else if(query_type.equals("0")){//加入系列
 
-        return reqMap ;
+            if(MiscUtils.isEmpty(reqMap.get("series_id"))){
+                throw new QNLiveException("000004");
+            }else{//判断系列是否属于这个用户
+                String series_id = reqMap.get("series_id").toString();
+                map.clear();
+                map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);
+                String lecturerSeriesUp = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
+                String lecturerSeriesDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);
+                if(jedis.zrank(lecturerSeriesUp,series_id) == null && jedis.zrank(lecturerSeriesDown,series_id) == null ){
+                    throw new QNLiveException("210001");
+                }else{
+                    course.put("series_id",series_id);
+                }
+            }
+
+            courseInfo = jedis.hgetAll(courseKey);//判断之前是否有加入系列
+            if(!MiscUtils.isEmpty(courseInfo.get("series_id"))){
+                throw new QNLiveException("210003");
+            }
+            course.put("series_course_updown","1");
+            resltMap = lectureModuleServer.updateSeriesCourse(course);
+
+            map.clear();
+            map.put("series_id",reqMap.get("series_id"));
+            String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+            long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
+            jedis.zadd(lectureSeriesKey, seriesLpos, course_id);
+        }else {
+            throw new QNLiveException("000004");
+        }
+        return resltMap ;
     }
+
+
+    /**
+     * 编辑系列课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("updateSeriesCourseLonely")
+    public Map<String, Object> updateSeriesCourseLonely(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        String user_id =  AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> resltMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String course_id = reqMap.get("course_id").toString();
+        return reqMap;
+    }
+
+
+
 
 
 }

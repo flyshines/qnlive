@@ -332,8 +332,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         //</editor-fold>
-
-
         pageCount =  pageConts - courseIdList.size();
         if(!MiscUtils.isEmpty(lecture_id) && !MiscUtils.isEmpty(userId) && lecture_id.equals(userId) && pageCount > 0 && updown == 2){//是讲师
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
@@ -634,9 +632,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(lecturerId)){
         	throw new QNLiveException("120018");
         }
-
-
-
         map.clear();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
         String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
