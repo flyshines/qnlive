@@ -411,6 +411,15 @@
       <if test="click_num != null" >
         click_num=#{click_num},
       </if>
+      <if test="series_course_updown != null" >
+        series_course_updown=#{series_course_updown},
+      </if>
+      <if test="series_id != null" >
+        series_id=#{series_id},
+      </if>
+      <if test="course_updown != null" >
+        course_updown=#{course_updown},
+      </if>
     </set>
     where course_id = #{course_id} and  `status` <![CDATA[ <> ]]> 5
     <if test="last_update_time != null" >

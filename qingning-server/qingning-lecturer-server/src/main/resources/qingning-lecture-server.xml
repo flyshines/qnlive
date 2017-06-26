@@ -780,6 +780,32 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="updateSeriesCourse">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100" />
+					<param name="course_id" type="string"  require="Y,000100" />
+					<param name="series_id" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<function name="updateSeriesCourseLonely">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="query_type" type="string" require="Y,000100" />
+					<param name="course_id" type="string"  require="Y,000100" />
+					<param name="series_id" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

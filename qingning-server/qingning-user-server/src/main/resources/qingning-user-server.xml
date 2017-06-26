@@ -540,6 +540,7 @@
 					<param name="room_remark" type="rstring"/>
 					<param name="series_pay_remark" type="rstring"/>
 					<param name="series_remark" type="rstring"/>
+					<param name="series_amount" type="long"/>
 					<param name="room_id" type="string"/>
 					<param name="roles" type="list"/>
 					<param name="series_join_status" type="string"/>

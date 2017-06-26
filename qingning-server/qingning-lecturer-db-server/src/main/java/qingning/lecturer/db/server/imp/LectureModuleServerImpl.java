@@ -651,4 +651,17 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		dbResultMap.put("update_time", now);
 		return dbResultMap;
 	}
+
+	@Override
+	public Map<String, Object> updateSeriesCourse(Map<String, Object> course) {
+		Integer updateCount = null;
+		Date now = new Date();
+		course.put("update_time",now);
+		updateCount=coursesMapper.updateCourse(course);
+
+		Map<String, Object> dbResultMap = new HashMap<String, Object>();
+		dbResultMap.put("update_count", updateCount);
+		dbResultMap.put("update_time", now);
+		return dbResultMap;
+	}
 }
