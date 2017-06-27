@@ -150,4 +150,6 @@ public interface ILectureModuleServer {
 	Map<String, Object> updateSeriesCourse(Map<String, Object> course);
 
 	Map<String, Object> updateSaasSeriesCourse(Map<String, Object> course);
+
+	Map<String, Object> increaseSeriesCourse(String series_id);
 }

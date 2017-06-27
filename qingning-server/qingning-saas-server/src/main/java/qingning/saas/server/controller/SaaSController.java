@@ -242,4 +242,31 @@ public class SaaSController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+    
+    /**
+     * 课程-添加课程留言
+     * @param entity
+     * @param courseId
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/course/message/new/{course_id}", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity addMessageForCourse(
+    		HttpEntity<Object> entity,
+			@PathVariable("course_id") String courseId,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addMessageForCourse", accessToken, version, appName);
+        Map<String, Object> param = (Map<String, Object>) entity.getBody();
+        param.put("course_id", courseId);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
+    
 }

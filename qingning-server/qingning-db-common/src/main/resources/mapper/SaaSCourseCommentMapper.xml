@@ -21,6 +21,9 @@
       <if test="comment_id != null" >
         comment_id,
       </if>
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
       <if test="course_id != null" >
         course_id,
       </if>
@@ -52,6 +55,9 @@
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="comment_id != null" >
         #{comment_id,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id,jdbcType=VARCHAR},
       </if>
       <if test="course_id != null" >
         #{course_id,jdbcType=VARCHAR},

@@ -658,5 +658,73 @@ public final class CacheUtils {
         }
 		return courseSet;
 	}
+
+	/**
+	 * 读取saas课程的留言id排序列表
+	 * @param courseId 课程id
+	 * @param lastMessageId 上一页最后一条数据的留言id
+	 * @param pageCount 每页数量
+	 * @param jedis
+	 * @return 以创建时间倒序获取
+	 * @throws Exception
+	 */
+	public static Set<String> readCourseMessageSet(String courseId, String lastMessageId, int pageCount, Jedis jedis) 
+			throws Exception{
+		//返回结果集
+		Set<String> messageSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+        String messageSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, keyMap);
+        if(jedis.exists(messageSetKey)){	//缓存中存在
+        	//获取上一页最后一条数据的score
+            if(lastMessageId != null && !"0".equals(lastMessageId)){	//不是获取第一页数据
+    	        Double lastScore = jedis.zscore(messageSetKey, lastMessageId);
+    	        /*
+    	         * 分页获取单品课程中的id列表
+    	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+    	         */
+    	        messageSet = jedis.zrevrangeByScore(messageSetKey, "("+lastScore, "-inf", 0, pageCount);
+            }else{	//获取第一页数据
+    	        /*
+    	         * 分页获取单品课程中的id列表
+    	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+    	         */
+            	messageSet = jedis.zrevrangeByScore(messageSetKey, "+inf", "-inf", 0, pageCount);
+            }
+        }
+		return messageSet;
+	}
+
+	/**
+	 * 从缓存中读取saas课程留言详情，若缓存没有从数据库读取后写入缓存
+	 * @param searchKeys String[]：第一个元素为留言所属的课程id，第二个元素为留言id
+	 * @param readMessageReqEntity 缓存没有读取数据库时使用，function="findSaasCourseCommentByCommentId"
+	 * @param operation
+	 * @param jedis
+	 * @param cachedValue 从数据库读取后是否写进缓存
+	 * @return
+	 * @throws Exception
+	 */
+	public static Map<String, String> readSaasCourseComment(String[] searchKeys, RequestEntity readMessageReqEntity,
+			CommonReadOperation operation, Jedis jedis, boolean cachedValue) throws Exception {
+		//拼接缓存key模式匹配的String[]
+		String[] keyFields = {Constants.CACHED_KEY_COURSE_FIELD, Constants.CACHED_KEY_COMMENT_FIELD};
+		
+		Map<String,String> values = readData(searchKeys, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+				keyFields, readMessageReqEntity, operation, jedis, cachedValue, -1);
+		
+		String commentId = values.get(Constants.CACHED_KEY_COMMENT_FIELD);	//缓存中的留言id
+		if(!searchKeys[1].equals(commentId)){	//请求留言id的和缓存中的留言id一致
+			Map<String, String> keyMap = new HashMap<String, String>();
+			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, searchKeys[0]);	//course_id
+			keyMap.put(Constants.CACHED_KEY_COMMENT_FIELD, searchKeys[1]);	//comment_id
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, keyMap);
+			jedis.del(key);
+			values = readData(searchKeys, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+					keyFields, readMessageReqEntity, operation, jedis, cachedValue, -1);
+		}
+		return values;
+	}
 	
 }
