@@ -702,7 +702,7 @@ public final class CacheUtils {
 	 * @param readMessageReqEntity 缓存没有读取数据库时使用，function="findSaasCourseCommentByCommentId"
 	 * @param operation
 	 * @param jedis
-	 * @param cachedValue
+	 * @param cachedValue 从数据库读取后是否写进缓存
 	 * @return
 	 * @throws Exception
 	 */
