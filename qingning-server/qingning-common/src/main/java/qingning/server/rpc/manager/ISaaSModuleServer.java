@@ -119,4 +119,26 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getShopBannerInfo(String bannerId);
+
+    /**获取店铺所有上架的课程
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> findUpCourseList(Map<String, Object> reqMap);
+    /**获取店铺所有上架的直播课程
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> findUpLiveCourseList(Map<String, Object> reqMap);
+
+    /**获取系列下的课程列表
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> getSeriesCourseList(Map<String, Object> reqMap);
+    /**开通店铺
+     * @param shop
+     * @return
+     */
+    void openShop(Map<String, Object> shop);
 }

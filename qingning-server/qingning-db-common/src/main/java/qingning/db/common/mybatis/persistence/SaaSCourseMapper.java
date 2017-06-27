@@ -23,4 +23,18 @@ public interface SaaSCourseMapper {
      * @return
      */
     List<String> selectUpListByShopId(String shopId);
+
+    /**根据店铺获取单品列表
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> selectUpCourseListByShop(Map<String, Object> param, PageBounds page);
+
+    /**查询系列课下的课程列表
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> findCourseBySeriesId(Map<String, Object> param, PageBounds page);
 }

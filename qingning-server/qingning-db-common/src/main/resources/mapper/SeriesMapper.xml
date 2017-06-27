@@ -209,4 +209,21 @@
 		ORDER BY t.update_course_time DESC
 	</select>
 
+	<select id="findSeriesListByLiturere" resultType="hashmap" parameterType="hashmap" >
+		SELECT
+		t.series_id AS course_id,
+		t.series_title AS course_title,
+		t.updown as 'status'
+		FROM
+		`t_series` t
+		WHERE
+		t.lecturer_id = #{user_id}
+		AND t.updown = '1'
+		<if test="keyword != null" >
+			AND t.series_title like '%${keyword}%'
+		</if>
+		ORDER BY t.update_course_time DESC
+
+	</select>
+
 </mapper>

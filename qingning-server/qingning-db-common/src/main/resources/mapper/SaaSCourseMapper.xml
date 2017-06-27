@@ -321,4 +321,43 @@
     AND series_or_course = '0'
     ORDER BY t.update_time DESC
   </select>
+  <select id="selectUpCourseListByShop" parameterType="hashmap" resultType="hashmap">
+  SELECT
+      t.course_id,
+      t.course_title,
+      t.course_updown AS status
+  FROM
+      `t_saas_course` t
+  WHERE
+      t.shop_id = #{shop_id,jdbcType=VARCHAR}
+  AND t.course_updown = '1'
+  AND series_or_course = '0'
+  AND goods_type = #{type,jdbcType=VARCHAR}
+    <if test="keyword != null" >
+      course_title like '%${keyword}%'
+    </if>
+  ORDER BY
+      t.update_time DESC
+  </select>
+  <select id="findCourseBySeriesId" parameterType="hashmap" resultType="hashmap">
+    SELECT
+      t.course_id,
+      t.course_title,
+      t.course_image,
+      t.goods_type AS type,
+      t.create_time,
+      t.student_num AS view_num,
+      t.comment_num AS comment_num,
+      t.series_course_updown AS 'status',
+      t.course_updown AS is_single
+    FROM
+    `t_saas_course` t
+    WHERE
+    t.series_id = #{series_id}
+    ORDER BY
+    t.create_time DESC
+
+  </select>
+
+
 </mapper>
