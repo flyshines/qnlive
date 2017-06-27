@@ -174,7 +174,7 @@
 		series_student_num = series_student_num + 1
 		where series_id = #{series_id}
 	</update>
-	<update id="increaseSeriesCourse" parameterType="string" >
+	<update id="increaseSeriesCourse" parameterType="hashmap" >
 		update t_series
 		set
 		course_num = course_num + 1
