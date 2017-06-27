@@ -28,6 +28,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     private ReadSeriesOperation readSeriesOperation;
     private ReadCourseOperation readCourseOperation;
     private ReadSingleListOperation readSingleListOperation;
+    private ReadSaasCourseMessageOperation readSaasCourseMessageOperation;
     private static Logger logger = LoggerFactory.getLogger(SaaSServerImpl.class);
 
     @Override
@@ -39,6 +40,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             readShopOperation = new ReadShopOperation(saaSModuleServer);
             readSeriesOperation = new ReadSeriesOperation(saaSModuleServer);
             readCourseOperation = new ReadCourseOperation(saaSModuleServer);
+            readSaasCourseMessageOperation = new ReadSaasCourseMessageOperation(saaSModuleServer);
 
         }
     }
@@ -99,12 +101,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.updateShop(param);
     }
 
-	/**
-	 * 店铺-轮播图列表
-	 * @param reqEntity
-	 * @return
-	 * @throws Exception
-	 */
+    /**
+     * 店铺-轮播图列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @FunctionName("shopBannerList")
     public Map<String, Object>  shopBannerList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
@@ -115,6 +117,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         String shopId = userInfo.get("shop_id");*/
         Map<String, Object> result = saaSModuleServer.getShopBannerList(reqMap);
+        return result;
+    }
+    /**
+     * 店铺-轮播图详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopBannerInfo")
+    public Map<String, Object>  shopBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String bannerId = reqMap.get("banner_id").toString();
+
+        Map<String, Object> result = saaSModuleServer.getShopBannerInfo(bannerId);
         return result;
     }
 	/**
@@ -159,11 +175,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String linkTo = null;
         if("1".equals(linkType)){
             //外部链接
-            if(reqMap.get("link_id")==null){
+            /*if(reqMap.get("link_id")==null){
                 //链接为空判断
                 throw new QNLiveException("000004");
-            }
-            linkTo = reqMap.get("link_type").toString();
+            }*/
+            linkTo = reqMap.get("link_to").toString();
         }else {
             if(reqMap.get("link_id")==null){
                 //课程ID为空判断
@@ -359,6 +375,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         reqMap.put("create_time",now);
         reqMap.put("create_date",now);
+        reqMap.put("course_price",reqMap.get("price"));
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
@@ -366,6 +383,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
+        //分享连接
+        reqMap.put("share_url",MiscUtils.getConfigByKey("share_url_single_index",Constants.HEADER_APP_NAME)+reqMap.get("course_id"));
 
         //默认下架
         reqMap.put("course_updown","2");
@@ -391,6 +410,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         reqMap.put("update_time",now);
         reqMap.put("app_name",reqEntity.getAppName());
+        reqMap.put("course_price",reqMap.get("price"));
         //插入课程
         saaSModuleServer.updateCourse(reqMap);
     }
@@ -567,7 +587,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 根据系列id查询缓存中系列内容课程id列表，需要传递分页标识
          */
-        //等待调洪深接口：read系列课内容课程列表
+        //read系列课的内容课程列表
         Set<String> courseSet = CacheUtils.readSeriesCourseUp(seriesId, lastCourseId, pageCount, jedis);
         if(courseSet != null){
         	logger.info("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
@@ -948,6 +968,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         } else {
             //2.如果缓存中没有课程详情，则读取数据库
             Map<String, Object> seriesDBMap = saaSModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            if(seriesDBMap==null){
+                throw new QNLiveException("210003");
+            }
             MiscUtils.converObjectMapToStringMap(seriesDBMap, resultMap);
         }
         return resultMap;
@@ -978,6 +1001,82 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         return resultMap;
     }
+    
+    /**
+     * H5_课程-获取课程留言列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+   /* @FunctionName("findCourseMessageList")
+    public Map<String, Object> findCourseMessageList(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	
+    	 * 获取请求参数
+    	 
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        //获取分页标识
+        String lastMessageId = reqMap.get("last_message_id").toString(); 
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //
+        List<Map<String, String>> messageInfoList = new ArrayList<>();
+        
+        
+         * TODO 判断登录用户是否已经购买该课程
+         
+        
+    	
+         * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
+         
+        //read系列课的内容课程列表
+        Set<String> messageSet = CacheUtils.readCourseMessageSet(courseId, lastMessageId, pageCount, jedis);
+        if(messageSet != null){
+        	logger.info("saas课程-获取课程留言列表>>>>从缓存中获取到课程（course_id=" + courseId + "）的留言列表");
+        	String messageDetailKey = null;	//获取内容课程详情的key
+        	//生成用于缓存不存在时调用数据库的requestEntity
+        	Map<String, Object> readMessageMap = new HashMap<String, Object>();
+        	//从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
+        	RequestEntity readMessageReqEntity = this.generateRequestEntity(null, null, "findSaasCourseCommentByCommentId", readMessageMap);
+        	
+        	for(String messageId : messageSet){
+        		readMessageMap.put("message_id", messageId);
+            	//获取留言详情
+            	Map<String, String> messageMap = CacheUtils.readSaasCourseMessage(messageId, readMessageReqEntity, readSaasCourseMessageOperation, jedis, true);
+            	
+            	messageInfoList.add(messageMap);
+            }
+        }
+        
+        resultMap.put("message_info_list", messageInfoList);
+        return resultMap;
+    }*/
+
+	/**
+	 * 店铺-单品-详情
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
+    @FunctionName("getShopSingleInfo")
+    public Map<String, String> getShopSingleInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        //从缓存获取课程详情
+        RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", reqMap);
+        Map<String,String> map = CacheUtils.readCourse(reqMap.get("course_id").toString(), readSingleReqEntity, readCourseOperation,jedis,true);
+        return map;
+    }
+
 
 
 }

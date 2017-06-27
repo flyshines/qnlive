@@ -214,9 +214,15 @@ public final class Constants {
 
 
 	//讲师所有的单品课程（直播间类型除外）
-   public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE:UP";//zset 讲师所有上架单品（直播课除外） (series_id,上架时间)
-   public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE";//zset 讲师所有下架单品（直播课除外） (series_id,下架时间)
+	public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE:UP";//zset 讲师所有上架单品（直播课除外） (series_id,上架时间)
+	public static final String CACHED_KEY_LECTURER_COURSES_NOT_LIVE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES_NOT_LIVE";//zset 讲师所有下架单品（直播课除外） (series_id,下架时间)
 
+   /*
+    * ***************saas课程留言相关*********************
+    */
+	public static final String CACHED_KEY_COMMENT_FIELD = "comment_id";	//留言id匹配模式
+	public static final String CACHED_KEY_COURSE_SAAS_COMMENT_ALL = "SYS:COURSE:{course_id}:SAAS_COMMENT_ALL";	//zset saas课程的留言id排序列表(score:创建时间)
+	public static final String CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL = "SYS:COURSE:{course_id}:{comment_id}";	//hash saas课程的留言详情
 
 
 

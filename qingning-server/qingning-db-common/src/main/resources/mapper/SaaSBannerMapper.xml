@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSBannerMapper" >
   <sql id="Base_Column_List" >
-    banner_id, banner_img, shop_id , banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
+    banner_id, banner_img, shop_id ,banner_name, banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
   </sql>
   <select id="selectByPrimaryKey" resultType="java.util.Map" parameterType="java.lang.String" >
     select 
@@ -31,6 +31,9 @@
       </if>
       <if test="banner_title != null" >
         banner_title,
+      </if>
+      <if test="banner_name != null" >
+        banner_name,
       </if>
       <if test="link_to != null" >
         link_to,
@@ -70,6 +73,9 @@
       <if test="banner_title != null" >
         #{banner_title,jdbcType=VARCHAR},
       </if>
+      <if test="banner_name != null" >
+        #{banner_name,jdbcType=VARCHAR},
+      </if>
       <if test="link_to != null" >
         #{link_to,jdbcType=VARCHAR},
       </if>
@@ -102,6 +108,9 @@
       <if test="banner_title != null" >
         banner_title = #{banner_title,jdbcType=VARCHAR},
       </if>
+      <if test="banner_name != null" >
+        banner_name = #{banner_name,jdbcType=VARCHAR},
+      </if>
       <if test="link_to != null" >
         link_to = #{link_to,jdbcType=VARCHAR},
       </if>
@@ -133,6 +142,13 @@
     from t_saas_banner
     where user_id = #{user_id,jdbcType=VARCHAR}
     ORDER BY create_time DESC
+  </select>
+  <select id="selectUpCount" resultType="java.lang.Integer" parameterType="java.util.Map" >
+    select
+    count(*)
+    from t_saas_banner
+    where user_id = #{user_id,jdbcType=VARCHAR}
+    AND  status = '1'
   </select>
   
   <!-- 根据map中的条件查询轮播列表 -->

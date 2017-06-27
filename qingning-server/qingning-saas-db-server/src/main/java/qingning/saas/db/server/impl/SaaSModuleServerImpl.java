@@ -85,10 +85,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
                 else return 1;
             }
         });
+
+        int upSize = bannerMapper.selectUpCount(param.get("user_id").toString());
+
         Map<String,Object> res = new HashMap<>();
         res.put("list",result);
         res.put("total_count",result.getTotal());
         res.put("total_page",result.getPaginator().getTotalPages());
+        res.put("up_count",upSize);
         return res;
     }
 
@@ -215,6 +219,20 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_count",result.getTotal());
         res.put("total_page",result.getPaginator().getTotalPages());
         return res;
+    }
+
+    /**
+     * 根据留言id获取留言信息
+     */
+	@Override
+	public Map<String, Object> findSaasCourseCommentByCommentId(String commentId) {
+		return courseCommentMapper.selectByPrimaryKey(commentId);
+	}
+
+    @Override
+    public Map<String, Object> getShopBannerInfo(String bannerId) {
+
+        return bannerMapper.selectByPrimaryKey(bannerId);
     }
 
 }
