@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSCourseMapper" >
   <sql id="Base_Column_List" >
-    course_id, shop_id, classify_id, lecturer_id, series_id, course_title,course_image, course_url, course_duration,
+    course_id, shop_id, classify_id, lecturer_id, series_id, course_title,course_image, course_url, share_url, course_duration,
     course_remark, course_type, goods_type, rq_code, course_price, student_num, course_amount,
     extra_num, extra_amount, comment_num, click_num,sale_num, series_or_course, series_course_updown,
     course_updown, app_name,details, create_date, create_time, update_time
@@ -43,6 +43,9 @@
       </if>
       <if test="course_url != null" >
         course_url,
+      </if>
+      <if test="share_url != null" >
+        share_url,
       </if>
       <if test="course_remark != null" >
         course_remark,
@@ -130,6 +133,9 @@
       <if test="course_url != null" >
         #{course_url,jdbcType=VARCHAR},
       </if>
+      <if test="share_url != null" >
+        #{share_url,jdbcType=VARCHAR},
+      </if>
       <if test="course_remark != null" >
         #{course_remark,jdbcType=VARCHAR},
       </if>
@@ -207,11 +213,17 @@
       <if test="series_id != null" >
         series_id = #{series_id,jdbcType=VARCHAR},
       </if>
+      <if test="series_id == null" >
+        series_id = NULL ,
+      </if>
       <if test="course_title != null" >
         course_title = #{course_title,jdbcType=VARCHAR},
       </if>
       <if test="course_url != null" >
         course_url = #{course_url,jdbcType=VARCHAR},
+      </if>
+      <if test="share_url != null" >
+        share_url = #{share_url,jdbcType=VARCHAR},
       </if>
       <if test="course_image != null" >
         course_image = #{course_image,jdbcType=VARCHAR},

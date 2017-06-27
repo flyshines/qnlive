@@ -29,4 +29,10 @@ public interface SaaSBannerMapper {
      * @return
      */
 	List<Map<String, Object>> selectBannerListByMap(Map<String, Object> paramMap);
+
+    /**获取已上架轮播图数量
+     * @param user_id
+     * @return
+     */
+    int selectUpCount(String user_id);
 }

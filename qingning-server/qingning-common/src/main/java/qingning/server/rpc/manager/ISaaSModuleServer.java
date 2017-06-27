@@ -121,5 +121,9 @@ public interface ISaaSModuleServer {
      */
 	Map<String, Object> findSaasCourseCommentByCommentId(String commentId);
 
-
+    /**获取轮播图信息
+     * @param bannerId
+     * @return
+     */
+    Map<String,Object> getShopBannerInfo(String bannerId);
 }

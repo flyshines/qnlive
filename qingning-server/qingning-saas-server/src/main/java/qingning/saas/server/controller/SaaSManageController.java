@@ -121,6 +121,29 @@ public class SaaSManageController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+    /**
+     * 店铺-轮播图详情
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerInfo(
+            @PathVariable(value = "banner_id") String bannerId,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerInfo", accessToken, version, appName);
+        Map<String,String> param = new HashMap<>();
+        param.put("banner_id",bannerId);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
     /**
      * 店铺-轮播图编辑
@@ -258,6 +281,30 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version, appName);
         requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 店铺-单品-详情
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/{course_id}/details", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getShopSingleInfo(
+            @PathVariable("course_id") String courseId,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShopSingleInfo", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("course_id",courseId);
+        requestEntity.setParam(paramCode);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }

@@ -101,12 +101,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.updateShop(param);
     }
 
-	/**
-	 * 店铺-轮播图列表
-	 * @param reqEntity
-	 * @return
-	 * @throws Exception
-	 */
+    /**
+     * 店铺-轮播图列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @FunctionName("shopBannerList")
     public Map<String, Object>  shopBannerList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
@@ -117,6 +117,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         String shopId = userInfo.get("shop_id");*/
         Map<String, Object> result = saaSModuleServer.getShopBannerList(reqMap);
+        return result;
+    }
+    /**
+     * 店铺-轮播图详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopBannerInfo")
+    public Map<String, Object>  shopBannerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String bannerId = reqMap.get("banner_id").toString();
+
+        Map<String, Object> result = saaSModuleServer.getShopBannerInfo(bannerId);
         return result;
     }
 	/**
@@ -161,11 +175,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String linkTo = null;
         if("1".equals(linkType)){
             //外部链接
-            if(reqMap.get("link_id")==null){
+            /*if(reqMap.get("link_id")==null){
                 //链接为空判断
                 throw new QNLiveException("000004");
-            }
-            linkTo = reqMap.get("link_type").toString();
+            }*/
+            linkTo = reqMap.get("link_to").toString();
         }else {
             if(reqMap.get("link_id")==null){
                 //课程ID为空判断
@@ -361,6 +375,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         reqMap.put("create_time",now);
         reqMap.put("create_date",now);
+        reqMap.put("course_price",reqMap.get("price"));
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
@@ -368,6 +383,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
+        //分享连接
+        reqMap.put("share_url",MiscUtils.getConfigByKey("share_url_single_index",Constants.HEADER_APP_NAME)+reqMap.get("course_id"));
 
         //默认下架
         reqMap.put("course_updown","2");
@@ -393,6 +410,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         reqMap.put("update_time",now);
         reqMap.put("app_name",reqEntity.getAppName());
+        reqMap.put("course_price",reqMap.get("price"));
         //插入课程
         saaSModuleServer.updateCourse(reqMap);
     }
@@ -950,6 +968,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         } else {
             //2.如果缓存中没有课程详情，则读取数据库
             Map<String, Object> seriesDBMap = saaSModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            if(seriesDBMap==null){
+                throw new QNLiveException("210003");
+            }
             MiscUtils.converObjectMapToStringMap(seriesDBMap, resultMap);
         }
         return resultMap;
@@ -1038,6 +1059,24 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("message_info_list", messageInfoList);
         return resultMap;
     }*/
+
+	/**
+	 * 店铺-单品-详情
+	 * @param reqEntity
+	 * @return
+	 * @throws Exception
+	 */
+    @FunctionName("getShopSingleInfo")
+    public Map<String, String> getShopSingleInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        //从缓存获取课程详情
+        RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", reqMap);
+        Map<String,String> map = CacheUtils.readCourse(reqMap.get("course_id").toString(), readSingleReqEntity, readCourseOperation,jedis,true);
+        return map;
+    }
+
 
 
 }
