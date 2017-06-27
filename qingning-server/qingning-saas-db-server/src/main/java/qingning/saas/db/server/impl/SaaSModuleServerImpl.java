@@ -217,4 +217,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return res;
     }
 
+    /**
+     * 根据留言id获取留言信息
+     */
+	@Override
+	public Map<String, Object> findSaasCourseCommentByCommentId(String commentId) {
+		return courseCommentMapper.selectByPrimaryKey(commentId);
+	}
+
 }

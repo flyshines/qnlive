@@ -114,5 +114,12 @@ public interface ISaaSModuleServer {
      */
     Map<String,Object> getSeriesList(Map<String, Object> param);
 
+    /**
+     * 根据留言id获取留言信息
+     * @param string
+     * @return
+     */
+	Map<String, Object> findSaasCourseCommentByCommentId(String commentId);
+
 
 }

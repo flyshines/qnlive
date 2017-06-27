@@ -533,21 +533,19 @@
 					<accessToken require="Y,000100" />
 				</auth>
 				<inputs>
-					<param name="course_id" type="string" require="Y"/>
+					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="last_message_id" type="string" require="N" />
+					<param name="page_count" type="long" require="N" />
 				</inputs>
 				<outputs>
-					<param name="course_info" type="map">
-						<param name="course_id" type="string" />
-						<param name="course_title" type="string" />
-						<param name="course_img_url" type="string" fieldname="course_image" />
-						<param name="browse_count" type="long" fieldname="click_num" />
-						<param name="message_count" type="long" fieldname="comment_num" />
-						<param name="put_time" type="long" fieldname="create_time" />
-						<param name="course_url" type="string" />
-						<param name="course_duration" type="long" />
+					<param name="message_info_list" type="list">
+						<param name="message_id" type="string" fieldname="comment_id" />
+						<param name="avatar_url" type="string" fieldname="avatar_address" />
+						<param name="nick_name" type="string" />
+						<param name="message_content" type="string" fieldname="content" />
+						<param name="reply_content" type="string" />
+						<param name="create_time" type="long" />
 					</param>
-					<param name="series_id" type="string" />
-					<param name="share_url" type="string" />
 				</outputs>
 			</function>
 

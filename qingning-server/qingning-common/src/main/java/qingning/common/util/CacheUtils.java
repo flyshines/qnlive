@@ -658,5 +658,36 @@ public final class CacheUtils {
         }
 		return courseSet;
 	}
+
+	/**
+	 * 读取saas课程的留言id排序列表
+	 * @param courseId 课程id
+	 * @param lastMessageId 上一页最后一条数据的留言id
+	 * @param pageCount 每页数量
+	 * @param jedis
+	 * @return 以创建时间倒序获取
+	 * @throws Exception
+	 */
+	public static Set<String> readCourseMessageSet(String courseId, String lastMessageId, int pageCount, Jedis jedis) 
+			throws Exception{
+		//返回结果集
+		Set<String> messageSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+        String messageSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, keyMap);
+        if(jedis.exists(messageSetKey)){	//缓存中存在
+        	//获取上一页最后一条数据的score
+            if(lastMessageId != null && !"0".equals(lastMessageId)){	//不是获取第一页数据
+    	        Double lastScore = jedis.zscore(messageSetKey, lastMessageId);
+    	        //分页获取单品课程中的id列表
+    	        messageSet = jedis.zrangeByScore(messageSetKey, "(" + lastScore, "+inf", 0, pageCount);
+            }else{	//获取第一页数据
+    	        //分页获取单品课程中的id列表
+            	messageSet = jedis.zrangeByScore(messageSetKey, "-inf", "+inf", 0, pageCount);
+            }
+        }
+		return messageSet;
+	}
 	
 }

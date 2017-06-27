@@ -28,6 +28,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     private ReadSeriesOperation readSeriesOperation;
     private ReadCourseOperation readCourseOperation;
     private ReadSingleListOperation readSingleListOperation;
+    private ReadSaasCourseMessageOperation readSaasCourseMessageOperation;
     private static Logger logger = LoggerFactory.getLogger(SaaSServerImpl.class);
 
     @Override
@@ -39,6 +40,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             readShopOperation = new ReadShopOperation(saaSModuleServer);
             readSeriesOperation = new ReadSeriesOperation(saaSModuleServer);
             readCourseOperation = new ReadCourseOperation(saaSModuleServer);
+            readSaasCourseMessageOperation = new ReadSaasCourseMessageOperation(saaSModuleServer);
 
         }
     }
@@ -567,7 +569,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 根据系列id查询缓存中系列内容课程id列表，需要传递分页标识
          */
-        //等待调洪深接口：read系列课内容课程列表
+        //read系列课的内容课程列表
         Set<String> courseSet = CacheUtils.readSeriesCourseUp(seriesId, lastCourseId, pageCount, jedis);
         if(courseSet != null){
         	logger.info("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
@@ -978,6 +980,64 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         return resultMap;
     }
+    
+    /**
+     * H5_课程-获取课程留言列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+   /* @FunctionName("findCourseMessageList")
+    public Map<String, Object> findCourseMessageList(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	
+    	 * 获取请求参数
+    	 
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        //获取分页标识
+        String lastMessageId = reqMap.get("last_message_id").toString(); 
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //
+        List<Map<String, String>> messageInfoList = new ArrayList<>();
+        
+        
+         * TODO 判断登录用户是否已经购买该课程
+         
+        
+    	
+         * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
+         
+        //read系列课的内容课程列表
+        Set<String> messageSet = CacheUtils.readCourseMessageSet(courseId, lastMessageId, pageCount, jedis);
+        if(messageSet != null){
+        	logger.info("saas课程-获取课程留言列表>>>>从缓存中获取到课程（course_id=" + courseId + "）的留言列表");
+        	String messageDetailKey = null;	//获取内容课程详情的key
+        	//生成用于缓存不存在时调用数据库的requestEntity
+        	Map<String, Object> readMessageMap = new HashMap<String, Object>();
+        	//从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
+        	RequestEntity readMessageReqEntity = this.generateRequestEntity(null, null, "findSaasCourseCommentByCommentId", readMessageMap);
+        	
+        	for(String messageId : messageSet){
+        		readMessageMap.put("message_id", messageId);
+            	//获取留言详情
+            	Map<String, String> messageMap = CacheUtils.readSaasCourseMessage(messageId, readMessageReqEntity, readSaasCourseMessageOperation, jedis, true);
+            	
+            	messageInfoList.add(messageMap);
+            }
+        }
+        
+        resultMap.put("message_info_list", messageInfoList);
+        return resultMap;
+    }*/
 
 
 }
