@@ -255,6 +255,9 @@
       <if test="extra_amount != null" >
         extra_amount = #{extra_amount,jdbcType=BIGINT},
       </if>
+      <if test="comment_num != null" >
+        comment_num = comment_num + #{comment_num,jdbcType=BIGINT},
+      </if>
       <if test="real_student_num != null" >
         real_student_num = #{real_student_num,jdbcType=BIGINT},
       </if>

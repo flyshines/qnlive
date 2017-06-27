@@ -698,7 +698,7 @@ public final class CacheUtils {
 
 	/**
 	 * 从缓存中读取saas课程留言详情，若缓存没有从数据库读取后写入缓存
-	 * @param messageId 要查看详情的留言id
+	 * @param searchKeys String[]：第一个元素为留言所属的课程id，第二个元素为留言id
 	 * @param readMessageReqEntity 缓存没有读取数据库时使用，function="findSaasCourseCommentByCommentId"
 	 * @param operation
 	 * @param jedis
@@ -706,18 +706,23 @@ public final class CacheUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Map<String, String> readSaasCourseMessage(String messageId, RequestEntity readMessageReqEntity,
+	public static Map<String, String> readSaasCourseComment(String[] searchKeys, RequestEntity readMessageReqEntity,
 			CommonReadOperation operation, Jedis jedis, boolean cachedValue) throws Exception {
-		Map<String,String> values = readData(messageId, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
-				Constants.CACHED_KEY_COMMENT_FIELD, readMessageReqEntity, operation, jedis, cachedValue);
+		//拼接缓存key模式匹配的String[]
+		String[] keyFields = {Constants.CACHED_KEY_COURSE_FIELD, Constants.CACHED_KEY_COMMENT_FIELD};
+		
+		Map<String,String> values = readData(searchKeys, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+				keyFields, readMessageReqEntity, operation, jedis, cachedValue, -1);
+		
 		String commentId = values.get(Constants.CACHED_KEY_COMMENT_FIELD);	//缓存中的留言id
-		if(!messageId.equals(commentId)){	//请求留言id的和缓存中的留言id一致
+		if(!searchKeys[1].equals(commentId)){	//请求留言id的和缓存中的留言id一致
 			Map<String, String> keyMap = new HashMap<String, String>();
-			keyMap.put(Constants.CACHED_KEY_COMMENT_FIELD, messageId);
+			keyMap.put(Constants.CACHED_KEY_COURSE_FIELD, searchKeys[0]);	//course_id
+			keyMap.put(Constants.CACHED_KEY_COMMENT_FIELD, searchKeys[1]);	//comment_id
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, keyMap);
 			jedis.del(key);
-			values = readData(messageId, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
-					Constants.CACHED_KEY_COMMENT_FIELD, readMessageReqEntity, operation, jedis, cachedValue);
+			values = readData(searchKeys, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+					keyFields, readMessageReqEntity, operation, jedis, cachedValue, -1);
 		}
 		return values;
 	}

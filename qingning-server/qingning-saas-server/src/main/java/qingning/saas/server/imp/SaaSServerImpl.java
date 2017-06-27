@@ -1027,7 +1027,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String lastMessageId = reqMap.get("last_message_id").toString(); 
         //获取每页数量
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
-        //
+        //课程留言列表
         List<Map<String, String>> messageInfoList = new ArrayList<>();
         
         /*
@@ -1047,10 +1047,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	//从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
         	RequestEntity readMessageReqEntity = this.generateRequestEntity(null, null, "findSaasCourseCommentByCommentId", readMessageMap);
         	
+        	String[] searchKeys = {courseId, ""};	//用于读取课程留言的
         	for(String messageId : messageSet){
+        		searchKeys[1] = messageId;
         		readMessageMap.put("message_id", messageId);
             	//获取留言详情
-            	Map<String, String> messageMap = CacheUtils.readSaasCourseMessage(messageId, readMessageReqEntity, readSaasCourseMessageOperation, jedis, true);
+            	Map<String, String> messageMap = CacheUtils.readSaasCourseComment(searchKeys, readMessageReqEntity, readSaasCourseMessageOperation, jedis, true);
             	
             	messageInfoList.add(messageMap);
             }
@@ -1077,6 +1079,84 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return map;
     }
 
+    /**
+     * 课程-添加课程留言
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("addMessageForCourse")
+    public Map<String, Object> addMessageForCourse(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取请求中的评论内容
+        String content = (String) reqMap.get("content");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        /*
+         * TODO 判断登录用户是否已经购买该课程
+         */
+        
+        /*
+         * 获得课程信息，主要用于后续获取店铺id进行存储
+         */
+        Map<String, Object> readCourseMap = new HashMap<String, Object>();
+        readCourseMap.put("course_id", courseId);
+        RequestEntity readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+        
+        Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+        if(courseInfoMap == null || courseInfoMap.isEmpty()){
+        	logger.error("saas课程-添加课程留言>>>>课程不存在");
+        	throw new QNLiveException("100004");
+        }
+        
+        /*
+         * 获取登录用户信息，主要用于后续获取用户昵称等
+         */
+        reqMap.put("user_id", userId);
+        Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+        if(loginedUserMap == null || loginedUserMap.isEmpty()){
+        	logger.error("saas课程-添加课程留言>>>>登录用户不存在");
+        	throw new QNLiveException("用户不存在");
+        }
+        
+        /*
+         * TODO 新增到数据库
+         */
+        //封装要新增的留言map
+        String commentId = MiscUtils.getUUId();
+        Map<String, Object> insertCommentMap = new HashMap<>();
+        insertCommentMap.put("comment_id", commentId);
+        insertCommentMap.put("shop_id", courseInfoMap.get("shop_id"));
+        insertCommentMap.put("series_id", courseInfoMap.get("series_id"));
+        insertCommentMap.put("course_id", courseId);
+        insertCommentMap.put("user_id", loginedUserMap.get("user_id"));
+        insertCommentMap.put("nick_name", loginedUserMap.get("nick_name"));
+        insertCommentMap.put("content", reqMap.get("content"));
+        insertCommentMap.put("course_name", courseInfoMap.get("course_title"));
+        insertCommentMap.put("type", courseInfoMap.get("goods_type"));
+        insertCommentMap.put("avatar_address", loginedUserMap.get("avatar_address"));
+       
+        //封装更新的saas课程评论数量map
+        Map<String, Object> updateCourseMap = new HashMap<>();
+        updateCourseMap.put("course_id", courseId);
+        updateCourseMap.put("comment_num", 1);
+        
+        //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
+        saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, jedis);
+        
+        return resultMap;
+    }
 
 
 }

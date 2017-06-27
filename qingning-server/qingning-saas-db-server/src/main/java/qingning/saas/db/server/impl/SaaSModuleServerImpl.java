@@ -4,10 +4,15 @@ package qingning.saas.db.server.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import qingning.common.util.Constants;
+import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ISaaSModuleServer;
+import redis.clients.jedis.Jedis;
 
 import java.util.*;
 
@@ -234,5 +239,32 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
         return bannerMapper.selectByPrimaryKey(bannerId);
     }
+
+    /**
+     * 新增saas课程的留言，同时更新课程的评论次数
+     */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Jedis jedis) {
+		Date now = new Date();
+		
+		//新增数据库saas课程的留言
+		insertCommentMap.put("create_time", now.getTime());
+		courseCommentMapper.insert(insertCommentMap);
+		//更新数据库课程的评论次数
+		updateCourseMap.put("update_time", now);
+		saasCourseMapper.updateByPrimaryKey(updateCourseMap);
+		
+		/*
+         * 插入到缓存中saas课程评论id列表
+         */
+        Map<String, Object> readSaasCourseCommentMap = new HashMap<>();
+        readSaasCourseCommentMap.put(Constants.CACHED_KEY_COURSE_FIELD, updateCourseMap.get("course_id"));
+        
+        String readSaasCourseCommentKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, readSaasCourseCommentMap);
+        jedis.zadd(readSaasCourseCommentKey, now.getTime(), insertCommentMap.get("comment_id").toString());
+		
+		return 1;
+	}
 
 }

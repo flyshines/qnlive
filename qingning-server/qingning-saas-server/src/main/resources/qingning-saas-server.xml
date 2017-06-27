@@ -599,6 +599,19 @@
 					</param>
 				</outputs>
 			</function>
+			
+			<!-- 课程-添加课程留言 -->
+			<function name="addMessageForCourse">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="content" type="string" require="Y,000100" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 
 		</default>
 		<version num="1.0.0" class="">

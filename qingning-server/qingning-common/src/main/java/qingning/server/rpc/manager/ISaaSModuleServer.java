@@ -4,6 +4,8 @@ package qingning.server.rpc.manager;
 import java.util.List;
 import java.util.Map;
 
+import redis.clients.jedis.Jedis;
+
 public interface ISaaSModuleServer {
 
 
@@ -126,4 +128,13 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getShopBannerInfo(String bannerId);
+    
+    /**
+     * 新增saas课程的留言，同时更新课程的评论次数
+     * @param insertCommentMap
+     * @param updateCourseMap 
+     * @param jedis 用于更新缓存中saas课程评论id列表
+     * @return
+     */
+	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Jedis jedis);
 }
