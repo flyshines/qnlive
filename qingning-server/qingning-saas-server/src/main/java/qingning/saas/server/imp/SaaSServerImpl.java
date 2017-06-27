@@ -1008,13 +1008,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      * @return
      * @throws Exception
      */
-   /* @FunctionName("findCourseMessageList")
+    @FunctionName("findCourseMessageList")
     public Map<String, Object> findCourseMessageList(RequestEntity reqEntity) throws Exception{
     	//返回结果集
     	Map<String, Object> resultMap = new HashMap<>();
-    	
+    	/*
     	 * 获取请求参数
-    	 
+    	 */
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -1030,14 +1030,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //
         List<Map<String, String>> messageInfoList = new ArrayList<>();
         
-        
+        /*
          * TODO 判断登录用户是否已经购买该课程
-         
+         */
         
-    	
+    	/*
          * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
-         
-        //read系列课的内容课程列表
+         */
+        //read系列课的内容课程列表，以创建时间倒序排序
         Set<String> messageSet = CacheUtils.readCourseMessageSet(courseId, lastMessageId, pageCount, jedis);
         if(messageSet != null){
         	logger.info("saas课程-获取课程留言列表>>>>从缓存中获取到课程（course_id=" + courseId + "）的留言列表");
@@ -1058,7 +1058,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         resultMap.put("message_info_list", messageInfoList);
         return resultMap;
-    }*/
+    }
 
 	/**
 	 * 店铺-单品-详情

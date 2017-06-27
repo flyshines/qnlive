@@ -27,7 +27,7 @@
 	  			banner_img_url,
 	  		</if>
 	  		<if test="jump_remark != null">
-	  			banner_remark,
+	  			banner_remarks,
 	  		</if>
 	  		<if test="jump_url != null">
 	  			jump_url,
@@ -128,8 +128,8 @@
   		<if test="banner_img_url != null and banner_img_url != ''">
   			banner_img_url = #{banner_img_url},
   		</if>
-  		<if test="banner_remark != null and banner_remark != ''">
-  			banner_remark = #{banner_remark},
+  		<if test="banner_remarks != null and banner_remarks != ''">
+  			banner_remarks = #{banner_remarks},
   		</if>
   		<if test="banner_type != null">
   			banner_type = #{banner_type},
@@ -149,7 +149,7 @@
   
   <!-- 更新banner所有字段 -->
   <update id="updateBannerInfoByMap" parameterType="hashmap">
-  	update t_banner_info set banner_name = #{banner_name}, banner_img_url = #{banner_img_url}, banner_remark = #{jump_remark},
+  	update t_banner_info set banner_name = #{banner_name}, banner_img_url = #{banner_img_url}, banner_remarks = #{jump_remark},
   		banner_type = #{banner_type}, status = #{status}, score = #{score}, jump_url = #{jump_url}
   	where banner_id = #{banner_id} and app_name = #{app_name}
   </update>

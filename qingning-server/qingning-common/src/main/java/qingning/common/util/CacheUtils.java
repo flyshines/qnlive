@@ -680,14 +680,46 @@ public final class CacheUtils {
         	//获取上一页最后一条数据的score
             if(lastMessageId != null && !"0".equals(lastMessageId)){	//不是获取第一页数据
     	        Double lastScore = jedis.zscore(messageSetKey, lastMessageId);
-    	        //分页获取单品课程中的id列表
-    	        messageSet = jedis.zrangeByScore(messageSetKey, "(" + lastScore, "+inf", 0, pageCount);
+    	        /*
+    	         * 分页获取单品课程中的id列表
+    	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+    	         */
+    	        messageSet = jedis.zrevrangeByScore(messageSetKey, "("+lastScore, "-inf", 0, pageCount);
             }else{	//获取第一页数据
-    	        //分页获取单品课程中的id列表
-            	messageSet = jedis.zrangeByScore(messageSetKey, "-inf", "+inf", 0, pageCount);
+    	        /*
+    	         * 分页获取单品课程中的id列表
+    	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+    	         */
+            	messageSet = jedis.zrevrangeByScore(messageSetKey, "+inf", "-inf", 0, pageCount);
             }
         }
 		return messageSet;
+	}
+
+	/**
+	 * 从缓存中读取saas课程留言详情，若缓存没有从数据库读取后写入缓存
+	 * @param messageId 要查看详情的留言id
+	 * @param readMessageReqEntity 缓存没有读取数据库时使用，function="findSaasCourseCommentByCommentId"
+	 * @param operation
+	 * @param jedis
+	 * @param cachedValue
+	 * @return
+	 * @throws Exception
+	 */
+	public static Map<String, String> readSaasCourseMessage(String messageId, RequestEntity readMessageReqEntity,
+			CommonReadOperation operation, Jedis jedis, boolean cachedValue) throws Exception {
+		Map<String,String> values = readData(messageId, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+				Constants.CACHED_KEY_COMMENT_FIELD, readMessageReqEntity, operation, jedis, cachedValue);
+		String commentId = values.get(Constants.CACHED_KEY_COMMENT_FIELD);	//缓存中的留言id
+		if(!messageId.equals(commentId)){	//请求留言id的和缓存中的留言id一致
+			Map<String, String> keyMap = new HashMap<String, String>();
+			keyMap.put(Constants.CACHED_KEY_COMMENT_FIELD, messageId);
+			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, keyMap);
+			jedis.del(key);
+			values = readData(messageId, Constants.CACHED_KEY_COURSE_SAAS_COMMENT_DETAIL, 
+					Constants.CACHED_KEY_COMMENT_FIELD, readMessageReqEntity, operation, jedis, cachedValue);
+		}
+		return values;
 	}
 	
 }
