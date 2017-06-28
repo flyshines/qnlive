@@ -21,4 +21,11 @@ public interface SeriesMapper {
      * @return
      */
     PageList<Map<String,Object>> selectSeriesListByLecturerId(Map<String, Object> param, PageBounds page);
+
+    /**讲师的系列课
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> findSeriesListByLiturere(Map<String, Object> param, PageBounds page);
 }

@@ -145,4 +145,13 @@ public interface IUserModuleServer {
     Map<String,Object> findSeriesBySeriesId(String course_id);
 
 	boolean isStudentOfTheSeries(Map<String, Object> queryMap);
+
+	Map<String,Object> joinSeries(Map<String, String> courseMap);
+
+	Map<String,Object> findSeriesRecommendUserNum(Map<String, Object> reqMap);
+
+
+	void increaseStudentNumBySeriesId(String series_id);
+
+	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
 }

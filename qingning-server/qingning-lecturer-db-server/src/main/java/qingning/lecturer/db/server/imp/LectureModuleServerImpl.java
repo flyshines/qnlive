@@ -72,6 +72,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private SeriesMapper seriesMapper;
 
+    @Autowired(required = true)
+    private SeriesStudentsMapper seriesStudentsMapper;
+
 	@Autowired(required = true)
 	private SaaSCourseMapper saaSCourseMapper;
 
@@ -636,6 +639,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("rq_code",  series.get("series_id"));
 		series.put("series_course_type", reqMap.get("series_course_type"));
 		series.put("appName",reqMap.get("appName"));
+
+
+
 		seriesMapper.insertSeries(series);
 		return series;
 	}
@@ -696,4 +702,41 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		dbResultMap.put("update_time", now);
 		return dbResultMap;
 	}
+
+    @Override
+    public Map<String, Object> updateUpdown(Map<String,Object> record) {
+        Integer updateCount = 0;
+	    String query_from = record.get("query_from").toString();
+        if(!MiscUtils.isEmpty(record.get("series_id"))){
+            updateCount += seriesMapper.updateSeries(record);
+            List<String> seriesCourseIdList = (List<String>) record.get("series_course_list");
+            for(String course_id : seriesCourseIdList){
+                Map<String,Object> course = new HashMap<>();
+                course.put("course_id",course_id);
+                course.put("series_course_updown",record.get("updown"));
+                if(query_from.equals("0")){
+                    updateCount += coursesMapper.updateCourse(course);
+                }else{
+                    updateCount += saaSCourseMapper.updateByPrimaryKey(course);
+                }
+            }
+        }else if(!MiscUtils.isEmpty(record.get("course_id"))){
+            if(query_from.equals("0")){
+                updateCount += coursesMapper.updateCourse(record);
+            }else{
+                updateCount += saaSCourseMapper.updateByPrimaryKey(record);
+            }
+        }
+
+        Map<String, Object> dbResultMap = new HashMap<String, Object>();
+        dbResultMap.put("update_count", updateCount);
+        dbResultMap.put("update_time", new Date());
+        return dbResultMap;
+    }
+
+
+    @Override
+    public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
+        return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
 }

@@ -240,7 +240,65 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return bannerMapper.selectByPrimaryKey(bannerId);
     }
 
-    /**
+    @Override
+    public Map<String, Object> findUpCourseList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> result = saasCourseMapper.selectUpCourseListByShop(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> findUpLiveCourseList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = null;
+        if("5".equals(param.get("type").toString())){
+            //系列课
+            result = seriesMapper.findSeriesListByLiturere(param, page);
+        }else {
+            //单品课程
+            result = coursesMapper.findCourseListByLiturere(param, page);
+        }
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getSeriesCourseList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> result = null;
+        if("0".equals(param.get("series_course_type").toString())){
+            //直播课程
+            result = coursesMapper.findCourseBySeriesId(param, page);
+        }else{
+            //sass课程
+            result = saasCourseMapper.findCourseBySeriesId(param, page);
+        }
+        //是否是单卖判断
+        for(Map<String,Object> map : result){
+            if(!"0".equals(map.get("is_single").toString())){
+                //非单卖
+                map.put("is_single","1");
+            }
+        }
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public void openShop(Map<String, Object> shop) {
+        shopMapper.insert(shop);
+    }
+	/**
      * 新增saas课程的留言，同时更新课程的评论次数
      */
 	@Override
@@ -274,5 +332,16 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap) {
 		return coursesMapper.findCourseByMap(reqMap);
 	}
+
+    @Override
+    public Map<String, Object> getLiveList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String,Object>> result = coursesMapper.findCourseListByLiturere(param,page);
+        Map<String,Object> res = new HashMap<>();
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
 
 }

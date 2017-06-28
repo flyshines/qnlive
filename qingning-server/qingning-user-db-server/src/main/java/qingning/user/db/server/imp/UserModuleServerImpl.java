@@ -410,4 +410,39 @@ public class UserModuleServerImpl implements IUserModuleServer {
     public boolean isStudentOfTheSeries(Map<String, Object> queryMap) {
         return !MiscUtils.isEmpty( seriesStudentsMapper.isStudentOfTheSeries(queryMap));
     }
+
+    @Override
+    public Map<String, Object> joinSeries(Map<String, String> courseMap) {
+        Date now = new Date();
+        Map<String, Object> student = new HashMap<String, Object>();
+        student.put("student_id", MiscUtils.getUUId());
+        student.put("user_id", courseMap.get("user_id"));
+        student.put("lecturer_id", courseMap.get("lecturer_id"));
+        student.put("series_id", courseMap.get("series_id"));
+        student.put("student_type", "0"); //TODO distribution case
+        student.put("create_time", now);
+        student.put("create_date", now);
+        //students.setPaymentAmount();//TODO
+        Integer insertCount = seriesStudentsMapper.insertStudent(student);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("insertCount", insertCount);
+        return resultMap;
+    }
+
+    @Override
+    public Map<String, Object> findSeriesRecommendUserNum(Map<String, Object> reqMap) {
+        return seriesStudentsMapper.findSeriesRecommendUserNum(reqMap);
+    }
+
+    @Override
+    public void increaseStudentNumBySeriesId(String series_id) {
+        seriesMapper.increaseSeriesStudent(series_id);
+    }
+
+
+    @Override
+    public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
+        return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
+
 }

@@ -84,13 +84,8 @@
     where series_id = #{series_id} and user_id = #{user_id} limit 1
   </select>
   
-  <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.course_id, student.student_pos ,course.status from t_courses_students student,t_courses course where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
-    and student.course_id=course.course_id
-  	<if test="student_pos != null">
-  	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
-  	</if> 
-  	order by student.student_pos limit #{size}
+  <select id="findSeriesIdByStudent" resultType="hashmap" parameterType="hashmap" >
+  	select series_id,student_pos from t_series_students  where user_id=#{user_id}
   </select>
 
 
@@ -109,11 +104,8 @@
       <if test="lecturer_id != null" >
         lecturer_id,
       </if>
-      <if test="room_id != null" >
-        room_id,
-      </if>
-      <if test="course_id != null" >
-        course_id,
+      <if test="series_id != null" >
+        series_id,
       </if>
       <if test="payment_amount != null" >
         payment_amount,
@@ -150,11 +142,8 @@
       <if test="lecturer_id != null" >
         #{lecturer_id},
       </if>
-      <if test="room_id != null" >
-        #{room_id},
-      </if>
-      <if test="course_id != null" >
-        #{course_id},
+      <if test="series_id != null" >
+        #{series_id },
       </if>
       <if test="payment_amount != null" >
         #{payment_amount},
@@ -206,14 +195,11 @@
   	limit #{page_count}
   </select>
   
-  <select id="findCourseRecommendUserNum" resultType="hashmap" parameterType="hashmap" >
+  <select id="findSeriesRecommendUserNum" resultType="hashmap" parameterType="hashmap" >
     select count(1) as recommend_num
-    from t_courses_students
+    from t_series_students
     where
-    course_id = #{course_id}
-    <if test="room_id != null">
-    	and room_id = #{room_id}
-    </if>
+    series_id = #{series_id}
     <if test="distributer_id != null">
     	and distributer_id = #{distributer_id}
     </if>

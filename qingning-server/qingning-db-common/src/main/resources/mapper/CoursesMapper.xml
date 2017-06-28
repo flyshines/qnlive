@@ -499,4 +499,37 @@
 		limit #{readed_count}, #{page_count}
 	</if>
   </select>
+
+  <select id="findCourseListByLiturere" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+        t.course_id,
+        t.course_title,
+        t.`status`
+    FROM
+        t_courses t
+    WHERE
+        t.lecturer_id = #{user_id}
+    AND STATUS = '1'
+    <if test="keyword != null" >
+      course_title like '%${keyword}%'
+    </if>
+  </select>
+  <select id="findCourseBySeriesId" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+      t.course_id,
+      t.course_title,
+      t.course_url AS course_image,
+      '4' AS type,
+      t.create_time,
+      t.student_num AS view_num,
+      '' AS comment_num,
+      t.series_course_updown AS 'status',
+      t.course_updown AS is_single
+    FROM
+    `t_courses` t
+    WHERE
+    t.series_id = #{series_id}
+    ORDER BY t.create_time DESC
+  </select>
+
 </mapper>

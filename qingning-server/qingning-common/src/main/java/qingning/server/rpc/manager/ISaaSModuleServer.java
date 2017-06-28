@@ -128,9 +128,29 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getShopBannerInfo(String bannerId);
-    
-    /**
-     * 新增saas课程的留言，同时更新课程的评论次数
+    /**获取店铺所有上架的课程
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> findUpCourseList(Map<String, Object> reqMap);
+    /**获取店铺所有上架的直播课程
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> findUpLiveCourseList(Map<String, Object> reqMap);
+
+    /**获取系列下的课程列表
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> getSeriesCourseList(Map<String, Object> reqMap);
+    /**开通店铺
+     * @param shop
+     * @return
+     */
+    void openShop(Map<String, Object> shop);
+
+     /** 新增saas课程的留言，同时更新课程的评论次数
      * @param insertCommentMap
      * @param updateCourseMap 
      * @param jedis 用于更新缓存中saas课程评论id列表
@@ -144,4 +164,11 @@ public interface ISaaSModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap);
+
+    /**获取直播列表
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> getLiveList(Map<String, Object> reqMap);
+
 }

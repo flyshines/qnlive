@@ -1,4 +1,7 @@
 package qingning.db.common.mybatis.persistence;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
+
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +28,25 @@ public interface CoursesMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> findCourseListBySearch(Map<String, Object> reqMap);
+
 	/**
 	 * 根据条件获取直播课程列表
 	 * @param reqMap 封装的查询条件：条件格式详情查看dao的sql
 	 * @return
 	 */
 	List<Map<String, Object>> findCourseByMap(Map<String, Object> reqMap);
+
+	/**查询正在直播的课程
+	 * @param param
+	 * @param page
+	 * @return
+	 */
+	PageList<Map<String,Object>> findCourseListByLiturere(Map<String, Object> param, PageBounds page);
+
+	/**查询系列课下的课程列表
+	 * @param param
+	 * @param page
+	 * @return
+	 */
+	PageList<Map<String,Object>> findCourseBySeriesId(Map<String, Object> param, PageBounds page);
 }

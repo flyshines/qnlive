@@ -156,6 +156,9 @@
 			<if test="series_remark != null" >
 				series_remark=#{series_remark},
 			</if>
+			<if test="updown != null" >
+				updown=#{updown},
+			</if>
 			<if test="update_time != null" >
 				update_time=#{update_time},
 			</if>
@@ -168,12 +171,14 @@
 		</set>
 		where series_id = #{series_id}
 	</update>
+
 	<update id="increaseSeriesStudent" parameterType="string" >
 		update t_series
 		set
 		series_student_num = series_student_num + 1
 		where series_id = #{series_id}
 	</update>
+
 	<update id="increaseSeriesCourse" parameterType="hashmap" >
 		update t_series
 		set
@@ -207,6 +212,23 @@
 			AND t.series_title like '%${keyword}%'
 		</if>
 		ORDER BY t.update_course_time DESC
+	</select>
+
+	<select id="findSeriesListByLiturere" resultType="hashmap" parameterType="hashmap" >
+		SELECT
+		t.series_id AS course_id,
+		t.series_title AS course_title,
+		t.updown as 'status'
+		FROM
+		`t_series` t
+		WHERE
+		t.lecturer_id = #{user_id}
+		AND t.updown = '1'
+		<if test="keyword != null" >
+			AND t.series_title like '%${keyword}%'
+		</if>
+		ORDER BY t.update_course_time DESC
+
 	</select>
 
 </mapper>

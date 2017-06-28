@@ -27,6 +27,20 @@
 
 				</outputs>
 			</function>
+
+			<!--店铺-轮播图列表-->
+			<function name="openShop">
+				<auth>
+					<accessToken require="Y" />
+					<version require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+
+				</outputs>
+			</function>
+
 			<!--店铺-店铺信息-->
 			<function name="shopInfo">
 				<auth>
@@ -38,6 +52,7 @@
 				<outputs>
 					<param name="user_id" type="string" />
 					<param name="avatar_address" type="string"/>
+					<param name="shop_id" type="string" />
 					<param name="shop_name" type="string" />
 					<param name="shop_url" type="string" />
 					<param name="shop_remark" type="string"/>
@@ -72,7 +87,7 @@
 					<param name="banner_title" type="string" require="Y,000100"/>
 					<param name="banner_name" type="string" require="Y,000100"/>
 					<param name="banner_img" type="string" require="Y,000100"/>
-					<param name="link_type" type="string" require="Y,000100" format="1|2|3|4,000004" />
+					<param name="link_type" type="string" require="Y,000100" format="0|1|2|3|4|5|6,000004" />
 					<param name="link_id" type="string" require="N" />
 					<param name="link_to" type="string" require="N" />
 					<param name="position" type="long" require="N" />
@@ -139,6 +154,26 @@
 				<inputs>
 					<param name="course_title" type="string" require="Y,000100"/>
 					<param name="course_url" type="string" />
+					<param name="course_type" type="string" />
+					<param name="type" type="string" format="1|2|3,000004"/>
+					<param name="course_image" type="string"  require="Y,000100"/>
+					<param name="price" type="double" default="0" />
+					<param name="details" type="string" />
+					<param name="course_remark" type="string" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--商品-系列-添加课程-->
+			<function name="addSeriesSingleCourse">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"/>
+					<param name="course_title" type="string" require="Y,000100"/>
+					<param name="course_url" type="string" />
 					<param name="type" type="string" format="1|2|3,000004"/>
 					<param name="course_image" type="string"  require="Y,000100"/>
 					<param name="price" type="double" default="0" />
@@ -155,6 +190,7 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="course_type" type="string" />
 					<param name="course_title" type="string" require="N"/>
 					<param name="course_url" type="string"  require="N"/>
 					<param name="course_image" type="string"  require="N"/>
@@ -179,6 +215,7 @@
 						<param name="banner_img" type="string" />
 						<param name="banner_title" type="string" />
 						<param name="link_type" type="string" />
+						<param name="link_id" type="string" />
 						<param name="link_to" type="string" />
 					</param>
 				</outputs>
@@ -310,6 +347,36 @@
 
 			<!-- 店铺-获取单品列表 -->
 			<function name="getSingleList">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="status" type="string" require="N"/>
+					<param name="type" type="string" require="N"/>
+					<param name="keyword" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="course_id" type="string" />
+						<param name="course_title" type="string" />
+						<param name="course_image" type="string" />
+						<param name="type"  fieldname="goods_type" type="string" />
+						<param name="create_time" type="long" />
+						<param name="price" fieldname="course_price" type="double" />
+						<param name="total_income" fieldname="course_amount" type="double" />
+						<param name="sale_num" type="long" />
+						<param name="status" fieldname="course_updown" type="string" />
+						<param name="course_url" type="string" />
+						<param name="share_url" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
+			<!-- 店铺-获取直播列表 -->
+			<function name="getLiveList">
 				<auth>
 					<accessToken require="Y" />
 				</auth>
@@ -503,21 +570,23 @@
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y"/>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
 				</inputs>
 				<outputs>
 					<param name="list" type="list">
-						<param name="series_title" type="string" />
 						<param name="course_id" type="string" />
-						<param name="course_image" fieldname="series_img" type="string" />
-						<param name="type" fieldname="series_course_type" type="string" />
-						<param name="remark" fieldname="series_course_type" type="string" />
+						<param name="course_title" type="string" />
+						<param name="course_image" type="string" />
+						<param name="type" type="string" />
 						<param name="create_time" type="long" />
-						<param name="view_num" fieldname="series_price" type="long" />
-						<param name="comment_num" fieldname="series_amount" default="0" type="long" />
-						<param name="status" fieldname="update_plan" type="string" />
-						<param name="is_single" fieldname="series_student_num" default="0" type="string" />
-						<param name="details"  type="string" />
+						<param name="view_num" type="long" />
+						<param name="comment_num" default="0" type="long" />
+						<param name="status" type="string" />
+						<param name="is_single" default="0" type="string" />
 					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
 				</outputs>
 			</function>
 			<!--店铺-单品上下架-->
@@ -543,10 +612,12 @@
 					<param name="course_id" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
+					<param name="series_id" type="string" />
 					<param name="course_id" type="string" />
 					<param name="course_title" type="string" />
 					<param name="course_image" type="string" />
 					<param name="type"  fieldname="goods_type" type="string" />
+					<param name="course_type" type="string" />
 					<param name="create_time" type="long" />
 					<param name="price" fieldname="course_price" type="double" />
 					<param name="total_income" fieldname="course_amount" type="double" />
@@ -555,6 +626,7 @@
 					<param name="course_url" type="string" />
 					<param name="share_url" type="string" />
 					<param name="details" type="string" />
+					<param name="course_remark" type="string" />
 				</outputs>
 			</function>
 			
@@ -639,6 +711,27 @@
 					<param name="content" type="string" require="Y,000100" />
 				</inputs>
 				<outputs>
+				</outputs>
+			</function>
+			<!-- 轮播图-获取课程列表 -->
+			<function name="getBannerCourseList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="type" type="string" require="Y"/>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="keyword" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="course_id" type="string" />
+						<param name="status" type="string" />
+						<param name="course_title" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
 				</outputs>
 			</function>
 

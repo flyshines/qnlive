@@ -21,6 +21,7 @@ public final class Constants {
 	public static final String SYS_READ_LAST_SERIES ="SYS_READ_LAST_SERIES";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";
+	public static final String SYS_READ_USER_SERIES_LIST = "SYS_READ_USER_SERIES_LIST";
 	public static final double DIVIDED_PROPORTION = 0.3;//分成比例
 
 	public static final String SYS_READ_USER_BY_UNIONID = "SYS_READ_USER_BY_UNIONID";
@@ -144,6 +145,7 @@ public final class Constants {
 
 	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
 	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
+	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
 
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";

@@ -36,6 +36,23 @@ public class SaaSManageController extends AbstractController {
     }
 
     /**
+     * 微信扫码 1 登录入口
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/open", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity openShop(@RequestHeader(value = "access_token") String accessToken,
+                            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+                            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "openShop", accessToken, version, appName);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
+    /**
      * 店铺-店铺信息
      *
      * @return
@@ -219,6 +236,27 @@ public class SaaSManageController extends AbstractController {
         return responseEntity;
     }
     /**
+     * 商品-系列-添加课程
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/course/add", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity addSeriesSingleCourse(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addSeriesSingleCourse", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
      * 店铺-单品-编辑视频、音频
      *
      * @param accessToken
@@ -340,6 +378,37 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(paramCode);
         return this.process(requestEntity, serviceManger, message);
     }
+    /**
+     * 店铺-单品列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/live/single/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getLiveList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "status",defaultValue = "") String status,
+            @RequestParam(value = "type",defaultValue = "") String type,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getLiveList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(status))
+            paramCode.put("status", status);
+        if(StringUtils.isNotEmpty(type))
+            paramCode.put("type", type);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
     /**
      * 店铺-用户列表
@@ -432,7 +501,7 @@ public class SaaSManageController extends AbstractController {
 
 
     /**
-     * 店铺-单品上下架
+     * 店铺-单品上下架(未用到)
      *
      * @param accessToken
      * @param version
@@ -520,11 +589,43 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getSeriesCourseList(
             @RequestHeader("access_token") String accessToken,
+            @PathVariable(value = "series_id") String series_id,
             @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesCourseList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("series_id", series_id);
+        param.put("page_size", pageSize);
+        param.put("page_num", pageNum);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 轮播图-选择跳转的课程
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/course/{type}/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getBannerCourseList(
+            @RequestHeader("access_token") String accessToken,
+            @PathVariable(value = "type" ) String type,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "keyword", defaultValue = "") String keyword,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getBannerCourseList", accessToken, version, appName);
+        Map<String,Object> param = new HashMap<>();
+        param.put("type",type);
+        param.put("page_size", pageSize);
+        param.put("page_num", pageNum);
+        param.put("keyword", keyword);
+        requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
 
