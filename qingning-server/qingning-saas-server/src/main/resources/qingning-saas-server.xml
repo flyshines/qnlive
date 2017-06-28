@@ -157,6 +157,7 @@
 					<param name="course_image" type="string"  require="Y,000100"/>
 					<param name="price" type="double" default="0" />
 					<param name="details" type="string" />
+					<param name="course_remark" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -168,6 +169,7 @@
 					<version require="N" />
 				</auth>
 				<inputs>
+					<param name="series_id" type="string" require="Y,000100"/>
 					<param name="course_title" type="string" require="Y,000100"/>
 					<param name="course_url" type="string" />
 					<param name="type" type="string" format="1|2|3,000004"/>
@@ -560,6 +562,7 @@
 					<param name="course_url" type="string" />
 					<param name="share_url" type="string" />
 					<param name="details" type="string" />
+					<param name="course_remark" type="string" />
 				</outputs>
 			</function>
 			

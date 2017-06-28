@@ -236,7 +236,7 @@ public class SaaSManageController extends AbstractController {
         return responseEntity;
     }
     /**
-     * 店铺-单品-添加视频、音频
+     * 商品-系列-添加课程
      *
      * @param accessToken
      * @param version

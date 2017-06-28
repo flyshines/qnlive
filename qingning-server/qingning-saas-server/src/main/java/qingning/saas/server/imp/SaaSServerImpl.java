@@ -425,11 +425,62 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         //默认下架
         reqMap.put("course_updown","2");
+        reqMap.put("series_course_updown","0");
+
+        reqMap.put("app_name",reqEntity.getAppName());
+        //插入课程
+        saaSModuleServer.addCourse(reqMap);
+    }
+
+	/**
+	 * 店铺-系列-添加课程
+	 * @param reqEntity
+	 * @throws Exception
+	 */
+    @FunctionName("addSeriesSingleCourse")
+    public void  addSeriesSingleCourse(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        reqMap.put("user_id",userId);
+        //店铺信息
+        Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        String shopId = shopInfo.get("shop_id");
+        reqMap.put("course_id",MiscUtils.getUUId());
+        reqMap.put("shop_id",shopId);
+        reqMap.put("lecturer_id",userId);
+        Date now = new Date();
+        reqMap.put("create_time",now);
+        reqMap.put("create_date",now);
+        reqMap.put("course_price",reqMap.get("price"));
+        //收益初始化
+        reqMap.put("extra_amount",0);
+        reqMap.put("extra_num",0);
+        reqMap.put("series_or_course",0);
+        reqMap.put("sale_num",0);
+        reqMap.put("goods_type",reqMap.get("type"));
+        reqMap.put("course_amount",0);
+        //分享连接
+        reqMap.put("share_url",MiscUtils.getConfigByKey("share_url_single_index",Constants.HEADER_APP_NAME)+reqMap.get("course_id"));
+        //默认下架
+        reqMap.put("course_updown","0");
         reqMap.put("series_course_updown","2");
 
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
+
+        //更新缓存
+        Map<String, Object> seriesMap = new HashMap<String, Object>();
+
+        seriesMap.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id"));
+        //已下架的zset列表
+        String readSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, seriesMap);
+        //新增到下架的缓存
+        jedis.zadd(readSeriesDownKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
+
+
+
     }
 
     /**
