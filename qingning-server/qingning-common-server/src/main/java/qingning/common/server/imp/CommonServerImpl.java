@@ -59,6 +59,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     private ReadLecturerOperation readLecturerOperation;
     private ReadRoomDistributerOperation readRoomDistributerOperation;
     private ReadShopOperation readShopOperation;
+    private ReadSeriesOperation readSeriesOperation;
 
     @Override
     public void initRpcServer() {
@@ -74,6 +75,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             readForceVersionOperation = new ReadForceVersionOperation(commonModuleServer);
             readLecturerOperation = new ReadLecturerOperation(commonModuleServer);
             readRoomDistributerOperation = new ReadRoomDistributerOperation(commonModuleServer);
+            readSeriesOperation = new ReadSeriesOperation(commonModuleServer);
         }
     }
 
@@ -821,13 +823,32 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String courseId = reqMap.get("course_id").toString();
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("course_id", courseId);
-        Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
-
-        if(MiscUtils.isEmpty(courseMap)){    //如果课程不存在
-            throw new QNLiveException("120009");
-        }
         //2.如果支付类型为打赏，则检测内存中的打赏类型是否存在，如果不存在则给出提示（120010，打赏类型不存在）
         String profit_type = reqMap.get("profit_type").toString();
+
+        Map<String,String> courseMap;
+        if("2".equals(profit_type)){
+            //系列课
+            query.put("series_id",courseId);
+            courseMap = CacheUtils.readSeries(courseId, generateRequestEntity(null, null, null, query), readSeriesOperation, jedis, true);
+            //直播间信息查询
+            Map<String,String> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
+            String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+            Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+            String roomId = null;
+            for(String id:key.keySet()){
+                roomId = id;
+            }
+            courseMap.put("room_id",roomId);
+        }else{
+            //打赏，课程收益
+            courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
+        }
+        if(MiscUtils.isEmpty(courseMap)){    //如果课程/系列不存在
+            throw new QNLiveException("120009");
+        }
+
 
         //3.插入t_trade_bill表 交易信息表
         String goodName = null;
@@ -836,8 +857,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> insertMap = new HashMap<>();
         insertMap.put("user_id",userId);
         insertMap.put("room_id",courseMap.get("room_id"));
-        insertMap.put("course_id",courseMap.get("course_id"));
-        //判断类型为 0:课程收益 1:打赏
+        insertMap.put("course_id",courseId);
+        //判断类型为 0:课程收益 1:打赏 2:系列课收益
         if(profit_type.equals("1")){
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
@@ -846,6 +867,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", courseMap.get("course_price"));
             totalFee = Integer.parseInt(courseMap.get("course_price"));
             goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+        }else if(profit_type.equals("2")){
+            //系列课收益
+            insertMap.put("amount", courseMap.get("series_price"));
+            totalFee = Integer.parseInt(courseMap.get("series_price"));
+            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("series_title"));
+            //系列类型（0直播 1语音 2视频 3图文）
+            insertMap.put("series_type",courseMap.get("series_course_type"));
         }
         insertMap.put("status","0");
         String tradeId = MiscUtils.getWeiXinId();//TODO
@@ -1008,6 +1036,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
 
                 String profit_type = (String)billMap.get("profit_type");
+                String seriesType = billMap.get("series_type")+"";
                 //1.1如果为打赏，则先查询该用户是否打赏了该课程
                 Map<String,Object> rewardMap = null;
                 if("1".equals(profit_type)){
@@ -1028,7 +1057,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 requestValues.put("tradeBillInCache", billMap);
                 Map<String,String> distributeRoom = null;
 
-                Map<String,Object> userDistributionInfo = null;
+                //Map<String,Object> userDistributionInfo = null;
                 Map<String,Object> recommendMap = null;
                 if("0".equals(profit_type)){ //profit_type 0 课程收益 1打赏收益
                     //t_room_distributer
@@ -1042,15 +1071,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         distributeRoom = CacheUtils.readDistributerRoom((String)recommendMap.get(Constants.CACHED_KEY_DISTRIBUTER_FIELD),
                                 (String)billMap.get("room_id"), readRoomDistributer, jedis);
                         requestValues.put("roomDistributerCache", distributeRoom);
-
+//未用到注释 罗思2017-06-28
                         //根据分销员id、用户id、rqCode、room_id、消费类型为购买，查询数据库
-                        Map<String,Object> queryuserDistribution = new HashMap<>();
-                        queryuserDistribution.put("distributer_id", distributeRoom.get("distributer_id"));
-                        queryuserDistribution.put("user_id", userId);
-                        queryuserDistribution.put("room_id", courseMap.get("room_id"));
-                        queryuserDistribution.put("rq_code", recommendMap.get("rq_code"));
-                        queryuserDistribution.put("profit_type", billMap.get("profit_type"));
-                        userDistributionInfo = commonModuleServer.findUserDistributionInfo(queryuserDistribution);
+//                        Map<String,Object> queryuserDistribution = new HashMap<>();
+//                        queryuserDistribution.put("distributer_id", distributeRoom.get("distributer_id"));
+//                        queryuserDistribution.put("user_id", userId);
+//                        queryuserDistribution.put("room_id", courseMap.get("room_id"));
+//                        queryuserDistribution.put("rq_code", recommendMap.get("rq_code"));
+//                        queryuserDistribution.put("profit_type", billMap.get("profit_type"));
+                        //userDistributionInfo = commonModuleServer.findUserDistributionInfo(queryuserDistribution);
                     }
                 }
                 Map<String,Object> handleResultMap = commonModuleServer.handleWeixinPayResult(requestValues);
@@ -1061,7 +1090,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 jedis.del(key);
                 //3.处理缓存中的数据
                 //3.4如果是购买课程，且存在分销行为，则进行相关缓存处理
-                long lecturerProfit = 0L;
                 Map<String,Object> sumInfo = null;
                 if("0".equals(profit_type) && !MiscUtils.isEmpty(distributeRoom)){
                     query.clear();
@@ -1114,15 +1142,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
                     jedis.hset(userCacheKey, "today_distributer_amount", MiscUtils.convertObjectToLong(sumInfo.get("share_amount"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_USER_KEY, distributeRoom.get("distributer_id"));
-                }else {
-                    lecturerProfit = (Long)handleResultMap.get("profit_amount");
                 }
 
                 //3.1 t_lecturer  缓存
                 query.clear();
                 query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
-                if("0".equals(profit_type)){
+                //如果是系列课直播也做以前的 直播统计
+                if("0".equals(profit_type)||"0".equals(seriesType)){
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
                     jedis.hincrBy(lecturerKey,"room_done_num",1);
@@ -1161,7 +1188,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("profit_type", "0");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
-                }else {
+                }else if("1".equals(profit_type)){
                     //如果之前并没有打赏该课程，则计入
                     if(MiscUtils.isEmpty(rewardMap)){
                         jedis.hincrBy(courseKey, "extra_num", 1);
@@ -1172,19 +1199,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
-
-                switch (courseMap.get("status")){
-                    case "1":
-                        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
-                        if(courseMap.get("status").equals("4")){
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,courseId);
-                        }else{
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,courseId);
-                        }
-                        break;
-                    case "2":
-                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,courseId);
-                        break;
+                //TODO 系列课除外 暂时不做热门推荐
+                if(StringUtils.isEmpty(courseMap.get("series_id"))){
+                    switch (courseMap.get("status")){
+                        case "1":
+                            MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+                            if(courseMap.get("status").equals("4")){
+                                jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,courseId);
+                            }else{
+                                jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,courseId);
+                            }
+                            break;
+                        case "2":
+                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,courseId);
+                            break;
+                    }
                 }
                 query.clear();
                 String lecturerId = courseMap.get("lecturer_id");

@@ -52,6 +52,7 @@
 				<outputs>
 					<param name="user_id" type="string" />
 					<param name="avatar_address" type="string"/>
+					<param name="shop_id" type="string" />
 					<param name="shop_name" type="string" />
 					<param name="shop_url" type="string" />
 					<param name="shop_remark" type="string"/>
@@ -153,6 +154,7 @@
 				<inputs>
 					<param name="course_title" type="string" require="Y,000100"/>
 					<param name="course_url" type="string" />
+					<param name="course_type" type="string" />
 					<param name="type" type="string" format="1|2|3,000004"/>
 					<param name="course_image" type="string"  require="Y,000100"/>
 					<param name="price" type="double" default="0" />
@@ -188,6 +190,7 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="course_type" type="string" />
 					<param name="course_title" type="string" require="N"/>
 					<param name="course_url" type="string"  require="N"/>
 					<param name="course_image" type="string"  require="N"/>
@@ -550,10 +553,12 @@
 					<param name="course_id" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
+					<param name="series_id" type="string" />
 					<param name="course_id" type="string" />
 					<param name="course_title" type="string" />
 					<param name="course_image" type="string" />
 					<param name="type"  fieldname="goods_type" type="string" />
+					<param name="course_type" type="string" />
 					<param name="create_time" type="long" />
 					<param name="price" fieldname="course_price" type="double" />
 					<param name="total_income" fieldname="course_amount" type="double" />

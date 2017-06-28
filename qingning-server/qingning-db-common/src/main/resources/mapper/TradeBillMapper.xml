@@ -28,7 +28,10 @@
       </if>
       <if test="profit_type != null" >
         profit_type,
-      </if>      
+      </if>
+      <if test="series_type != null" >
+        series_type,
+      </if>
       <if test="close_reason != null" >
         close_reason,
       </if>
@@ -66,7 +69,10 @@
       </if>
       <if test="profit_type != null" >
         #{profit_type},
-      </if>      
+      </if>
+      <if test="series_type != null" >
+        #{series_type},
+      </if>
       <if test="close_reason != null" >
         #{close_reason},
       </if>
@@ -105,6 +111,9 @@
       </if>
       <if test="profit_type != null" >
         profit_type = #{profit_type},
+      </if>
+      <if test="series_type != null" >
+        series_type = #{profit_type},
       </if>
       <if test="close_reason != null" >
         close_reason = #{close_reason},

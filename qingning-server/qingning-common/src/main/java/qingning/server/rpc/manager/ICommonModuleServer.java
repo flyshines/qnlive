@@ -248,4 +248,11 @@ public interface ICommonModuleServer {
 	 * @param shop
 	 */
 	void insertShopInfo(Map<String, Object> shop);
+
+	/**
+	 * 根据系列id查询系列
+	 * @param series_id
+	 * @return
+	 */
+	Map<String,Object> findSeriesBySeriesId(String series_id);
 }

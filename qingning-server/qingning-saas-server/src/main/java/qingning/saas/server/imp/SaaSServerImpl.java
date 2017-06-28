@@ -108,7 +108,17 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> shop = new HashMap<>();
         shop.put("user_id",userId);
         shop.put("shop_id",MiscUtils.getUUId());
-        shop.put("room_id",userMap.get("room_id")+"");
+        //直播间信息查询
+        Map<String,String> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+        Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+        String roomId = null;
+        for(String id:key.keySet()){
+            roomId = id;
+        }
+
+        shop.put("room_id",roomId);
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的店铺");
         shop.put("shop_remark","");

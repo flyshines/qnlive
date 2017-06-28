@@ -325,7 +325,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			profitRecord.put("lecturer_id", lecturerId);
 		}
 
-
+		//课程收益
 		if("0".equals(tradeBill.get("profit_type"))){
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
@@ -1029,5 +1029,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void insertShopInfo(Map<String, Object> shop) {
 		shopMapper.insert(shop);
+	}
+	@Override
+	public Map<String, Object> findSeriesBySeriesId(String series_id) {
+		return seriesMapper.findSeriesBySeriesId(series_id);
 	}
 }
