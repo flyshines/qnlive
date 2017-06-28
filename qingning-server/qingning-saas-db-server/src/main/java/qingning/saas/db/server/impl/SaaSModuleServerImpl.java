@@ -42,6 +42,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SaaSFeedBackMapper feedBackMapper;
     @Autowired(required = true)
     private SaaSCourseCommentMapper courseCommentMapper;
+    @Autowired(required = true)
+    private FeedbackMapper feedbackMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -325,6 +327,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		return 1;
 	}
 
+	/**
+	 * 根据条件获取直播课程列表
+	 */
+	@Override
+	public List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseByMap(reqMap);
+	}
+
     @Override
     public Map<String, Object> getLiveList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
@@ -344,5 +354,13 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_page",result.getPaginator().getTotalPages());
         return res;
     }
+
+    /**
+     * 新增反馈和建议
+     */
+	@Override
+	public int addFeedback(Map<String, Object> newFeedbackMap) {
+		return feedbackMapper.insertFeedBack(newFeedbackMap);
+	}
 
 }

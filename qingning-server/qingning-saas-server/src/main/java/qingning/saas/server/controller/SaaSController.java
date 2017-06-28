@@ -99,6 +99,37 @@ public class SaaSController extends AbstractController {
     }
     
     /**
+     * 店铺-获取店铺单品直播课程列表
+     * @param shopId
+     * @param lastLiveId
+     * @param pageCount
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/course/live_single/list/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopLiveSingleList(
+			@PathVariable("shop_id") String shopId,
+			@RequestParam(value="last_update_time", defaultValue="0")long lastUpdateTime,
+			@RequestParam(value="readed_count", defaultValue="0")long readedCount,
+			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopLiveSingleList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        param.put("last_update_time", lastUpdateTime);
+        param.put("readed_count", readedCount);
+        param.put("page_count", pageCount);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
+    /**
      * 课程-获取系列课程详情
      * @param seriesId
      * @param accessToken
@@ -263,6 +294,28 @@ public class SaaSController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addMessageForCourse", accessToken, version, appName);
         Map<String, Object> param = (Map<String, Object>) entity.getBody();
         param.put("course_id", courseId);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
+    /**
+     * 用户-提交反馈与建议
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/user/feedback/new", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity addFeedback(
+    		HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addFeedback", accessToken, version, appName);
+        Map<String, Object> param = (Map<String, Object>) entity.getBody();
         
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);

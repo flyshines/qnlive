@@ -269,6 +269,34 @@
 				</outputs>
 			</function>
 			
+			<!-- 店铺-获取店铺单品直播课程列表 -->
+			<function name="findShopLiveSingleList">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100"/>
+					<param name="last_update_time" type="long" require="N"/>
+					<param name="readed_count" type="long" require="N"/>
+					<param name="page_count" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="live_info_list" type="list">
+						<param name="live_id" type="string" fieldname="course_id" />
+						<param name="live_img_url" type="string" fieldname="course_url" />
+						<param name="live_start_time" type="long" fieldname="start_time" />
+						<param name="live_end_time" type="long" fieldname="end_time" />
+						<param name="live_type" type="string" fieldname="course_type" />
+						<param name="buy_status" type="string" />
+						<param name="live_title" type="string" fieldname="course_title" />
+						<param name="buyer_count" type="long" fieldname="student_num" />
+						<param name="price" type="double" fieldname="course_price" />
+						<param name="live_status" type="string" fieldname="status" />
+					</param>
+					<param name="last_update_time" type="long" />
+				</outputs>
+			</function>
+			
 			<!-- 课程-获取系列课程详情 -->
 			<function name="findSeriesCourseDetail">
 				<auth>
@@ -396,6 +424,7 @@
 						<param name="intro" type="string" fieldname="course_remark" />
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="create_time" type="long" />
+						<param name="single_type" type="string" fieldname="goods_type" />
 					</param>
 					<param name="series_id" type="string" />
 					<param name="is_bought" type="string" />
@@ -703,6 +732,19 @@
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
+				</outputs>
+			</function>
+			
+			<!-- 用户-提交反馈与建议 -->
+			<function name="addFeedback">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="content" type="string" require="Y"/>
+					<param name="contact" type="string" require="Y"/>
+				</inputs>
+				<outputs>
 				</outputs>
 			</function>
 

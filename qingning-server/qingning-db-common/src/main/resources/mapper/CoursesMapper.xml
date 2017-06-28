@@ -474,7 +474,31 @@
 	</where>
 	limit 20
   </select>
-
+  
+  <!-- 根据条件获取直播课程列表 -->
+  <select id="findCourseByMap" parameterType="hashmap" resultType="hashmap">
+  	SELECT * 
+	FROM t_courses 
+	<where>
+		app_name = #{app_name}
+		<if test="lecturer_id != null and lecturer_id != ''">
+			and lecturer_id = #{lecturer_id}
+		</if>
+		<if test="status != null and status != ''">
+			and status in (${status})
+		</if>
+		<if test="create_time != null"><!-- 排除前端获取第一页后新增的数据 -->
+			and create_time <![CDATA[ <= ]]> #{create_time}
+		</if>
+		<if test="course_updown != null">
+			and course_updown = #{course_updown}
+		</if>
+	</where>
+	ORDER BY position DESC
+	<if test="readed_count != null and page_count != null">
+		limit #{readed_count}, #{page_count}
+	</if>
+  </select>
 
   <select id="findCourseListByLiturere" resultType="hashmap" parameterType="hashmap" >
     SELECT

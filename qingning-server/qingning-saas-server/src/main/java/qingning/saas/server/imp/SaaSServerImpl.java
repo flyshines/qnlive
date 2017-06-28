@@ -399,7 +399,87 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         resultMap.put("series_info_list", seriesInfoList);
         return resultMap;
-	}   
+	}  
+    
+    /**
+     * H5_店铺-获取店铺单品直播课程列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findShopLiveSingleList")
+    public Map<String, Object>  findShopLiveSingleList(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 逻辑：
+    	 * 1.讲师所有直播课程（同时包括预告和直播结束）没有缓存，所以直接查询数据库
+    	 */
+    	
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	List<Map<String, String>> liveInfoList = new ArrayList<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+//        reqMap.put("user_id",userId);
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        //获取前端上一次刷新时的服务器时间
+        long lastUpdateTime = (long) reqMap.get("last_update_time"); 
+        //获取前端上一次刷新时的服务器时间
+        long readedCount = (long) reqMap.get("readed_count"); 
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //获取当前服务器时间
+        Date now = new Date();
+        
+        /*
+         * 从缓存中获取店铺信息
+         */
+        Map<String, String> shopMap = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        if(shopMap == null || shopMap.isEmpty()){
+        	logger.error("saas店铺-获取店铺单品直播课程列表>>>>请求的店铺不存在");
+        	throw new QNLiveException("190001");
+        }
+        //获取讲师id
+        String lecturerId = shopMap.get("user_id");
+        
+        /*
+         * 从数据库查询讲师的所有直播课程列表（同时包括预告和已完成）
+         */
+        reqMap.put("lecturer_id", lecturerId);
+        reqMap.put("status", "1,2,4");	//用于sql的where `status` in (1：已发布 2:已结束 4直播中)
+        if(readedCount == 0 && lastUpdateTime == 0){
+        	//前端请求第一页数据
+        	reqMap.put("create_time", now);	//用于sql进行条件查询：create_time <= now
+        	//返回给前端当前服务器时间
+        	resultMap.put("last_update_time", now);
+        }else{
+        	reqMap.put("create_time", new Date(lastUpdateTime));	//用于sql进行条件查询：create_time <= lastUpdateTime
+        	//返回给前端原来传递的时间
+        	resultMap.put("last_update_time", lastUpdateTime);
+        }
+        reqMap.put("course_updown", '1');	//单品上下架 单品课 1上架 2下架 0没有
+        reqMap.put("app_name", appName);
+        
+        List<Map<String, Object>> liveCourseMap = saaSModuleServer.findLiveCourseListByMap(reqMap);
+        /*
+         * TODO 购买状态
+         */
+       /* if(liveCourseMap != null){
+        	for(Map<String, Object> map : liveCourseMap){
+        		
+        	}
+        }*/
+        
+        resultMap.put("live_info_list", liveCourseMap);
+        return resultMap;
+	} 
 
 	/**
 	 * 店铺-单品-添加视频、音频
@@ -873,6 +953,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> updateCourseMap = new HashMap<>();
         updateCourseMap.put("course_id", singleId);
         updateCourseMap.put("click_num", 1);	//点击次数，置1是用于sql执行加1操作
+        updateCourseMap.put("series_id", singleMap.get("series_id"));	//临时解决bug的方法，因为若series_id=null,sql会将series_id置空
         //更新数据库
         saaSModuleServer.updateCourse(updateCourseMap);
         //更新缓存
@@ -1289,6 +1370,47 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
         saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, jedis);
+        
+        return resultMap;
+    }
+    
+    /**
+     * 用户-提交反馈与建议
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("addFeedback")
+    public Map<String, Object> addFeedback(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求中的反馈内容
+        String content = (String) reqMap.get("content");
+        //获取请求中的联系方式
+        String contact = (String) reqMap.get("contact");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        //获取当前服务器时间
+        Date now = new Date();
+        
+        /*
+         * 新增到数据库
+         */
+        Map<String, Object> newFeedbackMap = new HashMap<String, Object>();
+        newFeedbackMap.put("feedback_id", MiscUtils.getUUId());
+        newFeedbackMap.put("user_id", userId);
+        newFeedbackMap.put("content", content);
+        newFeedbackMap.put("status", 1);	//处理状态，1：未处理 2：已经处理
+        newFeedbackMap.put("phone_number", contact);
+        newFeedbackMap.put("create_time", now);
+        newFeedbackMap.put("update_time", now);
+        saaSModuleServer.addFeedback(newFeedbackMap);
         
         return resultMap;
     }
