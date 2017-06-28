@@ -157,4 +157,10 @@ public interface ISaaSModuleServer {
      * @return
      */
 	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Jedis jedis);
+
+    /**获取直播列表
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> getLiveList(Map<String, Object> reqMap);
 }

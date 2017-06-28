@@ -744,6 +744,22 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return saaSModuleServer.getSingleList(reqMap);
 
     }
+    /**
+     * 店铺-直播列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getLiveList")
+    public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        return saaSModuleServer.getLiveList(reqMap);
+
+    }
 
     /**
      * 店铺-用户列表
@@ -800,17 +816,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return userList;
     }
 
-    /**
-     * 店铺-直播列表
-     * @param reqEntity
-     * @return
-     * @throws Exception
-     */
-    @FunctionName("getLiveList")
-    public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
-        return null;
-    }
-    
+
     /**
      * H5_课程-获取单品课程详情
      * @param reqEntity
