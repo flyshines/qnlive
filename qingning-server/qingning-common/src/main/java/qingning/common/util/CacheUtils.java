@@ -193,6 +193,38 @@ public final class CacheUtils {
 			}
 			//</editor-fold>
 
+
+			//<editor-fold desc="用戶加入的系列">
+			final String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES,query);//存储用户关注的直播间
+			if(jedis.exists(seriesKey)){//判断当前缓存是否存在
+				jedis.expire(seriesKey, 60*60*72);//修改生命时间
+			} else {
+				RequestEntity entity = new RequestEntity();
+				entity.setFunctionName(Constants.SYS_READ_USER_SERIES_LIST);//加入参数 进行方法调用 获取房间id list
+				entity.setParam(query);
+				final Set<String> userSeriesSet = new HashSet<String>();
+				List<Map<String, Object>> list = (List<Map<String, Object>>) operation.invokeProcess(entity);//调用传入的operation对象里的invokeProcess方法
+				if (!MiscUtils.isEmpty(list)) {
+					for (Map<String, Object> course : list) {
+						userSeriesSet.add((String) course.get("series_id"));
+					}
+				}
+				if (!MiscUtils.isEmpty(userSeriesSet)) {
+					((JedisBatchCallback) jedis).invoke(new JedisBatchOperation() {
+						@Override
+						public void batchOperation(Pipeline pipeline, Jedis jedis) {
+							for (String series_id : userSeriesSet) {
+								pipeline.sadd(seriesKey, series_id);
+							}
+							pipeline.sync();
+						}
+					});
+					jedis.expire(roomsKey, 60 * 60 * 72);
+				}
+			}
+			//</editor-fold>
+
+
 			String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);//获取系统缓存key
 			Long course_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
 			if(course_num != Long.parseLong(result.get("course_num"))){
@@ -203,6 +235,12 @@ public final class CacheUtils {
 			if(room_num != Long.parseLong(result.get("live_room_num"))){ //如果数据和现在的不同
 				jedis.hset(userCacheKey,"live_room_num",room_num.toString());//修改用户缓存中的数据
 			}
+
+			Long series_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
+			if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
+				jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
+			}
+
 			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedis, true, 60*60*72);
 		}
 		return result;

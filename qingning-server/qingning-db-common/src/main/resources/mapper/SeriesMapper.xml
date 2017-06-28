@@ -156,6 +156,9 @@
 			<if test="series_remark != null" >
 				series_remark=#{series_remark},
 			</if>
+			<if test="updown != null" >
+				updown=#{updown},
+			</if>
 			<if test="update_time != null" >
 				update_time=#{update_time},
 			</if>
@@ -168,12 +171,14 @@
 		</set>
 		where series_id = #{series_id}
 	</update>
+
 	<update id="increaseSeriesStudent" parameterType="string" >
 		update t_series
 		set
 		series_student_num = series_student_num + 1
 		where series_id = #{series_id}
 	</update>
+
 	<update id="increaseSeriesCourse" parameterType="hashmap" >
 		update t_series
 		set
