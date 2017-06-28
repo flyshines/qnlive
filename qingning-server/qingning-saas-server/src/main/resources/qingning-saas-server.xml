@@ -364,7 +364,7 @@
 						<param name="course_id" type="string" />
 						<param name="course_title" type="string" />
 						<param name="course_image" type="string" />
-						<param name="type"  fieldname="goods_type" type="string" />
+						<param name="type"  type="string" />
 						<param name="create_time" type="long" />
 						<param name="price" fieldname="course_price" type="double" />
 						<param name="total_income" fieldname="course_amount" type="double" />
