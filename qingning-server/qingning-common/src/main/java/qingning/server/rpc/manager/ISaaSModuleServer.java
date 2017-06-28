@@ -171,4 +171,11 @@ public interface ISaaSModuleServer {
      */
     Map<String,Object> getLiveList(Map<String, Object> reqMap);
 
+    /**
+     * 新增反馈和建议
+     * @param newFeedbackMap
+     * @return
+     */
+	int addFeedback(Map<String, Object> newFeedbackMap);
+
 }

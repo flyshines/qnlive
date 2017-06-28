@@ -1373,6 +1373,47 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         return resultMap;
     }
+    
+    /**
+     * 用户-提交反馈与建议
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("addFeedback")
+    public Map<String, Object> addFeedback(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求中的反馈内容
+        String content = (String) reqMap.get("content");
+        //获取请求中的联系方式
+        String contact = (String) reqMap.get("contact");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        //获取当前服务器时间
+        Date now = new Date();
+        
+        /*
+         * 新增到数据库
+         */
+        Map<String, Object> newFeedbackMap = new HashMap<String, Object>();
+        newFeedbackMap.put("feedback_id", MiscUtils.getUUId());
+        newFeedbackMap.put("user_id", userId);
+        newFeedbackMap.put("content", content);
+        newFeedbackMap.put("status", 1);	//处理状态，1：未处理 2：已经处理
+        newFeedbackMap.put("phone_number", contact);
+        newFeedbackMap.put("create_time", now);
+        newFeedbackMap.put("update_time", now);
+        saaSModuleServer.addFeedback(newFeedbackMap);
+        
+        return resultMap;
+    }
 
 
 }

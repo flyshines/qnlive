@@ -299,5 +299,27 @@ public class SaaSController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
     
+    /**
+     * 用户-提交反馈与建议
+     * @param entity
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/user/feedback/new", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity addFeedback(
+    		HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addFeedback", accessToken, version, appName);
+        Map<String, Object> param = (Map<String, Object>) entity.getBody();
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
     
 }

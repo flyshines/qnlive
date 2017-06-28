@@ -42,6 +42,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SaaSFeedBackMapper feedBackMapper;
     @Autowired(required = true)
     private SaaSCourseCommentMapper courseCommentMapper;
+    @Autowired(required = true)
+    private FeedbackMapper feedbackMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -343,5 +345,13 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_page",result.getPaginator().getTotalPages());
         return res;
     }
+
+    /**
+     * 新增反馈和建议
+     */
+	@Override
+	public int addFeedback(Map<String, Object> newFeedbackMap) {
+		return feedbackMapper.insertFeedBack(newFeedbackMap);
+	}
 
 }

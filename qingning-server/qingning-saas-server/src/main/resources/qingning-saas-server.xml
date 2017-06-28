@@ -734,6 +734,19 @@
 					<param name="total_page" type="long" />
 				</outputs>
 			</function>
+			
+			<!-- 用户-提交反馈与建议 -->
+			<function name="addFeedback">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="content" type="string" require="Y"/>
+					<param name="contact" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 
 		</default>
 		<version num="1.0.0" class="">
