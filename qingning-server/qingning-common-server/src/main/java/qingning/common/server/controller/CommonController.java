@@ -183,8 +183,8 @@ public class CommonController extends AbstractController {
         map.put("code",code);
         if(state.equals("qnsaas")){
             appName = "qnlive";
-            map.put("state",appName);
         }
+        map.put("state",appName);
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",appName);
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
@@ -198,7 +198,7 @@ public class CommonController extends AbstractController {
             }else{//跳转直播
                 response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
             }
-            return ;
+             return ;
         }
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");

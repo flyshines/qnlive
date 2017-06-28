@@ -772,10 +772,10 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="series_remark" type="rstring"  />
-					<param name="series_img" type="string"  />
-					<param name="series_title" type="string"  />
-					<param name="series_status" type="string"  />
+					<param name="query_type" type="rstring"  />
+					<param name="updown_id" type="string"  />
+					<param name="updown" type="string"  />
+					<param name="query_from" type="string"  />
 				</inputs>
 				<outputs>
 				</outputs>

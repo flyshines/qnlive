@@ -3258,6 +3258,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         updownMap.put("update_time",now);
         updownMap.put("query_from",query_from);
         if(query_type.equals("1")){//系列
+            //<editor-fold desc="上下架 系列">
             updownMap.put("series_id",updown_id);
             String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, updownMap);
             //判断当前系列是这个讲师的吗
@@ -3315,7 +3316,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     jedis.zadd(seriesCourseDownKey, courselops, course_id);
                 }
             }
+            //</editor-fold>
         }else{
+            //<editor-fold desc="课程">
             //课程
             String courseId = updown_id;
             updownMap.put("course_id",courseId);
@@ -3402,6 +3405,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
                 }
             }
+            //</editor-fold>
 
         }
         return result ;
