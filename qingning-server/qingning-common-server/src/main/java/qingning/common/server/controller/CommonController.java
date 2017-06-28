@@ -177,14 +177,15 @@ public class CommonController extends AbstractController {
     public void weixinLogin(
             @RequestParam("code") String code,
             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
-            @RequestParam(value="saas_login",defaultValue = "0") String saasLogin,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
         Map<String,String> map = new HashMap<>();
-        map.put("code",code);
-        map.put("state",state);
-        map.put("saas_login",saasLogin);
         String appName = state;
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",state);
+        map.put("code",code);
+        if(state.equals("qnsaas")){
+            appName = "qnlive";
+            map.put("state",appName);
+        }
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",appName);
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
@@ -192,12 +193,9 @@ public class CommonController extends AbstractController {
         Integer key = Integer.valueOf(resultMap.get("key").toString());
         if(key == 1){
             String userWeixinAccessToken = (String) resultMap.get("access_token");
-
-            if("1".equals(saasLogin)){
-                //正常跳转到SaaS首页
-                response.sendRedirect("www.test.com"+userWeixinAccessToken);
-            }else{
-                //正常跳转到首页
+            if(state.equals("qnsaas")){//跳转h5店铺
+                response.sendRedirect("http://test.qnlive.1758app.com/qnsaas?token="+userWeixinAccessToken);
+            }else{//跳转直播
                 response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
             }
             return ;
@@ -205,7 +203,7 @@ public class CommonController extends AbstractController {
         //如果没有拿到
         logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
         String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url",appName);//手动授权url
-        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",appName)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",appName)).replace("STATE", appName);//修改参数
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",appName)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",appName)).replace("STATE", state);//修改参数
         response.sendRedirect(authorizationUrl);
         return ;
     }

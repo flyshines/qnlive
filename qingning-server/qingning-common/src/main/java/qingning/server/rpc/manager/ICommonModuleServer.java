@@ -248,4 +248,7 @@ public interface ICommonModuleServer {
 	 * @param shop
 	 */
 	void insertShopInfo(Map<String, Object> shop);
+
+
+	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
 }

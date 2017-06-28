@@ -105,6 +105,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private SaaSShopMapper shopMapper;
 
+	@Autowired(required = true)
+	private SeriesStudentsMapper seriesStudentsMapper;
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -1029,5 +1032,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void insertShopInfo(Map<String, Object> shop) {
 		shopMapper.insert(shop);
+	}
+
+	@Override
+	public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
+		return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
 	}
 }

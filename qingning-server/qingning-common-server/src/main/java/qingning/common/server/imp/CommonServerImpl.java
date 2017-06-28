@@ -358,7 +358,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> resultMap = new HashMap<String, Object>();
         String subscribe = "0";
         //是否是SaaS登录
-        boolean isSaas = "0".equals(reqMap.get("saas_login").toString())?false:true;
+  //      boolean isSaas = "0".equals(reqMap.get("saas_login").toString())?false:true;
         resultMap.put("key","1");//钥匙 用于在controller判断跳转的页面
 
         //1.传递授权code及相关参数，调用微信验证code接口
@@ -402,17 +402,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 commonModuleServer.updateUserWebOpenIdByUserId(userMap);
             }
             processLoginSuccess(2, null, loginInfoMap, resultMap,app_name);//获取后台安全证书 access_token
-            if(isSaas){
-                //SaaS登录检查用户店铺逻辑
-                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
-                checkShopInfo(loginInfoMap,reqEntity,jedis);
-            }
+//            if(isSaas){
+//                //SaaS登录检查用户店铺逻辑
+//                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
+//                checkShopInfo(loginInfoMap,reqEntity,jedis);
+//            }
             return resultMap;
         }else {
-            if(isSaas){
-                //SaaS登录为找到用户
-                throw new QNLiveException("000005");
-            }
+//            if(isSaas){
+//                //SaaS登录为找到用户
+//                throw new QNLiveException("000005");
+//            }
             //1.2.1.2 如果用户不存在，则根据用户的open_id和用户的access_token调用微信查询用户信息接口，得到用户的头像、昵称等相关信息
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid,app_name);
