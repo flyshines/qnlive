@@ -780,6 +780,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
             resultMap.put("course_num", MiscUtils.convertObjToObject(values.get("course_num"), Constants.SYSLONG, "course_num", 0l));
             resultMap.put("live_room_num", MiscUtils.convertObjToObject(values.get("live_room_num"), Constants.SYSLONG, "live_room_num", 0l));
+            resultMap.put("series_num", MiscUtils.convertObjToObject(values.get("series_num"), Constants.SYSLONG, "series_num", 0l));
             resultMap.put("today_distributer_amount",MiscUtils.convertObjToObject(values.get("today_distributer_amount"), Constants.SYSDOUBLE, "today_distributer_amount", 0d, true));
             resultMap.put("update_time", MiscUtils.convertObjToObject(values.get("update_time"),Constants.SYSLONG,"update_time", 0l));
         }else if(queryType.equals("2")){
