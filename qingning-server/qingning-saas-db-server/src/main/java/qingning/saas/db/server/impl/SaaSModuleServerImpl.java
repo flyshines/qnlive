@@ -267,4 +267,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		return 1;
 	}
 
+	/**
+	 * 根据条件获取直播课程列表
+	 */
+	@Override
+	public List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseByMap(reqMap);
+	}
+
 }
