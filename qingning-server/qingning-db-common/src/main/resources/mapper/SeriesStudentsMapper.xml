@@ -85,8 +85,7 @@
   </select>
   
   <select id="findSeriesIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.course_id, student.student_pos from t_series_students student where student.user_id=#{user_id}
-
+  	select student.series_id, student.student_pos from t_series_students student where student.user_id=#{user_id}
   	<if test="student_pos != null">
   	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
   	</if>
