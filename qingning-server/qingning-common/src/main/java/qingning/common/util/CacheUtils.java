@@ -235,6 +235,12 @@ public final class CacheUtils {
 			if(room_num != Long.parseLong(result.get("live_room_num"))){ //如果数据和现在的不同
 				jedis.hset(userCacheKey,"live_room_num",room_num.toString());//修改用户缓存中的数据
 			}
+
+			Long series_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
+			if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
+				jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
+			}
+
 			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedis, true, 60*60*72);
 		}
 		return result;

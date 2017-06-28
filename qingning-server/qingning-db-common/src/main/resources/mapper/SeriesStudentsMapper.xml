@@ -85,11 +85,7 @@
   </select>
   
   <select id="findSeriesIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.series_id, student.student_pos from t_series_students student where student.user_id=#{user_id}
-  	<if test="student_pos != null">
-  	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
-  	</if>
-  	order by student.student_pos limit #{size}
+  	select series_id,student_pos from t_series_students  where user_id=#{user_id}
   </select>
 
 
