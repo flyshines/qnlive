@@ -25,6 +25,8 @@ public class ReadUserOperation implements CommonReadOperation {
         	result = lectureModuleServer.findCourseIdByStudent(reqMap);
         } else  if(Constants.SYS_READ_USER_ROOM_LIST.equals(requestEntity.getFunctionName())){
             result = lectureModuleServer.findRoomIdByFans(reqMap);
+        } else if (Constants.SYS_READ_USER_SERIES_LIST.equals(requestEntity.getFunctionName())){
+            result = lectureModuleServer.findSeriesIdByStudent(reqMap);
         } else if(Constants.SYS_READ_USER_BY_UNIONID.equals(requestEntity.getFunctionName())) {
             result = lectureModuleServer.getLoginInfoByLoginId(reqMap.get("unionID").toString());
         } else {

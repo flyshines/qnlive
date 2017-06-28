@@ -812,6 +812,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);//删除已加入课程的key  在之后登录时重新加入
         jedis.del(key);//删除
+        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, map), readUserOperation, jedis);
+
 
         nowStudentNum = MiscUtils.convertObjectToLong(courseInfoMap.get("student_num")) + 1;
         String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level",appName);
@@ -870,8 +872,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }else{
                 remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
             }
-
-
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
 			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
@@ -897,7 +897,152 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * 加入课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("joinSeries")
+    public Map<String, Object> joinSeries(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
 
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        Map<String, Object> map = new HashMap<String, Object>();
+        //1.1读取课程信息
+        String series_id = (String)reqMap.get("series_id");
+        map.put("series_id", series_id);
+        Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, false);
+        if(MiscUtils.isEmpty(seriesInfoMap)){
+            throw new QNLiveException("100004");
+        }
+
+        //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        if(userId.equals(seriesInfoMap.get("lecturer_id"))){
+            throw new QNLiveException("100017");
+        }
+
+        //2.检测课程验证信息是否正确
+        //2.1如果课程为私密课程则检验密码
+        String course_type = seriesInfoMap.get("series_type");
+        if("1".equals(course_type)){
+            //TODO 支付课程要验证支付信息
+            if(reqMap.get("payment_id") == null){
+                throw new QNLiveException("000100");
+            }
+        }
+
+        //3.检测学生是否参与了该课程
+        Map<String,Object> studentQueryMap = new HashMap<>();
+        studentQueryMap.put("user_id",userId);
+        studentQueryMap.put("series_id",series_id);
+        if(userModuleServer.isStudentOfTheSeries(studentQueryMap)){//判断是否有加入课程
+            throw new QNLiveException("100004");
+        }
+
+        //5.将学员信息插入到学员参与表中
+        seriesInfoMap.put("user_id",userId);
+        Map<String,Object> insertResultMap = userModuleServer.joinSeries(seriesInfoMap);
+
+        //6.修改讲师缓存中的课程参与人数
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, seriesInfoMap.get("lecturer_id"));
+        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+        jedis.hincrBy(lecturerKey, "total_student_num", 1);
+        if("2".equals(course_type)){
+            jedis.hincrBy(lecturerKey, "pay_student_num", 1);
+        }
+        map.clear();
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+
+        Long nowStudentNum = 0L;
+        if(jedis.exists(seriesKey)){
+            map.clear();
+            map.put("series_id", series_id);
+            Map<String,Object> numInfo = userModuleServer.findSeriesRecommendUserNum(map);
+            long num = 0;
+            if(!MiscUtils.isEmpty(numInfo)){
+                num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+            }
+            jedis.hset(seriesKey, "student_num", num+"");
+        }else {
+            userModuleServer.increaseStudentNumBySeriesId(reqMap.get("series_id").toString());
+        }
+
+        //7.修改用户缓存信息中的加入课程数
+        map.clear();
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+
+        String userSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, seriesInfoMap);//删除已加入课程的key  在之后登录时重新加入
+        jedis.sadd(userSeriesKey,series_id);
+
+
+//        //series_type 0:公开课程  1:收费课程',
+//        //TODO 加入课程推送   收费课程支付成功才推送消息
+//        if (!"2".equals(seriesInfoMap.get("series_type"))) {
+//            //获取讲师的信息
+//            map.clear();
+//            map.put("lecturer_id", seriesInfoMap.get("lecturer_id"));
+//            Map<String, String> user = CacheUtils.readLecturer(seriesInfoMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
+//
+//            Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+//            TemplateData first = new TemplateData();
+//            first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//            String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first",appName), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
+//            first.setValue(firstContent);
+//            templateMap.put("first", first);
+//
+//            TemplateData courseTitle = new TemplateData();
+//            courseTitle.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//            courseTitle.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
+//            templateMap.put("keyword1", courseTitle);
+//
+//            Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
+//            TemplateData orderNo = new TemplateData();
+//            orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//            orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
+//            templateMap.put("keyword2", orderNo);
+//
+//            String lastContent;
+//            lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name",appName) + MiscUtils.RecoveryEmoji(user.get("nick_name"));
+//            lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
+//
+//            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+//            TemplateData remark = new TemplateData();
+//            if(appName.equals(Constants.HEADER_APP_NAME)){
+//                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+//            }else{
+//                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+//            }
+//            remark.setValue(lastContent);
+//            templateMap.put("remark", remark);
+//            String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
+//            WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course",appName),url, templateMap, jedis,appName);
+//        }
+
+//        //公开课 执行这段逻辑
+//        if (equals(courseInfoMap.get("course_type").equals("0"))) {
+//            //一个用户进入加入直播间带入1到2个人进入
+//
+//            map.clear();
+//            map.put("course_id", course_id);
+//            RequestEntity mqRequestEntity = new RequestEntity();
+//            mqRequestEntity.setServerName("CourseRobotService");
+//            mqRequestEntity.setAppName(appName);
+//            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+//            mqRequestEntity.setFunctionName("courseHaveStudentIn");
+//            mqRequestEntity.setParam(map);
+//            this.mqUtils.sendMessage(mqRequestEntity);
+//        }
+
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, seriesInfoMap.get("lecturer_id").toString());
+        return resultMap;
+    }
 
     @SuppressWarnings("unchecked")
     @FunctionName("courseInfo")

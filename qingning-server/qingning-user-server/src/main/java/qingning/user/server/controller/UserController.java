@@ -585,5 +585,28 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
-
+	/**
+	 * 用户订阅系列
+	 * @param series_id
+	 * @param entity
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/user/study/series/{series_id}", method = RequestMethod.PUT)
+	public
+	@ResponseBody
+	ResponseEntity joinSeries(
+			@PathVariable("series_id") String series_id,
+			HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "joinSeries", accessToken, version,appName);
+		((Map<String,Object>)entity.getBody()).put("series_id", series_id);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
 }
