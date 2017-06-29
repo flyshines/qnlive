@@ -42,6 +42,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	private ReadRoomDistributerOperation readRoomDistributerOperation;
 	private ReadSeriesOperation readSeriesOperation;
     private ReadDistributerOperation readDistributerOperation;
+    private ReadShopOperation readShopOperation;
+
     @Override
     public void initRpcServer() {
         if (lectureModuleServer == null) {
@@ -52,6 +54,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             readUserOperation = new ReadUserOperation(lectureModuleServer);
             readRoomDistributerOperation = new ReadRoomDistributerOperation(lectureModuleServer);
             readDistributerOperation = new ReadDistributerOperation(lectureModuleServer);
+            readShopOperation = new ReadShopOperation(lectureModuleServer);
             readSeriesOperation = new ReadSeriesOperation(lectureModuleServer);
         }
     }
@@ -3067,16 +3070,26 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String appName = reqEntity.getAppName();
         reqMap.put("appName",appName);
         Jedis jedis = jedisUtils.getJedis(appName);
+
+        String query_type = reqMap.get("query_type").toString();//查詢類型 0 app 1 saas
+        String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
         String updown = reqMap.get("updown").toString();//上下架
         if(!updown.equals("1") && !updown.equals("2")){
             reqMap.put("updown","2");
         }
-        //1.判断直播间是否属于当前讲师
-        String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
-        String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readLiveRoomOperation, jedis, true);
-        if (liveRoomOwner == null || !liveRoomOwner.equals(user_id)) {
-            throw new QNLiveException("100002");
+        if(query_type.equals("0")){
+            //1.判断直播间是否属于当前讲师
+            String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readLiveRoomOperation, jedis, true);
+            if (!liveRoomOwner.equals(user_id)) {
+                throw new QNLiveException("100002");
+            }
+        }else{
+            Map<String,String> shopInfo = CacheUtils.readShop((String)reqMap.get("shop_id"), reqEntity, readShopOperation,jedis);
+            if(MiscUtils.isEmpty(shopInfo) || !shopInfo.get("user_id").equals(user_id)){
+                throw new QNLiveException("190001");
+            }
         }
+
         reqMap.put("user_id", user_id);
         reqMap.put("series_status", "0");
         //2创建系列封面
@@ -3095,30 +3108,21 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String series_id = series.get("series_id").toString();
 
         //5 修改相关缓存
-        //5.1修改讲师个人信息缓存中的直播系列数 讲师直播间信息SYS: room:{room_id}
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        jedis.hincrBy(liveRoomKey, "live_series_num", 1);
+        if(query_type.equals("1")){
+            //5.1修改讲师个人信息缓存中的直播系列数 讲师直播间信息SYS: room:{room_id}
+            map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
+            String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+            jedis.hincrBy(liveRoomKey, "live_series_num", 1);
+            //5.2 修改讲师直播间信息中的直播系列数  讲师个人信息SYS: lecturer:{lecturer_id}
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
+            String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+            jedis.hincrBy(lectureKey, "live_serise_num", 1);
+        }
 
-        //5.2 修改讲师直播间信息中的直播系列数  讲师个人信息SYS: lecturer:{lecturer_id}
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
-        String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        jedis.hincrBy(lectureKey, "live_serise_num", 1);
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
         if(updown.equals("1")){ //上架
             setSeriesRedis(series_id,jedis);
-//            //1.将课程加入讲师 系列上架列表
-//            String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
-//            jedis.zadd(lectureSeriesKey, lpos, series_id);
-//            //课程内容分类
-//            map.put("series_course_type",reqMap.get("series_course_type"));
-//            String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-//            jedis.zadd(lectureSeriesCourseKey, lpos, series_id);
-//            if(Constants.DEFAULT_SERIES_COURSE_TYPE.equals(reqMap.get("series_course_type").toString())){
-//                //4.将课程上架到平台
-//                jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
-//            }
         }else{ //下架
             //将系列id 加入讲师下架列表
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);

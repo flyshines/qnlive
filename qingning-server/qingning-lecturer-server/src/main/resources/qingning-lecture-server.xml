@@ -733,6 +733,7 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
+					<param name="query_type" type="string"  require="Y,000100"/>
 					<param name="series_title" type="rstring" require="Y,000100" />
 					<param name="update_plan" type="long" require="Y,000100"  />
 					<param name="series_type" type="string" require="Y,000100"  format="^[0-1]$,100008"/>
@@ -745,8 +746,10 @@
 						return true;
 					},000100"/>
 					<param name="series_course_type" type="string" require="Y,000100"  format="^[0-3]$,100008"/>
-					<param name="room_id" type="string" require="Y,000100" />
+
 					<param name="updown" type="string" require="Y,000100"  />
+					<param name="room_id" type="string"  />
+					<param name="shop_id" type="string"  />
 				</inputs>
 				<outputs>
 					<param name="series_id" type="string" />

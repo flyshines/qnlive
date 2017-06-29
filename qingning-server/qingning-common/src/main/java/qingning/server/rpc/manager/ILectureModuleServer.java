@@ -159,4 +159,10 @@ public interface ILectureModuleServer {
 
 
 	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
+
+	/**获取店铺信息
+	 * @param param
+	 * @return
+	 */
+	Map<String,Object> getShopInfo(Map<String, Object> param);
 }

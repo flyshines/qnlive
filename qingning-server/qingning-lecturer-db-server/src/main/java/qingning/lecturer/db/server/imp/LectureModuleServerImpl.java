@@ -78,6 +78,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Autowired(required = true)
 	private SaaSCourseMapper saaSCourseMapper;
 
+    @Autowired(required = true)
+    private SaaSShopMapper shopMapper;
+
 
 
 
@@ -753,5 +756,11 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
     @Override
     public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
         return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
+
+
+    @Override
+    public Map<String, Object> getShopInfo(Map<String, Object> param) {
+        return shopMapper.selectByPrimaryKey(param);
     }
 }
