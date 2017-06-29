@@ -772,7 +772,7 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="query_type" type="rstring"  />
+					<param name="query_type" type="string"  />
 					<param name="updown_id" type="string"  />
 					<param name="updown" type="string"  />
 					<param name="query_from" type="string"  />
