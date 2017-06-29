@@ -363,4 +363,10 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		return feedbackMapper.insertFeedBack(newFeedbackMap);
 	}
 
+
+    @Override
+    public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
+        return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
+
 }

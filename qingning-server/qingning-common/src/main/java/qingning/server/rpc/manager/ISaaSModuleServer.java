@@ -177,5 +177,5 @@ public interface ISaaSModuleServer {
      * @return
      */
 	int addFeedback(Map<String, Object> newFeedbackMap);
-
+    List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
 }
