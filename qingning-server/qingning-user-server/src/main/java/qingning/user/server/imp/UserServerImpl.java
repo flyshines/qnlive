@@ -496,6 +496,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, String> courseMap = new HashMap<String, String>();
         String room_id = null;
+        String series_id = null;
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
 
@@ -504,12 +505,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+
         //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
         if (jedis.exists(courseKey)) {
             Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
             courseMap = courseCacheMap;
-            room_id = courseCacheMap.get("room_id").toString();
-
+            room_id = courseCacheMap.get("room_id");
+            if(!MiscUtils.isEmpty( courseCacheMap.get("series_id"))){
+                series_id = courseCacheMap.get("series_id");
+            }
         } else {
             //2.如果缓存中没有课程详情，则读取数据库
             Map<String, Object> courseDBMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
@@ -520,8 +524,25 @@ public class UserServerImpl extends AbstractQNLiveServer {
             } else {
                 MiscUtils.converObjectMapToStringMap(courseDBMap, courseMap);
                 room_id = courseDBMap.get("room_id").toString();
+                if(!MiscUtils.isEmpty( courseDBMap.get("series_id"))){
+                    series_id = courseDBMap.get("series_id").toString();
+                }
             }
         }
+
+        if(!MiscUtils.isEmpty(series_id)){
+            resultMap.put("series_id",series_id);
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, resultMap);
+            String series_title = jedis.hget(seriesKey, "series_title");
+            resultMap.put("series_title",series_title);
+            //TODO
+//            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SER, query);
+//            jedis.sismember(key, course_id)
+
+        }
+
+
+
         if (CollectionUtils.isEmpty(courseMap)) {
             throw new QNLiveException("100004");
         }
@@ -812,9 +833,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);//删除已加入课程的key  在之后登录时重新加入
         jedis.del(key);//删除
-        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, map), readUserOperation, jedis);
-
-
+  Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, map), readUserOperation, jedis);
         nowStudentNum = MiscUtils.convertObjectToLong(courseInfoMap.get("student_num")) + 1;
         String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level",appName);
         JSONArray levelJson = JSON.parseArray(levelString);
@@ -872,6 +891,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }else{
                 remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
             }
+
+
     		remark.setValue(lastContent);
     		templateMap.put("remark", remark);
 			String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
@@ -897,7 +918,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-    /**
+/**
      * 加入课程
      * @param reqEntity
      * @return
