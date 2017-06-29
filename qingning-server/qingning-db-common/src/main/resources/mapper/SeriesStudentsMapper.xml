@@ -85,7 +85,10 @@
   </select>
   
   <select id="findSeriesIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select series_id,student_pos from t_series_students  where user_id=#{user_id}
+  	select series.series_id,seriesStudent.student_pos from t_series_students seriesStudent,t_series series
+  	 where user_id=#{user_id}
+  	 and  series.series_id = seriesStudent.series_id
+  	 ORDER BY series.update_course_time DESC
   </select>
 
 

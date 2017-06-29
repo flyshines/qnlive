@@ -2481,8 +2481,77 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
 
+    /**
+     * 查询用户加入的系列列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("studySeries")
+    public  Map<String, Object> getStudySeries(RequestEntity reqEntity) throws Exception{
+        @SuppressWarnings("unchecked")
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
 
+        Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+        long series_num = 0;
+        try{
+            series_num = Long.parseLong(values.get("series_num").toString());
+        }catch(Exception e){
+            series_num = 0;
+        }
+        Map<String,Object> result = new HashMap<String,Object>();
+        result.put("series_num", series_num);
+        if(series_num>0){
+            long page_count = Long.valueOf(reqMap.get("page_count").toString());
+            Map<String,Object> queryMap = new HashMap<String,Object>();
+            queryMap.put("user_id", userId);
+            Set<String> userSeriesIdSet = new HashSet<>();
 
+            long startIndex = 0;//坐标起始位
+            long endIndex = -1;//坐标结束位
+            String userSeriesListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, queryMap);
+            //判断用哪个缓存
+
+            long endSeriesCourseSum = jedis.zcard(userSeriesListKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(reqMap.get("series_id"))){//如果课程ID没有 那么就从最近结束的课程找起
+                endIndex = -1;
+                startIndex = endSeriesCourseSum - page_count;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                String series_id = reqMap.get("series_id").toString();
+                long endRank = jedis.zrank(userSeriesListKey, series_id);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - page_count + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }else{
+
+                }
+            }
+            userSeriesIdSet = jedis.zrange(userSeriesListKey, startIndex, endIndex);
+            List<Map<String,String>> userSeriesList = new ArrayList<>();
+            for(String seriesId : userSeriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                Map<String,String> series = new HashMap<>();
+                series.put("series_id",seriesId);
+                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, series);
+                Map<String, String> seriesMap = jedis.hgetAll(seriesKey);
+                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, seriesMap);
+                String lecturer_nick_name = jedis.hget(lecturerKey, "nick_name");
+                seriesMap.put("lecturer_nick_name",lecturer_nick_name);
+                userSeriesList.add(seriesMap);
+            }
+            result.put("series_list", userSeriesList);
+        }
+        return result;
+    }
 
 
 }
