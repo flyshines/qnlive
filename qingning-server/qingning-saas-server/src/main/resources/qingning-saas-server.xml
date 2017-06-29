@@ -548,6 +548,7 @@
 				</inputs>
 				<outputs>
 					<param name="series_title" type="string" />
+					<param name="series_id" type="string" />
 					<param name="series_url" type="string" />
 					<param name="series_image" fieldname="series_img" type="string" />
 					<param name="type" fieldname="series_course_type" type="string" />
@@ -743,6 +744,19 @@
 				<inputs>
 					<param name="content" type="string" require="Y"/>
 					<param name="contact" type="string" require="Y"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!-- 用户-提交反馈与建议 -->
+			<function name="getSeriesUserList">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y"/>
+					<param name="user_id" type="string" require="N"/>
+					<param name="page_num" type="string" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>

@@ -340,7 +340,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				profitRecord.put("distributer_id", distributerId);
 			}
 		}
-
+		//收益类型（1:直播课，2：店铺课（非直播课））
+		profitRecord.put("course_type",tradeBill.get("course_type"));
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
@@ -402,7 +403,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);
 		}
-		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate);
+		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
+		//插入讲师收益
 		return profitRecord;
 	}
 	private Map<String,Object> initGains(String userId,String appName){
@@ -433,8 +435,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	 * @param appName			app名称
 	 * @param lecturerId		讲师ID
 	 * @param distributeRate	分销员收益比例
+	 * @param type	            1:直播收入,2:店铺收入（非直播间收入）
 	 */
-	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate){
+	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate,String type,Map<String,Object> profitRecord){
 		double rate = DoubleUtil.divide( (double) distributeRate,10000D);
 		//讲师收益
 		Map<String,Object> lectureGains = new HashMap<>();
@@ -474,7 +477,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
 			}
 		}else{
-			//店铺收益逻辑
+			//直播间收益逻辑
 			if(Constants.HEADER_APP_NAME.equals(appName)){
 				//qnlive逻辑
 				//讲师总收益
@@ -491,12 +494,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//更新t_user_gains 讲师收益统计
 		//直播间收入
-		long lectureRoomTotalAmountOld = Long.valueOf(lectureGainsOld.get("live_room_total_amount").toString());
-		long lectureRoomRealAmountOld = Long.valueOf(lectureGainsOld.get("live_room_real_incomes").toString());
-		lectureRoomTotalAmountOld = lectureTotalAmount + lectureRoomTotalAmountOld;
-		lectureRoomRealAmountOld = lectureRealAmount + lectureRoomRealAmountOld;
-		lectureGains.put("live_room_total_amount",lectureRoomTotalAmountOld);
-		lectureGains.put("live_room_real_incomes",lectureRoomRealAmountOld);
+		if("1".equals(type)){
+			long lectureRoomTotalAmountOld = Long.valueOf(lectureGainsOld.get("live_room_total_amount").toString());
+			long lectureRoomRealAmountOld = Long.valueOf(lectureGainsOld.get("live_room_real_incomes").toString());
+			lectureRoomTotalAmountOld = lectureTotalAmount + lectureRoomTotalAmountOld;
+			lectureRoomRealAmountOld = lectureRealAmount + lectureRoomRealAmountOld;
+			lectureGains.put("live_room_total_amount",lectureRoomTotalAmountOld);
+			lectureGains.put("live_room_real_incomes",lectureRoomRealAmountOld);
+		}
 		//用户收入
 		long lectureTotalAmountOld = Long.valueOf(lectureGainsOld.get("user_total_amount").toString());
 		long lectureTotalRealIncomesOld = Long.valueOf(lectureGainsOld.get("user_total_real_incomes").toString());
@@ -508,6 +513,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		lectureGains.put("user_total_real_incomes",lectureTotalRealIncomesOld);
 		lectureGains.put("balance",lectureBalanceOld);
 		userGainsMapper.updateUserGains(lectureGains);
+		//讲师收益
+		profitRecord.put("lecture_amount",lectureRealAmount);
 		//更新t_user_gains 分销员收益统计
 		if(distributerId!=null){
 			Map<String,Object> distGains = new HashMap<>();
@@ -536,6 +543,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			distGains.put("user_total_real_incomes",distTotalRealIncomesOld);
 			distGains.put("balance",distBalanceOld);
 			userGainsMapper.updateUserGains(distGains);
+			//分销员收益
+			profitRecord.put("dist_amount",distRealAmount);
 		}
 	}
 	@Override
