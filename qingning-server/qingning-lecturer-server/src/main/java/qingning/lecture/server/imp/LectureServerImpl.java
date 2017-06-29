@@ -3271,18 +3271,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(!lecturer_id.equals(user_id)){
                 throw new QNLiveException("210001");
             }
-//            String seriesCourseDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, updownMap);
-//            String seriesCourseUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, updownMap);
-//
-//            //获取这个系列所有的子课程
-//            Set<String> seriesCourseIdSet = null;
-//            if(updown.equals("1")){//上架 查现在所有下架的课程
-//                seriesCourseIdSet = jedis.zrangeByScore(seriesCourseDownKey, "-inf", "+inf");
-//            }else{//下架 查所有上架的课程
-//                seriesCourseIdSet = jedis.zrangeByScore(seriesCourseUpKey, "-inf", "+inf");
-//            }
-//            List<String> seriesCourseIdList = new ArrayList<String>(seriesCourseIdSet);
-//            updownMap.put("series_course_list",seriesCourseIdList);
             updownMap.put("updown",updown);
             result = lectureModuleServer.updateUpdown(updownMap);
 
@@ -3306,21 +3294,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.zadd(lecturerSeriesDownKey, seriesLpos, series_id);
                 jedis.zadd(seriesCourseTypeDownKey, seriesLpos, series_id);
             }
-//            for(String course_id : seriesCourseIdList){
-//                Map<String,Object> course = new HashMap<>();
-//                course.put("course_id",course_id);
-//                String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, updownMap);
-//                jedis.del(courseKey);
-//                Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, course), readCourseOperation, jedis, true);
-//                long courselops = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(courseMap.get("position")));
-//                if(updown.equals("1")){//往上架加入
-//                    jedis.zadd(seriesCourseUpKey, courselops, course_id);
-//                    jedis.zrem(seriesCourseDownKey,course_id);
-//                }else{//往下架加入
-//                    jedis.zrem(seriesCourseUpKey,course_id);
-//                    jedis.zadd(seriesCourseDownKey, courselops, course_id);
-//                }
-//            }
             //</editor-fold>
         }else{
             //<editor-fold desc="课程">
@@ -3335,7 +3308,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(query_type.equals("0")){
                 updownMap.put("course_updown",updown);
             }else{
+                if(MiscUtils.isEmpty(jedis.hget(courseKey, "series_id"))){
+                    throw new QNLiveException("210003");
+                }
                 updownMap.put("series_course_updown",updown);
+
             }
             result = lectureModuleServer.updateUpdown(updownMap);//更改数据库
             jedis.del(courseKey);
@@ -3539,7 +3516,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 编辑系列课程
+     * 设置单品
      * @param reqEntity
      * @return
      * @throws Exception

@@ -55,4 +55,9 @@ public interface CoursesMapper {
 	 * @return
 	 */
 	PageList<Map<String,Object>> findAllListByLiturere(Map<String, Object> param, PageBounds page);
+
+	int updateSeriesCourse(Map<String,Object> record);
+
+
+
 }
