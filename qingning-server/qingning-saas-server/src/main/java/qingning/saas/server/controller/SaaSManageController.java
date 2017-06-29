@@ -629,4 +629,29 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 商品-系列-已购用户列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/{series_id}/user/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSeriesUserList(
+            @RequestHeader("access_token") String accessToken,
+            @PathVariable(value = "series_id") String series_id,
+            @RequestParam(value = "user_id") String user_id,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesUserList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("series_id", series_id);
+        param.put("user_id", user_id);
+        param.put("page_num", pageNum);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 }
