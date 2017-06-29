@@ -165,4 +165,8 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	Map<String,Object> getShopInfo(Map<String, Object> param);
+
+	Map<String, Object> updateCourseLonely(Map<String, Object> course);
+
+
 }

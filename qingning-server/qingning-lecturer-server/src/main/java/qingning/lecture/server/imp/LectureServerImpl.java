@@ -3540,12 +3540,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
         }
-        if(reqMap.get("series_course_type").equals("0")){
-            resltMap = lectureModuleServer.updateCourse(reqMap);
-        }else{
-            resltMap = lectureModuleServer.updateSaasSeriesCourse(reqMap);
-        }
-
+        resltMap = lectureModuleServer.updateCourseLonely(reqMap);
         jedis.del(courseKey);
         Map<String,Object> query = new HashMap<>();
         query.put("course_id", course_id);
