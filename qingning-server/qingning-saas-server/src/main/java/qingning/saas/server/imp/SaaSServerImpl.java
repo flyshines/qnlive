@@ -467,17 +467,27 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("course_updown", '1');	//单品上下架 单品课 1上架 2下架 0没有
         reqMap.put("app_name", appName);
         
-        List<Map<String, Object>> liveCourseMap = saaSModuleServer.findLiveCourseListByMap(reqMap);
+        List<Map<String, Object>> liveCourseList = saaSModuleServer.findLiveCourseListByMap(reqMap);
+        List<Map<String, String>> resultLiveCourseList = new ArrayList<>();
         /*
-         * TODO 购买状态
+         * 调用方法判断直播状态
          */
-       /* if(liveCourseMap != null){
-        	for(Map<String, Object> map : liveCourseMap){
-        		
-        	}
-        }*/
+        if(liveCourseList != null){
+        	Random random = new Random();	//临时
+	        for(Map<String, Object> liveCourseMap : liveCourseList){
+	        	Map<String, String> liveInfoMap = new HashMap<String, String>();
+	        	MiscUtils.converObjectMapToStringMap(liveCourseMap, liveInfoMap);
+	        	//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+	        	MiscUtils.courseTranferState(now.getTime(), liveInfoMap);
+	        	/*
+	             * TODO 购买状态：临时随机返回
+	             */
+	        	liveInfoMap.put("buy_status", String.valueOf(random.nextInt(2)));
+	        	resultLiveCourseList.add(liveInfoMap);
+	        }
+        }
         
-        resultMap.put("live_info_list", liveCourseMap);
+        resultMap.put("live_info_list", resultLiveCourseList);
         return resultMap;
 	} 
 
@@ -935,6 +945,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
          * TODO 判断是否购买了该课程
          */
+		Random random = new Random();
+		resultMap.put("is_bought", random.nextInt(2));
+		
 		
 		/*
 		 * 查找是否属于系列课
@@ -1347,7 +1360,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         
         /*
-         * TODO 新增到数据库
+         * 新增到数据库
          */
         //封装要新增的留言map
         String commentId = MiscUtils.getUUId();
