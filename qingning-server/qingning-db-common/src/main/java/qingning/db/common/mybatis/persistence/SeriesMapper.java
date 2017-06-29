@@ -15,6 +15,8 @@ public interface SeriesMapper {
     List<Map<String,Object>> findSeriesBySearch(Map<String,Object> record);
     int increaseSeriesCourse(Map<String,Object> record);
 
+    int delSeriesCourse(Map<String,Object> record);
+
     /**根据讲师ID获取该讲师的所有系列课程
      * @param param
      * @param page

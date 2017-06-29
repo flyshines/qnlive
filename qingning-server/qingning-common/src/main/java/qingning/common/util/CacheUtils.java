@@ -195,7 +195,7 @@ public final class CacheUtils {
 
 
 			//<editor-fold desc="用戶加入的系列">
-			/*final String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES,query);//存储用户关注的直播间
+			final String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES,query);//存储用户关注的直播间
 			if(jedis.exists(seriesKey)){//判断当前缓存是否存在
 				jedis.expire(seriesKey, 60*60*72);//修改生命时间
 			} else {
@@ -221,7 +221,7 @@ public final class CacheUtils {
 					});
 					jedis.expire(roomsKey, 60 * 60 * 72);
 				}
-			}*/
+			}
 			//</editor-fold>
 
 
