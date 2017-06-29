@@ -586,7 +586,7 @@
 				</outputs>
 			</function>
 
-			<function name="getSerieCourse">
+			<function name="studySeries">
 				<auth>
 					<access_token require="Y" />
 					<appName require="Y" />
