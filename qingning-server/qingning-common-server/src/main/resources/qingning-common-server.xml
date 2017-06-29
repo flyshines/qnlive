@@ -994,6 +994,21 @@
 				<outputs>
 				</outputs>
 			</function>
+			
+			<!-- 查询系列邀请卡信息 -->
+			<function name="getSeriesInviteCard">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"/>
+					<param name="png" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="share_img" type="string" />
+				</outputs>
+			</function>
 
 		</default>
  
