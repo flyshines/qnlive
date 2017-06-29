@@ -46,8 +46,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
     			String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
 
-    			String classifyPredictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION;
-				String classifyFinishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH;
+
     			Map<String,String> classifyKeyMap = new HashMap<>();
     			jedis.del(predictionListKey);
     			jedis.del(finishListKey);
@@ -65,18 +64,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     						Date courseStartTime = (Date)values.get("start_time");
     						long position = MiscUtils.convertInfoToPostion(courseStartTime.getTime(), MiscUtils.convertObjectToLong(values.get("position")));
     						pipeline.zadd(predictionListKey, position,(String)values.get("course_id"));
-
-							String classify_id = values.get("classify_id").toString();
-							if(classifyKeyMap.containsKey(classify_id)){//存在
-								pipeline.zadd(classifyKeyMap.get(classify_id), position,course_id);
-							}else{//不存在
-								Map<String,String> map = new HashMap<>();
-								map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
-								String classifyPredictionListKeyByClassify_id = MiscUtils.getKeyOfCachedData(classifyPredictionListKey, map);//分类
-								jedis.del(classifyPredictionListKeyByClassify_id);
-								classifyKeyMap.put(classify_id,classifyPredictionListKeyByClassify_id);
-								pipeline.zadd(classifyPredictionListKeyByClassify_id, position,course_id);
-							}
 						} catch(Exception e){
     						log.error("course[id:"+course_id+"]"+e.getMessage());
         				}
@@ -129,20 +116,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     							pipeline.expire(courseKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
     							pipeline.expire(pptsKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
     							pipeline.expire(audiosKey, Constants.CACHED_MAX_COURSE_TIME_LIFE);
-
-								String classify_id = values.get("classify_id").toString();
-
-
-								if(classifyKeyMap.containsKey(classify_id)){//存在
-									pipeline.zadd(classifyKeyMap.get(classify_id), position,course_id);
-								}else{//不存在
-									Map<String,String> map = new HashMap<>();
-									map.put(Constants.CACHED_KEY_CLASSIFY,classify_id);
-									String classifyPredictionListKeyByClassify_id = MiscUtils.getKeyOfCachedData(classifyFinishListKey, map);//分类
-									jedis.del(classifyPredictionListKeyByClassify_id);
-									classifyKeyMap.put(classify_id,classifyPredictionListKeyByClassify_id);
-									pipeline.zadd(classifyPredictionListKeyByClassify_id, position,course_id);
-								}
     						} catch (Exception e){
     							log.warn("The course data["+course_id+"] is abnormal");
     						}
@@ -152,14 +125,8 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			}
 
 
-				Set<String> classifyIdSet = jedis.zrange(Constants.CACHED_KEY_CLASSIFY_ALL, 0, -1);
-				for(String classify_id : classifyIdSet){
-					Map<String,Object> map = new HashMap<>();
-					map.put("appName",appName);
-					map.put("classify_id",classify_id);
-					jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map));//分类
-					jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map));//分类
-				}
+
+
 
 				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
 				if(!MiscUtils.isEmpty(lecturerSet)){
@@ -175,45 +142,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
 
 					}
 				}
-				for(String classify_id :classifyIdSet ){
-					Map<String,Object> map = new HashMap<>();
-					map.put("appName",appName);
-					map.put("classify_id",classify_id);
-					List<Map<String, Object>> courseByClassifyId = coursesMapper.findCourseByClassifyId(map);
-					for(Map<String, Object> course : courseByClassifyId){
-						if(course.get("status").equals("2") || course.get("status").equals("1")){
-							String course_id = course.get("course_id").toString();
-							String lecturer_id = course.get("lecturer_id").toString();
-							map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//课程id
-							map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
-							String courseClassifyIdKey = "";
-							String courseLectureKey = "";
-							Long time = 0L ;
-							if(course.get("status").equals("2")){
-								courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);//分类
-								courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-								time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-
-							}else{
-								courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//分类
-								courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-								time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
-
-							}
-							if(jedis.zrank(courseClassifyIdKey,course_id) ==  null ){
-								map.put(Constants.CACHED_KEY_COURSE_FIELD, classify_id);//课程id
-								String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
-								long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(jedis.hget(courseKey, "position")));
-								jedis.zadd(courseClassifyIdKey, lpos,course_id);//在结束中增加
-								jedis.zadd(courseLectureKey, lpos,course_id);//在结束中增加
-							}
-						}else if(course.get("status").equals("5")){
-							String coursekey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, course);//获取课程在缓存中的key
-							jedis.hset(coursekey,"status","5");//把课程缓存中的状态改为已删除
-						}
-						map.clear();
-					}
-				}
 				Map<String,Object> map = new HashMap<>();
 				map.put("appName",appName);
 				map.put("status","5");
@@ -223,10 +151,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
 					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,id);
 					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
 				}
-
-
-
-
     		}
     	});
     }

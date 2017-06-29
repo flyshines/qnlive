@@ -37,4 +37,8 @@ public interface SaaSCourseMapper {
      * @return
      */
     PageList<Map<String,Object>> findCourseBySeriesId(Map<String, Object> param, PageBounds page);
+
+    int updateSeriesCourse(Map<String,Object> record);
+
+
 }

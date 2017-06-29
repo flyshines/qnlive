@@ -609,4 +609,32 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
+
+	/**
+	 * 查询用户加入的系列列表
+	 * @param page_count 分页参数
+	 * @param series_id 系列id
+	 * @param access_token
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/user/series/list",method=RequestMethod.GET)
+	public @ResponseBody ResponseEntity  getStudySeriesList(
+			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "series_id", defaultValue = "") String series_id,
+			@RequestHeader("access_token") String access_token,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studySeries", access_token, version,appName);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("series_id", series_id);
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+
+
+
 }

@@ -338,7 +338,16 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> getLiveList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = coursesMapper.findCourseListByLiturere(param,page);
+        PageList<Map<String,Object>> result = coursesMapper.findAllListByLiturere(param,page);
+        for(Map<String,Object> map: result){
+            if("0".equals(map.get("is_start"))){
+                map.put("type","0");
+            }else if("1".equals(map.get("is_start"))||map.get("end_time")==null){
+                map.put("type","1");
+            }else{
+                map.put("type","2");
+            }
+        }
         Map<String,Object> res = new HashMap<>();
         res.put("list",result);
         res.put("total_count",result.getTotal());
@@ -353,5 +362,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public int addFeedback(Map<String, Object> newFeedbackMap) {
 		return feedbackMapper.insertFeedBack(newFeedbackMap);
 	}
+
+
+    @Override
+    public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
+        return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
 
 }

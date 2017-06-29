@@ -1427,6 +1427,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         return resultMap;
     }
+    /**
+     * 用户-提交反馈与建议
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesUserList")
+    public Map<String, Object> getSeriesUserList(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+
+
+        return resultMap;
+    }
 
 
 }

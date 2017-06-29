@@ -213,9 +213,6 @@
       <if test="series_id != null" >
         series_id = #{series_id,jdbcType=VARCHAR},
       </if>
-      <if test="series_id == null" >
-        series_id = NULL ,
-      </if>
       <if test="course_title != null" >
         course_title = #{course_title,jdbcType=VARCHAR},
       </if>
@@ -294,6 +291,29 @@
     </set>
     where course_id = #{course_id,jdbcType=VARCHAR}
   </update>
+
+  <update id="updateSeriesCourse" parameterType="hashmap" >
+    update t_saas_course
+    <set >
+      <if test="series_course_updown != null" >
+        series_course_updown=#{series_course_updown},
+      </if>
+      <if test="series_id != null" >
+        series_id=#{series_id},
+      </if>
+      <if test="course_updown != null" >
+        course_updown=#{course_updown},
+      </if>
+      <if test="series_id == null" >
+        series_id=null,
+      </if>
+      <if test="update_time != null" >
+        update_time=#{update_time},
+      </if>
+    </set>
+    where course_id = #{course_id}
+  </update>
+
 
   <!--查询单品列表-->
   <select id="selectByShop" resultType="hashmap" parameterType="java.lang.String" >

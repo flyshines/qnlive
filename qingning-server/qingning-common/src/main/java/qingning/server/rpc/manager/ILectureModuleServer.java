@@ -153,8 +153,20 @@ public interface ILectureModuleServer {
 
 	Map<String, Object> increaseSeriesCourse(String series_id);
 
+	Map<String, Object> delSeriesCourse(String series_id);
+
 	Map<String, Object> updateUpdown(Map<String,Object> record);
 
 
 	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
+
+	/**获取店铺信息
+	 * @param param
+	 * @return
+	 */
+	Map<String,Object> getShopInfo(Map<String, Object> param);
+
+	Map<String, Object> updateCourseLonely(Map<String, Object> course);
+
+
 }

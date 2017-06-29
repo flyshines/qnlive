@@ -417,9 +417,6 @@
       <if test="series_id != null" >
         series_id=#{series_id},
       </if>
-      <if test="series_id == null" >
-        series_id = NULL ,
-      </if>
       <if test="course_updown != null" >
         course_updown=#{course_updown},
       </if>
@@ -432,6 +429,30 @@
     	and update_time=#{last_update_time}
     </if>
   </update>
+
+
+  <update id="updateSeriesCourse" parameterType="hashmap" >
+    update t_courses
+    <set >
+      <if test="series_course_updown != null" >
+        series_course_updown=#{series_course_updown},
+      </if>
+      <if test="series_id != null" >
+        series_id=#{series_id},
+      </if>
+      <if test="course_updown != null" >
+        course_updown=#{course_updown},
+      </if>
+      <if test="series_id == null" >
+        series_id=null,
+      </if>
+      <if test="update_time != null" >
+        update_time=#{update_time},
+      </if>
+    </set>
+    where course_id = #{course_id}
+  </update>
+
 
   <update id="updateAfterStudentBuyCourse" parameterType="hashmap" >
     update t_courses
@@ -513,6 +534,25 @@
     <if test="keyword != null" >
       course_title like '%${keyword}%'
     </if>
+  </select>
+  <select id="findAllListByLiturere" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+      t.course_id,
+      t.course_title,
+      t.course_url AS course_image,
+      t.create_time,
+      t.course_price,
+      t.course_amount,
+      t.student_num AS sale_num,
+      t.course_updown,
+      (t.start_time &lt; SYSDATE()) AS is_start,
+      t.end_time
+    FROM
+    t_courses t
+    WHERE
+    t.lecturer_id = #{user_id}
+    ORDER BY
+    t.create_time DESC
   </select>
   <select id="findCourseBySeriesId" resultType="hashmap" parameterType="hashmap" >
     SELECT
