@@ -219,5 +219,25 @@
 		and create_date=#{create_date}
 	</if>
   </select>
+
+  <select id="selectOrdersListByUserId" resultType="hashmap" parameterType="hashmap">
+    SELECT
+      t.profit_type,
+      t.share_amount,
+      t.course_id,
+      t.profit_amount,
+      t.create_time,
+      se.series_title,
+      t.user_id
+    FROM
+    t_lecturer_courses_profit t
+    LEFT JOIN t_series se ON se.series_id = t.course_id
+    WHERE
+    1=1
+    t.lecturer_id =  #{lecturer_id}
+	<if test="profit_type != null">
+		and profit_type=#{profit_type}
+	</if>
+  </select>
   
 </mapper>
