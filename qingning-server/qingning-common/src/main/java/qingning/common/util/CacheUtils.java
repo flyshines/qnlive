@@ -11,6 +11,7 @@ import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
+import redis.clients.jedis.Tuple;
 
 import java.util.*;
 
@@ -763,6 +764,56 @@ public final class CacheUtils {
 					keyFields, readMessageReqEntity, operation, jedis, cachedValue, -1);
 		}
 		return values;
+	}
+
+	/**
+	 * 读取系列课程的学员排序列表，包括zset的score（因为score=create_time）
+	 * @param seriesId 系列id
+	 * @param lastUserId 上一页最后一条数据的学员id
+	 * @param pageCount 每页数量
+	 * @param requestEntity 
+	 * @param operation 
+	 * @param jedis
+	 * @return
+	 * @throws Exception 
+	 */
+	public static Set<Tuple> readSeriesStudentSet(String seriesId, String lastUserId, int pageCount, 
+			RequestEntity requestEntity, CommonReadOperation operation, Jedis jedis) throws Exception {
+		//返回结果集
+		Set<Tuple> studentSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
+        String userSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_USERS, keyMap);
+        if(!jedis.exists(userSetKey)){
+        	//缓存中不存在，从数据库中查询并写入缓存中
+			List<Map<String, Object>> resultList = (List) operation.invokeProcess(requestEntity);
+			if(resultList != null && !MiscUtils.isEmpty(resultList)){
+				//生成zset的key
+				String zsetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_USERS, 
+						(Map<String, Object>)requestEntity.getParam());
+				for(Map<String, Object> map : resultList){
+					Long createTimeL = ((Date)map.get("create_time")).getTime();
+					jedis.zadd(zsetKey, createTimeL, map.get("user_id").toString());
+				}
+			}
+        }
+        //获取上一页最后一条数据的score
+        if(lastUserId != null && !"0".equals(lastUserId)){	//不是获取第一页数据
+	        Double lastScore = jedis.zscore(userSetKey, lastUserId);
+	        /*
+	         * 分页获取学员的id列表，包括score（score=create_time）
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+	        studentSet = jedis.zrevrangeByScoreWithScores(userSetKey, "("+lastScore, "-inf", 0, pageCount);
+        }else{	//获取第一页数据
+	        /*
+	         * 分页获取学员的id列表，包括score（score=create_time）
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+        	studentSet = jedis.zrevrangeByScoreWithScores(userSetKey, "+inf", "-inf", 0, pageCount);
+        }
+		return studentSet;
 	}
 	
 }

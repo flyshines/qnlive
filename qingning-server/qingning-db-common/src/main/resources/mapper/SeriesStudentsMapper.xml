@@ -210,7 +210,7 @@
   
   <!-- 根据条件查询系列id -->
   <select id="selectSeriesStudentsByMap" parameterType="hashmap" resultType="hashmap">
-  	SELECT series_id FROM t_series_students
+  	SELECT user_id, create_time, series_id FROM t_series_students
   	<where>
   		<if test="user_id != null">
   			and user_id = #{user_id}

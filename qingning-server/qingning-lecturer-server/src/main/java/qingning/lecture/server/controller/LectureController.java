@@ -929,4 +929,33 @@ public class LectureController extends AbstractController {
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
+	
+	/**
+	 * 分页获取系列课的收益列表
+	 * @param seriesId
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/series/{series_id}/income_list", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getSeriesIncomeList(
+			@PathVariable("series_id") String seriesId,
+			@RequestParam(value="last_user_id", defaultValue="0")String lastUserId,
+			@RequestParam(value="page_count", defaultValue="20")long pageCount,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+		@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "findSeriesIncomeList", accessToken, version, appName);
+		Map<String, Object> param = new HashMap<>();
+		param.put("series_id", seriesId);
+		param.put("last_user_id", lastUserId);
+		param.put("page_count", pageCount);
+		
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
 }
