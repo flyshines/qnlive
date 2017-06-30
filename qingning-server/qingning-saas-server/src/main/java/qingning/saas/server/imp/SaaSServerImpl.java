@@ -1581,10 +1581,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 pipeline.sync();
                 for(Map<String,Object> recordMap : records){
                     Response<String> courseName = (Response)recordMap.get("courseTitle");
-                    if(recordMap.get("series_title")==null) {
-                        recordMap.put("title", courseName.get());
-                    }
-                    recordMap.remove("cacheLecturerName");
+                    recordMap.put("title", courseName.get());
+                    //recordMap.remove("cacheLecturerName");
                     Date recordTime = (Date)recordMap.get("create_time");
                     recordMap.put("create_time", recordTime);
                 }
