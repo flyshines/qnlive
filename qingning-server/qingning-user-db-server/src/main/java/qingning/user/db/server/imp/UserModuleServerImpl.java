@@ -441,14 +441,15 @@ public class UserModuleServerImpl implements IUserModuleServer {
     }
 
     @Override
-    public Map<String, Object> joinSeries(Map<String, String> courseMap) {
+    public Map<String, Object> joinSeries(Map<String, String> seriesMap) {
         Date now = new Date();
         Map<String, Object> student = new HashMap<String, Object>();
         student.put("student_id", MiscUtils.getUUId());
-        student.put("user_id", courseMap.get("user_id"));
-        student.put("lecturer_id", courseMap.get("lecturer_id"));
-        student.put("series_id", courseMap.get("series_id"));
+        student.put("user_id", seriesMap.get("user_id"));
+        student.put("lecturer_id", seriesMap.get("lecturer_id"));
+        student.put("series_id", seriesMap.get("series_id"));
         student.put("student_type", "0"); //TODO distribution case
+        student.put("value_from", seriesMap.get("value_from"));
         student.put("create_time", now);
         student.put("create_date", now);
         //students.setPaymentAmount();//TODO

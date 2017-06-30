@@ -106,7 +106,7 @@
 					<param name="series_course_updown" type="string"/>
 					<param name="series_title" type="rstring"/>
 					<param name="series_updown" type="string"/>
-
+					<param name="series_id" type="string"/>
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
 					<param name="update_time" type="long"/>
@@ -167,10 +167,13 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
+					<param name="query_type" type="string" require="Y,000100"  />
+
 				</inputs>
 				<outputs>
 				</outputs>
 			</function>
+
 			<function name="joinSeries">
 				<auth>
 					<access_token require="Y" />
