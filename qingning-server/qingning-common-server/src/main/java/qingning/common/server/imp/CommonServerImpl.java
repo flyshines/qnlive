@@ -1204,7 +1204,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.clear();
                     query.put("series_id", handleResultMap.get("room_id").toString());
                     String seriesUsersKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_USERS, query);
-                    jedis.sadd(seriesUsersKey,userId);
+                    jedis.zadd(seriesUsersKey,System.currentTimeMillis(),userId);
                 }
 
                 //店铺今日统计

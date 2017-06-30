@@ -184,4 +184,10 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> findUserGainsByUserId(String userId);
+
+    /**店铺已购
+     * @param query
+     * @return
+     */
+    List<Map<String,Object>> findUserBuiedRecords(Map<String, Object> query);
 }
