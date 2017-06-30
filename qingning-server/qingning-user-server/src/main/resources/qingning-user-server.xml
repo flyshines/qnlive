@@ -614,6 +614,7 @@
 						<param name="lecturer_nick_name" type="rstring"/>
 						<param name="lecturer_id" type="string"/>
 						<param name="student" type="string"/>
+						<param name="series_id" type="string"/>
 						<param name="series_course_updown" type="string"/>
 						<param name="course_updown" type="string"/>
 					</param>
