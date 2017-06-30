@@ -3,6 +3,7 @@ package qingning.user.server.controller;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
@@ -258,11 +259,10 @@ public class UserController extends AbstractController{
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("position", position);
-		parMap.put("type", "0");
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
-	/**消费记录-saas后台
+	/**消费记录-saas后台(本店铺所有消费记录)
 	 * @param page_count
 	 * @param position
 	 * @param accessToken
@@ -274,6 +274,7 @@ public class UserController extends AbstractController{
 	@RequestMapping(value = "/user/record/consume/saas", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity getUserConsumeRecordsForSaaS(
+			@RequestParam(value = "shop_id", defaultValue = "") String shopId,
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "position", defaultValue = "") String position,
 			@RequestHeader("access_token") String accessToken,
@@ -283,7 +284,10 @@ public class UserController extends AbstractController{
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("position", position);
-		parMap.put("type", "1");
+		if(shopId==null||StringUtils.isEmpty(shopId)){
+			throw new QNLiveException("000100");
+		}
+		parMap.put("shop_id", shopId);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
@@ -588,7 +592,7 @@ public class UserController extends AbstractController{
 
 
 	/**
-	 * 用户查询系列课程详情
+	 * 用户查询系列详情
 	 * @param accessToken
 	 * @param version
 	 * @return
@@ -691,8 +695,6 @@ public class UserController extends AbstractController{
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
-
-
 
 
 }

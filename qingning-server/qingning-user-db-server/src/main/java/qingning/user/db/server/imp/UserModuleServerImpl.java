@@ -72,6 +72,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
     private SeriesMapper seriesMapper;
     @Autowired(required = true)
     private SeriesStudentsMapper seriesStudentsMapper;
+    @Autowired(required = true)
+    private SaaSShopMapper shopMapper;
 
     @Override
     public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
@@ -225,6 +227,22 @@ public class UserModuleServerImpl implements IUserModuleServer {
             //系列记录转换
             res = lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
         }
+        res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+            map.put("course_title", map.get("series_title"));
+        });
+        return res;
+    }
+
+    @Override
+    public List<Map<String, Object>> findUserShopRecords(Map<String, Object> queryMap) {
+        String shopId = queryMap.get("shop_id").toString();
+        String shopUser = shopMapper.selectUserIdByShopId(shopId);
+        //店铺不存在返回空
+        if(shopUser==null){
+            return null;
+        }
+        queryMap.put("lecturer_id",shopUser);
+        List<Map<String, Object>> res = lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
         res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
             map.put("course_title", map.get("series_title"));
         });
