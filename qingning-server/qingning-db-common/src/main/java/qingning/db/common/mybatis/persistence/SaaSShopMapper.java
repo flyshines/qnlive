@@ -13,4 +13,6 @@ public interface SaaSShopMapper {
     Map<String,Object> selectByPrimaryKey(Map<String,Object> record);
 
     int updateByPrimaryKey(Map<String,Object> record);
+
+    String selectUserIdByShopId(String shopId);
 }

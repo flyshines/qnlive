@@ -273,9 +273,9 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
+					<param name="shop_id" type="string" require="N"  />
 					<param name="page_count" type="long" require="N"  />
 					<param name="position" type="long" require="N"  />
-					<param name="type" type="string" require="N"  />
 				</inputs>
 				<outputs>
 					<param name="record_list" type="list">

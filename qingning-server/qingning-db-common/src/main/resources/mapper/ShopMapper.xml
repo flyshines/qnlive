@@ -17,6 +17,10 @@
       user_id = #{user_id,jdbcType=VARCHAR}
     </if>
   </select>
+  <select id="selectUserIdByShopId" resultType="java.lang.String" parameterType="java.lang.String" >
+    select user_id from t_saas_shop where shop_id = #{shopId} limit 1
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
     delete from t_saas_shop
     where shop_id = #{shop_id,jdbcType=VARCHAR}

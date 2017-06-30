@@ -154,4 +154,10 @@ public interface IUserModuleServer {
 	void increaseStudentNumBySeriesId(String series_id);
 
 	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
+
+	/**本店铺所有消费记录
+	 * @param queryMap
+	 * @return
+	 */
+	List<Map<String,Object>> findUserShopRecords(Map<String, Object> queryMap);
 }
