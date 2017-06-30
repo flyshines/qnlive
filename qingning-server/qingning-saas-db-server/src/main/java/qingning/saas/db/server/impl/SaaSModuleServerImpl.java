@@ -46,7 +46,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private FeedbackMapper feedbackMapper;
     @Autowired(required = true)
     private UserGainsMapper userGainsMapper;
-
+    @Autowired(required = true)
+    private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
         return coursesStudentsMapper.findCourseIdByStudent(reqMap);
@@ -385,6 +386,24 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> findUserGainsByUserId(String userId) {
         return userGainsMapper.findUserGainsByUserId(userId);
+    }
+
+    @Override
+    public List<Map<String, Object>> findUserBuiedRecords(Map<String, Object> query) {
+        List<Map<String, Object>> res;
+        if("1".equals(query.get("type"))){
+            //单品已购
+            query.put("profit_type","0");
+            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+        }else{
+            //系列已购
+            query.put("profit_type","2");
+            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+            res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+                map.put("title", map.get("series_title"));
+            });
+        }
+        return res;
     }
 
 }

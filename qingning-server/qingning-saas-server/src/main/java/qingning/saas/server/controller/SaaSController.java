@@ -322,7 +322,7 @@ public class SaaSController extends AbstractController {
     }
 
     /**
-     * 用户-提交反馈与建议
+     * 用户-访问店铺
      * @param entity
      * @param accessToken
      * @param appName
@@ -342,5 +342,54 @@ public class SaaSController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 用户- 单品已购
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/buy/single/{shop_id}/list", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity buiedSingleList(
+            @PathVariable("shop_id") String shopId,
+            @RequestParam(value = "position", defaultValue = "") String position,
+            @RequestParam(value = "page_count", defaultValue = "20") long page_count,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSingleList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id",shopId);
+        param.put("position",position);
+        param.put("page_count",page_count);
+        param.put("type","1");
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 用户-系列已购
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/buy/series/{shop_id}/list", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity buiedSeriesList(
+            @PathVariable("shop_id") String shopId,
+            @RequestParam(value = "position", defaultValue = "") String position,
+            @RequestParam(value = "page_count", defaultValue = "20") long page_count,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSeriesList", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id",shopId);
+        param.put("page_count",page_count);
+        param.put("position",position);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
     
 }

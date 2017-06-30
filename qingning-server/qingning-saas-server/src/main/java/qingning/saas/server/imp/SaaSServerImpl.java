@@ -7,15 +7,21 @@ import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.CollectionUtils;
 import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.saas.server.other.*;
 import qingning.server.AbstractQNLiveServer;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.manager.ISaaSModuleServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
+
 import java.util.*;
 
 public class SaaSServerImpl extends AbstractQNLiveServer {
@@ -1502,7 +1508,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return userGains;
     }
     /**
-     * 用户-余额明细
+     * 用户-访问店铺
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1531,6 +1537,85 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 jedis.hincrBy(userCountKey,"day_visit",1);
             }
         }
+    }
+
+    /**
+     * 用户-单品已购
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("buiedSingleList")
+    public Map<String, Object> buiedSingleList(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        String shopId = query.get("shop_id").toString();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        //店主ID
+        query.put("lecturer_id",shopInfo.get("user_id"));
+        query.put("user_id",userId);
+        query.put("type","1");
+        if(query.get("position") == null||StringUtils.isEmpty(query.get("position").toString())){
+            query.remove("position");
+        }
+        List<Map<String,Object>> records = saaSModuleServer.findUserBuiedRecords(query);
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+
+            //从缓存中查询讲师的名字
+            callBack.invoke((pipeline, jedis1) -> {
+                for(Map<String,Object> recordMap : records){
+                    cacheQueryMap.clear();
+                    cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                    String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                    Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                    recordMap.put("courseTitle", courseName);
+                }
+                pipeline.sync();
+                for(Map<String,Object> recordMap : records){
+                    Response<String> courseName = (Response)recordMap.get("courseTitle");
+                    recordMap.put("title", courseName.get());
+                    //recordMap.remove("cacheLecturerName");
+                    Date recordTime = (Date)recordMap.get("create_time");
+                    recordMap.put("create_time", recordTime);
+                }
+            });
+            resultMap.put("list", records);
+        }
+        return resultMap;
+    }
+    /**
+     * 用户-系列已购
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("buiedSeriesList")
+    public Map<String, Object> buiedSeriesList(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        String shopId = query.get("shop_id").toString();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        //店主ID
+        query.put("lecturer_id",shopInfo.get("user_id"));
+        query.put("user_id",userId);
+        query.put("type","2");
+
+        List<Map<String,Object>> records = saaSModuleServer.findUserBuiedRecords(query);
+        resultMap.put("list", records);
+
+        return resultMap;
     }
 
 
