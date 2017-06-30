@@ -24,6 +24,11 @@ public class ReadSeriesOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        return lectureModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+        String functionName = requestEntity.getFunctionName();
+        if("findSeriesStudentListBySeriesId".equals(functionName)){
+        	return lectureModuleServer.findSeriesStudentListBySeriesId(reqMap.get("series_id").toString());
+        }else{
+        	return lectureModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+        }
     }
 }

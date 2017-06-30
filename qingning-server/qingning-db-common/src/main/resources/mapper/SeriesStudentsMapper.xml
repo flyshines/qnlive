@@ -43,15 +43,7 @@
     </if>
   </select>
 
-  <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
-    select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time,b.student_num
-    from t_courses_students a, t_courses b
-    where a.course_id=b.course_id and a.user_id=#{user_id} and b.status <![CDATA[ <> ]]> 5
-    <if test="create_time != null">
-      and a.create_time <![CDATA[<]]> #{create_time}
-    </if>
-    order by a.create_time desc limit #{page_count}
-  </select>
+
 
   <select id="findLatestStudentAvatarAddList" resultType="string" parameterType="hashmap" >
     select
@@ -210,7 +202,7 @@
   
   <!-- 根据条件查询系列id -->
   <select id="selectSeriesStudentsByMap" parameterType="hashmap" resultType="hashmap">
-  	SELECT series_id FROM t_series_students
+  	SELECT user_id, create_time, series_id FROM t_series_students
   	<where>
   		<if test="user_id != null">
   			and user_id = #{user_id}

@@ -838,6 +838,29 @@
 				<outputs>
 				</outputs>
 			</function>
+			
+			<!-- 分页获取系列课的收益列表 -->
+			<function name="findSeriesIncomeList">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string"  require="Y,000100" />
+					<param name="last_user_id" type="string" require="N" />
+					<param name="page_count" type="long" require="N" />
+				</inputs>
+				<outputs>
+					<param name="income_info_list" type="list">
+						<param name="avatar_address" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="create_time" type="string" />
+					</param>
+				</outputs>
+			</function>
+			
+			
+			
 		</default>
 
 		<version num="1.0.0" class="">

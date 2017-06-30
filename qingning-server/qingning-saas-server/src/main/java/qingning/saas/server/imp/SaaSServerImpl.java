@@ -724,7 +724,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
     	RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
-    	readSeriesMap.put("seried_id", seriesId);
+    	readSeriesMap.put("series_id", seriesId);
 		//获取系列课程详情
 		Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
 		

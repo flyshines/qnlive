@@ -765,4 +765,14 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
         dbResultMap.put("update_time", new Date());
         return dbResultMap;
     }
+
+    /**
+     * 根据系列id获得该系列的所有学员列表
+     */
+	@Override
+	public List<Map<String, Object>> findSeriesStudentListBySeriesId(String seriesId) {
+		Map<String, Object> selectMap = new HashMap<>();
+		selectMap.put("series_id", seriesId);
+		return seriesStudentsMapper.selectSeriesStudentsByMap(selectMap);
+	}
 }
