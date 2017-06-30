@@ -37,6 +37,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private ReadRoomDistributer readRoomDistributer;
     private ReadLecturerOperation readLecturerOperation;
     private ReadRoomDistributerOperation readRoomDistributerOperation;
+    private ReadSeriesOperation readSeriesOperation;
     private static Logger logger = LoggerFactory.getLogger(UserServerImpl.class);
 
     @Override
@@ -50,6 +51,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             readRoomDistributer = new ReadRoomDistributer(userModuleServer);
             readLecturerOperation = new ReadLecturerOperation(userModuleServer);
             readRoomDistributerOperation = new ReadRoomDistributerOperation(userModuleServer);
+            readSeriesOperation = new ReadSeriesOperation(userModuleServer);
         }
     }
 
@@ -2289,13 +2291,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
      * @param jedis
      * @return
      */
-    private List<Map<String,String>> seriesList(List<String> seriesIdList,Jedis jedis){
+    private List<Map<String,String>> seriesList(List<String> seriesIdList,Jedis jedis) throws Exception {
         List<Map<String,String>> seriesList = new ArrayList<>();
         for(String seriesId : seriesIdList){
             Map<String,String> queryParam = new HashMap<String,String>();
             queryParam.put(Constants.CACHED_KEY_SERIES_FIELD, seriesId);
-            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryParam);
-            Map<String, String> series = jedis.hgetAll(seriesKey);
+            Map<String, String> series = CacheUtils.readSeries(seriesId, generateRequestEntity(null, null, null, queryParam), readSeriesOperation, jedis, true);
             String lecturer_id = series.get("lecturer_id");
             Map<String,String> query = new HashMap<String,String>();
             query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
@@ -2470,7 +2471,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
 
-
         Set<String> seriesCourseIdSet;//查询的课程idset
         List<String> seriesCourseIdList = new ArrayList<>();//课程id列表
         List<Map<String,String>> seriesCourseList = new LinkedList<>();//课程对象列表
@@ -2572,10 +2572,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, reqMap);
-
-
        // jedis.del(userKey);
-        Map<String,String> values = CacheUtils.readUser(userId, reqMap, readUserOperation, jedis);
+        Map<String,String> values = CacheUtils.readUser(userId, generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
         long series_num = 0;
         try{
             series_num = Long.parseLong(values.get("series_num").toString());
@@ -2616,18 +2614,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             userSeriesIdSet = jedis.zrange(userSeriesListKey, startIndex, endIndex);
-            List<Map<String,String>> userSeriesList = new ArrayList<>();
-            for(String seriesId : userSeriesIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
-                Map<String,String> series = new HashMap<>();
-                series.put("series_id",seriesId);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, series);
-                Map<String, String> seriesMap = jedis.hgetAll(seriesKey);
-                String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, seriesMap);
-                String lecturer_nick_name = jedis.hget(lecturerKey, "nick_name");
-                seriesMap.put("lecturer_nick_name",lecturer_nick_name);
-                userSeriesList.add(seriesMap);
-            }
-            result.put("series_list", userSeriesList);
+            result.put("series_list", seriesList(new ArrayList<String>(userSeriesIdSet), jedis));
         }
         return result;
     }
