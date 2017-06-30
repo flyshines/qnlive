@@ -1089,6 +1089,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * TODO 拼接分享链接share_url
 		 */
+		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix", appName) + articleId;
 		
         resultMap.put("article_info", articleMap);
         

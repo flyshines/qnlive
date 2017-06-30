@@ -854,7 +854,7 @@
 					<param name="income_info_list" type="list">
 						<param name="avatar_address" type="string" />
 						<param name="nick_name" type="string" />
-						<param name="create_time" type="string" />
+						<param name="create_time" type="long" />
 					</param>
 				</outputs>
 			</function>
