@@ -947,10 +947,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100017");
         }
 
-        //2.检测课程验证信息是否正确
-        //2.1如果课程为私密课程则检验密码
-        String course_type = seriesInfoMap.get("series_type");
-        if("1".equals(course_type)){
+        //查询支付订单
+        String series_type = seriesInfoMap.get("series_type");
+        if("1".equals(series_type)){
             //TODO 支付课程要验证支付信息
             if(reqMap.get("payment_id") == null){
                 throw new QNLiveException("000100");
@@ -974,7 +973,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, seriesInfoMap.get("lecturer_id"));
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "total_student_num", 1);
-        if("2".equals(course_type)){
+        if("2".equals(series_type)){
             jedis.hincrBy(lecturerKey, "pay_student_num", 1);
         }
         map.clear();

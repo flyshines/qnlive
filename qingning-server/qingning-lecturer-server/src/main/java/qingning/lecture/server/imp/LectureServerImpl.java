@@ -3123,6 +3123,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
         if(updown.equals("1")){ //上架
             setSeriesRedis(series_id,jedis);
+
         }else{ //下架
             //将系列id 加入讲师下架列表
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);
@@ -3196,46 +3197,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
 
-
-    /**
-     * 查询讲师创建的系列
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @FunctionName("getLecturerSeries")
-    public Map<String, Object> getLecturerSeries(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String appName = reqEntity.getAppName();
-        String lecturer_id = reqMap.get("lecturer_id").toString();//讲师id
-        String classify_id = reqMap.get("classify_id").toString();//分类id
-        Jedis jedis = jedisUtils.getJedis(appName);
-
-
-
-//        CACHED_KEY_LECTURER_SERIES = "SYS:LECTURER:{lecturer_id}:SERIES";//讲师所有上架系列
-//       CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//讲师所有下架系列
-//        CACHED_KEY_LECTURER_SERIES_CLASSIFY = "SYS:LECTURER:{lecturer_id}:SERIES:CLASSIFY:{classify_id}";//讲师在每个分类的系列 如果下架直接删掉value
-
-
-
-
-
-        if(MiscUtils.isEmpty(classify_id)){//查找讲师所有
-
-
-
-        }else{
-
-
-        }
-
-
-
-
-
-        return reqMap ;
-    }
 
 
 
@@ -3409,7 +3370,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 编辑系列课程
+     * 移进移出
      * @param reqEntity
      * @return
      * @throws Exception
@@ -3477,7 +3438,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, true);
 
         }else if(query_type.equals("0")){//加入系列
-
             if(MiscUtils.isEmpty(reqMap.get("series_id"))){
                 throw new QNLiveException("000004");
             }else{//判断系列是否属于这个用户
@@ -3488,9 +3448,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 String series_course_type = jedis.hget(seriesKey, "series_course_type");
                 map.clear();
                 map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);
-                String lecturerSeriesUp = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
-                String lecturerSeriesDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, map);
-                if(jedis.zrank(lecturerSeriesUp,series_id) == null && jedis.zrank(lecturerSeriesDown,series_id) == null ){
+                if(!jedis.hget(seriesKey,"lecturer_id").equals(user_id)){
                     throw new QNLiveException("210001");
                 }else{
                     course.put("series_id",series_id);
@@ -3503,7 +3461,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(series_course_type.equals("0")){
                     resltMap = lectureModuleServer.updateSeriesCourse(course);
                 }else{
-                    //TODO saas course
                     resltMap = lectureModuleServer.updateSaasSeriesCourse(course);
                 }
                 map.clear();
