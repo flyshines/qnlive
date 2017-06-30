@@ -683,7 +683,7 @@ public class SaaSManageController extends AbstractController {
     }
 
     /**
-     * 获取金额信息
+     * 获取余额信息
      * @param access_token 后台证书
      * @param version 版本
      * @return
@@ -696,6 +696,33 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userGains", access_token, version,appName);
         Map<String, Object> parMap = new HashMap<>();
+        requestEntity.setParam(parMap);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 获取订单明细
+     * @param access_token 后台证书
+     * @param version 版本
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/gains/order/list",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity  gainsOrdersList(
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "nick_name",defaultValue = "") String keyword,
+            @RequestParam(value = "goods_name",defaultValue = "") String courseName,
+            @RequestParam(value = "order_type",defaultValue = "") String orderType,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "gainsOrdersList", access_token, version,appName);
+        Map<String, Object> parMap = new HashMap<>();
+        parMap.put("page_size",pageSize);
+        parMap.put("page_num",pageNum);
+        parMap.put("nick_name",keyword);
+        parMap.put("course_name",courseName);
+        parMap.put("order_type",orderType);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }

@@ -137,6 +137,12 @@
         `t_saas_course_comment` t
     WHERE
         t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    <if test="course_name != null" >
+      AND t.course_name like '%${course_name}%'
+    </if>
+    <if test="nick_name != null" >
+      AND t.nick_name like '%${nick_name}%'
+    </if>
     ORDER BY create_time desc
   </select>
 </mapper>

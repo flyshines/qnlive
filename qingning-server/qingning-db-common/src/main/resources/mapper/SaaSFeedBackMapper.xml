@@ -99,6 +99,13 @@
         `t_saas_feedback` t
     WHERE
         t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    <if test="comment != null" >
+      AND t.content like '%${comment}%'
+    </if>
+    <if test="nick_name != null" >
+      AND t.nick_name like '%${nick_name}%'
+    </if>
+
     ORDER BY t.create_time DESC
   </select>
 </mapper>

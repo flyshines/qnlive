@@ -190,4 +190,10 @@ public interface ISaaSModuleServer {
      * @return
      */
     List<Map<String,Object>> findUserBuiedRecords(Map<String, Object> query);
+
+    /**获取订单记录
+     * @param query
+     * @return
+     */
+    Map<String,Object> getOrdersList(Map<String, Object> query);
 }
