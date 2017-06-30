@@ -3396,6 +3396,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
         if(query_type.equals("1")){//移除系列
+
+            if( !courseInfo.get("course_updown").equals("0")){
+
+
+            }else{
+
+            }
+
+
+
             map.clear();
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
@@ -3422,7 +3432,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }else if(series_course_updown.equals("2")){
                 String lecturerSeriesCourseDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                 jedis.zrem(lecturerSeriesCourseDown,course_id);
-
             }
 
             if(course_updown.equals("0")){//之前没有在单品上架
