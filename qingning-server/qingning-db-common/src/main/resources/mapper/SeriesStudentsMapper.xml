@@ -93,7 +93,7 @@
 
 
   <insert id="insertStudent" parameterType="hashmap" >
-    insert into t_courses_students
+    insert into t_series_students
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="student_id != null" >
         student_id,

@@ -170,7 +170,18 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="joinSeries">
+				<auth>
+					<access_token require="Y" />
+					<appName require="Y" />
+					<timesLimit millisecond="50" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"  />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
