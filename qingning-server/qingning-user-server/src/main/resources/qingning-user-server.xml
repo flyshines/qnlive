@@ -105,6 +105,7 @@
 					<param name="course_updown" type="string"/>
 					<param name="series_course_updown" type="string"/>
 					<param name="series_title" type="rstring"/>
+					<param name="series_updown" type="string"/>
 
 					<param name="course_password" type="string"/>
 					<param name="share_url" type="string"/>
