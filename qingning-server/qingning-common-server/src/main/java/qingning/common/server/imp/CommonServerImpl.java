@@ -875,6 +875,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", courseMap.get("course_price"));
             totalFee = Integer.parseInt(courseMap.get("course_price"));
             goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+            insertMap.put("course_type","1");
         }else if(profit_type.equals("2")){
             //系列课收益
             insertMap.put("amount", courseMap.get("series_price"));
@@ -1212,7 +1213,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
                 if(!jedis.exists(userCountKey)){
                     long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
+                    //今日收入
                     jedis.hincrBy(userCountKey,"day_amount",lecturerProfit);
+                    //今日付费人数
+                    jedis.hincrBy(userCountKey,"day_pay_user",1);
                     //设置失效时间为今天
                     jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
                 }else{
@@ -2228,7 +2232,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 ((Map<String, Object>) reqEntity.getParam()).put("series_id",id);//如果type==5 那么传入的id就是series_id
                 Map<String,String> seriesMap = CacheUtils.readSeries(id, reqEntity, readSeriesOperation, jedis, true);
                 
-                if(MiscUtils.isEmpty(seriesMap)){
+                if(seriesMap == null || MiscUtils.isEmpty(seriesMap)){
                 	logger.error("通用-查询分享信息>>>>系列不存在");
                     throw new QNLiveException("210003");
                 }
@@ -2243,12 +2247,30 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 /*
                  * TODO 根据讲师id获取直播间id
                  */
-        //        String roomId = "";
-        //        ((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
-        //        liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
+                String lecturerId = seriesMap.get("lecturer_id");
+                Map<String, Object> readRoom = new HashMap<>();
+                readRoom.put("lecturer_id", lecturerId);
+                String readRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, readRoom);
                 
-                content = title + "\n";
-                icon_url = loginedUserMap.get("avatar_address");	//登录用户的头像
+                Map<String, String> rooms = jedis.hgetAll(readRoomKey);
+                String roomId = null;
+                if(rooms != null && !rooms.isEmpty()){
+                	Set keys = rooms.keySet();
+                	Iterator iter = keys.iterator();
+                	roomId = (String) iter.next();	//如果有多个直播间，默认第一个
+                }
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
+                liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
+                
+                content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
+                /*
+                 * 优先使用直播间头像，若直播间头像不存在使用课程封面
+                 */
+                if(liveRoomMap != null && !liveRoomMap.isEmpty()){
+                	icon_url = liveRoomMap.get("avatar_address");
+                }else{
+                	icon_url = seriesMap.get("series_img");
+                }
                 simple_content = title;
                 //获取系列课分享链接
                 share_url = MiscUtils.getConfigByKey("series_share_url_pre_fix",appName) + id;

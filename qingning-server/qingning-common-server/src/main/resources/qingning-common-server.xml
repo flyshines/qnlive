@@ -1006,7 +1006,10 @@
 					<param name="png" type="string" require="N"/>
 				</inputs>
 				<outputs>
-					<param name="share_img" type="string" />
+					<param name="avatar_address" type="string" />
+					<param name="nick_name" type="string" />
+					<param name="course_title" type="string" />
+					<param name="share_url" type="string" />
 				</outputs>
 			</function>
 

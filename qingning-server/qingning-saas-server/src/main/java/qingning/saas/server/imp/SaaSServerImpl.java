@@ -3,6 +3,7 @@ package qingning.saas.server.imp;
 import com.alibaba.fastjson.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -835,6 +836,25 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
     }
     /**
+     * 店铺-单品列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getNoSeriesList")
+    public Map<String, Object> getNoSeriesList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        reqMap.put("noseries","1");
+        return saaSModuleServer.getSingleList(reqMap);
+
+    }
+    /**
      * 店铺-直播列表
      * @param reqEntity
      * @return
@@ -1428,7 +1448,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
     /**
-     * 用户-提交反馈与建议
+     * 系列-获取系列课的消费用户列表
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1440,6 +1460,77 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
 
         return resultMap;
+    }
+
+    /**
+     * 用户-余额明细
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userGains")
+    public Map<String, Object> userGains(RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> userGains = saaSModuleServer.findUserGainsByUserId(userId);
+        long todayMoney = 0L;
+        long todayVisit = 0L;
+        long todayPay = 0L;
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Map<String,Object> query = new HashMap<>();
+        query.put("user_id", userId);
+        String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
+        if(jedis.exists(userCountKey)){
+            String amount = jedis.hget(userCountKey,"day_amount");
+            String visit = jedis.hget(userCountKey,"day_visit");
+            String dayPayUser = jedis.hget(userCountKey,"day_pay_user");
+            if(StringUtils.isNotEmpty(amount)){
+                todayMoney = Long.valueOf(amount);
+            }
+            if(StringUtils.isNotEmpty(visit)){
+                todayVisit = Long.valueOf(visit);
+            }
+            if(StringUtils.isNotEmpty(dayPayUser)){
+                todayPay = Long.valueOf(dayPayUser);
+            }
+        }
+        userGains.put("today_amount",todayMoney);
+        userGains.put("today_visit",todayVisit);
+        userGains.put("today_pay",todayPay);
+        if(MiscUtils.isEmpty(userGains)){
+            throw new QNLiveException("170001");
+        }
+        return userGains;
+    }
+    /**
+     * 用户-余额明细
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userVisit")
+    public void userVisit(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query = new HashMap<>();
+        String shopId = ((Map<String,String>)reqEntity.getParam()).get("shop_id");
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        //店主ID
+        String lecturerId = shopInfo.get("user_id");
+        query.put("user_id", lecturerId);
+        String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
+        //本人访问自己的店铺不做统计
+        if(!lecturerId.equals(userId)){
+            if(!jedis.exists(userCountKey)){
+                long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
+                //今日浏览人数
+                jedis.hincrBy(userCountKey,"day_visit",1);
+                //设置失效时间为今天
+                jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
+            }else{
+                jedis.hincrBy(userCountKey,"day_visit",1);
+            }
+        }
     }
 
 

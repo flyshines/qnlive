@@ -117,13 +117,36 @@
   
   <select id="findUserConsumeRecords" resultType="hashmap" parameterType="hashmap" >
     select
-    lcp.profit_type, lcp.course_id, lcp.profit_amount, lcp.profit_amount,
-    lcp.create_time, lcp.position, t_courses.course_title, lcp.lecturer_id
-    from t_lecturer_courses_profit lcp left join t_courses  on t_courses.course_id = lcp.course_id
+    lcp.profit_type, lcp.course_id, lcp.profit_amount,
+    lcp.create_time, lcp.position, lcp.lecturer_id,
+    se.series_title
+    from t_lecturer_courses_profit lcp
+    LEFT JOIN t_series se ON se.series_id = lcp.course_id
     where 1=1
     and user_id = #{user_id}
     <if test="position != null" >
      and  `position` <![CDATA[<]]> #{position}
+    </if>
+    <if test="course_type != null" >
+     and  course_type = #{course_type}
+    </if>
+    order by `position` desc
+    limit #{page_count}
+  </select>
+  <select id="findUserIncomeRecords" resultType="hashmap" parameterType="hashmap" >
+    select
+    lcp.profit_type, lcp.course_id, lcp.profit_amount,
+    lcp.create_time, lcp.position, lcp.user_id,
+    se.series_title
+    from t_lecturer_courses_profit lcp
+    LEFT JOIN t_series se ON se.series_id = lcp.course_id
+    where 1=1
+    and lcp.lecturer_id = #{user_id}
+    <if test="position != null" >
+     and  `position` <![CDATA[<]]> #{position}
+    </if>
+    <if test="course_type != null" >
+     and  course_type = #{course_type}
     </if>
     order by `position` desc
     limit #{page_count}

@@ -12,4 +12,6 @@ public interface LecturerCoursesProfitMapper {
 	Map<String,Object> findUserDistributionInfoForLastDoneNum(Map<String, Object> queryuserDistribution);
 	
 	Map<String,Object> findCoursesSumInfo(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findUserIncomeRecords(Map<String, Object> queryMap);
 }
