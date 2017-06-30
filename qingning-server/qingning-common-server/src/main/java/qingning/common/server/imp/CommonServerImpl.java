@@ -1052,7 +1052,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if("2".equals(billMap.get("profit_type").toString())){
                     //系列课
                     query.put("series_id",courseId);
-                    courseMap = CacheUtils.readSeries(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
+                    courseMap = CacheUtils.readSeries(courseId, generateRequestEntity(null, null, null, query), readSeriesOperation, jedis, false);
                 }else{
                     //课程打赏，课程（分销，出售）
                     courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
