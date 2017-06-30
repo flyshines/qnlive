@@ -168,5 +168,12 @@ public interface ILectureModuleServer {
 
 	Map<String, Object> updateCourseLonely(Map<String, Object> course);
 
+	/**
+	 * 根据系列id获得该系列的所有学员列表
+	 * @param seriesId
+	 * @return
+	 */
+	List<Map<String, Object>> findSeriesStudentListBySeriesId(String seriesId);
+
 
 }
