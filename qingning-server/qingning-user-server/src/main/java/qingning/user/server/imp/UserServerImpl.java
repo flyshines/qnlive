@@ -1415,13 +1415,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
             queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
         }
         List<Map<String,Object>> records;
-        //查询直播间消费记录（不包括SAAS后台）
-        if("0".equals(reqMap.get("type").toString())){
+        if(reqMap.get("shop_id")!=null){
+            queryMap.put("shop_id",reqMap.get("shop_id"));
+            //本店铺所有消费记录
+            records = userModuleServer.findUserShopRecords(queryMap);
+        }else {
+            //查询直播间消费记录（不包括SAAS后台）
             //课程类型(1：直播间，2：店铺（非直播间）)
             queryMap.put("course_type","1");
-            records = userModuleServer.findUserConsumeRecords(queryMap);
-        }else {
-            //所有消费记录
             records = userModuleServer.findUserConsumeRecords(queryMap);
         }
 
