@@ -588,7 +588,7 @@ public class UserController extends AbstractController{
 
 
 	/**
-	 * 用户查询系列课程详情
+	 * 用户查询系列详情
 	 * @param accessToken
 	 * @param version
 	 * @return

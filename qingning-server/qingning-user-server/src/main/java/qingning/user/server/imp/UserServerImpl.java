@@ -2375,6 +2375,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         queryMap.clear();
         queryMap.put("user_id", userId);
+        queryMap.put("series_id",reqMap.get("series_id").toString());
         //判断访问者是普通用户还是讲师
         //如果为讲师，则返回讲师部分特定信息
         boolean isStudent = false;
