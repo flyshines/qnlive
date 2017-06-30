@@ -214,7 +214,9 @@ public final class CacheUtils {
 						@Override
 						public void batchOperation(Pipeline pipeline, Jedis jedis) {
 							for (String series_id : userSeriesSet) {
-								pipeline.sadd(seriesKey, series_id);
+								int i = 0;
+								pipeline.zadd(seriesKey,System.currentTimeMillis()+i, series_id);
+								i++;
 							}
 							pipeline.sync();
 						}
@@ -236,7 +238,7 @@ public final class CacheUtils {
 				jedis.hset(userCacheKey,"live_room_num",room_num.toString());//修改用户缓存中的数据
 			}
 
-			Long series_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
+			Long series_num = jedis.zcard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
 			if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
 				jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
 			}
