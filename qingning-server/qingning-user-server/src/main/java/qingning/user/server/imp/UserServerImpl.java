@@ -926,7 +926,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //1.1读取课程信息
         String series_id = (String)reqMap.get("series_id");
         map.put("series_id", series_id);
-        Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+        Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         if(MiscUtils.isEmpty(seriesInfoMap)){
             throw new QNLiveException("100004");
         }
