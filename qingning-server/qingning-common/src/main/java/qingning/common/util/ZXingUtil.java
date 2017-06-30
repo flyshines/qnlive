@@ -718,7 +718,8 @@ public class ZXingUtil {
      * @return 分会图片流
      * @throws Exception
      */
-    public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,String qr_code_content,Long time,String appName) throws Exception{
+    public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,
+    		String qr_code_content,Long time,String appName) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,9)+"...";
         }
@@ -765,6 +766,67 @@ public class ZXingUtil {
         convertImage = convertCircular(convertImage);
 //        int height= (int) (HEIGHT*0.03);
         BufferedImage waterMark2 = waterMark(pressText5, convertImage, 77*3, 108, 1.0f);
+    	return waterMark2;
+    }
+    
+    /**
+     * 创建系列课分享开篇
+     * @param user_head_portrait 登录用户头像
+     * @param userName 登录用户昵称
+     * @param series_name 系列课名称
+     * @param qr_code_content 二维码内容（分享链接）
+     * @param appName
+     * @return 邀请卡的base64
+     * @throws Exception
+     */
+    public static BufferedImage createSeriesPng(String user_head_portrait,String userName,String series_name,
+    		String qr_code_content,String appName) throws Exception{
+        if(userName.length()>9){
+            userName = userName.substring(0,9)+"...";
+        }
+
+        boolean twoline = false;
+//        course_name = "「"+course_name+"」";
+        if(series_name.length()>14){
+            twoline = true;
+        }
+        if(series_name.length()>28){
+        	series_name = series_name.substring(0,25)+"...";
+        }
+
+        BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        //镶嵌背景图  七牛云地址
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        //二维码的长宽
+        int qr_code_size= 70*3;
+        //用户头像的长宽
+        int head_portrait_size= 36*3;
+        //二维码
+        //二维码
+        BufferedImage qrImage = createImage(qr_code_content, "", qr_code_size, false);
+
+        //合成二维码后的图片
+        BufferedImage waterMark = waterMark(bi, qrImage, 124*3, HEIGHT-45*3-90*3, 1.0f);
+        //长按图片识别二维码进入直播间
+        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, true);
+
+        //
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false);
+        //
+        BufferedImage pressText3 = pressText("分享了一个系列课给你", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false);
+        //
+        BufferedImage pressText4 = pressText(series_name, pressText3, FONT_NAME, 1, 54, new Color(90,210,161), -30, twoline?(-HEIGHT/4-60):(-HEIGHT/4-30), 1.0f, true);
+
+   //     String format = new SimpleDateFormat("yyyy年MM月dd日 HH:mm").format(new Date(time));
+
+   //     BufferedImage pressText5 = pressText("直播时间:"+format, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -60, -HEIGHT/4+120, 1.0f, true);
+
+        //用户头像
+        BufferedImage url = getUrl(user_head_portrait);
+        BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
+        convertImage = convertCircular(convertImage);
+//        int height= (int) (HEIGHT*0.03);
+        BufferedImage waterMark2 = waterMark(pressText4, convertImage, 77*3, 108, 1.0f);
     	return waterMark2;
     }
 

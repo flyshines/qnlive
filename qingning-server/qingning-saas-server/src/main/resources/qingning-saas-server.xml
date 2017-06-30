@@ -260,7 +260,7 @@
 					<param name="single_info_list" type="list">
 						<param name="single_id" type="string" fieldname="course_id" />
 						<param name="single_img_url" type="string" fieldname="course_image" />
-						<param name="single_type" type="string" fieldname="course_type" />
+						<param name="single_type" type="string" fieldname="goods_type" />
 						<param name="buy_status" type="string" />
 						<param name="single_title" type="string" fieldname="course_title" />
 						<param name="browse_count" type="long" fieldname="student_num" />

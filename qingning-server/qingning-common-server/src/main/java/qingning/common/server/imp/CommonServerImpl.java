@@ -1929,7 +1929,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return share_url;
     }
 
-
     @SuppressWarnings("unchecked")
     @FunctionName("distributorsRecommendUser")
     public Map<String,Object> distributersRecommendUser (RequestEntity reqEntity) throws Exception{
@@ -2153,19 +2152,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 title = courseMap.get("course_title");
                 ((Map<String, Object>) reqEntity.getParam()).put("room_id",courseMap.get("room_id"));//把roomid 放进参数中 传到后面
                 Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedis, true);
-                if("2".equals(courseMap.get("status"))){
+                if("2".equals(courseMap.get("status"))){	//2：已结束
                     content = liveRoomMap.get("room_name")+"\n";
-                }else if("1".equals(courseMap.get("status"))){
+                }else if("1".equals(courseMap.get("status"))){	//1：已发布
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if(MiscUtils.isEmpty(content)){
                         content  = liveRoomMap.get("room_name") + "\n"+ MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }else {
                         content += "\n" + liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time",appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }
-                }else if("4".equals(courseMap.get("status"))){
+                }else if("4".equals(courseMap.get("status"))){	//4：直播中
                     content  = liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_content",appName);
                 }
-                icon_url = liveRoomMap.get("avatar_address");
+                icon_url = liveRoomMap.get("avatar_address");	//直播间头像
                 simple_content = courseMap.get("course_title");
                 share_url = getCourseShareURL(userId, id, courseMap,jedis,appName);
 
@@ -2227,6 +2226,58 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                             reqEntity.getVersion(),
                             jedis,
                             appName);
+                break;
+            case "5":
+            	logger.info("通用-查询分享信息>>>>获取系列课程分享信息");
+                ((Map<String, Object>) reqEntity.getParam()).put("series_id",id);//如果type==5 那么传入的id就是series_id
+                Map<String,String> seriesMap = CacheUtils.readSeries(id, reqEntity, readSeriesOperation, jedis, true);
+                
+                if(seriesMap == null || MiscUtils.isEmpty(seriesMap)){
+                	logger.error("通用-查询分享信息>>>>系列不存在");
+                    throw new QNLiveException("210003");
+                }
+                title = seriesMap.get("series_title");
+                
+                /*
+                 * 获取登录账户信息
+                 */
+                reqMap.put("user_id", userId);
+                Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+                
+                /*
+                 * TODO 根据讲师id获取直播间id
+                 */
+                String lecturerId = seriesMap.get("lecturer_id");
+                Map<String, Object> readRoom = new HashMap<>();
+                readRoom.put("lecturer_id", lecturerId);
+                String readRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, readRoom);
+                
+                Map<String, String> rooms = jedis.hgetAll(readRoomKey);
+                String roomId = null;
+                if(rooms != null && !rooms.isEmpty()){
+                	Set keys = rooms.keySet();
+                	Iterator iter = keys.iterator();
+                	roomId = (String) iter.next();	//如果有多个直播间，默认第一个
+                }
+                ((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
+                liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
+                
+                content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
+                /*
+                 * 优先使用直播间头像，若直播间头像不存在使用课程封面
+                 */
+                if(liveRoomMap != null && !liveRoomMap.isEmpty()){
+                	icon_url = liveRoomMap.get("avatar_address");
+                }else{
+                	icon_url = seriesMap.get("series_img");
+                }
+                simple_content = title;
+                //获取系列课分享链接
+                share_url = MiscUtils.getConfigByKey("series_share_url_pre_fix",appName) + id;
+
+                if(reqMap.get("png").toString().equals("Y"))
+                	//TODO 生成邀请卡二维码base64
+                    png_url = this.CreateSeriesRqPage(seriesMap, loginedUserMap, share_url, reqEntity.getVersion(), jedis, appName);
                 break;
         }
 
@@ -2378,6 +2429,37 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         BASE64Encoder encoder = new BASE64Encoder();
         String png_base64 =  encoder.encodeBuffer(bytes).trim();//转换成base64串
         png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
+        return png_base64;
+    }
+    
+    /**
+     * 创建系列课程邀请卡base64
+     * @param SeriesMap
+     * @param loginedUserMap
+     * @param share_url
+     * @param version
+     * @param jedis
+     * @param appName
+     * @return
+     * @throws Exception
+     */
+    public String CreateSeriesRqPage(Map<String, String> SeriesMap, Map<String, String> loginedUserMap, 
+    		String share_url, String version,Jedis jedis,String appName)throws Exception{
+        String user_head_portrait = loginedUserMap.get("avatar_address");//用户头像
+        String userName = loginedUserMap.get("nick_name");//用户姓名
+        BufferedImage png = null;//返回的图片
+
+        png = ZXingUtil.createSeriesPng(user_head_portrait, userName, SeriesMap.get("series_title"),
+        		share_url, appName);//生成图片
+        logger.info("获取到系列课程邀请卡base64");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
+        ImageIO.write(png, "png", baos);//写入流中
+        byte[] bytes = baos.toByteArray();//转换成字节
+        BASE64Encoder encoder = new BASE64Encoder();
+        String png_base64 =  encoder.encodeBuffer(bytes).trim();//转换成base64串
+        png_base64 = png_base64.replaceAll("\n", "").replaceAll("\r", "");//删除 \r\n
+        System.out.println(png_base64);
         return png_base64;
     }
 

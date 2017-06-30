@@ -750,4 +750,19 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
     public Map<String, Object> getShopInfo(Map<String, Object> param) {
         return shopMapper.selectByPrimaryKey(param);
     }
+
+    @Override
+    public Map<String, Object> updateCourseLonely(Map<String, Object> course) {
+
+        Integer updateCount = 0;
+        if(course.get("series_course_type").equals("0")){
+            updateCount = coursesMapper.updateCourse(course);
+        }else{
+            updateCount = saaSCourseMapper.updateByPrimaryKey(course);
+        }
+        Map<String, Object> dbResultMap = new HashMap<String, Object>();
+        dbResultMap.put("update_count", updateCount);
+        dbResultMap.put("update_time", new Date());
+        return dbResultMap;
+    }
 }

@@ -3438,6 +3438,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             map.clear();
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
+            lectureModuleServer.delSeriesCourse(oldSeriesId);
             String series_course_updown = courseInfo.get("series_course_updown");
             String course_updown =courseInfo.get("course_updown");
             String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
@@ -3456,9 +3457,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(series_course_updown.equals("1")){
                 String lecturerSeriesCourseUp = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
                 jedis.zrem(lecturerSeriesCourseUp,course_id);
+
             }else if(series_course_updown.equals("2")){
                 String lecturerSeriesCourseDown = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                 jedis.zrem(lecturerSeriesCourseDown,course_id);
+
             }
 
             if(course_updown.equals("0")){//之前没有在单品上架
@@ -3480,6 +3483,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }else{//判断系列是否属于这个用户
                 String series_id = reqMap.get("series_id").toString();
                 map.put("series_id",series_id);
+                lectureModuleServer.increaseSeriesCourse(series_id);
                 String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
                 String series_course_type = jedis.hget(seriesKey, "series_course_type");
                 map.clear();
@@ -3530,26 +3534,64 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resltMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(appName);
         String course_id = reqMap.get("course_id").toString();
-
+        String updown = reqMap.get("course_updown").toString();
         //判断 当前课程是否是这个讲师的
         Map<String,Object> map = new HashMap<>();
         map.put("course_id",course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Map<String, String> courseInfo = jedis.hgetAll(courseKey);
+
         jedis.del(courseKey);
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
         }
-        if(reqMap.get("series_course_type").equals("0")){
-            resltMap = lectureModuleServer.updateCourse(reqMap);
-        }else{
-            resltMap = lectureModuleServer.updateSaasSeriesCourse(reqMap);
-        }
-
+        resltMap = lectureModuleServer.updateCourseLonely(reqMap);
         jedis.del(courseKey);
         Map<String,Object> query = new HashMap<>();
         query.put("course_id", course_id);
-        CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, true);
+        Map<String, String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, true);
+        //<editor-fold desc="直播课">
+        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);
+        String predictionKey = "";
+        long lpos = 0L;
+        String classifyCourseKey = "";
+        String courseList = "";
+        String remmendList = "";
+        if(courseMap.get("status").equals("1") || courseMap.get("status").equals("4") ){ //预告或正在直播
+            predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, courseMap);
+            lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(courseMap.get("start_time")) , MiscUtils.convertObjectToLong(courseMap.get("position")));
+            //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
+            courseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+            classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, courseMap);
+            if(courseMap.get("status").equals("1")){
+                remmendList = Constants.SYS_COURSES_RECOMMEND_PREDICTION;
+            }else{
+                remmendList = Constants.SYS_COURSES_RECOMMEND_LIVE;
+            }
+        }else{//结束
+            courseList = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+            classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, courseMap);
+            predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, courseMap);
+            lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(courseMap.get("end_time")) , MiscUtils.convertObjectToLong(courseMap.get("position")));
+            remmendList = Constants.SYS_COURSES_RECOMMEND_FINISH;
+        }
+        String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, courseMap);
+        if(updown.equals("1")){//上架
+            jedis.zrem(lectureCourseKey,course_id);
+            jedis.zadd(courseList, lpos, course_id);
+            jedis.zadd(predictionKey, lpos, course_id);
+            jedis.zadd(remmendList,Long.valueOf(courseMap.get("student_num")) +Long.valueOf(courseMap.get("extra_num")) , course_id);//热门推荐 预告
+            jedis.zadd(classifyCourseKey, lpos, course_id);
+        }else{//下架
+            jedis.zrem(courseList,course_id);
+            jedis.zrem(predictionKey,course_id);
+            jedis.zrem(remmendList,course_id);
+            jedis.zrem(classifyCourseKey,course_id);
+            //加入讲师下架课程列表
+            jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(courseMap.get("position"))), course_id);
+        }
+        //</editor-fold>
+
         return resltMap;
     }
 
