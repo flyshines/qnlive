@@ -178,4 +178,10 @@ public interface ISaaSModuleServer {
      */
 	int addFeedback(Map<String, Object> newFeedbackMap);
     List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
+
+    /**收入明细
+     * @param userId
+     * @return
+     */
+    Map<String,Object> findUserGainsByUserId(String userId);
 }

@@ -384,6 +384,34 @@ public class SaaSManageController extends AbstractController {
      * @return
      * @throws Exception
      */
+    @RequestMapping(value = "/goods/noseries/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getSingleList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "type",defaultValue = "4") String type,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getNoSeriesList", accessToken, version, appName);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(type))
+            paramCode.put("type", type);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 店铺-单品列表
+     *
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/live/single/list", method = RequestMethod.GET)
     public
     @ResponseBody
@@ -654,4 +682,21 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 获取金额信息
+     * @param access_token 后台证书
+     * @param version 版本
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/user/gains",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity  userGains(
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userGains", access_token, version,appName);
+        Map<String, Object> parMap = new HashMap<>();
+        requestEntity.setParam(parMap);
+        return this.process(requestEntity, serviceManger, message);
+    }
 }

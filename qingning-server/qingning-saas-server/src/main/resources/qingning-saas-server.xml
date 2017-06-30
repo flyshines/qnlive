@@ -53,6 +53,7 @@
 					<param name="user_id" type="string" />
 					<param name="avatar_address" type="string"/>
 					<param name="shop_id" type="string" />
+					<param name="room_id" type="string" />
 					<param name="shop_name" type="string" />
 					<param name="shop_url" type="string" />
 					<param name="shop_remark" type="string"/>
@@ -363,6 +364,7 @@
 						<param name="course_title" type="string" />
 						<param name="course_image" type="string" />
 						<param name="type"  fieldname="goods_type" type="string" />
+						<param name="course_type" type="string" />
 						<param name="create_time" type="long" />
 						<param name="price" fieldname="course_price" type="double" />
 						<param name="total_income" fieldname="course_amount" type="double" />
@@ -370,6 +372,26 @@
 						<param name="status" fieldname="course_updown" type="string" />
 						<param name="course_url" type="string" />
 						<param name="share_url" type="string" />
+					</param>
+					<param name="total_count" type="long" />
+					<param name="total_page" type="long" />
+				</outputs>
+			</function>
+			<!-- 店铺-获取没有加入系列的单品列表 -->
+			<function name="getNoSeriesList">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_num" type="long" require="N"/>
+					<param name="page_size" type="long" require="N"/>
+					<param name="type" type="string" require="N"/>
+					<param name="keyword" type="string" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="course_id" type="string" />
+						<param name="course_title" type="string" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
@@ -525,6 +547,7 @@
 						<param name="series_title" type="string" />
 						<param name="series_image" fieldname="series_img" type="string" />
 						<param name="type" fieldname="series_course_type" type="string" />
+						<param name="series_type" type="string" />
 						<param name="create_time" type="long" />
 						<param name="price" fieldname="series_price" type="double" />
 						<param name="total_income" fieldname="series_amount" type="double" />
@@ -552,6 +575,7 @@
 					<param name="series_url" type="string" />
 					<param name="series_image" fieldname="series_img" type="string" />
 					<param name="type" fieldname="series_course_type" type="string" />
+					<param name="series_type" type="string" />
 					<param name="remark" fieldname="series_course_type" type="string" />
 					<param name="create_time" type="long" />
 					<param name="price" fieldname="series_price" type="double" />
@@ -757,6 +781,33 @@
 					<param name="series_id" type="string" require="Y"/>
 					<param name="user_id" type="string" require="N"/>
 					<param name="page_num" type="string" require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+
+			<!-- 用户-提交-收入统计 -->
+			<function name="userGains">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+					<param name="today_amount" type="double"/>
+					<param name="today_visit" type="long"/>
+					<param name="today_pay" type="double"/>
+					<param name="total_income" fieldname="user_total_amount" type="double"/>
+					<param name="balance" type="double"/>
+				</outputs>
+			</function>
+			<!-- 用户-提交-收入统计 -->
+			<function name="userVisit">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string"/>
 				</inputs>
 				<outputs>
 				</outputs>

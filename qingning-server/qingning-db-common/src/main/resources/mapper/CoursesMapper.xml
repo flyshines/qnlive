@@ -551,6 +551,12 @@
     t_courses t
     WHERE
     t.lecturer_id = #{user_id}
+    <if test="keyword != null" >
+      and t.course_title like '%${keyword}%'
+    </if>
+    <if test="noseries != null" >
+      and t.series_course_updown = '0'
+    </if>
     ORDER BY
     t.create_time DESC
   </select>

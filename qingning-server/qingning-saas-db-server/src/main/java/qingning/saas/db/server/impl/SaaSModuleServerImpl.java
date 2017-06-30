@@ -44,6 +44,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SaaSCourseCommentMapper courseCommentMapper;
     @Autowired(required = true)
     private FeedbackMapper feedbackMapper;
+    @Autowired(required = true)
+    private UserGainsMapper userGainsMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -171,13 +173,24 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
 	@Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = saasCourseMapper.selectByShop(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
-        return res;
+        if("4".equals(param.get("type"))) {
+            //直播
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String,Object>> result = coursesMapper.findAllListByLiturere(param,page);
+            Map<String,Object> res = new HashMap<>();
+            res.put("list",result);
+            res.put("total_count",result.getTotal());
+            res.put("total_page",result.getPaginator().getTotalPages());
+            return res;
+        }else{
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = saasCourseMapper.selectByShop(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
+            return res;
+        }
     }
 
     @Override
@@ -367,6 +380,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
         return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+    }
+
+    @Override
+    public Map<String, Object> findUserGainsByUserId(String userId) {
+        return userGainsMapper.findUserGainsByUserId(userId);
     }
 
 }

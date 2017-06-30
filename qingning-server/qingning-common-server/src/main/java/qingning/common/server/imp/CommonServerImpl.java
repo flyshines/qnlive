@@ -875,6 +875,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", courseMap.get("course_price"));
             totalFee = Integer.parseInt(courseMap.get("course_price"));
             goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+            insertMap.put("course_type","1");
         }else if(profit_type.equals("2")){
             //系列课收益
             insertMap.put("amount", courseMap.get("series_price"));
@@ -1212,7 +1213,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
                 if(!jedis.exists(userCountKey)){
                     long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
+                    //今日收入
                     jedis.hincrBy(userCountKey,"day_amount",lecturerProfit);
+                    //今日付费人数
+                    jedis.hincrBy(userCountKey,"day_pay_user",1);
                     //设置失效时间为今天
                     jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
                 }else{

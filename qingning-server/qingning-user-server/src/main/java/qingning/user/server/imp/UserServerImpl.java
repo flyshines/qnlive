@@ -1415,8 +1415,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(reqMap.get("position") != null && StringUtils.isNotBlank(reqMap.get("position").toString())){
             queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
         }
-
-        List<Map<String,Object>> records = userModuleServer.findUserConsumeRecords(queryMap);
+        List<Map<String,Object>> records;
+        //查询直播间消费记录（不包括SAAS后台）
+        if("0".equals(reqMap.get("type").toString())){
+            //课程类型(1：直播间，2：店铺（非直播间）)
+            queryMap.put("course_type","1");
+            records = userModuleServer.findUserConsumeRecords(queryMap);
+        }else {
+            //所有消费记录
+            records = userModuleServer.findUserConsumeRecords(queryMap);
+        }
 
         if(! CollectionUtils.isEmpty(records)){
             Map<String,Object> cacheQueryMap = new HashMap<>();
@@ -1432,11 +1440,92 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
                     }
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.clear();
+                        cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                        Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                        recordMap.put("courseTitle", courseName);
+                    }
                     pipeline.sync();
 
                     for(Map<String,Object> recordMap : records){
                         Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
+                        Response<String> courseName = (Response)recordMap.get("courseTitle");
                         recordMap.put("lecturer_name",cacheLecturerName.get());
+                        if(recordMap.get("series_title")==null) {
+                            recordMap.put("course_title", courseName.get());
+                        }
+                        recordMap.remove("cacheLecturerName");
+                        Date recordTime = (Date)recordMap.get("create_time");
+                        recordMap.put("create_time", recordTime);
+                    }
+                }
+            });
+
+            resultMap.put("record_list", records);
+        }
+
+        return resultMap;
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getUserIncomeRecords")
+    public Map<String, Object> getUserIncomeRecords(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        //获得用户id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        queryMap.put("user_id", userId);
+        //根据page_count、position（如果有）查询数据库
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("position") != null && StringUtils.isNotBlank(reqMap.get("position").toString())){
+            queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
+        }
+        queryMap.put("type","2");
+        List<Map<String,Object>> records = userModuleServer.findUserConsumeRecords(queryMap);
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("user_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
+                        recordMap.put("cacheLecturerName",cacheLecturerName);
+                    }
+                    for(Map<String,Object> recordMap : records){
+                            cacheQueryMap.clear();
+                            cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                            Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                            recordMap.put("courseTitle",courseName);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
+                        Response<String> courseName = (Response)recordMap.get("courseTitle");
+                        recordMap.put("lecturer_name",cacheLecturerName.get());
+                        if(recordMap.get("series_title")==null) {
+                            recordMap.put("course_title",courseName.get());
+                        }
+                        //打赏收益
+                        /*if("1".equals(recordMap.get("profit_type").toString())){
+                            ""
+                        }*/
+
+                        recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
+
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
                         recordMap.put("create_time", recordTime);

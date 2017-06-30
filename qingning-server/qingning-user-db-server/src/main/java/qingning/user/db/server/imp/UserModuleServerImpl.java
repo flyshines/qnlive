@@ -217,7 +217,18 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Override
     public List<Map<String, Object>> findUserConsumeRecords(Map<String, Object> queryMap) {
-        return lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
+        List<Map<String, Object>> res;
+        if("2".equals(queryMap.get("type"))){
+            //所有收入明细
+            res = lecturerCoursesProfitMapper.findUserIncomeRecords(queryMap);
+        }else{
+            //系列记录转换
+            res = lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
+        }
+        res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+            map.put("course_title", map.get("series_title"));
+        });
+        return res;
     }
 
     @Override

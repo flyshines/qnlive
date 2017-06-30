@@ -263,6 +263,7 @@
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
 					<param name="position" type="long" require="N"  />
+					<param name="type" type="string" require="N"  />
 				</inputs>
 				<outputs>
 					<param name="record_list" type="list">
@@ -272,17 +273,38 @@
 						<param name="create_time" type="long" />
 						<param name="position" type="long" />
 						<param name="course_title" type="string" convert="(course_title,profit_type)=>{
-							if(!utils.isEqual(profit_type,'0')){
+							if(utils.isEqual(profit_type,'1')){
 								return '';
 							}
 							return utils.RecoveryEmoji(course_title);
 						}"/>
 						<param name="lecturer_name" type="string" convert="(lecturer_name,profit_type)=>{
-							if(!utils.isEqual(profit_type,'1')){
+							if(utils.isEqual(profit_type,'0')){
 								return '';
 							}
 							return utils.RecoveryEmoji(lecturer_name);
 						}"/>
+					</param>
+				</outputs>
+			</function>
+			<function name="getUserIncomeRecords">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N"  />
+					<param name="position" type="long" require="N"  />
+					<param name="type" type="string" require="N"  />
+				</inputs>
+				<outputs>
+					<param name="record_list" type="list">
+						<param name="profit_type" type="string" />
+						<param name="course_id" type="string" />
+						<param name="profit_amount" type="double" />
+						<param name="create_time" type="long" />
+						<param name="position" type="long" />
+						<param name="title" type="string" />
 					</param>
 				</outputs>
 			</function>

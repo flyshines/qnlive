@@ -330,7 +330,10 @@
     <if test="keyword != null" >
       and course_title like '%${keyword}%'
     </if>
-
+    <if test="noseries != null" >
+      and res.series_course_updown = '0'
+    </if>
+    AND  res.course_updown != '0'
   </select>
 
   <select id="selectUpListByShopId" parameterType="java.lang.String" resultType="java.lang.String">

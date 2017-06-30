@@ -237,7 +237,15 @@ public class UserController extends AbstractController{
 	}
 
 
-
+	/**消费记录
+	 * @param page_count
+	 * @param position
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/user/record/consume", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity getUserConsumeRecords(
@@ -247,6 +255,56 @@ public class UserController extends AbstractController{
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version,appName);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("position", position);
+		parMap.put("type", "0");
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	/**消费记录-saas后台
+	 * @param page_count
+	 * @param position
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/record/consume/saas", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getUserConsumeRecordsForSaaS(
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "position", defaultValue = "") String position,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserConsumeRecords", accessToken, version,appName);
+		Map<String, Object> parMap = new HashMap<>();
+		parMap.put("page_count", page_count);
+		parMap.put("position", position);
+		parMap.put("type", "1");
+		requestEntity.setParam(parMap);
+		return this.process(requestEntity, serviceManger, message);
+	}
+	/**消费记录-saas收入
+	 * @param page_count
+	 * @param position
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/user/record/income/details", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity getUserIncomeRecords(
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "position", defaultValue = "") String position,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getUserIncomeRecords", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
 		parMap.put("position", position);
