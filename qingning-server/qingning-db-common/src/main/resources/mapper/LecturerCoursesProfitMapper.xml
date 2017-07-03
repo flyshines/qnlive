@@ -244,6 +244,45 @@
 	<if test="profit_type != null">
 		and profit_type=#{profit_type}
 	</if>
+    ORDER BY t.create_time DESC
+  </select>
+  <select id="searchOrdersListByUserId" resultType="hashmap" parameterType="hashmap">
+    SELECT
+      t.profit_id AS order_id,
+      t.user_id,
+      t.distributer_id,
+      t.profit_type,
+      t.share_amount,
+      t.course_id,
+      t.profit_amount,
+      t.create_time,
+      se.series_price AS price,
+      IFNULL(
+      se.series_title,
+      co.course_title
+      ) AS goods_name
+    FROM
+    t_lecturer_courses_profit t
+    LEFT JOIN t_series se ON se.series_id = t.course_id
+    LEFT JOIN t_courses co ON co.course_id = t.course_id
+    LEFT JOIN t_user u ON u.user_id = t.user_id
+    WHERE
+    1 = 1
+    and t.lecturer_id = #{lecturer_id}
+	<if test="nick_name != null">
+		and u.nick_name like'%${nick_name}%'
+	</if>
+	<if test="course_name != null">
+		and (se.series_title like'%${course_name}%' OR
+      co.course_title like'%${course_name}%')
+	</if>
+	<if test="dist != null">
+      AND t.distributer_id is null
+	</if>
+	<if test="auto != null">
+      AND t.distributer_id is not null
+	</if>
+    ORDER BY t.create_time DESC
   </select>
   
   <!-- 获取系列课收益明细列表 -->

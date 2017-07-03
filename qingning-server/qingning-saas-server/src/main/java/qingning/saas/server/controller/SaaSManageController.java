@@ -104,7 +104,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity wechatCheckLogin(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -358,7 +358,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getSingleList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "type",defaultValue = "") String type,
@@ -389,7 +389,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getSingleList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "type",defaultValue = "4") String type,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
@@ -417,7 +417,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getLiveList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "type",defaultValue = "") String type,
@@ -449,7 +449,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getUserList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "type",defaultValue = "") String type,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
@@ -480,7 +480,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getMessageList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "course_name",defaultValue = "") String courseName,
@@ -509,7 +509,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getFeedbackList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "comment",defaultValue = "") String comment,
@@ -566,7 +566,7 @@ public class SaaSManageController extends AbstractController {
     @ResponseBody
     ResponseEntity getSeriesList(
             @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
@@ -618,7 +618,7 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity getSeriesCourseList(
             @RequestHeader("access_token") String accessToken,
             @PathVariable(value = "series_id") String series_id,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -642,7 +642,7 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity getBannerCourseList(
             @RequestHeader("access_token") String accessToken,
             @PathVariable(value = "type" ) String type,
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
@@ -708,11 +708,14 @@ public class SaaSManageController extends AbstractController {
      */
     @RequestMapping(value="/gains/order/list",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity  gainsOrdersList(
-            @RequestParam(value = "page_size", defaultValue = "20") long pageSize,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "goods_name",defaultValue = "") String courseName,
             @RequestParam(value = "order_type",defaultValue = "") String orderType,
+            @RequestParam(value = "goods_type",defaultValue = "") String goodsType,
+
             @RequestHeader("access_token") String access_token,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -720,9 +723,14 @@ public class SaaSManageController extends AbstractController {
         Map<String, Object> parMap = new HashMap<>();
         parMap.put("page_size",pageSize);
         parMap.put("page_num",pageNum);
-        parMap.put("nick_name",keyword);
-        parMap.put("course_name",courseName);
-        parMap.put("order_type",orderType);
+        if(StringUtils.isNotEmpty(keyword))
+            parMap.put("nick_name",keyword);
+        if(StringUtils.isNotEmpty(courseName))
+            parMap.put("course_name",courseName);
+        if(StringUtils.isNotEmpty(orderType))
+            parMap.put("order_type",orderType);
+        if(StringUtils.isNotEmpty(goodsType))
+            parMap.put("profit_type",goodsType);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }

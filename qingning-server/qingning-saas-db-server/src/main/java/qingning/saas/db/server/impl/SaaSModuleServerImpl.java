@@ -409,8 +409,20 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> getOrdersList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param,page);
+        PageList<Map<String,Object>> result = null;
+        if(param.get("order_type")!=null){
+            if("1".equals(param.get("order_type").toString())){
+                param.put("dist","1");
+            }else if("2".equals(param.get("order_type").toString())){
+                param.put("auto","1");
+            }
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param,page);
+        }else if(param.get("nick_name")!=null||param.get("goods_name")!=null){
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param,page);
+        }else{
+            result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param,page);
 
+        }
         for(Map<String,Object> map : result) {
 
             //订单类型（1:分销订单，2:普通订单）
