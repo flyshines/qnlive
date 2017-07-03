@@ -48,6 +48,25 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         }
     }
+    
+    /**
+     * 判断用户是否定购某系列
+     * @param userId
+     * @param seriesId
+     * @param jedis
+     * @return
+     */
+    private boolean isBuySeries(String userId, String seriesId, Jedis jedis){
+    	Map<String, Object> keyField = new HashMap<String, Object>();
+    	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
+    	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, keyField);
+    	Long index = jedis.zrank(key, seriesId);
+    	if(index == null){	//获取不到下标，说明不在该用户定购的系列里
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
 
 	/**
 	 * 扫码登录 1 获取二维码接口
@@ -370,19 +389,19 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	 * 获取用户购买的所有系列课程
         	 * 返回 -> 键series_id；值1
         	 */
-        	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
+/*        	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
         	selectSeriesStudentsMap.put("user_id", userId);
         	selectSeriesStudentsMap.put("lecturer_id", lecturerId);
         	List<Map<String, Object>> userSeriesList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
-        	
+*/        	
         	/*
         	 * 对用户购买的所有系列课程进行格式化成map，方便后期用seriesId进行查询
         	 */
-        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
+/*        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
         	for(Map<String, Object> userSeriesMap : userSeriesList){
         		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
         	}
-        	
+*/        	
         	//生成用于缓存不存在时调用数据库的requestEntity
         	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
         	RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
@@ -392,8 +411,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             	//获取系列课程详情
             	Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
             	
+            	boolean buyStatus = isBuySeries(userId, seriesId, jedis);
+            	
             	//判断是否购买了该课程
-            	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
+            	if(!buyStatus){	//用户未购买
             		seriesMap.put("buy_status", "0");
             	}else{	//用户已购买
             		seriesMap.put("buy_status", "1");
