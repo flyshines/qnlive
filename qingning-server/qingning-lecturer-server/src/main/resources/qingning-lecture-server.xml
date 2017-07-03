@@ -854,7 +854,7 @@
 				<outputs>
 					<param name="profit_info_list" type="list">
 						<param name="user_id" type="string" />
-						<param name="nick_name" type="string" />
+						<param name="nick_name" type="rstring" />
 						<param name="create_time" type="long" />
 						<param name="profit_amount" type="double" />
 					</param>
