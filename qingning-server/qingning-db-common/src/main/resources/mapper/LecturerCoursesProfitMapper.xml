@@ -262,4 +262,28 @@
 	</if>
   </select>
   
+  <!-- 获取系列课收益统计（门票总收入，总收入） -->
+  <select id="selectSeriesProfitStatistics" parameterType="hashmap" resultType="hashmap">
+	SELECT SUM(profit_amount) amount FROM t_lecturer_courses_profit	<!-- 统计门票总收入 -->
+		<where>
+			profit_type = 2	
+			<if test="series_id != null and series_id != ''">
+				and course_id = #{series_id}
+			</if>
+			<if test="create_time != null"><!-- 排除前端获取第一页后新增的数据 -->
+				and create_time <![CDATA[ <= ]]> #{create_time}
+			</if>
+		</where>
+	UNION ALL
+	SELECT SUM(profit_amount) amount FROM t_lecturer_courses_profit <!-- 统计总收入 -->
+		<where>
+			<if test="series_id != null and series_id != ''">
+				and course_id = #{series_id}
+			</if>
+			<if test="create_time != null"><!-- 排除前端获取第一页后新增的数据 -->
+				and create_time <![CDATA[ <= ]]> #{create_time}
+			</if>
+		</where>
+  </select>
+  
 </mapper>

@@ -859,6 +859,12 @@
 						<param name="profit_amount" type="double" />
 					</param>
 					<param name="last_update_time" type="long" />
+					<param name="series_info" type="map">
+						<param name="series_title" type="string" />
+						<param name="buyer_count" type="long" fieldname="series_student_num" />
+						<param name="ticket_amount" type="double" />
+						<param name="totle_amount" type="double" />
+					</param>
 				</outputs>
 			</function>
 			

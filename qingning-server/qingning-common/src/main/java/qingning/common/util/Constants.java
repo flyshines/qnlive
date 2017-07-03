@@ -156,6 +156,8 @@ public final class Constants {
 	public static final String SHOP_DAY_COUNT = "SYS:SHOP:COUNT:{user_id}";
 	//系列课已购人员列表(收费课程)
 	public static final String CACHED_KEY_SERIES_USERS = "SYS:SERIES:USERS:{series_id}";
+	//店铺付费人员列表
+	public static final String CACHED_KEY_SHOP_USERS = "SYS:SHOP:USERS:{lecturer_id}";
 
 
 	public static final String CACHED_KEY_COURSE_ROBOT = "SYS:COURSEROBOT:{course_id}";

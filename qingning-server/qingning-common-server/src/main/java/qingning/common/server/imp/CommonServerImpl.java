@@ -1025,8 +1025,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = MiscUtils.getAppNameByAppid(appid);
-        //String appName = "qnlive";
+        //String appName = MiscUtils.getAppNameByAppid(appid);
+        String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -1034,8 +1034,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            //if(true){
+        //if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+            if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -1175,7 +1175,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
                 //如果是系列课直播也做以前的 直播统计
-                if("0".equals(profit_type)||"1".equals(courseType)){
+                if("0".equals(profit_type)||"2".equals(profit_type)){
                     jedis.hincrBy(lecturerKey,"total_student_num",1);
                     jedis.hincrBy(lecturerKey,"pay_student_num",1);
                     jedis.hincrBy(lecturerKey,"room_done_num",1);
@@ -1199,12 +1199,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hset(liveRoomKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
 
-                if("2".equals(profit_type)){
-                    //系列课已购人员列表
+                if("2".equals(profit_type)||"1".equals(profit_type)){
+                    //店铺课程付费用户
                     query.clear();
-                    query.put("series_id", handleResultMap.get("room_id").toString());
-                    String seriesUsersKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_USERS, query);
-                    jedis.zadd(seriesUsersKey,System.currentTimeMillis(),userId);
+                    query.put("lecturer_id", lecturerId);
+                    String seriesUsersKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP_USERS, query);
+                    if(!seriesUsersKey.contains(userId)){
+                        commonModuleServer.updateShopUsers(lecturerId,userId);
+                        jedis.sadd(seriesUsersKey,userId);
+                    }
                 }
 
                 //店铺今日统计

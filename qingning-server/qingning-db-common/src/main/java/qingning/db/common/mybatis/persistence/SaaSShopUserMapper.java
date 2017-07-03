@@ -1,6 +1,7 @@
 package qingning.db.common.mybatis.persistence;
 
 
+import org.apache.ibatis.annotations.Param;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
@@ -19,4 +20,6 @@ public interface SaaSShopUserMapper {
      * @return
      */
     PageList<Map<String,Object>> selectUsersByShop(Map<String, Object> param, PageBounds page);
+
+    int updateTypeById(@Param(value = "shopId") String shopId, @Param(value = "userId")String userId);
 }
