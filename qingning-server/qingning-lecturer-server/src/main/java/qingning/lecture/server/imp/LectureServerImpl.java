@@ -3291,7 +3291,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
             result = lectureModuleServer.updateUpdown(updownMap);//更改数据库
             jedis.del(courseKey);
-            Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
+            Map<String,String> courseMap = null;
+            if(query_from.equals("0")){
+                courseMap  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
+            }else{
+                courseMap  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, updownMap), readCourseOperation, jedis, true);
+            }
 
             if(query_type.equals("0")){//单品
                 //<editor-fold desc="单品">
