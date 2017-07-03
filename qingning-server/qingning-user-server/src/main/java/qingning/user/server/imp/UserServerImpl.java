@@ -939,7 +939,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<String, Object>();
         //1.1读取课程信息
         String series_id = (String)reqMap.get("series_id");
-        String query_type = reqMap.get("query_type").toString();//0app 1saas
+        String query_type = "0";
+        if(!MiscUtils.isEmpty(reqMap.get("query_type"))){
+            query_type = reqMap.get("query_type").toString();//0app 1saas
+        }
         map.put("series_id", series_id);
         Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         if(MiscUtils.isEmpty(seriesInfoMap)){

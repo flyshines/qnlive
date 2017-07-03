@@ -167,8 +167,7 @@
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
-					<param name="query_type" type="string" require="Y,000100"  />
-
+					<param name="query_type" type="string" require="Y,000100" default="0"  />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -182,6 +181,7 @@
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y,000100"  />
+					<param name="query_type" type="string" require="Y,000100" default="0"  />
 				</inputs>
 				<outputs>
 				</outputs>
