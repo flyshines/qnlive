@@ -775,4 +775,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		selectMap.put("series_id", seriesId);
 		return seriesStudentsMapper.selectSeriesStudentsByMap(selectMap);
 	}
+
+	/**
+	 * 获取系列课收益明细列表
+	 */
+	@Override
+	public List<Map<String, Object>> findSeriesProfitListByMap(Map<String, Object> reqMap) {
+		return lecturerCoursesProfitMapper.selectSeriesProfitListByMap(reqMap);
+	}
 }
