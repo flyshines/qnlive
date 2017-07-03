@@ -178,6 +178,9 @@
     <if test="profit_type != null" >
      and  profit_type = #{profit_type}
     </if>
+    <if test="position != null">
+      and position <![CDATA[ < ]]> #{position}
+    </if>
     order by `position` desc
     limit #{page_count}
   </select>
