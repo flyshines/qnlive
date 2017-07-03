@@ -67,6 +67,36 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     		return true;
     	}
     }
+    
+    /**
+     * 判断用户是否定购某Saas课程
+     * @param userId
+     * @param courseId Saas课程id
+     * @param jedis
+     * @return
+     */
+    private boolean isBuySaasCourse(String userId, String courseId, Jedis jedis){
+    	Map<String, Object> keyField = new HashMap<String, Object>();
+    	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
+    	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, keyField);
+    	Boolean result = jedis.sismember(key, courseId);
+    	return result;
+    }
+    
+    /**
+     * 判断用户是否定购某直播课程
+     * @param userId
+     * @param liveCourseId
+     * @param jedis
+     * @return
+     */
+    private boolean isBuyLiveCourse(String userId, String liveCourseId, Jedis jedis){
+    	Map<String, Object> keyField = new HashMap<String, Object>();
+    	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
+    	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, keyField);
+    	Boolean result = jedis.sismember(key, liveCourseId);
+    	return result;
+    }
 
 	/**
 	 * 扫码登录 1 获取二维码接口
@@ -500,16 +530,21 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
          * 调用方法判断直播状态
          */
         if(liveCourseList != null){
-        	Random random = new Random();	//临时
 	        for(Map<String, Object> liveCourseMap : liveCourseList){
 	        	Map<String, String> liveInfoMap = new HashMap<String, String>();
 	        	MiscUtils.converObjectMapToStringMap(liveCourseMap, liveInfoMap);
 	        	//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
 	        	MiscUtils.courseTranferState(now.getTime(), liveInfoMap);
 	        	/*
-	             * TODO 购买状态：临时随机返回
+	             * 购买状态
 	             */
-	        	liveInfoMap.put("buy_status", String.valueOf(random.nextInt(2)));
+	        	boolean buyStatus = isBuyLiveCourse(userId, liveCourseMap.get("course_id").toString(), jedis);
+	        	if(buyStatus){	//用户已经购买
+	        		liveInfoMap.put("buy_status", "1");
+	        	}else{
+	        		liveInfoMap.put("buy_status", "0");
+	        	}
+	        	
 	        	resultLiveCourseList.add(liveInfoMap);
 	        }
         }
@@ -725,12 +760,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             	Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSaasCourseReqEntity, readCourseOperation, jedis, true);
             	
             	//判断是否购买了该课程
-            /*	if(seriesIdKeyMap == null || seriesIdKeyMap.get(seriesId) == null){	//用户未购买
-            		seriesMap.put("buy_status", "0");
+            	boolean buyStatus = isBuySaasCourse(userId, singleId, jedis);
+            	if(!buyStatus){	//用户未购买
+            		singleMap.put("buy_status", "0");
             	}else{	//用户已购买
-            		seriesMap.put("buy_status", "1");
+            		singleMap.put("buy_status", "1");
             	}
-            */	
+            	
             	singleInfoList.add(singleMap);
             }
         }
@@ -772,6 +808,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 判断是否购买了该课程
 		 */
+		boolean isBought = isBuySeries(userId, seriesId, jedis);
+		if(isBought){	//已经购买
+			resultMap.put("is_bought", "1");
+		}else{
+			resultMap.put("is_bought", "0");
+		}
+/*		作废：2017-07-03 已经使用缓存进行判断
 		Map<String, Object> selectSeriesStudentsMap = new HashMap<>();
 		selectSeriesStudentsMap.put("user_id", userId);
     	selectSeriesStudentsMap.put("series_id", seriesId);
@@ -780,7 +823,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			resultMap.put("is_bought", "0");
 		}else{	//用户已购买
 			resultMap.put("is_bought", "1");
-		}
+		}*/
 		
         resultMap.put("series_info", seriesMap);
         return resultMap;
@@ -1012,11 +1055,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}
 		
 		/*
-         * TODO 判断是否购买了该课程
+         * 判断是否购买了该课程
          */
-		Random random = new Random();
-		resultMap.put("is_bought", random.nextInt(2));
-		
+		boolean isBought = isBuySaasCourse(userId, singleId, jedis);
+		if(isBought){	//已经购买
+			resultMap.put("is_bought", "1");
+		}else{
+			resultMap.put("is_bought", "0");
+		}
 		
 		/*
 		 * 查找是否属于系列课
@@ -1103,8 +1149,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         
         /*
-         * TODO 判断登录用户是否已经购买该课程
+         * 判断登录用户是否已经购买该课程
          */
+        boolean isBought = isBuySaasCourse(userId, articleId, jedis);
+        if(!isBought){	//未购买
+        	log.error("Saas_H5_课程-获取图文课程内容>>>>用户未购买该课程(articleId=" + articleId + ")");
+        	throw new QNLiveException("120007");
+        }
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readArticleMap = new HashMap<String, Object>();
@@ -1163,8 +1214,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         
         /*
-         * TODO 判断登录用户是否已经购买该课程
+         * 判断登录用户是否已经购买该课程
          */
+        boolean isBought = isBuySaasCourse(userId, courseId, jedis);
+        if(!isBought){	//未购买
+        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未购买该课程(courseId=" + courseId + ")");
+        	throw new QNLiveException("120007");
+        }
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readCourseMap = new HashMap<String, Object>();
@@ -1408,6 +1464,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * TODO 判断登录用户是否已经购买该课程
          */
+        boolean isBought = isBuySaasCourse(userId, courseId, jedis);
+        if(!isBought){	//未购买
+        	log.error("Saas_H5_课程-添加课程留言>>>>用户未购买该课程(courseId=" + courseId + ")");
+        	throw new QNLiveException("120007");
+        }
         
         /*
          * 获得课程信息，主要用于后续获取店铺id进行存储
