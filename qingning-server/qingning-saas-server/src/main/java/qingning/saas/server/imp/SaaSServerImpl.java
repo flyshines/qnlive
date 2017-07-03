@@ -641,11 +641,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         RequestEntity entity = new RequestEntity();
         entity.setFunctionName("findSaasCourseByCourseId");
         entity.setParam(reqMap);
+        //编辑课程
+        saaSModuleServer.updateCourse(reqMap);
 
         CacheUtils.readCourse(courseId, entity, readCourseOperation,jedis,true);
 
-        //插入课程
-        saaSModuleServer.updateCourse(reqMap);
+
     }
     
     /**
@@ -1658,7 +1659,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         query.put("lecturer_id",shopInfo.get("user_id"));
         query.put("user_id",userId);
         query.put("type","2");
-
+        if(query.get("position") == null||StringUtils.isEmpty(query.get("position").toString())){
+            query.remove("position");
+        }
         List<Map<String,Object>> records = saaSModuleServer.findUserBuiedRecords(query);
         resultMap.put("list", records);
 
