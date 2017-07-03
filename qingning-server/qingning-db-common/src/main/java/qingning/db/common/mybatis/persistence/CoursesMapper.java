@@ -49,6 +49,15 @@ public interface CoursesMapper {
 	 * @return
 	 */
 	PageList<Map<String,Object>> findCourseBySeriesId(Map<String, Object> param, PageBounds page);
+
+
+	/**
+	 * 根据条件获取直播课程列表
+	 * @param series_id series_id
+	 * @return
+	 */
+	List<Map<String, Object>> findCourseListBySeriesId(String series_id);
+
 	/**查询直播间所有直播的课程
 	 * @param param
 	 * @param page
