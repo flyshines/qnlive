@@ -605,6 +605,24 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("update_time",now);
         reqMap.put("app_name",reqEntity.getAppName());
         reqMap.put("course_price",reqMap.get("price"));
+        //更新缓存前操作
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Map<String,String> query = new HashMap<>();
+        query.clear();
+        String courseId = reqMap.get("course_id").toString();
+
+        reqMap.put(Constants.CACHED_KEY_COURSE_FIELD,courseId);
+        query.put(Constants.CACHED_KEY_COURSE_FIELD,courseId);
+        //更新缓存
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
+        jedis.del(courseKey);
+
+        RequestEntity entity = new RequestEntity();
+        entity.setFunctionName("findSaasCourseByCourseId");
+        entity.setParam(reqMap);
+
+        CacheUtils.readCourse(courseId, entity, readCourseOperation,jedis,true);
+
         //插入课程
         saaSModuleServer.updateCourse(reqMap);
     }

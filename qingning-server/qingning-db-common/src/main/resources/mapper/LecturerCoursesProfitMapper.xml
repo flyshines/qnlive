@@ -178,6 +178,9 @@
     <if test="profit_type != null" >
      and  profit_type = #{profit_type}
     </if>
+    <if test="position != null">
+      and position <![CDATA[ < ]]> #{position}
+    </if>
     order by `position` desc
     limit #{page_count}
   </select>
@@ -264,7 +267,7 @@
   
   <!-- 获取系列课收益统计（门票总收入，总收入） -->
   <select id="selectSeriesProfitStatistics" parameterType="hashmap" resultType="hashmap">
-	SELECT SUM(profit_amount) amount FROM t_lecturer_courses_profit	<!-- 统计门票总收入 -->
+	SELECT IFNULL(SUM(profit_amount), 0) amount FROM t_lecturer_courses_profit	<!-- 统计门票总收入 -->
 		<where>
 			profit_type = 2	
 			<if test="series_id != null and series_id != ''">
@@ -275,7 +278,7 @@
 			</if>
 		</where>
 	UNION ALL
-	SELECT SUM(profit_amount) amount FROM t_lecturer_courses_profit <!-- 统计总收入 -->
+	SELECT IFNULL(SUM(profit_amount), 0) amount FROM t_lecturer_courses_profit <!-- 统计总收入 -->
 		<where>
 			<if test="series_id != null and series_id != ''">
 				and course_id = #{series_id}

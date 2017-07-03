@@ -3606,20 +3606,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         /*
-         * 从数据库中获取系列课收入统计（门票收入合计，总收入）
-         * 下标为0表示门票总收入
-         * 下标为1表示总收入
-         */
-        List<Map<String, Object>> seriesProfitStatistics = lectureModuleServer.findSeriesProfitStatistics(reqMap);
-        if(seriesProfitStatistics != null && !seriesProfitStatistics.isEmpty()){
-        	seriesInfoMap.put("ticket_amount", String.valueOf(seriesProfitStatistics.get(0).get("amount")));
-        	seriesInfoMap.put("totle_amount", String.valueOf(seriesProfitStatistics.get(1).get("amount")));
-        }else{
-        	seriesInfoMap.put("ticket_amount", "0");
-        	seriesInfoMap.put("totle_amount", "0");
-        }
-        
-        /*
          * 从数据库查询系列课收益列表
          */
         if(readedCount == 0 && lastUpdateTime == 0){
@@ -3634,6 +3620,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         List<Map<String, Object>> profitInfoList = lectureModuleServer.findSeriesProfitListByMap(reqMap);
+        
+        /*
+         * 从数据库中获取系列课收入统计（门票收入合计，总收入）
+         * 下标为0表示门票总收入
+         * 下标为1表示总收入
+         */
+        List<Map<String, Object>> seriesProfitStatistics = lectureModuleServer.findSeriesProfitStatistics(reqMap);
+        if(seriesProfitStatistics != null && !seriesProfitStatistics.isEmpty()){
+        	seriesInfoMap.put("ticket_amount", String.valueOf(seriesProfitStatistics.get(0).get("amount")));
+        	seriesInfoMap.put("totle_amount", String.valueOf(seriesProfitStatistics.get(1).get("amount")));
+        }
         
         resultMap.put("series_info", seriesInfoMap);
         resultMap.put("profit_info_list", profitInfoList);
