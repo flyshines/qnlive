@@ -32,4 +32,10 @@ public interface LecturerCoursesProfitMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> selectSeriesProfitListByMap(Map<String, Object> reqMap);
+	/**
+	 * 获取系列课收益统计（门票总收入，总收入）
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> selectSeriesProfitStatistics(Map<String, Object> reqMap);
 }

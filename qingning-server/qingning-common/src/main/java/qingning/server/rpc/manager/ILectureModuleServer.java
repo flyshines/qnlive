@@ -181,6 +181,12 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findSeriesProfitListByMap(Map<String, Object> reqMap);
+	/**
+	 * 获取系列课收益统计（门票总收入，总收入）
+	 * @param reqMap
+	 * @return List:下标为0表示门票总收入;下标为1表示总收入
+	 */
+	List<Map<String, Object>> findSeriesProfitStatistics(Map<String, Object> reqMap);
 
 
 }

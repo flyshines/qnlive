@@ -783,4 +783,12 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> findSeriesProfitListByMap(Map<String, Object> reqMap) {
 		return lecturerCoursesProfitMapper.selectSeriesProfitListByMap(reqMap);
 	}
+
+	/**
+	 * 获取系列课收益统计（门票总收入，总收入）
+	 */
+	@Override
+	public List<Map<String, Object>> findSeriesProfitStatistics(Map<String, Object> reqMap) {
+		return lecturerCoursesProfitMapper.selectSeriesProfitStatistics(reqMap);
+	}
 }
