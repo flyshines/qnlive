@@ -710,12 +710,10 @@ public class SaaSManageController extends AbstractController {
     public @ResponseBody ResponseEntity  gainsOrdersList(
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "goods_name",defaultValue = "") String courseName,
             @RequestParam(value = "order_type",defaultValue = "") String orderType,
             @RequestParam(value = "goods_type",defaultValue = "") String goodsType,
-
             @RequestHeader("access_token") String access_token,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {

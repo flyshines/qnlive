@@ -881,8 +881,8 @@
 						<param name="income" type="double"/>
 						<param name="create_time" type="long"/>
 					</param>
-					<param name="total_count" type="long" />
-					<param name="total_page" type="long" />
+					<param name="total_count" type="long" default="0"/>
+					<param name="total_page" type="long" default="0"/>
 				</outputs>
 			</function>
 
