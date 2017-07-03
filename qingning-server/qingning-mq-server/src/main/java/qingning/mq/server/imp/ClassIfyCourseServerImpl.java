@@ -94,17 +94,20 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                         MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
                         Long lops = student_num + extra_num;
                         String course_id = course.get("course_id").toString();
-                        switch (course.get("status").toString()){
-                            case "1":
-                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
-                                break;
-                            case "2":
-                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
-                                break;
-                            case "4":
-                                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
-                                break;
+                        if(!course.get("course_updown").toString().equals("0")){
+                            switch (course.get("status").toString()){
+                                case "1":
+                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
+                                    break;
+                                case "2":
+                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
+                                    break;
+                                case "4":
+                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
+                                    break;
+                            }
                         }
+
                     }
                 }
                 log.debug("执行课程列表刷新工作---------完成");

@@ -18,6 +18,7 @@ public final class Constants {
 
 	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";
 	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";
+	public static final String SYS_READ_SAAS_COURSE ="SYS_READ_SAAS_COURSE";
 	public static final String SYS_READ_LAST_SERIES ="SYS_READ_LAST_SERIES";
 	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";
 	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";

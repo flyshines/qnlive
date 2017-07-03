@@ -81,8 +81,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
     @Autowired(required = true)
     private SaaSShopMapper shopMapper;
 
-
-
+	@Autowired(required = true)
+	private SaaSCourseMapper saasCourseMapper;
 
 	@Transactional(rollbackFor=Exception.class)
 	@Override
@@ -790,5 +790,10 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	@Override
 	public List<Map<String, Object>> findSeriesProfitStatistics(Map<String, Object> reqMap) {
 		return lecturerCoursesProfitMapper.selectSeriesProfitStatistics(reqMap);
+	}
+
+	@Override
+	public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+		return saasCourseMapper.selectByPrimaryKey(courseId);
 	}
 }

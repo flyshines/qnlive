@@ -21,14 +21,16 @@ public class ReadCourseOperation implements CommonReadOperation {
 
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
-        if(Constants.SYS_READ_LAST_COURSE.equals(functionName)){
-        	return lectureModuleServer.findLastestFinishCourse(reqMap);
+        if (Constants.SYS_READ_LAST_COURSE.equals(functionName)) {
+            return lectureModuleServer.findLastestFinishCourse(reqMap);
+        } else if (Constants.SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程
+            return lectureModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
         } else {
-        	return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
         }
     }
 }
