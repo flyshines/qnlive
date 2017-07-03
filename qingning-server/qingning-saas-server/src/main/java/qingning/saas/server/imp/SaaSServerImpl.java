@@ -1084,9 +1084,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}
 		
 		/*
-		 * TODO 拼接分享链接share_url
+		 * 拼接分享链接share_url
 		 */
 		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix", appName) + articleId;
+		resultMap.put("share_url", shareUrl);
 		
         resultMap.put("article_info", articleMap);
         
@@ -1143,8 +1144,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}
 		
 		/*
-		 * TODO 拼接分享链接share_url
+		 * 拼接分享链接share_url
 		 */
+		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix", appName) + courseId;
+		resultMap.put("share_url", shareUrl);
 		
         resultMap.put("course_info", courseMap);
         

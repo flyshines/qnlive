@@ -26,4 +26,10 @@ public interface LecturerCoursesProfitMapper {
 	 * @param page
 	 */
 	PageList<Map<String,Object>> selectOrdersListByUserId(Map<String, Object> param, PageBounds page);
+	/**
+	 * 获取系列课收益明细列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> selectSeriesProfitListByMap(Map<String, Object> reqMap);
 }

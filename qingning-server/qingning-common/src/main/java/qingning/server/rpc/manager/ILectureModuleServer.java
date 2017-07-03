@@ -175,5 +175,12 @@ public interface ILectureModuleServer {
 	 */
 	List<Map<String, Object>> findSeriesStudentListBySeriesId(String seriesId);
 
+	/**
+	 * 获取系列课收益明细列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findSeriesProfitListByMap(Map<String, Object> reqMap);
+
 
 }

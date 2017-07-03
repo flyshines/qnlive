@@ -3573,8 +3573,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> findSeriesIncomeList(RequestEntity reqEntity) throws Exception {
     	//返回结果集
     	Map<String, Object> resultMap = new HashMap<>();
-    	//学员信息列表
-    	List<Map<String, String>> studentInfoList = new ArrayList<>();
     	/*
     	 * 获取请求参数
     	 */
@@ -3586,38 +3584,42 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         //获取请求的系列id
         String seriesId = reqMap.get("series_id").toString();
-        //获取分页标识
-        String lastUserId = reqMap.get("last_user_id").toString(); 
+        //获取前端上一次更新时间
+        long lastUpdateTime = (long) reqMap.get("last_update_time");
+        //获取已加载的数量
+        long readedCount = (long) reqMap.get("readed_count");
         //获取每页数量
-        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        long pageCount = (long) reqMap.get("page_count");
+        Date now = new Date();
         
-    	/*
-         * 根据user_id查询缓存中系列课的学员id列表（包括zset中的score，因为score=create_time），需要传递分页标识
+        /*
+         * 从缓存中获取店铺信息
          */
-        RequestEntity readSeriesStudentReqEntity = this.generateRequestEntity(null, null, "findSeriesStudentListBySeriesId", reqMap);
-        //read系列课的内容课程列表，以创建时间倒序排序
-        Set<Tuple> userSet = CacheUtils.readSeriesStudentSet(seriesId, lastUserId, pageCount, 
-        		readSeriesStudentReqEntity, readSeriesOperation, jedis);
-        if(userSet != null){
-        	log.info("分页获取系列课的收益列表>>>>从缓存中获取到系列（series_id=" + seriesId + "）的学员列表");
-        	String userDetailKey = null;	//获取学员详情的key
-        	//生成用于缓存不存在时调用数据库的requestEntity
-        	Map<String, Object> readUserMap = new HashMap<String, Object>();
-        	RequestEntity readUserReqEntity = this.generateRequestEntity(null, null, "findUserInfoByUserId", readUserMap);
-        	
-        	for(Tuple studentUser : userSet){
-        		String studentUserId = studentUser.getElement();
-        		readUserMap.put("user_id", studentUserId);
-            	//获取学员详情
-            	Map<String, String> userMap = CacheUtils.readUser(studentUserId, readUserReqEntity, readUserOperation, jedis);
-            	BigDecimal createTimeBig = new BigDecimal(String.valueOf(studentUser.getScore()));
-            	userMap.put("create_time", createTimeBig.toPlainString());
-            	
-            	studentInfoList.add(userMap);
-            }
+/*        Map<String, String> shopMap = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        if(shopMap == null || shopMap.isEmpty()){
+        	logger.error("saas店铺-获取店铺单品直播课程列表>>>>请求的店铺不存在");
+        	throw new QNLiveException("190001");
+        }
+        //获取讲师id
+        String lecturerId = shopMap.get("user_id");
+ */       
+        /*
+         * 从数据库查询系列课收益列表
+         */
+        if(readedCount == 0 && lastUpdateTime == 0){
+        	//前端请求第一页数据
+        	reqMap.put("create_time", now);	//用于sql进行条件查询：create_time <= now
+        	//返回给前端当前服务器时间
+        	resultMap.put("last_update_time", now);
+        }else{
+        	reqMap.put("create_time", new Date(lastUpdateTime));	//用于sql进行条件查询：create_time <= lastUpdateTime
+        	//返回给前端原来传递的时间
+        	resultMap.put("last_update_time", lastUpdateTime);
         }
         
-        resultMap.put("income_info_list", studentInfoList);
+        List<Map<String, Object>> profitInfoList = lectureModuleServer.findSeriesProfitListByMap(reqMap);
+        
+        resultMap.put("profit_info_list", profitInfoList);
         return resultMap;
     
     }

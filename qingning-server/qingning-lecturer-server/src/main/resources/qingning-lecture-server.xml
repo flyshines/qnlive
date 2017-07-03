@@ -847,15 +847,18 @@
 				</auth>
 				<inputs>
 					<param name="series_id" type="string"  require="Y,000100" />
-					<param name="last_user_id" type="string" require="N" />
+					<param name="last_update_time" type="long" require="N" />
+					<param name="readed_count" type="long" require="N" />
 					<param name="page_count" type="long" require="N" />
 				</inputs>
 				<outputs>
-					<param name="income_info_list" type="list">
-						<param name="avatar_address" type="string" />
+					<param name="profit_info_list" type="list">
+						<param name="user_id" type="string" />
 						<param name="nick_name" type="string" />
 						<param name="create_time" type="long" />
+						<param name="profit_amount" type="double" />
 					</param>
+					<param name="last_update_time" type="long" />
 				</outputs>
 			</function>
 			

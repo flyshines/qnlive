@@ -944,7 +944,8 @@ public class LectureController extends AbstractController {
 	public
 	@ResponseBody ResponseEntity getSeriesIncomeList(
 			@PathVariable("series_id") String seriesId,
-			@RequestParam(value="last_user_id", defaultValue="0")String lastUserId,
+			@RequestParam(value="last_update_time", defaultValue="0")long lastUpdateTime,
+			@RequestParam(value="readed_count", defaultValue="0")long readedCount,
 			@RequestParam(value="page_count", defaultValue="20")long pageCount,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
@@ -952,7 +953,8 @@ public class LectureController extends AbstractController {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "findSeriesIncomeList", accessToken, version, appName);
 		Map<String, Object> param = new HashMap<>();
 		param.put("series_id", seriesId);
-		param.put("last_user_id", lastUserId);
+		param.put("last_update_time", lastUpdateTime);
+		param.put("readed_count", readedCount);
 		param.put("page_count", pageCount);
 		
 		requestEntity.setParam(param);
