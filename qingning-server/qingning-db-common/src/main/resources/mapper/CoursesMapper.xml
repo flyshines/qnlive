@@ -579,4 +579,23 @@
     ORDER BY t.create_time DESC
   </select>
 
+
+  <select id="findCourseListBySeriesId" resultType="hashmap" parameterType="java.lang.String" >
+    SELECT
+    t.course_id,
+    t.update_time,
+    t.course_title,
+    t.course_url,
+    t.create_time,
+    t.student_num,
+    t.series_course_updown ,
+    t.course_updown
+    FROM
+    `t_courses` t
+    WHERE
+    t.series_id = #{series_id}
+    ORDER BY t.create_time DESC
+  </select>
+
+
 </mapper>

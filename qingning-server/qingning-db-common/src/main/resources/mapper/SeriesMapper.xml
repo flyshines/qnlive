@@ -198,6 +198,25 @@
 		where series_id = #{series_id}
 	</update>
 
+	<select id="findSeriesByLecturer" resultType="hashmap" parameterType="java.lang.String" >
+		SELECT
+		t.series_id,
+		t.series_title,
+		t.series_img,
+		t.series_course_type,
+		t.create_time,
+		t.series_price,
+		t.series_amount,
+		t.series_student_num,
+		t.updown,
+		t.update_course_time,
+		t.series_status
+		FROM
+		`t_series` t
+		WHERE
+		t.lecturer_id = #{lecturer_id}
+		ORDER BY t.update_course_time DESC
+	</select>
 
 	<select id="selectSeriesListByLecturerId" resultType="hashmap" parameterType="hashmap" >
 		SELECT

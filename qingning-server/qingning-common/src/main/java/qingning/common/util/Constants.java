@@ -204,8 +204,12 @@ public final class Constants {
 	public static final String CACHED_KEY_PLATFORM_COURSE_LIVE = "SYS:COURSES:LIVE";
 	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 
-
+	//0直播 1语音 2视频 3图文
 	public static final String DEFAULT_SERIES_COURSE_TYPE = "0";//正在直播 默认
+	public static final String DEFAULT_SERIES_COURSE_VOICE_TYPE = "1";//1语音
+	public static final String DEFAULT_SERIES_COURSE_VIDEO_TYPE = "2";// 2视频 默认
+	public static final String DEFAULT_SERIES_COURSE_IMAGE_TEXT_TYPE = "3";//正在直播 默认
+
 	public static final String CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM = "SYS:SERIES:APP:PLATFORM";// zset 平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用  如果下架直接删掉value (series_id,上架时间)
 	public static final String CACHED_KEY_SERIES_FIELD = "series_id";//系列id
 	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
