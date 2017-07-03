@@ -410,6 +410,30 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String, Object> getOrdersList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String,Object>> result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param,page);
+
+        for(Map<String,Object> map : result) {
+
+            //订单类型（1:分销订单，2:普通订单）
+            if (map.get("distributer_id") != null) {
+                //分销订单
+                map.put("order_type", "1");
+            } else {
+                //普通订单
+                map.put("order_type", "2");
+            }
+            map.remove("distributer_id");
+
+            //商品类型（1:小圈子，2:系列，3:单品，4:打赏）
+            if (!"0".equals(map.get("share_amount").toString())) {
+                map.put("goods_type", "4");
+            } else if ("2".equals(map.get("profit_type").toString())) {
+                //系列课程
+                map.put("goods_type", "2");
+            } else {
+                //单品
+                map.put("goods_type", "3");
+            }
+        }
         Map<String,Object> res = new HashMap<>();
         res.put("list",result);
         res.put("total_count",result.getTotal());
