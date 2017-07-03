@@ -402,6 +402,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
             res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
                 map.put("title", map.get("series_title"));
             });
+
         }
         return res;
     }
