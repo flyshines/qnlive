@@ -110,7 +110,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(reqMap.get("room_name"))){        	
         	reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), userInfo.get("nick_name")));
         }
-        Map<String, Object> createResultMap = lectureModuleServer.createLiveRoom(reqMap);
+       lectureModuleServer.createLiveRoom(reqMap);
 
         //3.缓存修改
         //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
@@ -3389,7 +3389,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = new HashMap<>();
         map.put("course_id",course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        Map<String, String> courseInfo = jedis.hgetAll(courseKey);
+        Map<String, String> courseInfo = jedis.hgetAll(courseKey);//获取课程信息
         jedis.del(courseKey);
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
@@ -3397,16 +3397,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
         if(query_type.equals("1")){//移除系列
-
-            if( !courseInfo.get("course_updown").equals("0")){
-
-
-            }else{
-
-            }
-
-
-
             map.clear();
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
@@ -3418,7 +3408,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             course.put("series_course_updown","0");
             course.put("series_id","");
-            course.put("course_updown","2");
+            if(courseInfo.get("course_updown").equals("0")){
+                course.put("course_updown","2");
+            }
 
             if(series_course_type.equals("0")){
                 resltMap = lectureModuleServer.updateSeriesCourse(course);
