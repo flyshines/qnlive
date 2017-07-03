@@ -3264,7 +3264,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             updownMap.put("course_id",courseId);
             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, updownMap);
             //判断当前系列是这个讲师的吗
-            String lecturer_id = jedis.hget(courseKey, "lecturer_id");
+            //String lecturer_id = jedis.hget(courseKey, "lecturer_id");
+            Map<String, String> course = null;
+            if(query_from.equals("0")){
+                course  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
+            }else{
+                course  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, updownMap), readCourseOperation, jedis, true);
+            }
+
+
+
+            String lecturer_id = course.get("lecturer_id");
             if(!lecturer_id.equals(user_id)){
                 throw new QNLiveException("210001");
             }
@@ -3279,7 +3291,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
             result = lectureModuleServer.updateUpdown(updownMap);//更改数据库
             jedis.del(courseKey);
-            Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
+            Map<String,String> courseMap = null;
+            if(query_from.equals("0")){
+                courseMap  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
+            }else{
+                courseMap  = CacheUtils.readCourse(courseId,
+                        generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, updownMap), readCourseOperation, jedis, true);
+            }
 
             if(query_type.equals("0")){//单品
                 //<editor-fold desc="单品">

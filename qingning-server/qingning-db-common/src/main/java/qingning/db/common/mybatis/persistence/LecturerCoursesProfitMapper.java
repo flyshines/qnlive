@@ -38,4 +38,12 @@ public interface LecturerCoursesProfitMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> selectSeriesProfitStatistics(Map<String, Object> reqMap);
+
+
+	/**搜索
+	 * @param param
+	 * @param page
+	 * @return
+	 */
+	PageList<Map<String,Object>> searchOrdersListByUserId(Map<String, Object> param, PageBounds page);
 }

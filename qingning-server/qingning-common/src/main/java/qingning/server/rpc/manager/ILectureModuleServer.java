@@ -189,4 +189,5 @@ public interface ILectureModuleServer {
 	List<Map<String, Object>> findSeriesProfitStatistics(Map<String, Object> reqMap);
 
 
+	Map<String, Object> findSaasCourseByCourseId(String courseId);
 }

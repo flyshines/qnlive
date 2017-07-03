@@ -798,7 +798,7 @@
 					<param name="today_amount" type="double"/>
 					<param name="today_visit" type="long"/>
 					<param name="today_pay" type="long"/>
-					<param name="total_income" type="double"/>
+					<param name="total_income" fieldname="user_total_amount" type="double"/>
 					<param name="balance" type="double"/>
 				</outputs>
 			</function>
