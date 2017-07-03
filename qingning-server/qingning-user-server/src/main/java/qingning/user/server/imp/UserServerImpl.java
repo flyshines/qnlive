@@ -579,6 +579,23 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }else {
                 resultMap.put("join_status", "0");
             }
+
+
+            queryMap.clear();
+            queryMap.put("user_id", userId);
+            queryMap.put("series_id",reqMap.get("series_id").toString());
+            //判断访问者是普通用户还是讲师
+            isStudent = userModuleServer.isStudentOfTheSeries(queryMap);
+            //返回用户身份
+            //角色数组 1：普通用户、2：学员、3：讲师
+            //加入课程状态 0未加入 1已加入
+            if(isStudent){
+                resultMap.put("series_join_status", "1");
+            }else {
+                resultMap.put("series_join_status", "0");
+            }
+
+
             //查询关注状态
             //关注状态 0未关注 1已关注
             reqMap.put("room_id", liveRoomMap.get("room_id"));
