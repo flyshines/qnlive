@@ -456,7 +456,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.del(seriesKey);
                 //获取系列课程详情
                 CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                setSeriesRedis(series_id,jedis);
+                setSeriesRedis(series_id,lecturer_id,jedis);
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
@@ -3110,7 +3110,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //5 修改相关缓存
         Map<String, Object> map = new HashMap<String, Object>();
-        if(query_type.equals("1")){
+        if(query_type.equals("0")){
             //5.1修改讲师个人信息缓存中的直播系列数 讲师直播间信息SYS: room:{room_id}
             map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
             String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
@@ -3123,7 +3123,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
         if(updown.equals("1")){ //上架
-            setSeriesRedis(series_id,jedis);
+            setSeriesRedis(series_id,user_id,jedis);
 
         }else{ //下架
             //将系列id 加入讲师下架列表
@@ -3137,9 +3137,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
 
-    private void setSeriesRedis(String series_id,Jedis jedis){
+    private void setSeriesRedis(String series_id,String lecturer_id,Jedis jedis){
         Map<String,Object> map = new HashMap<>();
         map.put("series_id",series_id);
+        map.put("lecturer_id",lecturer_id);
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
         Map<String, String> series = jedis.hgetAll(seriesKey);
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
