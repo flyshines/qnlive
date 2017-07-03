@@ -580,7 +580,7 @@
   </select>
 
 
-  <select id="findCourseBySeriesId" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findCourseListBySeriesId" resultType="hashmap" parameterType="java.lang.String" >
     SELECT
     t.course_id,
     t.update_time,

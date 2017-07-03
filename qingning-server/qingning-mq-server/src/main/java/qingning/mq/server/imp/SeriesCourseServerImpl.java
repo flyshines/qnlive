@@ -68,7 +68,7 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                         String seriesCourseDownKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                         jedis.del(seriesCourseDownKey);
                         jedis.del(seriesCourseUpKey);
-                        List<Map<String, Object>> seriesCourseList = coursesMapper.findCourseBySeriesId(series_id);
+                        List<Map<String, Object>> seriesCourseList = coursesMapper.findCourseListBySeriesId(series_id);
                         for(Map<String, Object> course : seriesCourseList){
                             long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
                             if(course.get("series_course_updown").toString().equals("1")){
