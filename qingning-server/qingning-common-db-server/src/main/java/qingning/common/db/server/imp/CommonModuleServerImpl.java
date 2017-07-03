@@ -104,6 +104,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private SeriesMapper seriesMapper;
 	@Autowired(required = true)
 	private SaaSShopMapper shopMapper;
+	@Autowired(required = true)
+	private SaaSShopUserMapper shopUserMapper;
 
 	@Autowired(required = true)
 	private SeriesStudentsMapper seriesStudentsMapper;
@@ -1050,5 +1052,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
 		return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
+	}
+
+	@Override
+	public void updateShopUsers(String lecturerId, String userId) {
+		String shopId = shopMapper.selectShopIdByUserId(userId);
+		int i = shopUserMapper.updateTypeById(shopId,userId);
+		//插入付费用户
+		if(i==0){
+			Map<String,Object> user = new HashMap<>();
+			user.put("shop_id",shopId);
+			user.put("user_id",userId);
+			user.put("user_type","1");
+			user.put("total_consume",0);
+			user.put("create_time",new Date());
+			shopUserMapper.insert(user);
+		}
 	}
 }
