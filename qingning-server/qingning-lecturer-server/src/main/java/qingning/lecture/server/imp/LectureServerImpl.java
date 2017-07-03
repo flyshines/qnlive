@@ -3556,7 +3556,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
     
     /**
-     * 分页获取系列课的收益列表：目前收益只来自门票，所以相当于获取系列课的学学员列表
+     * 分页获取系列课的收益列表
      * @param reqEntity
      * @return
      * @throws Exception
@@ -3597,6 +3597,29 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String lecturerId = shopMap.get("user_id");
  */       
         /*
+         * 从缓存中获取系列课的详情
+         */
+        Map<String, String> seriesInfoMap = CacheUtils.readSeries(seriesId, reqEntity, readSeriesOperation, jedis, true);
+        if(seriesInfoMap == null || seriesInfoMap.isEmpty()){
+        	log.error("分页获取系列课的收益列表>>>>系列课程不存在");
+        	throw new QNLiveException("210003");
+        }
+        
+        /*
+         * 从数据库中获取系列课收入统计（门票收入合计，总收入）
+         * 下标为0表示门票总收入
+         * 下标为1表示总收入
+         */
+        List<Map<String, Object>> seriesProfitStatistics = lectureModuleServer.findSeriesProfitStatistics(reqMap);
+        if(seriesProfitStatistics != null && !seriesProfitStatistics.isEmpty()){
+        	seriesInfoMap.put("ticket_amount", String.valueOf(seriesProfitStatistics.get(0).get("amount")));
+        	seriesInfoMap.put("totle_amount", String.valueOf(seriesProfitStatistics.get(1).get("amount")));
+        }else{
+        	seriesInfoMap.put("ticket_amount", "0");
+        	seriesInfoMap.put("totle_amount", "0");
+        }
+        
+        /*
          * 从数据库查询系列课收益列表
          */
         if(readedCount == 0 && lastUpdateTime == 0){
@@ -3612,6 +3635,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         
         List<Map<String, Object>> profitInfoList = lectureModuleServer.findSeriesProfitListByMap(reqMap);
         
+        resultMap.put("series_info", seriesInfoMap);
         resultMap.put("profit_info_list", profitInfoList);
         return resultMap;
     
