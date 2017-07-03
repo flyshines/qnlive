@@ -255,4 +255,10 @@ public interface ICommonModuleServer {
 	 */
 	Map<String,Object> findSeriesBySeriesId(String series_id);
 	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
+	/**
+	 * 更新已付费用户
+	 * @param
+	 * @return
+	 */
+	void updateShopUsers(String lecturerId, String userId);
 }

@@ -129,7 +129,7 @@
 
 
   <select id="findCourseBySearch" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses where `status` <![CDATA[ <> ]]> 5
+    select * from t_courses where `status` <![CDATA[ <> ]]> 5 and course_updown = 1
     <if test="classify_id != null">
       and classify_id = #{classify_id}
     </if>
