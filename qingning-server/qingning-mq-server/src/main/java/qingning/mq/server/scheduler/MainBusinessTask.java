@@ -82,6 +82,10 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 
 	@Autowired(required=true)
 	private ClassifyInfoMapper classifyInfoMapper;
+
+
+	@Autowired(required=true)
+	private SeriesMapper seriesMapper;
 	//</editor-fold>
 	
 	public void init(){
@@ -129,6 +133,12 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			classIfyCourseServerImpl.setCoursesMapper(coursesMapper);
 			classIfyCourseServerImpl.setClassifyInfoMapper(classifyInfoMapper);
 			list.add(classIfyCourseServerImpl);
+
+			//系列相关
+			SeriesCourseServerImpl seriesCourseServerImpl = new SeriesCourseServerImpl();
+			seriesCourseServerImpl.setCoursesMapper(coursesMapper);
+			seriesCourseServerImpl.setSeriesMapper(seriesMapper);
+			list.add(seriesCourseServerImpl);
 
 			clearMessageLock();
 		}
