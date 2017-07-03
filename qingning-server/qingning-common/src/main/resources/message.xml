@@ -63,7 +63,7 @@
 				<entry key="100034" value="修改的课程开始时间不能早于当前时间"/>
 
 				<entry key="110003" value="关注直播间操作失败"/>
-				<entry key="110004" value="直播间属于当前用户，不需要关注"/>
+				<entry key="110004" value="无法关注自己的直播间"/>
 				<entry key="110005" value="用户已经关注直播间"/>
 				<entry key="110006" value="用户未关注当前直播间"/>
 
