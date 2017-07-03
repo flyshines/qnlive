@@ -2553,7 +2553,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             long now = System.currentTimeMillis();
             for(String courseId : seriesCourseIdList){
                 Map<String,String> queryParam = new HashMap<String,String>();
-                queryParam.put("course_id", course_id);
+                queryParam.put("course_id", courseId);
                 Map<String, String> courseInfoMap =  CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(now, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                 if(jedis.sismember(userCourseKey, courseId)){//判断当前用户是否有加入这个课程
