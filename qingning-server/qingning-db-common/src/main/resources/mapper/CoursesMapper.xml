@@ -557,6 +557,7 @@
     <if test="noseries != null" >
       and t.series_course_updown = '0'
     </if>
+    and t.series_id is null
     ORDER BY
     t.create_time DESC
   </select>

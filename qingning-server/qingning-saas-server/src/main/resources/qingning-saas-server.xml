@@ -461,7 +461,7 @@
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
 					<param name="page_size" type="long" require="N"/>
-					<param name="type" type="string" require="N"/>
+					<param name="type" type="string" format="0|1,000004" require="N"/>
 					<param name="nick_name" type="string" require="N"/>
 					<param name="phone" type="string" require="N"/>
 				</inputs>
@@ -871,14 +871,14 @@
 					<param name="list" type="list">
 						<param name="order_id" type="string"/>
 						<param name="user_id" type="string"/>
-						<param name="nick_name" type="long"/>
-						<param name="order_type" type="long"/>
+						<param name="nick_name" type="string"/>
+						<param name="order_type" type="string"/>
 						<param name="goods_type" type="string"/>
 						<param name="goods_name" type="string"/>
 						<param name="user_avatar" type="string"/>
-						<param name="price" type="string"/>
-						<param name="income" type="string"/>
-						<param name="create_time" type="string"/>
+						<param name="price" type="double"/>
+						<param name="income" type="double"/>
+						<param name="create_time" type="long"/>
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />

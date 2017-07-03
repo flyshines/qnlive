@@ -86,13 +86,12 @@
   
   <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
   	select student.course_id, student.student_pos ,course.status from t_courses_students student,t_courses course where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
-    and student.course_id=course.course_id
+    and student.course_id=course.course_id and student.value_from = 0
   	<if test="student_pos != null">
   	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
   	</if> 
   	order by student.student_pos limit #{size}
   </select>
-
 
   <insert id="insertStudent" parameterType="hashmap" >
     insert into t_courses_students
@@ -136,6 +135,9 @@
       <if test="rq_code != null">
         rq_code,
       </if>
+      <if test="value_from != null">
+        value_from,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="student_id != null" >
@@ -176,7 +178,10 @@
       </if>
       <if test="rq_code != null">
          #{rq_code},
-      </if>      
+      </if>
+      <if test="value_from != null">
+        #{value_from},
+      </if>
     </trim>
   </insert>
 

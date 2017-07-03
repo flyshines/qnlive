@@ -110,7 +110,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(reqMap.get("room_name"))){        	
         	reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), userInfo.get("nick_name")));
         }
-        Map<String, Object> createResultMap = lectureModuleServer.createLiveRoom(reqMap);
+       lectureModuleServer.createLiveRoom(reqMap);
 
         //3.缓存修改
         //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
@@ -456,7 +456,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.del(seriesKey);
                 //获取系列课程详情
                 CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                setSeriesRedis(series_id,jedis);
+                setSeriesRedis(series_id,lecturer_id,jedis);
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
@@ -3110,7 +3110,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //5 修改相关缓存
         Map<String, Object> map = new HashMap<String, Object>();
-        if(query_type.equals("1")){
+        if(query_type.equals("0")){
             //5.1修改讲师个人信息缓存中的直播系列数 讲师直播间信息SYS: room:{room_id}
             map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
             String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
@@ -3123,7 +3123,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
         if(updown.equals("1")){ //上架
-            setSeriesRedis(series_id,jedis);
+            setSeriesRedis(series_id,user_id,jedis);
 
         }else{ //下架
             //将系列id 加入讲师下架列表
@@ -3137,9 +3137,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
 
-    private void setSeriesRedis(String series_id,Jedis jedis){
+    private void setSeriesRedis(String series_id,String lecturer_id,Jedis jedis){
         Map<String,Object> map = new HashMap<>();
         map.put("series_id",series_id);
+        map.put("lecturer_id",lecturer_id);
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
         Map<String, String> series = jedis.hgetAll(seriesKey);
         long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));//根据最近更新课程时间和系列的排序
@@ -3389,7 +3390,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> map = new HashMap<>();
         map.put("course_id",course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
-        Map<String, String> courseInfo = jedis.hgetAll(courseKey);
+        Map<String, String> courseInfo = jedis.hgetAll(courseKey);//获取课程信息
         jedis.del(courseKey);
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
@@ -3397,16 +3398,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
         if(query_type.equals("1")){//移除系列
-
-            if( !courseInfo.get("course_updown").equals("0")){
-
-
-            }else{
-
-            }
-
-
-
             map.clear();
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
@@ -3418,7 +3409,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             course.put("series_course_updown","0");
             course.put("series_id","");
-            course.put("course_updown","2");
+            if(courseInfo.get("course_updown").equals("0")){
+                course.put("course_updown","2");
+            }
 
             if(series_course_type.equals("0")){
                 resltMap = lectureModuleServer.updateSeriesCourse(course);

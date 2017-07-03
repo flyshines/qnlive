@@ -407,7 +407,7 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
     /**
-     * 店铺-单品列表
+     * 店铺-直播列表
      *
      * @return
      * @throws Exception

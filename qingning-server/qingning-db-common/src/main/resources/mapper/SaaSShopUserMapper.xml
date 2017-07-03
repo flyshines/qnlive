@@ -68,8 +68,16 @@
     LEFT JOIN t_user u ON t.user_id = u.user_id
     WHERE
         t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    <if test="nick_name != null" >
+     and u.nick_name like '%${nick_name}%'
+    </if>
+    <if test="type != null" >
+     and t.user_type = #{type,jdbcType=VARCHAR}
+    </if>
+    <if test="phone != null" >
+     and u.phone_number like '%${phone}%'
+    </if>
     ORDER BY t.create_time desc
-
   </select>
 
 </mapper>

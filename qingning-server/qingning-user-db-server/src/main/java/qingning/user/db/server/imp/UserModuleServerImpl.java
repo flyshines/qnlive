@@ -151,6 +151,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
         student.put("lecturer_id", courseMap.get("lecturer_id"));
         student.put("room_id", courseMap.get("room_id"));
         student.put("course_id", courseMap.get("course_id"));
+        student.put("value_from", courseMap.get("value_from"));
         student.put("course_password", courseMap.get("course_password"));
         student.put("student_type", "0"); //TODO distribution case
         student.put("create_time", now);

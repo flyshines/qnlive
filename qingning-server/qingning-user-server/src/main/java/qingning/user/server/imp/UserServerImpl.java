@@ -101,8 +101,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             incrementNum = -1;
         }
 
-
-
         //5.更新用户信息中的关注直播间数，更新直播间缓存的粉丝数
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_ROOMS, map);//删除已加入课程的key  在调用
@@ -195,7 +193,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
-        if(courceStatus == 4 ){//如果预告或者是正在直播的课程
+        if(courceStatus == 4 && updown == 1){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
@@ -235,10 +233,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
-
-
-
-        if(courceStatus == 1 ){//如果预告或者是正在直播的课程
+        if(courceStatus == 1 && updown == 1){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
@@ -282,7 +277,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
         //=========================下面的缓存使用另外一种方式获取====================================
-        if(courceStatus == 2){//查询结束课程
+        if(courceStatus == 2  && updown == 1){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
@@ -328,48 +323,51 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 Collections.reverse(transfer);
                 courseIdList.addAll(transfer);
             }
+
+
         }
         //</editor-fold>
-//        pageCount =  pageConts - courseIdList.size();
-//        if(!MiscUtils.isEmpty(lecture_id) && !MiscUtils.isEmpty(userId) && lecture_id.equals(userId) && pageCount > 0 && updown == 2){//是讲师
-//            boolean key = true;//作为开关 用于下面是否需要接着执行方法
-//            long startIndex = 0; //开始下标
-//            long endIndex = -1;   //结束下标
-//            String getCourseIdKey ;
-//            Map<String,Object> map = new HashMap<String,Object>();
-//            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
-//            getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);//讲师 下架的课
-//
-//            long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
-//            if(MiscUtils.isEmpty(courseId)){//如果课程ID没有 那么就从最近结束的课程找起
-//                endIndex = -1;
-//                startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
-//                if(startIndex < 0){
-//                    startIndex = 0;
-//                }
-//            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
-//                long endRank = jedis.zrank(getCourseIdKey, courseId);
-//                endIndex = endRank - 1;
-//                if(endIndex >= 0){
-//                    startIndex = endIndex - pageCount + 1;
-//                    if(startIndex < 0){
-//                        startIndex = 0;
-//                    }
-//                }else{
-//                    key = false;//因为已经查到最后的课程没有必要往下查了
-//                }
-//            }
-//            if(key){
-//                courseIdSet = jedis.zrange(getCourseIdKey, startIndex, endIndex);
-//                List<String> transfer = new ArrayList<>();
-//                for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
-//                    transfer.add(course_id);
-//                }
-//                Collections.reverse(transfer);
-//                courseIdList.addAll(transfer);
-//            }
-//        }
+        if(!MiscUtils.isEmpty(lecture_id) && !MiscUtils.isEmpty(userId) && lecture_id.equals(userId)){
+            pageCount =  pageConts - courseIdList.size();
+            if(pageCount > 0 && updown == 2){//是讲师
+                boolean key = true;//作为开关 用于下面是否需要接着执行方法
+                long startIndex = 0; //开始下标
+                long endIndex = -1;   //结束下标
+                String getCourseIdKey ;
+                Map<String,Object> map = new HashMap<String,Object>();
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
+                getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);//讲师 下架的课
 
+                long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
+                if(MiscUtils.isEmpty(courseId)){//如果课程ID没有 那么就从最近结束的课程找起
+                    endIndex = -1;
+                    startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                    long endRank = jedis.zrank(getCourseIdKey, courseId);
+                    endIndex = endRank - 1;
+                    if(endIndex >= 0){
+                        startIndex = endIndex - pageCount + 1;
+                        if(startIndex < 0){
+                            startIndex = 0;
+                        }
+                    }else{
+                        key = false;//因为已经查到最后的课程没有必要往下查了
+                    }
+                }
+                if(key){
+                    courseIdSet = jedis.zrange(getCourseIdKey, startIndex, endIndex);
+                    List<String> transfer = new ArrayList<>();
+                    for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                        transfer.add(course_id);
+                    }
+                    Collections.reverse(transfer);
+                    courseIdList.addAll(transfer);
+                }
+            }
+        }
     //====================================================上面是获取课程id集合======================================================================
     //====================================================下面是针对用户 等其他操作=================================================================
         //<editor-fold desc="根据课程id 获取课程对象并判断当前用户是否有加入课程">
@@ -656,9 +654,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         Map<String, Object> platformCourses = new HashMap<>();
         platformCourses = getPlatformCourses(userId, state, pageCount, course_id, null, appName, lecturerId,updown);
-
-
-
         resultMap.putAll(platformCourses);
       //  resultMap.put("course_list", courseList);
         resultMap.put("course_sum",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
@@ -750,20 +745,30 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //2.检测课程验证信息是否正确
         //2.1如果课程为私密课程则检验密码
+
         String course_type = courseInfoMap.get("course_type");
-        if("1".equals(course_type)){
-            if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
-                throw new QNLiveException("000100");
+        if(query_type.equals("0")){
+            if("1".equals(course_type)){
+                if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
+                    throw new QNLiveException("000100");
+                }
+                if(! reqMap.get("course_password").toString().equals(courseInfoMap.get("course_password").toString())){
+                    throw new QNLiveException("120006");
+                }
+            }else if("2".equals(course_type)){
+                //TODO 支付课程要验证支付信息
+                if(reqMap.get("payment_id") == null){
+                    throw new QNLiveException("000100");
+                }
             }
-            if(! reqMap.get("course_password").toString().equals(courseInfoMap.get("course_password").toString())){
-                throw new QNLiveException("120006");
-            }
-        }else if("2".equals(course_type)){
-            //TODO 支付课程要验证支付信息
-            if(reqMap.get("payment_id") == null){
-                throw new QNLiveException("000100");
+        }else{
+            if("1".equals(course_type)){
+                if(reqMap.get("payment_id") == null){
+                    throw new QNLiveException("000100");
+                }
             }
         }
+
 
         //3.检测学生是否参与了该课程
         Map<String,Object> studentQueryMap = new HashMap<>();
@@ -775,7 +780,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //5.将学员信息插入到学员参与表中
         courseInfoMap.put("user_id",userId);
-        Map<String,Object> insertResultMap = userModuleServer.joinCourse(courseInfoMap);
+        courseInfoMap.put("value_from",query_type);
+        userModuleServer.joinCourse(courseInfoMap);
 
         if(query_type.equals("0")){
             //<editor-fold desc="app">
@@ -933,7 +939,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<String, Object>();
         //1.1读取课程信息
         String series_id = (String)reqMap.get("series_id");
-        String query_type = reqMap.get("query_type").toString();//0app 1saas
+        String query_type = "0";
+        if(!MiscUtils.isEmpty(reqMap.get("query_type"))){
+            query_type = reqMap.get("query_type").toString();//0app 1saas
+        }
         map.put("series_id", series_id);
         Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         if(MiscUtils.isEmpty(seriesInfoMap)){
@@ -2544,7 +2553,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             long now = System.currentTimeMillis();
             for(String courseId : seriesCourseIdList){
                 Map<String,String> queryParam = new HashMap<String,String>();
-                queryParam.put("course_id", course_id);
+                queryParam.put("course_id", courseId);
                 Map<String, String> courseInfoMap =  CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(now, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                 if(jedis.sismember(userCourseKey, courseId)){//判断当前用户是否有加入这个课程
