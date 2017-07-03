@@ -3421,11 +3421,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
             lectureModuleServer.delSeriesCourse(oldSeriesId);
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+            jedis.del(seriesKey);
+            //获取系列课程详情
+            CacheUtils.readSeries(oldSeriesId,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
             String series_course_updown = courseInfo.get("series_course_updown");
             String course_updown =courseInfo.get("course_updown");
-            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
             String series_course_type = jedis.hget(seriesKey, "series_course_type");
-
             course.put("series_course_updown","0");
             course.put("series_id","");
             if(courseInfo.get("course_updown").equals("0")){
@@ -3467,6 +3469,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.put("series_id",series_id);
                 lectureModuleServer.increaseSeriesCourse(series_id);
                 String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+                jedis.del(seriesKey);
+                //获取系列课程详情
+                CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
                 String series_course_type = jedis.hget(seriesKey, "series_course_type");
                 map.clear();
                 map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);

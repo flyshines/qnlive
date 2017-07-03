@@ -763,7 +763,7 @@
 				<inputs>
 					<param name="series_remark" type="rstring"  />
 					<param name="series_img" type="string"  />
-					<param name="series_title" type="string"  />
+					<param name="series_title" type="rstring"  />
 					<param name="series_status" type="string"  />
 				</inputs>
 				<outputs>
