@@ -126,7 +126,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的店铺");
         shop.put("shop_remark","");
-        shop.put("shop_url","");
+        String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
+        shop.put("shop_url",shopUrl);
         shop.put("status","1");
         shop.put("create_time",new Date());
         shop.put("shop_logo",userMap.get("avatar_address"));
@@ -148,8 +149,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
-        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
-        jedis.del(seriesKey);
+        //清空店铺缓存
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
+        jedis.del(shopKey);
         saaSModuleServer.updateShop(param);
     }
 
@@ -853,6 +855,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("user_id",userId);
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //只查单品
         reqMap.put("noseries","1");
         return saaSModuleServer.getSingleList(reqMap);
 
@@ -886,8 +889,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //TODO 付费用户存入缓存   其他普通和所有放入数据库
         Map<String, Object> userList = saaSModuleServer.getShopUsers(reqMap);
         return userList;
     }
@@ -904,6 +909,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
         //获取所有课程评论列表
@@ -922,6 +928,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
         //获取所有课程评论列表
@@ -1616,7 +1623,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
     /**
-     * 用户-系列已购
+     * 店铺-订单记录
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1624,17 +1631,17 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("gainsOrdersList")
     public Map<String, Object> gainsOrdersList(RequestEntity reqEntity) throws Exception{
         Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String, Object> resultMap = new HashMap<>();
-        String shopId = query.get("shop_id").toString();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         //店铺信息
-        Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        //String shopId = shopInfo.get("shop_id").toString();
 
         //店主ID
-        query.put("lecturer_id",shopInfo.get("user_id"));
-        query.put("user_id",userId);
-        query.put("type","2");
+        query.put("lecturer_id",userId);
+        //query.put("user_id",userId);
+        //query.put("profit_type","2");
 
         Map<String,Object> records = saaSModuleServer.getOrdersList(query);
         List<Map<String,Object>> list = (List<Map<String,Object>>)records.get("list");
@@ -1659,18 +1666,23 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                             cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
                             Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                            Response<String> coursePrice = pipeline.hget(courseKey, "course_price");
                             recordMap.put("courseTitle", courseName);
+                            recordMap.put("coursePrice", coursePrice);
                         }
                         pipeline.sync();
 
                         for(Map<String,Object> recordMap : list){
                             Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
                             Response<String> userAvatar = (Response)recordMap.get("userAvatar");
+
                             Response<String> courseName = (Response)recordMap.get("courseTitle");
+                            Response<String> coursePrice = (Response)recordMap.get("coursePrice");
                             recordMap.put("nick_name",cacheLecturerName.get());
                             recordMap.put("user_avatar",userAvatar.get());
-                            if(recordMap.get("series_title")==null) {
-                                recordMap.put("course_title", courseName.get());
+                            if(recordMap.get("goods_name")==null) {
+                                recordMap.put("goods_name", courseName.get());
+                                recordMap.put("price", coursePrice.get());
                             }
                             Date recordTime = (Date)recordMap.get("create_time");
                             recordMap.put("create_time", recordTime);
