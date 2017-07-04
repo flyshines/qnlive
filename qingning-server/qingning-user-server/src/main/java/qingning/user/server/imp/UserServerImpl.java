@@ -996,7 +996,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, seriesInfoMap.get("lecturer_id"));
         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
         jedis.hincrBy(lecturerKey, "total_student_num", 1);
-        if("2".equals(series_type)){
+        if("1".equals(series_type)){
             jedis.hincrBy(lecturerKey, "pay_student_num", 1);
         }
         map.clear();
@@ -1004,19 +1004,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
 
         Long nowStudentNum = 0L;
-        if(jedis.exists(seriesKey)){
-            map.clear();
-            map.put("series_id", series_id);
-            Map<String,Object> numInfo = userModuleServer.findSeriesRecommendUserNum(map);
-            long num = 0;
-            if(!MiscUtils.isEmpty(numInfo)){
-                num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
-            }
-            jedis.hset(seriesKey, "student_num", num+"");
-        }else {
-            userModuleServer.increaseStudentNumBySeriesId(reqMap.get("series_id").toString());
-        }
-
+        userModuleServer.increaseStudentNumBySeriesId(reqMap.get("series_id").toString());
+        jedis.del(seriesKey);
+        CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         //7.修改用户缓存信息中的加入课程数
         map.clear();
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
