@@ -456,7 +456,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.del(seriesKey);
                 //获取系列课程详情
                 CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                setSeriesRedis(series_id,lecturer_id,jedis);
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
