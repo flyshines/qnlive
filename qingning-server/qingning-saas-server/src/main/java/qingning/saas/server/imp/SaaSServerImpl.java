@@ -78,7 +78,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     private boolean isBuySaasCourse(String userId, String courseId, Jedis jedis){
     	Map<String, Object> keyField = new HashMap<String, Object>();
     	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
-    	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, keyField);
+    	String key = MiscUtils.getKeyOfCachedData(Constants.SYS_USER_BUY_LIST, keyField);
     	Boolean result = jedis.sismember(key, courseId);
     	return result;
     }
