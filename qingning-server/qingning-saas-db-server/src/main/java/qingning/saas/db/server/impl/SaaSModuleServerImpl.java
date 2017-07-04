@@ -319,24 +319,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
      */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Jedis jedis) {
-		Date now = new Date();
+	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap) {
 		
 		//新增数据库saas课程的留言
-		insertCommentMap.put("create_time", now.getTime());
 		courseCommentMapper.insert(insertCommentMap);
 		//更新数据库课程的评论次数
-		updateCourseMap.put("update_time", now);
 		saasCourseMapper.updateByPrimaryKey(updateCourseMap);
-		
-		/*
-         * 插入到缓存中saas课程评论id列表
-         */
-        Map<String, Object> readSaasCourseCommentMap = new HashMap<>();
-        readSaasCourseCommentMap.put(Constants.CACHED_KEY_COURSE_FIELD, updateCourseMap.get("course_id"));
-        
-        String readSaasCourseCommentKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, readSaasCourseCommentMap);
-        jedis.zadd(readSaasCourseCommentKey, now.getTime(), insertCommentMap.get("comment_id").toString());
 		
 		return 1;
 	}
@@ -394,7 +382,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         if("1".equals(query.get("type"))){
             //单品已购
             query.put("profit_type","0");
-            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+            res = lecturerCoursesProfitMapper.findUserBuiedSingleRecords(query);
         }else{
             //系列已购
             query.put("profit_type","2");
@@ -453,5 +441,18 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_page",result.getPaginator().getTotalPages());
         return res;
     }
+
+    /**
+     * 判断用户是否是指定课程的学员
+     */
+	@Override
+	public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
+		String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+		if("1".equals(isCourseStudent)){
+			return true;
+		}else{
+			return false;
+		}
+	}
 
 }

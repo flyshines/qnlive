@@ -185,6 +185,39 @@
     order by `position` desc
     limit #{page_count}
   </select>
+  <select id="findUserBuiedSingleRecords" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+      lcp.profit_type,
+      lcp.course_id,
+      lcp.profit_amount,
+      lcp.create_time,
+      lcp.position,
+      lcp.user_id
+    FROM
+    t_lecturer_courses_profit lcp
+    WHERE
+    1 = 1
+    <if test="lecturer_id != null" >
+      and lcp.lecturer_id = #{lecturer_id}
+    </if>
+    <if test="user_id != null" >
+      and lcp.user_id = #{user_id}
+    </if>
+    <if test="position != null" >
+     and  `position` <![CDATA[<]]> #{position}
+    </if>
+    <if test="course_type != null" >
+     and  course_type = #{course_type}
+    </if>
+    <if test="profit_type != null" >
+     and  profit_type = #{profit_type}
+    </if>
+    <if test="position != null">
+      and position <![CDATA[ < ]]> #{position}
+    </if>
+    order by `position` desc
+    limit #{page_count}
+  </select>
 
   <select id="findUserDistributionInfoForLastDoneNum" resultType="hashmap" parameterType="hashmap" >
     select

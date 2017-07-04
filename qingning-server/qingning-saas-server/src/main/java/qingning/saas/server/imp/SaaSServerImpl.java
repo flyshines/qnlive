@@ -167,10 +167,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
         Map<String, String> key = jedis.hgetAll(liveRoomListKey);
         String roomId = null;
-        for(String id:key.keySet()){
-            roomId = id;
+        if(key!=null&&!key.isEmpty()) {
+            for (String id : key.keySet()) {
+                roomId = id;
+            }
         }
-
         shop.put("room_id",roomId);
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的店铺");
@@ -412,7 +413,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //根据讲师id查询缓存中讲师已上架系列课，需要传递分页标识
         Set<String> seriesSet = CacheUtils.readLecturerSeriesUp(lecturerId, lastSeriesId, pageCount, jedis);
         if(seriesSet != null){
-        	logger.error("saas店铺-获取店铺系列课程列表>>>>从缓存中获取到讲师的上架系列课");
+        	logger.info("saas店铺-获取店铺系列课程列表>>>>从缓存中获取到讲师的上架系列课");
         	String seriesDetailKey = null;	//获取系列课程详情的key
         	
         	/*
@@ -1056,24 +1057,39 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}
 		
 		/*
-         * 判断是否购买了该课程
+         * 判断是否加入了课程
          */
-		boolean isBought = isBuySaasCourse(userId, singleId, jedis);
-		if(isBought){	//已经购买
-			resultMap.put("is_bought", "1");
-		}else{
-			resultMap.put("is_bought", "0");
-		}
+		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", singleId);
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        //加入课程状态 0未加入 1已加入
+        if(isStudent){
+            resultMap.put("is_join", "1");
+        }else {
+            resultMap.put("is_join", "0");
+        }
+		
 		
 		/*
 		 * 查找是否属于系列课
 		 */
-		if("1".equals(singleMap.get("series_or_course").toString()) || //1系列课
-				"2".equals(singleMap.get("series_or_course").toString())){	//2既是单品又属于某系列
+        String seriesId = singleMap.get("series_id");
+		if(StringUtils.isNotBlank(seriesId)){
 			/*
 			 * 属于某一门系列课，需要查找到系列id
 			 */
-			resultMap.put("series_id", singleMap.get("series_id"));
+			resultMap.put("series_id", seriesId);
+			resultMap.put("series_course_updown", singleMap.get("series_course_updown"));
+			/*
+			 * 判断是否订阅系列
+			 */
+			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			if(isJoinSeries){
+				resultMap.put("is_join_series", "1");
+			}else{
+				resultMap.put("is_join_series", "0");
+			}
 		}
 		
 		/*
@@ -1150,11 +1166,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         
         /*
-         * 判断登录用户是否已经购买该课程
+         * 判断是否加入了课程
          */
-        boolean isBought = isBuySaasCourse(userId, articleId, jedis);
-        if(!isBought){	//未购买
-        	log.error("Saas_H5_课程-获取图文课程内容>>>>用户未购买该课程(articleId=" + articleId + ")");
+		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", articleId);
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        if(!isStudent){	//未购买
+        	log.error("Saas_H5_课程-获取图文课程内容>>>>用户未加入该课程(articleId=" + articleId + ")");
         	throw new QNLiveException("120007");
         }
         
@@ -1173,12 +1192,22 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 查找是否属于系列课
 		 */
-		if("1".equals(articleMap.get("series_or_course").toString()) || //1系列课
-				"2".equals(articleMap.get("series_or_course").toString())){	//2既是单品又属于某系列
+		String seriesId = articleMap.get("series_id");
+		if(StringUtils.isNotBlank(seriesId)){
 			/*
 			 * 属于某一门系列课，需要查找到系列id
 			 */
 			resultMap.put("series_id", articleMap.get("series_id"));
+			resultMap.put("series_course_updown", articleMap.get("series_course_updown"));
+			/*
+			 * 判断是否加入系列课
+			 */
+			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			if(isJoinSeries){
+				resultMap.put("is_join_series", "1");
+			}else{
+				resultMap.put("is_join_series", "0");
+			}
 		}
 		
 		/*
@@ -1215,11 +1244,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         
         /*
-         * 判断登录用户是否已经购买该课程
+         * 判断是否加入了课程
          */
-        boolean isBought = isBuySaasCourse(userId, courseId, jedis);
-        if(!isBought){	//未购买
-        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未购买该课程(courseId=" + courseId + ")");
+		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", courseId);
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        if(!isStudent){	//未购买
+        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
         	throw new QNLiveException("120007");
         }
         
@@ -1238,12 +1270,22 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 查找是否属于系列课
 		 */
-		if("1".equals(courseMap.get("series_or_course").toString()) || //1系列课
-				"2".equals(courseMap.get("series_or_course").toString())){	//2既是单品又属于某系列
+		String seriesId = courseMap.get("series_id");
+		if(StringUtils.isNotBlank(seriesId)){
 			/*
 			 * 属于某一门系列课，需要查找到系列id
 			 */
 			resultMap.put("series_id", courseMap.get("series_id"));
+			resultMap.put("series_course_updown", courseMap.get("series_course_updown"));
+			/*
+			 * 判断是否加入系列课
+			 */
+			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			if(isJoinSeries){
+				resultMap.put("is_join_series", "1");
+			}else{
+				resultMap.put("is_join_series", "0");
+			}
 		}
 		
 		/*
@@ -1354,13 +1396,21 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         List<Map<String, String>> messageInfoList = new ArrayList<>();
         
         /*
-         * TODO 判断登录用户是否已经购买该课程
+         * 判断是否加入了课程
          */
+		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", courseId);
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        if(!isStudent){	//未购买
+        	log.error("Saas_H5_课程-获取课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
+        	throw new QNLiveException("120007");
+        }
         
     	/*
          * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
          */
-        //read系列课的内容课程列表，以创建时间倒序排序
+        //read课程的留言列表，以创建时间倒序排序
         Set<String> messageSet = CacheUtils.readCourseMessageSet(courseId, lastMessageId, pageCount, jedis);
         if(messageSet != null){
         	logger.info("saas课程-获取课程留言列表>>>>从缓存中获取到课程（course_id=" + courseId + "）的留言列表");
@@ -1439,7 +1489,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 课程-添加课程留言
+     * H5_课程-添加课程留言
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1461,13 +1511,17 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取缓存jedis
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
+        Date now = new Date();
         
         /*
-         * TODO 判断登录用户是否已经购买该课程
+         * 判断是否加入了课程
          */
-        boolean isBought = isBuySaasCourse(userId, courseId, jedis);
-        if(!isBought){	//未购买
-        	log.error("Saas_H5_课程-添加课程留言>>>>用户未购买该课程(courseId=" + courseId + ")");
+		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", courseId);
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        if(!isStudent){	//未购买
+        	log.error("Saas_H5_课程-添加课程留言>>>>用户未加入该课程(courseId=" + courseId + ")");
         	throw new QNLiveException("120007");
         }
         
@@ -1510,20 +1564,31 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         insertCommentMap.put("course_name", courseInfoMap.get("course_title"));
         insertCommentMap.put("type", courseInfoMap.get("goods_type"));
         insertCommentMap.put("avatar_address", loginedUserMap.get("avatar_address"));
+        insertCommentMap.put("create_time", now.getTime());
        
         //封装更新的saas课程评论数量map
         Map<String, Object> updateCourseMap = new HashMap<>();
         updateCourseMap.put("course_id", courseId);
         updateCourseMap.put("comment_num", 1);
+        updateCourseMap.put("update_time", now);
         
         //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
-        saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, jedis);
+        saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap);
+        
+        /*
+         * 插入到缓存中saas课程评论id列表
+         */
+        Map<String, Object> readSaasCourseCommentMap = new HashMap<>();
+        readSaasCourseCommentMap.put(Constants.CACHED_KEY_COURSE_FIELD, updateCourseMap.get("course_id"));
+        
+        String readSaasCourseCommentKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, readSaasCourseCommentMap);
+        jedis.zadd(readSaasCourseCommentKey, now.getTime(), insertCommentMap.get("comment_id").toString());
         
         return resultMap;
     }
     
     /**
-     * 用户-提交反馈与建议
+     * H5_用户-提交反馈与建议
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1685,15 +1750,62 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                     String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
                     Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                    Response<String> start_time = pipeline.hget(courseKey, "start_time");
+                    Response<String> end_time = pipeline.hget(courseKey, "end_time");
+                    Response<String> course_updown = pipeline.hget(courseKey, "course_updown");
+                    Response<String> course_image = pipeline.hget(courseKey, "course_image");
+                    Response<String> goods_type = pipeline.hget(courseKey, "goods_type");
+                    Response<String> course_duration = pipeline.hget(courseKey, "course_duration");
+                    Response<String> status = pipeline.hget(courseKey, "status");
                     recordMap.put("courseTitle", courseName);
+                    recordMap.put("start_time", start_time);
+                    recordMap.put("end_time", end_time);
+                    recordMap.put("course_updown", course_updown);
+                    recordMap.put("course_image", course_image);
+                    recordMap.put("goods_type", goods_type);
+                    recordMap.put("course_duration", course_duration);
+                    recordMap.put("status", status);
                 }
                 pipeline.sync();
                 for(Map<String,Object> recordMap : records){
                     Response<String> courseName = (Response)recordMap.get("courseTitle");
+                    Response<String> course_updown = (Response)recordMap.get("course_updown");
+                    Response<String> course_image = (Response)recordMap.get("course_image");
+                    Response<String> goods_type = (Response)recordMap.get("goods_type");
+                    Response<String> course_duration = (Response)recordMap.get("course_duration");
+                    Response<String> status = (Response)recordMap.get("status");
                     recordMap.put("title", courseName.get());
                     //recordMap.remove("cacheLecturerName");
-                    Date recordTime = (Date)recordMap.get("create_time");
-                    recordMap.put("create_time", recordTime);
+                    if(recordMap.get("start_time") instanceof Date){
+                        Date start_time = (Date)recordMap.get("start_time");
+                        Date end_time = (Date)recordMap.get("end_time");
+                        String liveStatus = status.get();
+                        if(! liveStatus.equals("2")&& !liveStatus.equals("5")){
+                            long courseStartTime = start_time.getTime();
+                            if(System.currentTimeMillis() > courseStartTime){
+                                recordMap.put("live_status", "1");
+                            }else{
+                                recordMap.put("live_status", liveStatus);
+                            }
+                        }else{
+                            recordMap.put("live_status", liveStatus);
+                        }
+                        recordMap.put("start_time", start_time);
+                        recordMap.put("end_time", end_time);
+                    }else{
+                        recordMap.remove("start_time");
+                        recordMap.remove("end_time");
+                    }
+                    recordMap.put("status", course_updown.get());
+                    recordMap.put("course_image", course_image.get());
+                    recordMap.put("course_duration", course_duration.get());
+                    if(goods_type!=null){
+                        //非直播
+                        recordMap.put("type", goods_type.get());
+                    }else{
+                        //直播
+                        recordMap.put("type", "0");
+                    }
                 }
             });
             resultMap.put("list", records);
