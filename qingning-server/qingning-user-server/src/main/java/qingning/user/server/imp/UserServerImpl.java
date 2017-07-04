@@ -771,8 +771,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }else if("2".equals(course_type)){
                 //TODO 支付课程要验证支付信息
-                if(reqMap.get("payment_id") == null){
+                 if(reqMap.get("payment_id") == null){
                     throw new QNLiveException("000100");
+                }
+                Map<String,Object> queryMap = new HashMap<>();
+                queryMap.put("payment_id",reqMap.get("payment_id"));
+                queryMap.put("user_id",userId);
+                boolean userWhetherToPay = userModuleServer.findUserWhetherToPay(queryMap);
+                if(!userWhetherToPay){
+                    throw new QNLiveException("120022");
                 }
             }
         }else{
@@ -976,6 +983,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
             if(reqMap.get("payment_id") == null){
                 throw new QNLiveException("000100");
             }
+            Map<String,Object> queryMap = new HashMap<>();
+            queryMap.put("payment_id",reqMap.get("payment_id"));
+            queryMap.put("user_id",userId);
+            boolean userWhetherToPay = userModuleServer.findUserWhetherToPay(queryMap);
+            if(!userWhetherToPay){
+                throw new QNLiveException("120022");
+            }
+
         }
 
         //3.检测学生是否参与了该课程

@@ -160,4 +160,13 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	List<Map<String,Object>> findUserShopRecords(Map<String, Object> queryMap);
+
+	/**
+	 * 判断订单
+	 * @param record
+	 * Created by DavidGong on 2017/7/4.
+	 * @return
+	 */
+	boolean findUserWhetherToPay(Map<String,Object> record);
+
 }

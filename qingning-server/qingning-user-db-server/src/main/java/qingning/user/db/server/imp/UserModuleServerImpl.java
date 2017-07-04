@@ -75,6 +75,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
     @Autowired(required = true)
     private SaaSShopMapper shopMapper;
 
+    @Autowired(required = true)
+    private TradeBillMapper tradeBillMapper;
+
     @Override
     public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
         Map<String, Object> dbResultMap = new HashMap<>();
@@ -248,6 +251,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
             map.put("course_title", map.get("series_title"));
         });
         return res;
+    }
+
+    @Override
+    public boolean findUserWhetherToPay(Map<String, Object> record) {
+        return  !MiscUtils.isEmpty(tradeBillMapper.findUserWhetherToPay(record)) ;
     }
 
     @Override
