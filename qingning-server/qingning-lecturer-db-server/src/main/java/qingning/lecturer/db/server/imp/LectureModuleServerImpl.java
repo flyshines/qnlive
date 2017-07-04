@@ -711,7 +711,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("update_course_time",now);
 		map.put("series_id",series_id);
-		updateCount=seriesMapper.increaseSeriesCourse(map);
+		updateCount=seriesMapper.delSeriesCourse(map);
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
 		dbResultMap.put("update_count", updateCount);
 		dbResultMap.put("update_time", now);
