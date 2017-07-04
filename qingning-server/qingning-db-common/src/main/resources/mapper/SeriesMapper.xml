@@ -153,6 +153,9 @@
 			<if test="series_img != null" >
 				series_img=#{series_img},
 			</if>
+			<if test="course_num != null" >
+				course_num=#{course_num},
+			</if>
 			<if test="series_remark != null" >
 				series_remark=#{series_remark},
 			</if>
