@@ -218,12 +218,14 @@ public class CommonController extends AbstractController {
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-
-        Integer key = Integer.valueOf(resultMap.get("key").toString());
+        String appName = Constants.HEADER_APP_NAME;
+        if(resultMap.get("app_name")!=null){
+            appName = resultMap.get("app_name").toString();
+        }
         String access_token = (String) resultMap.get("access_token");
         String weName = (String) resultMap.get("name");
 
-        response.sendRedirect(MiscUtils.getConfigByKey("share_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
+        response.sendRedirect(MiscUtils.getConfigByKey("share_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPNAME",appName));
     }
 
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
