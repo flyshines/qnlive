@@ -161,6 +161,7 @@
 					<param name="price" type="double" default="0" />
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
+					<param name="course_abstract" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -197,6 +198,8 @@
 					<param name="course_image" type="string"  require="N"/>
 					<param name="price" type="double"  require="N"/>
 					<param name="details" type="string"  require="N"/>
+					<param name="course_abstract" type="string"  require="N"/>
+					<param name="course_remark" type="string"  require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -654,6 +657,7 @@
 					<param name="share_url" type="string" />
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
+					<param name="course_abstract" type="string" />
 				</outputs>
 			</function>
 			
@@ -838,6 +842,8 @@
 						<param name="create_time" type="long"/>
 						<param name="type" type="string"/>
 						<param name="position" type="long"/>
+						<param name="course_duration" type="long"/>
+						<param name="live_status" type="long"/>
 					</param>
 				</outputs>
 			</function>
@@ -858,6 +864,8 @@
 						<param name="position" type="long"/>
 						<param name="title" type="string"/>
 						<param name="type" type="string"/>
+						<param name="update_plan" type="long"/>
+						<param name="student_num" type="long"/>
 					</param>
 				</outputs>
 			</function>

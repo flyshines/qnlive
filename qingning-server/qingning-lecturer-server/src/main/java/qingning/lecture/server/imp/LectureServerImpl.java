@@ -456,7 +456,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.del(seriesKey);
                 //获取系列课程详情
                 CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                setSeriesRedis(series_id,lecturer_id,jedis);
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
@@ -3273,9 +3272,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 course  = CacheUtils.readCourse(courseId,
                         generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, updownMap), readCourseOperation, jedis, true);
             }
-
-
-
             String lecturer_id = course.get("lecturer_id");
             if(!lecturer_id.equals(user_id)){
                 throw new QNLiveException("210001");
@@ -3299,7 +3295,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 courseMap  = CacheUtils.readCourse(courseId,
                         generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, updownMap), readCourseOperation, jedis, true);
             }
-
             if(query_type.equals("0")){//单品
                 //<editor-fold desc="单品">
                 if(query_from.equals("0")){ //判断来源

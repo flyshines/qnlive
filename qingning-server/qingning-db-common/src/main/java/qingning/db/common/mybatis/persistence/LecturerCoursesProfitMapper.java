@@ -46,4 +46,11 @@ public interface LecturerCoursesProfitMapper {
 	 * @return
 	 */
 	PageList<Map<String,Object>> searchOrdersListByUserId(Map<String, Object> param, PageBounds page);
+
+
+	/**单品已购
+	 * @param query
+	 * @return
+	 */
+	List<Map<String,Object>> findUserBuiedSingleRecords(Map<String, Object> query);
 }

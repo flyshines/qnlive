@@ -4,14 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.FetchRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -36,11 +34,8 @@ import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -646,7 +641,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap,reqEntity.getAppName());
-
+            resultMap.put("app_name",loginInfoMap.get("app_name"));
             return resultMap;
         }
     }
@@ -840,8 +835,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
             Map<String, String> key = jedis.hgetAll(liveRoomListKey);
             String roomId = null;
-            for(String id:key.keySet()){
-                roomId = id;
+            if(key!=null&&!key.isEmpty()) {
+                for (String id : key.keySet()) {
+                    roomId = id;
+                }
             }
             courseMap.put("room_id",roomId);
         }else{
@@ -859,6 +856,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> insertMap = new HashMap<>();
         insertMap.put("user_id",userId);
+        //判断roomID
+        if(courseMap.get("room_id")==null){
+            //直播间信息查询
+            Map<String,String> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+            Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+            if(key!=null&&!key.isEmpty()){
+                String roomId = null;
+                for(String id:key.keySet()){
+                    roomId = id;
+                }
+                courseMap.put("room_id",roomId);
+            }
+        }
         insertMap.put("room_id",courseMap.get("room_id"));
         insertMap.put("course_id",courseId);
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
@@ -1063,7 +1075,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if(MiscUtils.isEmpty(courseMap)){
                     throw new QNLiveException("100004");
                 }
-                String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
 
                 String profit_type = (String)billMap.get("profit_type");
                 //系列类型（1直播(包括系列直播) 2店铺课程）
@@ -1235,6 +1246,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 //3.3 课程缓存或者表 t_courses
                 if("0".equals(profit_type)){
+                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                     //jedis.hincrBy(courseKey, "student_num", 1);
                     query.clear();
                     query.put("course_id", courseId);
@@ -1254,6 +1266,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else if("1".equals(profit_type)){
+                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                     //如果之前并没有打赏该课程，则计入
                     if(MiscUtils.isEmpty(rewardMap)){
                         jedis.hincrBy(courseKey, "extra_num", 1);
@@ -1263,6 +1276,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                }else if("2".equals(profit_type)){
+                    //系列课收益统计
+                    query.put("series_id", courseId);
+                    String seriesKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
+                    query.clear();
+                    query.put("course_id", courseId);
+                    query.put("profit_type", "2");
+                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
+                    jedis.hset(seriesKey, "series_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
                 //TODO 系列课除外 暂时不做热门推荐
                 if(StringUtils.isEmpty(courseMap.get("series_id"))){
