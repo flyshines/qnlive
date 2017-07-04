@@ -857,6 +857,8 @@
 						<param name="position" type="long"/>
 						<param name="title" type="string"/>
 						<param name="type" type="string"/>
+						<param name="update_plan" type="long"/>
+						<param name="student_num" type="long"/>
 					</param>
 				</outputs>
 			</function>
