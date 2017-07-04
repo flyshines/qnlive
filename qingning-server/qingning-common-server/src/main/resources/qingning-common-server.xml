@@ -600,7 +600,7 @@
 				</auth>
 				<inputs>
 					<param name="classify_id" type="string"   require="N" />
-					<param name="search_text" type="string"   require="Y,000100" />
+					<param name="search_text" type="rstring"   require="Y,000100" />
 					<param name="search_type" type="string"   require="Y,000100" />
 					<param name="page_count" type="string"   require="Y,000100" />
 					<param name="page_num" type="string"   require="Y,000100" />

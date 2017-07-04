@@ -2761,7 +2761,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         //0.校验该课程是否属于该讲师
-        Map<String,String> courseMap = jedis.hgetAll(courseKey);
+        Map<String,String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
 
         String courseOwner = courseMap.get("lecturer_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//根据安全证书获取userId

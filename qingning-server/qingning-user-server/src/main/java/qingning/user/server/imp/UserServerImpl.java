@@ -935,10 +935,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
             //</editor-fold>
-        }else{
-
-
-
         }
         return resultMap;
     }
