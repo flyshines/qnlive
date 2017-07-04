@@ -539,7 +539,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             resultMap.put("series_updown",series_updown);
             Map<String,Object> queryMap = new HashMap<>();
             queryMap.put("user_id", userId);
-            queryMap.put("series_id",reqMap.get("series_id").toString());
+            queryMap.put("series_id",series_id);
             //判断访问者是普通用户还是讲师
             isStudent = userModuleServer.isStudentOfTheSeries(queryMap);
             //返回用户身份
