@@ -7,5 +7,7 @@ public interface TradeBillMapper {
     int updateTradeBill(Map<String,Object> record);
     Map<String,Object> findByOutTradeNo(String outTradeNo);
 
+
+    String findUserWhetherToPay(Map<String,Object> record);
     Map<String,Object> findUserNumberByCourse(Map<String,Object> record);
 }
