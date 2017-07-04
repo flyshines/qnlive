@@ -878,17 +878,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
             goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+            insertMap.put("course_type","1");
+        }else if(profit_type.equals("0")){
+            insertMap.put("amount", courseMap.get("course_price"));
+            totalFee = Integer.parseInt(courseMap.get("course_price"));
+            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
             //区分店铺课程
             if(courseMap.get("goods_type")!=null){
                 insertMap.put("course_type","2");
             }else{
                 insertMap.put("course_type","1");
             }
-        }else if(profit_type.equals("0")){
-            insertMap.put("amount", courseMap.get("course_price"));
-            totalFee = Integer.parseInt(courseMap.get("course_price"));
-            goodName = MiscUtils.getConfigByKey("weixin_pay_buy_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
-            insertMap.put("course_type","1");
         }else if(profit_type.equals("2")){
             //系列课收益
             insertMap.put("amount", courseMap.get("series_price"));
