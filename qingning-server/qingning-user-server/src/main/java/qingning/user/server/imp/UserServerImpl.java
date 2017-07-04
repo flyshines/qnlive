@@ -2604,8 +2604,14 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, reqMap);
+        Map<String,String> values = null;
+        if(jedis.exists(userKey)) {
+            values =  CacheUtils.readUser(userId, generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
+
+        }else{
+            values =  jedis.hgetAll(userKey);
+        }
        // jedis.del(userKey);
-        Map<String,String> values = CacheUtils.readUser(userId, generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
         long series_num = 0;
         try{
             series_num = Long.parseLong(values.get("series_num").toString());
