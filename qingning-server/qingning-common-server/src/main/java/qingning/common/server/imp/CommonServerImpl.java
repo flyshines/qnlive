@@ -1058,7 +1058,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if(MiscUtils.isEmpty(courseMap)){
                     throw new QNLiveException("100004");
                 }
-                String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
 
                 String profit_type = (String)billMap.get("profit_type");
                 //系列类型（1直播(包括系列直播) 2店铺课程）
@@ -1230,6 +1229,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 //3.3 课程缓存或者表 t_courses
                 if("0".equals(profit_type)){
+                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                     //jedis.hincrBy(courseKey, "student_num", 1);
                     query.clear();
                     query.put("course_id", courseId);
@@ -1249,6 +1249,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else if("1".equals(profit_type)){
+                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                     //如果之前并没有打赏该课程，则计入
                     if(MiscUtils.isEmpty(rewardMap)){
                         jedis.hincrBy(courseKey, "extra_num", 1);
@@ -1258,6 +1259,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                }else if("2".equals(profit_type)){
+                    //系列课收益统计
+                    query.put("series_id", courseId);
+                    String seriesKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
+                    query.clear();
+                    query.put("course_id", courseId);
+                    query.put("profit_type", "2");
+                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
+                    jedis.hset(seriesKey, "series_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
                 //TODO 系列课除外 暂时不做热门推荐
                 if(StringUtils.isEmpty(courseMap.get("series_id"))){
