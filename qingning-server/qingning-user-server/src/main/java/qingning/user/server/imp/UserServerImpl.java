@@ -2607,7 +2607,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,String> values = null;
         if(jedis.exists(userKey)) {
             values =  CacheUtils.readUser(userId, generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
-
         }else{
             values =  jedis.hgetAll(userKey);
         }
@@ -2650,7 +2649,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             userSeriesIdSet = jedis.zrange(userSeriesListKey, startIndex, endIndex);
-            result.put("series_list", seriesList(new ArrayList<String>(userSeriesIdSet), jedis));
+            ArrayList<String> transfer = new ArrayList<>(userSeriesIdSet);
+            Collections.reverse(transfer);
+            result.put("series_list", seriesList(transfer ,jedis));
         }
         return result;
     }
