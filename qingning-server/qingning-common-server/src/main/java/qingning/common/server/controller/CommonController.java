@@ -208,6 +208,30 @@ public class CommonController extends AbstractController {
         return ;
     }
 
+    @RequestMapping(value = "/common/saas/login", method = RequestMethod.GET)
+    public void pcLoginForSaaS(     @RequestParam("code") String code,
+                             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+                             HttpServletRequest request,HttpServletResponse response) throws Exception {
+        Map<String, String> map = new HashMap<>();
+        map.put("code", code);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "",state);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+        Integer key = Integer.valueOf(resultMap.get("key").toString());
+        String access_token = (String) resultMap.get("access_token");
+        String weName = (String) resultMap.get("name");
+        if(key == 0){//未绑定
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_phone_url",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
+        } else if(key == 1) { //登录过 有直播间信息
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_binding_room_url",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")));
+        } else { //登录过 没有直播间信息
+            //重定向到另一个页面
+            response.sendRedirect(MiscUtils.getConfigByKey("weixin_pc_no_to_creat_room_ur",state));
+        }
+    }
+
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
     public void pcLogin(     @RequestParam("code") String code,
                              @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
