@@ -177,6 +177,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
 	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程
 
+	public static final String SYS_USER_BUY_LIST = "SYS:USER:BUY:{user_id}";
 
 
 

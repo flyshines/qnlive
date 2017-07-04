@@ -11,6 +11,7 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.model.FetchRet;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -1210,9 +1211,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
 
+                //用户已购课程
+                query.clear();
+                query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+                String userBuyKey = MiscUtils.getKeyOfCachedData(Constants.SYS_USER_BUY_LIST, query);
+                jedis.sadd(userBuyKey,courseId);
+
                 //店铺今日统计
                 query.clear();
-                query.put("user_id", lecturerId);
+                query.put(Constants.CACHED_KEY_USER_FIELD, lecturerId);
                 String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
                 if(!jedis.exists(userCountKey)){
                     long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
