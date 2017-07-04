@@ -394,7 +394,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         if("1".equals(query.get("type"))){
             //单品已购
             query.put("profit_type","0");
-            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+            res = lecturerCoursesProfitMapper.findUserBuiedSingleRecords(query);
         }else{
             //系列已购
             query.put("profit_type","2");

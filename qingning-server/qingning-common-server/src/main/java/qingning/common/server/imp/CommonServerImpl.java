@@ -835,8 +835,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
             Map<String, String> key = jedis.hgetAll(liveRoomListKey);
             String roomId = null;
-            for(String id:key.keySet()){
-                roomId = id;
+            if(key!=null&&!key.isEmpty()) {
+                for (String id : key.keySet()) {
+                    roomId = id;
+                }
             }
             courseMap.put("room_id",roomId);
         }else{
@@ -854,6 +856,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> insertMap = new HashMap<>();
         insertMap.put("user_id",userId);
+        //判断roomID
+        if(courseMap.get("room_id")==null){
+            //直播间信息查询
+            Map<String,String> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+            Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+            if(key!=null&&!key.isEmpty()){
+                String roomId = null;
+                for(String id:key.keySet()){
+                    roomId = id;
+                }
+                courseMap.put("room_id",roomId);
+            }
+        }
         insertMap.put("room_id",courseMap.get("room_id"));
         insertMap.put("course_id",courseId);
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
