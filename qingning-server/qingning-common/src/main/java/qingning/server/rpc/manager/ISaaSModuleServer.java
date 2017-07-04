@@ -153,10 +153,9 @@ public interface ISaaSModuleServer {
      /** 新增saas课程的留言，同时更新课程的评论次数
      * @param insertCommentMap
      * @param updateCourseMap 
-     * @param jedis 用于更新缓存中saas课程评论id列表
      * @return
      */
-	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Jedis jedis);
+	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap);
 
 	/**
 	 * 根据条件获取直播课程列表
@@ -196,4 +195,11 @@ public interface ISaaSModuleServer {
      * @return
      */
     Map<String,Object> getOrdersList(Map<String, Object> query);
+
+    /**
+     * 判断用户是否是指定课程的学员
+     * @param selectIsStudentMap
+     * @return
+     */
+	boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap);
 }

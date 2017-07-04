@@ -450,9 +450,11 @@
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="create_time" type="long" />
 						<param name="single_type" type="string" fieldname="goods_type" />
+						<param name="series_course_updown" type="string" />
 					</param>
 					<param name="series_id" type="string" />
-					<param name="is_bought" type="string" />
+					<param name="is_join_series" type="string" />
+					<param name="is_join" type="string" />
 				</outputs>
 			</function>
 
@@ -679,7 +681,8 @@
 						<param name="price" type="double" fieldname="course_price" />
 					</param>
 					<param name="series_id" type="string" />
-					<param name="is_bought" type="string" />
+					<param name="series_course_updown" type="string" />
+					<param name="is_join_series" type="string" />
 					<param name="share_url" type="string" />
 				</outputs>
 			</function>
@@ -705,6 +708,8 @@
 						<param name="course_type" type="string" fieldname="goods_type" />
 					</param>
 					<param name="series_id" type="string" />
+					<param name="series_course_updown" type="string" />
+					<param name="is_join_series" type="string" />
 					<param name="share_url" type="string" />
 				</outputs>
 			</function>
