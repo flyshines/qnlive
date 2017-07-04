@@ -191,9 +191,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
         Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
 
+        if(MiscUtils.isEmpty(lecture_id)){
+            if(updown == 2){
+                courseId = null;
+            }
+        }
+
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
-        if(courceStatus == 4 && updown == 1){//如果预告或者是正在直播的课程
+        if(courceStatus == 4 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
@@ -233,7 +239,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
-        if(courceStatus == 1 && updown == 1){//如果预告或者是正在直播的课程
+        if(courceStatus == 1 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
@@ -277,7 +283,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
         //=========================下面的缓存使用另外一种方式获取====================================
-        if(courceStatus == 2  && updown == 1){//查询结束课程
+        if(courceStatus == 2 ){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
             long endIndex = -1;   //结束下标
@@ -323,8 +329,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 Collections.reverse(transfer);
                 courseIdList.addAll(transfer);
             }
-
-
         }
         //</editor-fold>
         if(!MiscUtils.isEmpty(lecture_id) && !MiscUtils.isEmpty(userId) && lecture_id.equals(userId)){
@@ -668,6 +672,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         Map<String, Object> platformCourses = new HashMap<>();
         platformCourses = getPlatformCourses(userId, state, pageCount, course_id, null, appName, lecturerId,updown);
+
         resultMap.putAll(platformCourses);
       //  resultMap.put("course_list", courseList);
         resultMap.put("course_sum",jedis.zrange(lecturerCoursesPredictionKey,0,-1).size()+ jedis.zrange(lecturerCoursesFinishKey,0,-1).size());
@@ -935,10 +940,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, courseInfoMap.get("lecturer_id").toString());
             //</editor-fold>
-        }else{
-
-
-
         }
         return resultMap;
     }
@@ -1105,18 +1106,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, String> courseMap = new HashMap<>();
         //1.先检查该课程是否在缓存中
         if (jedis.exists(courseKey)) {
-
-            //任意课程都可以免费试听五分钟，不进行是否为该课程学生的校验
-            //检测学员是否加入了该课程，加入课程才能查询相关信息，如果没加入课程则提示学员未加入该课程（120007）
-//            Map<String,Object> queryStudentMap = new HashMap<>();
-//            queryStudentMap.put("user_id", userId);
-//            queryStudentMap.put("course_id",reqMap.get("course_id").toString());
-//            if(!userModuleServer.isStudentOfTheCourse(queryStudentMap)){
-//                throw new QNLiveException("120007");
-//            }
-
             courseMap = jedis.hgetAll(courseKey);
-
             JSONArray pptList = null;
             map.clear();
             map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
