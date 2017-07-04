@@ -208,6 +208,26 @@ public class CommonController extends AbstractController {
         return ;
     }
 
+    @RequestMapping(value = "/common/saas/login", method = RequestMethod.GET)
+    public void pcLoginForSaaS(     @RequestParam("code") String code,
+                             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+                             HttpServletRequest request,HttpServletResponse response) throws Exception {
+        Map<String, String> map = new HashMap<>();
+        map.put("code", code);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "",state);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+        String appName = Constants.HEADER_APP_NAME;
+        if(resultMap.get("app_name")!=null){
+            appName = resultMap.get("app_name").toString();
+        }
+        String access_token = (String) resultMap.get("access_token");
+        String weName = (String) resultMap.get("name");
+
+        response.sendRedirect(MiscUtils.getConfigByKey("share_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPNAME",appName));
+    }
+
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
     public void pcLogin(     @RequestParam("code") String code,
                              @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,

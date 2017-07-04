@@ -161,6 +161,7 @@
 					<param name="price" type="double" default="0" />
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
+					<param name="course_abstract" type="string" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -197,6 +198,8 @@
 					<param name="course_image" type="string"  require="N"/>
 					<param name="price" type="double"  require="N"/>
 					<param name="details" type="string"  require="N"/>
+					<param name="course_abstract" type="string"  require="N"/>
+					<param name="course_remark" type="string"  require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -652,6 +655,7 @@
 					<param name="share_url" type="string" />
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
+					<param name="course_abstract" type="string" />
 				</outputs>
 			</function>
 			
