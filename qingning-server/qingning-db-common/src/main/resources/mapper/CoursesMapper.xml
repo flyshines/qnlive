@@ -566,7 +566,7 @@
       t.course_id,
       t.course_title,
       t.course_url AS course_image,
-      '4' AS type,
+      '0' AS type,
       t.create_time,
       t.student_num AS view_num,
       '' AS comment_num,

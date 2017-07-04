@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.Configuration;
@@ -35,11 +34,8 @@ import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -1210,9 +1206,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
 
+                //用户已购课程
+                query.clear();
+                query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+                String userBuyKey = MiscUtils.getKeyOfCachedData(Constants.SYS_USER_BUY_LIST, query);
+                jedis.sadd(userBuyKey,courseId);
+
                 //店铺今日统计
                 query.clear();
-                query.put("user_id", lecturerId);
+                query.put(Constants.CACHED_KEY_USER_FIELD, lecturerId);
                 String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
                 if(!jedis.exists(userCountKey)){
                     long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
