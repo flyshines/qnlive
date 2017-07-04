@@ -225,7 +225,7 @@ public class CommonController extends AbstractController {
         String access_token = (String) resultMap.get("access_token");
         String weName = (String) resultMap.get("name");
 
-        response.sendRedirect(MiscUtils.getConfigByKey("share_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPNAME",appName));
+        response.sendRedirect(MiscUtils.getConfigByKey("share_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPFROME",appName));
     }
 
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)

@@ -1724,8 +1724,31 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             query.remove("position");
         }
         List<Map<String,Object>> records = saaSModuleServer.findUserBuiedRecords(query);
-        resultMap.put("list", records);
 
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.put(Constants.CACHED_KEY_SERIES_FIELD, recordMap.get(Constants.CACHED_KEY_SERIES_FIELD));
+                        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, cacheQueryMap);
+                        Response<String> studentNum = pipeline.hget(seriesKey, "student_num");
+                        recordMap.put("studentNum",studentNum);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> studentNum = (Response)recordMap.get("studentNum");
+                        recordMap.put("student_num",studentNum.get());
+                    }
+                }
+            });
+            resultMap.put("list", records);
+        }
         return resultMap;
     }
     /**
