@@ -197,7 +197,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
 
-
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
         if(courceStatus == 4 ){//如果预告或者是正在直播的课程
