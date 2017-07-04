@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
@@ -76,6 +77,12 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                             }else{
                                 jedis.zadd(seriesCourseDownKey, update_time,course.get("course_id").toString());
                             }
+                        }
+                        map.put("course_num",seriesCourseList.size());
+                        seriesMapper.updateSeries(map);
+                        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+                        if(jedis.exists(seriesKey)){
+                            jedis.hset(seriesKey,"course_num",seriesCourseList.size()+"");
                         }
                     }
                 }
