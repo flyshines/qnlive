@@ -1267,24 +1267,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 //3.3 课程缓存或者表 t_courses
                 if("0".equals(profit_type)){
                     //jedis.hincrBy(courseKey, "student_num", 1);
-                    query.clear();
-                    query.put("course_id", courseId);
-                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
+                    Map<String,Object> param = new HashMap<>();
+                    param.put("course_id", courseId);
+                    String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, param);
 
-                    Map<String,Object> numInfo = commonModuleServer.findCourseRecommendUserNum(query);
+                    Map<String,Object> numInfo = commonModuleServer.findCourseRecommendUserNum(param);
                     long num = 0;
                     if(!MiscUtils.isEmpty(numInfo)){
                         num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
                     }
                     jedis.hset(courseKey, "student_num", num+"");
-/*                	long lastNum = MiscUtils.convertObjectToLong(jedis.hget(courseKey, "student_num"));
-                	if(lastNum<num){
-                		jedis.hset(courseKey, "student_num", num+"");
-                	}*/
-                    query.clear();
-                    query.put("course_id", courseId);
-                    query.put("profit_type", "0");
-                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
+
+                    param = new HashMap<>();
+                    param.put("course_id", courseId);
+                    param.put("profit_type", "0");
+                    sumInfo = commonModuleServer.findCoursesSumInfo(param);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else if("1".equals(profit_type)){
                     String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
@@ -1299,13 +1296,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else if("2".equals(profit_type)){
                     //系列课收益统计
-                    query.clear();
-                    query.put("series_id", courseId);
-                    String seriesKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, query);
-                    query.clear();
-                    query.put("course_id", courseId);
-                    query.put("profit_type", "2");
-                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
+                    Map<String,Object> param = new HashMap<>();
+                    param.put("series_id", courseId);
+                    String seriesKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, param);
+                    param.put("course_id", courseId);
+                    param.put("profit_type", "2");
+                    sumInfo = commonModuleServer.findCoursesSumInfo(param);
                     jedis.hset(seriesKey, "series_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }
                 //TODO 系列课除外 暂时不做热门推荐
