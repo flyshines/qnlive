@@ -113,7 +113,7 @@
   </select>
 
   <select id="findPlatformCourseList" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses where status = #{status}
+    select * from t_courses where status = #{status} and course_updown = 1
     <if test="app_name != null" >
       and app_name = #{app_name}
     </if>
@@ -147,7 +147,7 @@
   </select>
 
   <select id="findCourseByStatus" resultType="hashmap" parameterType="hashmap" >
-    SELECT course_id FROM t_courses WHERE app_name = #{appName} and `status` = #{status}
+    SELECT course_id FROM t_courses WHERE app_name = #{appName} and `status` = #{status} and course_updown = 1
   </select>
 
   <insert id="insertCourse" parameterType="hashmap" >

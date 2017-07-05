@@ -199,6 +199,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
+        /**
+         * 直播
+         */
         if(courceStatus == 4 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
@@ -239,6 +242,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
+
+
+        /**
+         * 预告
+         */
         if(courceStatus == 1 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
@@ -283,6 +291,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
         //=========================下面的缓存使用另外一种方式获取====================================
+        /**
+         * 结束
+         */
         if(courceStatus == 2 ){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
