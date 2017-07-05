@@ -1282,7 +1282,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     param.put("course_id", courseId);
                     param.put("profit_type", "0");
                     sumInfo = commonModuleServer.findCoursesSumInfo(param);
-                    jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
+                    jedis.hset(courseKey, "course_amount", lecturer_profit);
+                    if(!lecturer_profit.equals(jedis.hget(courseKey,"series_amount"))){
+                        jedis.hset(courseKey, "course_amount", lecturer_profit);
+                    }
                 }else if("1".equals(profit_type)){
                     query.clear();
                     query.put("course_id", courseId);
@@ -1305,6 +1309,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
                     logger.error("series_test_13006660"+seriesKey+"  " + lecturer_profit+"   "+appName);
                     long ibak = jedis.hset(seriesKey, "series_amount", lecturer_profit);
+                    if(!lecturer_profit.equals(jedis.hget(seriesKey,"series_amount"))){
+                        logger.error("setAgain!!!!!!!!!!");
+                        jedis.hset(seriesKey, "series_amount", lecturer_profit);
+                    }
                     logger.error(ibak+"");
                 }
                 //TODO 系列课除外 暂时不做热门推荐
