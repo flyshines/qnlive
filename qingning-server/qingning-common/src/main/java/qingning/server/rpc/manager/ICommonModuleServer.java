@@ -160,7 +160,7 @@ public interface ICommonModuleServer {
 	int updateClassify(Map<String, Object> record);
 	/**
 	 * 新增轮播
-	 * @param reqMap
+	 * @param insertMap
 	 * @return
 	 */
 	int addBanner(Map<String, Object> insertMap);
@@ -261,4 +261,10 @@ public interface ICommonModuleServer {
 	 * @return
 	 */
 	void updateShopUsers(String lecturerId, String userId);
+
+    List<Map<String,Object>> findSeriesByLecturer(String lecturerId);
+
+	List<Map<String,Object>> findCourseListBySeriesId(String series_id);
+
+	void updateSeries(Map<String, Object> map);
 }

@@ -1069,4 +1069,19 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			shopUserMapper.insert(user);
 		}
 	}
+
+	@Override
+	public List<Map<String, Object>> findSeriesByLecturer(String lecturerId) {
+		return seriesMapper.findSeriesByLecturer(lecturerId);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseListBySeriesId(String series_id) {
+		return coursesMapper.findCourseListBySeriesId(series_id);
+	}
+
+	@Override
+	public void updateSeries(Map<String, Object> map) {
+		seriesMapper.updateSeries(map);
+	}
 }
