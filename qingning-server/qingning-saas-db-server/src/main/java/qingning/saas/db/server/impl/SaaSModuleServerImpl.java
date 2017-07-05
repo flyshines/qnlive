@@ -39,7 +39,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Autowired(required = true)
     private CoursesMapper coursesMapper;
     @Autowired(required = true)
-    private SaaSFeedBackMapper feedBackMapper;
+    private SaaSFeedBackMapper saasFeedbackMapper;
     @Autowired(required = true)
     private SaaSCourseCommentMapper courseCommentMapper;
     @Autowired(required = true)
@@ -233,7 +233,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> getUserFeedBack(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = feedBackMapper.selectFeedBackByShop(param,page);
+        PageList<Map<String,Object>> result = saasFeedbackMapper.selectFeedBackByShop(param,page);
         Map<String,Object> res = new HashMap<>();
         res.put("list",result);
         res.put("total_count",result.getTotal());
@@ -377,7 +377,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
      */
 	@Override
 	public int addFeedback(Map<String, Object> newFeedbackMap) {
-		return feedbackMapper.insertFeedBack(newFeedbackMap);
+		return saasFeedbackMapper.insert(newFeedbackMap);
 	}
 
 

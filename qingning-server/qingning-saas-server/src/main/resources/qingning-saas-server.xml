@@ -345,6 +345,7 @@
 						<param name="browse_count" type="long" fieldname="click_num" />
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="put_time" type="long" fieldname="create_time" />
+						<param name="is_join" type="string" />
 					</param>
 				</outputs>
 			</function>
@@ -776,13 +777,14 @@
 					<accessToken require="Y,000100" />
 				</auth>
 				<inputs>
-					<param name="content" type="string" require="Y"/>
-					<param name="contact" type="string" require="Y"/>
+					<param name="shop_id" type="string" require="Y,000100" />
+					<param name="content" type="string" require="Y,000100"/>
+					<param name="contact" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
 				</outputs>
 			</function>
-			<!-- 用户-提交反馈与建议 -->
+			<!-- 商品-系列-已购用户列表 -->
 			<function name="getSeriesUserList">
 				<auth>
 					<accessToken require="Y,000100" />

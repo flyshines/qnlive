@@ -20,6 +20,9 @@
       <if test="back_id != null" >
         back_id,
       </if>
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
       <if test="user_id != null" >
         user_id,
       </if>
@@ -42,6 +45,9 @@
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="back_id != null" >
         #{back_id,jdbcType=VARCHAR},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id,jdbcType=VARCHAR},
       </if>
       <if test="user_id != null" >
         #{user_id,jdbcType=VARCHAR},
