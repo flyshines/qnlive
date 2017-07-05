@@ -1059,7 +1059,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
         String appName = MiscUtils.getAppNameByAppid(appid);
-        String appName = "qnlive";
+        //String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
