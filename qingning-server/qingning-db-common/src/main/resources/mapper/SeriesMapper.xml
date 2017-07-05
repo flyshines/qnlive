@@ -215,7 +215,7 @@
 		t.update_course_time,
 		t.series_status
 		FROM
-		`t_series` t
+		t_series t
 		WHERE
 		t.lecturer_id = #{lecturer_id}
 		ORDER BY t.update_course_time DESC

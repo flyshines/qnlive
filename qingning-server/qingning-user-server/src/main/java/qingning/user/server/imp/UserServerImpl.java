@@ -199,6 +199,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
+        /**
+         * 直播
+         */
         if(courceStatus == 4 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
@@ -239,6 +242,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courceStatus = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
+
+
+        /**
+         * 预告
+         */
         if(courceStatus == 1 ){//如果预告或者是正在直播的课程
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
@@ -283,6 +291,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
 
         //=========================下面的缓存使用另外一种方式获取====================================
+        /**
+         * 结束
+         */
         if(courceStatus == 2 ){//查询结束课程
             boolean key = true;//作为开关 用于下面是否需要接着执行方法
             long startIndex = 0; //开始下标
@@ -679,10 +690,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
-
-
-
-
     Map<String, Object> findCourseFinishList(Jedis jedis, String key,
                                              String startIndexCache, String startIndexDB, String endIndex, Integer limit, Integer count) {
         Set<Tuple> finishList = jedis.zrevrangeByScoreWithScores(key, startIndexCache, endIndex, limit, count);
@@ -766,6 +773,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //2.1如果课程为私密课程则检验密码
 
         String course_type = courseInfoMap.get("course_type");
+
+        boolean isSeriesStudent = false;//为用户，则返回用户部分信息
+        if(!MiscUtils.isEmpty(courseInfoMap.get("series_id"))){
+            Map<String,Object> queryMap = new HashMap<>();
+            queryMap.put("user_id", userId);
+            queryMap.put("series_id",reqMap.get("series_id").toString());
+            //判断访问者是普通用户还是讲师
+            //如果为讲师，则返回讲师部分特定信息
+            isSeriesStudent = userModuleServer.isStudentOfTheSeries(queryMap);
+        }
+
         if(query_type.equals("0")){
             if("1".equals(course_type)){
                 if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
@@ -775,16 +793,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("120006");
                 }
             }else if("2".equals(course_type)){
-                //TODO 支付课程要验证支付信息
-                 if(reqMap.get("payment_id") == null){
-                    throw new QNLiveException("000100");
-                }
-                Map<String,Object> queryMap = new HashMap<>();
-                queryMap.put("payment_id",reqMap.get("payment_id"));
-                queryMap.put("user_id",userId);
-                boolean userWhetherToPay = userModuleServer.findUserWhetherToPay(queryMap);
-                if(!userWhetherToPay){
-                    throw new QNLiveException("120022");
+                if(!isSeriesStudent){
+                    if(reqMap.get("payment_id") == null){
+                        throw new QNLiveException("000100");
+                    }
+                    Map<String,Object> queryMap = new HashMap<>();
+                    queryMap.put("payment_id",reqMap.get("payment_id"));
+                    queryMap.put("user_id",userId);
+                    boolean userWhetherToPay = userModuleServer.findUserWhetherToPay(queryMap);
+                    if(!userWhetherToPay){
+                        throw new QNLiveException("120022");
+                    }
                 }
             }
         }else{
