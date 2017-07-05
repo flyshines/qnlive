@@ -1302,8 +1302,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     param.put("course_id", courseId);
                     param.put("profit_type", "2");
                     sumInfo = commonModuleServer.findCoursesSumInfo(param);
-                    logger.error("series_test_13006660"+seriesKey+"  " + MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"   "+appName);
-                    long ibak = jedis.hset(seriesKey, "series_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
+                    logger.error("series_test_13006660"+seriesKey+"  " + lecturer_profit+"   "+appName);
+                    long ibak = jedis.hset(seriesKey, "series_amount", lecturer_profit);
                     logger.error(ibak+"");
                 }
                 //TODO 系列课除外 暂时不做热门推荐
