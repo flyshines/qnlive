@@ -1288,13 +1288,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     sumInfo = commonModuleServer.findCoursesSumInfo(param);
                     jedis.hset(courseKey, "course_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                 }else if("1".equals(profit_type)){
+                    query.clear();
+                    query.put("course_id", courseId);
                     String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
                     //如果之前并没有打赏该课程，则计入
                     if(MiscUtils.isEmpty(rewardMap)){
                         jedis.hincrBy(courseKey, "extra_num", 1);
                     }
-                    query.clear();
-                    query.put("course_id", courseId);
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
