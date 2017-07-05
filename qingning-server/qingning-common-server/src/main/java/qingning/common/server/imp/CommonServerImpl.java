@@ -503,7 +503,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     private void checkShopInfo(Map<String, Object> loginInfoMap,RequestEntity reqEntity,Jedis jedis) throws Exception{
         String userId = loginInfoMap.get("user_id").toString();
-        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
+        Map<String,String> shopInfo;
+        try{
+            shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
+        }catch (Exception e){
+            //店铺空
+            shopInfo = null;
+        }
         if(shopInfo == null){
             //创建店铺
             Map<String,Object> shop = new HashMap<>();
@@ -513,7 +519,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             shop.put("user_name",loginInfoMap.get("user_name")+"");
             shop.put("shop_name",loginInfoMap.get("user_name")+"的店铺");
             shop.put("shop_remark","");
-            shop.put("shop_url","");
+            String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
+            shop.put("shop_url",shopUrl);
             shop.put("status","1");
             shop.put("create_time",new Date());
             shop.put("shop_logo",loginInfoMap.get("avatar_address"));
@@ -588,6 +595,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     resultMap.put("key","3");
                 }
             }
+            if(reqMap.get("is_saas")!=null){
+                //SaaS登录检查用户店铺逻辑
+                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
+                checkShopInfo(loginInfoMap,reqEntity,jedis);
+            }
             return resultMap;
         } else {
             String sex = userJson.getString("sex");//性别
@@ -641,6 +653,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
             //生成access_token，将相关信息放入缓存，构造返回参数
             processLoginSuccess(1, dbResultMap, null, resultMap,reqEntity.getAppName());
+            if(reqMap.get("is_saas")!=null){
+                //SaaS登录检查用户店铺逻辑
+                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
+                checkShopInfo(loginInfoMap,reqEntity,jedis);
+            }
             resultMap.put("app_name",loginInfoMap.get("app_name"));
             return resultMap;
         }
