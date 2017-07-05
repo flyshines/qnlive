@@ -143,7 +143,7 @@
 
 
   <select id="findCourseByClassifyId" resultType="hashmap" parameterType="hashmap" >
-    SELECT * FROM t_courses WHERE app_name = #{appName} and classify_id = #{classify_id}
+    SELECT * FROM t_courses WHERE app_name = #{appName} and classify_id = #{classify_id} and course_updown = 1
   </select>
 
   <select id="findCourseByStatus" resultType="hashmap" parameterType="hashmap" >
