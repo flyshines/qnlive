@@ -1266,6 +1266,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 logger.error("======jedis======");
                 logger.error(jedis.toString());
                 System.out.print(jedis);
+                jedis.close();
                 jedis = jedisUtils.getJedis(appName);
                 logger.error(jedis.toString());
                 System.out.print(jedis);
