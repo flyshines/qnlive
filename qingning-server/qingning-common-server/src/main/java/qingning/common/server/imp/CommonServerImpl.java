@@ -1068,7 +1068,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            if(true){
+            //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
