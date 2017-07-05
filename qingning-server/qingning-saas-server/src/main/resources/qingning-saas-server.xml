@@ -345,6 +345,7 @@
 						<param name="browse_count" type="long" fieldname="click_num" />
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="put_time" type="long" fieldname="create_time" />
+						<param name="is_join" type="string" />
 					</param>
 				</outputs>
 			</function>

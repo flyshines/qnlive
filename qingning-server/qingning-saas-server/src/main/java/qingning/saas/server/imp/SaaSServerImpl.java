@@ -857,6 +857,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	if("0".equals(seriesType)){	//直播类型的系列课，从t_course中查询
         		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
+        		
+        		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+        		selectIsStudentMap.put("user_id", userId);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
                 	//获取课程详情
@@ -867,15 +870,42 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 	courseMap.put("course_image", courseMap.get("course_url").toString());
                 	courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
                 	
+                	/*
+                	 * 判断是否加入课程
+                	 */
+            		selectIsStudentMap.put("course_id", courseId);
+                	boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+                    //加入课程状态 0未加入 1已加入
+                    if(isStudent){
+                    	courseMap.put("is_join", "1");
+                    }else {
+                    	courseMap.put("is_join", "0");
+                    }
+                	
                 	courseInfoList.add(courseMap);
                 }
         	}else{	//非直播类型的系列课，从t_saas_course中查询
         		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+        		
+        		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
+        		selectIsStudentMap.put("user_id", userId);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
                 	//获取课程详情
                 	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	
+                	/*
+                	 * 判断是否加入课程
+                	 */
+            		selectIsStudentMap.put("course_id", courseId);
+                	boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+                    //加入课程状态 0未加入 1已加入
+                    if(isStudent){
+                    	courseMap.put("is_join", "1");
+                    }else {
+                    	courseMap.put("is_join", "0");
+                    }
                 	
                 	courseInfoList.add(courseMap);
                 }
