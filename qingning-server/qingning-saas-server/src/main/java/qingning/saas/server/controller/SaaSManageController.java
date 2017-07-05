@@ -296,7 +296,7 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version, appName);
         Map<String,String> param = (Map)entity.getBody();
-        param.put("type","1");
+        param.put("type","3");
         requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;

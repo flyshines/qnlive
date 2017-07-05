@@ -1263,14 +1263,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }else{
                     jedis.hincrBy(userCountKey,"day_amount",lecturerProfit);
                 }
-                logger.error("======jedis======");
-                logger.error(jedis.toString());
-                System.out.print(jedis);
+
+                //jedis后面设置不生效问题处理
                 jedis.close();
                 jedis = jedisUtils.getJedis(appName);
-                logger.error(jedis.toString());
-                System.out.print(jedis);
-                logger.error("======jedis======");
+
                 //3.3 课程缓存或者表 t_courses
                 if("0".equals(profit_type)){
                     //jedis.hincrBy(courseKey, "student_num", 1);
@@ -1309,7 +1306,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     param.put("course_id", courseId);
                     param.put("profit_type", "2");
                     sumInfo = commonModuleServer.findCoursesSumInfo(param);
-                    logger.error("series_test_13006660"+sumInfo.toString());
                     jedis.hset(seriesKey, "series_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                     logger.error("series_test_13006660"+seriesKey+"  " + MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"   "+appName);
                 }
