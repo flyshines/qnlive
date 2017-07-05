@@ -416,23 +416,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	logger.info("saas店铺-获取店铺系列课程列表>>>>从缓存中获取到讲师的上架系列课");
         	String seriesDetailKey = null;	//获取系列课程详情的key
         	
-        	/*
-        	 * 获取用户购买的所有系列课程
-        	 * 返回 -> 键series_id；值1
-        	 */
-/*        	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
-        	selectSeriesStudentsMap.put("user_id", userId);
-        	selectSeriesStudentsMap.put("lecturer_id", lecturerId);
-        	List<Map<String, Object>> userSeriesList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
-*/        	
-        	/*
-        	 * 对用户购买的所有系列课程进行格式化成map，方便后期用seriesId进行查询
-        	 */
-/*        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
-        	for(Map<String, Object> userSeriesMap : userSeriesList){
-        		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
-        	}
-*/        	
         	//生成用于缓存不存在时调用数据库的requestEntity
         	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
         	RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
@@ -474,7 +457,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     	
     	//返回结果集
     	Map<String, Object> resultMap = new HashMap<>();
-    	List<Map<String, String>> liveInfoList = new ArrayList<>();
     	/*
     	 * 获取请求参数
     	 */
@@ -489,7 +471,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         //获取前端上一次刷新时的服务器时间
         long lastUpdateTime = (long) reqMap.get("last_update_time"); 
-        //获取前端上一次刷新时的服务器时间
+        //获取前端已经加载的数量
         long readedCount = (long) reqMap.get("readed_count"); 
         //获取每页数量
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
@@ -641,8 +623,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String readSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, seriesMap);
         //新增到下架的缓存
         jedis.zadd(readSeriesDownKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
-
-
 
     }
 
@@ -1069,7 +1049,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }else {
             resultMap.put("is_join", "0");
         }
-		
 		
 		/*
 		 * 查找是否属于系列课
@@ -1545,7 +1524,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         if(loginedUserMap == null || loginedUserMap.isEmpty()){
         	logger.error("saas课程-添加课程留言>>>>登录用户不存在");
-        	throw new QNLiveException("用户不存在");
+        	throw new QNLiveException("000005");
         }
         
         /*
@@ -1603,26 +1582,40 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
         //获取请求中的反馈内容
         String content = (String) reqMap.get("content");
         //获取请求中的联系方式
         String contact = (String) reqMap.get("contact");
+        //获取请求中的店铺id
+        String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
         String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
         //获取当前服务器时间
         Date now = new Date();
+        
+        /*
+         * 从缓存中获取登录用户信息
+         */
+        Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+        if(loginedUserMap == null || loginedUserMap.isEmpty()){
+        	log.error("Saas_H5_用户-提交反馈与建议>>>>登录用户不存在");
+        	throw new QNLiveException("000005");
+        }
         
         /*
          * 新增到数据库
          */
         Map<String, Object> newFeedbackMap = new HashMap<String, Object>();
-        newFeedbackMap.put("feedback_id", MiscUtils.getUUId());
+        newFeedbackMap.put("back_id", MiscUtils.getUUId());
+        newFeedbackMap.put("shop_id", shopId);
         newFeedbackMap.put("user_id", userId);
+        newFeedbackMap.put("avatar_address", loginedUserMap.get("avatar_address"));
+        newFeedbackMap.put("nick_name", loginedUserMap.get("nick_name"));
         newFeedbackMap.put("content", content);
-        newFeedbackMap.put("status", 1);	//处理状态，1：未处理 2：已经处理
-        newFeedbackMap.put("phone_number", contact);
+        newFeedbackMap.put("phone", contact);
         newFeedbackMap.put("create_time", now);
-        newFeedbackMap.put("update_time", now);
         saaSModuleServer.addFeedback(newFeedbackMap);
         
         return resultMap;

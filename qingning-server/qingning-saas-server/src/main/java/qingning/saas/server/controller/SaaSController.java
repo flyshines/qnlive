@@ -308,15 +308,16 @@ public class SaaSController extends AbstractController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/user/feedback/new", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/{shop_id}/feedback/new", method = RequestMethod.POST)
     public @ResponseBody ResponseEntity addFeedback(
     		HttpEntity<Object> entity,
+    		@PathVariable("shop_id") String shopId,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addFeedback", accessToken, version, appName);
         Map<String, Object> param = (Map<String, Object>) entity.getBody();
-        
+        param.put("shop_id", shopId);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
