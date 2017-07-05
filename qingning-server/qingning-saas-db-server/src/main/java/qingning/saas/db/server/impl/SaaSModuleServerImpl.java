@@ -48,6 +48,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private UserGainsMapper userGainsMapper;
     @Autowired(required = true)
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
+    @Autowired(required = true)
+    private SystemConfigMapper systemConfigMapper;
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
         return coursesStudentsMapper.findCourseIdByStudent(reqMap);
@@ -142,8 +144,21 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	}
 
     @Override
-    public void updateBanner(Map<String, Object> param) {
+    public int updateBanner(Map<String, Object> param) {
+        int i = bannerMapper.selectUpCount(param.get("user_id").toString());
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("config_key","saasBannerSize");
+        paramMap.put("appName",Constants.HEADER_APP_NAME);
+        Map<String,Object> sysConfig = systemConfigMapper.findCustomerServiceBySystemConfig(paramMap);
+        int size = 3;
+        if(sysConfig!=null&&sysConfig.get("config_key")!=null){
+            size = Integer.valueOf(sysConfig.get("config_value").toString());
+        }
+        if(i>=size){
+            return 1;
+        }
         bannerMapper.updateByPrimaryKey(param);
+        return 0;
     }
 
     @Override

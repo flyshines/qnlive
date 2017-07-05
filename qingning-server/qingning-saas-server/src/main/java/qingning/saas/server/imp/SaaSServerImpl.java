@@ -334,7 +334,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public void  shopBannerUpdown(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         reqMap.put("status",reqMap.get("type"));
-        saaSModuleServer.updateBanner(reqMap);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        int i = saaSModuleServer.updateBanner(reqMap);
+        if(i==1){
+            throw new QNLiveException("210007");
+        }
     }
     
     /**
