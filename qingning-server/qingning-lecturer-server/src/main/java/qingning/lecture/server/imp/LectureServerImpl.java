@@ -618,7 +618,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }
-            if ("0".equals(course_type)) {//公开课才开启机器人
+            if ("0".equals(course_type)){//公开课才开启机器人
                 log.info("创建课程，开始机器人加入功能");
                 map.clear();
                 map.put("course_id", courseId);
@@ -640,15 +640,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
             jedis.zadd(lectureCourseKey, lpos, course.get("course_id"));
             resultMap.put("course_id", course.get("course_id"));
-            if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
+            if(!MiscUtils.isEmpty(course.get("series_id"))){
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                 jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
             }
-
         }
-
-
-
         //给课程里面推消息
         Map<String, Object> userInfo = lectureModuleServer.findUserInfoByUserId(course.get("lecturer_id"));
         Map<String,Object> startLecturerMessageInformation = new HashMap<>();
@@ -669,7 +665,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 //					//添加到老师发送的集合中
         String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
         jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
-
         String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
         Map<String,String> result = new HashMap<String,String>();
         MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
