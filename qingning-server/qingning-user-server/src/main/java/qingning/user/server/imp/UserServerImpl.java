@@ -333,7 +333,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //</editor-fold>
         if(!MiscUtils.isEmpty(lecture_id) && !MiscUtils.isEmpty(userId) && lecture_id.equals(userId)){
             pageCount =  pageConts - courseIdList.size();
-            if(pageCount > 0 && updown == 2){//是讲师
+            if(pageCount > 0 || updown == 2){//是讲师
                 boolean key = true;//作为开关 用于下面是否需要接着执行方法
                 long startIndex = 0; //开始下标
                 long endIndex = -1;   //结束下标
