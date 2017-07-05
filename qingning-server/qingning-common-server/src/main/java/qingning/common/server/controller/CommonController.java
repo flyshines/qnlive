@@ -215,6 +215,7 @@ public class CommonController extends AbstractController {
         Map<String, String> map = new HashMap<>();
         map.put("code", code);
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "",state);
+        map.put("is_saas","1");
         requestEntity.setParam(map);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
