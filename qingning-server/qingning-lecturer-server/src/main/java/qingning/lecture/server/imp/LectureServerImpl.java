@@ -3461,8 +3461,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
                 jedis.del(seriesKey);
                 //获取系列课程详情
-                CacheUtils.readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                String series_course_type = jedis.hget(seriesKey, "series_course_type");
+                Map<String, String> seriesMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
+                String series_course_type = seriesMap.get("series_course_type");
                 map.clear();
                 map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);
                 if(!jedis.hget(seriesKey,"lecturer_id").equals(user_id)){
