@@ -503,7 +503,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     private void checkShopInfo(Map<String, Object> loginInfoMap,RequestEntity reqEntity,Jedis jedis) throws Exception{
         String userId = loginInfoMap.get("user_id").toString();
-        Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
+        Map<String,String> shopInfo;
+        try{
+            shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
+        }catch (Exception e){
+            //店铺空
+            shopInfo = null;
+        }
         if(shopInfo == null){
             //创建店铺
             Map<String,Object> shop = new HashMap<>();
