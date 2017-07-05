@@ -59,7 +59,7 @@ public interface ISaaSModuleServer {
      * @param param
      * @return
      */
-    void updateBanner(Map<String, Object> param);
+    int updateBanner(Map<String, Object> param);
     /**新增视频，音频课程
      * @param param
      * @return

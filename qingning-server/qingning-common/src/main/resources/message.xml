@@ -121,8 +121,9 @@
 				<entry key="210001" value="该系列不属于当前用户"/>
 				<entry key="210002" value="课程不属于当前系列"/>
 				<entry key="210003" value="课程只能加入一个系列"/>
-				<entry key="210003" value="系列不存在"/>			
+				<entry key="210004" value="系列不存在"/>
 				<entry key="210005" value="已开通店铺，不能重复开通"/>
+				<entry key="210007" value="轮播图上架上限"/>
 
 				<entry key="210006" value="用户操作失败"/>
 			</map>
