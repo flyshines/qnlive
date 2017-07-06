@@ -140,7 +140,7 @@
 					<param name="course_id" type="string" require="Y,000100"  />
 					<param name="course_title" type="rstring" require="N" format=".{0,30},100020"/>
 					<param name="start_time" type="long" require="N"  />
-					<param name="course_remark" type="rstring" require="N" format="[\s\S]{0,2048},100021"/>
+					<param name="course_remark" type="rstring" require="N"/>
 					<param name="course_url" type="string" require="N"  />
 					<param name="course_password" type="string" require="N"  />
 					<param name="status" type="string" require="N"  validate="(status,course_title,start_time,course_remark,course_url,course_password)=>{

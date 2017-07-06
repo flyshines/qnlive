@@ -67,6 +67,6 @@ public interface CoursesMapper {
 
 	int updateSeriesCourse(Map<String,Object> record);
 
-
+	List<Map<String, Object>> findCourseListAllByLecturerId(String lecturer_id);
 
 }

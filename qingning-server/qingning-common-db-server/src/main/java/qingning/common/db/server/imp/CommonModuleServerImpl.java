@@ -110,6 +110,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private SeriesStudentsMapper seriesStudentsMapper;
 
+	@Autowired(required = true)
+	private SaaSCourseMapper saaSCourseMapper;
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -304,13 +307,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//支付金额
 		long amount = Long.valueOf(tradeBill.get("amount").toString());
-
+		String userId = tradeBill.get("user_id").toString();
 		//3.更新 讲师课程收益信息表
 		Map<String,Object> profitRecord = new HashMap<String,Object>();
 		profitRecord.put("profit_id", profitId);
 		profitRecord.put("course_id", tradeBill.get("course_id"));
 		profitRecord.put("room_id", tradeBill.get("room_id"));
-		profitRecord.put("user_id", tradeBill.get("user_id"));
+		profitRecord.put("user_id", userId);
 		profitRecord.put("profit_amount", amount);
 		profitRecord.put("profit_type", tradeBill.get("profit_type"));
 		profitRecord.put("create_time", now);
@@ -357,7 +360,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				roomDistributerRecommendUpdateMap.put("update_time",now);
 				roomDistributerRecommendUpdateMap.put("rq_code", rqCode);
 				roomDistributerRecommendUpdateMap.put("room_id", tradeBill.get("room_id"));
-				roomDistributerRecommendUpdateMap.put("user_id", tradeBill.get("user_id"));
+				roomDistributerRecommendUpdateMap.put("user_id", userId);
 				roomDistributerRecommendMapper.studentBuyCourseUpdate(roomDistributerRecommendUpdateMap);
 				//查询是否有t_room_distributer_courses表，如果没有，则插入数据
 				Map<String,Object> roomDistributerCourseMap = new HashMap<>();
@@ -392,7 +395,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			//t_courses_students
 			Map<String,Object> student = new HashMap<>();
 			student.put("student_id", MiscUtils.getUUId());
-			student.put("user_id", tradeBill.get("user_id"));
+			student.put("user_id", userId);
 			student.put("distributer_id", distributerId);
 			student.put("lecturer_id", lecturerId);
 			student.put("room_id", courseMap.get("room_id"));
@@ -404,10 +407,40 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			student.put("create_time", now);
 			student.put("create_date", now);
 			coursesStudentsMapper.insertStudent(student);
+
 		}
 		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
 		//插入讲师收益
+		updateShopUser(lecturerId,userId,amount);
 		return profitRecord;
+	}
+
+	private void updateShopUser(String lecturerId,String userId,long amount){
+		//该用户在店铺的所有消费记录
+		//查询店铺ID
+		String shopId = shopMapper.selectShopIdByUserId(userId);
+		if(shopId!=null){
+			Map<String,Object> param = new HashMap<>();
+			param.put("lecturer_id",lecturerId);
+			param.put("user_id",userId);
+			Map<String,Object> mapSum = lecturerCoursesProfitMapper.findUserSumInfo(param);
+			Long totalConsume = amount;
+			if(mapSum!=null){
+				totalConsume += Long.valueOf(mapSum.get("profit_amount").toString());
+			}
+			int i = shopUserMapper.updateTypeById(shopId,userId,totalConsume);
+			//插入付费用户
+			if(i==0){
+				Map<String,Object> user = new HashMap<>();
+				user.put("shop_id",shopId);
+				user.put("user_id",userId);
+				user.put("user_type","1");
+				user.put("total_consume",totalConsume);
+				user.put("create_time",new Date());
+				shopUserMapper.insert(user);
+			}
+		}
+
 	}
 	private Map<String,Object> initGains(String userId,String appName){
 		//初始化用户收入信息
@@ -1055,22 +1088,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void updateShopUsers(String lecturerId, String userId) {
-		String shopId = shopMapper.selectShopIdByUserId(userId);
-		int i = shopUserMapper.updateTypeById(shopId,userId);
-		//插入付费用户
-		if(i==0){
-			Map<String,Object> user = new HashMap<>();
-			user.put("shop_id",shopId);
-			user.put("user_id",userId);
-			user.put("user_type","1");
-			user.put("total_consume",0);
-			user.put("create_time",new Date());
-			shopUserMapper.insert(user);
-		}
-	}
-
-	@Override
 	public List<Map<String, Object>> findSeriesByLecturer(String lecturerId) {
 		return seriesMapper.findSeriesByLecturer(lecturerId);
 	}
@@ -1083,5 +1100,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void updateSeries(Map<String, Object> map) {
 		seriesMapper.updateSeries(map);
+	}
+
+
+	@Override
+	public List<Map<String, Object>> findCourseListAllByLecturerId(String lecturerId) {
+		return coursesMapper.findCourseListAllByLecturerId(lecturerId);
+	}
+
+	@Override
+	public Map<String, Object> findSaaSCourseByCourseId(String course_id) {
+		return saaSCourseMapper.selectByPrimaryKey(course_id);
 	}
 }

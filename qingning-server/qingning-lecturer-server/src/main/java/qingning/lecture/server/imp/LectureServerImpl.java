@@ -367,10 +367,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
-        //课程之间需要间隔三十分钟
+
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
+
+        //课程之间需要间隔三十分钟
+        String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(startTime);
         cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
@@ -378,12 +380,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         cal.setTimeInMillis(startTime);
         cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
         long nextStartTime = cal.getTimeInMillis();
-        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
+        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesAllKey, preStartTime+"", nextStartTime+"", 0, 1);
         if(!MiscUtils.isEmpty(courseList)){
             throw new QNLiveException("100029");
         }
         reqMap.put("user_id", userId);
- 
+
+
         //2.1创建IM 聊天群组
         Map<String,String> queryParam = new HashMap<>();                
         queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
@@ -406,11 +409,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
             reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
         }
-
-
         //创建课程到数据库
         Map<String, Object> dbResultMap = lectureModuleServer.createCourse(reqMap);
- 
         //4 修改相关缓存
         //4.1修改讲师个人信息缓存中的课程数 讲师个人信息SYS: lecturer:{lecturer_id}     
         Map<String, Object> map = new HashMap<String, Object>();
@@ -437,7 +437,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //<editor-fold desc="上架">
             String courseId = (String)course.get("course_id");
             String roomId = course.get("room_id");
-
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
                 map.clear();
                 String series_id = reqMap.get("series_id").toString();
@@ -670,7 +669,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
         jedis.hmset(messageKey, result);
         //</editor-fold>
-
+        //设置讲师更新课程 30分钟
+        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+        jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
         return resultMap;
     }
 

@@ -126,7 +126,7 @@
 				<inputs>
 					<param name="profit_type" type="string" require="Y,000100"  format="^[0-2]$,120011"/>
 					<param name="course_id" type="string" require="Y,000100"/>
-					<param name="platform" type="string" require="Y,000100"/>
+					<param name="platform" type="string" require="N"/>
 					<param name="reward_amount" type="double" require="N" validate="(profit_type,reward_amount)=>{
 					       		var isEmpty= reward_amount==null || reward_amount == 0;
 					       		if(utils.isEqual(profit_type,'1') &amp;&amp; isEmpty){

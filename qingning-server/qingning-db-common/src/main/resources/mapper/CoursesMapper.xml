@@ -597,5 +597,7 @@
     ORDER BY t.create_time DESC
   </select>
 
-
+  <select id="findCourseListAllByLecturerId" resultType="hashmap" parameterType="java.lang.String" >
+    SELECT * FROM t_courses WHERE lecturer_id = #{lecturer_id}
+  </select>
 </mapper>
