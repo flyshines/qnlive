@@ -1280,10 +1280,18 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     param.put("course_id", courseId);
                     param.put("profit_type", "0");
                     sumInfo = commonModuleServer.findCoursesSumInfo(param);
-                    String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
-                    jedis.hset(courseKey, "course_amount", lecturer_profit);
-                    if(!lecturer_profit.equals(jedis.hget(courseKey,"series_amount"))){
-                        jedis.hset(courseKey, "course_amount", lecturer_profit);
+                    String courseAmount = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
+                    jedis.hset(courseKey, "course_amount", courseAmount);
+
+                    Map<String,Object> course = new HashMap<>();
+                    course.put("course_id",courseId);
+                    course.put("course_amount",courseAmount);
+                    course.put("course_type",courseType);
+                    //同步课程收入到数据库
+                    commonModuleServer.updateCourseCmountByCourseId(course);
+                    //规避
+                    if(!courseAmount.equals(jedis.hget(courseKey,"series_amount"))){
+                        jedis.hset(courseKey, "course_amount", courseAmount);
                     }
                 }else if("1".equals(profit_type)){
                     query.clear();
@@ -1307,6 +1315,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
                     logger.error("series_test_13006660"+seriesKey+"  " + lecturer_profit+"   "+appName);
                     long ibak = jedis.hset(seriesKey, "series_amount", lecturer_profit);
+
+                    Map<String,Object> course = new HashMap<>();
+                    course.put("series_id",courseId);
+                    course.put("series_amount",lecturer_profit);
+                    //同步系列课收入到数据库
+                    commonModuleServer.updateSeriesCmountByCourseId(course);
+
                     if(!lecturer_profit.equals(jedis.hget(seriesKey,"series_amount"))){
                         logger.error("setAgain!!!!!!!!!!");
                         jedis.hset(seriesKey, "series_amount", lecturer_profit);

@@ -429,6 +429,11 @@
     	and update_time=#{last_update_time}
     </if>
   </update>
+  <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
+    update t_courses set
+        course_amount = #{course_amount}
+    where course_id = #{course_id}
+  </update>
 
 
   <update id="updateSeriesCourse" parameterType="hashmap" >
