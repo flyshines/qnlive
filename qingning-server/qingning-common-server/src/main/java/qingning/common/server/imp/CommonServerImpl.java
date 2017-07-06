@@ -882,7 +882,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(courseMap.get("room_id")==null){
             //直播间信息查询
             Map<String,String> map = new HashMap<>();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
             String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
             Map<String, String> key = jedis.hgetAll(liveRoomListKey);
             if(key!=null&&!key.isEmpty()){
