@@ -783,7 +783,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //如果为讲师，则返回讲师部分特定信息
             isSeriesStudent = userModuleServer.isStudentOfTheSeries(queryMap);
         }
-
         if(query_type.equals("0")){
             if("1".equals(course_type)){
                 if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){

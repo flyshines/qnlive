@@ -148,7 +148,7 @@
 
 
   <select id="findUserWhetherToPay" resultType="string" parameterType="hashmap" >
- select '1' from t_trade_bill trade,t_payment_bill payment where trade.trade_id = payment.trade_id and payment.pre_pay_no=#{payment_id} and trade.user_id=#{user_id}
+ select '1' from t_trade_bill trade,t_payment_bill payment where trade.trade_id = payment.trade_id and payment.pre_pay_no=#{payment_id} and trade.user_id=#{user_id} and `status` = 2
   </select>
 
 </mapper>
