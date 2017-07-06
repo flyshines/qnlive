@@ -1068,8 +1068,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = MiscUtils.getAppNameByAppid(appid);
-        //String appName = "qnlive";
+        //String appName = MiscUtils.getAppNameByAppid(appid);
+        String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -1077,8 +1077,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            //if(true){
+        //if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+            if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -1213,11 +1213,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query);
                 //如果是系列课直播也做以前的 直播统计
                 if("0".equals(profit_type)||"2".equals(profit_type)){
-                    jedis.hincrBy(lecturerKey,"total_student_num",1);
-                    jedis.hincrBy(lecturerKey,"pay_student_num",1);
-                    jedis.hincrBy(lecturerKey,"room_done_num",1);
-                    if(!MiscUtils.isEmpty(distributeRoom)){
-                        jedis.hincrBy(lecturerKey,"room_distributer_done_num",1);
+                    //直播统计(过滤店铺统计)
+                    if("1".equals(courseType)){
+                        jedis.hincrBy(lecturerKey,"total_student_num",1);
+                        jedis.hincrBy(lecturerKey,"pay_student_num",1);
+                        jedis.hincrBy(lecturerKey,"room_done_num",1);
+                        if(!MiscUtils.isEmpty(distributeRoom)){
+                            jedis.hincrBy(lecturerKey,"room_distributer_done_num",1);
+                        }
                     }
                 }
 
@@ -1366,8 +1369,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
                 }else if(profit_type.equals("0")){
-                    Long nowStudentNum = 0L;
-
+                    Long nowStudentNum;
                     //修改用户缓存信息中的加入课程数
                     query.clear();
                     query.put(Constants.CACHED_KEY_USER_FIELD, userId);
