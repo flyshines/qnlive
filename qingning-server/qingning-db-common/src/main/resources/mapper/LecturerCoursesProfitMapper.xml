@@ -288,6 +288,10 @@
 	<if test="profit_type != null">
 		and profit_type=#{profit_type}
 	</if>
+
+    <if test="user_id != null">
+      and t.user_id = #{user_id}
+    </if>
     ORDER BY t.create_time DESC
   </select>
   <select id="searchOrdersListByUserId" resultType="hashmap" parameterType="hashmap">
@@ -315,6 +319,9 @@
     and t.lecturer_id = #{lecturer_id}
 	<if test="nick_name != null">
 		and u.nick_name like'%${nick_name}%'
+	</if>
+	<if test="user_id != null">
+		and t.user_id = #{user_id}
 	</if>
 	<if test="course_name != null">
 		and (se.series_title like'%${course_name}%' OR
