@@ -470,4 +470,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		}
 	}
 
+	/**
+	 * 根据key查询系统配置表
+	 */
+	@Override
+	public List<Map<String, Object>> findSystemConfigByInKey(Map<String, Object> selectSysConfigMap) {
+		return systemConfigMapper.selectSysConfigByInKey(selectSysConfigMap);
+	}
+
 }

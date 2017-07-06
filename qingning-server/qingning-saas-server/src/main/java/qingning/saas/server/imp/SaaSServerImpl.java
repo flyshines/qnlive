@@ -138,6 +138,28 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("user_id",userId);
         shop.put("nick_name",userMap.get("nick_name"));
         shop.put("phone_num",userMap.get("phone_number"));
+        
+        /*
+         * 返回店铺预览url、电脑端特性url、使用教程url
+         */
+        //从数据库查询url
+        String sysKeys = "'shop_preview_url','pc_introduce_url','use_url'";
+        String appName = reqEntity.getAppName();
+        Map<String, Object> selectSysConfigMap = new HashMap<String, Object>();
+        selectSysConfigMap.put("config_key", sysKeys);
+        selectSysConfigMap.put("app_name", appName);
+        List<Map<String, Object>> sysConfigList = saaSModuleServer.findSystemConfigByInKey(selectSysConfigMap);
+        for(Map<String, Object> sysConfigMap : sysConfigList){
+        	String sysConfigKey = sysConfigMap.get("config_key").toString();
+        	String sysConfigValue = sysConfigMap.get("config_value").toString();
+        	if("shop_preview_url".equals(sysConfigKey)){
+        		shop.put("shop_preview_url",sysConfigValue);
+        	}else if("pc_introduce_url".equals(sysConfigKey)){
+        		shop.put("pc_introduce_url",sysConfigValue);
+        	}else if("use_url".equals(sysConfigKey)){
+        		shop.put("use_url",sysConfigValue);
+        	}
+        }
         return shop;
     }
     /**

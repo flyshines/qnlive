@@ -13,4 +13,10 @@
   <select id="findSystemConfigByAppName" resultType="hashmap" parameterType="java.lang.String">
     select * from t_system_config where app_name = #{appName}
   </select>
+  
+  <!-- 根据config_key IN 查询系统配置 -->
+  <select id="selectSysConfigByInKey" parameterType="hashmap" resultType="hashmap">
+  	SELECT config_key, config_value FROM t_system_config
+	WHERE config_key IN (${config_key}) AND app_name = #{app_name}
+  </select>
 </mapper>

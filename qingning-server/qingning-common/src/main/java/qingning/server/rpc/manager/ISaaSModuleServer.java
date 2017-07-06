@@ -202,4 +202,11 @@ public interface ISaaSModuleServer {
      * @return
      */
 	boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap);
+
+	/**
+	 * 根据key查询系统配置表
+	 * @param selectSysConfigMap
+	 * @return
+	 */
+	List<Map<String, Object>> findSystemConfigByInKey(Map<String, Object> selectSysConfigMap);
 }
