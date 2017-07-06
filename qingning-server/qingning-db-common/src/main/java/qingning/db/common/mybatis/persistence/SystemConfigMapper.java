@@ -18,4 +18,11 @@ public interface SystemConfigMapper {
     List<Map<String,Object>> findSystemConfig();
 
     List<Map<String,Object>> findSystemConfigByAppName(@Param("appName")String appName);
+
+    /**
+     * 根据config_key IN 查询系统配置
+     * @param selectSysConfigMap
+     * @return
+     */
+	List<Map<String, Object>> selectSysConfigByInKey(Map<String, Object> selectSysConfigMap);
 }
