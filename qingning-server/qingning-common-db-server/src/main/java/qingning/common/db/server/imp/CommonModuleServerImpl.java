@@ -332,7 +332,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(!MiscUtils.isEmpty(courseMap)){
 			profitRecord.put("lecturer_id", lecturerId);
 		}
-
 		//课程收益
 		if("0".equals(tradeBill.get("profit_type"))){
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
