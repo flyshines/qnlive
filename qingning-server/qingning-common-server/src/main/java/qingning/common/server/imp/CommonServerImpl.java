@@ -1228,12 +1228,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     jedis.hset(lecturerKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
 
-                    //3.2 直播间缓存 t_live_room
-                    query.clear();
-                    query.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
-                    String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
-                    sumInfo = commonModuleServer.findCoursesSumInfo(query);
-                    jedis.hset(liveRoomKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    //3.2 直播间缓存 t_live_room(直播间存在时)
+                    if(handleResultMap.get("room_id")!=null){
+                        query.clear();
+                        query.put(Constants.FIELD_ROOM_ID, handleResultMap.get("room_id").toString());
+                        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
+                        sumInfo = commonModuleServer.findCoursesSumInfo(query);
+                        jedis.hset(liveRoomKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    }
                 }
                 //用户已购课程
                 query.clear();
@@ -1400,9 +1402,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
                 String user_id = (String) billMap.get("user_id");
                 String course_id = (String) billMap.get("course_id");
-                String room_id = (String) billMap.get("room_id");
+                //直播间存在时则通知
+                if (!StringUtils.isBlank(user_id)&&billMap.get("room_id")!=null) {
+                    String room_id = billMap.get("room_id").toString();
 
-                if (!StringUtils.isBlank(user_id)) {
                     Map<String, Object> loginInfoUser = commonModuleServer.findLoginInfoByUserId(user_id);
                     String openId=(String) loginInfoUser.get("web_openid");
                     //  成员报名付费通知 老师 暂时 不需要了
