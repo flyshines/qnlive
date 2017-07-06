@@ -367,21 +367,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
             throw new QNLiveException("100002");
         }
-        //课程之间需要间隔三十分钟
+
         Map<String,Object> query = new HashMap<String,Object>();
         query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lecturerCoursesPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, query);
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(startTime);
-        cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
-        long preStartTime = cal.getTimeInMillis();
-        cal.setTimeInMillis(startTime);
-        cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
-        long nextStartTime = cal.getTimeInMillis();
-        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesPredictionKey, preStartTime+"", nextStartTime+"", 0, 1);
-        if(!MiscUtils.isEmpty(courseList)){
+        //课程之间需要间隔三十分钟
+        String lecturerUpdateKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_UPDATE_COURSE, query);
+        if(jedis.exists(lecturerUpdateKey)){
             throw new QNLiveException("100029");
         }
+
+
+
+
+
         reqMap.put("user_id", userId);
  
         //2.1创建IM 聊天群组
@@ -437,7 +435,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             //<editor-fold desc="上架">
             String courseId = (String)course.get("course_id");
             String roomId = course.get("room_id");
-
             if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
                 map.clear();
                 String series_id = reqMap.get("series_id").toString();
@@ -670,7 +667,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
         jedis.hmset(messageKey, result);
         //</editor-fold>
-
+        //设置讲师更新课程 30分钟
+        jedis.setex(lecturerUpdateKey,Constants.MIN_30,course.get("course_id"));
         return resultMap;
     }
 
