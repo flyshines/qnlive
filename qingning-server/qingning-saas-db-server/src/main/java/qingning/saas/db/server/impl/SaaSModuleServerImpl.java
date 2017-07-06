@@ -413,7 +413,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> getOrdersList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = null;
+        PageList<Map<String,Object>> result;
         if(param.get("order_type")!=null){
             if("1".equals(param.get("order_type").toString())){
                 param.put("dist","1");
