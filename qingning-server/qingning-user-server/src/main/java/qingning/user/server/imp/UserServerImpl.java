@@ -783,6 +783,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //如果为讲师，则返回讲师部分特定信息
             isSeriesStudent = userModuleServer.isStudentOfTheSeries(queryMap);
         }
+        if(isSeriesStudent){
+            course_type = "0";
+        }
         if(query_type.equals("0")){
             if("1".equals(course_type)){
                 if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
@@ -792,7 +795,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("120006");
                 }
             }else if("2".equals(course_type)){
-                if(!isSeriesStudent){
                     if(reqMap.get("payment_id") == null){
                         throw new QNLiveException("000100");
                     }
@@ -804,7 +806,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         throw new QNLiveException("120022");
                     }
                 }
-            }
         }else{
             if("1".equals(course_type)){
                 if(reqMap.get("payment_id") == null){
@@ -835,9 +836,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
             jedis.hincrBy(lecturerKey, "total_student_num", 1);
             if("2".equals(course_type)){
-                if(!isSeriesStudent){
                     jedis.hincrBy(lecturerKey, "pay_student_num", 1);
-                }
             }
             map.clear();
             map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
