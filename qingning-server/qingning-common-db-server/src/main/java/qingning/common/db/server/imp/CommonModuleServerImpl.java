@@ -1084,4 +1084,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public void updateSeries(Map<String, Object> map) {
 		seriesMapper.updateSeries(map);
 	}
+
+	@Override
+	public List<Map<String, Object>> findCourseListAllByLecturerId(String lecturerId) {
+		return coursesMapper.findCourseListAllByLecturerId(lecturerId);
+	}
 }

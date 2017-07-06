@@ -3845,30 +3845,40 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         //<editor-fold desc="讲师系列课">
         Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+
         for(String lecturerId : lecturerSet) {
-            Map<String,Object> map = new HashMap<>();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-            for(int i = 0;i<4;i++){
-                map.put("series_course_type",i);
-                String upkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-                String downkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                jedis.del(upkey);
-                jedis.del(downkey);
+            Map<String,Object> query = new HashMap<String,Object>();
+            query.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+            String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
+            jedis.del(lecturerCoursesAllKey);
+            List<Map<String, Object>> courseList = commonModuleServer.findCourseListAllByLecturerId(lecturerId);
+            for(Map<String, Object> course : courseList){
+                long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+                jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id").toString());
             }
-            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
-            for(Map<String, Object> series : seriesList){
-                Map<String, Object> queryMap = new HashMap<>();
-                queryMap.put("lecturer_id",lecturerId);
-                String series_id = series.get("series_id").toString();
-                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
-                queryMap.put("series_course_type",series.get("series_course_type"));
-                String upkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, queryMap);
-                String downkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, queryMap);
-                if(series.get("updown").equals("1")){
-                    jedis.zadd(upkey, update_course_time,series_id);
-                }else{
-                    jedis.zadd(downkey, update_course_time,series_id);
-                }
+//            Map<String,Object> map = new HashMap<>();
+//            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//            for(int i = 0;i<4;i++){
+//                map.put("series_course_type",i);
+//                String upkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
+//                String downkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
+//                jedis.del(upkey);
+//                jedis.del(downkey);
+//            }
+//            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
+//            for(Map<String, Object> series : seriesList){
+//                Map<String, Object> queryMap = new HashMap<>();
+//                queryMap.put("lecturer_id",lecturerId);
+//                String series_id = series.get("series_id").toString();
+//                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
+//                queryMap.put("series_course_type",series.get("series_course_type"));
+//                String upkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, queryMap);
+//                String downkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, queryMap);
+//                if(series.get("updown").equals("1")){
+//                    jedis.zadd(upkey, update_course_time,series_id);
+//                }else{
+//                    jedis.zadd(downkey, update_course_time,series_id);
+//                }
 //                map.clear();
 //                map.put("series_id",series_id);
 //                String seriesCourseUpKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
@@ -3890,7 +3900,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                if(jedis.exists(seriesKey)){
 //                    jedis.hset(seriesKey,"course_num",seriesCourseList.size()+"");
 //                }
-            }
+//            }
         }
         //</editor-fold>
 

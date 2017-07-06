@@ -267,4 +267,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findCourseListBySeriesId(String series_id);
 
 	void updateSeries(Map<String, Object> map);
+
+    List<Map<String,Object>> findCourseListAllByLecturerId(String lecturerId);
 }

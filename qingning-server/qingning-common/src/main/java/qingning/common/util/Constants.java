@@ -42,7 +42,6 @@ public final class Constants {
 	public static final int COURSE_MAX_INTERVAL = 10;
 	public static final int CACHED_MAX_COURSE_TIME_LIFE = 1000*60 *24 *7;
 	public static final int MAX_QUERY_LIMIT = 1000;
-	public static final int MIN_30 = 30*60;
 	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";
 
 	public static final String DEFAULT = "default";
@@ -177,6 +176,8 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
 	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
 	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程
+
+	public static final String CACHED_KEY_COURSE_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:ALL";//讲师所有的课程 只是判断讲师课程
 	//用户已购课程ID set集合
 	public static final String SYS_USER_BUY_LIST = "SYS:USER:BUY:{user_id}";
 
@@ -220,8 +221,6 @@ public final class Constants {
 	public static final String CACHED_KEY_SERIES_COURSE_UP = "SYS:SERIES:COURSE:{series_id}:UP";//zset 系列的课程 (course_id,上架时间)
 	public static final String CACHED_KEY_SERIES_COURSE_DOWN = "SYS:SERIES:COURSE:{series_id}:DOWN";//zset 系列的课程 (course_id,下架时间)下架
 
-	//讲师最近更新课程
-	public static final String CACHED_KEY_LECTURER_UPDATE_COURSE = "SYS:LECTURER:{lecturer_id}:UPDATE_COURSE";//zset 讲师所有下架系列 (series_id,下架时间)
 
 	//讲师所有的系列
 	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
