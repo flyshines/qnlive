@@ -228,7 +228,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
                 Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
                 endIndex = "-inf";//设置结束位置
             }
             courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
@@ -2099,6 +2099,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("withdraw_info_list",userModuleServer.findWithdrawList(param));
 		return resultMap;
     }
+
+
     /**
      * 获取提现记录列表-后台
      * @param reqEntity
