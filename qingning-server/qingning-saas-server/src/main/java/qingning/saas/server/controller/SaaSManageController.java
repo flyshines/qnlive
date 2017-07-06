@@ -708,6 +708,7 @@ public class SaaSManageController extends AbstractController {
      * @param orderType     订单类型（1:分销订单，2:普通订单）
      * @param goodsType     商品类型(0:单品 1:打赏 2:系列)
      * @param user_id       用户ID
+     * @param goods_id      商品ID
      * @param access_token
      * @param appName
      * @param version
@@ -723,6 +724,7 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "order_type",defaultValue = "") String orderType,
             @RequestParam(value = "goods_type",defaultValue = "") String goodsType,
             @RequestParam(value = "user_id",defaultValue = "") String user_id,
+            @RequestParam(value = "goods_id",defaultValue = "") String goods_id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -740,6 +742,8 @@ public class SaaSManageController extends AbstractController {
             parMap.put("profit_type",goodsType);
         if(StringUtils.isNotEmpty(user_id))
             parMap.put("user_id",user_id);
+        if(StringUtils.isNotEmpty(goods_id))
+            parMap.put("goods_id",goods_id);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }
