@@ -417,8 +417,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	private void updateShopUser(String lecturerId,String userId,long amount){
 		//该用户在店铺的所有消费记录
-		//查询店铺ID
-		String shopId = shopMapper.selectShopIdByUserId(userId);
+		//根据讲师ID查询店铺ID
+		String shopId = shopMapper.selectShopIdByUserId(lecturerId);
 		if(shopId!=null){
 			Map<String,Object> param = new HashMap<>();
 			param.put("lecturer_id",lecturerId);
