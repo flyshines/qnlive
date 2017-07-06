@@ -3382,9 +3382,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     status = "2";
                 }
             }
-
-
-
         }while ( key && courseIdList.size()<page_number);
 
         List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表

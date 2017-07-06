@@ -1035,11 +1035,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             jedis.hincrBy(lecturerKey, "pay_student_num", 1);
         }
         map.clear();
-        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
 
         Long nowStudentNum = 0L;
-        userModuleServer.increaseStudentNumBySeriesId(reqMap.get("series_id").toString());
+        userModuleServer.increaseStudentNumBySeriesId(series_id);
         jedis.del(seriesKey);
         CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         //7.修改用户缓存信息中的加入课程数
