@@ -26,6 +26,9 @@
       <if test="user_id != null" >
         user_id,
       </if>
+      <if test="total_consume != null" >
+        total_consume,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -36,6 +39,9 @@
       </if>
       <if test="user_id != null" >
         #{user_id,jdbcType=VARCHAR},
+      </if>
+      <if test="total_consume != null" >
+        #{total_consume,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -53,7 +59,8 @@
   </update>
   <update id="updateTypeById" parameterType="hashmap" >
     update t_saas_shop_users
-     set user_type = 1
+     set user_type = 1,
+     total_consume = #{totalConsume,jdbcType=BIGINT}
     where shop_id = #{shopId,jdbcType=VARCHAR}
     AND user_id = #{userId,jdbcType=VARCHAR}
   </update>
