@@ -58,7 +58,7 @@
   </select>
   
   <select id="findLecturerCourseListByStatus" resultType="hashmap" parameterType="hashmap" >
-     select * from t_courses where lecturer_id = #{lecturer_id} and status = #{status}
+     select * from t_courses where lecturer_id = #{lecturer_id} and status = #{status} and course_updown = 1
      <if test='status =="1"' >
      	<if test="start_time != null" >
     		and start_time <![CDATA[ < ]]> #{start_time} 
