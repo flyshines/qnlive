@@ -1111,4 +1111,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public Map<String, Object> findSaaSCourseByCourseId(String course_id) {
 		return saaSCourseMapper.selectByPrimaryKey(course_id);
 	}
+
+	@Override
+	public void updateCourseCmountByCourseId(Map<String, Object> course) {
+		if("1".equals(course.get("course_type"))){
+			coursesMapper.updateCourseCmountByCourseId(course);
+		}else if("2".equals(course.get("course_type"))){
+			saaSCourseMapper.updateCourseCmountByCourseId(course);
+		}
+	}
+
+	@Override
+	public void updateSeriesCmountByCourseId(Map<String, Object> course) {
+		seriesMapper.updateSeriesCmountByCourseId(course);
+	}
 }

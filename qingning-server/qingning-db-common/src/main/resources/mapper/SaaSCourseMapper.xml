@@ -394,5 +394,10 @@
 
   </select>
 
+  <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
+    update t_saas_course set
+    course_amount = #{course_amount}
+    where course_id = #{course_id}
+  </update>
 
 </mapper>
