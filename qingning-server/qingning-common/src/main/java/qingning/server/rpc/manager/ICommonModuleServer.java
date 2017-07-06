@@ -264,7 +264,7 @@ public interface ICommonModuleServer {
 
     List<Map<String,Object>> findCourseListAllByLecturerId(String lecturerId);
 
-‘	/**查找SaaS课程
+	/**查找SaaS课程
 	 * @param course_id
 	 * @return
 	 */
