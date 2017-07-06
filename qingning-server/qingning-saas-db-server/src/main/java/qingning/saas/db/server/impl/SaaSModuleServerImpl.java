@@ -388,7 +388,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> findUserGainsByUserId(String userId) {
-        return userGainsMapper.findUserGainsByUserId(userId);
+        Map<String ,Object> result = userGainsMapper.findUserGainsByUserId(userId);
+        if(result == null){
+            //初始化用户余额信息
+            Map<String,Object> gainsMap = new HashMap<>();
+            gainsMap.put("user_id",userId);
+            gainsMap.put("live_room_total_amount","0");
+            gainsMap.put("live_room_real_incomes","0");
+            gainsMap.put("distributer_total_amount","0");
+            gainsMap.put("distributer_real_incomes","0");
+            gainsMap.put("user_total_amount","0");
+            gainsMap.put("user_total_real_incomes","0");
+            gainsMap.put("balance","0");
+            userGainsMapper.insertUserGainsByNewUser(gainsMap);
+            return gainsMap;
+        }
+        return result;
     }
 
     @Override
