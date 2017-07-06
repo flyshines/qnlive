@@ -893,6 +893,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 courseMap.put("room_id",roomId);
             }
         }
+        //讲师店铺查询
+        query.put("user_id",courseMap.get("lecturer_id"));
+        try{
+            Map<String,String> shop = CacheUtils.readShopByUserId(courseMap.get("lecturer_id"),generateRequestEntity(null, null, null, query),readShopOperation,jedis);
+            insertMap.put("shop_id",shop.get("shop_id"));
+        }catch (Exception e){
+            //店铺不存在
+        }
         insertMap.put("room_id",courseMap.get("room_id"));
         insertMap.put("course_id",courseId);
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
