@@ -262,9 +262,13 @@ public interface ICommonModuleServer {
 
 	void updateSeries(Map<String, Object> map);
 
-	/**查找SaaS课程
+    List<Map<String,Object>> findCourseListAllByLecturerId(String lecturerId);
+
+‘	/**查找SaaS课程
 	 * @param course_id
 	 * @return
 	 */
 	Map<String,Object> findSaaSCourseByCourseId(String course_id);
+
+
 }

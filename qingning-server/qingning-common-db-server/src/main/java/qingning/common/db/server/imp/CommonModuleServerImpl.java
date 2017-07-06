@@ -1102,6 +1102,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		seriesMapper.updateSeries(map);
 	}
 
+
+	@Override
+	public List<Map<String, Object>> findCourseListAllByLecturerId(String lecturerId) {
+		return coursesMapper.findCourseListAllByLecturerId(lecturerId);
+	}
+
 	@Override
 	public Map<String, Object> findSaaSCourseByCourseId(String course_id) {
 		return saaSCourseMapper.selectByPrimaryKey(course_id);

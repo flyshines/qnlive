@@ -778,7 +778,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(courseInfoMap.get("series_id"))){
             Map<String,Object> queryMap = new HashMap<>();
             queryMap.put("user_id", userId);
-            queryMap.put("series_id",reqMap.get("series_id").toString());
+            queryMap.put("series_id",courseInfoMap.get("series_id").toString());
             //判断访问者是普通用户还是讲师
             //如果为讲师，则返回讲师部分特定信息
             isSeriesStudent = userModuleServer.isStudentOfTheSeries(queryMap);
@@ -836,7 +836,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
             jedis.hincrBy(lecturerKey, "total_student_num", 1);
             if("2".equals(course_type)){
-                jedis.hincrBy(lecturerKey, "pay_student_num", 1);
+                if(!isSeriesStudent){
+                    jedis.hincrBy(lecturerKey, "pay_student_num", 1);
+                }
             }
             map.clear();
             map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
