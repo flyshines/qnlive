@@ -256,6 +256,16 @@
 		and create_date=#{create_date}
 	</if>
   </select>
+  <select id="findUserSumInfo" resultType="hashmap" parameterType="hashmap">
+  	select sum(profit_amount) profit_amount,sum(share_amount) share_amount,sum(profit_amount-share_amount) lecturer_profit
+	from t_lecturer_courses_profit where 1=1
+	<if test="lecturer_id != null" >
+		and lecturer_id= #{lecturer_id}
+	</if>
+	<if test="user_id != null" >
+		and user_id=#{user_id}
+	</if>
+  </select>
 
   <select id="selectOrdersListByUserId" resultType="hashmap" parameterType="hashmap">
     SELECT

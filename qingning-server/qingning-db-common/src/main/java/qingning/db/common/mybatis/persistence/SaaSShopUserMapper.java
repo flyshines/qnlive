@@ -21,5 +21,5 @@ public interface SaaSShopUserMapper {
      */
     PageList<Map<String,Object>> selectUsersByShop(Map<String, Object> param, PageBounds page);
 
-    int updateTypeById(@Param(value = "shopId") String shopId, @Param(value = "userId")String userId);
+    int updateTypeById(@Param(value = "shopId") String shopId, @Param(value = "userId")String userId,@Param(value = "totalConsume") Long totalConsume);
 }

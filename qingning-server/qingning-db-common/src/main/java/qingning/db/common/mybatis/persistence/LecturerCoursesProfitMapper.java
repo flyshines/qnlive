@@ -53,4 +53,6 @@ public interface LecturerCoursesProfitMapper {
 	 * @return
 	 */
 	List<Map<String,Object>> findUserBuiedSingleRecords(Map<String, Object> query);
+
+	Map<String,Object> findUserSumInfo(Map<String, Object> query);
 }
