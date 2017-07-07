@@ -53,13 +53,13 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                     }
                     List<Map<String, Object>> seriesList = seriesMapper.findSeriesByLecturer(lecturerId);
                     for(Map<String, Object> series : seriesList){
-                        map.put("lecturer_id",lecturerId);
+                        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                         String series_id = series.get("series_id").toString();
                         long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
-                        map.put("series_course_type",series.get("series_course_type"));
+                        map.put("series_course_type",series.get("series_course_type").toString());
                         String upkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
                         String downkey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                        if(series.get("updown").equals("1")){
+                        if(series.get("updown").toString().equals("1")){
                             jedis.zadd(upkey, update_course_time,series_id);
                         }else{
                             jedis.zadd(downkey, update_course_time,series_id);
