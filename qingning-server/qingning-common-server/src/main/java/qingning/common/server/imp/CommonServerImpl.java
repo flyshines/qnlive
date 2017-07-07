@@ -539,130 +539,136 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("pcCodeUserLogin")
-    public Map<String,Object> pcCodeUserLogin (RequestEntity reqEntity) throws Exception{
-        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
-        Map<String,Object> resultMap = new HashMap<String, Object>();
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
-        String subscribe = "0";
-        resultMap.put("key","0");//未绑定手机号码
+    public Map<String,Object> pcCodeUserLogin (RequestEntity reqEntity) {
+        try {
+            Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+            Map<String, Object> resultMap = new HashMap<String, Object>();
+            String appName = reqEntity.getAppName();
+            Jedis jedis = jedisUtils.getJedis(appName);
+            String subscribe = "0";
+            resultMap.put("key", "0");//未绑定手机号码
 
-        //1.传递授权code及相关参数，调用微信验证code接口
-        String code = reqMap.get("code").toString();
+            //1.传递授权code及相关参数，调用微信验证code接口
+            String code = reqMap.get("code").toString();
 
-        JSONObject accountJson = WeiXinUtil.getPCUserAccountInfo(code,appName);
+            JSONObject accountJson = WeiXinUtil.getPCUserAccountInfo(code, appName);
 
-        Object errCode = accountJson.get("errcode");
-        if (errCode != null ) {
-            throw new QNLiveException("120008");
-        }
+            Object errCode = accountJson.get("errcode");
+            if (errCode != null) {
+                throw new QNLiveException("120008");
+            }
 
-        String openid = accountJson.getString("openid");
-        String union_id = accountJson.getString("unionid");
+            String openid = accountJson.getString("openid");
+            String union_id = accountJson.getString("unionid");
 
-        //PC和公众平台共用的接口 getUserByOpenid是公众平台特有的接口
-        JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid,appName);
-        errCode = userJson.get("errcode");
-        if (errCode != null ) {
-            throw new QNLiveException("120008");
-        }
+            //PC和公众平台共用的接口 getUserByOpenid是公众平台特有的接口
+            JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(accountJson.getString("access_token"), openid, appName);
+            errCode = userJson.get("errcode");
+            if (errCode != null) {
+                throw new QNLiveException("120008");
+            }
 //        if(userJson.get("subscribe") != null){
 //            subscribe = userJson.get("subscribe").toString();
 //        }
 
-        String nickname = userJson.getString("nickname");//昵称
-        resultMap.put("name", nickname);
+            String nickname = userJson.getString("nickname");//昵称
+            resultMap.put("name", nickname);
 
-        //1.2如果验证成功，则得到用户的union_id和用户的access_token。
-        //1.2.1根据 union_id查询数据库
-        Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("login_type","0");//0与union查询
-        queryMap.put("login_id",union_id);
-        Map<String,Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
+            //1.2如果验证成功，则得到用户的union_id和用户的access_token。
+            //1.2.1根据 union_id查询数据库
+            Map<String, Object> queryMap = new HashMap<>();
+            queryMap.put("login_type", "0");//0与union查询
+            queryMap.put("login_id", union_id);
+            Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(queryMap);
 
 
-        //1.2.1.1如果用户存在则进行登录流程
-        if(loginInfoMap != null){//有
-            processLoginSuccess(2, null, loginInfoMap, resultMap,reqEntity.getAppName());//获取后台安全证书 access_token
-            Object phone = loginInfoMap.get("phone_number");
-            if (phone != null) { //有直播间和手机号
-                resultMap.put("key","1");
-            } else {
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, loginInfoMap.get("user_id"));
-                String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-                Map<String,String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
+            //1.2.1.1如果用户存在则进行登录流程
+            if (loginInfoMap != null) {//有
+                processLoginSuccess(2, null, loginInfoMap, resultMap, reqEntity.getAppName());//获取后台安全证书 access_token
+                Object phone = loginInfoMap.get("phone_number");
+                if (phone != null) { //有直播间和手机号
+                    resultMap.put("key", "1");
+                } else {
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, loginInfoMap.get("user_id"));
+                    String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+                    Map<String, String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
 
-                if(CollectionUtils.isEmpty(liveRoomsMap)){//登录过 没有直播间信息
-                    resultMap.put("key","3");
+                    if (CollectionUtils.isEmpty(liveRoomsMap)) {//登录过 没有直播间信息
+                        resultMap.put("key", "3");
+                    }
                 }
-            }
-            if(reqMap.get("is_saas")!=null){
-                //SaaS登录检查用户店铺逻辑
-                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
-                checkShopInfo(loginInfoMap,reqEntity,jedis);
-            }
-            return resultMap;
-        } else {
-            String sex = userJson.getString("sex");//性别
-            String headimgurl = userJson.getString("headimgurl");//头像
+                if (reqMap.get("is_saas") != null) {
+                    //SaaS登录检查用户店铺逻辑
+                    reqMap.put("user_id", loginInfoMap.get("user_id").toString());
+                    checkShopInfo(loginInfoMap, reqEntity, jedis);
+                }
+                return resultMap;
+            } else {
+                String sex = userJson.getString("sex");//性别
+                String headimgurl = userJson.getString("headimgurl");//头像
 
-            Map<String,String> imResultMap = null;
-            try {
-                imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//注册im
-            }catch (Exception e){
-                //TODO 暂不处理
-            }
+                Map<String, String> imResultMap = null;
+                try {
+                    imResultMap = IMMsgUtil.createIMAccount("weixinCodeLogin");//注册im
+                } catch (Exception e) {
+                    //TODO 暂不处理
+                }
 
-            //初始化数据库相关表
-            reqMap.put("m_user_id", imResultMap.get("uid"));
-            reqMap.put("m_pwd", imResultMap.get("password"));
-            //设置默认用户头像
-            if(MiscUtils.isEmpty(headimgurl)){
-                reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address",appName));//TODO
-            }else {
-                String transferAvatarAddress = qiNiuFetchURL(headimgurl,appName);
-                reqMap.put("avatar_address",transferAvatarAddress);
-            }
+                //初始化数据库相关表
+                reqMap.put("m_user_id", imResultMap.get("uid"));
+                reqMap.put("m_pwd", imResultMap.get("password"));
+                //设置默认用户头像
+                if (MiscUtils.isEmpty(headimgurl)) {
+                    reqMap.put("avatar_address", MiscUtils.getConfigByKey("default_avatar_address", appName));//TODO
+                } else {
+                    String transferAvatarAddress = qiNiuFetchURL(headimgurl, appName);
+                    reqMap.put("avatar_address", transferAvatarAddress);
+                }
 
-            if(MiscUtils.isEmpty(nickname)){
-                reqMap.put("nick_name","用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
-            }else {
-                reqMap.put("nick_name", nickname);
-            }
+                if (MiscUtils.isEmpty(nickname)) {
+                    reqMap.put("nick_name", "用户" + jedis.incrBy(Constants.CACHED_KEY_USER_NICK_NAME_INCREMENT_NUM, 1));//TODO
+                } else {
+                    reqMap.put("nick_name", nickname);
+                }
 
-            if(MiscUtils.isEmpty(sex)){
-                reqMap.put("gender","2");//TODO
-            }
+                if (MiscUtils.isEmpty(sex)) {
+                    reqMap.put("gender", "2");//TODO
+                }
 
-            //微信性别与本系统性别转换
-            //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-            if(sex.equals("1")){
-                reqMap.put("gender","1");//TODO
-            }
-            if(sex.equals("2")){
-                reqMap.put("gender","0");//TODO
-            }
-            if(sex.equals("0")){
-                reqMap.put("gender","2");//TODO
-            }
+                //微信性别与本系统性别转换
+                //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
+                if (sex.equals("1")) {
+                    reqMap.put("gender", "1");//TODO
+                }
+                if (sex.equals("2")) {
+                    reqMap.put("gender", "0");//TODO
+                }
+                if (sex.equals("0")) {
+                    reqMap.put("gender", "2");//TODO
+                }
 
-            union_id =  userJson.getString("unionid");
-            reqMap.put("unionid",union_id);
-            reqMap.put("web_openid",openid);
-            reqMap.put("login_type","4");
-            reqMap.put("subscribe",subscribe);
-            Map<String,String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
-            //生成access_token，将相关信息放入缓存，构造返回参数
-            processLoginSuccess(1, dbResultMap, null, resultMap,reqEntity.getAppName());
-            if(reqMap.get("is_saas")!=null){
-                //SaaS登录检查用户店铺逻辑
-                reqMap.put("user_id",loginInfoMap.get("user_id").toString());
-                checkShopInfo(loginInfoMap,reqEntity,jedis);
+                union_id = userJson.getString("unionid");
+                reqMap.put("unionid", union_id);
+                reqMap.put("web_openid", openid);
+                reqMap.put("login_type", "4");
+                reqMap.put("subscribe", subscribe);
+                Map<String, String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
+                //生成access_token，将相关信息放入缓存，构造返回参数
+                processLoginSuccess(1, dbResultMap, null, resultMap, reqEntity.getAppName());
+                if (reqMap.get("is_saas") != null) {
+                    //SaaS登录检查用户店铺逻辑
+                    reqMap.put("user_id", loginInfoMap.get("user_id").toString());
+                    checkShopInfo(loginInfoMap, reqEntity, jedis);
+                }
+                resultMap.put("app_name", loginInfoMap.get("app_name"));
+                return resultMap;
             }
-            resultMap.put("app_name",loginInfoMap.get("app_name"));
-            return resultMap;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            System.err.println(e);
         }
+        return null;
     }
 
     /**
