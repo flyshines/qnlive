@@ -43,8 +43,6 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
                 jedis.del( Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM);
                 for(String lecturerId : lecturerSet) {
-
-
                     Map<String,Object> map = new HashMap<>();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                     for(int i = 0;i<4;i++){
