@@ -41,4 +41,5 @@ public interface SaaSCourseMapper {
     int updateSeriesCourse(Map<String,Object> record);
 
 
+    void updateCourseCmountByCourseId(Map<String, Object> course);
 }

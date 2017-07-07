@@ -58,7 +58,7 @@
   </select>
   
   <select id="findLecturerCourseListByStatus" resultType="hashmap" parameterType="hashmap" >
-     select * from t_courses where lecturer_id = #{lecturer_id} and status = #{status}
+     select * from t_courses where lecturer_id = #{lecturer_id} and status = #{status} and course_updown=1
      <if test='status =="1"' >
      	<if test="start_time != null" >
     		and start_time <![CDATA[ < ]]> #{start_time} 
@@ -82,7 +82,7 @@
   </select>
   
   <select id="findLecturerCourseList" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses where lecturer_id = #{lecturer_id}
+    select * from t_courses where lecturer_id = #{lecturer_id} and course_updown=1
     <if test="status != null" >
     	and status = #{status}
     </if>
@@ -428,6 +428,11 @@
     <if test="last_update_time != null" >
     	and update_time=#{last_update_time}
     </if>
+  </update>
+  <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
+    update t_courses set
+        course_amount = #{course_amount}
+    where course_id = #{course_id}
   </update>
 
 

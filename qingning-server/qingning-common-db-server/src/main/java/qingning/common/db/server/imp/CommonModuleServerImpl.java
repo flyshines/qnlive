@@ -332,7 +332,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		if(!MiscUtils.isEmpty(courseMap)){
 			profitRecord.put("lecturer_id", lecturerId);
 		}
-
 		//课程收益
 		if("0".equals(tradeBill.get("profit_type"))){
 			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
@@ -417,8 +416,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	private void updateShopUser(String lecturerId,String userId,long amount){
 		//该用户在店铺的所有消费记录
-		//查询店铺ID
-		String shopId = shopMapper.selectShopIdByUserId(userId);
+		//根据讲师ID查询店铺ID
+		String shopId = shopMapper.selectShopIdByUserId(lecturerId);
 		if(shopId!=null){
 			Map<String,Object> param = new HashMap<>();
 			param.put("lecturer_id",lecturerId);
@@ -1111,5 +1110,19 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public Map<String, Object> findSaaSCourseByCourseId(String course_id) {
 		return saaSCourseMapper.selectByPrimaryKey(course_id);
+	}
+
+	@Override
+	public void updateCourseCmountByCourseId(Map<String, Object> course) {
+		if("1".equals(course.get("course_type"))){
+			coursesMapper.updateCourseCmountByCourseId(course);
+		}else if("2".equals(course.get("course_type"))){
+			saaSCourseMapper.updateCourseCmountByCourseId(course);
+		}
+	}
+
+	@Override
+	public void updateSeriesCmountByCourseId(Map<String, Object> course) {
+		seriesMapper.updateSeriesCmountByCourseId(course);
 	}
 }

@@ -69,4 +69,5 @@ public interface CoursesMapper {
 
 	List<Map<String, Object>> findCourseListAllByLecturerId(String lecturer_id);
 
+	void updateCourseCmountByCourseId(Map<String, Object> course);
 }

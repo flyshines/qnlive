@@ -270,5 +270,13 @@ public interface ICommonModuleServer {
 	 */
 	Map<String,Object> findSaaSCourseByCourseId(String course_id);
 
+	/**更新课程收入
+	 * @param course
+	 */
+	void updateCourseCmountByCourseId(Map<String, Object> course);
 
+	/**更新系列课收入
+	 * @param course
+	 */
+	void updateSeriesCmountByCourseId(Map<String, Object> course);
 }

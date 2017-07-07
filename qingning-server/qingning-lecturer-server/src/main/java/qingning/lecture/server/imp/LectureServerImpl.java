@@ -640,6 +640,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zadd(lectureCourseKey, lpos, course.get("course_id"));
             resultMap.put("course_id", course.get("course_id"));
             if(!MiscUtils.isEmpty(course.get("series_id"))){
+                map.put("series_id",course.get("series_id"));
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                 jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
             }

@@ -699,10 +699,19 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }
-    /**
-     * 获取订单明细
-     * @param access_token 后台证书
-     * @param version 版本
+
+    /**获取订单明细
+     * @param pageSize
+     * @param pageNum
+     * @param keyword       用户名称
+     * @param courseName    商品名称
+     * @param orderType     订单类型（1:分销订单，2:普通订单）
+     * @param goodsType     商品类型(0:单品 1:打赏 2:系列)
+     * @param user_id       用户ID
+     * @param goods_id      商品ID
+     * @param access_token
+     * @param appName
+     * @param version
      * @return
      * @throws Exception
      */
@@ -714,6 +723,8 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "goods_name",defaultValue = "") String courseName,
             @RequestParam(value = "order_type",defaultValue = "") String orderType,
             @RequestParam(value = "goods_type",defaultValue = "") String goodsType,
+            @RequestParam(value = "user_id",defaultValue = "") String user_id,
+            @RequestParam(value = "goods_id",defaultValue = "") String goods_id,
             @RequestHeader("access_token") String access_token,
             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -729,6 +740,10 @@ public class SaaSManageController extends AbstractController {
             parMap.put("order_type",orderType);
         if(StringUtils.isNotEmpty(goodsType))
             parMap.put("profit_type",goodsType);
+        if(StringUtils.isNotEmpty(user_id))
+            parMap.put("user_id",user_id);
+        if(StringUtils.isNotEmpty(goods_id))
+            parMap.put("goods_id",goods_id);
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }

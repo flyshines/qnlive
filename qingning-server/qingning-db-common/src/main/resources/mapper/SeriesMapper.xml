@@ -263,4 +263,9 @@
 
 	</select>
 
+	<update id="updateSeriesCmountByCourseId" parameterType="hashmap" >
+		update t_series set
+		series_amount = #{series_amount}
+		where series_id = #{series_id}
+	</update>
 </mapper>

@@ -228,7 +228,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
                 Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
                 endIndex = "-inf";//设置结束位置
             }
             courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
@@ -783,7 +783,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //如果为讲师，则返回讲师部分特定信息
             isSeriesStudent = userModuleServer.isStudentOfTheSeries(queryMap);
         }
-
+        if(isSeriesStudent){
+            course_type = "0";
+        }
         if(query_type.equals("0")){
             if("1".equals(course_type)){
                 if(reqMap.get("course_password") == null || StringUtils.isBlank(reqMap.get("course_password").toString())){
@@ -793,7 +795,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("120006");
                 }
             }else if("2".equals(course_type)){
-                if(!isSeriesStudent){
                     if(reqMap.get("payment_id") == null){
                         throw new QNLiveException("000100");
                     }
@@ -805,7 +806,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         throw new QNLiveException("120022");
                     }
                 }
-            }
         }else{
             if("1".equals(course_type)){
                 if(reqMap.get("payment_id") == null){
@@ -836,9 +836,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
             jedis.hincrBy(lecturerKey, "total_student_num", 1);
             if("2".equals(course_type)){
-                if(!isSeriesStudent){
                     jedis.hincrBy(lecturerKey, "pay_student_num", 1);
-                }
             }
             map.clear();
             map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
@@ -1037,11 +1035,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
             jedis.hincrBy(lecturerKey, "pay_student_num", 1);
         }
         map.clear();
-        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
 
         Long nowStudentNum = 0L;
-        userModuleServer.increaseStudentNumBySeriesId(reqMap.get("series_id").toString());
+        userModuleServer.increaseStudentNumBySeriesId(series_id);
         jedis.del(seriesKey);
         CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         //7.修改用户缓存信息中的加入课程数
@@ -2101,6 +2099,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("withdraw_info_list",userModuleServer.findWithdrawList(param));
 		return resultMap;
     }
+
+
     /**
      * 获取提现记录列表-后台
      * @param reqEntity

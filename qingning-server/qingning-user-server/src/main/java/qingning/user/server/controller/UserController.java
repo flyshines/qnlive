@@ -576,7 +576,6 @@ public class UserController extends AbstractController{
 			@PathVariable("room_id") String room_id,
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "series_id", defaultValue = "") String series_id,
-			@RequestParam(value = "series_status", defaultValue = "0") String  series_status,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
@@ -585,7 +584,6 @@ public class UserController extends AbstractController{
 		param.put("page_count", page_count);
 		param.put("room_id", room_id);
 		param.put("series_id", series_id);
-		param.put("series_status", series_status);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
