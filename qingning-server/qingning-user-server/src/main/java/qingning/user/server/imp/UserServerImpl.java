@@ -426,14 +426,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         
-        /*
-         * 获取登录用户是否关注公众号标识
-         */
-        Map<String, Object> accTokenMap = new HashMap<>();
-        accTokenMap.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
-        String accTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, accTokenMap);
-        String subscribe = jedis.hget(accTokenKey, "subscribe");	//获取登录用户是否关注公众号标识
-        
         //查询出直播间基本信息
         Map<String, String> infoMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedis, true);
         if (CollectionUtils.isEmpty(infoMap)) {
@@ -476,13 +468,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-        
-        /*
-         * 判断登录用户是否关注公众号
-         */
-        if(StringUtils.isBlank(subscribe) || "0".equals(subscribe)){	//未关注公众号
-        	resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
-        }
+        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
+
         return resultMap;
     }
 
@@ -626,7 +613,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //关注状态 0未关注 1已关注
             reqMap.put("room_id", liveRoomMap.get("room_id"));
             Map<String, Object> fansMap = userModuleServer.findFansByUserIdAndRoomId(reqMap);
-            if (CollectionUtils.isEmpty(fansMap)) {
+            if (CollectionUtils.isEmpty(fansMap)) {	//未关注直播间
                 resultMap.put("follow_status", "0");
             } else {
                 resultMap.put("follow_status", "1");
@@ -654,6 +641,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         resultMap.put("roles", roles);
         resultMap.put("qr_code",getQrCode(courseMap.get("lecturer_id"),userId,jedis,appName));
+        
         if(!resultMap.get("status").equals("2")){
             resultMap.put("status",courseMap.get("status"));
         }
