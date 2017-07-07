@@ -1540,8 +1540,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     for(Map<String,Object> recordMap : records){
-                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("user_id"));
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
                     }
@@ -1565,9 +1565,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         /*if("1".equals(recordMap.get("profit_type").toString())){
                             ""
                         }*/
-
+                        if(recordMap.get("lecturer_name")==null){
+                            System.out.println(recordMap.get("user_id"));
+                        }
                         recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
-
+                        if(recordMap.get("distributer_id")!=null){
+                            //分销收入
+                            recordMap.put("is_share","1");
+                        }else{
+                            recordMap.put("is_share","0");
+                        }
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
                         recordMap.put("create_time", recordTime);
