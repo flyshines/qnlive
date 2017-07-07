@@ -2175,18 +2175,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();                
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());                
         //从讲师信息中加载，数据不存在需加载缓存
-        Map<String,String> keyMap = new HashMap<String,String>();
+        Map<String,String> keyMap = new HashMap<>();
         keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         reqEntity.setParam(keyMap);
         Map<String,String> values = CacheUtils.readLecturer(userId, reqEntity, readLecturerOperation, jedis);
         
-        String total_amount_str = (String)values.get("total_amount");
-        String course_num_str =  (String)values.get("course_num");
-        String total_student_num_str =  (String)values.get("total_student_num");
+        String total_amount_str = values.get("total_amount");
+        String course_num_str = values.get("course_num");
+        String total_student_num_str = values.get("total_student_num");
         
-        Map<String,Object> result = new HashMap<String,Object>();
+        Map<String,Object> result = new HashMap<>();
         result.put("total_student_num", total_student_num_str);
         result.put("course_num", course_num_str);
         result.put("total_amount", total_amount_str);
