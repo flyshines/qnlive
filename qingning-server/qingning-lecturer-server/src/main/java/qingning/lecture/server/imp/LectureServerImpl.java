@@ -1291,7 +1291,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
     /**
-     * 逻辑roomCourses,courseList类似，注意重构同步
+     * 直播间收入
      * */
     @FunctionName("courseList")
     public Map<String, Object> getCourseList(RequestEntity reqEntity) throws Exception {
@@ -1315,9 +1315,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         resultMap.putAll(platformCourses);
         resultMap.put("course_num",jedis.zrange(lecturerCoursesAllKey,0,-1).size());
         return resultMap;
-
-
-}
+    }
     /**
      * 获取课程列表
      * 关键redis
@@ -3109,11 +3107,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.zadd(seriesCourseTypeUpKey, seriesLpos, series_id);
                 jedis.zrem(lecturerSeriesDownKey,series_id);
                 jedis.zrem(seriesCourseTypeDownKey,series_id);
+                if(seriesMap.get("series_course_type").equals("0")){
+                    long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(seriesMap.get("position")));
+                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,lpos,series_id);
+                }
             }else{//往下架加入
                 jedis.zrem(lecturerSeriesUpKey,series_id);
                 jedis.zrem(seriesCourseTypeUpKey,series_id);
                 jedis.zadd(lecturerSeriesDownKey, seriesLpos, series_id);
                 jedis.zadd(seriesCourseTypeDownKey, seriesLpos, series_id);
+                if(seriesMap.get("series_course_type").equals("0")){
+                    jedis.zrem(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,series_id);
+                }
             }
             //</editor-fold>
         }else{
