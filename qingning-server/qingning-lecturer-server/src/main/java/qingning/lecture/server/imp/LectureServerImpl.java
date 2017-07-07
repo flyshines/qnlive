@@ -384,8 +384,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         long startIndex = startTime-30*60*1000;
         long endIndex = startTime+30*60*1000;
-        Long aLong = jedis.zremrangeByScore(lecturerCoursesAllKey, startIndex, endIndex);
-        if(aLong != 0){
+        long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
+        long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
+        Set<String> aLong = jedis.zrangeByScore(lecturerCoursesAllKey, start, end);
+        if(aLong.size()!=0){
             throw new QNLiveException("100029");
         }
         reqMap.put("user_id", userId);
@@ -674,8 +676,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
         jedis.hmset(messageKey, result);
         //</editor-fold>
+        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
         //设置讲师更新课程 30分钟
-        jedis.zadd(lecturerCoursesAllKey,MiscUtils.convertObjectToLong(course.get("start_time")),course.get("course_id"));
+        jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
         return resultMap;
     }
 
