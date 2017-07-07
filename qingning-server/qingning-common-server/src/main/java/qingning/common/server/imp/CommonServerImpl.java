@@ -1303,10 +1303,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.clear();
                     query.put("course_id", courseId);
                     String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
-                    //如果之前并没有打赏该课程，则计入
-                    if(MiscUtils.isEmpty(rewardMap)){
-                        jedis.hincrBy(courseKey, "extra_num", 1);
-                    }
+
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     String extraAmount = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
@@ -1321,6 +1318,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     course.put("course_type",courseType);
                     course.put("extra_amount",extraAmount);
                     course.put("extra_num",count);
+                    jedis.hset(courseKey, "extra_num", count);
                     commonModuleServer.updateCourseCmountByCourseId(course);
                 }else if("2".equals(profit_type)){
                     //系列课收益统计
