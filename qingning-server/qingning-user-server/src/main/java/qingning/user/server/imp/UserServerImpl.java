@@ -765,8 +765,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         //1.2检测该用户是否为讲师，为讲师则不能加入该课程 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        if(userId.equals(courseInfoMap.get("lecturer_id"))){
-            throw new QNLiveException("210006");
+        //如果是app 就判断是否是讲师
+        if(query_type.equals("0")){
+            if(userId.equals(courseInfoMap.get("lecturer_id"))){
+                throw new QNLiveException("210006");
+            }
         }
 
         //2.检测课程验证信息是否正确
@@ -990,10 +993,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100004");
         }
 
-        //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+
+
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        if(userId.equals(seriesInfoMap.get("lecturer_id"))){
-            throw new QNLiveException("100017");
+        //如果是app 就判断是否是讲师
+        if(query_type.equals("0")){
+            //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+            if(userId.equals(seriesInfoMap.get("lecturer_id"))){
+                throw new QNLiveException("100017");
+            }
         }
 
         //查询支付订单
