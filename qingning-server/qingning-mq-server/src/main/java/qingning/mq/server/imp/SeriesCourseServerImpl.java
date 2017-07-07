@@ -53,6 +53,7 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                     }
                     List<Map<String, Object>> seriesList = seriesMapper.findSeriesByLecturer(lecturerId);
                     for(Map<String, Object> series : seriesList){
+                        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                         String series_id = series.get("series_id").toString();
                         long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
                         map.put("series_course_type",series.get("series_course_type").toString());
