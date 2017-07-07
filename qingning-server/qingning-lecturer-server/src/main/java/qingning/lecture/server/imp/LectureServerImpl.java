@@ -3016,15 +3016,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zrem(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,series_id);
             jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
         }
-
-
-
     }
-
-
-
-
-
 
     /**
      * 编辑系列
@@ -3053,10 +3045,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, reqMap), readSeriesOperation, jedis, true);
         return resultMap ;
     }
-
-
-
-
 
     /**
      * 上下架

@@ -147,7 +147,7 @@ public class JGMsgUtil {
 		System.out.println("发送推送"+"  执行时间"+System.currentTimeMillis());
 		JSONObject obj = new JSONObject();
 		obj.put("body","单次直播最长1440分钟，您已直播1430分钟，还剩10分钟");
-		obj.put("to","000054dea56b56d34535a8f5e529ad53327b");//courseMap.get("lecturer_id")
+		obj.put("to","00003a53768ff7e14784b63345b35d26f395");//courseMap.get("lecturer_id")
 		obj.put("msg_type","4");
 		Map<String,String> extrasMap = new HashMap<>();
 		extrasMap.put("msg_type","4");
