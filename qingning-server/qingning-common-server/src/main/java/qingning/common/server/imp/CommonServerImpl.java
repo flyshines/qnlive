@@ -908,6 +908,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
             goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+            //区分店铺课程
+            if(courseMap.get("goods_type")!=null){
+                insertMap.put("course_type","2");
+            }else{
+                insertMap.put("course_type","1");
+            }
             insertMap.put("course_type","1");
         }else if(profit_type.equals("0")){
             insertMap.put("amount", courseMap.get("course_price"));
@@ -1303,7 +1309,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
-                    jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    String extraAmount = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
+                    jedis.hset(courseKey,  "extra_amount", extraAmount);
+                    String count = "0";
+                    if(sumInfo!=null){
+                        count = sumInfo.get("counts").toString();
+                    }
+                    //同步打赏收入到数据库
+                    Map<String,Object> course = new HashMap<>();
+                    course.put("course_id",courseId);
+                    course.put("course_type",courseType);
+                    course.put("extra_amount",extraAmount);
+                    course.put("extra_num",count);
+                    commonModuleServer.updateCourseCmountByCourseId(course);
                 }else if("2".equals(profit_type)){
                     //系列课收益统计
                     Map<String,Object> param = new HashMap<>();
