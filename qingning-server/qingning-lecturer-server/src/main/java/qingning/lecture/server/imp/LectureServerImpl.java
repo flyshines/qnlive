@@ -1617,15 +1617,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
 
         List<Map<String,Object>> list = lectureModuleServer.findCourseProfitList(reqMap);
-        result.put("profit_list", list);       
+        result.put("profit_list", list);   
+        //key:distributer_id; value:收益流水list
         final Map<String, List<Map<String,Object>>> profitMap = new HashMap<String, List<Map<String,Object>>>();
         for(Map<String,Object> profit:list){
             String distributer_id = (String)profit.get("distributer_id");
-            if(profit.get("share_amount") != null){
-                Long trueProfit = (Long)profit.get("profit_amount") - (Long)profit.get("share_amount");
+            if(profit.get("share_amount") != null){	//分销员收益不为空
+                Long trueProfit = (Long)profit.get("profit_amount") - (Long)profit.get("share_amount");	//真实收益=总收益-分销收益
                 profit.put("profit_amount", trueProfit);
             }
-            if(!MiscUtils.isEmpty(distributer_id)){
+            if(!MiscUtils.isEmpty(distributer_id)){	//分销员id不为空
                 List<Map<String,Object>> profitList = profitMap.get(distributer_id);
                 if(profitList==null){
                     profitList = new LinkedList<Map<String,Object>>();
@@ -1634,24 +1635,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 profitList.add(profit);
             }
         }
-        if(!profitMap.isEmpty()){                       
+        if(!profitMap.isEmpty()){	//map:分销员id-收益列表                       
             ((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     Map<String, Object> keyMap = new HashMap<String, Object>();
                     Map<String, Response<String>> distributerNameMap = new HashMap<String, Response<String>>();
-                    for(String key:profitMap.keySet()){
+                    for(String key:profitMap.keySet()){	//循环分销员id
                         keyMap.clear();
                         keyMap.put(Constants.CACHED_KEY_DISTRIBUTER_FIELD, key);
                         String distributerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_DISTRIBUTER, keyMap);
+                        //map:分销员id-分销员昵称
                         distributerNameMap.put(key, pipeline.hget(distributerKey, "nick_name"));
                     }
                     pipeline.sync();
                     for(String key:profitMap.keySet()){
-                        List<Map<String,Object>> profitList = profitMap.get(key);
+                        List<Map<String,Object>> profitList = profitMap.get(key);	//该分销员的收益列表
                         Response<String> response = distributerNameMap.get(key);
                         if(response!=null){
-                            String distributer = response.get();
+                            String distributer = response.get();	//该分销员昵称
                             if(MiscUtils.isEmpty(distributer)){
                                 log.warn(key + " can't get the nick name of distributer.");
                                 continue;

@@ -425,12 +425,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         reqMap.put("user_id", userId);
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        
+        /*
+         * 获取登录用户是否关注公众号标识
+         */
+        Map<String, Object> accTokenMap = new HashMap<>();
+        accTokenMap.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+        String accTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, accTokenMap);
+        String subscribe = jedis.hget(accTokenKey, "subscribe");	//获取登录用户是否关注公众号标识
+        
         //查询出直播间基本信息
         Map<String, String> infoMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedis, true);
         if (CollectionUtils.isEmpty(infoMap)) {
             throw new QNLiveException("100002");
         }
-
 
         //查询关注信息 //TODO 先查询数据库，后续确认是否查询缓存
         //关注状态 0未关注 1已关注
@@ -468,7 +476,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
+        
+        /*
+         * 判断登录用户是否关注公众号
+         */
+        if(StringUtils.isBlank(subscribe) || "0".equals(subscribe)){	//未关注公众号
+        	resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
+        }
         return resultMap;
     }
 
@@ -1540,8 +1554,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     for(Map<String,Object> recordMap : records){
-                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("user_id"));
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
                     }
@@ -1565,9 +1579,44 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         /*if("1".equals(recordMap.get("profit_type").toString())){
                             ""
                         }*/
+                        if(recordMap.get("lecturer_name")==null){
+                            System.out.println(recordMap.get("user_id"));
+                        }
+                        //商品类型
+                        String type;
+                        if(recordMap.get("profit_type").toString().equals("2")){
+                            type = "系列";
+                        }else if("1".equals(recordMap.get("course_type").toString())){
+                            type = "直播";
+                        }else{
+                            type = "单品";
+                        }
+                        //操作类型
+                        String typeIn;
+                        if(recordMap.get("profit_type").toString().equals("1")){
+                            typeIn = "打赏";
+                        }else{
+                            typeIn = "购买";
+                        }
+                        StringBuffer title = new StringBuffer();
+                        if(recordMap.get("distributer_id")!=null){
+                            //分销收入
+                            recordMap.put("is_share","1");
 
-                        recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
+                            title.append(recordMap.get("lecturer_name")).append("  通过  ")
+                                    .append(recordMap.get("dist_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】").append("分销比例为");
+                            double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));
+                            title.append(rate*100).append("%");
+                            recordMap.put("profit_amount",recordMap.get("share_amount"));
 
+                            recordMap.put("title",title.toString());
+
+                        }else{
+                            //购买，打赏
+                            recordMap.put("is_share","0");
+                            title.append(recordMap.get("lecturer_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】");
+                            recordMap.put("title",title.toString());
+                        }
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
                         recordMap.put("create_time", recordTime);
