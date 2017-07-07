@@ -484,7 +484,7 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	/**
-	 * 创建直播间分销用户
+	 * 数据统计
 	 * @param page_count
 	 * @param access_token
 	 * @param version

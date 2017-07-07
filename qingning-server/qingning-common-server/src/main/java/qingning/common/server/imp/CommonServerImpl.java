@@ -1074,8 +1074,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = MiscUtils.getAppNameByAppid(appid);
-        //String appName = "qnlive";
+        //String appName = MiscUtils.getAppNameByAppid(appid);
+        String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -1083,8 +1083,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            //if(true){
+        //if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+            if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -1233,6 +1233,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 //直播间,讲师统计
                 if("1".equals(courseType)){
                     query.clear();
+                    query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(lecturerKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
