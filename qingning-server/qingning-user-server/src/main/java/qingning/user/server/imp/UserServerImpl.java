@@ -860,33 +860,40 @@ public class UserServerImpl extends AbstractQNLiveServer {
             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
             Long nowStudentNum = 0L;
-            if(jedis.exists(courseKey)){
-                //jedis.hincrBy(courseKey, "student_num", 1);
-                map.clear();
-                map.put("course_id", course_id);
-                Map<String,Object> numInfo = userModuleServer.findCourseRecommendUserNum(map);
-                long num = 0;
-                if(!MiscUtils.isEmpty(numInfo)){
-                    num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
-                }
-                jedis.hset(courseKey, "student_num", num+"");
-                Map<String, String> courseMap = jedis.hgetAll(courseKey);
-                switch (courseMap.get("status")){
-                    case "1":
-                        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
-                        if(courseMap.get("status").equals("4")){
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,course_id);
-                        }else{
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,course_id);
-                        }
-                        break;
-                    case "2":
-                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,course_id);
-                        break;
-                }
-            }else {
-                userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+            userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+            jedis.del(courseKey);
+             HashMap<String,Object> queryMap = new HashMap<>();
+             queryMap.put("course_id",course_id);
+            Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, false);
+            switch (courseMap.get("status")){
+                case "1":
+                    MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+                    if(courseMap.get("status").equals("4")){
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE,1,course_id);
+                    }else{
+                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION,1,course_id);
+                    }
+                    break;
+                case "2":
+                    jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,course_id);
+                    break;
             }
+//            if(jedis.exists(courseKey)){
+//                //jedis.hincrBy(courseKey, "student_num", 1);
+//                map.clear();
+//                map.put("course_id", course_id);
+//                userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+//                Map<String,Object> numInfo = userModuleServer.findCourseRecommendUserNum(map);
+//                long num = 0;
+//                if(!MiscUtils.isEmpty(numInfo)){
+//                    num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
+//                }
+//                jedis.hset(courseKey, "student_num", num+"");
+//                Map<String, String> courseMap = jedis.hgetAll(courseKey);
+//
+//            }else {
+//                userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+//            }
 
             //7.修改用户缓存信息中的加入课程数
             map.clear();
