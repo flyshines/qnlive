@@ -425,12 +425,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         reqMap.put("user_id", userId);
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+        
+        /*
+         * 获取登录用户是否关注公众号标识
+         */
+        Map<String, Object> accTokenMap = new HashMap<>();
+        accTokenMap.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+        String accTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, accTokenMap);
+        String subscribe = jedis.hget(accTokenKey, "subscribe");	//获取登录用户是否关注公众号标识
+        
         //查询出直播间基本信息
         Map<String, String> infoMap = CacheUtils.readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedis, true);
         if (CollectionUtils.isEmpty(infoMap)) {
             throw new QNLiveException("100002");
         }
-
 
         //查询关注信息 //TODO 先查询数据库，后续确认是否查询缓存
         //关注状态 0未关注 1已关注
@@ -468,7 +476,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
 
         resultMap.put("roles", roles);
-        resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
+        
+        /*
+         * 判断登录用户是否关注公众号
+         */
+        if(StringUtils.isBlank(subscribe) || "0".equals(subscribe)){	//未关注公众号
+        	resultMap.put("qr_code",getQrCode(infoMap.get("lecturer_id"),userId,jedis,appName));
+        }
         return resultMap;
     }
 
