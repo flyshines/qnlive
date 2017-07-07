@@ -41,7 +41,10 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
         String appName = requestEntity.getAppName();
         ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
+                jedis.del( Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM);
                 for(String lecturerId : lecturerSet) {
+
+
                     Map<String,Object> map = new HashMap<>();
                     map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
                     for(int i = 0;i<4;i++){
@@ -63,6 +66,10 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                             jedis.zadd(upkey, update_course_time,series_id);
                         }else{
                             jedis.zadd(downkey, update_course_time,series_id);
+                        }
+
+                        if(series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")){
+                            jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, update_course_time,series_id);
                         }
                         map.clear();
                         map.put("series_id",series_id);

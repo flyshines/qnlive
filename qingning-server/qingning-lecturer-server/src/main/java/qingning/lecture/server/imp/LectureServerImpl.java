@@ -373,15 +373,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //课程之间需要间隔三十分钟
         String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
-//        Calendar cal = Calendar.getInstance();//获取日历类
-//        cal.setTimeInMillis(startTime);
-//        cal.add(Calendar.MINUTE, -3*Constants.COURSE_MAX_INTERVAL);
-//        long preStartTime = cal.getTimeInMillis();
-//        cal.setTimeInMillis(startTime);
-//        cal.add(Calendar.MINUTE, 3*Constants.COURSE_MAX_INTERVAL);
-//        long nextStartTime = cal.getTimeInMillis();
-//        Set<Tuple> courseList = jedis.zrangeByScoreWithScores(lecturerCoursesAllKey, preStartTime+"", nextStartTime+"", 0, 1);
-
         long startIndex = startTime-30*60*1000;
         long endIndex = startTime+30*60*1000;
         long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
