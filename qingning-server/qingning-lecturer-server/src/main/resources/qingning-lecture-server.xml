@@ -165,7 +165,6 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
-					<param name="room_id"  type="string" require="N"  />
 					<param name="course_id" type="string" require="N"/>
 				</inputs>
 				<outputs>
