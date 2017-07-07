@@ -908,6 +908,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long)reqMap.get("reward_amount")).intValue();
             goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name",appName) +"-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
+            //区分店铺课程
+            if(courseMap.get("goods_type")!=null){
+                insertMap.put("course_type","2");
+            }else{
+                insertMap.put("course_type","1");
+            }
             insertMap.put("course_type","1");
         }else if(profit_type.equals("0")){
             insertMap.put("amount", courseMap.get("course_price"));
@@ -1068,8 +1074,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        String appName = MiscUtils.getAppNameByAppid(appid);
-        //String appName = "qnlive";
+        //String appName = MiscUtils.getAppNameByAppid(appid);
+        String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -1077,8 +1083,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            //if(true){
+        //if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+            if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -1227,6 +1233,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 //直播间,讲师统计
                 if("1".equals(courseType)){
                     query.clear();
+                    query.put(Constants.CACHED_KEY_LECTURER_FIELD, courseMap.get("lecturer_id"));
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
                     jedis.hset(lecturerKey, "total_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
                     jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
@@ -1297,13 +1304,23 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     query.clear();
                     query.put("course_id", courseId);
                     String courseKey  = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, query);
-                    //如果之前并没有打赏该课程，则计入
-                    if(MiscUtils.isEmpty(rewardMap)){
-                        jedis.hincrBy(courseKey, "extra_num", 1);
-                    }
+
                     query.put("profit_type", "1");
                     sumInfo = commonModuleServer.findCoursesSumInfo(query);
-                    jedis.hset(courseKey,  "extra_amount", MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"");
+                    String extraAmount = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit"))+"";
+                    jedis.hset(courseKey,  "extra_amount", extraAmount);
+                    String count = "0";
+                    if(sumInfo!=null){
+                        count = sumInfo.get("counts").toString();
+                    }
+                    //同步打赏收入到数据库
+                    Map<String,Object> course = new HashMap<>();
+                    course.put("course_id",courseId);
+                    course.put("course_type",courseType);
+                    course.put("extra_amount",extraAmount);
+                    course.put("extra_num",count);
+                    jedis.hset(courseKey, "extra_num", count);
+                    commonModuleServer.updateCourseCmountByCourseId(course);
                 }else if("2".equals(profit_type)){
                     //系列课收益统计
                     Map<String,Object> param = new HashMap<>();

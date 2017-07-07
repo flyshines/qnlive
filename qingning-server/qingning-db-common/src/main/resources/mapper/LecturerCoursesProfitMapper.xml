@@ -140,7 +140,7 @@
     select
     lcp.profit_type, lcp.course_id, lcp.profit_amount,
     lcp.create_time, lcp.position, lcp.user_id,
-    se.series_title
+    se.series_title,share_amount,distributer_id
     from t_lecturer_courses_profit lcp
     LEFT JOIN t_series se ON se.series_id = lcp.course_id
     where 1=1
@@ -232,7 +232,7 @@
   </select>
 
   <select id="findCoursesSumInfo" resultType="hashmap" parameterType="hashmap">
-  	select sum(profit_amount) profit_amount,sum(share_amount) share_amount,sum(profit_amount-share_amount) lecturer_profit 
+  	select sum(profit_amount) profit_amount,sum(share_amount) share_amount,sum(profit_amount-share_amount) lecturer_profit ,count(profit_amount) as counts
 	from t_lecturer_courses_profit where 1=1
 	<if test="course_id != null" >
 		and course_id= #{course_id}

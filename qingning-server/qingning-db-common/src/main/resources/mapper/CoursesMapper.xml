@@ -430,8 +430,18 @@
     </if>
   </update>
   <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
-    update t_courses set
-        course_amount = #{course_amount}
+    update t_courses
+    <set >
+      <if test="course_amount != null" >
+        course_amount=#{course_amount},
+      </if>
+      <if test="extra_amount != null" >
+        extra_amount=#{extra_amount},
+      </if>
+      <if test="extra_num != null" >
+        extra_num = #{extra_num},
+      </if>
+    </set>
     where course_id = #{course_id}
   </update>
 

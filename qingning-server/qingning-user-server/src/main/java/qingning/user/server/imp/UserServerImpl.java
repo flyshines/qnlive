@@ -779,8 +779,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         //1.2检测该用户是否为讲师，为讲师则不能加入该课程 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        if(userId.equals(courseInfoMap.get("lecturer_id"))){
-            throw new QNLiveException("210006");
+        //如果是app 就判断是否是讲师
+        if(query_type.equals("0")){
+            if(userId.equals(courseInfoMap.get("lecturer_id"))){
+                throw new QNLiveException("210006");
+            }
         }
 
         //2.检测课程验证信息是否正确
@@ -1004,10 +1007,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("100004");
         }
 
-        //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+
+
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        if(userId.equals(seriesInfoMap.get("lecturer_id"))){
-            throw new QNLiveException("100017");
+        //如果是app 就判断是否是讲师
+        if(query_type.equals("0")){
+            //1.2检测该用户是否为讲师，为讲师则不能加入该课程
+            if(userId.equals(seriesInfoMap.get("lecturer_id"))){
+                throw new QNLiveException("100017");
+            }
         }
 
         //查询支付订单
@@ -1546,8 +1554,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     for(Map<String,Object> recordMap : records){
-                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("user_id"));
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
                     }
@@ -1571,9 +1579,16 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         /*if("1".equals(recordMap.get("profit_type").toString())){
                             ""
                         }*/
-
+                        if(recordMap.get("lecturer_name")==null){
+                            System.out.println(recordMap.get("user_id"));
+                        }
                         recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
-
+                        if(recordMap.get("distributer_id")!=null){
+                            //分销收入
+                            recordMap.put("is_share","1");
+                        }else{
+                            recordMap.put("is_share","0");
+                        }
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
                         recordMap.put("create_time", recordTime);

@@ -168,28 +168,25 @@ public class LectureController extends AbstractController {
 	}
 
 	/**
-	 * 查询课程列表
+	 * 查询直播间收入课程列表
 	 * @param page_count
-	 * @param room_id
 	 * @param course_id
 	 * @param accessToken
 	 * @param version
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/lecturer/courses", method = RequestMethod.GET)
-	public
-	@ResponseBody ResponseEntity getCourseList(
-			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "room_id", defaultValue = "") String room_id,
-			@RequestParam(value = "course_id", defaultValue = "") String course_id,
-			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-			@RequestHeader("version") String version) throws Exception {
+		@RequestMapping(value = "/lecturer/courses", method = RequestMethod.GET)
+		public
+		@ResponseBody ResponseEntity getCourseList(
+				@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+				@RequestParam(value = "course_id", defaultValue = "") String course_id,
+				@RequestHeader("access_token") String accessToken,
+				@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+				@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "courseList", accessToken, version,appName);
 		Map<String, Object> parMap = new HashMap<String, Object>();
 		parMap.put("page_count", page_count);
-		parMap.put("room_id", room_id);
 		parMap.put("course_id", course_id);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
@@ -484,7 +481,7 @@ public class LectureController extends AbstractController {
 		return this.process(requestEntity, serviceManger, message);
 	}
 	/**
-	 * 创建直播间分销用户
+	 * 数据统计
 	 * @param page_count
 	 * @param access_token
 	 * @param version

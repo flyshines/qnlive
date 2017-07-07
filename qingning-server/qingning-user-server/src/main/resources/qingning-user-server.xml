@@ -321,6 +321,8 @@
 						<param name="create_time" type="long" />
 						<param name="position" type="long" />
 						<param name="title" type="string" />
+						<param name="share_amount" type="double" />
+						<param name="is_share" type="string" />
 					</param>
 				</outputs>
 			</function>
