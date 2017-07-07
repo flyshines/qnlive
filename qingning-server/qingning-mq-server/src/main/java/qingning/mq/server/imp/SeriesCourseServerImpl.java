@@ -69,7 +69,8 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                         }
 
                         if(series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")){
-                            jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, update_course_time,series_id);
+                            long lpos = MiscUtils.convertInfoToPostion(update_course_time, MiscUtils.convertObjectToLong(series.get("position")));
+                            jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos,series_id);
                         }
                         map.clear();
                         map.put("series_id",series_id);
