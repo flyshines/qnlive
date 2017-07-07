@@ -1568,12 +1568,22 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         if(recordMap.get("lecturer_name")==null){
                             System.out.println(recordMap.get("user_id"));
                         }
-                        recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
                         if(recordMap.get("distributer_id")!=null){
                             //分销收入
                             recordMap.put("is_share","1");
+
+                            StringBuffer title = new StringBuffer();
+                            title.append(recordMap.get("lecturer_name")).append("  通过  ")
+                                    .append(recordMap.get("dist_name")).append("  购买:").append(recordMap.get("course_title")).append("分销比例为");
+                            double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));
+                            title.append(rate*100).append("%");
+                            recordMap.put("profit_amount",recordMap.get("share_amount"));
+
+                            recordMap.put("title",title.toString());
+
                         }else{
                             recordMap.put("is_share","0");
+                            recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
                         }
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
