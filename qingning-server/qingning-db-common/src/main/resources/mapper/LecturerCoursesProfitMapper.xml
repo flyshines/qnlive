@@ -141,7 +141,7 @@
     lcp.profit_type, lcp.course_id, lcp.profit_amount,
     lcp.create_time, lcp.position, lcp.user_id,
     se.series_title,share_amount,distributer_id,
-    u.nick_name AS dist_name
+    u.nick_name AS dist_name,course_type
     from t_lecturer_courses_profit lcp
     LEFT JOIN t_series se ON se.series_id = lcp.course_id
     LEFT JOIN t_user u ON u.user_id = lcp.distributer_id

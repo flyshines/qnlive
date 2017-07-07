@@ -1582,13 +1582,29 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         if(recordMap.get("lecturer_name")==null){
                             System.out.println(recordMap.get("user_id"));
                         }
+                        //商品类型
+                        String type;
+                        if(recordMap.get("profit_type").toString().equals("2")){
+                            type = "系列";
+                        }else if("1".equals(recordMap.get("course_type").toString())){
+                            type = "直播";
+                        }else{
+                            type = "单品";
+                        }
+                        //操作类型
+                        String typeIn;
+                        if(recordMap.get("profit_type").toString().equals("1")){
+                            typeIn = "打赏";
+                        }else{
+                            typeIn = "购买";
+                        }
+                        StringBuffer title = new StringBuffer();
                         if(recordMap.get("distributer_id")!=null){
                             //分销收入
                             recordMap.put("is_share","1");
 
-                            StringBuffer title = new StringBuffer();
                             title.append(recordMap.get("lecturer_name")).append("  通过  ")
-                                    .append(recordMap.get("dist_name")).append("  购买:").append(recordMap.get("course_title")).append("分销比例为");
+                                    .append(recordMap.get("dist_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】").append("分销比例为");
                             double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));
                             title.append(rate*100).append("%");
                             recordMap.put("profit_amount",recordMap.get("share_amount"));
@@ -1596,8 +1612,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
                             recordMap.put("title",title.toString());
 
                         }else{
+                            //购买，打赏
                             recordMap.put("is_share","0");
-                            recordMap.put("title",recordMap.get("lecturer_name")+"  "+recordMap.get("course_title"));
+                            title.append(recordMap.get("lecturer_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】");
+                            recordMap.put("title",title.toString());
                         }
                         recordMap.remove("cacheLecturerName");
                         Date recordTime = (Date)recordMap.get("create_time");
