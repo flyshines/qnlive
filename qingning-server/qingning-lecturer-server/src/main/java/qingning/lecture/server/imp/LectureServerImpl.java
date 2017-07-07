@@ -1583,8 +1583,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("total_amount", total_amount);
         result.put("cash_in_amount", cash_in_amount);
-        List<Map<String,String>> courseList = getPlatformCourses(userId, (int)reqMap.get("page_count"),(String)reqMap.get("course_id"),appName);
-        result.put("course_list", courseList);
+        //List<Map<String,String>> courseList = getPlatformCourses(userId, (int)reqMap.get("page_count"),(String)reqMap.get("course_id"),appName);
+        //result.put("course_list", courseList);
         return result;
     }
 
