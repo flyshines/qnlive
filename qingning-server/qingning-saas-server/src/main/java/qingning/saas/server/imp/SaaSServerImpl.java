@@ -593,8 +593,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
-        //分享连接
-        reqMap.put("share_url",MiscUtils.getConfigByKey("share_url_single_index",Constants.HEADER_APP_NAME)+reqMap.get("course_id"));
 
         //默认下架
         reqMap.put("course_updown","2");
@@ -633,8 +631,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
-        //分享连接
-        reqMap.put("share_url",MiscUtils.getConfigByKey("share_url_single_index",Constants.HEADER_APP_NAME)+reqMap.get("course_id"));
         //默认下架
         reqMap.put("course_updown","0");
         reqMap.put("series_course_updown","2");
