@@ -39,7 +39,12 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
         ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
                 log.debug("执行课程列表刷新工作");
-
+                for(String lecturer_id : lecturerSet){
+                    Map<String,Object> map = new HashMap<>();
+                    map.put("lecturer_id",lecturer_id);
+                    String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);
+                    jedis.del(lecturerCoursesAllKey);
+                }
                 //删除平台
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
