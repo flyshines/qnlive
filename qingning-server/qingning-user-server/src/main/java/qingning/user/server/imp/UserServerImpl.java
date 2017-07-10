@@ -1788,6 +1788,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 courseMap.put("nick_name", jedis.hget(key, "nick_name"));
                 courseList.add(courseMap);
             }
+            result.put("course_list",courseList);
     	}
     	return result;
     }
