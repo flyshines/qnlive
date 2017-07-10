@@ -213,6 +213,7 @@
 						}"/>
 						<param name="im_course_id" type="string"/>
 						<param name="position" type="long"/>
+						<param name="extra_amount" default="0" type="double"/>
 					</param>
 
 				</outputs>
