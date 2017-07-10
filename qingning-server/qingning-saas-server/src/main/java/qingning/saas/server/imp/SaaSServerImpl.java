@@ -131,6 +131,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         Map<String,String> shop = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        shop.put("avatar_address",userMap.get("avatar_address"));
         if(shop == null){
             //店铺不存在
             throw new QNLiveException("190001");
