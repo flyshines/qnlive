@@ -378,7 +378,6 @@
 						<param name="sale_num" type="long" />
 						<param name="status" fieldname="course_updown" type="string" />
 						<param name="course_url" type="string" />
-						<param name="share_url" type="string" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
@@ -428,7 +427,6 @@
 						<param name="sale_num" type="long" />
 						<param name="status" fieldname="course_updown" type="string" />
 						<param name="course_url" type="string" />
-						<param name="share_url" type="string" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
@@ -658,7 +656,6 @@
 					<param name="sale_num" type="long" />
 					<param name="status" fieldname="course_updown" type="string" />
 					<param name="course_url" type="string" />
-					<param name="share_url" type="string" />
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
 					<param name="course_abstract" type="string" />
@@ -687,7 +684,6 @@
 					<param name="series_id" type="string" />
 					<param name="series_course_updown" type="string" />
 					<param name="is_join_series" type="string" />
-					<param name="share_url" type="string" />
 				</outputs>
 			</function>
 			
@@ -714,7 +710,6 @@
 					<param name="series_id" type="string" />
 					<param name="series_course_updown" type="string" />
 					<param name="is_join_series" type="string" />
-					<param name="share_url" type="string" />
 				</outputs>
 			</function>
 			
