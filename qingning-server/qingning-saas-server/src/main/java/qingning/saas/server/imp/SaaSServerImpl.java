@@ -1,6 +1,7 @@
 package qingning.saas.server.imp;
 
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -161,6 +162,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		shop.put("use_url",sysConfigValue);
         	}
         }
+        //直播分享URL
+        shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix", appName));
         return shop;
     }
     /**
