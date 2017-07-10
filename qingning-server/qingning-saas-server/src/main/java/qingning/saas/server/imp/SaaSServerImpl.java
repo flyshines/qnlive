@@ -94,7 +94,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     	Map<String, Object> keyField = new HashMap<String, Object>();
     	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
     	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, keyField);
-    	Boolean result = jedis.sismember(key, liveCourseId);
+    	Boolean result = !MiscUtils.isEmpty(jedis.zrank(key, liveCourseId));
     	return result;
     }
 

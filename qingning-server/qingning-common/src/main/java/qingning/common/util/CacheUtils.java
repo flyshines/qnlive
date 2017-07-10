@@ -154,7 +154,9 @@ public final class CacheUtils {
 						@Override
 						public void batchOperation(Pipeline pipeline, Jedis jedis) {
 							for(String courseId:userCourseSet){
-								pipeline.sadd(coursesKey, courseId);
+								int i = 0;
+								pipeline.zadd(coursesKey,System.currentTimeMillis()+i, courseId);
+								i++;
 							}
 							pipeline.sync();
 						}						
@@ -229,7 +231,7 @@ public final class CacheUtils {
 
 
 			String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);//获取系统缓存key
-			Long course_num = jedis.scard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
+			Long course_num = jedis.zcard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
 			if(course_num != Long.parseLong(result.get("course_num"))){
 				jedis.hset(userCacheKey,"course_num",course_num.toString());//修改用户缓存中的数据
 			}
