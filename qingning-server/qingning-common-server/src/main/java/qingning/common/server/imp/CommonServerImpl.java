@@ -3309,7 +3309,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
 
 
-                if(jedis.sismember(key, course.get("course_id").toString())){//判断当前用户是否有加入这个课程
+                if(!MiscUtils.isEmpty(jedis.zrank(key, course.get("course_id").toString()))){//判断当前用户是否有加入这个课程
                     course.put("student", "Y");
                 } else {
                     course.put("student", "N");
@@ -3432,7 +3432,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 queryParam.put("course_id", courseid);
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(courseid, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(System.currentTimeMillis(), courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                if(jedis.sismember(courseKey, courseid)){//判断当前用户是否有加入这个课程
+                if(!MiscUtils.isEmpty(jedis.zrank(courseKey, courseid))){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
                 } else {
                     courseInfoMap.put("student", "N");

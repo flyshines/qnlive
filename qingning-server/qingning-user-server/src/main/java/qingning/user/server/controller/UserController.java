@@ -343,7 +343,7 @@ public class UserController extends AbstractController{
 	/**
 	 * 查询用户加入的课程列表
 	 * @param page_count
-	 * @param record_time
+	 * @param course_id
 	 * @param access_token
 	 * @param version
 	 * @return
@@ -352,14 +352,14 @@ public class UserController extends AbstractController{
 	@RequestMapping(value="/user/course/list",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity  getStudyCourseList(
 			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "record_time", defaultValue = "") String record_time,
+			@RequestParam(value = "course_id", defaultValue = "") String course_id,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
-		parMap.put("record_time", record_time);
+		parMap.put("course_id", course_id);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}

@@ -396,7 +396,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 queryParam.put("course_id", course_id);
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                if(jedis.sismember(key, course_id)){//判断当前用户是否有加入这个课程
+                if(MiscUtils.isEmpty(jedis.zrank(key, course_id))){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
                 } else {
                     courseInfoMap.put("student", "N");
@@ -1750,41 +1750,44 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	Map<String,Object> result = new HashMap<String,Object>();
     	result.put("course_num", course_num);
     	if(course_num>0){
-	    	Map<String,Object> queryMap = new HashMap<String,Object>();
-	    	queryMap.put("create_time", reqMap.get("record_time"));
-	    	queryMap.put("page_count", reqMap.get("page_count"));
-	    	queryMap.put("user_id", userId);
+            long page_count = Long.valueOf(reqMap.get("page_count").toString());
+            Map<String,Object> queryMap = new HashMap<String,Object>();
+            queryMap.put("user_id", userId);
 
-	    	final List<Map<String,Object>> list = userModuleServer.findCourseListOfStudent(queryMap);
-	    	result.put("course_list", list);
-	    	if(!MiscUtils.isEmpty(list)){
-	    		((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
-	    			@Override
-	    			public void batchOperation(Pipeline pipeline, Jedis jedis) {
-	    	    		long currentTime= System.currentTimeMillis();
-	    	    		Map<String,Response<String>> nickeNameMap = new HashMap<String,Response<String>>();
-	    	    		for(Map<String,Object> course:list){
-	    	    			Map<String,String> course_map = new HashMap<String,String>();
-	    	    			MiscUtils.converObjectMapToStringMap(course, course_map);
-	    	    			MiscUtils.courseTranferState(currentTime, course_map);
-	    	    			course.put("status", course_map.get("status"));
-	    	    			String lecturer_id = course_map.get("lecturer_id");
-	    	    			if(!nickeNameMap.containsKey(lecturer_id)){
-	    	    				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, course_map);
-		    	    			nickeNameMap.put(lecturer_id, pipeline.hget(key, "nick_name"));
-	    	    			}
-	    	    		}
-	    	    		pipeline.sync();
-	    	    		for(Map<String,Object> course:list){
-	    	    			String lecturer_id =(String) course.get("lecturer_id");
-	    	    			if(!MiscUtils.isEmpty(lecturer_id)){
-	    	    				Response<String> response = nickeNameMap.get(lecturer_id);
-	    	    				if(response != null)	course.put("nick_name", response.get());
-	    	    			}
-	    	    		}
-	    			}
-	    		});
-	    	}
+            Set<String> userCourseIdSet = new HashSet<>();
+            long startIndex = 0;//坐标起始位
+            long endIndex = -1;//坐标结束位
+            String userCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES,queryMap);
+            long endSeriesCourseSum = jedis.zcard(userCourseKey);
+	    	if(MiscUtils.isEmpty(reqMap.get("course_id"))){
+                endIndex = -1;
+                startIndex = endSeriesCourseSum - page_count;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{
+                String course_id = reqMap.get("course_id").toString();
+                long endRank = jedis.zrank(userCourseKey, course_id);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - page_count + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }
+            }
+            userCourseIdSet = jedis.zrange(userCourseKey, startIndex, endIndex);
+            ArrayList<String> transfer = new ArrayList<>(userCourseIdSet);
+            Collections.reverse(transfer);
+            List<Map<String,String>> courseList = new ArrayList<>();
+            for(String course_id : userCourseIdSet){
+                queryMap.clear();
+                queryMap.put("course_id",course_id);
+                Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
+                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, courseMap);
+                courseMap.put("nick_name", jedis.hget(key, "nick_name"));
+                courseList.add(courseMap);
+            }
     	}
     	return result;
     }
@@ -2638,7 +2641,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 queryParam.put("course_id", courseId);
                 Map<String, String> courseInfoMap =  CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(now, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                if(jedis.sismember(userCourseKey, courseId)){//判断当前用户是否有加入这个课程
+                if(!MiscUtils.isEmpty(jedis.zrank(userCourseKey, courseId))){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
                 } else {
                     courseInfoMap.put("student", "N");
