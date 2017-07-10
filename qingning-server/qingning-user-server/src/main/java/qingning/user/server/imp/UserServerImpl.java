@@ -2016,16 +2016,23 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public  Map<String, Object> userGains(RequestEntity reqEntity) throws Exception{
         String appName = reqEntity.getAppName();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Map<String, Object> userGainsByUserId = userModuleServer.findUserGainsByUserId(userId);
+        Map<String, Object> userGains = userModuleServer.findUserGainsByUserId(userId);
+
+        //直播间+分销收入计算
+        Long userTotalRealIncome = Long.valueOf(userGains.get("live_room_real_incomes").toString())+Long.valueOf(userGains.get("distributer_real_incomes").toString());
+        Long userTotalIncome = Long.valueOf(userGains.get("live_room_total_amount").toString())+Long.valueOf(userGains.get("distributer_total_amount").toString());
+        userGains.put("user_total_real_incomes",userTotalRealIncome);
+        userGains.put("user_total_amount",userTotalIncome);
+
         Map<String,Object> innerMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
         innerMap.put("user_id", userId);
         Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
-        userGainsByUserId.put("phone",userMap.get("phone_number"));
-        if(MiscUtils.isEmpty(userGainsByUserId)){
+        userGains.put("phone",userMap.get("phone_number"));
+        if(MiscUtils.isEmpty(userGains)){
             throw new QNLiveException("170001");
         }
-        return userGainsByUserId;
+        return userGains;
     }
 
 

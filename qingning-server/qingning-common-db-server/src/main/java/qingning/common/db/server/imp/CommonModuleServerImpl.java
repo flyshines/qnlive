@@ -483,8 +483,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			lectureGainsOld = initGains(lecturerId,appName);
 		}
 		//讲师收益
-		long lectureTotalAmount = 0L;
-		long lectureRealAmount = 0L;
+		long lectureTotalAmount;
+		long lectureRealAmount;
 
 		//分销员收益
 		long distTotalAmount = 0L;

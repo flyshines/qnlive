@@ -53,7 +53,15 @@
   </update>
 
   <select id="findUserGainsByUserId" parameterType="java.lang.String" resultType="hashmap">
-   select * from t_user_gains where user_id = #{user_id}
+   select
+    user_id,
+	live_room_total_amount,
+	live_room_real_incomes,
+	distributer_total_amount,
+	distributer_real_incomes,
+	user_total_amount,
+	user_total_real_incomes,
+	balance from t_user_gains where user_id = #{user_id}
   </select>
 
 
