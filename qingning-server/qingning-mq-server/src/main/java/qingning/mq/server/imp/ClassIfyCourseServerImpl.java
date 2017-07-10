@@ -55,57 +55,63 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     map.put("classify_id",classify_id);
                     List<Map<String, Object>> courseByClassifyId = coursesMapper.findCourseByClassifyId(map);
                     for(Map<String, Object> course : courseByClassifyId){
-                        if(course.get("status").equals("2") || course.get("status").equals("1")){
-                            String course_id = course.get("course_id").toString();
-                            String lecturer_id = course.get("lecturer_id").toString();
-                            map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//?γ?id
-                            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
-                            map.put("course_id",course_id);
-                            String courseClassifyIdKey = "";
+                        String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, course);
+                        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+                        jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id").toString());
+                        if( course.get("course_updown").toString().endsWith("1")){
+                            if(course.get("status").equals("2") || course.get("status").equals("1")){
+                                String course_id = course.get("course_id").toString();
+                                String lecturer_id = course.get("lecturer_id").toString();
+                                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);//?γ?id
+                                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
+                                map.put("course_id",course_id);
+                                String courseClassifyIdKey = "";
 //                            String courseLectureKey = "";
-                            String courseListKey = "";
-                            Long time = 0L ;
-                            if(course.get("status").equals("2")){
-                                courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
-                                courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
+                                String courseListKey = "";
+                                Long time = 0L ;
+                                if(course.get("status").equals("2")){
+                                    courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+                                    courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
 //                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-                                time = MiscUtils.convertObjectToLong(course.get("end_time"));//
-                            }else{
-                                courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-                                courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
+                                    time = MiscUtils.convertObjectToLong(course.get("end_time"));//
+                                }else{
+                                    courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+                                    courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
 //                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                                time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
-                            }
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
-                            long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                            jedis.zadd(courseClassifyIdKey,lpos, course_id);
+                                    time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
+                                }
+                                String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);//"SYS:COURSE:{course_id}"
+                                lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                                jedis.zadd(courseClassifyIdKey,lpos, course_id);
 //                            jedis.zadd(courseLectureKey,lpos, course_id);
-                            jedis.zadd(courseListKey,lpos, course_id);
-                            if(course.get("status").equals("2")){
-                                if(jedis.hget(courseKey, "status").equals("1")){
-                                    jedis.hset(courseKey,"status","2");
+                                jedis.zadd(courseListKey,lpos, course_id);
+                                if(course.get("status").equals("2")){
+                                    if(jedis.hget(courseKey, "status").equals("1")){
+                                        jedis.hset(courseKey,"status","2");
+                                    }
                                 }
                             }
-                        }
-                        //统计热门推荐
-                        Long student_num = Long.valueOf(course.get("student_num").toString());
-                        Long extra_num = Long.valueOf(course.get("extra_num").toString());
-                        Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
-                        MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
-                        Long lops = student_num + extra_num;
-                        String course_id = course.get("course_id").toString();
-                        if(!course.get("course_updown").toString().equals("0")){
-                            switch (course.get("status").toString()){
-                                case "1":
-                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
-                                    break;
-                                case "2":
-                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
-                                    break;
-                                case "4":
-                                    jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
-                                    break;
+                            //统计热门推荐
+                            Long student_num = Long.valueOf(course.get("student_num").toString());
+                            Long extra_num = Long.valueOf(course.get("extra_num").toString());
+                            Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                            MiscUtils.courseTranferState(System.currentTimeMillis(), course,time);
+                            Long lops = student_num + extra_num;
+                            String course_id = course.get("course_id").toString();
+                            if(!course.get("course_updown").toString().equals("0")){
+                                switch (course.get("status").toString()){
+                                    case "1":
+                                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION,lops,course_id);
+                                        break;
+                                    case "2":
+                                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_FINISH,lops,course_id);
+                                        break;
+                                    case "4":
+                                        jedis.zadd(Constants.SYS_COURSES_RECOMMEND_LIVE,lops,course_id);
+                                        break;
+                                }
                             }
+
                         }
 
                     }
