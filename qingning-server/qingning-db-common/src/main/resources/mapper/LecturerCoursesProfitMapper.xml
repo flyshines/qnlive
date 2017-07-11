@@ -29,6 +29,9 @@
       <if test="profit_type != null" >
         profit_type,
       </if>
+      <if test="course_type != null" >
+        course_type,
+      </if>
       <if test="create_time != null" >
         create_time,
       </if>
@@ -75,6 +78,9 @@
       </if>
       <if test="profit_type != null" >
         #{profit_type},
+      </if>
+      <if test="course_type != null" >
+        #{course_type},
       </if>
       <if test="create_time != null" >
         #{create_time},

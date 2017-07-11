@@ -725,7 +725,7 @@ public final class MiscUtils {
         return resultNum;
     }
     public static long convertInfoToPostion(long timeInMillis,long pos){
-    	long postion = (timeInMillis-1487034415000l)/1000;
+    	long postion = (timeInMillis-1487034415000L)/1000;
     	return postion*Constants.SEQUENCE+pos;
     }
     
