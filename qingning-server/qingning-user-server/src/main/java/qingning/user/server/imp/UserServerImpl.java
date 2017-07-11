@@ -2046,15 +2046,23 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String, Object> userGains = userModuleServer.findUserGainsByUserId(userId);
-
-        //直播间+分销收入计算
-        Long userTotalRealIncome = Long.valueOf(userGains.get("live_room_real_incomes").toString())+Long.valueOf(userGains.get("distributer_real_incomes").toString());
-        Long userTotalIncome = Long.valueOf(userGains.get("live_room_total_amount").toString())+Long.valueOf(userGains.get("distributer_total_amount").toString());
-        userGains.put("user_total_real_incomes",userTotalRealIncome);
-        userGains.put("user_total_amount",userTotalIncome);
-
-        Map<String,Object> innerMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+
+        //判断当前用户是否有店铺
+        Map<String, Object> shopMap = new HashMap<>();
+        shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
+        if (jedis.exists(lectureLiveRoomKey)) {//有店铺
+            userGains.put("has_shop","1");
+        }else{//没店铺
+            userGains.put("has_shop","0");
+            //直播间+分销收入计算
+            Long userTotalRealIncome = Long.valueOf(userGains.get("live_room_real_incomes").toString())+Long.valueOf(userGains.get("distributer_real_incomes").toString());
+            Long userTotalIncome = Long.valueOf(userGains.get("live_room_total_amount").toString())+Long.valueOf(userGains.get("distributer_total_amount").toString());
+            userGains.put("user_total_real_incomes",userTotalRealIncome);
+            userGains.put("user_total_amount",userTotalIncome);
+        }
+        Map<String,Object> innerMap = new HashMap<>();
         innerMap.put("user_id", userId);
         Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
         userGains.put("phone",userMap.get("phone_number"));

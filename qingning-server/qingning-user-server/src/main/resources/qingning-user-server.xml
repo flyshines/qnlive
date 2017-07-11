@@ -420,6 +420,7 @@
 					<param name="user_total_real_incomes" type="double"/>
 					<param name="balance" type="double"/>
 					<param name="phone" type="string"/>
+					<param name="has_shop" type="string"/>
 				</outputs>
 			</function>
 			
