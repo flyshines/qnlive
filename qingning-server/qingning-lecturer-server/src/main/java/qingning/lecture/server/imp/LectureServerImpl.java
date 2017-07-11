@@ -28,6 +28,7 @@ import redis.clients.jedis.Tuple;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -3064,9 +3065,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //1.将课程加入讲师 系列上架列表
         String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
+        long seriesScore = 0L;
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            seriesScore = sdf.parse(series.get("update_course_time")).getTime();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
+        jedis.zadd(lectureSeriesKey, seriesScore,series_id );
 
-        jedis.zrem(lectureSeriesKey,series_id);
-        jedis.zadd(lectureSeriesKey, lpos, series_id);
         //课程内容分类
         map.put("series_course_type",series.get("series_course_type"));
         String lectureSeriesCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
@@ -3290,19 +3298,24 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     jedis.zadd(seriesCourseUpKey, courselops, courseId);
                     jedis.zrem(seriesCourseDownKey,courseId);
                     Map<String, Object> dbResultMap = lectureModuleServer.increaseSeriesCourse(series_id);
-                    
                     /*
                      * 更新讲师所有上架系列课缓存
                      */
                     Map<String, Object> readSeriesMap = new HashMap<>();
                     readSeriesMap.put("series_id", series_id);
                     RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
-                    Map<String, String> seriesMap = CacheUtils.readSeries(series_id, reqEntity, readSeriesOperation, jedis, true);
-                    
-                    String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
-                    long score = ((Date)dbResultMap.get("update_time")).getTime();
-                    score = MiscUtils.convertLongByDesc(score);	//获取新的排序分值
-                    jedis.zadd(lecturerSeriesUpKey, score, series_id);
+                    Map<String, String> seriesMap = CacheUtils.readSeries(series_id, readSeriesReqEntity, readSeriesOperation, jedis, true);
+                    if(seriesMap.get("updown").equals("1")){
+                        String seriesCourseTypeDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, seriesMap);
+                        long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(seriesMap.get("position")));//根据最近更新课程时间和系列的排序
+                        jedis.zadd(seriesCourseTypeDownKey, seriesLpos, series_id);
+
+                        String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
+                        long score = ((Date)dbResultMap.get("update_time")).getTime();
+                        score = MiscUtils.convertLongByDesc(score);	//获取新的排序分值
+                        jedis.zadd(lecturerSeriesUpKey, score, series_id);
+                    }
+
                 }else{//往下架加入
                     jedis.zrem(seriesCourseUpKey,courseId);
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
