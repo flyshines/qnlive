@@ -124,10 +124,6 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     				}
     			}
 
-
-
-
-
 				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
 				if(!MiscUtils.isEmpty(lecturerSet)){
 					for(String lecturerId : lecturerSet) {
