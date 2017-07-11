@@ -916,7 +916,18 @@
 					</param>
 				</outputs>
 			</function>
-
+			<!-- 绑定手机验证码 -->
+			<function name="bindPhone">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="phone" type="string" require="Y,000100"/>
+					<param name="code" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 		<version num="1.0.0" class="">
 		</version>

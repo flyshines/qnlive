@@ -230,19 +230,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }else{ //首页
                 getCourseIdKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
             }
-//            if(MiscUtils.isEmpty(courseId)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
-//                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-//                startIndex = courseScoreByRedis+"";//设置起始位置
-//                endIndex = "-inf";//设置结束位置
-//            }else{//传了courseid
-//                Map<String,String> queryParam = new HashMap<String,String>();
-//                queryParam.put("course_id", courseId);
-//                RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
-//                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
-//                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-//                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
-//                endIndex = "-inf";//设置结束位置
-//            }
             if(MiscUtils.isEmpty(courseId)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
                 startIndex = "-inf";//设置起始位置 '(' 是要求大于这个参数
@@ -424,7 +411,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 queryParam.put("course_id", course_id);
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
                 MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                if(MiscUtils.isEmpty(jedis.zrank(key, course_id))){//判断当前用户是否有加入这个课程
+                if(!MiscUtils.isEmpty(jedis.zrank(key, course_id))){//判断当前用户是否有加入这个课程
                     courseInfoMap.put("student", "Y");
                 } else {
                     courseInfoMap.put("student", "N");
@@ -1087,70 +1074,52 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Long nowStudentNum = 0L;
         userModuleServer.increaseStudentNumBySeriesId(series_id);
         jedis.del(seriesKey);
-        CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
+        Map<String, String> stringMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
         //7.修改用户缓存信息中的加入课程数
         map.clear();
         map.put(Constants.CACHED_KEY_USER_FIELD, userId);
 
         String userSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, seriesInfoMap);//删除已加入课程的key  在之后登录时重新加入
         jedis.zadd(userSeriesKey,System.currentTimeMillis(),series_id);
-//        //series_type 0:公开课程  1:收费课程',
-//        //TODO 加入课程推送   收费课程支付成功才推送消息
-//        if (!"2".equals(seriesInfoMap.get("series_type"))) {
-//            //获取讲师的信息
-//            map.clear();
-//            map.put("lecturer_id", seriesInfoMap.get("lecturer_id"));
-//            Map<String, String> user = CacheUtils.readLecturer(seriesInfoMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
-//
-//            Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-//            TemplateData first = new TemplateData();
-//            first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//            String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_course_first",appName), MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
-//            first.setValue(firstContent);
-//            templateMap.put("first", first);
-//
-//            TemplateData courseTitle = new TemplateData();
-//            courseTitle.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//            courseTitle.setValue(MiscUtils.RecoveryEmoji(courseInfoMap.get("course_title")));
-//            templateMap.put("keyword1", courseTitle);
-//
-//            Date start_time = new Date(Long.parseLong(courseInfoMap.get("start_time")));
-//            TemplateData orderNo = new TemplateData();
-//            orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//            orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
-//            templateMap.put("keyword2", orderNo);
-//
-//            String lastContent;
-//            lastContent = MiscUtils.getConfigByKey("wpush_shop_course_lecturer_name",appName) + MiscUtils.RecoveryEmoji(user.get("nick_name"));
-//            lastContent += "\n" +MiscUtils.getConfigByKey("wpush_shop_course_remark",appName);
-//
-//            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
-//            TemplateData remark = new TemplateData();
-//            if(appName.equals(Constants.HEADER_APP_NAME)){
-//                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
-//            }else{
-//                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
-//            }
-//            remark.setValue(lastContent);
-//            templateMap.put("remark", remark);
-//            String url = String.format(MiscUtils.getConfigByKey("course_live_room_url",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
-//            WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_course",appName),url, templateMap, jedis,appName);
-//        }
+        //series_type 0:公开课程  1:收费课程',
+        //TODO 加入课程推送   收费课程支付成功才推送消息
+        if (!"2".equals(seriesInfoMap.get("series_type"))) {
+            //获取讲师的信息
+            map.clear();
+            map.put("lecturer_id", seriesInfoMap.get("lecturer_id"));
+            Map<String, String> lecturer = CacheUtils.readLecturer(seriesInfoMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
 
-//        //公开课 执行这段逻辑
-//        if (equals(courseInfoMap.get("course_type").equals("0"))) {
-//            //一个用户进入加入直播间带入1到2个人进入
-//
-//            map.clear();
-//            map.put("course_id", course_id);
-//            RequestEntity mqRequestEntity = new RequestEntity();
-//            mqRequestEntity.setServerName("CourseRobotService");
-//            mqRequestEntity.setAppName(appName);
-//            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-//            mqRequestEntity.setFunctionName("courseHaveStudentIn");
-//            mqRequestEntity.setParam(map);
-//            this.mqUtils.sendMessage(mqRequestEntity);
-//        }
+            Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+            TemplateData first = new TemplateData();
+            first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+            String firstContent = String.format(MiscUtils.getConfigByKey("wpush_shop_series_first",appName), MiscUtils.RecoveryEmoji(stringMap.get("series_title")));
+            first.setValue(firstContent);
+            templateMap.put("first", first);
+
+            TemplateData courseTitle = new TemplateData();
+            courseTitle.setColor(Constants.WE_CHAT_PUSH_COLOR);
+            courseTitle.setValue(MiscUtils.RecoveryEmoji(lecturer.get("nick_name")));
+            templateMap.put("keyword1", courseTitle);
+
+            Date start_time = new Date(System.currentTimeMillis());
+            TemplateData orderNo = new TemplateData();
+            orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+            orderNo.setValue(MiscUtils.parseDateToFotmatString(start_time, "yyyy-MM-dd HH:mm:ss"));
+            templateMap.put("keyword2", orderNo);
+
+            Map<String,Object> studentUserMap = userModuleServer.findLoginInfoByUserId(userId);
+            TemplateData remark = new TemplateData();
+            if(appName.equals(Constants.HEADER_APP_NAME)){
+                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+            }else{
+                remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+            }
+            remark.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_series_remark",appName));
+            templateMap.put("remark", remark);
+            String url = MiscUtils.getConfigByKey("series_share_url_pre_fix",appName)+series_id;//String.format(MiscUtils.getConfigByKey("series_share_url_pre_fix",appName), courseInfoMap.get("course_id"),  courseInfoMap.get("room_id"));
+            WeiXinUtil.send_template_message((String) studentUserMap.get("web_openid"), MiscUtils.getConfigByKey("wpush_shop_series",appName),url, templateMap, jedis,appName);
+        }
+
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, seriesInfoMap.get("lecturer_id").toString());
         return resultMap;
     }

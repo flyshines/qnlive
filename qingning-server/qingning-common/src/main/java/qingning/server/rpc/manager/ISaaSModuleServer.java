@@ -209,4 +209,10 @@ public interface ISaaSModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findSystemConfigByInKey(Map<String, Object> selectSysConfigMap);
+
+    /**更新用户手机号码
+     * @param userMap
+     * @return
+     */
+    int updateUserPhone(Map<String, Object> userMap);
 }

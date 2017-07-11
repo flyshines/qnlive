@@ -822,6 +822,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
         } else if ("2".equals(type)) {//更新课程的时间
             templateId = MiscUtils.getConfigByKey("wpush_update_course",appName);//更新课程的模板id
             isUpdateCourse = true;
+        }else if("3".equals(type)){
+            templateId = MiscUtils.getConfigByKey("wpush_start_series_course",appName);//系列更新课程的模板id
         }
         Jedis jedis = jedisUtils.getJedis(appName);
         List<String> studentIds = new ArrayList<>();
@@ -842,11 +844,15 @@ public class MessagePushServerImpl extends AbstractMsgService {
         JSONObject obj = new JSONObject();
         Map<String,String> extrasMap = new HashMap<>();
 
-        if (!isUpdateCourse) {
+        if ("1".equals(type)) {
             obj.put("body",String.format(MiscUtils.getConfigKey("jpush_room_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("room_name")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
             obj.put("msg_type","11");//发布新课程
             extrasMap.put("msg_type","11");
-        } else {
+        }else if("3".equals(type)){
+            obj.put("body",String.format(MiscUtils.getConfigKey("jpush_series_follow_new_course"), MiscUtils.RecoveryEmoji(courseInfo.get("series_title")),  MiscUtils.RecoveryEmoji(courseInfo.get("course_title"))));
+            obj.put("msg_type","11");//发布新课程
+            extrasMap.put("msg_type","11");
+        } else if("2".equals(type)){
             String start_time = reqMap.get("start_time").toString();
             obj.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_time_modify"), MiscUtils.RecoveryEmoji(courseInfo.get("course_title")), start_time));
             obj.put("msg_type","13");

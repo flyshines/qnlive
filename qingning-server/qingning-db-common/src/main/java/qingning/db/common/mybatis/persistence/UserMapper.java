@@ -19,4 +19,10 @@ public interface UserMapper {
 	 * @return
 	 */
 	List<Map<String,Object>> selectNotGainsUserId(@Param("page_num") int page_num,@Param("page_count") int page_count);
+
+	/**查找数据库是否有该手机号码的用户
+	 * @param userMap
+	 * @return
+	 */
+	int existByPhone(Map<String, Object> userMap);
 }
