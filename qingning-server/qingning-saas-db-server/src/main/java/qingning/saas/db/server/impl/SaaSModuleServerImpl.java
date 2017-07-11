@@ -493,4 +493,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		return systemConfigMapper.selectSysConfigByInKey(selectSysConfigMap);
 	}
 
+    @Override
+    public int updateUserPhone(Map<String, Object> userMap) {
+        //手机号码已经绑定
+        if(userMapper.existByPhone(userMap)>0){
+            return 1;
+        }
+        userMapper.updateUser(userMap);
+        return 0;
+    }
+
 }

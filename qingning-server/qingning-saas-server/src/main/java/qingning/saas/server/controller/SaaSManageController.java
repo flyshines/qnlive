@@ -747,4 +747,22 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
     }
+
+    /**
+     * 绑定手机号码（校验验证码）
+     * @param accessToken 用户安全证书
+     * @param version 版本
+     * @throws Exception
+     */
+    @RequestMapping(value = "/bind/phone", method = RequestMethod.PUT)
+    public @ResponseBody ResponseEntity  verifyVerificationCode(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bindPhone", accessToken, version,appName);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 }
