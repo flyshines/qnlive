@@ -723,9 +723,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
     public Map<String, Object> updateUpdown(Map<String,Object> record) {
         Integer updateCount = 0;
 	    String query_from = record.get("query_from").toString();
-        if(!MiscUtils.isEmpty(record.get("series_id"))){
+        if(!MiscUtils.isEmpty(record.get("series_id"))){	//系列id不为null
             updateCount += seriesMapper.updateSeries(record);
-        }else if(!MiscUtils.isEmpty(record.get("course_id"))){
+        }else if(!MiscUtils.isEmpty(record.get("course_id"))){	//课程id不为null
             if(query_from.equals("0")){
                 updateCount += coursesMapper.updateCourse(record);
             }else{

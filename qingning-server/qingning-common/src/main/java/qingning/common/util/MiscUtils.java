@@ -729,6 +729,24 @@ public final class MiscUtils {
     	return postion*Constants.SEQUENCE+pos;
     }
     
+    /**
+     * 未来时间-指定时间：实现指定时间越大，返回值越小
+     * @param timeInMillis 指定时间
+     * @return
+     */
+    public static long convertLongByDesc(long timeInMillis){
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	long futureTime = 0;
+		try {
+			futureTime = sdf.parse("2100-01-01 00:00:00").getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}	
+		//设定一个未来时间，用来做减法实现倒序排列
+    	long postion = futureTime - timeInMillis;	//未来时间-指定时间：实现指定时间越大，返回值越小
+    	return postion;
+    }
+    
 	/** 
 	 * @Description 将字符串中的emoji表情转换成可以在utf-8字符集数据库中保存的格式（表情占4个字节，需要utf8mb4字符集） 
 	 * @param str 待转换字符串 

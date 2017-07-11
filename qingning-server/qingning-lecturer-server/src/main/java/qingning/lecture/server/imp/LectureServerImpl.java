@@ -3155,7 +3155,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	/*
             	 * 维护讲师所有上架系列，根据子课最新的更新时间进行排序
             	 */
-                jedis.zadd(lecturerSeriesUpKey, seriesLpos,series_id );
+            	//获取子课程更新时间
+            	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            	long seriesScore = sdf.parse(seriesMap.get("update_course_time")).getTime();
+            	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
+                jedis.zadd(lecturerSeriesUpKey, seriesScore,series_id );
+                
                 jedis.zadd(seriesCourseTypeUpKey, seriesLpos, series_id);
                 jedis.zrem(lecturerSeriesDownKey,series_id);
                 jedis.zrem(seriesCourseTypeDownKey,series_id);
@@ -3284,7 +3289,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(updown.equals("1")){//往上架加入
                     jedis.zadd(seriesCourseUpKey, courselops, courseId);
                     jedis.zrem(seriesCourseDownKey,courseId);
-                    lectureModuleServer.increaseSeriesCourse(series_id);
+                    Map<String, Object> dbResultMap = lectureModuleServer.increaseSeriesCourse(series_id);
+                    
+                    /*
+                     * 更新讲师所有上架系列课缓存
+                     */
+                    Map<String, Object> readSeriesMap = new HashMap<>();
+                    readSeriesMap.put("series_id", series_id);
+                    RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
+                    Map<String, String> seriesMap = CacheUtils.readSeries(series_id, reqEntity, readSeriesOperation, jedis, true);
+                    
+                    String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
+                    long score = ((Date)dbResultMap.get("update_time")).getTime();
+                    score = MiscUtils.convertLongByDesc(score);	//获取新的排序分值
+                    jedis.zadd(lecturerSeriesUpKey, score, series_id);
                 }else{//往下架加入
                     jedis.zrem(seriesCourseUpKey,courseId);
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
