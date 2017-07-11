@@ -638,7 +638,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
-        reqMap.put("series_or_course",0);
+        reqMap.put("series_or_course",1);
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
