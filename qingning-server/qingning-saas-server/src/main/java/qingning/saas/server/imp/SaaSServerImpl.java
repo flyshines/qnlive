@@ -638,7 +638,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //收益初始化
         reqMap.put("extra_amount",0);
         reqMap.put("extra_num",0);
-        reqMap.put("series_or_course",1);
+        reqMap.put("series_or_course",0);
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
@@ -1808,18 +1808,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                     String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
                     Response<String> courseName = pipeline.hget(courseKey, "course_title");
-                    Response<String> start_time = pipeline.hget(courseKey, "start_time");
-                    Response<String> end_time = pipeline.hget(courseKey, "end_time");
                     Response<String> course_updown = pipeline.hget(courseKey, "course_updown");
                     Response<String> course_image = pipeline.hget(courseKey, "course_image");
                     Response<String> goods_type = pipeline.hget(courseKey, "goods_type");
                     Response<String> course_duration = pipeline.hget(courseKey, "course_duration");
                     Response<String> status = pipeline.hget(courseKey, "status");
+                    Response<String> course_url = pipeline.hget(courseKey, "course_url");
                     recordMap.put("courseTitle", courseName);
-                    recordMap.put("start_time", start_time);
-                    recordMap.put("end_time", end_time);
                     recordMap.put("course_updown", course_updown);
                     recordMap.put("course_image", course_image);
+                    recordMap.put("course_url", course_url);
                     recordMap.put("goods_type", goods_type);
                     recordMap.put("course_duration", course_duration);
                     recordMap.put("status", status);
@@ -1829,6 +1827,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     Response<String> courseName = (Response)recordMap.get("courseTitle");
                     Response<String> course_updown = (Response)recordMap.get("course_updown");
                     Response<String> course_image = (Response)recordMap.get("course_image");
+                    Response<String> course_url = (Response)recordMap.get("course_url");
                     Response<String> goods_type = (Response)recordMap.get("goods_type");
                     Response<String> course_duration = (Response)recordMap.get("course_duration");
                     Response<String> status = (Response)recordMap.get("status");
@@ -1850,20 +1849,17 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                         }
                         recordMap.put("start_time", start_time);
                         recordMap.put("end_time", end_time);
+                        recordMap.put("course_image", course_url.get());
+                        recordMap.put("type", "0");
                     }else{
                         recordMap.remove("start_time");
                         recordMap.remove("end_time");
+                        recordMap.put("course_image", course_image.get());
+                            //非直播
+                        recordMap.put("type", goods_type.get());
                     }
                     recordMap.put("status", course_updown.get());
-                    recordMap.put("course_image", course_image.get());
                     recordMap.put("course_duration", course_duration.get());
-                    if(goods_type!=null){
-                        //非直播
-                        recordMap.put("type", goods_type.get());
-                    }else{
-                        //直播
-                        recordMap.put("type", "0");
-                    }
                 }
             });
             resultMap.put("list", records);

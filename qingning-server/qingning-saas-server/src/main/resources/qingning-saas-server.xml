@@ -705,7 +705,7 @@
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="put_time" type="long" fieldname="create_time" />
 						<param name="course_url" type="string" />
-						<param name="course_duration" type="long" />
+						<param name="course_duration" default="0" type="long" />
 						<param name="course_type" type="string" fieldname="goods_type" />
 					</param>
 					<param name="series_id" type="string" />
