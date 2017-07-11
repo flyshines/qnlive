@@ -899,6 +899,23 @@
 					<param name="total_page" type="long" default="0"/>
 				</outputs>
 			</function>
+			
+			<!-- 店铺-获取店铺信息 -->
+			<function name="findShopInfo">
+				<auth>
+					<accessToken require="Y,000100" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string"/>
+				</inputs>
+				<outputs>
+					<param name="shop_info" type="map">
+						<param name="shop_logo_url" type="string" fieldname="shop_logo"/>
+						<param name="shop_name" type="rstring"/>
+						<param name="shop_remark" type="string"/>
+					</param>
+				</outputs>
+			</function>
 
 		</default>
 		<version num="1.0.0" class="">
