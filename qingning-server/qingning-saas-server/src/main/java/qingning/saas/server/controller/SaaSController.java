@@ -393,4 +393,27 @@ public class SaaSController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
     
+    /**
+     * 店铺-获取店铺信息
+     * @param shopId
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/shop_info/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopInfo(
+			@PathVariable("shop_id") String shopId,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopInfo", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    
 }

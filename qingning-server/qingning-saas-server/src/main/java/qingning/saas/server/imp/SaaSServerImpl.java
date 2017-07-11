@@ -1994,6 +1994,34 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         return resultMap;
     }
+    
+    /**
+     * H5_店铺-获取店铺信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findShopInfo")
+    public Map<String, Object>  findShopInfo(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        Map<String, String> shopInfoMap = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        resultMap.put("shop_info", shopInfoMap);
+        
+        return resultMap;
+	} 
 
 
 }
