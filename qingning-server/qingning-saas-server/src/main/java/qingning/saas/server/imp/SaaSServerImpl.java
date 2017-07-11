@@ -1508,16 +1508,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String type = reqMap.get("type").toString();
         Map<String,Object> result = null;
         if("1".equals(type)){
-            //语音直播
-            result = saaSModuleServer.findUpLiveCourseList(reqMap);
-        }else if("2".equals(type)||"3".equals(type)||"4".equals(type)){
             //单品课程
             //2:图文，3:音频，4:视频
             int typeInt = Integer.valueOf(type)-1;
             reqMap.put("type",typeInt+"");
             result = saaSModuleServer.findUpCourseList(reqMap);
-        }else if("5".equals(type)){
+        }else if("2".equals(type)){
             //系列课
+            result = saaSModuleServer.findUpLiveCourseList(reqMap);
+        }else if("4".equals(type)){
+            //语音直播
             result = saaSModuleServer.findUpLiveCourseList(reqMap);
         }
         return result;
