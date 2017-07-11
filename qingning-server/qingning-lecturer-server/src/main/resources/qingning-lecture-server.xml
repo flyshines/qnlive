@@ -350,6 +350,9 @@
 				<outputs>
 					<param name="total_amount" type="double" default="0"/>
 					<param name="cash_in_amount" type="double" default="0"/>
+					<param name="course_num" type="long" default="0"/>
+					<param name="total_student_num" type="double" default="0"/>
+
 					<!--<param name="course_list" type="list">
 						<param name="status" type="string"/>
 						<param name="student" type="string"/>

@@ -1574,6 +1574,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         String cash_in_amount = "";
         String total_amount = jedis.hget(liveRoomKey, "total_amount");
+        String course_num = jedis.hget(liveRoomKey, "course_num");
+        String total_student_num = jedis.hget(liveRoomKey, "total_student_num");
         if(MiscUtils.isEmpty(total_amount)){ //判斷有沒有錢
             total_amount="0";
             cash_in_amount = "0";
@@ -1583,8 +1585,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("total_amount", total_amount);
         result.put("cash_in_amount", cash_in_amount);
-        //List<Map<String,String>> courseList = getPlatformCourses(userId, (int)reqMap.get("page_count"),(String)reqMap.get("course_id"),appName);
-        //result.put("course_list", courseList);
+        result.put("course_num", course_num);
+        result.put("total_student_num", total_student_num);
         return result;
     }
 
