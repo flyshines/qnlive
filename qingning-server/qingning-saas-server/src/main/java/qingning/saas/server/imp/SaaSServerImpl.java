@@ -1599,7 +1599,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         insertCommentMap.put("course_name", courseInfoMap.get("course_title"));
         insertCommentMap.put("type", courseInfoMap.get("goods_type"));
         insertCommentMap.put("avatar_address", loginedUserMap.get("avatar_address"));
-        insertCommentMap.put("create_time", now.getTime());
+        insertCommentMap.put("create_time", now);
        
         //封装更新的saas课程评论数量map
         Map<String, Object> updateCourseMap = new HashMap<>();
