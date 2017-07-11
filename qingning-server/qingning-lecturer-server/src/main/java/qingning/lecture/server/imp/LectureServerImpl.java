@@ -3152,6 +3152,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String seriesCourseTypeUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, seriesMap);//讲师在不同的课程内容上架的系列
 
             if(updown.equals("1")){//往上架加入
+            	/*
+            	 * 维护讲师所有上架系列，根据子课最新的更新时间进行排序
+            	 */
                 jedis.zadd(lecturerSeriesUpKey, seriesLpos,series_id );
                 jedis.zadd(seriesCourseTypeUpKey, seriesLpos, series_id);
                 jedis.zrem(lecturerSeriesDownKey,series_id);

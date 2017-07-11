@@ -197,6 +197,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 roomId = id;
             }
         }
+
         shop.put("room_id",roomId);
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的店铺");
@@ -207,6 +208,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("create_time",new Date());
         shop.put("shop_logo",userMap.get("avatar_address"));
         saaSModuleServer.openShop(shop);
+
+        //插入缓存
+        Map<String, Object> shopMap = new HashMap<>();
+        shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
+        Map<String,String> stringMap = new HashMap<>();
+        MiscUtils.converObjectMapToStringMap(shopMap,stringMap);
+        jedis.hmset(shopKey,stringMap);
         return null;
     }
     /**
@@ -1508,16 +1517,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String type = reqMap.get("type").toString();
         Map<String,Object> result = null;
         if("1".equals(type)){
-            //语音直播
-            result = saaSModuleServer.findUpLiveCourseList(reqMap);
-        }else if("2".equals(type)||"3".equals(type)||"4".equals(type)){
             //单品课程
             //2:图文，3:音频，4:视频
             int typeInt = Integer.valueOf(type)-1;
             reqMap.put("type",typeInt+"");
             result = saaSModuleServer.findUpCourseList(reqMap);
-        }else if("5".equals(type)){
+        }else if("2".equals(type)){
             //系列课
+            result = saaSModuleServer.findUpLiveCourseList(reqMap);
+        }else if("4".equals(type)){
+            //语音直播
             result = saaSModuleServer.findUpLiveCourseList(reqMap);
         }
         return result;
@@ -1599,7 +1608,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         insertCommentMap.put("course_name", courseInfoMap.get("course_title"));
         insertCommentMap.put("type", courseInfoMap.get("goods_type"));
         insertCommentMap.put("avatar_address", loginedUserMap.get("avatar_address"));
-        insertCommentMap.put("create_time", now.getTime());
+        insertCommentMap.put("create_time", now);
        
         //封装更新的saas课程评论数量map
         Map<String, Object> updateCourseMap = new HashMap<>();
@@ -1985,6 +1994,34 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         return resultMap;
     }
+    
+    /**
+     * H5_店铺-获取店铺信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findShopInfo")
+    public Map<String, Object>  findShopInfo(RequestEntity reqEntity) throws Exception{
+    	//返回结果集
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        
+        Map<String, String> shopInfoMap = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
+        resultMap.put("shop_info", shopInfoMap);
+        
+        return resultMap;
+	} 
 
 
 }

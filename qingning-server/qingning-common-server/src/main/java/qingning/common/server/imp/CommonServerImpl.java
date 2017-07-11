@@ -527,6 +527,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             shop.put("create_time",new Date());
             shop.put("shop_logo",loginInfoMap.get("avatar_address"));
             commonModuleServer.insertShopInfo(shop);
+
+            //插入缓存
+            Map<String, Object> shopMap = new HashMap<>();
+            shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
+            String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
+            Map<String,String> stringMap = new HashMap<>();
+            MiscUtils.converObjectMapToStringMap(shopMap,stringMap);
+            jedis.hmset(shopKey,stringMap);
         }
 
     }
