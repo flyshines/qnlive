@@ -457,6 +457,61 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,lpos,series_id);
 
+
+                //TODO 订阅的系列发布了新的课程 推送提醒
+                map.put("lecturer_id", userId);
+                Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
+                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
+                List<Map<String, Object>> seriesStudentList = lectureModuleServer.findSeriesStudentListBySeriesId(series_id);
+                if(!MiscUtils.isEmpty(seriesStudentList)){
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                    TemplateData first = new TemplateData();
+                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    first.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_series_first",appName),MiscUtils.RecoveryEmoji(series.get("series_title"))));
+                    templateMap.put("first", first);
+                    TemplateData name = new TemplateData();
+                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    name.setValue(MiscUtils.RecoveryEmoji(course.get("course_title")));
+                    templateMap.put("keyword1", name);
+                    TemplateData wuliu = new TemplateData();
+                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    String content = "";
+                    wuliu.setValue(content);
+                    templateMap.put("keyword2", wuliu);
+                    TemplateData orderNo = new TemplateData();
+                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
+                    templateMap.put("keyword3", orderNo);
+                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+                    TemplateData receiveAddr = new TemplateData();
+                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
+                    templateMap.put("keyword4", receiveAddr);
+                    TemplateData remark = new TemplateData();
+                    if(appName.equals(Constants.HEADER_APP_NAME)){
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+                    }else{
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+                    }
+                    remark.setValue(MiscUtils.getConfigByKey("wpush_follow_series_remark",appName));
+                    templateMap.put("remark", remark);
+
+                    Map<String, Object> wxPushParam = new HashMap<>();
+                    wxPushParam.put("templateParam", templateMap);//模板消息
+                    course.put("series_title", series.get("series_title"));
+                    wxPushParam.put("course", course);//课程ID
+                    wxPushParam.put("followers", seriesStudentList);//直播间关注者
+                    wxPushParam.put("pushType", "3");//1创建课程 2更新课程 3系列更新课程
+                    RequestEntity mqRequestEntity = new RequestEntity();
+                    mqRequestEntity.setServerName("MessagePushServer");
+                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
+                    mqRequestEntity.setParam(wxPushParam);
+                    mqRequestEntity.setAppName(appName);
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+
+
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
@@ -477,6 +532,117 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
                 String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
                 jedis.zadd(classifyCourseKey, lpos, courseId);
+
+                //</editor-fold>
+                //<editor-fold desc="单品课推送">
+                map.clear();
+                map.put("lecturer_id", userId);
+                Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
+                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
+                String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
+                //取出粉丝列表
+                List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
+                Map<String,Object> queryNo = new HashMap<String,Object>();
+                queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
+                String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
+                Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
+                if (MiscUtils.isEmpty(serviceNoMap)) {
+                    Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId); //查找授权信息
+                    MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
+                }
+                //关注的直播间有新的课程，推送提醒
+                if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
+                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+                    TemplateData first = new TemplateData();
+                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first",appName));
+                    templateMap.put("first", first);
+                    TemplateData name = new TemplateData();
+                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
+                    templateMap.put("keyword1", name);
+                    TemplateData wuliu = new TemplateData();
+                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
+                    if(MiscUtils.isEmpty(content)){
+                        content = "";
+                    }
+                    wuliu.setValue(content);
+                    templateMap.put("keyword2", wuliu);
+
+                    TemplateData orderNo = new TemplateData();
+                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
+                    templateMap.put("keyword3", orderNo);
+                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+                    TemplateData receiveAddr = new TemplateData();
+                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
+                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
+                    templateMap.put("keyword4", receiveAddr);
+                    TemplateData remark = new TemplateData();
+                    if(appName.equals(Constants.HEADER_APP_NAME)){
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+                    }else{
+                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+                    }
+                    remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark",appName),MiscUtils.RecoveryEmoji(nickName)));
+                    templateMap.put("remark", remark);
+
+                    if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
+                        Map<String, Object> wxPushParam = new HashMap<>();
+                        wxPushParam.put("templateParam", templateMap);//模板消息
+                        course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
+                        wxPushParam.put("course", course);//课程ID
+                        wxPushParam.put("followers", findFollowUser);//直播间关注者
+                        wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                        RequestEntity mqRequestEntity = new RequestEntity();
+                        mqRequestEntity.setServerName("MessagePushServer");
+                        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                        mqRequestEntity.setFunctionName("noticeCourseToFollower");
+                        mqRequestEntity.setParam(wxPushParam);
+                        mqRequestEntity.setAppName(appName);
+                        this.mqUtils.sendMessage(mqRequestEntity);
+                    }
+                    if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
+                        log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
+                        String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis,appName);
+                        log.debug("验证讲师服务号token--------------------");
+                        if (authorizer_access_token != null) {
+                            Map<String, Object> wxPushParam = new HashMap<>();
+                            wxPushParam.put("templateParam", templateMap);//模板消息
+                            wxPushParam.put("course_id", courseId);//课程ID
+                            wxPushParam.put("lecturer_id", userId);
+                            wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));//第三方服务号的
+                            wxPushParam.put("accessToken", authorizer_access_token);//课程ID
+                            wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+                            String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
+                            log.debug("发送mq消息进行异步处理--------------------");
+                            Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam, appName);
+                            RequestEntity mqRequestEntity = new RequestEntity();
+                            mqRequestEntity.setServerName("MessagePushServer");
+                            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+                            mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+                            mqRequestEntity.setParam(weCatTemplateInfo);
+                            mqRequestEntity.setAppName(appName);
+                            noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+                        }
+                    }
+                }
+                if ("0".equals(course_type)){//公开课才开启机器人
+                    log.info("创建课程，开始机器人加入功能");
+                    map.clear();
+                    map.put("course_id", courseId);
+                    RequestEntity mqRequestEntity = new RequestEntity();
+                    mqRequestEntity.setServerName("CourseRobotService");
+                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                    mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
+                    mqRequestEntity.setParam(map);
+                    mqRequestEntity.setAppName(appName);
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                    jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+                }
+                //</editor-fold>
+
             }
             //4.6 将课程插入到平台分类列表 分类列表
             map.clear();
@@ -522,116 +688,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     this.mqUtils.sendMessage(mqRequestEntity);
                 }
             }
-            //</editor-fold>
-            map.clear();
-            map.put("lecturer_id", userId);
-            Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
-            String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
-            String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
-            //取出粉丝列表
-            List<Map<String,Object>> findFollowUser = lectureModuleServer.findRoomFanListWithLoginInfo(roomId);
-            Map<String,Object> queryNo = new HashMap<String,Object>();
-            queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
-            String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
-            Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
-            if (MiscUtils.isEmpty(serviceNoMap)) {
-                Map<String, Object> serviceNoMapObj = lectureModuleServer.findServiceNoInfoByLecturerId(userId); //查找授权信息
-                MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
-            }
 
-            //TODO 订阅的系列发布了新的课程 推送提醒
-
-            //关注的直播间有新的课程，推送提醒
-            if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
-                Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                TemplateData first = new TemplateData();
-                first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first",appName));
-                templateMap.put("first", first);
-                TemplateData name = new TemplateData();
-                name.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
-                templateMap.put("keyword1", name);
-                TemplateData wuliu = new TemplateData();
-                wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
-                if(MiscUtils.isEmpty(content)){
-                    content = "";
-                }
-                wuliu.setValue(content);
-                templateMap.put("keyword2", wuliu);
-
-                TemplateData orderNo = new TemplateData();
-                orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
-                templateMap.put("keyword3", orderNo);
-                Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-                TemplateData receiveAddr = new TemplateData();
-                receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
-                templateMap.put("keyword4", receiveAddr);
-                TemplateData remark = new TemplateData();
-                if(appName.equals(Constants.HEADER_APP_NAME)){
-                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
-                }else{
-                    remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
-                }
-                remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark",appName),MiscUtils.RecoveryEmoji(nickName)));
-                templateMap.put("remark", remark);
-
-                if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
-                    Map<String, Object> wxPushParam = new HashMap<>();
-                    wxPushParam.put("templateParam", templateMap);//模板消息
-                    course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
-                    wxPushParam.put("course", course);//课程ID
-                    wxPushParam.put("followers", findFollowUser);//直播间关注者
-                    wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-                    RequestEntity mqRequestEntity = new RequestEntity();
-                    mqRequestEntity.setServerName("MessagePushServer");
-                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
-                    mqRequestEntity.setParam(wxPushParam);
-                    mqRequestEntity.setAppName(appName);
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                }
-                if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
-                    log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
-                    String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis,appName);
-                    log.debug("验证讲师服务号token--------------------");
-                    if (authorizer_access_token != null) {
-                        Map<String, Object> wxPushParam = new HashMap<>();
-                        wxPushParam.put("templateParam", templateMap);//模板消息
-                        wxPushParam.put("course_id", courseId);//课程ID
-                        wxPushParam.put("lecturer_id", userId);
-                        wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));//第三方服务号的
-                        wxPushParam.put("accessToken", authorizer_access_token);//课程ID
-                        wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-                        String url = MiscUtils.getConfigByKey("course_share_url_pre_fix",appName)+courseId;//推送url
-                        log.debug("发送mq消息进行异步处理--------------------");
-                        Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam, appName);
-                        RequestEntity mqRequestEntity = new RequestEntity();
-                        mqRequestEntity.setServerName("MessagePushServer");
-                        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                        mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                        mqRequestEntity.setParam(weCatTemplateInfo);
-                        mqRequestEntity.setAppName(appName);
-                        noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
-                    }
-                }
-            }
-            if ("0".equals(course_type)){//公开课才开启机器人
-                log.info("创建课程，开始机器人加入功能");
-                map.clear();
-                map.put("course_id", courseId);
-                RequestEntity mqRequestEntity = new RequestEntity();
-                mqRequestEntity.setServerName("CourseRobotService");
-                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
-                mqRequestEntity.setParam(map);
-                mqRequestEntity.setAppName(appName);
-                this.mqUtils.sendMessage(mqRequestEntity);
-                jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
-            }
             //</editor-fold>
         }else if("2".equals(reqMap.get("updown"))){
             map.clear();
