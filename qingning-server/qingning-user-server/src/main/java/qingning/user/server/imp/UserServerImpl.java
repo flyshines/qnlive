@@ -1498,6 +1498,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(reqMap.get("shop_id")!=null){
             queryMap.put("shop_id",reqMap.get("shop_id"));
             //本店铺所有消费记录
+            queryMap.put("course_type","2");
             records = userModuleServer.findUserShopRecords(queryMap);
         }else {
             //查询直播间消费记录（不包括SAAS后台）
