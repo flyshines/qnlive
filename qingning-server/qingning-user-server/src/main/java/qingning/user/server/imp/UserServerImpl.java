@@ -126,8 +126,19 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
 
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        int status =  Integer.parseInt(reqMap.get("status").toString());//状态 1.预告 2.已结束 4.在直播中
+
+        int status = 0;
+
         String course_id = (String)reqMap.get("course_id");//课程id
+        if(!MiscUtils.isEmpty(course_id)){
+            Map<String,Object> param = new HashMap<>();
+            param.put("course_id",course_id);
+            Map<String, String> courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, param), readCourseOperation, jedis, true);//从缓存中读取课程信息
+            status = Integer.valueOf(courseMap.get("status").toString());
+        }else{
+            status = Integer.parseInt(reqMap.get("status").toString());//状态 1.预告 2.已结束 4.在直播中
+        }
+
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
         String classify_id = reqMap.get("classify_id").toString();
         int updown = 1;
@@ -141,6 +152,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //Map<String, Object> values = getPlatformCourses(reqEntity);
         //课程列表总数
         values.put("course_amount",jedis.zrange(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,0,-1).size()+jedis.zrange(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,0,-1).size());
+
         if(!MiscUtils.isEmpty(values)){
         	final List<Map<String,Object>> courseList = (List<Map<String,Object>>)values.get("course_list");
         	if(!MiscUtils.isEmpty(courseList)){
@@ -266,7 +278,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
             if(MiscUtils.isEmpty(courseId)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
                 endIndex ="+inf";//设置结束位置
             }else{//传了courseid
                 Map<String,String> queryParam = new HashMap<String,String>();
@@ -274,7 +286,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
                 Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
                 endIndex ="+inf";//设置结束位置
             }
             courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
@@ -406,6 +418,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         //</editor-fold>
         resultMap.put("course_list", courseList);
+        resultMap.put("course_list_size", courseList.size());
         return resultMap;
     }
 

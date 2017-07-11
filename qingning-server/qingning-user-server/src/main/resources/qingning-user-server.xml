@@ -32,6 +32,7 @@
 				</inputs>
 				<outputs>
                     <param name="course_amount" type="long"/>
+					<param name="course_list_size" type="long"/>
 					<param name="course_list" type="list">
 						<param name="course_id" type="string"/>
 						<param name="status" type="string"/>

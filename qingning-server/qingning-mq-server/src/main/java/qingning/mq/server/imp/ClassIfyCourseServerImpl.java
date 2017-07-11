@@ -46,8 +46,8 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     jedis.del(lecturerCoursesAllKey);
                 }
                 //删除平台
-                jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
-                jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
+            //    jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
+               // jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
@@ -75,12 +75,12 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                                 String courseListKey = "";
                                 Long time = 0L ;
                                 if(course.get("status").equals("2")){
-                                    courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+                                //    courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
                                     courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
 //                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
                                     time = MiscUtils.convertObjectToLong(course.get("end_time"));//
                                 }else{
-                                    courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+                              //      courseListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
                                     courseClassifyIdKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
 //                                courseLectureKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
                                     time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("start_time").toString());
@@ -89,7 +89,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                                 lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
                                 jedis.zadd(courseClassifyIdKey,lpos, course_id);
 //                            jedis.zadd(courseLectureKey,lpos, course_id);
-                                jedis.zadd(courseListKey,lpos, course_id);
+                           //     jedis.zadd(courseListKey,lpos, course_id);
                                 if(course.get("status").equals("2")){
                                     if(jedis.hget(courseKey, "status").equals("1")){
                                         jedis.hset(courseKey,"status","2");
