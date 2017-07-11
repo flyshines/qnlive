@@ -286,11 +286,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String, Object> findUpLiveCourseList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String, Object>> result = null;
-        if("5".equals(param.get("type").toString())){
+        if("2".equals(param.get("type").toString())){
             //系列课
             result = seriesMapper.findSeriesListByLiturere(param, page);
         }else {
-            //单品课程
+            //直播课程
             result = coursesMapper.findCourseListByLiturere(param, page);
         }
         Map<String, Object> res = new HashMap<>();

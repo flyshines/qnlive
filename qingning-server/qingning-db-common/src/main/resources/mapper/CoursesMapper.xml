@@ -549,6 +549,7 @@
     <if test="keyword != null" >
       course_title like '%${keyword}%'
     </if>
+    and t.series_course_updown = '0'
   </select>
   <select id="findAllListByLiturere" resultType="hashmap" parameterType="hashmap" >
     SELECT
@@ -569,10 +570,7 @@
     <if test="keyword != null" >
       and t.course_title like '%${keyword}%'
     </if>
-    <if test="noseries != null" >
-      and t.series_course_updown = '0'
-    </if>
-    and t.series_id is null
+    and t.series_course_updown = '0'
     ORDER BY
     t.create_time DESC
   </select>
