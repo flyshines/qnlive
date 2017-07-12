@@ -102,7 +102,7 @@ public class SaaSManageController extends AbstractController {
     @RequestMapping(value = "/shop/banner/list", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity wechatCheckLogin(
+    ResponseEntity shopBannerList(
             @RequestHeader("access_token") String accessToken,
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
