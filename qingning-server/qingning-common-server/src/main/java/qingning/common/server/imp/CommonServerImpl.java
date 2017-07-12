@@ -666,10 +666,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 processLoginSuccess(1, dbResultMap, null, resultMap, reqEntity.getAppName());
                 if (reqMap.get("is_saas") != null) {
                     //SaaS登录检查用户店铺逻辑
-                    reqMap.put("user_id", loginInfoMap.get("user_id").toString());
+                    reqMap.put("user_id", resultMap.get("user_id").toString());
                     checkShopInfo(loginInfoMap, reqEntity, jedis);
                 }
-                resultMap.put("app_name", loginInfoMap.get("app_name"));
+                resultMap.put("app_name", reqEntity.getAppName());
                 return resultMap;
             }
         } catch (Exception e) {
