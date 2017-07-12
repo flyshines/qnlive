@@ -3305,17 +3305,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     readSeriesMap.put("series_id", series_id);
                     RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
                     Map<String, String> seriesMap = CacheUtils.readSeries(series_id, readSeriesReqEntity, readSeriesOperation, jedis, true);
+
                     if(seriesMap.get("updown").equals("1")){
-                        String seriesCourseTypeDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, seriesMap);
+                        String seriesCourseTypeUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, seriesMap);
                         long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(seriesMap.get("position")));//根据最近更新课程时间和系列的排序
-                        jedis.zadd(seriesCourseTypeDownKey, seriesLpos, series_id);
+                        jedis.zadd(seriesCourseTypeUpKey, seriesLpos, series_id);
 
                         String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
                         long score = ((Date)dbResultMap.get("update_time")).getTime();
                         score = MiscUtils.convertLongByDesc(score);	//获取新的排序分值
                         jedis.zadd(lecturerSeriesUpKey, score, series_id);
                     }
-
                 }else{//往下架加入
                     jedis.zrem(seriesCourseUpKey,courseId);
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
