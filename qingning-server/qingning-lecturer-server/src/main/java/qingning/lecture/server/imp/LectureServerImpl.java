@@ -3065,13 +3065,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         //1.将课程加入讲师 系列上架列表
         String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, map);
-        long seriesScore = 0L;
-        try{
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            seriesScore = sdf.parse(series.get("update_course_time")).getTime();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        long seriesScore = Long.parseLong(series.get("update_course_time"));
         seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
         jedis.zadd(lectureSeriesKey, seriesScore,series_id );
 
@@ -3164,8 +3158,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             	 * 维护讲师所有上架系列，根据子课最新的更新时间进行排序
             	 */
             	//获取子课程更新时间
-            	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            	long seriesScore = sdf.parse(seriesMap.get("update_course_time")).getTime();
+            	long seriesScore = Long.parseLong(seriesMap.get("update_course_time"));
             	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
                 jedis.zadd(lecturerSeriesUpKey, seriesScore,series_id );
                 
