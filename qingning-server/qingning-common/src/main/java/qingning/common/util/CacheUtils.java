@@ -242,9 +242,14 @@ public final class CacheUtils {
 			}
 
 			Long series_num = jedis.zcard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
-			if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
+			if(MiscUtils.isEmpty(result.get("series_num"))){
+				if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
+					jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
+				}
+			}else{
 				jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
 			}
+
 
 			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedis, true, 60*60*72);
 		}
