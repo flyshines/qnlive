@@ -114,6 +114,8 @@
 					<param name="access_token" type="string"/>
 					<param name="key" type="string"/>
 					<param name="name" type="string"/>
+					<param name="shop_id" type="string"/>
+					<param name="room_id" type="string"/>
 				</outputs>
 			</function>
 
