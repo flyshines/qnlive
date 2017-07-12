@@ -334,14 +334,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
      */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap) {
+	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap,  Map<String, Object> updateSaasShopUserMap) {
 		
 		//新增数据库saas课程的留言
 		courseCommentMapper.insert(insertCommentMap);
 		//更新数据库课程的评论次数
 		saasCourseMapper.updateByPrimaryKey(updateCourseMap);
 		//更新数据库用户留言数
-        shopUserMapper.updateByPrimaryKey(updateCourseMap);
+        shopUserMapper.updateByPrimaryKey(updateSaasShopUserMap);
 		return 1;
 	}
 
