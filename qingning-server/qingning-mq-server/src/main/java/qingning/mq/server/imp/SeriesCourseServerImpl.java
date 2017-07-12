@@ -85,11 +85,12 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                                 jedis.zadd(seriesCourseDownKey, update_time,course.get("course_id").toString());
                             }
                         }
-                        map.put("course_num",seriesCourseList.size());
+                        Long course_num = jedis.zcard(seriesCourseUpKey);
+                        map.put("course_num",course_num);
                         seriesMapper.updateSeries(map);
                         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
                         if(jedis.exists(seriesKey)){
-                            jedis.hset(seriesKey,"course_num",seriesCourseList.size()+"");
+                            jedis.hset(seriesKey,"course_num",course_num+"");
                         }
                     }
                 }

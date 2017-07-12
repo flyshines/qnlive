@@ -228,8 +228,6 @@ public final class CacheUtils {
 				}
 			}
 			//</editor-fold>
-
-
 			String userCacheKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);//获取系统缓存key
 			Long course_num = jedis.zcard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query));//课程存储key 获取加入课程总数
 			if(course_num != Long.parseLong(result.get("course_num"))){

@@ -71,8 +71,14 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        updateCourseData(lecturerSet,pipeline);
 			        //更新讲师分销信息
 			        updateLecturerDistributionLink(lecturerSet, jedis);
+					//更新讲师saas课程
+					updateSaasCourseData(lecturerSet,jedis);
+
 				}
-				
+
+
+
+
 		        //查询出所有需要更新的分销员        
 				Set<String> distributerIdSet = jedis.smembers(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
 				jedis.del(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
@@ -323,7 +329,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				}
 			}
 
-			private void updateSaasCourseData(Set<String> lecturerSet, Jedis jedis, Pipeline pipeline){
+			private void updateSaasCourseData(Set<String> lecturerSet, Jedis jedis){
 				Map<String,Set<String>> preCourseKeyMap = new HashMap<>();
 				Map<String,Object> queryParam = new HashMap<String,Object>();
 				Set<String> courseIdSet = new HashSet<String>();
