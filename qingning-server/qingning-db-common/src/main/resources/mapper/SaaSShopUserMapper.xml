@@ -54,6 +54,9 @@
       <if test="user_id != null" >
         user_id = #{user_id,jdbcType=VARCHAR},
       </if>
+      <if test="comment_num != null" >
+        msg_num = msg_num + #{comment_num,jdbcType=BIGINT},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>

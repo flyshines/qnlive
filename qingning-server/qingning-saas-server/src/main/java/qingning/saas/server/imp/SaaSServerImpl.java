@@ -1615,7 +1615,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         updateCourseMap.put("course_id", courseId);
         updateCourseMap.put("comment_num", 1);
         updateCourseMap.put("update_time", now);
-        
+
+        //用户在改店铺的评论数
+        updateCourseMap.put("user_id", userId);
+        updateCourseMap.put("shop_id", courseInfoMap.get("shop_id"));
+
         //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
         saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap);
         
