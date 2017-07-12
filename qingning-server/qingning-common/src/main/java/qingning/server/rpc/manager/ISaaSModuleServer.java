@@ -153,9 +153,10 @@ public interface ISaaSModuleServer {
      /** 新增saas课程的留言，同时更新课程的评论次数
      * @param insertCommentMap
      * @param updateCourseMap 
+     * @param updateSaasShopUserMap 
      * @return
      */
-	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap);
+	int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Map<String, Object> updateSaasShopUserMap);
 
 	/**
 	 * 根据条件获取直播课程列表
