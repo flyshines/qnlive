@@ -613,7 +613,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     checkShopInfo(loginInfoMap, reqEntity, jedis);
                 }*/
                 //店铺，直播间 信息
-                getRoomAndShop(loginInfoMap,jedis);
+                getRoomAndShop(resultMap,jedis);
                 return resultMap;
             } else {
                 String sex = userJson.getString("sex");//性别
