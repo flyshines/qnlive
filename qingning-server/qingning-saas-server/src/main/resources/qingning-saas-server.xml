@@ -566,6 +566,7 @@
 						<param name="status" fieldname="updown" type="string" />
 						<param name="sharing_status" type="string" default="0" />
 						<param name="update_status" fieldname="series_status" type="string" />
+						<param name="series_count" fieldname="course_num" type="long" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />

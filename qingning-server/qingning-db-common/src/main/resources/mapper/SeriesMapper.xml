@@ -232,7 +232,8 @@
 			t.series_amount,
 			t.series_student_num,
 			t.updown,
-			t.series_status
+			t.series_status,
+			t.course_num
 		FROM
 			`t_series` t
 		WHERE
