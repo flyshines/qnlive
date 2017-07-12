@@ -2351,7 +2351,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
                 
                 /*
-                 * TODO 根据讲师id获取直播间id
+                 * 根据讲师id获取直播间id
                  */
                 String lecturerId = seriesMap.get("lecturer_id");
                 Map<String, Object> readRoom = new HashMap<>();
@@ -2364,9 +2364,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 	Set keys = rooms.keySet();
                 	Iterator iter = keys.iterator();
                 	roomId = (String) iter.next();	//如果有多个直播间，默认第一个
+                	
+                	((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
+                    liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
+                }else{
+                	liveRoomMap = null;
                 }
-                ((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
-                liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
                 
                 content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
                 /*
@@ -2382,7 +2385,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = MiscUtils.getConfigByKey("series_share_url_pre_fix",appName) + id;
 
                 if(reqMap.get("png").toString().equals("Y"))
-                	//TODO 生成邀请卡二维码base64
+                	//生成邀请卡二维码base64
                     png_url = this.CreateSeriesRqPage(seriesMap, loginedUserMap, share_url, reqEntity.getVersion(), jedis, appName);
                 break;
         }
