@@ -526,7 +526,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getCourseDetailInfo(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        Map<String, String> courseMap = new HashMap<String, String>();
         String room_id = null;
         String series_id = null;
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -538,29 +537,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
 
-        //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
-        if (jedis.exists(courseKey)) {
-            Map<String, String> courseCacheMap = jedis.hgetAll(courseKey);
-            courseMap = courseCacheMap;
-            room_id = courseCacheMap.get("room_id");
-            if(!MiscUtils.isEmpty( courseCacheMap.get("series_id"))){
-                series_id = courseCacheMap.get("series_id");
-            }
-        } else {
-            //2.如果缓存中没有课程详情，则读取数据库
-            Map<String, Object> courseDBMap = userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
-
-            //3.如果缓存和数据库中都没有课程详情，则提示课程不存在
-            if (CollectionUtils.isEmpty(courseDBMap)) {
-                throw new QNLiveException("100004");
-            } else {
-                MiscUtils.converObjectMapToStringMap(courseDBMap, courseMap);
-                room_id = courseDBMap.get("room_id").toString();
-                if(!MiscUtils.isEmpty( courseDBMap.get("series_id"))){
-                    series_id = courseDBMap.get("series_id").toString();
-                }
-            }
+        Map<String, String> courseMap = CacheUtils.readCourse(reqMap.get("course_id").toString(), this.generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);//从缓存中读取课程信息
+        room_id = courseMap.get("room_id");
+        if(!MiscUtils.isEmpty( courseMap.get("series_id"))){
+            series_id = courseMap.get("series_id");
         }
+
+        long click_num = Long.valueOf(courseMap.get("click_num")) + 1L;
+        jedis.hset(courseKey,"click_num",click_num+"");
+
         boolean isStudent = false;
         if(!MiscUtils.isEmpty(series_id)){
             resultMap.put("series_id",series_id);

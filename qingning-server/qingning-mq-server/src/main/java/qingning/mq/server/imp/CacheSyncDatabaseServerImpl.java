@@ -42,8 +42,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
     private RoomDistributerDetailsMapper roomDistributerDetailsMapper;
     private UserMapper userMapper;
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
-    
-    @Override
+	private SaaSCourseMapper saaSCourseMapper;
+
+	@Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
     	String appName = requestEntity.getAppName();
     	Jedis jedis = jedisUtils.getJedis(appName);
@@ -321,7 +322,46 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        }
 				}
 			}
-			
+
+			private void updateSaasCourseData(Set<String> lecturerSet, Jedis jedis, Pipeline pipeline){
+				Map<String,Set<String>> preCourseKeyMap = new HashMap<>();
+				Map<String,Object> queryParam = new HashMap<String,Object>();
+				Set<String> courseIdSet = new HashSet<String>();
+				for(String lecturerId : lecturerSet){
+					queryParam.clear();
+					queryParam.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+					String saasCourseListKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS, queryParam);
+					Set<String> zrange = jedis.zrange(saasCourseListKey, 0, -1);
+					if(!MiscUtils.isEmpty(zrange))
+						courseIdSet.addAll(zrange);
+				}
+
+				Map<String, Map<String, String>> courseData = new HashMap<>();
+				for(String course_id : courseIdSet ){
+					queryParam.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);
+					String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, queryParam);
+					courseData.put(course_id, jedis.hgetAll(courseKey));
+				}
+
+				for(String courseId:courseData.keySet()){
+					Map<String,String> values = courseData.get(courseId);
+					if(MiscUtils.isEmpty(values)){
+						continue;
+					}
+					try{
+						Map<String,Object> courses = new HashMap<String,Object>();
+						courses.put("course_id", courseId);
+						courses.put("click_num", MiscUtils.convertObjectToLong(values.get("click_num")));
+						saaSCourseMapper.updateByPrimaryKey(courses);
+					}catch(Exception e){
+						log.error("Sync courses ["+courseId+"]:"+e.getMessage());
+					}
+				}
+
+
+			}
+
+
 			@SuppressWarnings("unchecked")
 			private void updateCourseData(Set<String> lecturerSet, Pipeline pipeline){
 				Map<String,Object> queryParam = new HashMap<String,Object>();
@@ -373,6 +413,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 						courses.put("extra_num", MiscUtils.convertObjectToLong(values.get("extra_num")));
 						courses.put("extra_amount", MiscUtils.convertObjectToLong(values.get("extra_amount")));
 						courses.put("real_student_num", MiscUtils.convertObjectToLong(values.get("real_student_num")));
+						courses.put("click_num", MiscUtils.convertObjectToLong(values.get("click_num")));
                     	String real_start_time = values.get("real_start_time");
                     	if(!MiscUtils.isEmpty(real_start_time)){
                     		courses.put("real_start_time",new Date(Long.parseLong(real_start_time)));
@@ -437,6 +478,13 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 				}
 				pipeline.sync();
 			}
+
+
+
+
+
+
+
 			
 			private void updateDistributerData(Set<String> distributerSet, Pipeline pipeline){
 				Map<String,Object> queryParam = new HashMap<String,Object>();
@@ -605,5 +653,12 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 	public void setLecturerCoursesProfitMapper(LecturerCoursesProfitMapper lecturerCoursesProfitMapper) {
 		this.lecturerCoursesProfitMapper = lecturerCoursesProfitMapper;
 	}
-	
+
+	public SaaSCourseMapper getSaaSCourseMapper() {
+		return saaSCourseMapper;
+	}
+
+	public void setSaaSCourseMapper(SaaSCourseMapper saaSCourseMapper) {
+		this.saaSCourseMapper = saaSCourseMapper;
+	}
 }

@@ -63,6 +63,9 @@
       <if test="course_num != null" >
         course_num,
       </if>
+      <if test="series_num != null" >
+        series_num,
+      </if>
       <if test="live_room_num != null" >
         live_room_num,
       </if>
@@ -118,6 +121,9 @@
       </if>
       <if test="course_num != null" >
         #{course_num},
+      </if>
+      <if test="series_num != null" >
+        #{series_num},
       </if>
       <if test="live_room_num != null" >
         #{live_room_num},

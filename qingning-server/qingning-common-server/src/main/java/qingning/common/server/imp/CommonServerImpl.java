@@ -742,6 +742,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         Map<String,Object> query = new HashMap<String,Object>();
         query.put("user_id", user_id);
+        jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query));
         Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
 
         //3.增加相关返回参数

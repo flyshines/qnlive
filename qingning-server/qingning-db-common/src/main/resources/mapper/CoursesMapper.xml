@@ -473,8 +473,11 @@
     update t_courses
     set
     student_num = #{student_num,jdbcType=BIGINT} ,
-    course_amount = #{course_amount,jdbcType=BIGINT}
-    where course_id = #{course_id,jdbcType=VARCHAR} 
+    course_amount = #{course_amount,jdbcType=BIGINT},
+    <if test="click_num != null">
+      click_num = #{click_num,jdbcType=BIGINT},
+    </if>
+    where course_id = #{course_id,jdbcType=VARCHAR}
     <if test="last_update_time != null" >
     	and update_time=#{last_update_time}
     </if>
