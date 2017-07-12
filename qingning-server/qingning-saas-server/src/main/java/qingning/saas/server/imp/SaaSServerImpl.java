@@ -845,7 +845,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		}else{	//用户已购买
 			resultMap.put("is_bought", "1");
 		}*/
-		
+
         resultMap.put("series_info", seriesMap);
         return resultMap;
 	} 
@@ -1749,6 +1749,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         userGains.put("today_amount",todayMoney);
         userGains.put("today_visit",todayVisit);
         userGains.put("today_pay",todayPay);
+        double balance = Double.valueOf(userGains.get("balance").toString());
+
+        balance = DoubleUtil.sub(balance , DoubleUtil.mul(balance,Constants.SYS_WX_RATE));
+        userGains.put("balance",balance);
+
         if(MiscUtils.isEmpty(userGains)){
             throw new QNLiveException("170001");
         }

@@ -346,6 +346,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//收益类型（1:直播课，2：店铺课（非直播课））
 		profitRecord.put("course_type",tradeBill.get("course_type"));
+
+		//插入讲师收益
+		updateShopUser(lecturerId,userId,amount);
+
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
@@ -409,8 +413,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 		}
 		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
-		//插入讲师收益
-		updateShopUser(lecturerId,userId,amount);
 		return profitRecord;
 	}
 
