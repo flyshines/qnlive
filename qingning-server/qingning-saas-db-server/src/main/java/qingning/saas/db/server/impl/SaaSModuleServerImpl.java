@@ -340,7 +340,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 		courseCommentMapper.insert(insertCommentMap);
 		//更新数据库课程的评论次数
 		saasCourseMapper.updateByPrimaryKey(updateCourseMap);
-		
+		//更新数据库用户留言数
+        shopUserMapper.updateByPrimaryKey(updateCourseMap);
 		return 1;
 	}
 
