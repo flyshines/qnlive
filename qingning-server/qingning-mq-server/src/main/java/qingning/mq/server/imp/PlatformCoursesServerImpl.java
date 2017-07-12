@@ -124,29 +124,28 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     				}
     			}
 
-				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-				if(!MiscUtils.isEmpty(lecturerSet)){
-					for(String lecturerId : lecturerSet) {
-						//删除缓存中的旧的课程列表及课程信息实体
-						Map<String, Object> map = new HashMap<>();
-						map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-						predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-						finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
-
-						jedis.del(predictionListKey);
-						jedis.del(finishListKey);
-
-					}
-				}
-				Map<String,Object> map = new HashMap<>();
-				map.put("appName",appName);
-				map.put("status","5");
-				List<Map<String, Object>> courseIdList = coursesMapper.findCourseByStatus(map);
-				for(Map<String, Object> courseid : courseIdList){
-					String id = courseid.get("course_id").toString();
-					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,id);
-					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
-				}
+//				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+//				if(!MiscUtils.isEmpty(lecturerSet)){
+//					for(String lecturerId : lecturerSet) {
+//						//删除缓存中的旧的课程列表及课程信息实体
+//						Map<String, Object> map = new HashMap<>();
+//						map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//						predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//						finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+//						jedis.del(predictionListKey);
+//						jedis.del(finishListKey);
+//
+//					}
+//				}
+//				Map<String,Object> map = new HashMap<>();
+//				map.put("appName",appName);
+//				map.put("status","5");
+//				List<Map<String, Object>> courseIdList = coursesMapper.findCourseByStatus(map);
+//				for(Map<String, Object> courseid : courseIdList){
+//					String id = courseid.get("course_id").toString();
+//					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION,id);
+//					jedis.zrem(Constants.CACHED_KEY_PLATFORM_COURSE_FINISH,id);
+//				}
     		}
     	});
     }
