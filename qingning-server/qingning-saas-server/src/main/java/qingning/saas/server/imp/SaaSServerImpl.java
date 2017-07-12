@@ -1773,7 +1773,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         query.put("user_id", lecturerId);
         String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
         //本人访问自己的店铺不做统计
-        if(!lecturerId.equals(userId)){
+        if(lecturerId!=null&&!lecturerId.equals(userId)){
             if(!jedis.exists(userCountKey)){
                 long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
                 //今日浏览人数

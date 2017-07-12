@@ -331,7 +331,7 @@ public class SaaSController extends AbstractController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/user/vsit", method = RequestMethod.PUT)
+    @RequestMapping(value = "/user/visit", method = RequestMethod.PUT)
     public @ResponseBody ResponseEntity userVisit(
     		HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,

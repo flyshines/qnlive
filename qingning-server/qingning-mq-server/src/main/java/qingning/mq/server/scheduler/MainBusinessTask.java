@@ -82,7 +82,8 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 
 	@Autowired(required=true)
 	private ClassifyInfoMapper classifyInfoMapper;
-
+	@Autowired(required=true)
+	private SaaSCourseMapper saaSCourseMapper;
 
 	@Autowired(required=true)
 	private SeriesMapper seriesMapper;
@@ -104,6 +105,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			cacheSyncDatabaseServerimpl.setRoomDistributerDetailsMapper(roomDistributerDetailsMapper);
 			cacheSyncDatabaseServerimpl.setUserMapper(userMapper);
 			cacheSyncDatabaseServerimpl.setLecturerCoursesProfitMapper(lecturerCoursesProfitMapper);
+			cacheSyncDatabaseServerimpl.setSaaSCourseMapper(saaSCourseMapper);
 			list.add(cacheSyncDatabaseServerimpl);
 
 			//讲师课程列表定时任务
