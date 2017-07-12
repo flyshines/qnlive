@@ -270,9 +270,10 @@
 						<param name="single_type" type="string" fieldname="goods_type" />
 						<param name="buy_status" type="string" />
 						<param name="single_title" type="string" fieldname="course_title" />
-						<param name="browse_count" type="long" fieldname="student_num" />
+						<param name="browse_count" type="long" fieldname="click_num" />
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="price" type="double" fieldname="course_price" />
+						<param name="is_join" type="string" />
 					</param>
 				</outputs>
 			</function>
@@ -300,6 +301,7 @@
 						<param name="buyer_count" type="long" fieldname="student_num" />
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="live_status" type="string" fieldname="status" />
+						<param name="is_join" type="string" />
 					</param>
 					<param name="last_update_time" type="long" />
 				</outputs>
@@ -458,6 +460,7 @@
 					<param name="series_id" type="string" />
 					<param name="is_join_series" type="string" />
 					<param name="is_join" type="string" />
+					<param name="is_bought" type="string" />
 				</outputs>
 			</function>
 
