@@ -698,6 +698,10 @@ public final class CacheUtils {
     	        //分页获取系列的课程的id列表
             	courseSet = jedis.zrangeByScore(seriesCourseSetKey, "-inf", "+inf", 0, pageCount);
             }
+        }else{	//缓存不存在，从数据库查询系列课上架的子课列表
+        	
+        	
+        	
         }
 		return courseSet;
 	}

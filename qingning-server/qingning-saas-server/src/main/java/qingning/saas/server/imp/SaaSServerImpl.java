@@ -1620,22 +1620,28 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         updateCourseMap.put("comment_num", 1);
         updateCourseMap.put("update_time", now);
 
-        //用户在改店铺的评论数
-        updateCourseMap.put("user_id", userId);
-        updateCourseMap.put("shop_id", courseInfoMap.get("shop_id"));
-        updateCourseMap.put("update_time", new Date());
+        //用户在该店铺的评论数
+        Map<String, Object> updateSaasShopUserMap = new HashMap<>();
+        updateSaasShopUserMap.put("user_id", userId);
+        updateSaasShopUserMap.put("shop_id", courseInfoMap.get("shop_id"));
+        updateSaasShopUserMap.put("update_time", now);
 
         //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
-        saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap);
+        saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, updateSaasShopUserMap);
         
         /*
          * 插入到缓存中saas课程评论id列表
          */
         Map<String, Object> readSaasCourseCommentMap = new HashMap<>();
         readSaasCourseCommentMap.put(Constants.CACHED_KEY_COURSE_FIELD, updateCourseMap.get("course_id"));
-        
         String readSaasCourseCommentKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, readSaasCourseCommentMap);
         jedis.zadd(readSaasCourseCommentKey, now.getTime(), insertCommentMap.get("comment_id").toString());
+        
+        /*
+         * 更新缓存中saas课程的评论数量
+         */
+        String readSaasCourseDetailKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, readSaasCourseCommentMap); 
+        jedis.hincrBy(readSaasCourseDetailKey, "comment_num", 1);
         
         return resultMap;
     }
