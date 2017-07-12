@@ -270,7 +270,7 @@
 						<param name="single_type" type="string" fieldname="goods_type" />
 						<param name="buy_status" type="string" />
 						<param name="single_title" type="string" fieldname="course_title" />
-						<param name="browse_count" type="long" fieldname="student_num" />
+						<param name="browse_count" type="long" fieldname="click_num" />
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="is_join" type="string" />
