@@ -612,6 +612,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
+        //缓存加入讲师创建的课程
+        jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS,now.getTime(),reqMap.get("course_id").toString());
     }
 
 	/**
@@ -658,6 +660,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String readSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, seriesMap);
         //新增到下架的缓存
         jedis.zadd(readSeriesDownKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
+        //缓存加入讲师创建的课程
+        jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS,now.getTime(),reqMap.get("course_id").toString());
 
     }
 
@@ -1100,7 +1104,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			logger.error("saas_H5_课程-获取单品课程详情>>>>课程不存在");
 			throw new QNLiveException("100004");
 		}
-		
 		/*
          * 判断是否加入了课程
          */
@@ -1139,20 +1142,21 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
          * Saas课程的浏览量+1，更新缓存和数据库
          */
-        Map<String, Object> updateCourseMap = new HashMap<>();
+        /*Map<String, Object> updateCourseMap = new HashMap<>();
         updateCourseMap.put("course_id", singleId);
         updateCourseMap.put("click_num", 1);	//点击次数，置1是用于sql执行加1操作
         updateCourseMap.put("series_id", singleMap.get("series_id"));	//临时解决bug的方法，因为若series_id=null,sql会将series_id置空
         //更新数据库
-        saaSModuleServer.updateCourse(updateCourseMap);
+        saaSModuleServer.updateCourse(updateCourseMap);*/
+
+
         //更新缓存
         Map<String, Object> readCourseMap = new HashMap<String, Object>();
         readCourseMap.put(Constants.CACHED_KEY_COURSE_FIELD, singleId);
         String readCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, readCourseMap);
         jedis.hincrBy(readCourseKey, "click_num", 1);	//缓存中点击数+1
-		
+
         resultMap.put("single_info", singleMap);
-        
         return resultMap;
 	}
 
