@@ -22,4 +22,17 @@ public interface SaaSShopUserMapper {
     PageList<Map<String,Object>> selectUsersByShop(Map<String, Object> param, PageBounds page);
 
     int updateTypeById(@Param(value = "shopId") String shopId, @Param(value = "userId")String userId,@Param(value = "totalConsume") Long totalConsume);
+
+    /**判断店铺是否有该用户
+     * @param userId
+     * @param shopId
+     * @return
+     */
+    int selectExistUser(@Param("userId") String userId, @Param("shopId") String shopId);
+
+    /**店铺计数统计
+     * @param shopId
+     * @return
+     */
+    int selectCountByShopId(@Param("shopId") String shopId,@Param("userType") String userType);
 }

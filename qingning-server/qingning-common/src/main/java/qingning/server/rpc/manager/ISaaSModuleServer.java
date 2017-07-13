@@ -223,4 +223,10 @@ public interface ISaaSModuleServer {
      * @return
      */
 	Map<String, Object> findTradeBillByMap(Map<String, Object> selectTradeBillMap);
+
+    /**更新店铺访问用户
+     * @param userId
+     * @param shopId
+     */
+    void userVisitShop(String userId, String shopId);
 }

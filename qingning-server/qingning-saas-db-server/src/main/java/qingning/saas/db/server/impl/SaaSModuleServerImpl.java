@@ -43,8 +43,6 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Autowired(required = true)
     private SaaSCourseCommentMapper courseCommentMapper;
     @Autowired(required = true)
-    private FeedbackMapper feedbackMapper;
-    @Autowired(required = true)
     private UserGainsMapper userGainsMapper;
     @Autowired(required = true)
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
@@ -52,6 +50,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SystemConfigMapper systemConfigMapper;
     @Autowired(required = true)
     private TradeBillMapper tradeBillMapper;
+
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
         return coursesStudentsMapper.findCourseIdByStudent(reqMap);
@@ -76,8 +75,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getShopBannerList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
-        PageList<Map<String,Object>> result = bannerMapper.selectListByUserId(param,page);
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String, Object>> result = bannerMapper.selectListByUserId(param, page);
         //根据优先级排序
         Collections.sort(result, new Comparator() {
             @Override
@@ -88,7 +87,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
                 Map<String, Object> map2 = (Map) o2;
                 if (map1.get("position") != null && StringUtils.isNotEmpty(map1.get("position") + "")) {
                     position1 = Integer.valueOf(map1.get("position").toString());
-                }else{
+                } else {
                     return 1;
                 }
                 if (map2.get("position") != null && StringUtils.isNotEmpty(map2.get("position") + "")) {
@@ -102,11 +101,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
         int upSize = bannerMapper.selectUpCount(param.get("user_id").toString());
 
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
-        res.put("up_count",upSize);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        res.put("up_count", upSize);
         return res;
     }
 
@@ -119,44 +118,44 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     /**
      * 前端获取店铺轮播列表
      */
-	@Override
-	public List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap) {
-		return bannerMapper.selectBannerListByMap(paramMap);
-	}
+    @Override
+    public List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap) {
+        return bannerMapper.selectBannerListByMap(paramMap);
+    }
 
     @Override
     public Map<String, Object> getShopInfo(Map<String, Object> param) {
         return shopMapper.selectByPrimaryKey(param);
     }
-    
+
     /**
      * 根据系列id获取系列详情
      */
     @Override
-    public Map<String, Object> findSeriesBySeriesId(String seriesId){
-		return seriesMapper.findSeriesBySeriesId(seriesId);
+    public Map<String, Object> findSeriesBySeriesId(String seriesId) {
+        return seriesMapper.findSeriesBySeriesId(seriesId);
     }
 
     /**
      * 根据条件查询系列id
      */
-	@Override
-	public List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap) {
-		return seriesStudentsMapper.selectSeriesStudentsByMap(selectSeriesStudentsMap);
-	}
+    @Override
+    public List<Map<String, Object>> findSeriesStudentsByMap(Map<String, Object> selectSeriesStudentsMap) {
+        return seriesStudentsMapper.selectSeriesStudentsByMap(selectSeriesStudentsMap);
+    }
 
     @Override
     public int updateBanner(Map<String, Object> param) {
         int i = bannerMapper.selectUpCount(param.get("user_id").toString());
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("config_key","saasBannerSize");
-        paramMap.put("appName",Constants.HEADER_APP_NAME);
-        Map<String,Object> sysConfig = systemConfigMapper.findCustomerServiceBySystemConfig(paramMap);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("config_key", "saasBannerSize");
+        paramMap.put("appName", Constants.HEADER_APP_NAME);
+        Map<String, Object> sysConfig = systemConfigMapper.findCustomerServiceBySystemConfig(paramMap);
         int size = 3;
-        if(sysConfig!=null&&sysConfig.get("config_key")!=null){
+        if (sysConfig != null && sysConfig.get("config_key") != null) {
             size = Integer.valueOf(sysConfig.get("config_value").toString());
         }
-        if(i>=size){
+        if (i >= size) {
             return 1;
         }
         bannerMapper.updateByPrimaryKey(param);
@@ -165,42 +164,42 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public void addCourse(Map<String, Object> param) {
-    	saasCourseMapper.insert(param);
+        saasCourseMapper.insert(param);
     }
 
     @Override
     public void updateCourse(Map<String, Object> param) {
-    	saasCourseMapper.updateByPrimaryKey(param);
+        saasCourseMapper.updateByPrimaryKey(param);
     }
 
     /**
      * 根据课程id获取saas课程信息，从t_saas_course查询
      */
-	@Override
-	public Map<String, Object> findSaasCourseByCourseId(String courseId) {
-		return saasCourseMapper.selectByPrimaryKey(courseId);
-	}
-	
-	/**
-	 * 根据课程id获取直播课程信息，从t_course查询
-	 */
-	@Override
-	public Map<String, Object> findCourseByCourseId(String courseId) {
-		return coursesMapper.findCourseByCourseId(courseId);
-	}
+    @Override
+    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+        return saasCourseMapper.selectByPrimaryKey(courseId);
+    }
 
-	@Override
+    /**
+     * 根据课程id获取直播课程信息，从t_course查询
+     */
+    @Override
+    public Map<String, Object> findCourseByCourseId(String courseId) {
+        return coursesMapper.findCourseByCourseId(courseId);
+    }
+
+    @Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
-        if("4".equals(param.get("type"))) {
+        if ("4".equals(param.get("type"))) {
             //直播
-            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-            PageList<Map<String,Object>> result = coursesMapper.findAllListByLiturere(param,page);
-            Map<String,Object> res = new HashMap<>();
-            res.put("list",result);
-            res.put("total_count",result.getTotal());
-            res.put("total_page",result.getPaginator().getTotalPages());
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = coursesMapper.findAllListByLiturere(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
             return res;
-        }else{
+        } else {
             PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
             PageList<Map<String, Object>> result = saasCourseMapper.selectByShop(param, page);
             Map<String, Object> res = new HashMap<>();
@@ -213,33 +212,39 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getShopUsers(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = shopUserMapper.selectUsersByShop(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = shopUserMapper.selectUsersByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        //付费用户，免费用户
+        int free = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"0");
+        int paied = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"1");
+        res.put("paied_count",paied);
+        res.put("free_count",free);
         return res;
     }
 
     @Override
     public Map<String, Object> getCourseComment(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = courseCommentMapper.selectCommentByShop(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = courseCommentMapper.selectCommentByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
+
     @Override
     public Map<String, Object> getUserFeedBack(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = saasFeedbackMapper.selectFeedBackByShop(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = saasFeedbackMapper.selectFeedBackByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
@@ -250,22 +255,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getSeriesList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = seriesMapper.selectSeriesListByLecturerId(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = seriesMapper.selectSeriesListByLecturerId(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
     /**
      * 根据留言id获取留言信息
      */
-	@Override
-	public Map<String, Object> findSaasCourseCommentByCommentId(String commentId) {
-		return courseCommentMapper.selectByPrimaryKey(commentId);
-	}
+    @Override
+    public Map<String, Object> findSaasCourseCommentByCommentId(String commentId) {
+        return courseCommentMapper.selectByPrimaryKey(commentId);
+    }
 
     @Override
     public Map<String, Object> getShopBannerInfo(String bannerId) {
@@ -275,12 +280,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> findUpCourseList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = saasCourseMapper.selectUpCourseListByShop(param,page);
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = saasCourseMapper.selectUpCourseListByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
@@ -288,10 +293,10 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String, Object> findUpLiveCourseList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String, Object>> result = null;
-        if("2".equals(param.get("type").toString())){
+        if ("2".equals(param.get("type").toString())) {
             //系列课
             result = seriesMapper.findSeriesListByLiturere(param, page);
-        }else {
+        } else {
             //直播课程
             result = coursesMapper.findCourseListByLiturere(param, page);
         }
@@ -304,26 +309,26 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getSeriesCourseList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = null;
-        if("0".equals(param.get("series_course_type").toString())){
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = null;
+        if ("0".equals(param.get("series_course_type").toString())) {
             //直播课程
             result = coursesMapper.findCourseBySeriesId(param, page);
-        }else{
+        } else {
             //sass课程
             result = saasCourseMapper.findCourseBySeriesId(param, page);
         }
         //是否是单卖判断
-        for(Map<String,Object> map : result){
-            if(!"0".equals(map.get("is_single").toString())){
+        for (Map<String, Object> map : result) {
+            if (!"0".equals(map.get("is_single").toString())) {
                 //非单卖
-                map.put("is_single","1");
+                map.put("is_single", "1");
             }
         }
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
@@ -331,57 +336,58 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public void openShop(Map<String, Object> shop) {
         shopMapper.insert(shop);
     }
-	/**
+
+    /**
      * 新增saas课程的留言，同时更新课程的评论次数
      */
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap,  Map<String, Object> updateSaasShopUserMap) {
-		
-		//新增数据库saas课程的留言
-		courseCommentMapper.insert(insertCommentMap);
-		//更新数据库课程的评论次数
-		saasCourseMapper.updateByPrimaryKey(updateCourseMap);
-		//更新数据库用户留言数
-        shopUserMapper.updateByPrimaryKey(updateSaasShopUserMap);
-		return 1;
-	}
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int addSaasCourseComment(Map<String, Object> insertCommentMap, Map<String, Object> updateCourseMap, Map<String, Object> updateSaasShopUserMap) {
 
-	/**
-	 * 根据条件获取直播课程列表
-	 */
-	@Override
-	public List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap) {
-		return coursesMapper.findCourseByMap(reqMap);
-	}
+        //新增数据库saas课程的留言
+        courseCommentMapper.insert(insertCommentMap);
+        //更新数据库课程的评论次数
+        saasCourseMapper.updateByPrimaryKey(updateCourseMap);
+        //更新数据库用户留言数
+        shopUserMapper.updateByPrimaryKey(updateSaasShopUserMap);
+        return 1;
+    }
+
+    /**
+     * 根据条件获取直播课程列表
+     */
+    @Override
+    public List<Map<String, Object>> findLiveCourseListByMap(Map<String, Object> reqMap) {
+        return coursesMapper.findCourseByMap(reqMap);
+    }
 
     @Override
     public Map<String, Object> getLiveList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result = coursesMapper.findAllListByLiturere(param,page);
-        for(Map<String,Object> map: result){
-            if("0".equals(map.get("is_start"))){
-                map.put("type","0");
-            }else if("1".equals(map.get("is_start"))||map.get("end_time")==null){
-                map.put("type","1");
-            }else{
-                map.put("type","2");
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = coursesMapper.findAllListByLiturere(param, page);
+        for (Map<String, Object> map : result) {
+            if ("0".equals(map.get("is_start"))) {
+                map.put("type", "0");
+            } else if ("1".equals(map.get("is_start")) || map.get("end_time") == null) {
+                map.put("type", "1");
+            } else {
+                map.put("type", "2");
             }
         }
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
     /**
      * 新增反馈和建议
      */
-	@Override
-	public int addFeedback(Map<String, Object> newFeedbackMap) {
-		return saasFeedbackMapper.insert(newFeedbackMap);
-	}
+    @Override
+    public int addFeedback(Map<String, Object> newFeedbackMap) {
+        return saasFeedbackMapper.insert(newFeedbackMap);
+    }
 
 
     @Override
@@ -391,18 +397,18 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> findUserGainsByUserId(String userId) {
-        Map<String ,Object> result = userGainsMapper.findUserGainsByUserId(userId);
-        if(result == null){
+        Map<String, Object> result = userGainsMapper.findUserGainsByUserId(userId);
+        if (result == null) {
             //初始化用户余额信息
-            Map<String,Object> gainsMap = new HashMap<>();
-            gainsMap.put("user_id",userId);
-            gainsMap.put("live_room_total_amount","0");
-            gainsMap.put("live_room_real_incomes","0");
-            gainsMap.put("distributer_total_amount","0");
-            gainsMap.put("distributer_real_incomes","0");
-            gainsMap.put("user_total_amount","0");
-            gainsMap.put("user_total_real_incomes","0");
-            gainsMap.put("balance","0");
+            Map<String, Object> gainsMap = new HashMap<>();
+            gainsMap.put("user_id", userId);
+            gainsMap.put("live_room_total_amount", "0");
+            gainsMap.put("live_room_real_incomes", "0");
+            gainsMap.put("distributer_total_amount", "0");
+            gainsMap.put("distributer_real_incomes", "0");
+            gainsMap.put("user_total_amount", "0");
+            gainsMap.put("user_total_real_incomes", "0");
+            gainsMap.put("balance", "0");
             userGainsMapper.insertUserGainsByNewUser(gainsMap);
             return gainsMap;
         }
@@ -412,13 +418,13 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public List<Map<String, Object>> findUserBuiedRecords(Map<String, Object> query) {
         List<Map<String, Object>> res;
-        if("1".equals(query.get("type"))){
+        if ("1".equals(query.get("type"))) {
             //单品已购
-            query.put("profit_type","0");
+            query.put("profit_type", "0");
             res = lecturerCoursesProfitMapper.findUserBuiedSingleRecords(query);
-        }else{
+        } else {
             //系列已购
-            query.put("profit_type","2");
+            query.put("profit_type", "2");
             res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
             res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
                 map.put("title", map.get("series_title"));
@@ -430,22 +436,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getOrdersList(Map<String, Object> param) {
-        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_size").toString()));
-        PageList<Map<String,Object>> result;
-        if(param.get("order_type")!=null){
-            if("1".equals(param.get("order_type").toString())){
-                param.put("dist","1");
-            }else if("2".equals(param.get("order_type").toString())){
-                param.put("auto","1");
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result;
+        if (param.get("order_type") != null) {
+            if ("1".equals(param.get("order_type").toString())) {
+                param.put("dist", "1");
+            } else if ("2".equals(param.get("order_type").toString())) {
+                param.put("auto", "1");
             }
-            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param,page);
-        }else if(param.get("nick_name")!=null||param.get("goods_name")!=null){
-            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param,page);
-        }else{
-            result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param,page);
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param, page);
+        } else if (param.get("nick_name") != null || param.get("goods_name") != null) {
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param, page);
+        } else {
+            result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param, page);
 
         }
-        for(Map<String,Object> map : result) {
+        for (Map<String, Object> map : result) {
 
             //订单类型（1:分销订单，2:普通订单）
             if (map.get("distributer_id") != null) {
@@ -468,38 +474,38 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
                 map.put("goods_type", "3");
             }
         }
-        Map<String,Object> res = new HashMap<>();
-        res.put("list",result);
-        res.put("total_count",result.getTotal());
-        res.put("total_page",result.getPaginator().getTotalPages());
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
         return res;
     }
 
     /**
      * 判断用户是否是指定课程的学员
      */
-	@Override
-	public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
-		String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
-		if("1".equals(isCourseStudent)){
-			return true;
-		}else{
-			return false;
-		}
-	}
+    @Override
+    public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
+        String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+        if ("1".equals(isCourseStudent)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * 根据key查询系统配置表
-	 */
-	@Override
-	public List<Map<String, Object>> findSystemConfigByInKey(Map<String, Object> selectSysConfigMap) {
-		return systemConfigMapper.selectSysConfigByInKey(selectSysConfigMap);
-	}
+    /**
+     * 根据key查询系统配置表
+     */
+    @Override
+    public List<Map<String, Object>> findSystemConfigByInKey(Map<String, Object> selectSysConfigMap) {
+        return systemConfigMapper.selectSysConfigByInKey(selectSysConfigMap);
+    }
 
     @Override
     public int updateUserPhone(Map<String, Object> userMap) {
         //手机号码已经绑定
-        if(userMapper.existByPhone(userMap)>0){
+        if (userMapper.existByPhone(userMap) > 0) {
             return 1;
         }
         userMapper.updateUser(userMap);
@@ -513,5 +519,20 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public Map<String, Object> findTradeBillByMap(Map<String, Object> selectTradeBillMap) {
 		return tradeBillMapper.findTradeBillByMap(selectTradeBillMap);
 	}
+
+    @Override
+    public void userVisitShop(String userId, String shopId) {
+        if (shopUserMapper.selectExistUser(userId, shopId) == 0) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("shop_id", shopId);
+            userMap.put("user_id", userId);
+            userMap.put("user_type", "0");
+            userMap.put("total_consume", 0);
+            userMap.put("total_consume", 0);
+            userMap.put("msg_num", 0);
+            userMap.put("create_time", new Date());
+            shopUserMapper.insert(userMap);
+        }
+    }
 
 }

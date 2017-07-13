@@ -253,14 +253,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("create_time",new Date());
         shop.put("shop_logo",userMap.get("avatar_address"));
         saaSModuleServer.openShop(shop);
-
         //插入缓存
-        Map<String, Object> shopMap = new HashMap<>();
-        shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
-        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
-        Map<String,String> stringMap = new HashMap<>();
-        MiscUtils.converObjectMapToStringMap(shopMap,stringMap);
-        jedis.hmset(shopKey,stringMap);
+        CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         return null;
     }
     /**
@@ -881,7 +875,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			resultMap.put("is_bought", "0");
 			resultMap.put("is_join", "0");
 		}
-		
+
         resultMap.put("series_info", seriesMap);
         return resultMap;
 	} 
@@ -1773,6 +1767,11 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         userGains.put("today_amount",todayMoney);
         userGains.put("today_visit",todayVisit);
         userGains.put("today_pay",todayPay);
+        double balance = Double.valueOf(userGains.get("balance").toString());
+
+        balance = DoubleUtil.sub(balance , DoubleUtil.mul(balance,Constants.SYS_WX_RATE));
+        userGains.put("balance",balance);
+
         if(MiscUtils.isEmpty(userGains)){
             throw new QNLiveException("170001");
         }
@@ -1804,6 +1803,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 jedis.hincrBy(userCountKey,"day_visit",1);
                 //设置失效时间为今天
                 jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
+
+                //插入t_saas_shop_users表
+                saaSModuleServer.userVisitShop(userId,shopId);
+
             }else{
                 jedis.hincrBy(userCountKey,"day_visit",1);
             }

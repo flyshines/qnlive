@@ -487,6 +487,8 @@
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
+					<param name="paied_count" type="long" />
+					<param name="free_count" type="long" />
 				</outputs>
 			</function>
 			<!-- 店铺-获取留言板列表 -->
@@ -565,6 +567,7 @@
 						<param name="status" fieldname="updown" type="string" />
 						<param name="sharing_status" type="string" default="0" />
 						<param name="update_status" fieldname="series_status" type="string" />
+						<param name="series_count" fieldname="course_num" type="long" />
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
@@ -590,7 +593,7 @@
 					<param name="create_time" type="long" />
 					<param name="price" fieldname="series_price" type="double" />
 					<param name="total_income" fieldname="series_amount" default="0" type="double" />
-					<param name="series_count" fieldname="update_plan" type="double" />
+					<param name="series_count" fieldname="course_num" type="long" />
 					<param name="sale_num" fieldname="series_student_num" default="0" type="long" />
 					<param name="status" fieldname="updown" type="string" />
 					<param name="sharing_status" type="string" default="0" />
