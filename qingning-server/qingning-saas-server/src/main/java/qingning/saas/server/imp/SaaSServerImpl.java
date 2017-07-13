@@ -1803,13 +1803,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 jedis.hincrBy(userCountKey,"day_visit",1);
                 //设置失效时间为今天
                 jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
-
-                //插入t_saas_shop_users表
-                saaSModuleServer.userVisitShop(userId,shopId);
-
             }else{
                 jedis.hincrBy(userCountKey,"day_visit",1);
             }
+
+            //插入t_saas_shop_users表
+            saaSModuleServer.userVisitShop(userId,shopId);
         }
     }
 
