@@ -649,8 +649,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
 
-        //默认下架
-        reqMap.put("course_updown","2");
+        //默认上架
+        reqMap.put("course_updown","1");
         reqMap.put("series_course_updown","0");
 
         reqMap.put("app_name",reqEntity.getAppName());
@@ -688,9 +688,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
-        //默认下架
+        //默认上架
         reqMap.put("course_updown","0");
-        reqMap.put("series_course_updown","2");
+        reqMap.put("series_course_updown","1");
 
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
