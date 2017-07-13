@@ -700,12 +700,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> seriesMap = new HashMap<String, Object>();
 
         seriesMap.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id"));
-        //已下架的zset列表
-        String readSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, seriesMap);
+        //已上架的zset列表
+        String readSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, seriesMap);
         //新增到下架的缓存
-        jedis.zadd(readSeriesDownKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
+        jedis.zadd(readSeriesUpKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
         //缓存加入讲师创建的课程
-        jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS,now.getTime(),reqMap.get("course_id").toString());
+        jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS, now.getTime(),reqMap.get("course_id").toString());
 
     }
 
