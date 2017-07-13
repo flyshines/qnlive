@@ -75,11 +75,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					updateSaasCourseData(lecturerSet,jedis);
 
 				}
-
-
-
-
-		        //查询出所有需要更新的分销员        
+		        //查询出所有需要更新的分销员
 				Set<String> distributerIdSet = jedis.smembers(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
 				jedis.del(Constants.CACHED_UPDATE_DISTRIBUTER_KEY);
 				if(!MiscUtils.isEmpty(distributerIdSet)){
