@@ -216,4 +216,10 @@ public interface ISaaSModuleServer {
      * @return
      */
     int updateUserPhone(Map<String, Object> userMap);
+
+    /**更新店铺访问用户
+     * @param userId
+     * @param shopId
+     */
+    void userVisitShop(String userId, String shopId);
 }
