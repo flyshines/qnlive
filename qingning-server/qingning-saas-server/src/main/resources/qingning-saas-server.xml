@@ -488,6 +488,8 @@
 					</param>
 					<param name="total_count" type="long" />
 					<param name="total_page" type="long" />
+					<param name="paied_count" type="long" />
+					<param name="free_count" type="long" />
 				</outputs>
 			</function>
 			<!-- 店铺-获取留言板列表 -->

@@ -43,8 +43,6 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Autowired(required = true)
     private SaaSCourseCommentMapper courseCommentMapper;
     @Autowired(required = true)
-    private FeedbackMapper feedbackMapper;
-    @Autowired(required = true)
     private UserGainsMapper userGainsMapper;
     @Autowired(required = true)
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
@@ -218,6 +216,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("list", result);
         res.put("total_count", result.getTotal());
         res.put("total_page", result.getPaginator().getTotalPages());
+        //付费用户，免费用户
+        int free = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"0");
+        int paied = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"1");
+        res.put("paied_count",paied);
+        res.put("free_count",free);
         return res;
     }
 
