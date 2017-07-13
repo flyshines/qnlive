@@ -63,7 +63,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                         String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, course);
                         long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
                         jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id").toString());
-                        if( course.get("course_updown").toString().endsWith("1")){
+                        if( course.get("course_updown").toString().equals("1")){
                             if(course.get("status").equals("2") || course.get("status").equals("1")){
                                 String course_id = course.get("course_id").toString();
                                 String lecturer_id = course.get("lecturer_id").toString();
@@ -116,6 +116,8 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                                         break;
                                 }
                             }
+
+                        }else if( course.get("course_updown").toString().equals("2")){
 
                         }
 
