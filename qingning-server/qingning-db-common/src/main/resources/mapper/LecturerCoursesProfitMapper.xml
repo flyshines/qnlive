@@ -344,11 +344,11 @@
       co.course_title like'%${course_name}%')
 	</if>
 	<if test="dist != null">
-      AND t.distributer_id is null
-	</if>
-	<if test="auto != null">
       AND t.distributer_id is not null
-	</if>
+    </if>
+	<if test="auto != null">
+      AND t.distributer_id is null
+    </if>
     ORDER BY t.create_time DESC
   </select>
   

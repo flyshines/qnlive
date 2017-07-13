@@ -32,6 +32,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
+import sun.misc.Cache;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -606,11 +607,13 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         resultMap.put("key", "3");
                     }
                 }
-                if (reqMap.get("is_saas") != null) {
+                /*if (reqMap.get("is_saas") != null) {
                     //SaaS登录检查用户店铺逻辑
                     reqMap.put("user_id", loginInfoMap.get("user_id").toString());
                     checkShopInfo(loginInfoMap, reqEntity, jedis);
-                }
+                }*/
+                //店铺，直播间 信息
+                getRoomAndShop(resultMap,jedis);
                 return resultMap;
             } else {
                 String sex = userJson.getString("sex");//性别
@@ -664,12 +667,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 Map<String, String> dbResultMap = commonModuleServer.initializeRegisterUser(reqMap);
                 //生成access_token，将相关信息放入缓存，构造返回参数
                 processLoginSuccess(1, dbResultMap, null, resultMap, reqEntity.getAppName());
-                if (reqMap.get("is_saas") != null) {
+                /*if (reqMap.get("is_saas") != null) {
                     //SaaS登录检查用户店铺逻辑
-                    reqMap.put("user_id", loginInfoMap.get("user_id").toString());
+                    reqMap.put("user_id", resultMap.get("user_id").toString());
                     checkShopInfo(loginInfoMap, reqEntity, jedis);
-                }
-                resultMap.put("app_name", loginInfoMap.get("app_name"));
+                }*/
+
+                //店铺，直播间 信息
+                getRoomAndShop(resultMap,jedis);
+
+                resultMap.put("app_name", reqEntity.getAppName());
                 return resultMap;
             }
         } catch (Exception e) {
@@ -678,7 +685,30 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
         return null;
     }
+    private void getRoomAndShop(Map<String, Object> map,Jedis jedis){
+        String userId = map.get("user_id").toString();
+        //直播间信息查询
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+        Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+        String roomId = null;
+        if(key!=null&&!key.isEmpty()) {
+            for (String id : key.keySet()) {
+                roomId = id;
+            }
+        }
+        map.put("room_id",roomId);
 
+        //讲师店铺查询
+        Map<String,Object> query = new HashMap<>();
+        query.put("user_id",userId);
+        try{
+            Map<String,String> shop = CacheUtils.readShopByUserId(userId,generateRequestEntity(null, null, null, query),readShopOperation,jedis);
+            map.put("shop_id",shop.get("shop_id"));
+        }catch (Exception e){
+            //店铺不存在
+        }
+    }
     /**
      *
      * @param type 1新注册用户处理方式，2老用户处理方式
@@ -755,7 +785,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("nick_name", userMap.get("nick_name"));
         //注册店铺用到
-        loginInfoMap.put("room_id",userMap.get("room_id"));
         loginInfoMap.put("user_name",userMap.get("nick_name"));
         loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
     }
@@ -1089,8 +1118,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String,String> requestMapData = (SortedMap<String,String>)reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        //String appName = MiscUtils.getAppNameByAppid(appid);
-        String appName = "qnlive";
+        String appName = MiscUtils.getAppNameByAppid(appid);
+        //String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if(billMap != null && billMap.get("status").equals("2")){
@@ -1098,8 +1127,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             return TenPayConstant.SUCCESS;
         }
 
-        //if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
-            if(true){
+        if (TenPayUtils.isValidSign(requestMapData,appName)){// MD5签名成功，处理课程打赏\购买课程等相关业务
+            //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if("SUCCESS".equals(requestMapData.get("return_code")) &&
@@ -2351,7 +2380,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 Map<String, String> loginedUserMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
                 
                 /*
-                 * TODO 根据讲师id获取直播间id
+                 * 根据讲师id获取直播间id
                  */
                 String lecturerId = seriesMap.get("lecturer_id");
                 Map<String, Object> readRoom = new HashMap<>();
@@ -2364,9 +2393,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 	Set keys = rooms.keySet();
                 	Iterator iter = keys.iterator();
                 	roomId = (String) iter.next();	//如果有多个直播间，默认第一个
+                	
+                	((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
+                    liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
+                }else{
+                	liveRoomMap = null;
                 }
-                ((Map<String, Object>) reqEntity.getParam()).put("room_id",roomId);//把roomid 放进参数中 传到后面
-                liveRoomMap = CacheUtils.readLiveRoom(roomId, reqEntity, readLiveRoomOperation, jedis, true);
                 
                 content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
                 /*
@@ -2382,7 +2414,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = MiscUtils.getConfigByKey("series_share_url_pre_fix",appName) + id;
 
                 if(reqMap.get("png").toString().equals("Y"))
-                	//TODO 生成邀请卡二维码base64
+                	//生成邀请卡二维码base64
                     png_url = this.CreateSeriesRqPage(seriesMap, loginedUserMap, share_url, reqEntity.getVersion(), jedis, appName);
                 break;
         }

@@ -225,8 +225,10 @@ public class CommonController extends AbstractController {
         }
         String access_token = (String) resultMap.get("access_token");
         String weName = (String) resultMap.get("name");
+        String shopId = (String) resultMap.get("shop_id");
+        String roomId = (String) resultMap.get("room_id");
 
-        response.sendRedirect(MiscUtils.getConfigByKey("wx_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPFROME",appName));
+        response.sendRedirect(MiscUtils.getConfigByKey("wx_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPFROME",appName).replace("ROOMID",roomId).replace("SHOPID",shopId));
     }
 
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
