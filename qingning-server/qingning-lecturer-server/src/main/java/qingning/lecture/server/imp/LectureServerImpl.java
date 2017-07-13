@@ -3381,10 +3381,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("course_id",course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Map<String, String> courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);//获取课程信息
-        jedis.del(courseKey);
+        if(!MiscUtils.isEmpty(courseInfo)){
+        }else{
+            courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);//获取课程信息
+        }
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
         }
+        jedis.del(courseKey);
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
         if(query_type.equals("1")){//移除系列
