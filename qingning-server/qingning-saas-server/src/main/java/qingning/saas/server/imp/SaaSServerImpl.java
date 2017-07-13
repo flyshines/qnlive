@@ -208,14 +208,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("create_time",new Date());
         shop.put("shop_logo",userMap.get("avatar_address"));
         saaSModuleServer.openShop(shop);
-
         //插入缓存
-        Map<String, Object> shopMap = new HashMap<>();
-        shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
-        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
-        Map<String,String> stringMap = new HashMap<>();
-        MiscUtils.converObjectMapToStringMap(shopMap,stringMap);
-        jedis.hmset(shopKey,stringMap);
+        CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         return null;
     }
     /**
