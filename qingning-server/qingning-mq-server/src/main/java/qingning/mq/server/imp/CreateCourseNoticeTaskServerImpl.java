@@ -63,7 +63,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 				titleMap.put(courseId, pipeline.hget(courseKey, "course_title"));
 				positionMap.put(courseId, pipeline.hget(courseKey, "position"));
 				IMCourseIdMap.put(courseId, pipeline.hget(courseKey, "im_course_id"));
-				realStartTimeMap.put(courseId, pipeline.hget(courseKey, "real_start_time"));
+//				realStartTimeMap.put(courseId, pipeline.hget(courseKey, "real_start_time"));
             }
             pipeline.sync();
             long currentTime = System.currentTimeMillis();
@@ -74,7 +74,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	String course_title =MiscUtils.convertString(titleMap.get(courseId).get());
             	long position = MiscUtils.convertObjectToLong(positionMap.get(courseId).get());
 				String im_course_id = IMCourseIdMap.get(courseId).get();
-				long realStartTime = MiscUtils.convertObjectToLong(realStartTimeMap.get(courseId).get());
+//				long realStartTime = MiscUtils.convertObjectToLong(realStartTimeMap.get(courseId).get());
             	map.clear();
             	map.put("course_id", courseId);
             	map.put("start_time", new Date(time));
