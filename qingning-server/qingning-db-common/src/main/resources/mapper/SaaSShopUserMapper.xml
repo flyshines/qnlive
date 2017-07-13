@@ -48,12 +48,6 @@
   <update id="updateByPrimaryKey" parameterType="hashmap" >
     update t_saas_shop_users
     <set >
-      <if test="shop_id != null" >
-        shop_id = #{shop_id,jdbcType=VARCHAR},
-      </if>
-      <if test="user_id != null" >
-        user_id = #{user_id,jdbcType=VARCHAR},
-      </if>
       <if test="update_time != null" >
         update_time = #{update_time},
       </if>
@@ -61,7 +55,8 @@
         msg_num = msg_num + #{comment_num,jdbcType=BIGINT},
       </if>
     </set>
-    where id = #{id,jdbcType=INTEGER}
+        where shop_id = #{shop_id,jdbcType=VARCHAR}
+          and user_id = #{user_id,jdbcType=VARCHAR}
   </update>
   <update id="updateTypeById" parameterType="hashmap" >
     update t_saas_shop_users

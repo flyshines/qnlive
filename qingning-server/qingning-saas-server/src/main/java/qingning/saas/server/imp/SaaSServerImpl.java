@@ -649,8 +649,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
 
-        //默认下架
-        reqMap.put("course_updown","2");
+        //默认上架
+        reqMap.put("course_updown","1");
         reqMap.put("series_course_updown","0");
 
         reqMap.put("app_name",reqEntity.getAppName());
@@ -688,9 +688,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("sale_num",0);
         reqMap.put("goods_type",reqMap.get("type"));
         reqMap.put("course_amount",0);
-        //默认下架
+        //默认上架
         reqMap.put("course_updown","0");
-        reqMap.put("series_course_updown","2");
+        reqMap.put("series_course_updown","1");
 
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
@@ -1643,6 +1643,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         updateSaasShopUserMap.put("user_id", userId);
         updateSaasShopUserMap.put("shop_id", courseInfoMap.get("shop_id"));
         updateSaasShopUserMap.put("update_time", now);
+        updateSaasShopUserMap.put("comment_num", 1);
 
         //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
         saaSModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, updateSaasShopUserMap);
@@ -1803,13 +1804,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 jedis.hincrBy(userCountKey,"day_visit",1);
                 //设置失效时间为今天
                 jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
-
-                //插入t_saas_shop_users表
-                saaSModuleServer.userVisitShop(userId,shopId);
-
             }else{
                 jedis.hincrBy(userCountKey,"day_visit",1);
             }
+
+            //插入t_saas_shop_users表
+            saaSModuleServer.userVisitShop(userId,shopId);
         }
     }
 

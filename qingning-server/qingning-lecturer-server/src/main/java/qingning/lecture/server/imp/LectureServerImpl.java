@@ -234,6 +234,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         request.setParam(map); 
         Map<String,String> lectureInfo = CacheUtils.readLecturer(userId, request, readLecturerOperation, jedis);
         Map<String,Object> userInfo = lectureModuleServer.findUserInfoByUserId(userId);
+
         long payCourseNum = MiscUtils.convertObjectToLong(lectureInfo.get("pay_course_num"));
         if(MiscUtils.isEmpty(userInfo.get("phone_number"))){//如果没有手机号就直接返回
             resultMap.put("phone_number", "");
@@ -249,11 +250,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     return resultMap;
  
                 }else {
-                    List<Map<String,Object>> liveRoomListResult = new ArrayList<>();  
+                    List<Map<String,Object>> liveRoomListResult = new ArrayList<>();
                     for(String roomIdCache : liveRoomsMap.keySet()){
                         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomIdCache, reqEntity, readLiveRoomOperation, jedis, true);
                         Map<String,Object> peocessLiveRoomMap;
- 
                         if(! CollectionUtils.isEmpty(liveRoomMap)){
                         	String roomId = liveRoomMap.get("room_id");
                         	String lectureId = liveRoomMap.get("lecturer_id");
@@ -287,6 +287,41 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
  
             }else {
+                List<Map<String, Object>> liveRoomByLectureId = lectureModuleServer.findLiveRoomByLectureId(userId);
+                List<Map<String,Object>> liveRoomListResult = new ArrayList<>();
+                for(Map<String, Object> room : liveRoomByLectureId){
+                    String roomIdCache = room.get("room_id").toString();
+                    Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomIdCache, reqEntity, readLiveRoomOperation, jedis, true);
+                    Map<String,Object> peocessLiveRoomMap;
+                    if(! CollectionUtils.isEmpty(liveRoomMap)){
+                        String roomId = liveRoomMap.get("room_id");
+                        String lectureId = liveRoomMap.get("lecturer_id");
+                        Map<String,Object> query = new HashMap<String,Object>();
+                        query.put("room_id", roomId);
+                        query.put("room_id", lectureId);
+                        RequestEntity entity = this.generateRequestEntity(null, null, Constants.SYS_READ_LAST_COURSE, query);
+                        Map<String,String> courseInfo = CacheUtils.readLastCourseOfTheRoom(roomId, lectureId, entity, readCourseOperation, jedis);
+
+                        peocessLiveRoomMap = new HashMap<>();
+                        peocessLiveRoomMap.put("avatar_address", MiscUtils.convertString(liveRoomMap.get("avatar_address")));
+                        peocessLiveRoomMap.put("room_name", MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
+                        //peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(liveRoomMap.get("last_course_amount"),true));
+                        if(!MiscUtils.isEmpty(courseInfo)){
+                            long amount = MiscUtils.convertObjectToLong(courseInfo.get("course_amount")) + MiscUtils.convertObjectToLong(courseInfo.get("extra_amount"));
+                            peocessLiveRoomMap.put("last_course_amount", MiscUtils.convertObjectToDouble(amount,true));
+                        } else {
+                            peocessLiveRoomMap.put("last_course_amount", 0d);
+                        }
+                        peocessLiveRoomMap.put("fans_num", MiscUtils.convertObjectToLong(liveRoomMap.get("fans_num")));
+                        peocessLiveRoomMap.put("room_id", MiscUtils.convertString(liveRoomMap.get("room_id")));
+                        peocessLiveRoomMap.put("update_time", MiscUtils.convertObjectToLong(liveRoomMap.get("update_time")));
+                        peocessLiveRoomMap.put("pay_course_num", payCourseNum);
+                        liveRoomListResult.add(peocessLiveRoomMap);
+                    }
+                }
+                if(! CollectionUtils.isEmpty(liveRoomListResult)){
+                    resultMap.put("room_list", liveRoomListResult);
+                }
                 return resultMap;
             }
         }else {
@@ -3098,8 +3133,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> keyMap = new HashMap<String, String>();
         keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, keyMap);
-        Map<String, String> seriesMap = jedis.hgetAll(key);
-        String lecturer_id = seriesMap.get("lecturer_id").toString();
+        Map<String, String> series = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, keyMap), readSeriesOperation, jedis, true);
+        String lecturer_id = series.get("lecturer_id");
         if(!lecturer_id.equals(user_id)){
             throw new QNLiveException("210001");
         }
@@ -3346,10 +3381,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("course_id",course_id);
         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
         Map<String, String> courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);//获取课程信息
-        jedis.del(courseKey);
+        if(!MiscUtils.isEmpty(courseInfo)){
+        }else{
+            courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);//获取课程信息
+        }
         if(!courseInfo.get("lecturer_id").equals(user_id)){//课程不是这个用户的
             throw new QNLiveException("100013");
         }
+        jedis.del(courseKey);
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
         if(query_type.equals("1")){//移除系列
