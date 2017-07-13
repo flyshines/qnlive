@@ -168,7 +168,7 @@
     lcp.profit_type, lcp.course_id, lcp.profit_amount,
     lcp.create_time, lcp.position, lcp.user_id,
     se.series_title,se.series_id,se.series_img as series_image,
-    se.series_course_type as type,se.update_plan
+    se.series_course_type as type,se.update_plan, se.course_num
     from t_lecturer_courses_profit lcp
     LEFT JOIN t_series se ON se.series_id = lcp.course_id
     where 1=1
