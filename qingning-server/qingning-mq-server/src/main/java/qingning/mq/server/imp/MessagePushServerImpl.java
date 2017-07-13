@@ -184,6 +184,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
                 scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
                 qnSchedule.add(scheduleTask);
             }else{
+                log.debug("课程已超时强制结束 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
                 processCourseEnd(coursesMapper,"2",courseId,jedis,appName);
             }
 
