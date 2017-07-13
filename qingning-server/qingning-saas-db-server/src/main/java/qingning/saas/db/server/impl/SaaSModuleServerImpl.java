@@ -190,7 +190,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getSingleList(Map<String, Object> param) {
-        if ("4".equals(param.get("type"))) {
+        if ("0".equals(param.get("type"))) {
             //直播
             PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
             PageList<Map<String, Object>> result = coursesMapper.findAllListByLiturere(param, page);
