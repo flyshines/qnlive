@@ -10,4 +10,10 @@ public interface TradeBillMapper {
 
     String findUserWhetherToPay(Map<String,Object> record);
     Map<String,Object> findUserNumberByCourse(Map<String,Object> record);
+    /**
+     * 根据条件查询订单
+     * @param selectTradeBillMap
+     * @return
+     */
+	Map<String, Object> findTradeBillByMap(Map<String, Object> selectTradeBillMap);
 }

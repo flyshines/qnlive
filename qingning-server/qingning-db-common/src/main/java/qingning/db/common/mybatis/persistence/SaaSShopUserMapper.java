@@ -29,4 +29,10 @@ public interface SaaSShopUserMapper {
      * @return
      */
     int selectExistUser(@Param("userId") String userId, @Param("shopId") String shopId);
+
+    /**店铺计数统计
+     * @param shopId
+     * @return
+     */
+    int selectCountByShopId(@Param("shopId") String shopId,@Param("userType") String userType);
 }

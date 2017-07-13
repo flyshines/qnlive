@@ -240,7 +240,7 @@ public final class CacheUtils {
 			}
 
 			Long series_num = jedis.zcard(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, query));//查询用户关注直播间总数
-			if(MiscUtils.isEmpty(result.get("series_num"))){
+			if(!MiscUtils.isEmpty(result.get("series_num"))){
 				if(series_num != Long.parseLong(result.get("series_num"))){ //如果数据和现在的不同
 					jedis.hset(userCacheKey,"series_num",series_num.toString());//修改用户缓存中的数据
 				}

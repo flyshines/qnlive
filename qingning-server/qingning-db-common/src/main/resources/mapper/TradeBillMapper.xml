@@ -156,5 +156,21 @@
   <select id="findUserWhetherToPay" resultType="string" parameterType="hashmap" >
  select '1' from t_trade_bill trade,t_payment_bill payment where trade.trade_id = payment.trade_id and payment.pre_pay_no=#{payment_id} and trade.user_id=#{user_id} and payment.status= 2
   </select>
+  
+  <!-- 根据条件查询订单 -->
+  <select id="findTradeBillByMap" resultType="hashmap" parameterType="hashmap">
+	  select * from t_trade_bill
+	  <where>
+	  	<if test="user_id != null">
+	  		and user_id = #{user_id}
+	  	</if>
+	  	<if test="course_id != null">
+	  		and course_id = #{course_id}
+	  	</if>
+	  	<if test="status != null">
+	  		and status = #{status}
+	  	</if>
+	  </where>
+  </select>
 
 </mapper>

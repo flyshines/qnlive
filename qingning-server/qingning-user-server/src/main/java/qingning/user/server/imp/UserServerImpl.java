@@ -1036,7 +1036,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         studentQueryMap.put("user_id",userId);
         studentQueryMap.put("series_id",series_id);
         if(userModuleServer.isStudentOfTheSeries(studentQueryMap)){//判断是否有加入课程
-            throw new QNLiveException("100004");
+            throw new QNLiveException("120005");
         }
 
         //5.将学员信息插入到学员参与表中

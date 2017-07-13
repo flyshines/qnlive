@@ -107,5 +107,14 @@
         t.user_id = #{userId,jdbcType=VARCHAR}
     AND t.shop_id = #{shopId,jdbcType=VARCHAR}
   </select>
+ <select id="selectCountByShopId" resultType="java.lang.Integer" parameterType="java.lang.String" >
+      SELECT
+          count(*)
+      FROM
+          t_saas_shop_users
+      WHERE
+          shop_id = #{shopId,jdbcType=VARCHAR}
+      AND user_type = #{userType,jdbcType=VARCHAR}
+  </select>
 
 </mapper>
