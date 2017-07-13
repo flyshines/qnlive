@@ -695,7 +695,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         
         String shopId = shopInfo.get("shop_id");
-        reqMap.put("course_id",MiscUtils.getUUId());
+        String courseId = MiscUtils.getUUId();
+        reqMap.put("course_id", courseId);
         reqMap.put("shop_id",shopId);
         reqMap.put("lecturer_id",userId);
         Date now = new Date();
@@ -724,7 +725,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //系列课已上架子课的zset列表
         String readSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, seriesInfoMap);
         //新增到上架的缓存
-        jedis.zadd(readSeriesUpKey,System.currentTimeMillis(), seriesId);
+        jedis.zadd(readSeriesUpKey,System.currentTimeMillis(), courseId);
         
         /*
          * 缓存加入讲师创建的课程
