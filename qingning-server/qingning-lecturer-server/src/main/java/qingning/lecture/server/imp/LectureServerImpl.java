@@ -3133,8 +3133,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, String> keyMap = new HashMap<String, String>();
         keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
         String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, keyMap);
-        Map<String, String> seriesMap = jedis.hgetAll(key);
-        String lecturer_id = seriesMap.get("lecturer_id").toString();
+        Map<String, String> series = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, keyMap), readSeriesOperation, jedis, true);
+        String lecturer_id = series.get("lecturer_id");
         if(!lecturer_id.equals(user_id)){
             throw new QNLiveException("210001");
         }
