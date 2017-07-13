@@ -97,7 +97,7 @@
     SELECT
         count(*)
     FROM
-        `t_saas_shop` t
+        `t_saas_shop_users` t
     WHERE
         t.user_id = #{userId,jdbcType=VARCHAR}
     AND t.shop_id = #{shopId,jdbcType=VARCHAR}
