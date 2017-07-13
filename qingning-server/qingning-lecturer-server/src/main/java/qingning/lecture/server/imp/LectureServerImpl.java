@@ -3310,10 +3310,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         jedis.zadd(lecturerSeriesUpKey, score, series_id);
                     }
 
-
-
-
-
                 }else{//往下架加入
                     jedis.zrem(seriesCourseUpKey,courseId);
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
