@@ -50,6 +50,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
     @Autowired(required = true)
     private SystemConfigMapper systemConfigMapper;
+    @Autowired(required = true)
+    private TradeBillMapper tradeBillMapper;
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
         return coursesStudentsMapper.findCourseIdByStudent(reqMap);
@@ -503,5 +505,13 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         userMapper.updateUser(userMap);
         return 0;
     }
+
+    /**
+     * 根据条件查询订单
+     */
+	@Override
+	public Map<String, Object> findTradeBillByMap(Map<String, Object> selectTradeBillMap) {
+		return tradeBillMapper.findTradeBillByMap(selectTradeBillMap);
+	}
 
 }

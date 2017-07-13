@@ -50,13 +50,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     }
     
     /**
-     * 判断用户是否定购某系列
+     * 判断用户是否加入某系列
      * @param userId
      * @param seriesId
      * @param jedis
      * @return
      */
-    private boolean isBuySeries(String userId, String seriesId, Jedis jedis){
+    private boolean isJoinSeries(String userId, String seriesId, Jedis jedis){
     	Map<String, Object> keyField = new HashMap<String, Object>();
     	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
     	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_SERIES, keyField);
@@ -66,6 +66,51 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     	}else{
     		return true;
     	}
+    }
+    
+    /**
+     * 判断用户是否购买系列
+     * @param userId
+     * @param seriesId
+     * @param jedis
+     * @return
+     */
+    private boolean isBuySeries(String userId, String seriesId, Jedis jedis){
+    	Map<String, Object> selectTradeBillMap = new HashMap<>();
+    	selectTradeBillMap.put("user_id", userId);
+    	selectTradeBillMap.put("course_id", seriesId);
+    	selectTradeBillMap.put("status", '2');	//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭 
+    	
+    	Map<String, Object> buyBillMap = saaSModuleServer.findTradeBillByMap(selectTradeBillMap);
+    	
+    	if(MiscUtils.isEmpty(buyBillMap)){	//已经支付的订单不存在
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    /**
+     * 判断用户是否加入某单品课程（包括直播、非直播）
+     * @param userId
+     * @param courseId
+     * @param jedis
+     * @return
+     */
+    private boolean isJoinCourse(String userId, String courseId, Jedis jedis){
+    	Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();	//用于判断是否加入课程
+		selectIsStudentMap.put("user_id", userId);
+		selectIsStudentMap.put("course_id", courseId);
+		/*
+         * 判断是否加入了课程
+         */
+        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        //加入课程状态 0未加入 1已加入
+        if(isStudent){
+        	return true;
+        }else {
+        	return false;
+        }
     }
     
     /**
@@ -84,13 +129,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     }
     
     /**
-     * 判断用户是否定购某直播课程
+     * 判断用户是否加入某直播课程
      * @param userId
      * @param liveCourseId
      * @param jedis
      * @return
      */
-    private boolean isBuyLiveCourse(String userId, String liveCourseId, Jedis jedis){
+    private boolean isJoinLiveCourse(String userId, String liveCourseId, Jedis jedis){
     	Map<String, Object> keyField = new HashMap<String, Object>();
     	keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
     	String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, keyField);
@@ -464,13 +509,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             	//获取系列课程详情
             	Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
             	
-            	boolean buyStatus = isBuySeries(userId, seriesId, jedis);
+            	boolean joinStatus = isJoinSeries(userId, seriesId, jedis);
             	
-            	//判断是否购买了该课程
-            	if(!buyStatus){	//用户未购买
-            		seriesMap.put("buy_status", "0");
+            	//判断是否加入了该课程
+            	if(!joinStatus){	//用户未加入
+            		seriesMap.put("is_join", "0");
             	}else{	//用户已购买
-            		seriesMap.put("buy_status", "1");
+            		seriesMap.put("is_join", "1");
             	}
             	
             	seriesInfoList.add(seriesMap);
@@ -559,28 +604,18 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 	        	MiscUtils.converObjectMapToStringMap(liveCourseMap, liveInfoMap);
 	        	//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
 	        	MiscUtils.courseTranferState(now.getTime(), liveInfoMap);
+	        	
 	        	/*
-	             * 购买状态
-	             */
+        		 * 判断是否加入了课程
+        		 */
 	        	String courseId = liveCourseMap.get("course_id").toString();
-	        	boolean buyStatus = isBuyLiveCourse(userId, courseId, jedis);
-	        	if(buyStatus){	//用户已经购买
-	        		liveInfoMap.put("buy_status", "1");
-	        		/*
-	        		 * 判断是否加入了课程
-	        		 */
-	        		selectIsStudentMap.put("course_id", courseId);
-	        		boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
-	        		//加入课程状态 0未加入 1已加入
-	        		if(isStudent){
-	        			liveInfoMap.put("is_join", "1");
-	        		}else {
-	        			liveInfoMap.put("is_join", "0");
-	        		}
-	        	}else{
-	        		liveInfoMap.put("buy_status", "0");
-	        		liveInfoMap.put("is_join", "0");
-	        	}
+        		boolean isStudent = isJoinLiveCourse(userId, courseId, jedis);
+        		//加入课程状态 0未加入 1已加入
+        		if(isStudent){
+        			liveInfoMap.put("is_join", "1");
+        		}else {
+        			liveInfoMap.put("is_join", "0");
+        		}
 	        	
 	        	resultLiveCourseList.add(liveInfoMap);
 	        }
@@ -770,54 +805,24 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	logger.info("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
         	String singleDetailKey = null;	//获取单品课程详情的key
         	
-        	/*
-        	 * 获取用户购买的所有单品课程
-        	 * 返回 -> 键course_id；值1
-        	 */
-        /*	Map<String, Object> selectSeriesStudentsMap = new HashMap<String, Object>();
-        	selectSeriesStudentsMap.put("user_id", userId);
-        	selectSeriesStudentsMap.put("lecturer_id", lecturerId);
-        	List<Map<String, Object>> userSeriesList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
-        	
-        	
-        	 * 对用户购买的所有系列课程进行格式化成map，方便后期用seriesId进行查询
-        	 
-        	Map<String, String> seriesIdKeyMap = new HashMap<>();	//以seriesId做key，存储用户购买过的所有系列课
-        	for(Map<String, Object> userSeriesMap : userSeriesList){
-        		seriesIdKeyMap.put(userSeriesMap.get("series_id").toString(), "1");
-        	}
-        */	
         	//生成用于缓存不存在时调用数据库的requestEntity
         	Map<String, Object> readSaasCourseMap = new HashMap<>();
         	RequestEntity readSaasCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSaasCourseMap);
         	
-        	Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();	//用于判断是否加入课程
-    		selectIsStudentMap.put("user_id", userId);
             for(String singleId : singleSet){
             	readSaasCourseMap.put("course_id", singleId);
             	//获取系列课程详情
             	Map<String, String> singleMap = CacheUtils.readCourse(singleId, readSaasCourseReqEntity, readCourseOperation, jedis, true);
-            	
-            	//判断是否购买了该课程
-            	boolean buyStatus = isBuySaasCourse(userId, singleId, jedis);
-            	if(!buyStatus){	//用户未购买
-            		singleMap.put("buy_status", "0");
-            		singleMap.put("is_join", "0");	//未购买一定未加入
-            	}else{	//用户已购买
-            		singleMap.put("buy_status", "1");
-            		
-            		/*
-                     * 判断是否加入了课程
-                     */
-            		selectIsStudentMap.put("course_id", singleId);
-                    boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
-                    //加入课程状态 0未加入 1已加入
-                    if(isStudent){
-                    	singleMap.put("is_join", "1");
-                    }else {
-                    	singleMap.put("is_join", "0");
-                    }
-            	}
+            	/*
+                 * 判断是否加入了课程
+                 */
+                boolean isStudent = isJoinCourse(userId, singleId, jedis); 
+                //加入课程状态 0未加入 1已加入
+                if(isStudent){
+                	singleMap.put("is_join", "1");
+                }else {
+                	singleMap.put("is_join", "0");
+                }
             	
             	singleInfoList.add(singleMap);
             }
@@ -858,24 +863,24 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		Map<String, String> seriesMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
 		
 		/*
-		 * 判断是否购买了该课程
+		 * 判断是否购买了该系列
 		 */
 		boolean isBought = isBuySeries(userId, seriesId, jedis);
-		if(isBought){	//已经购买
+		if(isBought){
 			resultMap.put("is_bought", "1");
+			/*
+			 * 判断是否加入了该系列
+			 */
+			boolean isJoin = isJoinSeries(userId, seriesId, jedis);
+			if(isJoin){	//已经购买
+				resultMap.put("is_join", "1");
+			}else{
+				resultMap.put("is_join", "0");
+			}
 		}else{
 			resultMap.put("is_bought", "0");
+			resultMap.put("is_join", "0");
 		}
-/*		作废：2017-07-03 已经使用缓存进行判断
-		Map<String, Object> selectSeriesStudentsMap = new HashMap<>();
-		selectSeriesStudentsMap.put("user_id", userId);
-    	selectSeriesStudentsMap.put("series_id", seriesId);
-		List<Map<String, Object>> seriesStudentList = saaSModuleServer.findSeriesStudentsByMap(selectSeriesStudentsMap);
-		if(seriesStudentList == null || seriesStudentList.size() == 0){	//用户未购买
-			resultMap.put("is_bought", "0");
-		}else{	//用户已购买
-			resultMap.put("is_bought", "1");
-		}*/
 		
         resultMap.put("series_info", seriesMap);
         return resultMap;
@@ -928,8 +933,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
         		
-        		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-        		selectIsStudentMap.put("user_id", userId);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
                 	//获取课程详情
@@ -941,10 +944,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 	courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
                 	
                 	/*
-                	 * 判断是否加入课程
+                	 * 判断是否加入课程，直播类
                 	 */
-            		selectIsStudentMap.put("course_id", courseId);
-                	boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+                	boolean isStudent = isJoinLiveCourse(userId, courseId, jedis); 
                     //加入课程状态 0未加入 1已加入
                     if(isStudent){
                     	courseMap.put("is_join", "1");
@@ -958,18 +960,15 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         		logger.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
         		readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
         		
-        		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-        		selectIsStudentMap.put("user_id", userId);
         		for(String courseId : courseSet){
                 	readCourseMap.put("course_id", courseId);
                 	//获取课程详情
                 	Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
                 	
                 	/*
-                	 * 判断是否加入课程
+                	 * 判断是否加入课程，非直播类
                 	 */
-            		selectIsStudentMap.put("course_id", courseId);
-                	boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+                	boolean isStudent = isJoinCourse(userId, courseId, jedis);
                     //加入课程状态 0未加入 1已加入
                     if(isStudent){
                     	courseMap.put("is_join", "1");
@@ -1146,10 +1145,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     		/*
              * 判断是否加入了课程
              */
-    		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-    		selectIsStudentMap.put("user_id", userId);
-    		selectIsStudentMap.put("course_id", singleId);
-            boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+            boolean isStudent = isJoinCourse(userId, singleId, jedis);
             //加入课程状态 0未加入 1已加入
             if(isStudent){
                 resultMap.put("is_join", "1");
@@ -1171,7 +1167,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			/*
 			 * 判断是否订阅系列
 			 */
-			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
 			if(isJoinSeries){
 				resultMap.put("is_join_series", "1");
 			}else{
@@ -1256,10 +1252,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 判断是否加入了课程
          */
-		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-		selectIsStudentMap.put("user_id", userId);
-		selectIsStudentMap.put("course_id", articleId);
-        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        boolean isStudent = isJoinCourse(userId, articleId, jedis);
         if(!isStudent){	//未购买
         	log.error("Saas_H5_课程-获取图文课程内容>>>>用户未加入该课程(articleId=" + articleId + ")");
         	throw new QNLiveException("120007");
@@ -1290,7 +1283,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			/*
 			 * 判断是否加入系列课
 			 */
-			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
 			if(isJoinSeries){
 				resultMap.put("is_join_series", "1");
 			}else{
@@ -1334,10 +1327,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 判断是否加入了课程
          */
-		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-		selectIsStudentMap.put("user_id", userId);
-		selectIsStudentMap.put("course_id", courseId);
-        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        boolean isStudent = isJoinCourse(userId, courseId, jedis);
         if(!isStudent){	//未购买
         	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
         	throw new QNLiveException("120007");
@@ -1368,7 +1358,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			/*
 			 * 判断是否加入系列课
 			 */
-			boolean isJoinSeries = isBuySeries(userId, seriesId, jedis);
+			boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
 			if(isJoinSeries){
 				resultMap.put("is_join_series", "1");
 			}else{
@@ -1486,10 +1476,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 判断是否加入了课程
          */
-		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-		selectIsStudentMap.put("user_id", userId);
-		selectIsStudentMap.put("course_id", courseId);
-        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        boolean isStudent = isJoinCourse(userId, courseId, jedis);
         if(!isStudent){	//未购买
         	log.error("Saas_H5_课程-获取课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
         	throw new QNLiveException("120007");
@@ -1604,10 +1591,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 判断是否加入了课程
          */
-		Map<String, Object> selectIsStudentMap = new HashMap<String, Object>();
-		selectIsStudentMap.put("user_id", userId);
-		selectIsStudentMap.put("course_id", courseId);
-        boolean isStudent = saaSModuleServer.isStudentOfTheCourse(selectIsStudentMap);
+        boolean isStudent = isJoinCourse(userId, courseId, jedis);
         if(!isStudent){	//未购买
         	log.error("Saas_H5_课程-添加课程留言>>>>用户未加入该课程(courseId=" + courseId + ")");
         	throw new QNLiveException("120007");

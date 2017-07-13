@@ -244,7 +244,7 @@
 						<param name="series_id" type="string" />
 						<param name="series_img_url" type="string" fieldname="series_img" />
 						<param name="series_type" type="string" fieldname="series_course_type" />
-						<param name="buy_status" type="string" />
+						<param name="is_join" type="string" />
 						<param name="series_title" type="string" />
 						<param name="series_course_count" type="int" fieldname="course_num" />
 						<param name="buyer_count" type="long" fieldname="series_student_num" />
@@ -268,12 +268,11 @@
 						<param name="single_id" type="string" fieldname="course_id" />
 						<param name="single_img_url" type="string" fieldname="course_image" />
 						<param name="single_type" type="string" fieldname="goods_type" />
-						<param name="buy_status" type="string" />
+						<param name="is_join" type="string" />
 						<param name="single_title" type="string" fieldname="course_title" />
 						<param name="browse_count" type="long" fieldname="click_num" />
 						<param name="message_count" type="long" fieldname="comment_num" />
 						<param name="price" type="double" fieldname="course_price" />
-						<param name="is_join" type="string" />
 					</param>
 				</outputs>
 			</function>
@@ -296,12 +295,11 @@
 						<param name="live_start_time" type="long" fieldname="start_time" />
 						<param name="live_end_time" type="long" fieldname="end_time" />
 						<param name="live_type" type="string" fieldname="course_type" />
-						<param name="buy_status" type="string" />
+						<param name="is_join" type="string" />
 						<param name="live_title" type="string" fieldname="course_title" />
 						<param name="buyer_count" type="long" fieldname="student_num" />
 						<param name="price" type="double" fieldname="course_price" />
 						<param name="live_status" type="string" fieldname="status" />
-						<param name="is_join" type="string" />
 					</param>
 					<param name="last_update_time" type="long" />
 				</outputs>
@@ -328,6 +326,7 @@
 						<param name="price" type="double" fieldname="series_price" />
 					</param>
 					<param name="is_bought" type="string" />
+					<param name="is_join" type="string" />
 				</outputs>
 			</function>
 			

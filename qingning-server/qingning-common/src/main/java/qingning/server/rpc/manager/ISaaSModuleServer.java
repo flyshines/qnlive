@@ -216,4 +216,11 @@ public interface ISaaSModuleServer {
      * @return
      */
     int updateUserPhone(Map<String, Object> userMap);
+
+    /**
+     * 根据条件查询订单
+     * @param selectTradeBillMap
+     * @return
+     */
+	Map<String, Object> findTradeBillByMap(Map<String, Object> selectTradeBillMap);
 }
