@@ -535,4 +535,12 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         }
     }
 
+    /**
+     * 根据非空字段更新系列课详情
+     */
+	@Override
+	public int updateSeriesByMap(Map<String, Object> updateSeriesMap) {
+		return seriesMapper.updateSeries(updateSeriesMap);
+	}
+
 }

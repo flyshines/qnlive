@@ -229,4 +229,11 @@ public interface ISaaSModuleServer {
      * @param shopId
      */
     void userVisitShop(String userId, String shopId);
+
+    /**
+     * 根据非空字段更新系列课详情
+     * @param updateSeriesMap
+     * @return
+     */
+	int updateSeriesByMap(Map<String, Object> updateSeriesMap);
 }
