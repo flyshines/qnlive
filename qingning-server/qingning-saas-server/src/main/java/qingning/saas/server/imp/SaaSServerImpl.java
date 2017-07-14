@@ -941,6 +941,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 			}
 		}
 		
+		/*
+		 * 判断登录帐号是否是讲师
+		 */
+		String lecturerId = seriesMap.get("lecturer_id");
+		if(userId.equals(lecturerId)){
+			resultMap.put("is_lecturer", "1");
+		}else{
+			resultMap.put("is_lecturer", "0");
+		}
+		
         resultMap.put("series_info", seriesMap);
         return resultMap;
 	} 

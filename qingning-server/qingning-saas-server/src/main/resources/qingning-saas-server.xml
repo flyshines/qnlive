@@ -327,6 +327,7 @@
 					</param>
 					<param name="is_bought" type="string" />
 					<param name="is_join" type="string" />
+					<param name="is_lecturer" type="string" />
 				</outputs>
 			</function>
 			
