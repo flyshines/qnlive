@@ -1471,14 +1471,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     for(Map<String,Object> recordMap : records){
                         cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("lecturer_id"));
                         String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
+                        //获得讲师的昵称
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
-                    }
-                    for(Map<String,Object> recordMap : records){
+                        
                         cacheQueryMap.clear();
                         cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
                         Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                        //获得课程的标题
                         recordMap.put("courseTitle", courseName);
                     }
                     pipeline.sync();

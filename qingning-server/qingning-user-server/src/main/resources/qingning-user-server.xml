@@ -291,7 +291,7 @@
 						<param name="position" type="long" />
 						<param name="course_title" type="string" convert="(course_title,profit_type)=>{
 							if(utils.isEqual(profit_type,'1')){
-								return '';
+								return '打赏课程：' + utils.RecoveryEmoji(course_title);
 							}
 							return utils.RecoveryEmoji(course_title);
 						}"/>
