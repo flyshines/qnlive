@@ -352,7 +352,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
-		if("0".equals(tradeBill.get("profit_type"))){
+		if("0".equals(tradeBill.get("profit_type"))&&"1".equals("course_type")){
 			String rqCode = null;
 			if(!MiscUtils.isEmpty(roomDistributerCache)){
 				//t_room_distributer_recommend更新，done_num+1，course_num+1，update_time更新

@@ -659,6 +659,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.addCourse(reqMap);
         //缓存加入讲师创建的课程
         jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS,now.getTime(),reqMap.get("course_id").toString());
+        jedis.zadd(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP,now.getTime(),reqMap.get("course_id").toString());
     }
 
 	/**
