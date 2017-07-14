@@ -2013,9 +2013,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             //店铺实际收益
-            Double liveRoomTotalAmount = Double.valueOf(userGains.get("user_total_real_incomes").toString());
-            Double userTotalRealIncomes = Double.valueOf(userGains.get("user_total_real_incomes").toString());
-            userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
+
+            Long user_total_real_incomes = Long.valueOf(userGains.get("user_total_real_incomes").toString());
+            Long distributer_real_incomes = Long.valueOf(userGains.get("distributer_real_incomes").toString());
+
+            userGains.put("shop_total_amount",user_total_real_incomes-distributer_real_incomes);
+
+
             userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
