@@ -1843,7 +1843,16 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         userGains.put("today_amount",todayMoney);
         userGains.put("today_visit",todayVisit);
+
+
         userGains.put("today_pay",todayPay);
+
+        Long user_total_real_incomes = Long.valueOf(userGains.get("user_total_real_incomes").toString());
+        Long distributer_real_incomes = Long.valueOf(userGains.get("distributer_real_incomes").toString());
+
+        userGains.put("user_total_amount",user_total_real_incomes-distributer_real_incomes);
+
+
         double balance = Double.valueOf(userGains.get("balance").toString());
 
         balance = DoubleUtil.sub(balance , DoubleUtil.mul(balance,Constants.SYS_WX_RATE));
