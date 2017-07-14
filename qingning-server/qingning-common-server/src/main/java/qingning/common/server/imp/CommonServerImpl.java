@@ -502,44 +502,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
     }
 
-    private void checkShopInfo(Map<String, Object> loginInfoMap,RequestEntity reqEntity,Jedis jedis) throws Exception{
-        String userId = loginInfoMap.get("user_id").toString();
-        Map<String,String> shopInfo;
-        try{
-            shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation,jedis);
-        }catch (Exception e){
-            //店铺空
-            shopInfo = null;
-        }
-        if(shopInfo == null){
-            //创建店铺
-            Map<String,Object> shop = new HashMap<>();
-            shop.put("user_id",userId);
-            shop.put("shop_id",MiscUtils.getUUId());
-            if(loginInfoMap.get("room_id")!=null){
-                shop.put("room_id",loginInfoMap.get("room_id").toString());
-            }
-            shop.put("user_name",loginInfoMap.get("user_name")+"");
-            shop.put("shop_name",loginInfoMap.get("user_name")+"的店铺");
-            shop.put("shop_remark","");
-            String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
-            shop.put("shop_url",shopUrl);
-            shop.put("status","1");
-            shop.put("create_time",new Date());
-            shop.put("shop_logo",loginInfoMap.get("avatar_address"));
-            commonModuleServer.insertShopInfo(shop);
-
-            //插入缓存
-            Map<String, Object> shopMap = new HashMap<>();
-            shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
-            String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
-            Map<String,String> stringMap = new HashMap<>();
-            MiscUtils.converObjectMapToStringMap(shopMap,stringMap);
-            jedis.hmset(shopKey,stringMap);
-        }
-
-    }
-    //</editor-fold>
 
     /**
      * PC端  微信授权code登录
@@ -1993,12 +1955,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 
-        Map<String,Object> query = new HashMap<String,Object>();
-        query.put("user_id", userId);
         String roomId = reqMap.get("room_id").toString();
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedis,true);
         resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
 
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", liveRoomMap.get("lecturer_id"));
         Map<String, String> userMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
         resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));

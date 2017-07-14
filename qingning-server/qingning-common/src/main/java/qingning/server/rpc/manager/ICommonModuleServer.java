@@ -244,10 +244,6 @@ public interface ICommonModuleServer {
 	 */
 	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
 
-	/**插入店铺信息
-	 * @param shop
-	 */
-	void insertShopInfo(Map<String, Object> shop);
 	/**
 	 * 根据系列id查询系列
 	 * @param series_id
