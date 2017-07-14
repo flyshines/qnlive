@@ -165,6 +165,9 @@
 			<if test="update_time != null" >
 				update_time=#{update_time},
 			</if>
+			<if test="update_course_time != null" >
+				update_course_time = #{update_course_time},
+			</if>
 			<if test="series_status != null" >
 				series_status=#{series_status},
 			</if>
