@@ -147,10 +147,11 @@
     lcp.profit_type, lcp.course_id, lcp.profit_amount,
     lcp.create_time, lcp.position, lcp.user_id,
     se.series_title,share_amount,distributer_id,
-    u.nick_name AS dist_name,course_type
+    u.nick_name AS dist_name,course_type,bu.nick_name as buy_name
     from t_lecturer_courses_profit lcp
     LEFT JOIN t_series se ON se.series_id = lcp.course_id
     LEFT JOIN t_user u ON u.user_id = lcp.distributer_id
+    LEFT JOIN t_user bu ON bu.user_id = lcp.user_id
     where 1=1
     and lcp.lecturer_id = #{user_id}
     <if test="position != null" >

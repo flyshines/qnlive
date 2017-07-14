@@ -1537,12 +1537,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     for(Map<String,Object> recordMap : records){
-                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
-                        Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
-                        recordMap.put("cacheLecturerName",cacheLecturerName);
-                    }
-                    for(Map<String,Object> recordMap : records){
                             cacheQueryMap.clear();
                             cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
@@ -1552,9 +1546,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     pipeline.sync();
 
                     for(Map<String,Object> recordMap : records){
-                        Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
                         Response<String> courseName = (Response)recordMap.get("courseTitle");
-                        recordMap.put("lecturer_name",cacheLecturerName.get());
                         if(recordMap.get("series_title")==null) {
                             recordMap.put("course_title",courseName.get());
                         }
@@ -1562,7 +1554,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         /*if("1".equals(recordMap.get("profit_type").toString())){
                             ""
                         }*/
-                        if(recordMap.get("lecturer_name")==null){
+                        if(recordMap.get("buy_name")==null){
                             System.out.println(recordMap.get("user_id"));
                         }
                         //商品类型
@@ -1586,9 +1578,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
                             //分销收入
                             recordMap.put("is_share","1");
 
-                            title.append(recordMap.get("lecturer_name")).append("  通过  ")
+                            title.append(recordMap.get("buy_name")).append("  通过  ")
                                     .append(recordMap.get("dist_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】").append("分销比例为");
-                            double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));
+                            double rate = DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2);
                             title.append(rate*100).append("%");
                             recordMap.put("profit_amount",recordMap.get("share_amount"));
 
@@ -1597,7 +1589,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         }else{
                             //购买，打赏
                             recordMap.put("is_share","0");
-                            title.append(recordMap.get("lecturer_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】");
+                            title.append(recordMap.get("buy_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】");
                             recordMap.put("title",title.toString());
                         }
                         recordMap.remove("cacheLecturerName");
