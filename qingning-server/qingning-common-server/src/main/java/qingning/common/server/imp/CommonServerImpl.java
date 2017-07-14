@@ -1955,12 +1955,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
 
-        Map<String,Object> query = new HashMap<String,Object>();
-        query.put("user_id", userId);
         String roomId = reqMap.get("room_id").toString();
         Map<String,String> liveRoomMap = CacheUtils.readLiveRoom(roomId,reqEntity,readLiveRoomOperation,jedis,true);
         resultMap.put("room_name",MiscUtils.RecoveryEmoji(liveRoomMap.get("room_name")));
 
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", liveRoomMap.get("lecturer_id"));
         Map<String, String> userMap = CacheUtils.readUser(liveRoomMap.get("lecturer_id"), this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
         resultMap.put("avatar_address",liveRoomMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
