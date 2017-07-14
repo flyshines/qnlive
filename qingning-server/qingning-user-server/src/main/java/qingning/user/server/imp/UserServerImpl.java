@@ -2023,16 +2023,11 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     roomId = id;
                 }
             }
-            if(roomId!=null){
-                userGains.put("has_shop","1");
-                Map<String,Object> query = new HashMap<>();
-                query.clear();
-                query.put(Constants.FIELD_ROOM_ID, roomId);
-                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
-                String shop_total_amount = jedis.hget(liveRoomKey, "total_amount");
-                userGains.put("shop_total_amount",shop_total_amount);
-
-            }
+            //店铺实际收益
+            Double liveRoomTotalAmount = Double.valueOf(userGains.get("live_room_total_amount").toString());
+            Double userTotalRealIncomes = Double.valueOf(userGains.get("user_total_real_incomes").toString());
+            userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
+            userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
             //直播间+分销收入计算
