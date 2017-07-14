@@ -2024,8 +2024,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             //店铺实际收益
-            Double liveRoomTotalAmount = Double.valueOf(userGains.get("live_room_total_amount").toString());
-            Double userTotalRealIncomes = Double.valueOf(userGains.get("user_total_real_incomes").toString());
+            Double liveRoomTotalAmount = Double.valueOf(userGains.get("user_total_real_incomes").toString());
+            Double userTotalRealIncomes = Double.valueOf(userGains.get("distributer_real_incomes").toString());
             userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
             userGains.put("has_shop","1");
         }else{//没店铺
