@@ -240,7 +240,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
     @Override
     public List<Map<String, Object>> findUserShopRecords(Map<String, Object> queryMap) {
         String shopId = queryMap.get("shop_id").toString();
-        String shopUser = shopMapper.selectUserIdByShopId(shopId);
+		String shopUser = shopMapper.selectUserIdByShopId(shopId);	//店主的user_id
         //店铺不存在返回空
         if(shopUser==null){
             return null;

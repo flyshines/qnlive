@@ -1469,16 +1469,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 @Override
                 public void batchOperation(Pipeline pipeline, Jedis jedis) {
                     for(Map<String,Object> recordMap : records){
-                        cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("lecturer_id"));
-                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("lecturer_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
+                        //获得讲师的昵称
                         Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
                         recordMap.put("cacheLecturerName",cacheLecturerName);
-                    }
-                    for(Map<String,Object> recordMap : records){
+                        
                         cacheQueryMap.clear();
                         cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
                         String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
                         Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                        //获得课程的标题
                         recordMap.put("courseTitle", courseName);
                     }
                     pipeline.sync();
@@ -2006,7 +2007,28 @@ public class UserServerImpl extends AbstractQNLiveServer {
         innerMap.put("user_id", userId);
         Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
         if (userMap.get("shop_id")!=null) {//有店铺
-            userGains.put("has_shop","1");
+
+            //直播间信息查询
+            Map<String,String> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+            String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+            Map<String, String> key = jedis.hgetAll(liveRoomListKey);
+            String roomId = null;
+            if(key!=null&&!key.isEmpty()) {
+                for (String id : key.keySet()) {
+                    roomId = id;
+                }
+            }
+            if(roomId!=null){
+                userGains.put("has_shop","1");
+                Map<String,Object> query = new HashMap<>();
+                query.clear();
+                query.put(Constants.FIELD_ROOM_ID, roomId);
+                String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, query);
+                String shop_total_amount = jedis.hget(liveRoomKey, "total_amount");
+                userGains.put("shop_total_amount",shop_total_amount);
+
+            }
         }else{//没店铺
             userGains.put("has_shop","0");
             //直播间+分销收入计算

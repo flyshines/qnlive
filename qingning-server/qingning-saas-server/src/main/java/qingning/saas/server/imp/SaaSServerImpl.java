@@ -2057,8 +2057,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     @Override
                     public void batchOperation(Pipeline pipeline, Jedis jedis) {
                         for(Map<String,Object> recordMap : list){
-                            cacheQueryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, recordMap.get("user_id"));
-                            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, cacheQueryMap);
+                            cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
+                            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
                             Response<String> nackName = pipeline.hget(lecturerKey, "nick_name");
                             Response<String> userAvatar = pipeline.hget(lecturerKey, "avatar_address");
                             recordMap.put("cacheLecturerName",nackName);
