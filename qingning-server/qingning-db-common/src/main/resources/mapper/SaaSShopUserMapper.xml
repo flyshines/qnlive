@@ -23,6 +23,9 @@
       <if test="shop_id != null" >
         shop_id,
       </if>
+      <if test="user_type != null" >
+          user_type,
+      </if>
       <if test="user_id != null" >
         user_id,
       </if>
@@ -36,6 +39,9 @@
       </if>
       <if test="shop_id != null" >
         #{shop_id,jdbcType=VARCHAR},
+      </if>
+      <if test="user_type != null" >
+        #{user_type,jdbcType=VARCHAR},
       </if>
       <if test="user_id != null" >
         #{user_id,jdbcType=VARCHAR},
