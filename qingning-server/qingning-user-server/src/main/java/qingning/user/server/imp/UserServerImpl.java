@@ -2023,7 +2023,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Double liveRoomTotalAmount = Double.valueOf(userGains.get("live_room_total_amount").toString());
             Double userTotalRealIncomes = Double.valueOf(userGains.get("user_total_real_incomes").toString());
             userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
-            
+            userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
             //直播间+分销收入计算
