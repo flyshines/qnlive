@@ -457,9 +457,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
             if (map.get("distributer_id") != null) {
                 //分销订单
                 map.put("order_type", "1");
+                map.put("income",map.get("share_amount"));
             } else {
                 //普通订单
                 map.put("order_type", "2");
+                map.put("income",map.get("profit_amount"));
             }
             map.remove("distributer_id");
 
