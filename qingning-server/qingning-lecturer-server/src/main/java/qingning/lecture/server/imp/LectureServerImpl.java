@@ -1429,29 +1429,35 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
         //判断传过来的课程状态
         //<editor-fold desc="获取课程idList">
-        String startIndex ;//坐标起始位
-        String endIndex ;//坐标结束位
-        //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+        long startIndex = 0L;//坐标起始位
+        long endIndex = 0L;//坐标结束位
+
+
         Map<String,Object> map = new HashMap<String,Object>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
         String getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);//讲师
+        long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
         if(MiscUtils.isEmpty(courseId)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
-            long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
-            startIndex = courseScoreByRedis+"";//设置起始位置
-            endIndex = "-inf";//设置结束位置
+            endIndex = -1;
+            startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+            if(startIndex < 0){
+                startIndex = 0;
+            }
         }else{//传了courseid
-            Map<String,String> queryParam = new HashMap<String,String>();
-            queryParam.put("course_id", courseId);
-            RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
-            Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
-            long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
-            startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
-            endIndex = "-inf";//设置结束位置
+            long endRank = jedis.zrank(getCourseIdKey, courseId);
+            endIndex = endRank - 1;
+            if(endIndex >= 0){
+                startIndex = endIndex - pageCount + 1;
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }
         }
-        courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+        courseIdSet = jedis.zrange(getCourseIdKey, startIndex, endIndex);
         for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
             courseIdList.add(course_id);
         }
+        Collections.reverse(courseIdList);
         //</editor-fold>
         if(courseIdList.size() > 0){
             Map<String,String> queryParam = new HashMap<String,String>();

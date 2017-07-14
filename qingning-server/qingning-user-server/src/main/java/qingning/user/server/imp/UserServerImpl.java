@@ -376,15 +376,19 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         startIndex = 0;
                     }
                 }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
-                    long endRank = jedis.zrank(getCourseIdKey, courseId);
-                    endIndex = endRank - 1;
-                    if(endIndex >= 0){
-                        startIndex = endIndex - pageCount + 1;
-                        if(startIndex < 0){
-                            startIndex = 0;
+                    if(jedis.exists(getCourseIdKey)){
+                        long endRank = jedis.zrank(getCourseIdKey, courseId);
+                        endIndex = endRank - 1;
+                        if(endIndex >= 0){
+                            startIndex = endIndex - pageCount + 1;
+                            if(startIndex < 0){
+                                startIndex = 0;
+                            }
+                        }else{
+                            key = false;//因为已经查到最后的课程没有必要往下查了
                         }
                     }else{
-                        key = false;//因为已经查到最后的课程没有必要往下查了
+                        key = false;
                     }
                 }
                 if(key){
@@ -2023,7 +2027,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Double liveRoomTotalAmount = Double.valueOf(userGains.get("live_room_total_amount").toString());
             Double userTotalRealIncomes = Double.valueOf(userGains.get("user_total_real_incomes").toString());
             userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
-            
+            userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
             //直播间+分销收入计算
