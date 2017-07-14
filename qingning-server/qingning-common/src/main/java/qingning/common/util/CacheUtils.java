@@ -652,10 +652,10 @@ public final class CacheUtils {
             if(lastSingleId != null && !"0".equals(lastSingleId)){	//不是获取第一页数据
     	        Double lastScore = jedis.zscore(lecturerSingleSetKey, lastSingleId);
     	        //分页获取单品课程中的id列表
-    	        singleSet = jedis.zrangeByScore(lecturerSingleSetKey, "(" + lastScore, "+inf", 0, pageCount);
+    	        singleSet = jedis.zrevrangeByScore(lecturerSingleSetKey, "(" + lastScore, "-inf", 0, pageCount);
             }else{	//获取第一页数据
     	        //分页获取单品课程中的id列表
-            	singleSet = jedis.zrangeByScore(lecturerSingleSetKey, "-inf", "+inf", 0, pageCount);
+            	singleSet = jedis.zrevrangeByScore(lecturerSingleSetKey, "+inf", "-inf", 0, pageCount);
             }
         }else{
 			//缓存不存在，更新缓存
