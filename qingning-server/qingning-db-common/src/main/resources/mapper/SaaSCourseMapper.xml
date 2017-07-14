@@ -355,7 +355,7 @@
     t.shop_id = #{shopId,jdbcType=VARCHAR}
     AND t.course_updown = '1'
     AND series_or_course = '0'
-    ORDER BY t.update_time DESC
+    ORDER BY t.updown_time DESC
   </select>
   <select id="selectUpCourseListByShop" parameterType="hashmap" resultType="hashmap">
   SELECT

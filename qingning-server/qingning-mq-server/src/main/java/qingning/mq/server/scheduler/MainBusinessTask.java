@@ -125,6 +125,13 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			platformCoursesServerimpl.setCourseAudioMapper(courseAudioMapper);
 			list.add(platformCoursesServerimpl);
 
+			//系列相关
+			SeriesCourseServerImpl seriesCourseServerImpl = new SeriesCourseServerImpl();
+			seriesCourseServerImpl.setCoursesMapper(coursesMapper);
+			seriesCourseServerImpl.setSeriesMapper(seriesMapper);
+			list.add(seriesCourseServerImpl);
+
+
 			//课程极光定时推送
 			CreateCourseNoticeTaskServerImpl createCourseNoticeTaskServerImpl = new CreateCourseNoticeTaskServerImpl();
 			createCourseNoticeTaskServerImpl.setCoursesMapper(coursesMapper);
@@ -136,11 +143,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			classIfyCourseServerImpl.setClassifyInfoMapper(classifyInfoMapper);
 			list.add(classIfyCourseServerImpl);
 
-			//系列相关
-			SeriesCourseServerImpl seriesCourseServerImpl = new SeriesCourseServerImpl();
-			seriesCourseServerImpl.setCoursesMapper(coursesMapper);
-			seriesCourseServerImpl.setSeriesMapper(seriesMapper);
-			list.add(seriesCourseServerImpl);
+
 
 			clearMessageLock();
 		}

@@ -871,7 +871,7 @@
 						<param name="title" type="string"/>
 						<param name="type" type="string"/>
 						<param name="course_num" type="long"/>
-						<param name="student_num" default="0" type="long"/>
+						<param name="student_num" default="0" type="long" fieldname="series_student_num"/>
 					</param>
 				</outputs>
 			</function>
