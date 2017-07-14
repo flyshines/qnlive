@@ -255,6 +255,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.openShop(shop);
         //插入缓存
         CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+
+        //更新用户缓存
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryMap);
+        jedis.hset(userKey,"shop_id",shop.get("shop_id").toString());
+
         return null;
     }
     /**
@@ -659,7 +666,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         saaSModuleServer.addCourse(reqMap);
         //缓存加入讲师创建的课程
         jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS,now.getTime(),reqMap.get("course_id").toString());
-        jedis.zadd(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP,now.getTime(),reqMap.get("course_id").toString());
+
+        //更新店铺已上架的课程
+        Map<String,Object> query = new HashMap<>();
+        query.put("lecturer_id",userId);
+        String upCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP, query);
+        jedis.zadd(upCourseKey,now.getTime(),reqMap.get("course_id").toString());
     }
 
 	/**
@@ -757,8 +769,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
             jedis.zadd(lecturerSeriesUpKey, seriesScore, seriesId);
         }
-    	
 
+        //更新系列上架课程缓存
+        Map<String,Object> query = new HashMap<>();
+        query.put("series_id",seriesId);
+        String upSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, query);
+        jedis.zadd(upSeriesKey,now.getTime(),courseId);
     }
 
     /**

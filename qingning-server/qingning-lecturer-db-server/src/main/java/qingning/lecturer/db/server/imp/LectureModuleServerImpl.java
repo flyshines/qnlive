@@ -721,6 +721,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
     @Override
     public Map<String, Object> updateUpdown(Map<String,Object> record) {
+		record.put("update_time",new Date());
         Integer updateCount = 0;
 	    String query_from = record.get("query_from").toString();
         if(!MiscUtils.isEmpty(record.get("series_id"))){	//系列id不为null
