@@ -669,13 +669,35 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("addSeriesSingleCourse")
     public void  addSeriesSingleCourse(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String seriesId = (String) reqMap.get("series_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         reqMap.put("user_id",userId);
-        //店铺信息
+        
+        /*
+         * 获取系列的详情
+         */
+        Map<String, Object> readSeriesMap = new HashMap<>();
+        readSeriesMap.put("series_id", seriesId);
+        RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
+        Map<String, String> seriesInfoMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
+        if(MiscUtils.isEmpty(seriesInfoMap)){
+        	log.error("saas_店铺-系列-添加课程>>>>系列课程不存在");
+        	throw new QNLiveException("210004");
+        }
+        
+        /*
+         * 店铺信息
+         */
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        if(MiscUtils.isEmpty(shopInfo)){
+        	log.error("saas_店铺-系列-添加课程>>>>店铺不存在");
+        	throw new QNLiveException("190001");
+        }
+        
         String shopId = shopInfo.get("shop_id");
-        reqMap.put("course_id",MiscUtils.getUUId());
+        String courseId = MiscUtils.getUUId();
+        reqMap.put("course_id", courseId);
         reqMap.put("shop_id",shopId);
         reqMap.put("lecturer_id",userId);
         Date now = new Date();
@@ -696,17 +718,45 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
+        log.error("saas_店铺-系列-添加课程>>>>数据库插入子课程成功");
 
-        //更新缓存
-        Map<String, Object> seriesMap = new HashMap<String, Object>();
-
-        seriesMap.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id"));
-        //已上架的zset列表
-        String readSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, seriesMap);
-        //新增到下架的缓存
-        jedis.zadd(readSeriesUpKey,System.currentTimeMillis(),reqMap.get("series_id").toString());
-        //缓存加入讲师创建的课程
+        /*
+         * 更新缓存中系列已经上架的子课zset
+         */
+        //系列课已上架子课的zset列表
+        String readSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, seriesInfoMap);
+        //新增到上架的缓存
+        jedis.zadd(readSeriesUpKey,System.currentTimeMillis(), courseId);
+        
+        /*
+         * 缓存加入讲师创建的课程
+         */
         jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS, now.getTime(),reqMap.get("course_id").toString());
+        
+        /*
+         * 更新系列课已更新课程数量（数据库、缓存）
+         */
+        Map<String, Object> updateSeriesMap = new HashMap<>();
+        updateSeriesMap.put("series_id", seriesId);
+        updateSeriesMap.put("course_num", 
+        		Integer.parseInt(seriesInfoMap.get("course_num")) + 1);	//已更新的课程数量，传1用于sql执行+1操作
+        updateSeriesMap.put("update_course_time", now);
+        saaSModuleServer.updateSeriesByMap(updateSeriesMap);
+        //更新缓存中系列的详情
+        String readSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, seriesInfoMap);
+        jedis.hincrBy(readSeriesKey, "course_num", 1);
+        
+        /*
+         * 更新缓存中讲师所有上架系列的zset，目的是将该系列在zset中重新排序，根据子课最新的更新时间进行排序
+         */
+        if("1".equals(seriesInfoMap.get("updown").toString())){	//该系列为已上架，才需要更新讲师所有上架的系列
+        	//获取子课程更新时间
+            String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesInfoMap);//讲师所有上架系列
+        	long seriesScore = now.getTime();
+        	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
+            jedis.zadd(lecturerSeriesUpKey, seriesScore, seriesId);
+        }
+    	
 
     }
 
