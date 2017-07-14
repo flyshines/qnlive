@@ -421,6 +421,7 @@
 					<param name="balance" type="double"/>
 					<param name="phone" type="string"/>
 					<param name="has_shop" type="string"/>
+					<param name="shop_total_amount" type="double" default="0"/>
 				</outputs>
 			</function>
 			
