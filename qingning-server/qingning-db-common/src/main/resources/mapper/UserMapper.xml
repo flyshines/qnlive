@@ -3,7 +3,12 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.UserMapper" >
 
   <select id="findByUserId" resultType="hashmap" parameterType="java.lang.String" >
-    select * from t_user where user_id = #{user_id}
+    SELECT
+        t.*,s.shop_id
+    FROM
+        t_user t
+    LEFT JOIN t_saas_shop s ON t.user_id = s.user_id
+    where t.user_id = #{user_id}
   </select>
   <select id="existByPhone" resultType="java.lang.Integer" parameterType="hashmap" >
     SELECT count(*) FROM t_user t WHERE t.phone_number = #{phone_number}

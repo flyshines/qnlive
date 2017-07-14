@@ -2002,11 +2002,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String, Object> userGains = userModuleServer.findUserGainsByUserId(userId);
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
 
-        //判断当前用户是否有店铺
-        Map<String, Object> shopMap = new HashMap<>();
-        shopMap.put(Constants.CACHED_KEY_SHOP_FIELD, userId);
-        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, shopMap);
-        if (jedis.exists(lectureLiveRoomKey)) {//有店铺
+        Map<String,Object> innerMap = new HashMap<>();
+        innerMap.put("user_id", userId);
+        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
+        if (userMap.get("shop_id")!=null) {//有店铺
             userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
@@ -2016,9 +2015,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
             userGains.put("user_total_real_incomes",userTotalRealIncome);
             userGains.put("user_total_amount",userTotalIncome);
         }
-        Map<String,Object> innerMap = new HashMap<>();
-        innerMap.put("user_id", userId);
-        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
         userGains.put("phone",userMap.get("phone_number"));
         if(MiscUtils.isEmpty(userGains)){
             throw new QNLiveException("170001");

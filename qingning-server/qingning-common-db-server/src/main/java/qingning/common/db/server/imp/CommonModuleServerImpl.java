@@ -1075,10 +1075,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void insertShopInfo(Map<String, Object> shop) {
-		shopMapper.insert(shop);
-	}
-	@Override
 	public Map<String, Object> findSeriesBySeriesId(String series_id) {
 		return seriesMapper.findSeriesBySeriesId(series_id);
 	}

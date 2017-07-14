@@ -90,7 +90,7 @@
 				</auth>
 				<inputs>
 					<param name="banner_title" type="string" require="Y,000100"/>
-					<param name="banner_name" type="string" require="Y,000100"/>
+					<param name="banner_name" type="string" require="N"/>
 					<param name="banner_img" type="string" require="Y,000100"/>
 					<param name="link_type" type="string" require="Y,000100" format="0|1|2|3|4|5|6,000004" />
 					<param name="link_id" type="string" require="N" />

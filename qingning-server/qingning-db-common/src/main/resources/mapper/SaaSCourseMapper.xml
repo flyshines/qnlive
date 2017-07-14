@@ -107,6 +107,9 @@
       <if test="update_time != null" >
         update_time,
       </if>
+      <if test="updown_time != null" >
+        updown_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -188,13 +191,16 @@
         #{details,jdbcType=VARCHAR},
       </if>
       <if test="create_date != null" >
-        #{create_date,jdbcType=DATE},
+        #{create_date,jdbcType=TIMESTAMP},
       </if>
       <if test="create_time != null" >
         #{create_time,jdbcType=TIMESTAMP},
       </if>
       <if test="update_time != null" >
         #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updown_time != null" >
+        #{updown_time,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -277,7 +283,7 @@
         details = #{details,jdbcType=VARCHAR},
       </if>
       <if test="create_date != null" >
-        create_date = #{create_date,jdbcType=DATE},
+        create_date = #{create_date,jdbcType=TIMESTAMP},
       </if>
       <if test="click_num != null" >
         click_num = #{click_num, jdbcType=BIGINT},
@@ -287,6 +293,9 @@
       </if>
       <if test="update_time != null" >
         update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updown_time != null" >
+        updown_time = #{update_time,jdbcType=TIMESTAMP},
       </if>
     </set>
     where course_id = #{course_id,jdbcType=VARCHAR}
@@ -334,6 +343,7 @@
       and res.series_course_updown = '0'
     </if>
     AND  res.course_updown != '0'
+    order by res.updown_time desc
   </select>
 
   <select id="selectUpListByShopId" parameterType="java.lang.String" resultType="java.lang.String">
