@@ -194,7 +194,7 @@ public class CommonController extends AbstractController {
         if(key == 1){
             String userWeixinAccessToken = (String) resultMap.get("access_token");
             if(state.equals("qnsaas")){//跳转h5店铺
-                response.sendRedirect("http://test.qnlive.1758app.com/qnsaas?token="+userWeixinAccessToken);
+                response.sendRedirect("http://m.qnlive.com/qnsaas?token="+userWeixinAccessToken);
             }else{//跳转直播
                 response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
             }
