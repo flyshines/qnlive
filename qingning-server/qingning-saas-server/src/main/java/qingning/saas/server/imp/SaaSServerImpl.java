@@ -640,6 +640,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         reqMap.put("create_time",now);
         reqMap.put("create_date",now);
+        reqMap.put("updown_time",now);
         reqMap.put("course_price",reqMap.get("price"));
         //收益初始化
         reqMap.put("extra_amount",0);
@@ -1188,7 +1189,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 	}
 
     /**
-     * 店铺-单品上下架（未用到）
+     * 店铺-单品上下架
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1216,6 +1217,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         //更新时间
         reqMap.put("update_time",now);
+        reqMap.put("updown_time",now);
         saaSModuleServer.updateCourse(reqMap);
     }
     
