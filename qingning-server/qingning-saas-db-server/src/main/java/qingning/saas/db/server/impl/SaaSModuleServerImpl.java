@@ -457,7 +457,11 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
             if (map.get("distributer_id") != null) {
                 //分销订单
                 map.put("order_type", "1");
-                map.put("income",map.get("share_amount"));
+
+                Long profitAmount = Long.valueOf(map.get("profit_amount").toString());
+                Long shareAmount = Long.valueOf(map.get("share_amount").toString());
+                map.put("income",profitAmount - shareAmount);
+
             } else {
                 //普通订单
                 map.put("order_type", "2");

@@ -571,7 +571,13 @@
     <if test="keyword != null" >
       and t.course_title like '%${keyword}%'
     </if>
-    AND course_updown !=0
+    <if test="course_updown != null" >
+      AND course_updown = #{course_updown}
+    </if>
+    <if test="course_updown == null" >
+      AND course_updown !=0
+    </if>
+    AND status !=5
     ORDER BY
     t.create_time DESC
   </select>

@@ -429,7 +429,7 @@ public class SaaSManageController extends AbstractController {
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
         if(StringUtils.isNotEmpty(status))
-            paramCode.put("status", status);
+            paramCode.put("course_updown", status);
         if(StringUtils.isNotEmpty(type))
             paramCode.put("type", type);
         if(StringUtils.isNotEmpty(keyword))
