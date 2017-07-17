@@ -3445,38 +3445,37 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }else if(query_type.equals("0")){//加入系列
             if(MiscUtils.isEmpty(reqMap.get("series_id"))){
                 throw new QNLiveException("000004");
-            }else{//判断系列是否属于这个用户
-                String series_id = reqMap.get("series_id").toString();
-                map.put("series_id",series_id);
-                lectureModuleServer.increaseSeriesCourse(series_id);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
-                jedis.del(seriesKey);
-                //获取系列课程详情
-                Map<String, String> seriesMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                String series_course_type = seriesMap.get("series_course_type");
-                map.clear();
-                map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);
-                if(!jedis.hget(seriesKey,"lecturer_id").equals(user_id)){
-                    throw new QNLiveException("210001");
-                }else{
-                    course.put("series_id",series_id);
-                }
-                courseInfo = jedis.hgetAll(courseKey);//判断之前是否有加入系列
-                if(!MiscUtils.isEmpty(courseInfo.get("series_id"))){
-                    throw new QNLiveException("210003");
-                }
-                course.put("series_course_updown","1");
-                if(series_course_type.equals("0")){
-                    resltMap = lectureModuleServer.updateSeriesCourse(course);
-                }else{
-                    resltMap = lectureModuleServer.updateSaasSeriesCourse(course);
-                }
-                map.clear();
-                map.put("series_id",reqMap.get("series_id"));
-                String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
-                long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(lectureSeriesKey, seriesLpos, course_id);
             }
+            String series_id = reqMap.get("series_id").toString();
+            map.put("series_id",series_id);
+            Map<String, Object> stringObjectMap = lectureModuleServer.increaseSeriesCourse(series_id);
+            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+            jedis.del(seriesKey);
+            //获取系列课程详情
+            Map<String, String> seriesMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
+            String series_course_type = seriesMap.get("series_course_type");
+            map.clear();
+            map.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD,user_id);
+            if(!jedis.hget(seriesKey,"lecturer_id").equals(user_id)){
+                throw new QNLiveException("210001");
+            }else{
+                course.put("series_id",series_id);
+            }
+            courseInfo = jedis.hgetAll(courseKey);//判断之前是否有加入系列
+            if(!MiscUtils.isEmpty(courseInfo.get("series_id"))){
+                throw new QNLiveException("210003");
+            }
+            course.put("series_course_updown","1");
+            if(series_course_type.equals("0")){
+                resltMap = lectureModuleServer.updateSeriesCourse(course);
+            }else{
+                resltMap = lectureModuleServer.updateSaasSeriesCourse(course);
+            }
+            map.clear();
+            map.put("series_id",reqMap.get("series_id"));
+            String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+            long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
+            jedis.zadd(lectureSeriesKey, seriesLpos, course_id);
         }else {
             throw new QNLiveException("000004");
         }

@@ -189,9 +189,8 @@
 		update t_series
 		set
 		course_num = course_num + 1
-		<if test="update_course_time != null" >
-			,update_course_time=#{update_course_time}
-		</if>
+		,
+		update_course_time = #{update_course_time}
 		where series_id = #{series_id}
 	</update>
 	<update id="delSeriesCourse" parameterType="hashmap" >
