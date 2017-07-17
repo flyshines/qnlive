@@ -325,7 +325,7 @@
 
 
   <!--查询单品列表-->
-  <select id="selectByShop" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="selectByShop" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_saas_course res
@@ -343,7 +343,7 @@
       and res.series_course_updown = '0'
     </if>
     AND  res.course_updown != '0'
-    order by res.course_updown = 2 esc, res.updown_time desc
+    order by res.updown_time desc, res.updown_time desc
   </select>
 
   <select id="selectUpListByShopId" parameterType="java.lang.String" resultType="java.lang.String">
