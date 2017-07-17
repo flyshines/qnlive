@@ -1581,13 +1581,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
                         if(recordMap.get("distributer_id")!=null){
                             //分销收入
                             recordMap.put("is_share","1");
-
                             title.append(recordMap.get("buy_name")).append("  通过  ")
                                     .append(recordMap.get("dist_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】").append("分销比例为");
-                            double rate = DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2);
-                            title.append(rate*100).append("%");
-                            recordMap.put("profit_amount",recordMap.get("share_amount"));
-
+                            double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));                            title.append(rate*100).append("%");
+                            recordMap.put("profit_amount",(Long.valueOf(recordMap.get("profit_amount").toString())-Long.valueOf(recordMap.get("share_amount").toString())));
                             recordMap.put("title",title.toString());
 
                         }else{
@@ -2020,9 +2017,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             //店铺实际收益
-            Double liveRoomTotalAmount = Double.valueOf(userGains.get("user_total_real_incomes").toString());
-            Double userTotalRealIncomes = Double.valueOf(userGains.get("distributer_real_incomes").toString());
-            userGains.put("shop_total_amount",DoubleUtil.sub(userTotalRealIncomes, liveRoomTotalAmount));
+
+            Long user_total_real_incomes = Long.valueOf(userGains.get("user_total_real_incomes").toString());
+            Long distributer_real_incomes = Long.valueOf(userGains.get("distributer_real_incomes").toString());
+
+            userGains.put("shop_total_amount",user_total_real_incomes-distributer_real_incomes);
+
+
             userGains.put("has_shop","1");
         }else{//没店铺
             userGains.put("has_shop","0");
