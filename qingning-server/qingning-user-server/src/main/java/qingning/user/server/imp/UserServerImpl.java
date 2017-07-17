@@ -413,18 +413,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
-                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, false);//从缓存中读取课程信息
-                MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
-                if(jedis.exists(key)){
-                    if(!MiscUtils.isEmpty(jedis.zrank(key, course_id))){//判断当前用户是否有加入这个课程
-                        courseInfoMap.put("student", "Y");
-                    } else {
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                if(!MiscUtils.isEmpty(courseInfoMap)){
+                    MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    if(jedis.exists(key)){
+                        if(!MiscUtils.isEmpty(jedis.zrank(key, course_id))){//判断当前用户是否有加入这个课程
+                            courseInfoMap.put("student", "Y");
+                        } else {
+                            courseInfoMap.put("student", "N");
+                        }
+                    }else{
                         courseInfoMap.put("student", "N");
                     }
-                }else{
-                    courseInfoMap.put("student", "N");
+                    courseList.add(courseInfoMap);
                 }
-               courseList.add(courseInfoMap);
             }
         }
         //</editor-fold>
