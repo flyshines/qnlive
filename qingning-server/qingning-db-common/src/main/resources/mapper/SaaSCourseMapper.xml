@@ -325,7 +325,7 @@
 
 
   <!--查询单品列表-->
-  <select id="selectByShop" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="selectByShop" resultType="hashmap" parameterType="hashmap" >
     select
     <include refid="Base_Column_List" />
     from t_saas_course res
