@@ -83,12 +83,11 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Autowired(required = true)
 	private SaaSCourseMapper saasCourseMapper;
-
-	@Transactional(rollbackFor=Exception.class)
-	@Override
 	/**
 	 * 创建直播间
 	 */
+	@Transactional(rollbackFor=Exception.class)
+	@Override
 	public Map<String,Object> createLiveRoom(Map<String, Object> reqMap) {
 		Date now = new Date();
 		//1.插入直播间表
@@ -643,8 +642,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("series_course_type", reqMap.get("series_course_type"));
 		series.put("appName",reqMap.get("appName"));
 
-
-
 		seriesMapper.insertSeries(series);
 		return series;
 	}
@@ -689,6 +686,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return dbResultMap;
 	}
 
+	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> increaseSeriesCourse(String series_id) {
         Integer updateCount = null;
@@ -704,6 +702,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return dbResultMap;
 	}
 
+	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> delSeriesCourse(String series_id) {
 		Integer updateCount = null;

@@ -1733,6 +1733,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
     	Map<String,String> values = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
+
     	long course_num = 0;
     	try{
     		course_num = Long.parseLong(values.get("course_num").toString());
@@ -1740,8 +1741,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
     		course_num = 0;
     	}
     	Map<String,Object> result = new HashMap<String,Object>();
-    	result.put("course_num", course_num);
     	if(course_num>0){
+            result.put("course_num", course_num);
             long page_count = Long.valueOf(reqMap.get("page_count").toString());
             Map<String,Object> queryMap = new HashMap<String,Object>();
             queryMap.put("user_id", userId);
@@ -1769,9 +1770,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             userCourseIdSet = jedis.zrange(userCourseKey, startIndex, endIndex);
-            ArrayList<String> transfer = new ArrayList<>(userCourseIdSet);
-            Collections.reverse(transfer);
+            ArrayList<String> transfer = new ArrayList<>();
             List<Map<String,String>> courseList = new ArrayList<>();
+            for(String course_id : userCourseIdSet){
+                transfer.add(course_id);
+            }
+            Collections.reverse(transfer);
             for(String course_id : transfer){
                 queryMap.clear();
                 queryMap.put("course_id",course_id);
@@ -1779,8 +1783,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, courseMap);
                 courseMap.put("nick_name", jedis.hget(key, "nick_name"));
                 courseList.add(courseMap);
+                result.put("course_list",courseList);
             }
-            result.put("course_list",courseList);
+            result.put("course_number",courseList.size());
     	}
     	return result;
     }
@@ -2735,7 +2740,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
             userSeriesIdSet = jedis.zrange(userSeriesListKey, startIndex, endIndex);
-            ArrayList<String> transfer = new ArrayList<>(userSeriesIdSet);
+            ArrayList<String> transfer = new ArrayList<>();
+            for(String courseid : userSeriesIdSet){
+                transfer.add(courseid);
+            }
             Collections.reverse(transfer);
             result.put("series_list", seriesList(transfer ,jedis));
         }
