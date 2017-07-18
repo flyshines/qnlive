@@ -1751,25 +1751,26 @@ public class UserServerImpl extends AbstractQNLiveServer {
             long startIndex = 0;//坐标起始位
             long endIndex = -1;//坐标结束位
             String userCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES,queryMap);
-            long endSeriesCourseSum = jedis.zcard(userCourseKey);
-	    	if(MiscUtils.isEmpty(reqMap.get("course_id"))){
-                endIndex = -1;
-                startIndex = endSeriesCourseSum - page_count;
-                if(startIndex < 0){
-                    startIndex = 0;
-                }
-            }else{
-                String course_id = reqMap.get("course_id").toString();
-                long endRank = jedis.zrank(userCourseKey, course_id);
-                endIndex = endRank - 1;
-                if(endIndex >= 0){
-                    startIndex = endIndex - page_count + 1;
-                    if(startIndex < 0){
-                        startIndex = 0;
-                    }
-                }
-            }
+//            long endSeriesCourseSum = jedis.zcard(userCourseKey);
+//	    	if(MiscUtils.isEmpty(reqMap.get("course_id"))){
+//                endIndex = -1;
+//                startIndex = endSeriesCourseSum - page_count;
+//                if(startIndex < 0){
+//                    startIndex = 0;
+//                }
+//            }else{
+//                String course_id = reqMap.get("course_id").toString();
+//                long endRank = jedis.zrank(userCourseKey, course_id);
+//                endIndex = endRank - 1;
+//                if(endIndex >= 0){
+//                    startIndex = endIndex - page_count + 1;
+//                    if(startIndex < 0){
+//                        startIndex = 0;
+//                    }
+//                }
+//            }
             userCourseIdSet = jedis.zrange(userCourseKey, startIndex, endIndex);
+
             ArrayList<String> transfer = new ArrayList<>();
             List<Map<String,String>> courseList = new ArrayList<>();
             for(String course_id : userCourseIdSet){
