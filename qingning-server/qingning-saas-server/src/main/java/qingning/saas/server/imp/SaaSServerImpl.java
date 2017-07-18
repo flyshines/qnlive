@@ -731,7 +731,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
-        log.error("saas_店铺-系列-添加课程>>>>数据库插入子课程成功");
+        log.info("saas_店铺-系列-添加课程>>>>数据库插入子课程成功");
 
         /*
          * 更新缓存中系列已经上架的子课zset
@@ -744,7 +744,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         /*
          * 缓存加入讲师创建的课程
          */
-        jedis.zadd(Constants.CACHED_KEY_COURSE_SAAS, now.getTime(),reqMap.get("course_id").toString());
+        String readLecturerSaasCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS, seriesInfoMap);
+        jedis.zadd(readLecturerSaasCourseKey, now.getTime(),courseId);
         
         /*
          * 更新系列课已更新课程数量（数据库、缓存）
@@ -752,7 +753,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> updateSeriesMap = new HashMap<>();
         updateSeriesMap.put("series_id", seriesId);
         updateSeriesMap.put("course_num", 
-        		Integer.parseInt(seriesInfoMap.get("course_num")) + 1);	//已更新的课程数量，传1用于sql执行+1操作
+        		Integer.parseInt(seriesInfoMap.get("course_num")) + 1);	//已更新的课程数量执行+1操作
         updateSeriesMap.put("update_course_time", now);
         saaSModuleServer.updateSeriesByMap(updateSeriesMap);
         //更新缓存中系列的详情
@@ -769,12 +770,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
             jedis.zadd(lecturerSeriesUpKey, seriesScore, seriesId);
         }
-
-        //更新系列上架课程缓存
-        Map<String,Object> query = new HashMap<>();
-        query.put("series_id",seriesId);
-        String upSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, query);
-        jedis.zadd(upSeriesKey,now.getTime(),courseId);
     }
 
     /**
@@ -2066,6 +2061,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //query.put("profit_type","2");
 
         Map<String,Object> records = saaSModuleServer.getOrdersList(query);
+
+        resultMap.put("total_count",records.get("total_count"));
+        resultMap.put("total_page",records.get("total_page"));
+
         List<Map<String,Object>> list = (List<Map<String,Object>>)records.get("list");
 
         if(list!=null&&!list.isEmpty()){
