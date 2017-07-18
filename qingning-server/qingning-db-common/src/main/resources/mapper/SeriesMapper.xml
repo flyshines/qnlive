@@ -188,9 +188,7 @@
 	<update id="increaseSeriesCourse" parameterType="hashmap" >
 		update t_series
 		set
-		course_num = course_num + 1
-		,
-		update_course_time = #{update_course_time}
+		course_num = course_num + 1,update_course_time = #{update_course_time}
 		where series_id = #{series_id}
 	</update>
 	<update id="delSeriesCourse" parameterType="hashmap" >

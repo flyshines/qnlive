@@ -352,14 +352,14 @@ public class UserController extends AbstractController{
 	@RequestMapping(value="/user/course/list",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity  getStudyCourseList(
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
-			@RequestParam(value = "course_id", defaultValue = "") String course_id,
+			@RequestParam(value = "record_time", defaultValue = "") String record_time,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("UserServer", "studyCourses", access_token, version,appName);
 		Map<String, Object> parMap = new HashMap<>();
 		parMap.put("page_count", page_count);
-		parMap.put("course_id", course_id);
+		parMap.put("record_time", record_time);
 		requestEntity.setParam(parMap);
 		return this.process(requestEntity, serviceManger, message);
 	}
