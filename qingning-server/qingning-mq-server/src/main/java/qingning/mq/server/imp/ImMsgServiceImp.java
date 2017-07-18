@@ -66,23 +66,25 @@ public class ImMsgServiceImp implements ImMsgService {
 	
 	@Override
 	public void process(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
-		Map<String,Object> body = imMessage.getBody();
-		String msgType = body.get("msg_type").toString();
-		String appName = body.get("app_name").toString();
-		if(appName == null || appName.equals("")){
-			appName = Constants.HEADER_APP_NAME;
+    	try{
+			Map<String,Object> body = imMessage.getBody();
+			String msgType = body.get("msg_type").toString();
+			String appName = body.get("app_name").toString();
+			if(appName == null || appName.equals("")){
+				appName = Constants.HEADER_APP_NAME;
+			}
+			switch (msgType){
+				case "1"://存储聊天消息
+					processSaveCourseMessages(imMessage, jedisUtils, context,appName);
+					break;
+				case "2"://禁言
+					processCourseBanUser(imMessage, jedisUtils, context,appName);
+					break;
+			}
+		}catch(Exception e){
+			log.error(e.toString());
 		}
-		switch (msgType){
-			case "1"://存储聊天消息
-				processSaveCourseMessages(imMessage, jedisUtils, context,appName);
-				break;
-			case "2"://禁言
-				processCourseBanUser(imMessage, jedisUtils, context,appName);
-				break;
-//			case "3"://讲师讲课音频
-//				processCourseAudio(imMessage, jedisUtils, context);
-//				break;
-		}
+
 	}
 
 

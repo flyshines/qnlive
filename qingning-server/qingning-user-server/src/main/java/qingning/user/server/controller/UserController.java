@@ -351,7 +351,7 @@ public class UserController extends AbstractController{
 	 */
 	@RequestMapping(value="/user/course/list",method=RequestMethod.GET)
 	public @ResponseBody ResponseEntity  getStudyCourseList(
-			@RequestParam(value = " page_count", defaultValue = "20") String page_count,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestParam(value = "course_id", defaultValue = "") String course_id,
 			@RequestHeader("access_token") String access_token,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
