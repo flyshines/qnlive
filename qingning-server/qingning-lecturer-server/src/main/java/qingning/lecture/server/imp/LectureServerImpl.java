@@ -414,9 +414,15 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
         long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
         Set<String> aLong = jedis.zrangeByScore(lecturerCoursesAllKey, start, end);
-        if(aLong.size()!=0){
-            throw new QNLiveException("100029");
+        for(String course_id : aLong){
+            Map<String,Object> map = new HashMap<>();
+            map.put("course_id",course_id);
+            Map<String, String> course = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+            if(course.get("status").equals("1")){
+                throw new QNLiveException("100029");
+            }
         }
+
         reqMap.put("user_id", userId);
 
 
