@@ -470,14 +470,14 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
             map.remove("distributer_id");
 
             //商品类型（1:小圈子，2:系列，3:单品，4:打赏）
-            if (!"0".equals(map.get("share_amount").toString())) {
-                map.put("goods_type", "4");
+            if ("1".equals(map.get("profit_type").toString())) {
+                map.put("goods_type", "1");
             } else if ("2".equals(map.get("profit_type").toString())) {
                 //系列课程
                 map.put("goods_type", "2");
             } else {
                 //单品
-                map.put("goods_type", "3");
+                map.put("goods_type", "0");
             }
         }
         Map<String, Object> res = new HashMap<>();

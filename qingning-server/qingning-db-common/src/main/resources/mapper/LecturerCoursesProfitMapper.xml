@@ -290,10 +290,14 @@
       t.profit_amount,
       t.create_time,
       se.series_title as goods_name,
-      se.series_price AS price
+      se.series_price AS price,
+      u.nick_name,
+      u.avatar_address as user_avatar
     FROM
     t_lecturer_courses_profit t
     LEFT JOIN t_series se ON se.series_id = t.course_id
+    LEFT JOIN t_user u ON u.user_id = t.user_id
+
     WHERE
     1=1
     and t.lecturer_id = #{lecturer_id}
@@ -322,7 +326,9 @@
       IFNULL(
       se.series_title,
       co.course_title
-      ) AS goods_name
+      ) AS goods_name,
+      u.nick_name,
+      u.avatar_address as user_avatar
     FROM
     t_lecturer_courses_profit t
     LEFT JOIN t_series se ON se.series_id = t.course_id
