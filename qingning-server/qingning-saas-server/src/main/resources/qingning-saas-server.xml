@@ -414,7 +414,7 @@
 				<inputs>
 					<param name="page_num" type="long" require="N"/>
 					<param name="page_size" type="long" require="N"/>
-					<param name="status" type="string" require="N"/>
+					<param name="course_updown" type="string" require="N"/>
 					<param name="type" type="string" require="N"/>
 					<param name="keyword" type="string" require="N"/>
 				</inputs>
