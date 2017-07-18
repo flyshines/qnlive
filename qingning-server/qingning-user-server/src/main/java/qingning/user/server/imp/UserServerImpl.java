@@ -842,6 +842,15 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //5.将学员信息插入到学员参与表中
         courseInfoMap.put("user_id",userId);
         courseInfoMap.put("value_from",query_type);
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD,  courseInfoMap.get("lecturer_id"));
+        String lecturerRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+
+        Map<String,String> liveRoomsMap = jedis.hgetAll(lecturerRoomKey);
+
+        for(String roomId :liveRoomsMap.keySet()){
+            courseInfoMap.put("room_id",roomId);
+            break;
+        }
         userModuleServer.joinCourse(courseInfoMap);
 
         if(query_type.equals("0")){
