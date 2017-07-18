@@ -301,36 +301,36 @@ public class ImMsgServiceImp implements ImMsgService {
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
 		String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
 		jedis.hmset(messageKey, stringMap);
-		if("6".equals(information.get("send_type"))){//结束消息
-			//1.7如果存在课程聊天信息
-            RequestEntity messageRequestEntity = new RequestEntity();
-            Map<String,Object> processMap = new HashMap<>();
-            processMap.put("course_id", (String)information.get("course_id"));
-            messageRequestEntity.setParam(processMap);
-			messageRequestEntity.setAppName(appName);
-            try {
-            	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
-
-            	if(saveCourseMessageService != null){
-            		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
-            	}
-            } catch (Exception e) {
-            	log.error("SaveCourseMessageService["+information.get("course_id")+"] error:"+e.getMessage());
-            }
-
-            //1.8如果存在课程音频信息
-//            RequestEntity audioRequestEntity = new RequestEntity();
-//            audioRequestEntity.setParam(processMap);
+//		if("6".equals(information.get("send_type"))){//结束消息
+//			//1.7如果存在课程聊天信息
+//            RequestEntity messageRequestEntity = new RequestEntity();
+//            Map<String,Object> processMap = new HashMap<>();
+//            processMap.put("course_id", (String)information.get("course_id"));
+//            messageRequestEntity.setParam(processMap);
 //			messageRequestEntity.setAppName(appName);
 //            try {
-//            	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
-//            	if(saveCourseAudioService!=null){
-//            		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
+//            	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
+//
+//            	if(saveCourseMessageService != null){
+//            		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
 //            	}
 //            } catch (Exception e) {
-//            	log.error("save SaveCourseAudioService["+information.get("course_id")+"] error:"+e.getMessage());
+//            	log.error("SaveCourseMessageService["+information.get("course_id")+"] error:"+e.getMessage());
 //            }
-		}
+//
+//            //1.8如果存在课程音频信息
+////            RequestEntity audioRequestEntity = new RequestEntity();
+////            audioRequestEntity.setParam(processMap);
+////			messageRequestEntity.setAppName(appName);
+////            try {
+////            	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
+////            	if(saveCourseAudioService!=null){
+////            		saveCourseAudioService.process(audioRequestEntity, jedisUtils, null);
+////            	}
+////            } catch (Exception e) {
+////            	log.error("save SaveCourseAudioService["+information.get("course_id")+"] error:"+e.getMessage());
+////            }
+//		}
 	}
 
 
