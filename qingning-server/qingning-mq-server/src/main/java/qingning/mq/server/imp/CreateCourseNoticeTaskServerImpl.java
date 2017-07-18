@@ -1,5 +1,7 @@
 package qingning.mq.server.imp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.Constants;
@@ -21,7 +23,7 @@ import java.util.Set;
 
 
 public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
-
+	private static Logger log = LoggerFactory.getLogger(CreateCourseNoticeTaskServerImpl.class);
 	private CoursesMapper coursesMapper;
 	private MessagePushServerImpl messagePushServerImpl;
 	@Override
@@ -84,29 +86,36 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 				RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStartCancelAll", map);
 				requestEntity.setAppName(appName);
 				//清除所有定时任务
+				log.debug("清除所有定时任务:"+courseId);
 				messagePushServerImpl.processCourseNotStartCancelAll(requestEntity, jedisUtils, context);
 
 				//提前60分钟开课提醒
+				log.debug("提前60分钟开课提醒:"+courseId);
 				requestEntity.setFunctionName("processCourseStartShortNotice");
 				messagePushServerImpl.processCourseStartShortNotice(requestEntity, jedisUtils, context);
 
 				//课程开课提醒
+				log.debug("课程开课提醒:"+courseId);
 				requestEntity.setFunctionName("processCourseStartIM");
 				messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
 
 				//讲师未出现提醒
+				log.debug("讲师未出现提醒:"+courseId);
 				requestEntity.setFunctionName("processCourseStartLecturerNotShow");
 				messagePushServerImpl.processCourseStartLecturerNotShow(requestEntity, jedisUtils, context);
 
 				//课程超时提醒
+				log.debug("课程超时提醒:"+courseId);
 				requestEntity.setFunctionName("processLiveCourseOvertimeNotice");
 				messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 
 				//课程超时强制结束
+				log.debug("课程超时强制结束:"+courseId);
 				requestEntity.setFunctionName("processCourseLiveOvertime");
 				messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
 				if((date-currentDate)/(1000*60*60*24) == 1){
 					//24小时提醒
+					log.debug("24小时提醒:"+courseId);
 					RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);
 					messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
 				}
