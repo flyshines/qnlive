@@ -359,7 +359,7 @@
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
-					<param name="record_time" type="date"/>
+					<param name="record_time" type="string"/>
 				</inputs>
 				<outputs>
 					<param name="course_num" type="long"/>
