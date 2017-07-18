@@ -1772,7 +1772,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             ArrayList<String> transfer = new ArrayList<>(userCourseIdSet);
             Collections.reverse(transfer);
             List<Map<String,String>> courseList = new ArrayList<>();
-            for(String course_id : userCourseIdSet){
+            for(String course_id : transfer){
                 queryMap.clear();
                 queryMap.put("course_id",course_id);
                 Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
