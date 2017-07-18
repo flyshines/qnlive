@@ -176,8 +176,8 @@ public class MessagePushServerImpl extends AbstractMsgService {
             long realStartTime = MiscUtils.convertObjectToLong(reqMap.get("real_start_time"));//真实开课时间
             log.debug("---------------課程开课時間"+realStartTime);
             //6个小时 超时结束
-           // long taskStartTime = 6*60*60*1000 + realStartTime;//加过6个小时的时间
-            long taskStartTime = 10*60*1000 + realStartTime;
+            long taskStartTime = 6L*60L*60L*1000L + realStartTime;//加过6个小时的时间
+            //long taskStartTime = 10*60*1000 + realStartTime;
             log.debug("--------------超时任务处理时间6小时,当前时间:"+System.currentTimeMillis()+"执行时间:"+taskStartTime);
             if(System.currentTimeMillis() - taskStartTime > 0){
                 log.debug("课程已超时强制结束 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
@@ -223,7 +223,7 @@ public class MessagePushServerImpl extends AbstractMsgService {
             long start_time = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
 
             //24小时 课程开始24小时时推送提示
-            long noticeTime= 24*60*60*1000;
+            long noticeTime= 24L*60L*60L*1000L;
             //long noticeTime= 30*60*1000;
             long taskStartTime = start_time - noticeTime;
             if(taskStartTime>0){
