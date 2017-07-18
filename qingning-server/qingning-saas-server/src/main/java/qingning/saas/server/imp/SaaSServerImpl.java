@@ -2066,6 +2066,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //query.put("profit_type","2");
 
         Map<String,Object> records = saaSModuleServer.getOrdersList(query);
+
+        resultMap.put("total_count",records.get("total_count"));
+        resultMap.put("total_page",records.get("total_page"));
+
         List<Map<String,Object>> list = (List<Map<String,Object>>)records.get("list");
 
         if(list!=null&&!list.isEmpty()){
