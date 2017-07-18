@@ -53,7 +53,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             Map<String, Response<String>> titleMap = new HashMap<>();
             Map<String, Response<String>> positionMap = new HashMap<>();
             Map<String, Response<String>> IMCourseIdMap = new HashMap<>();
-			Map<String, Response<String>> realStartTimeMap = new HashMap<String, Response<String>>();
+
             for(Tuple tuple : predictionCourseIdList){
             	String courseId = tuple.getElement();
 				map.clear();
@@ -63,18 +63,16 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 				titleMap.put(courseId, pipeline.hget(courseKey, "course_title"));
 				positionMap.put(courseId, pipeline.hget(courseKey, "position"));
 				IMCourseIdMap.put(courseId, pipeline.hget(courseKey, "im_course_id"));
-//				realStartTimeMap.put(courseId, pipeline.hget(courseKey, "real_start_time"));
             }
             pipeline.sync();
             long currentTime = System.currentTimeMillis();
             long currentDate = MiscUtils.getDate(currentTime);
             for(String courseId : timeMap.keySet()){
-            	long time = Long.parseLong(timeMap.get(courseId).get());
+            	long time = Long.parseLong(timeMap.get(courseId).get());//课程开始时间
             	long date = MiscUtils.getDate(time);
             	String course_title =MiscUtils.convertString(titleMap.get(courseId).get());
             	long position = MiscUtils.convertObjectToLong(positionMap.get(courseId).get());
 				String im_course_id = IMCourseIdMap.get(courseId).get();
-//				long realStartTime = MiscUtils.convertObjectToLong(realStartTimeMap.get(courseId).get());
             	map.clear();
             	map.put("course_id", courseId);
             	map.put("start_time", new Date(time));
@@ -82,75 +80,36 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	map.put("course_title", course_title);
             	map.put("position", position);
             	map.put("im_course_id", im_course_id);
-            	if(time>0){
-            		map.put("real_start_time", time);
-            	}
-            	boolean isTheSameDate = MiscUtils.isTheSameDate(new Date(time), new Date());
-            	if(time<=currentTime || isTheSameDate){//开课时间小于当前时间或者是今天
-                    RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStartCancelAll", map);
-					requestEntity.setAppName(appName);
-                    if(time>0){
+				map.put("real_start_time", time);
+				RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStartCancelAll", map);
+				requestEntity.setAppName(appName);
+				//清除所有定时任务
+				messagePushServerImpl.processCourseNotStartCancelAll(requestEntity, jedisUtils, context);
 
-						//清除所有定时任务
-                    	messagePushServerImpl.processCourseNotStartCancelAll(requestEntity, jedisUtils, context);
+				//提前60分钟开课提醒
+				requestEntity.setFunctionName("processCourseStartShortNotice");
+				messagePushServerImpl.processCourseStartShortNotice(requestEntity, jedisUtils, context);
 
-						//提前60分钟开课提醒
-						requestEntity.setFunctionName("processCourseStartShortNotice");
-						messagePushServerImpl.processCourseStartShortNotice(requestEntity, jedisUtils, context);
+				//课程开课提醒
+				requestEntity.setFunctionName("processCourseStartIM");
+				messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
 
-						//课程开课提醒
-						requestEntity.setFunctionName("processCourseStartIM");
-						messagePushServerImpl.processCourseStartIM(requestEntity,jedisUtils,context);
+				//讲师未出现提醒
+				requestEntity.setFunctionName("processCourseStartLecturerNotShow");
+				messagePushServerImpl.processCourseStartLecturerNotShow(requestEntity, jedisUtils, context);
 
-						//讲师未出现提醒
-						requestEntity.setFunctionName("processCourseStartLecturerNotShow");
-						messagePushServerImpl.processCourseStartLecturerNotShow(requestEntity, jedisUtils, context);
+				//课程超时提醒
+				requestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+				messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
 
-						//课程超时提醒
-						requestEntity.setFunctionName("processLiveCourseOvertimeNotice");
-						messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntity, jedisUtils, context);
-
-						//课程超时强制结束
-						requestEntity.setFunctionName("processCourseLiveOvertime");
-                    	messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
-                    }
-            	}
-            	if(time>currentTime){//开课时间大于当前时间
-	            	if(isTheSameDate){
-	                    RequestEntity requestEntityTask = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED,"processCourseStartShortNotice",map);
-						requestEntityTask.setAppName(appName);
-
-						//清除所有定时任务
-						messagePushServerImpl.processCourseNotStartCancelAll(requestEntityTask, jedisUtils, context);
-
-	                     //提前60分钟开课提醒
-						requestEntityTask.setFunctionName("processCourseStartShortNotice");
-	                    messagePushServerImpl.processCourseStartShortNotice(requestEntityTask, jedisUtils, context);
-
-						//课程开课提醒
-						requestEntityTask.setFunctionName("processCourseStartIM");
-						messagePushServerImpl.processCourseStartIM(requestEntityTask,jedisUtils,context);
-
-	                    //讲师未出现提醒
-	                    requestEntityTask.setFunctionName("processCourseStartLecturerNotShow");
-	                    messagePushServerImpl.processCourseStartLecturerNotShow(requestEntityTask, jedisUtils, context);
-
-
-						//课程超时提醒
-						requestEntityTask.setFunctionName("processLiveCourseOvertimeNotice");
-						messagePushServerImpl.processLiveCourseOvertimeNotice(requestEntityTask, jedisUtils, context);
-
-
-						//课程超时强制结束
-						requestEntityTask.setFunctionName("processCourseLiveOvertime");
-						messagePushServerImpl.processCourseLiveOvertime(requestEntityTask, jedisUtils, context);
-
-	            	} else if((date-currentDate)/(1000*60*60*24) == 1){
-	            		//24小时提醒
-	                    RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);                   
-	                    messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
-	            	}
-            	}
+				//课程超时强制结束
+				requestEntity.setFunctionName("processCourseLiveOvertime");
+				messagePushServerImpl.processCourseLiveOvertime(requestEntity, jedisUtils, context);
+				if((date-currentDate)/(1000*60*60*24) == 1){
+					//24小时提醒
+					RequestEntity requestEntityTask =  generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseStartLongNotice", map);
+					messagePushServerImpl.processCourseStartLongNotice(requestEntityTask, jedisUtils, context);
+				}
             }
     	}
     }

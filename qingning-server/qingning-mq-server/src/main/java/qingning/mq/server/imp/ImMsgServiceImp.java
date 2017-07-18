@@ -82,7 +82,8 @@ public class ImMsgServiceImp implements ImMsgService {
 					break;
 			}
 		}catch(Exception e){
-			log.error(e.toString());
+			log.error(e.toString()+"==============================" +
+					JSON.toJSONString(imMessage));
 		}
 
 	}
