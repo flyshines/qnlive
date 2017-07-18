@@ -395,7 +395,7 @@
   </select>
 
 
-  <select id="findCourseBySeriesId" parameterType="hashmap" resultType="java.lang.String">
+  <select id="findCourseListBySeriesId" parameterType="hashmap" resultType="java.lang.String">
     SELECT * WHERE t.series_id = #{series_id}
   </select>
 

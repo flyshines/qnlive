@@ -980,7 +980,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 修改课程 删除课程
+     * 修改课程
      * @param reqEntity
      * @return
      * @throws Exception
