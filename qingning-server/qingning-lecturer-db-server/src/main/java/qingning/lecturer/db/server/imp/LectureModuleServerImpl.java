@@ -686,7 +686,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return dbResultMap;
 	}
 
-	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> increaseSeriesCourse(String series_id) {
         Integer updateCount = null;
@@ -702,7 +701,6 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		return dbResultMap;
 	}
 
-	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> delSeriesCourse(String series_id) {
 		Integer updateCount = null;

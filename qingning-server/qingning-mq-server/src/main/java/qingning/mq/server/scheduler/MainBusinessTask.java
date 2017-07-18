@@ -143,9 +143,6 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			classIfyCourseServerImpl.setCoursesMapper(coursesMapper);
 			classIfyCourseServerImpl.setClassifyInfoMapper(classifyInfoMapper);
 			list.add(classIfyCourseServerImpl);
-
-
-
 			clearMessageLock();
 		}
 	}
