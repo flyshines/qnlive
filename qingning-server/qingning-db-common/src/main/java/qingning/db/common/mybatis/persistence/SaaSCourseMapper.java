@@ -42,4 +42,7 @@ public interface SaaSCourseMapper {
 
 
     void updateCourseCmountByCourseId(Map<String, Object> course);
+
+    List<Map<String,Object>> findCourseListBySeriesId(String series_id);
+
 }

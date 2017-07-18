@@ -129,6 +129,7 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 			SeriesCourseServerImpl seriesCourseServerImpl = new SeriesCourseServerImpl();
 			seriesCourseServerImpl.setCoursesMapper(coursesMapper);
 			seriesCourseServerImpl.setSeriesMapper(seriesMapper);
+			seriesCourseServerImpl.setSaaSCourseMapper(saaSCourseMapper);
 			list.add(seriesCourseServerImpl);
 
 

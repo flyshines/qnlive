@@ -10,6 +10,7 @@ import qingning.common.util.JedisUtils;
 import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.ClassifyInfoMapper;
 import qingning.db.common.mybatis.persistence.CoursesMapper;
+import qingning.db.common.mybatis.persistence.SaaSCourseMapper;
 import qingning.db.common.mybatis.persistence.SeriesMapper;
 import qingning.server.AbstractMsgService;
 import qingning.server.JedisBatchCallback;
@@ -31,6 +32,8 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
     private static Logger log = LoggerFactory.getLogger(SeriesCourseServerImpl.class);
     private CoursesMapper coursesMapper;
     private SeriesMapper seriesMapper;
+    private SaaSCourseMapper saaSCourseMapper;
+
     @Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
         processSeriesCourseCache(requestEntity, jedisUtils, context);
@@ -76,7 +79,13 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                         String seriesCourseDownKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
                         jedis.del(seriesCourseDownKey);
                         jedis.del(seriesCourseUpKey);
-                        List<Map<String, Object>> seriesCourseList = coursesMapper.findCourseListBySeriesId(series_id);
+                        List<Map<String, Object>> seriesCourseList = null;
+                        if(series.get("series_course_type").toString().equals("0")){
+                            seriesCourseList = coursesMapper.findCourseListBySeriesId(series_id);
+                        }else{
+                            seriesCourseList = saaSCourseMapper.findCourseListBySeriesId(series_id);
+                        }
+
                         for(Map<String, Object> course : seriesCourseList){
                             long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
                             if(course.get("series_course_updown").toString().equals("1")){
@@ -84,6 +93,8 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                             }else{
                                 jedis.zadd(seriesCourseDownKey, update_time,course.get("course_id").toString());
                             }
+
+
                         }
                         Long course_num = jedis.zcard(seriesCourseUpKey);
                         map.put("course_num",course_num);
@@ -119,5 +130,13 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
 
     public void setSeriesMapper(SeriesMapper seriesMapper) {
         this.seriesMapper = seriesMapper;
+    }
+
+    public SaaSCourseMapper getSaaSCourseMapper() {
+        return saaSCourseMapper;
+    }
+
+    public void setSaaSCourseMapper(SaaSCourseMapper saaSCourseMapper) {
+        this.saaSCourseMapper = saaSCourseMapper;
     }
 }

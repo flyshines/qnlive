@@ -393,6 +393,13 @@
     t.create_time DESC
 
   </select>
+
+
+  <select id="findCourseBySeriesId" parameterType="hashmap" resultType="java.lang.String">
+    SELECT * WHERE t.series_id = #{series_id}
+  </select>
+
+
   <!--更新课程打赏收益-->
   <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
     update t_saas_course
