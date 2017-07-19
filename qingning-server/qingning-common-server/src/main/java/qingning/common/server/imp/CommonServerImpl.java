@@ -753,7 +753,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
 
         Map<String, Object> queryMap = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
+        queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
         String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryMap);
         if(jedis.exists(lectureLiveRoomKey)){
             Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
@@ -763,7 +763,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     roomId = id;
                 }
             }
-            resultMap.put("roomId", roomId);
+            resultMap.put("room_id", roomId);
         }
         //</editor-fold>
         String shop_id = "";
