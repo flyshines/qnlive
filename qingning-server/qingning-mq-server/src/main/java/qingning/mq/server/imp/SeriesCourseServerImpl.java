@@ -93,8 +93,6 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
                             }else{
                                 jedis.zadd(seriesCourseDownKey, update_time,course.get("course_id").toString());
                             }
-
-
                         }
                         Long course_num = jedis.zcard(seriesCourseUpKey);
                         map.put("course_num",course_num);

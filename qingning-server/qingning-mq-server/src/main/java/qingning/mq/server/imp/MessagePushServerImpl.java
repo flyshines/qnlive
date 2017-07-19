@@ -180,24 +180,22 @@ public class MessagePushServerImpl extends AbstractMsgService {
             //long taskStartTime = 10*60*1000 + realStartTime;
             log.debug("--------------超时任务处理时间6小时,当前时间:"+System.currentTimeMillis()+"执行时间:"+taskStartTime);
             if(System.currentTimeMillis() - taskStartTime > 0){
-                log.debug("课程已超时强制结束 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
-               // processCourseEnd(coursesMapper,"2",courseId,jedis,appName);
-                processSaveCourseImg(courseId,jedisUtils,appName);
-            }else{
-                ScheduleTask scheduleTask = new ScheduleTask(){
-                    @Override
-                    public void process() {
-                        log.debug("课程直播超时处理定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
-                        //processCourseEnd(coursesMapper,"2",courseId,jedis,appName);
-                        processSaveCourseImg(courseId,jedisUtils,appName);
-                    }
-                };
-                scheduleTask.setId(courseId);
-                scheduleTask.setCourseId(courseId);
-                scheduleTask.setStartTime(taskStartTime);
-                scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
-                qnSchedule.add(scheduleTask);
+                taskStartTime=System.currentTimeMillis()+10L*60L*1000L;
             }
+            ScheduleTask scheduleTask = new ScheduleTask(){
+                @Override
+                public void process() {
+                    log.debug("课程直播超时处理定时任务 课程id"+courseId+"  执行时间"+System.currentTimeMillis());
+                    //processCourseEnd(coursesMapper,"2",courseId,jedis,appName);
+                    processSaveCourseImg(courseId,jedisUtils,appName);
+                }
+            };
+            scheduleTask.setId(courseId);
+            scheduleTask.setCourseId(courseId);
+            scheduleTask.setStartTime(taskStartTime);
+            scheduleTask.setTaskName(QNSchedule.TASK_END_COURSE);
+            qnSchedule.add(scheduleTask);
+
         }catch(Exception e){
             log.error("超时强制结束定时任务出现异常");
         }
