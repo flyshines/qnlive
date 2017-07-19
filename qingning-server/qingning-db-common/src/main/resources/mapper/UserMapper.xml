@@ -80,6 +80,9 @@
       <if test="plateform != null" >
         plateform,
       </if>
+      <if test="user_role != null" >
+        user_role,
+      </if>
       <if test="create_time != null" >
         create_time,
       </if>
@@ -138,6 +141,9 @@
       </if>
       <if test="plateform != null" >
         #{plateform},
+      </if>
+      <if test="user_role != null" >
+        #{user_role},
       </if>
       <if test="last_login_time != null" >
         #{last_login_time},
