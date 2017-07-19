@@ -1093,6 +1093,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public List<Map<String, Object>> findCourseListBySeriesId(String series_id) {
 		return coursesMapper.findCourseListBySeriesId(series_id);
 	}
+	@Override
+	public List<Map<String, Object>> findSaasCourseListBySeriesId(String series_id) {
+		return saaSCourseMapper.findCourseListBySeriesId(series_id);
+	}
 
 	@Override
 	public void updateSeries(Map<String, Object> map) {

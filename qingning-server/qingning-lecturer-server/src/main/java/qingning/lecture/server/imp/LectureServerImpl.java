@@ -3649,7 +3649,63 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     }
 
 
+    /**
+     * 获取讲师单个课程
+     *
+     *  1、显示当天内将要开始的直播
+     2、如果直播已经开始，而接下去没有其他直播，那么就一直显示这个直播，知道直播结束
+     3、如果上一个直播已经开始，有下一个直播，那么在下一个直播的前30分钟，开始显示下一个直播
+     4、如果当前没有直播，并且今天接下来的时间也没有直播，那么就显示空状态“今天暂无直播，您可以点击上面“新增课程”，以创建直播和系列”
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("getSingleLecturerLiveCourse")
+    public Map<String, Object> getSingleLecturerLiveCourse(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String user_id =  AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String lecturer_id = reqMap.get("lecturer_id").toString();//分类id
+        Map<String,Object> map = new HashMap<>();
+        map.put("lecturer_id",lecturer_id);
+        String lecturerPredictionCourseListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//讲师预告和直播课程list key
 
+        String startIndex ;//坐标起始位
+        String endIndex ;//坐标结束位
+        Long now = System.currentTimeMillis();
+
+        long courseScoreByRedis = MiscUtils.convertInfoToPostion( now,0L);
+        startIndex =courseScoreByRedis+"";//设置结束位置
+        endIndex = "-inf";//设置起始位置 '(' 是要求大于这个参数
+        Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
+
+        startIndex ="("+courseScoreByRedis;//设置结束位置
+        endIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
+        Set<String> previewCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
+
+        if(!MiscUtils.isEmpty(previewCourseIdSet)){
+            String courseId = "";
+            for(String course_id : previewCourseIdSet){
+                courseId = course_id;
+            }
+            map.clear();
+            map.put("course_id",courseId);
+            Map<String, String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+            Long start_time = Long.valueOf(courseMap.get("start_time"));
+            int min30 = 30 * 60 * 1000;
+            if( start_time<(now - min30)){
+
+            }
+
+        }else if(!MiscUtils.isEmpty(liveCourseIdSet)){
+
+
+        }
+
+
+
+        Map<String, Object> resultMap = lectureModuleServer.updateSeries(reqMap);
+        return resultMap ;
+    }
 
 
 }
