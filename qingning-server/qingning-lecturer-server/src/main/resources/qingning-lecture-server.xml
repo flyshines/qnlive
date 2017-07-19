@@ -870,9 +870,30 @@
 					</param>
 				</outputs>
 			</function>
-			
-			
-			
+
+			<function name="getSingleLecturerLiveCourse">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="lecturer_id" type="string"  require="Y,000100" />
+				</inputs>
+				<outputs>
+					<param name="room_id" type="string" />
+					<param name="course_type" type="string"/>
+					<param name="status" type="string"/>
+					<param name="course_url" type="string"/>
+					<param name="course_title" type="rstring"/>
+					<param name="start_time" type="long"/>
+					<param name="student_num" type="long"/>
+					<param name="avatar_address" type="string"/>
+					<param name="update_time" type="long"/>
+					<param name="room_id" type="string"/>
+					<param name="share_url" type="string"/>
+				</outputs>
+			</function>
+
 		</default>
 
 		<version num="1.0.0" class="">

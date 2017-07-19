@@ -3441,8 +3441,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.put(Constants.CACHED_KEY_LECTURER_FIELD,courseInfo.get(Constants.CACHED_KEY_LECTURER_FIELD));
                 long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(courseInfo.get("position")));
                 //加入讲师下架课程列表
-                String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
-                jedis.zadd(lectureCourseKey, lpos, course_id);
+                if(series_course_type.equals("0")) {
+                    String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+                    jedis.zadd(lectureCourseKey, lpos, course_id);
+                }
             }
             Map<String,Object> query = new HashMap<>();
             query.put("course_id", course_id);
@@ -3545,9 +3547,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(courseMap.get("end_time")) , MiscUtils.convertObjectToLong(courseMap.get("position")));
             remmendList = Constants.SYS_COURSES_RECOMMEND_FINISH;
         }
+
+
         String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, courseMap);
+
         if(updown.equals("1")){//上架
-            jedis.zrem(lectureCourseKey,course_id);
+            if(reqMap.get("series_course_type").equals("0")){
+                jedis.zrem(lectureCourseKey,course_id);
+            }
             jedis.zadd(courseList, lpos, course_id);
             jedis.zadd(predictionKey, lpos, course_id);
             jedis.zadd(remmendList,Long.valueOf(courseMap.get("student_num")) +Long.valueOf(courseMap.get("extra_num")) , course_id);//热门推荐 预告
@@ -3557,11 +3564,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             jedis.zrem(predictionKey,course_id);
             jedis.zrem(remmendList,course_id);
             jedis.zrem(classifyCourseKey,course_id);
-            //加入讲师下架课程列表
-            jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(courseMap.get("position"))), course_id);
+            if(reqMap.get("series_course_type").equals("0")){
+                //加入讲师下架课程列表
+                jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(courseMap.get("position"))), course_id);
+            }
         }
         //</editor-fold>
-
         return resltMap;
     }
     
@@ -3651,7 +3659,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
     /**
      * 获取讲师单个课程
-     *
      *  1、显示当天内将要开始的直播
      2、如果直播已经开始，而接下去没有其他直播，那么就一直显示这个直播，知道直播结束
      3、如果上一个直播已经开始，有下一个直播，那么在下一个直播的前30分钟，开始显示下一个直播
@@ -3663,7 +3670,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
-        String user_id =  AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> resultMap = new HashMap<>();
         String lecturer_id = reqMap.get("lecturer_id").toString();//分类id
         Map<String,Object> map = new HashMap<>();
         map.put("lecturer_id",lecturer_id);
@@ -3671,39 +3678,45 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         String startIndex ;//坐标起始位
         String endIndex ;//坐标结束位
+        Map<String, String> courseMap = new HashMap<>();
         Long now = System.currentTimeMillis();
-
+        boolean iskey = true;
+        //直播的
         long courseScoreByRedis = MiscUtils.convertInfoToPostion( now,0L);
-        startIndex =courseScoreByRedis+"";//设置结束位置
-        endIndex = "-inf";//设置起始位置 '(' 是要求大于这个参数
-        Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
-
+        String courseId = "";
+        //预告
         startIndex ="("+courseScoreByRedis;//设置结束位置
         endIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
-        Set<String> previewCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
-
+        Set<String> previewCourseIdSet = jedis.zrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
         if(!MiscUtils.isEmpty(previewCourseIdSet)){
-            String courseId = "";
             for(String course_id : previewCourseIdSet){
                 courseId = course_id;
             }
             map.clear();
             map.put("course_id",courseId);
-            Map<String, String> courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+            courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
             Long start_time = Long.valueOf(courseMap.get("start_time"));
-            int min30 = 30 * 60 * 1000;
-            if( start_time<(now - min30)){
-
+            long min30 = 30L * 60L * 1000L;
+            if( start_time > (now - min30)){//创建时间小于 当前时间减去30分钟
+                resultMap.putAll(courseMap);
+                iskey = false;
             }
-
-        }else if(!MiscUtils.isEmpty(liveCourseIdSet)){
-
-
         }
-
-
-
-        Map<String, Object> resultMap = lectureModuleServer.updateSeries(reqMap);
+        if(iskey){
+            startIndex =courseScoreByRedis+"";//设置结束位置
+            endIndex = "-inf";//
+            Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
+            if(!MiscUtils.isEmpty(liveCourseIdSet)) {
+                for (String course_id : liveCourseIdSet) {
+                    courseId = course_id;
+                }
+                map.clear();
+                map.put("course_id", courseId);
+                courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+            }
+        }
+        MiscUtils.courseTranferState(now, courseMap);
+        resultMap.putAll(courseMap);
         return resultMap ;
     }
 

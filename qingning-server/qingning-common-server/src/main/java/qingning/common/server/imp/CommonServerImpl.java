@@ -827,8 +827,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("user_id", userId);
             resultMap.put("avatar_address", values.get("avatar_address"));
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
-            return resultMap;
         }
+        //<editor-fold desc="获取用户直播间id  / 可能没有">
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+        if(jedis.exists(lectureLiveRoomKey)){
+            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
+            String roomId = "";
+            if(roomKey!=null&&!roomKey.isEmpty()) {
+                for (String id : roomKey.keySet()) {
+                    roomId = id;
+                }
+            }
+            resultMap.put("roomId", roomId);
+        }
+        //</editor-fold>
+
+        String shop_id = "";
+        if(!MiscUtils.isEmpty(values.get("shop_id"))){
+            shop_id = values.get("shop_id");
+        }
+        resultMap.put("shop_id", shop_id);
+
         return resultMap;
     }
 
@@ -3878,68 +3899,71 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String courseId = reqMap.get("course_id").toString();
         Jedis jedis = jedisUtils.getJedis(appName);
-
         Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
         for(String lecturerId : lecturerSet) {
             Map<String, Object> map = new HashMap<>();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-            for (int i = 0; i < 4; i++) {
-                map.put("series_course_type", i);
-                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                jedis.del(upkey);
-                jedis.del(downkey);
-            }
-            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
-            for (Map<String, Object> series : seriesList) {
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                String series_id = series.get("series_id").toString();
-                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
-                map.put("series_course_type", series.get("series_course_type").toString());
-                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                if (series.get("updown").toString().equals("1")) {
-                    jedis.zadd(upkey, update_course_time, series_id);
-                } else {
-                    jedis.zadd(downkey, update_course_time, series_id);
-                }
+            map.put("lecturer_id",lecturerId);
+            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+            jedis.del(lectureCourseKey);
 
-                if (series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")) {
-                    long lpos = MiscUtils.convertInfoToPostion(update_course_time, MiscUtils.convertObjectToLong(series.get("position")));
-                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
-                }
-                map.clear();
-                map.put("series_id", series_id);
-                String seriesCourseUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
-                String seriesCourseDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
-                jedis.del(seriesCourseDownKey);
-                jedis.del(seriesCourseUpKey);
-                List<Map<String, Object>> seriesCourseList = null;
-                if (series.get("series_course_type").toString().equals("0")) {
-                    seriesCourseList = commonModuleServer.findCourseListBySeriesId(series_id);
-                } else {
-                    seriesCourseList = commonModuleServer.findSaasCourseListBySeriesId(series_id);
-                }
-
-                for (Map<String, Object> course : seriesCourseList) {
-                    long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
-                    if (course.get("series_course_updown").toString().equals("1")) {
-                        jedis.zadd(seriesCourseUpKey, update_time, course.get("course_id").toString());
-                    } else {
-                        jedis.zadd(seriesCourseDownKey, update_time, course.get("course_id").toString());
-                    }
-                }
-                Long course_num = jedis.zcard(seriesCourseUpKey);
-                map.put("course_num", course_num);
-                commonModuleServer.updateSeries(map);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
-                if (jedis.exists(seriesKey)) {
-                    jedis.hset(seriesKey, "course_num", course_num + "");
-                }
+            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+            for(Map<String, Object> course : lecturerCourseList){
+                if(course.get("course_updown").toString().equals("2")){
+                    //加入讲师下架课程列表
+                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
             }
+            }
+
+
         }
 
-
+//            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
+//            for (Map<String, Object> series : seriesList) {
+//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//                String series_id = series.get("series_id").toString();
+//                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
+//                map.put("series_course_type", series.get("series_course_type").toString());
+//                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
+//                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
+//                if (series.get("updown").toString().equals("1")) {
+//                    jedis.zadd(upkey, update_course_time, series_id);
+//                } else {
+//                    jedis.zadd(downkey, update_course_time, series_id);
+//                }
+//
+//                if (series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")) {
+//                    long lpos = MiscUtils.convertInfoToPostion(update_course_time, MiscUtils.convertObjectToLong(series.get("position")));
+//                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
+//                }
+//                map.clear();
+//                map.put("series_id", series_id);
+//                String seriesCourseUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+//                String seriesCourseDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
+//                jedis.del(seriesCourseDownKey);
+//                jedis.del(seriesCourseUpKey);
+//                List<Map<String, Object>> seriesCourseList = null;
+//                if (series.get("series_course_type").toString().equals("0")) {
+//                    seriesCourseList = commonModuleServer.findCourseListBySeriesId(series_id);
+//                } else {
+//                    seriesCourseList = commonModuleServer.findSaasCourseListBySeriesId(series_id);
+//                }
+//
+//                for (Map<String, Object> course : seriesCourseList) {
+//                    long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
+//                    if (course.get("series_course_updown").toString().equals("1")) {
+//                        jedis.zadd(seriesCourseUpKey, update_time, course.get("course_id").toString());
+//                    } else {
+//                        jedis.zadd(seriesCourseDownKey, update_time, course.get("course_id").toString());
+//                    }
+//                }
+//                Long course_num = jedis.zcard(seriesCourseUpKey);
+//                map.put("course_num", course_num);
+//                commonModuleServer.updateSeries(map);
+//                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+//                if (jedis.exists(seriesKey)) {
+//                    jedis.hset(seriesKey, "course_num", course_num + "");
+//                }
+//            }
         //<editor-fold desc="讲师系列课">
  //       Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
 
