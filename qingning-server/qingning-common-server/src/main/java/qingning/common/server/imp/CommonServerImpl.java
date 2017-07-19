@@ -341,27 +341,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 break;
         }
-        String user_id = resultMap.get("user_id").toString();
-        Map<String, Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
-        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-        if(jedis.exists(lectureLiveRoomKey)){
-            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
-            String roomId = "";
-            if(roomKey!=null&&!roomKey.isEmpty()) {
-                for (String id : roomKey.keySet()) {
-                    roomId = id;
-                }
-            }
-            resultMap.put("roomId", roomId);
-        }
-        //</editor-fold>
-        Map<String,String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, map), readUserOperation, jedis);
-        String shop_id = "";
-        if(!MiscUtils.isEmpty(userMap.get("shop_id"))){
-            shop_id = userMap.get("shop_id");
-        }
-        resultMap.put("shop_id", shop_id);
+
 
         return resultMap;
     }
@@ -765,12 +745,34 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("m_user_id", m_user_id);
         resultMap.put("user_id", user_id);
 
-        resultMap.put("avatar_address", userMap.get("avatar_address"));
-        //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
-        resultMap.put("nick_name", userMap.get("nick_name"));
+
+
+
         //注册店铺用到
         loginInfoMap.put("user_name",userMap.get("nick_name"));
         loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
+
+        Map<String, Object> queryMap = new HashMap<>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryMap);
+        if(jedis.exists(lectureLiveRoomKey)){
+            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
+            String roomId = "";
+            if(roomKey!=null&&!roomKey.isEmpty()) {
+                for (String id : roomKey.keySet()) {
+                    roomId = id;
+                }
+            }
+            resultMap.put("roomId", roomId);
+        }
+        //</editor-fold>
+        String shop_id = "";
+        if(!MiscUtils.isEmpty(userMap.get("shop_id"))){
+            shop_id = userMap.get("shop_id");
+        }
+        resultMap.put("shop_id", shop_id);
+        resultMap.put("avatar_address", userMap.get("avatar_address"));
+        resultMap.put("nick_name", userMap.get("nick_name"));
     }
 
     @SuppressWarnings("unchecked")
