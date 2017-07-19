@@ -1940,7 +1940,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap,jedis,appName));
         if(reqMap.get("png").toString().equals("Y")){
-            resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+            resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
         }
         return resultMap;
     }
@@ -1961,10 +1961,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         return resultMap;
     }
-
-
-
-
 
     @SuppressWarnings("unchecked")
     @FunctionName("getRoomInviteCard")
@@ -1991,14 +1987,79 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         long timeS1 = System.currentTimeMillis();
         logger.debug("-------------------------"+String.valueOf(timeS1));
         if(reqMap.get("png").toString().equals("Y")) {
-            resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+            resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
         }
         long timeS2 = System.currentTimeMillis();
         logger.debug("-------------------------"+String.valueOf(timeS2));
         return resultMap;
     }
 
+
+
+
+
     private String getLiveRoomShareURL(String userId, String roomId,Jedis jedis,String appName) throws Exception{
+        String share_url;
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        queryMap.put("room_id", roomId);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
+
+        boolean isDistributer = false;
+        String recommend_code = null;
+        if (! MiscUtils.isEmpty(distributerRoom)) {
+            isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
+        }
+
+        //是分销员
+        if(isDistributer == true){
+            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId+"&recommend_code="+recommend_code;
+        }else {
+            //不是分销员
+            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId;
+        }
+        return share_url;
+    }
+
+
+
+
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getShopCard")
+    public Map<String,Object> getShopCard (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        Map<String,Object> resultMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String shop_id = reqMap.get("shop_id").toString();
+        Map<String,String> shop  = CacheUtils.readShop(shop_id, reqEntity, readShopOperation,jedis);
+        resultMap.put("shop_name",MiscUtils.RecoveryEmoji(shop.get("shop_name")));
+
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", userId);
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
+        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+
+        //????????????????????????
+        resultMap.put("share_url",MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id);
+        if(reqMap.get("png").toString().equals("Y")) {
+            resultMap.put("png_url",this.CreateRqPage(null,null,shop_id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+        }
+//        long timeS2 = System.currentTimeMillis();
+//        logger.debug("-------------------------"+String.valueOf(timeS2));
+        return resultMap;
+    }
+
+
+
+
+
+    private String getShopCard(String userId, String roomId,Jedis jedis,String appName) throws Exception{
         String share_url;
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
@@ -2201,7 +2262,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     @SuppressWarnings("unchecked")
     @FunctionName("createFeedback")
-    public Map<String,Object> createFeedback (RequestEntity reqEntity) throws Exception{
+    public Map<String,Object> createFeedback (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<>();
 
@@ -2286,7 +2347,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = getCourseShareURL(userId, id, courseMap,jedis,appName);
 
                 if(reqMap.get("png").toString().equals("Y"))
-                    png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
+                    png_url = this.CreateRqPage(id,null,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
                 break;
 
             case "2":
@@ -2301,7 +2362,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = getLiveRoomShareURL(userId, id,jedis,appName);
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content",appName) + liveRoomInfoMap.get("room_name");
                 if(reqMap.get("png").toString().equals("Y"))
-                    png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
+                    png_url = this.CreateRqPage(null,id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
 
 
                 break;
@@ -2336,6 +2397,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if(reqMap.get("png").toString().equals("Y"))
                     png_url = this.CreateRqPage(null,
                             liveRoomInfo.get("room_id"),
+                            null,
                             reqMap.get("id").toString(),
                             (Integer.parseInt(values.get("profit_share_rate")) / 100.0),
                             Integer.valueOf(values.get("effective_time")),
@@ -2510,7 +2572,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      * @return 返回流信息
      * @throws Exception
      */
-    public String CreateRqPage(String course_id,String room_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version,Jedis jedis,String appName)throws Exception{
+    public String CreateRqPage(String course_id,String room_id,String shop_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version,Jedis jedis,String appName)throws Exception{
         String userId = AccessTokenUtil.getUserIdFromAccessToken(access_token);//用安全证书拿userId
         RequestEntity reqEntity = new RequestEntity();
         Map<String,Object> query = new HashMap<String,Object>();
@@ -2542,7 +2604,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
             Long start_time = Long.valueOf(jedis.hget(courseKey, "start_time"));
             png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,start_time,appName);//生成图片
+        }else if(shop_id != null){
+           Map<String,String> shop  = CacheUtils.readShop(shop_id, reqEntity, readShopOperation,jedis);
+            String share_url = MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id;
+            png = ZXingUtil.createShopPng(user_head_portrait,userName,shop.get("shop_name"),share_url,shop.get("shop_remark"),appName);//生成图片
         }
+
+
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
@@ -3911,7 +3980,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if(course.get("course_updown").toString().equals("2")){
                     //加入讲师下架课程列表
                     jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
-            }
+                }
             }
 
 

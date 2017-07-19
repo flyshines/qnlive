@@ -642,7 +642,32 @@ public class CommonController extends AbstractController {
     }
 
 
-
+    /**
+     * 查询店铺邀请卡信息
+     * @param shop_id
+     * @param access_token
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/shop/{shop_id}/card",method=RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopCard(
+            @RequestParam(value="png",defaultValue="N") String png,
+            @PathVariable("shop_id") String shop_id,
+            @RequestHeader("access_token") String access_token,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception{
+        long startTime = System.currentTimeMillis();
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getShopCard", access_token, version,appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shop_id);
+        param.put("png",png);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        long endTime = System.currentTimeMillis();
+        logger.debug("==================================================================="+(endTime-startTime)+"==========================================================");
+        return responseEntity;
+    }
 
 
 
