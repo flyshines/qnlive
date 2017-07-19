@@ -974,16 +974,14 @@ public class LectureController extends AbstractController {
 	4、如果当前没有直播，并且今天接下来的时间也没有直播，那么就显示空状态“今天暂无直播，您可以点击上面“新增课程”，以创建直播和系列”
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/lecturer/{lecturer_id}/liveCourse", method = RequestMethod.GET)
+	@RequestMapping(value = "/lecturer/liveCourse", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity getSingleLecturerLiveCourse(
-			@PathVariable(value="lecturer_id")String lecturer_id,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getSingleLecturerLiveCourse", accessToken, version, appName);
 		Map<String, Object> param = new HashMap<>();
-		param.put("lecturer_id", lecturer_id);
 		requestEntity.setParam(param);
 		return this.process(requestEntity, serviceManger, message);
 	}
