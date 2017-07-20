@@ -249,6 +249,8 @@ public final class MiscUtils {
             for(String name : properties.stringPropertyNames()){            	
                 propertiesMap.put(name, properties.getProperty(name));
             }            
+        }catch (IOException e){
+
         }finally{
             if(input!=null){
                 input.close();
@@ -851,7 +853,9 @@ public final class MiscUtils {
         for(String appName : APP_NAME){
             String path = appMap.get(appName+"_application").toString();//app配置文件
             Map<String, String> appConfigMap = convertPropertiesFileToMap(path);//读取app的配置
-            appConfigMap.putAll(configPropertyMap);//加入共有配置
+            //规避配置文件不存在
+            if(appConfigMap!=null)
+                appConfigMap.putAll(configPropertyMap);//加入共有配置
             propertiesMap.put(appName,appConfigMap);
         }
         return propertiesMap;

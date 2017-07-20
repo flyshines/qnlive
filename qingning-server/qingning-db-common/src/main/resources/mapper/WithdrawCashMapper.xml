@@ -173,5 +173,24 @@
       WHERE
         t.withdraw_cash_id = #{withdraw_cash_id} and app_name = #{app_name}
 	</select>
+  <!-- 查询-提现记录 -->
+	<select id="selectSaaSWithdrawList" resultType="hashmap" parameterType="hashmap">
+      SELECT
+          t.withdraw_cash_id,
+          t.user_id,
+          t.state AS 'status',
+          t.remark,
+          t.user_name,
+          t.nick_name,
+          t.alipay_account_number,
+          t.actual_amount,
+          t.create_time,
+          t.update_time AS handle_time
+      FROM
+          `t_withdraw_cash` t
+      WHERE
+          t.user_id = #{user_id}
+      ORDER BY t.create_time desc
+	</select>
 
 </mapper>

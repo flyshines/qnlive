@@ -236,4 +236,10 @@ public interface ISaaSModuleServer {
      * @return
      */
 	int updateSeriesByMap(Map<String, Object> updateSeriesMap);
+
+    /**获取提现记录
+     * @param reqMap
+     * @return
+     */
+    Map<String,Object> getUserWithdrawList(Map<String, Object> reqMap);
 }
