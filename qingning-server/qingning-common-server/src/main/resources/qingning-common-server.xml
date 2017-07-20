@@ -1025,7 +1025,7 @@
 				</auth>
 				<inputs>
 					<param name="file_url" type="string" require="Y,000100"/>
-					<param name="type" type="string" require="Y,000100"/>
+					<param name="type" type="string" format="1|2,000004" require="Y,000100"/>
 					<param name="time_second" type="long" default="" require="N"/>
 				</inputs>
 				<outputs>
