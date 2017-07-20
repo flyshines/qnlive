@@ -341,6 +341,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 }
                 break;
         }
+
+
         return resultMap;
     }
 
@@ -743,12 +745,34 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("m_user_id", m_user_id);
         resultMap.put("user_id", user_id);
 
-        resultMap.put("avatar_address", userMap.get("avatar_address"));
-        //resultMap.put("nick_name", MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
-        resultMap.put("nick_name", userMap.get("nick_name"));
+
+
+
         //注册店铺用到
         loginInfoMap.put("user_name",userMap.get("nick_name"));
         loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
+
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryMap);
+        if(jedis.exists(lectureLiveRoomKey)){
+            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
+            String roomId = "";
+            if(roomKey!=null&&!roomKey.isEmpty()) {
+                for (String id : roomKey.keySet()) {
+                    roomId = id;
+                }
+            }
+            resultMap.put("room_id", roomId);
+        }
+        //</editor-fold>
+        String shop_id = "";
+        if(!MiscUtils.isEmpty(userMap.get("shop_id"))){
+            shop_id = userMap.get("shop_id");
+        }
+        resultMap.put("shop_id", shop_id);
+        resultMap.put("avatar_address", userMap.get("avatar_address"));
+        resultMap.put("nick_name", userMap.get("nick_name"));
     }
 
     @SuppressWarnings("unchecked")
@@ -827,8 +851,29 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("user_id", userId);
             resultMap.put("avatar_address", values.get("avatar_address"));
             resultMap.put("nick_name", MiscUtils.RecoveryEmoji(values.get("nick_name")));
-            return resultMap;
         }
+        //<editor-fold desc="获取用户直播间id  / 可能没有">
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
+        if(jedis.exists(lectureLiveRoomKey)){
+            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
+            String roomId = "";
+            if(roomKey!=null&&!roomKey.isEmpty()) {
+                for (String id : roomKey.keySet()) {
+                    roomId = id;
+                }
+            }
+            resultMap.put("roomId", roomId);
+        }
+        //</editor-fold>
+
+        String shop_id = "";
+        if(!MiscUtils.isEmpty(values.get("shop_id"))){
+            shop_id = values.get("shop_id");
+        }
+        resultMap.put("shop_id", shop_id);
+
         return resultMap;
     }
 
@@ -1919,7 +1964,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
         resultMap.put("share_url",getCourseShareURL(userId, courseId, courseMap,jedis,appName));
         if(reqMap.get("png").toString().equals("Y")){
-            resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+            resultMap.put("png_url",this.CreateRqPage(courseId,null,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
         }
         return resultMap;
     }
@@ -1940,10 +1985,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         return resultMap;
     }
-
-
-
-
 
     @SuppressWarnings("unchecked")
     @FunctionName("getRoomInviteCard")
@@ -1970,14 +2011,79 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         long timeS1 = System.currentTimeMillis();
         logger.debug("-------------------------"+String.valueOf(timeS1));
         if(reqMap.get("png").toString().equals("Y")) {
-            resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+            resultMap.put("png_url",this.CreateRqPage(null,roomId,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
         }
         long timeS2 = System.currentTimeMillis();
         logger.debug("-------------------------"+String.valueOf(timeS2));
         return resultMap;
     }
 
+
+
+
+
     private String getLiveRoomShareURL(String userId, String roomId,Jedis jedis,String appName) throws Exception{
+        String share_url;
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("distributer_id", userId);
+        queryMap.put("room_id", roomId);
+        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
+
+        boolean isDistributer = false;
+        String recommend_code = null;
+        if (! MiscUtils.isEmpty(distributerRoom)) {
+            isDistributer = true;
+            recommend_code = distributerRoom.get("rq_code");
+        }
+
+        //是分销员
+        if(isDistributer == true){
+            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId+"&recommend_code="+recommend_code;
+        }else {
+            //不是分销员
+            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId;
+        }
+        return share_url;
+    }
+
+
+
+
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getShopCard")
+    public Map<String,Object> getShopCard (RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
+        Map<String,Object> resultMap = new HashMap<>();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String shop_id = reqMap.get("shop_id").toString();
+        Map<String,String> shop  = CacheUtils.readShop(shop_id, reqEntity, readShopOperation,jedis);
+        resultMap.put("shop_name",MiscUtils.RecoveryEmoji(shop.get("shop_name")));
+
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", userId);
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
+        resultMap.put("avatar_address",userMap.get("avatar_address"));
+        resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
+
+        //????????????????????????
+        resultMap.put("share_url",MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id);
+        if(reqMap.get("png").toString().equals("Y")) {
+            resultMap.put("png_url",this.CreateRqPage(null,null,shop_id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
+        }
+//        long timeS2 = System.currentTimeMillis();
+//        logger.debug("-------------------------"+String.valueOf(timeS2));
+        return resultMap;
+    }
+
+
+
+
+
+    private String getShopCard(String userId, String roomId,Jedis jedis,String appName) throws Exception{
         String share_url;
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
@@ -2180,7 +2286,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     @SuppressWarnings("unchecked")
     @FunctionName("createFeedback")
-    public Map<String,Object> createFeedback (RequestEntity reqEntity) throws Exception{
+    public Map<String,Object> createFeedback (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>)reqEntity.getParam();
         Map<String,Object> resultMap = new HashMap<>();
 
@@ -2265,7 +2371,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = getCourseShareURL(userId, id, courseMap,jedis,appName);
 
                 if(reqMap.get("png").toString().equals("Y"))
-                    png_url = this.CreateRqPage(id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
+                    png_url = this.CreateRqPage(id,null,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
                 break;
 
             case "2":
@@ -2280,7 +2386,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 share_url = getLiveRoomShareURL(userId, id,jedis,appName);
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content",appName) + liveRoomInfoMap.get("room_name");
                 if(reqMap.get("png").toString().equals("Y"))
-                    png_url = this.CreateRqPage(null,id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
+                    png_url = this.CreateRqPage(null,id,null,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName);
 
 
                 break;
@@ -2315,6 +2421,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 if(reqMap.get("png").toString().equals("Y"))
                     png_url = this.CreateRqPage(null,
                             liveRoomInfo.get("room_id"),
+                            null,
                             reqMap.get("id").toString(),
                             (Integer.parseInt(values.get("profit_share_rate")) / 100.0),
                             Integer.valueOf(values.get("effective_time")),
@@ -2489,7 +2596,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
      * @return 返回流信息
      * @throws Exception
      */
-    public String CreateRqPage(String course_id,String room_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version,Jedis jedis,String appName)throws Exception{
+    public String CreateRqPage(String course_id,String room_id,String shop_id,String room_share_code,Double profit_share_rate,Integer effective_time,String access_token, String version,Jedis jedis,String appName)throws Exception{
         String userId = AccessTokenUtil.getUserIdFromAccessToken(access_token);//用安全证书拿userId
         RequestEntity reqEntity = new RequestEntity();
         Map<String,Object> query = new HashMap<String,Object>();
@@ -2521,7 +2628,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
             Long start_time = Long.valueOf(jedis.hget(courseKey, "start_time"));
             png = ZXingUtil.createCoursePng(user_head_portrait,userName,courseMap.get("course_title"),share_url,start_time,appName);//生成图片
+        }else if(shop_id != null){
+           Map<String,String> shop  = CacheUtils.readShop(shop_id, reqEntity, readShopOperation,jedis);
+            String share_url = MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id;
+            png = ZXingUtil.createShopPng(user_head_portrait,userName,shop.get("shop_name"),share_url,shop.get("shop_remark"),appName);//生成图片
         }
+
+
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节
@@ -3878,68 +3992,71 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String courseId = reqMap.get("course_id").toString();
         Jedis jedis = jedisUtils.getJedis(appName);
-
         Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
         for(String lecturerId : lecturerSet) {
             Map<String, Object> map = new HashMap<>();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-            for (int i = 0; i < 4; i++) {
-                map.put("series_course_type", i);
-                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                jedis.del(upkey);
-                jedis.del(downkey);
-            }
-            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
-            for (Map<String, Object> series : seriesList) {
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-                String series_id = series.get("series_id").toString();
-                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
-                map.put("series_course_type", series.get("series_course_type").toString());
-                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
-                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
-                if (series.get("updown").toString().equals("1")) {
-                    jedis.zadd(upkey, update_course_time, series_id);
-                } else {
-                    jedis.zadd(downkey, update_course_time, series_id);
-                }
+            map.put("lecturer_id",lecturerId);
+            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+            jedis.del(lectureCourseKey);
 
-                if (series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")) {
-                    long lpos = MiscUtils.convertInfoToPostion(update_course_time, MiscUtils.convertObjectToLong(series.get("position")));
-                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
-                }
-                map.clear();
-                map.put("series_id", series_id);
-                String seriesCourseUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
-                String seriesCourseDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
-                jedis.del(seriesCourseDownKey);
-                jedis.del(seriesCourseUpKey);
-                List<Map<String, Object>> seriesCourseList = null;
-                if (series.get("series_course_type").toString().equals("0")) {
-                    seriesCourseList = commonModuleServer.findCourseListBySeriesId(series_id);
-                } else {
-                    seriesCourseList = commonModuleServer.findSaasCourseListBySeriesId(series_id);
-                }
-
-                for (Map<String, Object> course : seriesCourseList) {
-                    long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
-                    if (course.get("series_course_updown").toString().equals("1")) {
-                        jedis.zadd(seriesCourseUpKey, update_time, course.get("course_id").toString());
-                    } else {
-                        jedis.zadd(seriesCourseDownKey, update_time, course.get("course_id").toString());
-                    }
-                }
-                Long course_num = jedis.zcard(seriesCourseUpKey);
-                map.put("course_num", course_num);
-                commonModuleServer.updateSeries(map);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
-                if (jedis.exists(seriesKey)) {
-                    jedis.hset(seriesKey, "course_num", course_num + "");
+            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+            for(Map<String, Object> course : lecturerCourseList){
+                if(course.get("course_updown").toString().equals("2")){
+                    //加入讲师下架课程列表
+                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
                 }
             }
+
+
         }
 
-
+//            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
+//            for (Map<String, Object> series : seriesList) {
+//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+//                String series_id = series.get("series_id").toString();
+//                long update_course_time = MiscUtils.convertObjectToLong(series.get("update_course_time"));
+//                map.put("series_course_type", series.get("series_course_type").toString());
+//                String upkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, map);
+//                String downkey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, map);
+//                if (series.get("updown").toString().equals("1")) {
+//                    jedis.zadd(upkey, update_course_time, series_id);
+//                } else {
+//                    jedis.zadd(downkey, update_course_time, series_id);
+//                }
+//
+//                if (series.get("series_course_type").toString().equals("0") && series.get("updown").toString().equals("1")) {
+//                    long lpos = MiscUtils.convertInfoToPostion(update_course_time, MiscUtils.convertObjectToLong(series.get("position")));
+//                    jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM, lpos, series_id);
+//                }
+//                map.clear();
+//                map.put("series_id", series_id);
+//                String seriesCourseUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+//                String seriesCourseDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
+//                jedis.del(seriesCourseDownKey);
+//                jedis.del(seriesCourseUpKey);
+//                List<Map<String, Object>> seriesCourseList = null;
+//                if (series.get("series_course_type").toString().equals("0")) {
+//                    seriesCourseList = commonModuleServer.findCourseListBySeriesId(series_id);
+//                } else {
+//                    seriesCourseList = commonModuleServer.findSaasCourseListBySeriesId(series_id);
+//                }
+//
+//                for (Map<String, Object> course : seriesCourseList) {
+//                    long update_time = MiscUtils.convertObjectToLong(course.get("update_time"));
+//                    if (course.get("series_course_updown").toString().equals("1")) {
+//                        jedis.zadd(seriesCourseUpKey, update_time, course.get("course_id").toString());
+//                    } else {
+//                        jedis.zadd(seriesCourseDownKey, update_time, course.get("course_id").toString());
+//                    }
+//                }
+//                Long course_num = jedis.zcard(seriesCourseUpKey);
+//                map.put("course_num", course_num);
+//                commonModuleServer.updateSeries(map);
+//                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+//                if (jedis.exists(seriesKey)) {
+//                    jedis.hset(seriesKey, "course_num", course_num + "");
+//                }
+//            }
         //<editor-fold desc="讲师系列课">
  //       Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
 

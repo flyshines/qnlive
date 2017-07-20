@@ -177,7 +177,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
 	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
-	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程
+	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程  直播
 	public static final String CACHED_KEY_COURSE_SAAS = "SYS:LECTURER:{lecturer_id}:COURSES:SAAS";//讲师saas平台课程
 	public static final String CACHED_KEY_COURSE_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:ALL";//讲师所有的课程 只是判断讲师课程
 	//用户已购课程ID set集合

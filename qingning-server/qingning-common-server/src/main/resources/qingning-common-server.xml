@@ -34,6 +34,8 @@
 					<param name="access_token" type="string"/>
 					<param name="m_user_id" type="string"/>
 					<param name="user_id" type="string"/>
+					<param name="room_id" type="string"/>
+					<param name="shop_id" type="string"/>
 					<param name="nick_name" type="rstring"/>
 					<param name="server_url_info_update_time" type="long"/>
 					<param name="avatar_address" type="string"/>

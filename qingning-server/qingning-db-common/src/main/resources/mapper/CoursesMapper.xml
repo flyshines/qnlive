@@ -82,7 +82,7 @@
   </select>
   
   <select id="findLecturerCourseList" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses where lecturer_id = #{lecturer_id} and course_updown=1
+    select * from t_courses where lecturer_id = #{lecturer_id}
     <if test="status != null" >
     	and status = #{status}
     </if>

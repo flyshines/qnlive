@@ -768,6 +768,70 @@ public class ZXingUtil {
         BufferedImage waterMark2 = waterMark(pressText5, convertImage, 77*3, 108, 1.0f);
     	return waterMark2;
     }
+
+
+    /**
+     * 分享店铺
+     * @param user_head_portrait 分享者 用户头像
+     * @param userName  分享者名称
+     * @param shop_name 店铺名称
+     * @param qr_code_content 二维码链接
+     * @return 分会图片流
+     * @throws Exception
+     */
+    public static BufferedImage createShopPng(String user_head_portrait,String userName,String shop_name,
+                                                String qr_code_content,String shop_remark,String appName) throws Exception{
+        if(userName.length()>9){
+            userName = userName.substring(0,9)+"...";
+        }
+
+        boolean twoline = false;
+//        course_name = "「"+course_name+"」";
+        if(shop_name.length()>14){
+            twoline = true;
+        }
+        if(shop_name.length()>28){
+            shop_name = shop_name.substring(0,25)+"...";
+        }
+        if(shop_remark.length()>30){
+            shop_remark = shop_remark.substring(0,25)+"...";
+        }
+
+        BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        //镶嵌背景图  七牛云地址
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        //二维码的长宽
+        int qr_code_size= 70*3;
+        //用户头像的长宽
+        int head_portrait_size= 36*3;
+        //二维码
+        //二维码
+        BufferedImage qrImage = createImage(qr_code_content, "", qr_code_size, false);
+
+        //合成二维码后的图片
+        BufferedImage waterMark = waterMark(bi, qrImage, 124*3, HEIGHT-45*3-90*3, 1.0f);
+        //长按图片识别二维码进入直播间
+        BufferedImage pressText1 = pressText("长按识别二维码进入直播间", waterMark, FONT_NAME, 1, 36, Color.white, 0,260*3, 1.0f, true);
+
+        //
+        BufferedImage pressText2 = pressText(userName, pressText1, FONT_NAME, 1,42, new Color(13,13,13), 363, 108+42, 1.0f, false);
+        //
+        BufferedImage pressText3 = pressText("推荐一个不错的店铺", pressText2, FONT_NAME, 1, 36, new Color(167,167,167), 363, 108+42+54, 1.0f, false);
+        //
+        BufferedImage pressText4 = pressText(shop_name, pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, true);
+
+        BufferedImage pressText5 = pressText(shop_remark, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -120, -HEIGHT/4+60, 1.0f, true);
+
+        //用户头像
+        BufferedImage url = getUrl(user_head_portrait);
+        BufferedImage  convertImage= scaleByPercentage(url, head_portrait_size,head_portrait_size);
+        convertImage = convertCircular(convertImage);
+//        int height= (int) (HEIGHT*0.03);
+        BufferedImage waterMark2 = waterMark(pressText5,convertImage, 77*3, 108, 1.0f);
+        return waterMark2;
+    }
+
+
     
     /**
      * 创建系列课分享开篇
@@ -1003,62 +1067,62 @@ public class ZXingUtil {
     
 	
 //
-//	public static void main(String[] args) throws Exception{
-//////字体
-//////        GraphicsEnvironment eq = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//////        String[] fontNames = eq.getAvailableFontFamilyNames();
-//////        for(String fontName : fontNames){
-//////            System.out.println(fontName);
-//////        }
-//////
-//////		//生成二维码
-//////		 encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/5.png");
-//////		 System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null));// TODO
+	public static void main(String[] args) throws Exception{
+////字体
+////        GraphicsEnvironment eq = GraphicsEnvironment.getLocalGraphicsEnvironment();
+////        String[] fontNames = eq.getAvailableFontFamilyNames();
+////        for(String fontName : fontNames){
+////            System.out.println(fontName);
+////        }
 ////
-////		try {
-////
-////		    System.out.println(System.currentTimeMillis());
-////		 	//通过网络  用户头像
-////			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
-////	    	//用户名称
-////	    	String userName= "谷子和姜";
-////	    	//二维码内容
-////	    	String qr_code_content="www.baidu.com";
-////	    	long time = 1488160472302l;
-//////	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-////            BufferedImage createCoursePng = createCoursePng(user_head_portrait, userName,"我的课程名字我的课程名字我的课程名字我的课程名字我的课程名字", qr_code_content, time);
-//////            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
-////	    	  //生成的图片位置
-//////	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
-//////            String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
-////            String imagePath3= "C:/Users/Administrator/Desktop/LivePng5.png";
-//////	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
-//////            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
-////            ImageIO.write(createCoursePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
-////            System.out.println(System.currentTimeMillis());
-//////            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//////            ImageIO.write(createRoomDistributerPng, "png", baos);
-//////            byte[] bytes = baos.toByteArray();
-//////            QiNiuUpUtils.uploadByIO(bytes,userName);
-//////            BASE64Encoder encoder = new BASE64Encoder();
-//////            BASE64Decoder decoder = new BASE64Decoder();
-//////            System.out.println(encoder.encodeBuffer(bytes));
-//////            byte[] b = decoder.decodeBuffer( encoder.encodeBuffer(bytes));
-//////            for (int i = 0; i < b.length; ++i) {
-//////                if (b[i] < 0) {// 调整异常数据
-//////                    b[i] += 256;
-//////                }
-//////            }// 生成jpeg图片
-//////            String imgFilePath = "C:/Users/Administrator/Desktop/test22.png";//新生成的图片
-//////            OutputStream out = new FileOutputStream(imgFilePath);
-//////            out.write(b);
-//////            out.flush();
-//////            out.close();
-////            System.out.println("ok");
-////		} catch (Exception e) {
-////			e.printStackTrace();
-////		}
-//
-//    }
+//		//生成二维码
+//		 encodeQRCodeImage("http://www.baidu.com", null, "C:/Users/Administrator/Desktop/myQRCodeImage.png", 300, 300,"C:/Users/Administrator/Desktop/5.png");
+//		 System.out.println(decodeQRCodeImage("C:/Users/Administrator/Desktop/myQRCodeImage.png",  null));// TODO
+
+		try {
+
+		    System.out.println(System.currentTimeMillis());
+		 	//通过网络  用户头像
+			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
+	    	//用户名称
+	    	String userName= "谷子和姜";
+	    	//二维码内容
+	    	String qr_code_content="www.baidu.com";
+	    	long time = 1488160472302l;
+//	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
+            BufferedImage createCoursePng =createShopPng(user_head_portrait,userName,"宫洪深的店铺",qr_code_content,"宫洪深的店铺简介,宫洪深的店铺简介,宫洪深的店铺简介,宫洪深的店铺简介,","qnlive");
+//            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
+	    	  //生成的图片位置
+//	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";
+//            String imagePath2= "C:/Users/Administrator/Desktop/CoursePng.png";
+            String imagePath3= "C:/Users/Administrator/Desktop/LivePng5.png";
+//	        ImageIO.write(createRoomDistributerPng, imagePath1.substring(imagePath1.lastIndexOf(".") + 1), new File(imagePath1));
+//            ImageIO.write(createCoursePng, imagePath2.substring(imagePath2.lastIndexOf(".") + 1), new File(imagePath2));
+            ImageIO.write(createCoursePng, imagePath3.substring(imagePath3.lastIndexOf(".") + 1), new File(imagePath3));
+            System.out.println(System.currentTimeMillis());
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            ImageIO.write(createRoomDistributerPng, "png", baos);
+//            byte[] bytes = baos.toByteArray();
+//            QiNiuUpUtils.uploadByIO(bytes,userName);
+//            BASE64Encoder encoder = new BASE64Encoder();
+//            BASE64Decoder decoder = new BASE64Decoder();
+//            System.out.println(encoder.encodeBuffer(bytes));
+//            byte[] b = decoder.decodeBuffer( encoder.encodeBuffer(bytes));
+//            for (int i = 0; i < b.length; ++i) {
+//                if (b[i] < 0) {// 调整异常数据
+//                    b[i] += 256;
+//                }
+//            }// 生成jpeg图片
+//            String imgFilePath = "C:/Users/Administrator/Desktop/test22.png";//新生成的图片
+//            OutputStream out = new FileOutputStream(imgFilePath);
+//            out.write(b);
+//            out.flush();
+//            out.close();
+            System.out.println("ok");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+    }
 }  
 
