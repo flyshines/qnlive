@@ -20,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by 宫洪深 on 2017/2/28.
@@ -149,7 +151,8 @@ public class QiNiuUpUtils {
      * @param callBack  是否需要回调
      * @return
      */
-    public static String cutAuto(String url,Long times,boolean callBack) throws Exception{
+    public static Map<String,String> cutAuto(String url,Long times,boolean callBack) throws Exception{
+        Map<String,String> res = new HashMap<>();
         //默认截取时间
         if(times == null){
             times = cutTimes;
@@ -174,7 +177,9 @@ public class QiNiuUpUtils {
             }else{
                 persistentId = om.pfop(audioSpace, srcKey,fops,pipeline,"");
             }
-            return persistentId;
+            res.put("persistentId",persistentId);
+            res.put("newUrl",autoDomain+"/"+newSrcName);
+            return res;
         } catch (QiniuException e) {
             e.printStackTrace();
             throw new QNLiveException("210008");
@@ -189,7 +194,8 @@ public class QiNiuUpUtils {
      * @param callBack  是否需要回调
      * @return
      */
-    public static String cutVideo(String space,String domain,String url,Long times,boolean callBack) throws Exception{
+    public static Map<String,String> cutVideo(String space, String domain, String url, Long times, boolean callBack) throws Exception{
+        Map<String,String> res = new HashMap<>();
         //默认截取时间
         if(times == null){
             times = cutTimes;
@@ -214,7 +220,9 @@ public class QiNiuUpUtils {
             }else{
                 persistentId = om.pfop(space, srcKey,fops,pipeline,"");
             }
-            return persistentId;
+            res.put("persistentId",persistentId);
+            res.put("newUrl",domain+"/"+newSrcName);
+            return res;
         } catch (QiniuException e) {
             e.printStackTrace();
             throw new QNLiveException("210008");
@@ -235,7 +243,7 @@ public class QiNiuUpUtils {
                 "avthumb/mp3/|saveas/"+UrlSafeBase64.encodeToString(newSpace)
                 ,new StringMap().putNotEmpty("notifyURL", ""));
 */
-        String persistentId = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,url,10L,false);
+        QiNiuUpUtils.cutVideo(audioSpace,autoDomain,url,10L,false);
         /*String persistentId = om.pfop(audioSpace, srcKey, "avthumb/mp3/|saveas/"+UrlSafeBase64.encodeToString(newSpace),"","");
         System.out.print(persistentId);*/
     }

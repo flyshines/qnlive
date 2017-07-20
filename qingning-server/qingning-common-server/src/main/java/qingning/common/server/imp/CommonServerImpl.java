@@ -32,7 +32,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
-import sun.misc.Cache;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -5123,11 +5122,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(reqMap.containsKey("time_second"))
             time = Long.valueOf(reqMap.get("time_second").toString());
         String type = reqMap.get("type").toString();
-        String persistentId;
+        Map<String,String> qiniuRes;
         if("1".equals(type)){
             //音频截取
-            persistentId = QiNiuUpUtils.cutAuto(reqMap.get("file_url").toString(),time,false);
-            resMap.put("psersistent_id",persistentId);
+            qiniuRes = QiNiuUpUtils.cutAuto(reqMap.get("file_url").toString(),time,false);
         }else {
             //视频截取
             String fileUrl = reqMap.get("file_url").toString();
@@ -5139,15 +5137,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             //转移到新的视频空间名称
             String videoSpace = MiscUtils.getConfigKey("video_space");
             if(fileUrl.contains(autoDomain)){
-                persistentId = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
+                qiniuRes = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
             }else if(fileUrl.contains(videoDomain)){
-                persistentId = QiNiuUpUtils.cutVideo(videoSpace,videoDomain,reqMap.get("file_url").toString(),time,false);
+                qiniuRes = QiNiuUpUtils.cutVideo(videoSpace,videoDomain,reqMap.get("file_url").toString(),time,false);
             }else{
                 throw new QNLiveException("210009");
             }
-            resMap.put("psersistent_id",persistentId);
         }
-
+        resMap.put("psersistent_id",qiniuRes.get("persistentId"));
+        resMap.put("new_url",qiniuRes.get("newUrl"));
         return resMap;
     }
 

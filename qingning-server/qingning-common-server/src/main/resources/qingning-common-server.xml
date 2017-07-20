@@ -1030,6 +1030,7 @@
 				</inputs>
 				<outputs>
 					<param name="psersistent_id" type="string" />
+					<param name="new_url" type="string" />
 				</outputs>
 			</function>
 		</default>
