@@ -4992,9 +4992,46 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
 
+    /**
+     *  七牛音视频截取
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("cutMedia")
+    public Map<String, Object> cutMedia (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String,Object> resMap = new HashMap<>();
+        Long time = null;
+        if(reqMap.containsKey("time_second"))
+            time = Long.valueOf(reqMap.get("time_second").toString());
+        String type = reqMap.get("type").toString();
+        String persistentId;
+        if("1".equals(type)){
+            //音频截取
+            persistentId = QiNiuUpUtils.cutAuto(reqMap.get("file_url").toString(),time,false);
+            resMap.put("psersistent_id",persistentId);
+        }else {
+            //视频截取
+            String fileUrl = reqMap.get("file_url").toString();
+            //目前支持的空间文件转码
+            String autoDomain = MiscUtils.getConfigKey("audio_space_domain_name");
+            String videoDomain = MiscUtils.getConfigKey("video_space_domain_name");
+            //转移到新的空间名称
+            String audioSpace = MiscUtils.getConfigKey("audio_space");
+            //转移到新的视频空间名称
+            String videoSpace = MiscUtils.getConfigKey("video_space");
+            if(fileUrl.contains(autoDomain)){
+                persistentId = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
+            }else if(fileUrl.contains(videoDomain)){
+                persistentId = QiNiuUpUtils.cutVideo(videoSpace,videoDomain,reqMap.get("file_url").toString(),time,false);
+            }else{
+                throw new QNLiveException("210009");
+            }
+            resMap.put("psersistent_id",persistentId);
+        }
 
-
-
-
+        return resMap;
+    }
 
 }

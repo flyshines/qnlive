@@ -1015,11 +1015,23 @@
 					<param name="share_url" type="string" />
 				</outputs>
 			</function>
-
+			<!-- 七牛文件截取 -->
+			<function name="cutMedia">
+				<auth>
+					<accessToken require="N" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+					<param name="file_url" type="string" require="Y,000100"/>
+					<param name="type" type="string" require="Y,000100"/>
+					<param name="time_second" type="long" default="" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="psersistent_id" type="string" />
+				</outputs>
+			</function>
 		</default>
- 
- 
- 
+
         <version num="1.0.0" class="">
         </version>
     </server>
