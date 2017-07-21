@@ -401,5 +401,90 @@
 			</if>
 		</where>
   </select>
+  <!-- 查询所有订单记录-仅后台使用 -->
+  <select id="selectOrderListAll" parameterType="hashmap" resultType="hashmap">
+    SELECT
+        *
+    FROM
+        (
+            SELECT
+                t.lecturer_id AS user_id,
+                t.profit_amount as amount,
+                t.profit_type,
+                t.create_time,
+                t.user_id AS resume_id,
+                p.payment_id as order_id,
+                u.nick_name,
+                ru.nick_name AS resume_user,
+                t.profit_id,
+                t.share_amount,
+                p.pre_pay_no,
+                '0' AS is_dist
+            FROM
+                `t_lecturer_courses_profit` t
+            LEFT JOIN t_payment_bill p ON p.payment_id = t.payment_id
+            LEFT JOIN t_user u ON u.user_id = t.lecturer_id
+            LEFT JOIN t_user ru ON ru.user_id = t.user_id
+            WHERE 1=1
+                <if test="user_name != null">
+                  and u.nick_name like '%${user_name}%'
+                </if>
+                <if test="user_id != null">
+                  and u.user_id = #{user_id}
+                </if>
+                <if test="order_id != null">
+                  and p.payment_id = #{order_id}
+                </if>
+                <if test="pre_pay_no != null">
+                  and p.pre_pay_no = #{pre_pay_no}
+                </if>
+                <if test="start_time != null">
+                  and t.create_time &gt; #{start_time,jdbcType=TIMESTAMP}
+                </if>
+                <if test="end_time != null">
+                  and t.create_time &lt; #{end_time,jdbcType=TIMESTAMP}
+                </if>
+            UNION ALL
+                SELECT
+                    dt.lecturer_id AS user_id,
+                    dt.profit_amount as amount,
+                    dt.profit_type,
+                    dt.create_time,
+                    dt.user_id AS resume_id,
+                    p.payment_id as order_id,
+                    u.nick_name,
+                    ru.nick_name AS resume_user,
+                    dt.profit_id,
+                    dt.share_amount,
+                    p.pre_pay_no,
+                    '1' AS is_dist
+                FROM
+                    t_lecturer_courses_profit dt
+                JOIN t_payment_bill p ON p.payment_id = dt.payment_id
+                JOIN t_user u ON u.user_id = dt.distributer_id
+                JOIN t_user ru ON ru.user_id = dt.user_id
+                WHERE 1=1
+                    <if test="user_name != null">
+                      and u.nick_name like '%${user_name}%'
+                    </if>
+                    <if test="user_id != null">
+                      and u.user_id = #{user_id}
+                    </if>
+                    <if test="order_id != null">
+                      and p.payment_id = #{order_id}
+                    </if>
+                    <if test="pre_pay_no != null">
+                      and p.pre_pay_no = #{pre_pay_no}
+                    </if>
+                    <if test="start_time != null">
+                      and dt.create_time &gt; #{start_time,jdbcType=TIMESTAMP}
+                    </if>
+                    <if test="end_time != null">
+                      and dt.create_time &lt; #{end_time,jdbcType=TIMESTAMP}
+                    </if>
+        ) t
+    ORDER BY
+        t.create_time DESC
+  </select>
   
 </mapper>

@@ -658,6 +658,45 @@
 					</param>
 				</outputs>
 			</function>
+
+			<!-- 获取订单记录 后台-->
+			<function name="getOrderListAll">
+				<auth>
+					<accessToken require="N" />
+					<appName require="Y, 000100" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="string" require="Y" />
+					<param name="page_num" type="string" require="Y" />
+					<param name="user_name" type="string" require="N" />
+					<param name="user_id" type="string" require="N" />
+					<param name="order_id" type="string" require="N" />
+					<param name="pre_pay_no" type="string" require="N" />
+					<param name="start_time" type="string" require="N" />
+					<param name="end_time" type="string" require="N" />
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="order_id" type="string" />
+						<param name="user_id" type="string" />
+						<param name="nick_name" type="string" />
+						<param name="user_amount" type="double" />
+						<param name="amount" type="double" />
+						<param name="profit_type" type="string" />
+						<param name="create_time" type="long" />
+						<param name="resume_id" type="string" />
+						<param name="resume_user" type="string" />
+						<param name="resume_id" type="string" />
+						<param name="pre_pay_no" type="string" />
+					</param>
+					<param name="total_count" type="long" default="0"/>
+					<param name="total_page" type="long" default="0"/>
+				</outputs>
+			</function>
+
+
+
 			</default>
 		</server>
 

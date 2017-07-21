@@ -2216,6 +2216,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		return userModuleServer.findWithdrawListAll(param);
     }
 
+
     /**
      * 后台_处理提现
      * @param reqEntity
@@ -2757,5 +2758,21 @@ public class UserServerImpl extends AbstractQNLiveServer {
         return result;
     }
 
+    /**
+     * 获取订单记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getOrderListAll")
+    public Map<String, Object> getOrderListAll(RequestEntity reqEntity) throws Exception{
 
+    	//获取请求参数
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        param.put("app_name", reqEntity.getAppName());
+
+        //查询提现记录列表
+
+        return userModuleServer.findOrderListAll(param);
+    }
 }

@@ -9,6 +9,7 @@ import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
 import qingning.server.AbstractController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -694,5 +695,54 @@ public class UserController extends AbstractController{
 		return this.process(requestEntity, serviceManger, message);
 	}
 
+
+	/**
+	 * 获取订单记录-后台
+	 * @param page_count
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/order/list", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getOrderListAll(
+			@RequestParam(value="page_count", defaultValue="10") String page_count,
+			@RequestParam(value="page_num", defaultValue="1") String page_num,
+			@RequestParam(value="user_name",defaultValue="") String user_name,
+			@RequestParam(value="user_id",defaultValue="") String user_id,
+			@RequestParam(value="order_id",defaultValue="") String order_id,
+			@RequestParam(value="pre_pay_no",defaultValue="") String pre_pay_no,
+			@RequestParam(value="start_time",defaultValue="") Long start_time,
+			@RequestParam(value="end_time",defaultValue="") Long end_time,
+			@RequestHeader(value="access_token", defaultValue = "") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value="version",defaultValue="") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getOrderListAll", accessToken, version, appName);
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("page_count", page_count);
+		paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name)) {
+			paramMap.put("user_name", user_name);
+		}
+		if(StringUtils.isNotEmpty(user_id)) {
+			paramMap.put("user_id", user_id);
+		}
+		if(StringUtils.isNotEmpty(order_id)) {
+			paramMap.put("order_id", order_id);
+		}
+		if(StringUtils.isNotEmpty(pre_pay_no)) {
+			paramMap.put("pre_pay_no", pre_pay_no);
+		}
+		if(start_time!=null)
+			paramMap.put("start_time", new Date(Long.valueOf(start_time)));
+		if(end_time!=null)
+			paramMap.put("end_time", new Date(Long.valueOf(end_time)));
+		requestEntity.setParam(paramMap);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		return responseEntity;
+	}
 
 }
