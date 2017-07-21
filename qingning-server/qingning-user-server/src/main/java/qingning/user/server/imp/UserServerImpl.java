@@ -2775,4 +2775,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         return userModuleServer.findOrderListAll(param);
     }
+    /**
+     * 导出订单记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("exportOrderListAll")
+    public Map<String, Object> exportOrderListAll(RequestEntity reqEntity) throws Exception{
+
+    	//获取请求参数
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        param.put("app_name", reqEntity.getAppName());
+
+        //查询提现记录列表
+        return userModuleServer.findOrderListAll(param);
+    }
 }

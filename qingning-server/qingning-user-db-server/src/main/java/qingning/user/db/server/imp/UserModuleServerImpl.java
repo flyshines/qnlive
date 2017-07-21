@@ -268,6 +268,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
                 //分销者
                 map.put("profit_type","3");
                 map.put("user_amount",map.get("share_amount"));
+                map.remove("distributer_id");
             }else if(!"0".equals(map.get("share_amount").toString())){
                 //讲师分销收益
                 map.put("profit_type","2");

@@ -14,6 +14,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,8 @@ public final class MiscUtils {
     private static String configPropertyPath="classpath:application.properties";
     private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
- 
+    private static DateFormat dateTimeFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+
     private static Pattern emojiPattern = Pattern.compile("([\\x{10000}-\\x{10ffff}\ud800-\udfff])");
     private static Pattern emojiRecoverPattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
     
@@ -890,6 +892,26 @@ public final class MiscUtils {
         return null;
     }
 
+    /**
+     * 2011-05-09 11:49:45.0  转换标准格式
+     * @param datestr
+     * @return
+     */
+    public static String formatDateHrous1(String datestr) {
+        if(StringUtils.isBlank(datestr)){
+            return null;
+        }
+        Date date =  new Date(Long.valueOf(datestr));
+        return dateTimeFormat.format(date);
+    }
+
+    public static String formatDate(String datestr) {
+        if(StringUtils.isBlank(datestr)){
+            return null;
+        }
+        Date date = new Date(Long.valueOf(datestr));
+        return dateTimeFormat1.format(date);
+    }
 
     /**
      * 判断是否存在appname
