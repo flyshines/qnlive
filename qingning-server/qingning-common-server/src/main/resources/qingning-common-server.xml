@@ -822,7 +822,7 @@
 					<param name="classify_id" type="string" require="Y,000100"/>
 					<param name="classify_name" type="string" require="Y,000100"/>
 					<param name="is_use" type="string" require="N" format="0|1,000004"/>
-					<param name="position" type="int" require="N"/>
+					<param name="position" type="string" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>

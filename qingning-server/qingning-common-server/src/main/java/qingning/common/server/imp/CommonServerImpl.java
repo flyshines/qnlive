@@ -4653,7 +4653,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> param = (Map)reqEntity.getParam();
         param.put("app_names", appName);
-        
         commonModuleServer.updateClassify(param);
         //清除缓存
         Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
