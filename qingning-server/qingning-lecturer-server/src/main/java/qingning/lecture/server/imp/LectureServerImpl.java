@@ -3671,7 +3671,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> resultMap = new HashMap<>();
-        String lecturer_id = reqMap.get("lecturer_id").toString();//分类id
+        String lecturer_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> map = new HashMap<>();
         map.put("lecturer_id",lecturer_id);
         String lecturerPredictionCourseListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//讲师预告和直播课程list key

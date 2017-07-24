@@ -229,8 +229,8 @@ public class ZXingUtil {
 
 
             String lengthString = getLengthString(pressText,fontSize,font_width);
-            if (lengthString.indexOf(",")>0) { //需要换行
-            	String[] split = lengthString.split(",");
+            if (lengthString.indexOf("\n")>0) { //需要换行
+            	String[] split = lengthString.split("\n");
                 font_height = 0;
                 int tempX = 0;
             	if (split!=null && split.length>0) {
@@ -389,7 +389,7 @@ public class ZXingUtil {
         {
 			String sbText = new String(text.charAt(i) + "");
 			if (length >= Length) {
-				sb.append(sbText + ",");
+				sb.append(sbText + "\n");
 				length = 0;
 			} else {
 				sb.append(sbText);
@@ -772,6 +772,7 @@ public class ZXingUtil {
 
     /**
      * 分享店铺
+     * 分享店铺
      * @param user_head_portrait 分享者 用户头像
      * @param userName  分享者名称
      * @param shop_name 店铺名称
@@ -820,7 +821,7 @@ public class ZXingUtil {
         //
         BufferedImage pressText4 = pressText(shop_name, pressText3, FONT_NAME, 1, 54, new Color(90,210,161), 0, -HEIGHT/4-60, 1.0f, true);
 
-        BufferedImage pressText5 = pressText(shop_remark, pressText4, FONT_NAME, 1, 48, new Color(131,131,131), -120, -HEIGHT/4+60, 1.0f, true);
+        BufferedImage pressText5 = pressText(shop_remark, pressText4, FONT_NAME, 1, 46, new Color(131,131,131), -30, -HEIGHT/4+40, 1.0f, true);
 
         //用户头像
         BufferedImage url = getUrl(user_head_portrait);
@@ -1085,12 +1086,14 @@ public class ZXingUtil {
 		 	//通过网络  用户头像
 			String user_head_portrait="http://120.24.78.189:9090/app-server-file/pic/read_image?name=000093_1479899539822.jpg&proto=1";
 	    	//用户名称
-	    	String userName= "谷子和姜";
+	    	String userName= "宫洪深";
 	    	//二维码内容
 	    	String qr_code_content="www.baidu.com";
 	    	long time = 1488160472302l;
 //	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-            BufferedImage createCoursePng =createShopPng(user_head_portrait,userName,"宫洪深的店铺",qr_code_content,"宫洪深的店铺简介,宫洪深的店铺简介,宫洪深的店铺简介,宫洪深的店铺简介,","qnlive");
+            BufferedImage createCoursePng =createShopPng(user_head_portrait,userName,"宫洪深的店铺",qr_code_content,"宫洪深的店铺简介宫洪深,的店铺简介宫洪深的店.铺简介宫洪深的店铺简介","qnlive");
+         //   BufferedImage createCoursePng =createCoursePng(user_head_portrait,userName,"宫洪深的课程1111111111111111111111111111111111111",qr_code_content,System.currentTimeMillis(),"qnlive");
+
 //            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);
 	    	  //生成的图片位置
 //	    	String imagePath1= "C:/Users/Administrator/Desktop/RoomDistributerPng1.png";

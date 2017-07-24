@@ -2068,8 +2068,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
         resultMap.put("avatar_address",userMap.get("avatar_address"));
         resultMap.put("nick_name",MiscUtils.RecoveryEmoji(userMap.get("nick_name")));
-
-        //????????????????????????
         resultMap.put("share_url",MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id);
         if(reqMap.get("png").toString().equals("Y")) {
             resultMap.put("png_url",this.CreateRqPage(null,null,shop_id,null,null,null,reqEntity.getAccessToken(),reqEntity.getVersion(),jedis,appName));
@@ -2077,34 +2075,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        long timeS2 = System.currentTimeMillis();
 //        logger.debug("-------------------------"+String.valueOf(timeS2));
         return resultMap;
-    }
-
-
-
-
-
-    private String getShopCard(String userId, String roomId,Jedis jedis,String appName) throws Exception{
-        String share_url;
-        Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("distributer_id", userId);
-        queryMap.put("room_id", roomId);
-        Map<String,String> distributerRoom = CacheUtils.readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
-
-        boolean isDistributer = false;
-        String recommend_code = null;
-        if (! MiscUtils.isEmpty(distributerRoom)) {
-            isDistributer = true;
-            recommend_code = distributerRoom.get("rq_code");
-        }
-
-        //是分销员
-        if(isDistributer == true){
-            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId+"&recommend_code="+recommend_code;
-        }else {
-            //不是分销员
-            share_url = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+roomId;
-        }
-        return share_url;
     }
 
     private String getCourseShareURL(String userId, String courseId, Map<String,String> courseMap,Jedis jedis,String appName) throws Exception{
@@ -2633,9 +2603,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String share_url = MiscUtils.getConfigByKey("share_url_saas_shop_index",appName)+shop_id;
             png = ZXingUtil.createShopPng(user_head_portrait,userName,shop.get("shop_name"),share_url,shop.get("shop_remark"),appName);//生成图片
         }
-
-
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流
         ImageIO.write(png, "png", baos);//写入流中
         byte[] bytes = baos.toByteArray();//转换成字节

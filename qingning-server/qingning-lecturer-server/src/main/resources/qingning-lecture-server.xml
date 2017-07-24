@@ -877,7 +877,6 @@
 					<appName require="Y" />
 				</auth>
 				<inputs>
-					<param name="lecturer_id" type="string"  require="Y,000100" />
 				</inputs>
 				<outputs>
 					<param name="room_id" type="string" />
