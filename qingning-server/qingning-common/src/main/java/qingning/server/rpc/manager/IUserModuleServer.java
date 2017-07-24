@@ -169,4 +169,9 @@ public interface IUserModuleServer {
 	 */
 	boolean findUserWhetherToPay(Map<String,Object> record);
 
+	/**订单列表-后台
+	 * @param param
+	 * @return
+	 */
+	Map<String,Object> findOrderListAll(Map<String, Object> param);
 }

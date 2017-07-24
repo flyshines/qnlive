@@ -55,4 +55,11 @@ public interface LecturerCoursesProfitMapper {
 	List<Map<String,Object>> findUserBuiedSingleRecords(Map<String, Object> query);
 
 	Map<String,Object> findUserSumInfo(Map<String, Object> query);
+
+	/**查询所有订单记录
+	 * @param param
+	 * @param page
+	 * @return
+	 */
+	PageList<Map<String,Object>> selectOrderListAll(Map<String, Object> param, PageBounds page);
 }

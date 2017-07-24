@@ -50,6 +50,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private SystemConfigMapper systemConfigMapper;
     @Autowired(required = true)
     private TradeBillMapper tradeBillMapper;
+    @Autowired(required = true)
+    private WithdrawCashMapper withdrawCashMapper;
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -548,5 +550,20 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 	public int updateSeriesByMap(Map<String, Object> updateSeriesMap) {
 		return seriesMapper.updateSeries(updateSeriesMap);
 	}
+
+    /**提现记录
+     * @param param
+     * @return
+     */
+    @Override
+    public Map<String, Object> getUserWithdrawList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = withdrawCashMapper.selectSaaSWithdrawList(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
 
 }

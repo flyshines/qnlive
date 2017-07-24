@@ -124,6 +124,8 @@
 				<entry key="210004" value="系列不存在"/>
 				<entry key="210005" value="已开通店铺，不能重复开通"/>
 				<entry key="210007" value="轮播图上架上限"/>
+				<entry key="210008" value="七牛截取错误"/>
+				<entry key="210009" value="暂不支持此空间的文件截取"/>
 
 				<entry key="210006" value="用户操作失败"/>
 			</map>

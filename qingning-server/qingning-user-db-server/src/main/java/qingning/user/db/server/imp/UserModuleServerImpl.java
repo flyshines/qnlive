@@ -259,6 +259,37 @@ public class UserModuleServerImpl implements IUserModuleServer {
     }
 
     @Override
+    public Map<String, Object> findOrderListAll(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String,Object>> result = lecturerCoursesProfitMapper.selectOrderListAll(param,page);
+        Map<String,Object> res = new HashMap<>();
+        for(Map<String,Object> map: result){
+            if("1".equals(map.get("is_dist").toString())){
+                //分销者
+                map.put("profit_type","3");
+                map.put("user_amount",map.get("share_amount"));
+                map.remove("distributer_id");
+            }else if(!"0".equals(map.get("share_amount").toString())){
+                //讲师分销收益
+                map.put("profit_type","2");
+                Long total = Long.valueOf(map.get("amount").toString());
+                Long share = Long.valueOf(map.get("share_amount").toString());
+                map.put("user_amount",total-share);
+            }else if("2".equals(map.get("profit_type").toString())){
+                //门票
+                map.put("profit_type","0");
+                map.put("user_amount",map.get("amount"));
+            }else{
+                map.put("user_amount",map.get("amount"));
+            }
+        }
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
     public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap) {
         return distributerMapper.findDistributionInfoByDistributerId(queryMap);
     }
@@ -431,11 +462,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
     @Override
     public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
-        PageList<Map<String,Object>> resout = withdrawCashMapper.selectWithdrawListAll(param,page);
+        PageList<Map<String,Object>> result = withdrawCashMapper.selectWithdrawListAll(param,page);
         Map<String,Object> res = new HashMap<>();
-        res.put("user_list",resout);
-        res.put("total_count",resout.getTotal());
-        res.put("total_page",resout.getPaginator().getTotalPages());
+        res.put("user_list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
         return res;
     }
 

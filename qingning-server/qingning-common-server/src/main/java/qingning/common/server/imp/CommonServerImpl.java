@@ -32,7 +32,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import sun.misc.BASE64Encoder;
-import sun.misc.Cache;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -5076,9 +5075,45 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     }
 
 
-
-
-
-
+    /**
+     *  七牛音视频截取
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("cutMedia")
+    public Map<String, Object> cutMedia (RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String,Object> resMap = new HashMap<>();
+        Long time = null;
+        if(reqMap.containsKey("time_second"))
+            time = Long.valueOf(reqMap.get("time_second").toString());
+        String type = reqMap.get("type").toString();
+        Map<String,String> qiniuRes;
+        if("1".equals(type)){
+            //音频截取
+            qiniuRes = QiNiuUpUtils.cutAuto(reqMap.get("file_url").toString(),time,false);
+        }else {
+            //视频截取
+            String fileUrl = reqMap.get("file_url").toString();
+            //目前支持的空间文件转码
+            String autoDomain = MiscUtils.getConfigKey("audio_space_domain_name");
+            String videoDomain = MiscUtils.getConfigKey("video_space_domain_name");
+            //转移到新的空间名称
+            String audioSpace = MiscUtils.getConfigKey("audio_space");
+            //转移到新的视频空间名称
+            String videoSpace = MiscUtils.getConfigKey("video_space");
+            if(fileUrl.contains(autoDomain)){
+                qiniuRes = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
+            }else if(fileUrl.contains(videoDomain)){
+                qiniuRes = QiNiuUpUtils.cutVideo(videoSpace,videoDomain,reqMap.get("file_url").toString(),time,false);
+            }else{
+                throw new QNLiveException("210009");
+            }
+        }
+        resMap.put("psersistent_id",qiniuRes.get("persistentId"));
+        resMap.put("new_url",qiniuRes.get("newUrl"));
+        return resMap;
+    }
 
 }

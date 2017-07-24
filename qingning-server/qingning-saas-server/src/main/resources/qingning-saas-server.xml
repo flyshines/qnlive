@@ -934,6 +934,34 @@
 				<outputs>
 				</outputs>
 			</function>
+			<!-- 提现记录 -->
+			<function name="sysWithdraw">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="page_size" type="long"/>
+					<param name="page_num" type="long"/>
+				</inputs>
+				<outputs>
+					<param name="list" type="list">
+						<param name="withdraw_cash_id" type="string"/>
+						<param name="user_id" type="string"/>
+						<param name="user_name" type="string"/>
+						<param name="nick_name" type="string"/>
+						<param name="alipay_account_number" type="string"/>
+						<param name="actual_amount" type="double"/>
+						<param name="create_time" type="long"/>
+						<param name="status" type="string"/>
+						<param name="remark" type="string"/>
+						<param name="create_time" type="long"/>
+						<param name="handle_time" type="long"/>
+						<param name="type" default="1" type="string"/>
+					</param>
+					<param name="total_count" type="long" default="0"/>
+					<param name="total_page" type="long" default="0"/>
+				</outputs>
+			</function>
 		</default>
 		<version num="1.0.0" class="">
 		</version>

@@ -2178,5 +2178,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return null;
 	}
 
+    /**
+     * 提现记录
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("sysWithdraw")
+    public Map<String, Object>  sysWithdraw(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        Map<String, Object> resMap = saaSModuleServer.getUserWithdrawList(reqMap);
+        return resMap;
+	}
+
 
 }

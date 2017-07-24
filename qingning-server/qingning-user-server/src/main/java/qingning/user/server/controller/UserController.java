@@ -6,11 +6,14 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.CSVUtils;
 import qingning.common.util.Constants;
 import qingning.server.AbstractController;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.util.*;
 
 @RestController
 public class UserController extends AbstractController{
@@ -695,4 +698,117 @@ public class UserController extends AbstractController{
 	}
 
 
+	/**
+	 * 获取订单记录-后台
+	 * @param page_count
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/order/list", method = RequestMethod.GET)
+	public
+	@ResponseBody
+	ResponseEntity getOrderListAll(
+			@RequestParam(value="page_count", defaultValue="10") String page_count,
+			@RequestParam(value="page_num", defaultValue="1") String page_num,
+			@RequestParam(value="user_name",defaultValue="") String user_name,
+			@RequestParam(value="user_id",defaultValue="") String user_id,
+			@RequestParam(value="order_id",defaultValue="") String order_id,
+			@RequestParam(value="pre_pay_no",defaultValue="") String pre_pay_no,
+			@RequestParam(value="start_time",defaultValue="") Long start_time,
+			@RequestParam(value="end_time",defaultValue="") Long end_time,
+			@RequestHeader(value="access_token", defaultValue = "") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader(value="version",defaultValue="") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getOrderListAll", accessToken, version, appName);
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("page_count", page_count);
+		paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name)) {
+			paramMap.put("user_name", user_name);
+		}
+		if(StringUtils.isNotEmpty(user_id)) {
+			paramMap.put("user_id", user_id);
+		}
+		if(StringUtils.isNotEmpty(order_id)) {
+			paramMap.put("order_id", order_id);
+		}
+		if(StringUtils.isNotEmpty(pre_pay_no)) {
+			paramMap.put("pre_pay_no", pre_pay_no);
+		}
+		if(start_time!=null)
+			paramMap.put("start_time", new Date(Long.valueOf(start_time)));
+		if(end_time!=null)
+			paramMap.put("end_time", new Date(Long.valueOf(end_time)));
+		requestEntity.setParam(paramMap);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		return responseEntity;
+	}
+
+	/******************************* 导出数据 	***************************************/
+
+	/**
+	 * 导出订单记录-后台
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/sys/order/export",method=RequestMethod.GET)
+	public void exportOrderListAll(HttpServletResponse resp, HttpServletRequest req,
+							 @RequestParam(value="page_count", defaultValue="2000") String page_count,
+							 @RequestParam(value="page_num", defaultValue="1") String page_num,
+							 @RequestParam(value="user_name",defaultValue="") String user_name,
+							 @RequestParam(value="user_id",defaultValue="") String user_id,
+							 @RequestParam(value="order_id",defaultValue="") String order_id,
+							 @RequestParam(value="pre_pay_no",defaultValue="") String pre_pay_no,
+							 @RequestParam(value="start_time",defaultValue="") Long start_time,
+							 @RequestParam(value="end_time",defaultValue="") Long end_time,
+							 @RequestParam(value="access_token", defaultValue = "") String accessToken,
+							 @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+							 @RequestHeader(value="version",defaultValue="") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "exportOrderListAll", accessToken, version, appName);
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("page_count", page_count);
+		paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name)) {
+			paramMap.put("user_name", user_name);
+		}
+		if(StringUtils.isNotEmpty(user_id)) {
+			paramMap.put("user_id", user_id);
+		}
+		if(StringUtils.isNotEmpty(order_id)) {
+			paramMap.put("order_id", order_id);
+		}
+		if(StringUtils.isNotEmpty(pre_pay_no)) {
+			paramMap.put("pre_pay_no", pre_pay_no);
+		}
+		if(start_time!=null)
+			paramMap.put("start_time", new Date(Long.valueOf(start_time)));
+		if(end_time!=null)
+			paramMap.put("end_time", new Date(Long.valueOf(end_time)));
+		requestEntity.setParam(paramMap);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		List<Map<String, Object>> exportCourseList = new ArrayList<>();
+		Map<String,Object> res = (Map<String,Object>)responseEntity.getReturnData();
+		if(res.get("list") instanceof List){
+			exportCourseList = (List<Map<String, Object>>)res.get("list");
+		}
+
+		LinkedHashMap<String,String> headMap = new LinkedHashMap<>();
+		headMap.put("order_id", "订单ID");
+		headMap.put("pre_pay_no", "微信订单ID");
+		headMap.put("user_id", "收益人ID");
+		headMap.put("resume_id", "消费者ID");
+		headMap.put("distributer_id", "分销者ID");
+		headMap.put("user_amount", "收益");
+		headMap.put("amount", "订单总额");
+		headMap.put("nick_name", "收益人昵称");
+		headMap.put("profit_type", "收益来源");
+		headMap.put("resume_user", "消费者昵称");
+		headMap.put("distributer_user", "分销者昵称");
+		headMap.put("create_time", "创建时间");
+
+		File file = CSVUtils.createCSVFile(exportCourseList, headMap, null, "订单记录");
+		CSVUtils.exportFile(resp, file.getName(), file);
+	}
 }

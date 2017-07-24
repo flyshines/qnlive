@@ -6,6 +6,8 @@ package qingning.common.server.controller;
 //import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 //import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -1454,6 +1456,63 @@ public class CommonController extends AbstractController {
         logger.debug("IMERROR ipAdress : "+ipAdress);
         requestEntity.setParam(map);
         return this.process(requestEntity, serviceManger, message);
+    }
+
+
+    /**
+     * 七牛音视频处理
+     * @param fileUrl 文件地址
+
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/qiniu/cutMedia", method = RequestMethod.POST)
+    public
+    @ResponseBody ResponseEntity cutMedia(
+            HttpEntity<Object> entity,
+            @RequestParam(value = "file_url", defaultValue="") String fileUrl,
+            @RequestParam(value = "type", defaultValue="") String type,
+            @RequestParam(value="time_second", defaultValue="") String timeSecond
+                )throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "cutMedia", "", "","qnlive");
+        Map<String,String> map = (Map<String,String>)entity.getBody();
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 七牛回调处理
+
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/qiniu/callback", method = RequestMethod.GET)
+    public
+    @ResponseBody void callback(HttpServletRequest request,HttpServletResponse response)throws Exception {
+        logger.info("================> 接收到 qiniuNotify 通知。==================");
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        PrintWriter out = null;
+        try{
+            out =response.getWriter();
+            String resultData = MiscUtils.convertStreamToString(request.getInputStream());
+            SortedMap<String,String> requestMapData = MiscUtils.requestToMap(resultData);//notify请求数据
+            logger.info("===> weixinNotify 请求数据：" + requestMapData);
+            JSONObject result = new JSONObject();
+            result.put("success",true);
+            result.put("name","");
+            logger.info("===> result Data: " + result.toJSONString());
+            out.println(result.toJSONString());
+            out.flush();
+            out.close();
+        }catch(Exception e){
+            logger.error("====================>  qiniuNotify 处理异常  ========");
+            logger.error(e.getMessage(), e);
+            out.flush();
+            out.close();
+        }
+        logger.info("==========================>  qiniuNotify 处理完毕。 =======");
     }
 
 
