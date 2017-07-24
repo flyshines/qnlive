@@ -151,14 +151,14 @@ public class QiNiuUpUtils {
      * @param callBack  是否需要回调
      * @return
      */
-    public static Map<String,String> cutAuto(String url,Long times,boolean callBack) throws Exception{
+    public static Map<String,String> cutAuto(String space, String domain,String url,Long times,boolean callBack) throws Exception{
         Map<String,String> res = new HashMap<>();
         //默认截取时间
         if(times == null){
             times = cutTimes;
         }
         //文件名称
-        String srcKey = url.replace(autoDomain + "/", "");
+        String srcKey = url.replace(domain + "/", "");
         String srcNames[] = srcKey.split("\\.");
         String newSrcName;
         if(srcNames.length<2){
@@ -169,16 +169,16 @@ public class QiNiuUpUtils {
             newSrcName = srcName+".mp3";
         }
         //转码参数
-        String fops = "avthumb/mp3/t/"+times+"|saveas/"+UrlSafeBase64.encodeToString(audioSpace+":"+newSrcName);
+        String fops = "avthumb/mp3/t/"+times+"|saveas/"+UrlSafeBase64.encodeToString(space+":"+newSrcName);
         try {
             String persistentId;
             if(callBack){
-                persistentId = om.pfop(audioSpace, srcKey,fops,pipeline,verifyCallback);
+                persistentId = om.pfop(space, srcKey,fops,pipeline,verifyCallback);
             }else{
-                persistentId = om.pfop(audioSpace, srcKey,fops,pipeline,"");
+                persistentId = om.pfop(space, srcKey,fops,pipeline,"");
             }
             res.put("persistentId",persistentId);
-            res.put("newUrl",autoDomain+"/"+newSrcName);
+            res.put("newUrl",domain+"/"+newSrcName);
             return res;
         } catch (QiniuException e) {
             e.printStackTrace();

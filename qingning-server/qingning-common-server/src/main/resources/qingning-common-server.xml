@@ -785,6 +785,7 @@
 				<inputs>
 					<param name="classify_name" type="string" require="Y,000100"/>
 					<param name="position" type="string" require="N"/>
+					<param name="is_use" type="string" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
@@ -1029,7 +1030,7 @@
 					<param name="time_second" type="long" default="" require="N"/>
 				</inputs>
 				<outputs>
-					<param name="psersistent_id" type="string" />
+					<param name="persistent_id" type="string" />
 					<param name="new_url" type="string" />
 				</outputs>
 			</function>
