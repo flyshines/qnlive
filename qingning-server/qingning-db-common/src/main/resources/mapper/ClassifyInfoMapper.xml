@@ -82,7 +82,7 @@
       <if test="classify_name != null and classify_name != '' " >
 		classify_name = #{classify_name},
       </if>
-      <if test="is_use != null and is_use != ''" >
+      <if test="is_use != null" >
         is_use = #{is_use},
       </if>
       position = #{position}
@@ -98,5 +98,19 @@
 		AND classify_id IN (${classify_ids})
 	</if>
 	GROUP BY classify_id
+  </select>
+  <!-- 查找最后一条插入的记录 -->
+  <select id="selectLastInsert" resultType="hashmap">
+    SELECT
+      *
+    FROM
+    `t_classify_info` t
+    WHERE
+    t.classify_id = (
+    SELECT
+    max(classify_id)
+    FROM
+    t_classify_info
+    )
   </select>
 </mapper>

@@ -785,7 +785,7 @@
 				<inputs>
 					<param name="classify_name" type="string" require="Y,000100"/>
 					<param name="position" type="string" require="N"/>
-					<param name="is_use" type="string" require="N"/>
+					<param name="is_use" type="string" default="0" require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
