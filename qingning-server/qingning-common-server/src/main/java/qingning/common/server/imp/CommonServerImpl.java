@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import qingning.common.dj.DjSendMsg;
+import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.AccessToken;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
@@ -4563,7 +4564,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         for(String classKey : classKeys){
         	jedis.del(classKey);
         }
-        
+        //更新知享分类列表
+        //HttpClientUtil
+
+
         return resultMap;
     }
     
@@ -5090,19 +5094,31 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             time = Long.valueOf(reqMap.get("time_second").toString());
         String type = reqMap.get("type").toString();
         Map<String,String> qiniuRes;
+        String fileUrl = reqMap.get("file_url").toString();
         if("1".equals(type)){
             //音频截取
-            qiniuRes = QiNiuUpUtils.cutAuto(reqMap.get("file_url").toString(),time,false);
-        }else {
-            //视频截取
-            String fileUrl = reqMap.get("file_url").toString();
-            //目前支持的空间文件转码
             String autoDomain = MiscUtils.getConfigKey("audio_space_domain_name");
-            String videoDomain = MiscUtils.getConfigKey("video_space_domain_name");
+            String autoZXDomain = MiscUtils.getConfigKey("audio_zx_space_domain_name");
             //转移到新的空间名称
             String audioSpace = MiscUtils.getConfigKey("audio_space");
+            //转移到新的空间名称
+            String audioZXSpace = MiscUtils.getConfigKey("audio_zx_space");
+            if(fileUrl.contains(autoDomain)){
+                qiniuRes = QiNiuUpUtils.cutAuto(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
+            }else if(fileUrl.contains(autoZXDomain)){
+                qiniuRes = QiNiuUpUtils.cutAuto(audioZXSpace,autoZXDomain,reqMap.get("file_url").toString(),time,false);
+            }else{
+                throw new QNLiveException("210009");
+            }
+        }else {
+            //视频截取
+            //目前支持的空间文件转码
+            String videoDomain = MiscUtils.getConfigKey("video_space_domain_name");
+            String autoDomain = MiscUtils.getConfigKey("audio_space_domain_name");
+
             //转移到新的视频空间名称
             String videoSpace = MiscUtils.getConfigKey("video_space");
+            String audioSpace = MiscUtils.getConfigKey("audio_space");
             if(fileUrl.contains(autoDomain)){
                 qiniuRes = QiNiuUpUtils.cutVideo(audioSpace,autoDomain,reqMap.get("file_url").toString(),time,false);
             }else if(fileUrl.contains(videoDomain)){
@@ -5111,7 +5127,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("210009");
             }
         }
-        resMap.put("psersistent_id",qiniuRes.get("persistentId"));
+        resMap.put("persistent_id",qiniuRes.get("persistentId"));
         resMap.put("new_url",qiniuRes.get("newUrl"));
         return resMap;
     }
