@@ -1035,6 +1035,18 @@
 					<param name="new_url" type="string" />
 				</outputs>
 			</function>
+			<!--发送手机验证码-以后手机号码-->
+			<function name="sendVipVerificationCode">
+				<auth>
+					<accessToken require="Y"/>
+					<appName require="Y" />
+				</auth>
+				<inputs>
+					<param name="ipAdress" type="string"  require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
         <version num="1.0.0" class="">
