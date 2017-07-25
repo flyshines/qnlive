@@ -3959,23 +3959,72 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String courseId = reqMap.get("course_id").toString();
         Jedis jedis = jedisUtils.getJedis(appName);
-        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-        for(String lecturerId : lecturerSet) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("lecturer_id",lecturerId);
-            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
-            jedis.del(lectureCourseKey);
+ //       Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+//        for(String lecturerId : lecturerSet) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("lecturer_id",lecturerId);
+//            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+//            jedis.del(lectureCourseKey);
+//
+//            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+//            for(Map<String, Object> course : lecturerCourseList){
+//                if(course.get("course_updown").toString().equals("2")){
+//                    //加入讲师下架课程列表
+//                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
+//                }
+//            }
+//
+//
+//        }
 
-            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
-            for(Map<String, Object> course : lecturerCourseList){
-                if(course.get("course_updown").toString().equals("2")){
-                    //加入讲师下架课程列表
-                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
+
+        //</editor-fold>
+        //<editor-fold desc="刷新所有讲师的课程列表">
+                Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+        if(!MiscUtils.isEmpty(lecturerSet)){
+            String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+            String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+            jedis.del(predictionListKey);
+            jedis.del(finishListKey);
+            for(String lecturerId : lecturerSet) {
+                Map<String, Object> map = new HashMap<>();
+                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
+                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+                for(Map<String, Object> course : lecturerCourseList){
+                    Long time = 0L ;
+                    String courseList = "";
+                    String course_id = course.get("course_id").toString();
+                    long position = MiscUtils.convertObjectToLong(course.get("position"));
+//                    if(position == 408L){
+//                        System.out.println(position);
+//                    }
+                    if(course.get("status").toString().equals("2")){
+                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, position);
+//                        if(lpos == 12290585000000404L){
+//                            System.out.println("-----------------------");
+//                        }
+
+                        jedis.zadd(finishListKey, lpos,course_id);//在结束中增加
+                        Double zscore = jedis.zscore(predictionListKey, course_id);
+                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
+
+                    }else if(course.get("status").toString().equals("1")){
+                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, position);
+//                        if(lpos == 12290585000000404L){
+//                            System.out.println("-----------------------");
+//                        }
+                        jedis.zadd(predictionListKey, lpos,course_id);//在结束中增加
+                        Double zscore = jedis.zscore(predictionListKey, course_id);
+                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
+
+                    }
                 }
             }
-
-
         }
+        //</editor-fold>
+
 
 //            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
 //            for (Map<String, Object> series : seriesList) {
@@ -4041,52 +4090,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        }
 
 
-        //</editor-fold>
-        //<editor-fold desc="刷新所有讲师的课程列表">
-//                Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-//        if(!MiscUtils.isEmpty(lecturerSet)){
-//            String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-//            String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
-//            jedis.del(predictionListKey);
-//            jedis.del(finishListKey);
-//            for(String lecturerId : lecturerSet) {
-//                Map<String, Object> map = new HashMap<>();
-//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-//                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
-//                for(Map<String, Object> course : lecturerCourseList){
-//                    Long time = 0L ;
-//                    String courseList = "";
-//                    String course_id = course.get("course_id").toString();
-//                    long position = MiscUtils.convertObjectToLong(course.get("position"));
-////                    if(position == 408L){
-////                        System.out.println(position);
-////                    }
-//                    if(course.get("status").toString().equals("2")){
-//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-//                        long lpos = MiscUtils.convertInfoToPostion(time, position);
-////                        if(lpos == 12290585000000404L){
-////                            System.out.println("-----------------------");
-////                        }
-//
-//                        jedis.zadd(finishListKey, lpos,course_id);//在结束中增加
-//                        Double zscore = jedis.zscore(predictionListKey, course_id);
-//                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
-//
-//                    }else if(course.get("status").toString().equals("1")){
-//                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("end_time").toString());
-//                        long lpos = MiscUtils.convertInfoToPostion(time, position);
-////                        if(lpos == 12290585000000404L){
-////                            System.out.println("-----------------------");
-////                        }
-//                        jedis.zadd(predictionListKey, lpos,course_id);//在结束中增加
-//                        Double zscore = jedis.zscore(predictionListKey, course_id);
-//                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
-//
-//                    }
-//                }
-//            }
-//        }
-        //</editor-fold>
+
 
         return resultMap;
     }
