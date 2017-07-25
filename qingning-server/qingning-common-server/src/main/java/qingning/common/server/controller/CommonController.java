@@ -1473,7 +1473,7 @@ public class CommonController extends AbstractController {
             @RequestParam(value = "file_url", defaultValue="") String fileUrl,
             @RequestParam(value = "type", defaultValue="") String type,
             @RequestParam(value="time_second", defaultValue="") String timeSecond
-                )throws Exception {
+    )throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "cutMedia", "", "","qnlive");
         Map<String,String> map = (Map<String,String>)entity.getBody();
         requestEntity.setParam(map);
@@ -1516,9 +1516,61 @@ public class CommonController extends AbstractController {
     }
 
 
-
+<<<<<<< .mine
 
     @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/user/userloginbyuserid", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity userlogin(
+            @RequestParam(value="user_id", defaultValue="") String user_id,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader(value="version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLoginByUserId", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+=======
+     * 发送手机验证码(已有电话号码用户)
+     * @param accessToken 用户安全证书
+     * @param version 版本
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/vip/sendVerificationCode", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity sendVipVerificationCode(HttpServletRequest request,
+                                                             @RequestHeader("access_token") String accessToken,
+                                                             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+                                                             @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendVipVerificationCode", accessToken, null,appName);
+>>>>>>> .theirs
+ /**
+     * 发送手机验证码(已有电话号码用户)
+     * @param accessToken 用户安全证书
+     * @param version 版本
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/vip/sendVerificationCode", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity sendVipVerificationCode(HttpServletRequest request,
+                                                             @RequestHeader("access_token") String accessToken,
+                                                             @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+                                                             @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "sendVipVerificationCode", accessToken, null,appName);
+        String ipAdress = HttpTookit.getIpAdress(request);//获取请求地址
+        Map<String,String> map = new HashMap<>();
+        map.put("ipAdress",ipAdress);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }<<<<<<< .mine
+        requestEntity.setParam(param);
+
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+=======
+        Map<String,String> map = new HashMap<>();
+        map.put("ipAdress",ipAdress);
+        requestEntity.setParam(map);
+>>>>>>> .theirs
+@SuppressWarnings("unchecked")
     @RequestMapping(value = "/common/user/userloginbyuserid", method = RequestMethod.GET)
     public
     @ResponseBody
@@ -1534,9 +1586,17 @@ public class CommonController extends AbstractController {
 
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }<<<<<<< .mine
     }
 
 
 
 
+=======
+    }
+
+
+
+
+>>>>>>> .theirs
 }
