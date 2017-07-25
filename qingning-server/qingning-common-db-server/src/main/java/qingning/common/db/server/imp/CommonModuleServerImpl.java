@@ -959,8 +959,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public int insertClassify(Map<String, Object> record) {
-		return classifyInfoMapper.insertClassifyInfo(record);
+	@Transactional(rollbackFor=Exception.class)
+	public Map<String,Object> insertClassify(Map<String, Object> record) {
+		int i = classifyInfoMapper.insertClassifyInfo(record);
+		if(i>0){
+			return classifyInfoMapper.selectLastInsert();
+		}
+		return null;
 	}
 
 	@Override

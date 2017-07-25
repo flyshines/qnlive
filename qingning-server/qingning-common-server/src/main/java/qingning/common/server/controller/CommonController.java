@@ -1074,7 +1074,7 @@ public class CommonController extends AbstractController {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/classify/edit", method = RequestMethod.POST)
+    @RequestMapping(value = "/common/classify/edit", method = RequestMethod.PUT)
     public @ResponseBody
     ResponseEntity editClassify(
             @RequestHeader(value = "access_token", defaultValue = "") String accessToken,

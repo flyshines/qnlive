@@ -294,6 +294,56 @@ public class HttpTookit {
     }
 
 
+
+    /**
+     * HTTP Post 获取内容
+     * @param url  请求的url地址 ?之前的地址
+     * @param params 请求的参数
+     * @param charset    编码格式
+     * @return    页面内容
+     */
+    public static String doPost(String url,Map<String,String> params,String charset,Map<String,String> headers){
+        if(StringUtils.isBlank(url)){
+            return null;
+        }
+        try {
+            List<NameValuePair> pairs = null;
+            if(params != null && !params.isEmpty()){
+                pairs = new ArrayList<NameValuePair>(params.size());
+                for(Map.Entry<String,String> entry : params.entrySet()){
+                    String value = entry.getValue();
+                    if(value != null){
+                        pairs.add(new BasicNameValuePair(entry.getKey(),value));
+                    }
+                }
+            }
+            HttpPost httpPost = new HttpPost(url);
+            for(String key:headers.keySet()){
+                httpPost.setHeader(key,headers.get(key));
+            }
+            if(pairs != null && pairs.size() > 0){
+                httpPost.setEntity(new UrlEncodedFormEntity(pairs,CHARSET));
+            }
+
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                httpPost.abort();
+                throw new RuntimeException("HttpClient,error status code :" + statusCode);
+            }
+            HttpEntity entity = response.getEntity();
+            String result = null;
+            if (entity != null){
+                result = EntityUtils.toString(entity, "utf-8");
+            }
+            EntityUtils.consume(entity);
+            response.close();
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static void main(String []args){
 //        Map<String, String> param = new HashMap<String, String>();
 //        param.put("name", "wan");

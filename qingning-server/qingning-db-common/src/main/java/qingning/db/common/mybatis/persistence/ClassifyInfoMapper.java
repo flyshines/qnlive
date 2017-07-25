@@ -34,4 +34,9 @@ public interface ClassifyInfoMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> findCourseNumGroupByClassifyId(Map<String, Object> selectMap);
+
+    /**查找最后一条记录
+     * @return
+     */
+    Map<String,Object> selectLastInsert();
 }

@@ -150,7 +150,7 @@ public interface ICommonModuleServer {
 	 * @param record
 	 * @return
 	 */
-	int insertClassify(Map<String, Object> record);
+	Map<String,Object> insertClassify(Map<String, Object> record);
 	
 	/**
 	 * 更新分类

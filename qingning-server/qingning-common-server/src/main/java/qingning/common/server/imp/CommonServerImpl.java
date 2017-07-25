@@ -4560,18 +4560,32 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         param.put("create_date",now);
         param.put("create_time",now.getTime());
-        param.put("is_use","1");
+        //param.put("is_use","1");
         param.put("app_names", appName);
-        commonModuleServer.insertClassify(param);
+        Map<String,Object> result = commonModuleServer.insertClassify(param);
         //清除缓存
         Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
-        for(String classKey : classKeys){
-        	jedis.del(classKey);
-        }
+        classKeys.forEach(jedis::del);
+
         //更新知享分类列表
-        //HttpClientUtil
 
-
+        //参数
+        Map<String,String> paramMap = new HashMap<>();
+        paramMap.put("qn_classify_id",result.get("classify_id").toString());
+        paramMap.put("classify_name",param.get("classify_name").toString());
+        paramMap.put("is_use",result.get("is_use").toString());
+        if(result.get("position")!=null)
+            paramMap.put("position",result.get("position").toString());
+        else
+            paramMap.put("position","0");
+        //请求头
+        Map<String,String> headerMap = new HashMap<>();
+        headerMap.put("version","1.0");
+        headerMap.put("Content-Type","application/json;charset=UTF-8");
+        String addClassfyUrl = MiscUtils.getConfigByKey("classfy_sync_add",Constants.HEADER_APP_NAME);
+        //获取请求
+        String res =  HttpClientUtil.doPostUrl(addClassfyUrl,headerMap,paramMap,"UTF-8");
+        logger.debug(res);
         return resultMap;
     }
     
@@ -4643,14 +4657,31 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String,Object> param = (Map)reqEntity.getParam();
         param.put("app_names", appName);
-        
         commonModuleServer.updateClassify(param);
         //清除缓存
         Set<String> classKeys = jedis.keys(Constants.CACHED_KEY_CLASSIFY_PATTERN);
         for(String classKey : classKeys){
         	jedis.del(classKey);
         }
-        
+
+        //更新知享分类列表
+        //参数
+        Map<String,String> paramMap = new HashMap<>();
+        paramMap.put("qn_classify_id",param.get("classify_id").toString());
+        if(param.get("classify_name")!=null)
+            paramMap.put("classify_name",param.get("classify_name").toString());
+        if(param.get("position")!=null)
+            paramMap.put("position",param.get("position").toString());
+        if(param.get("is_use")!=null)
+            paramMap.put("is_use",param.get("is_use").toString());
+        //请求头
+        Map<String,String> headerMap = new HashMap<>();
+        headerMap.put("version","1.0");
+        headerMap.put("Content-Type","application/json;charset=UTF-8");
+        String updateClassfyUrl = MiscUtils.getConfigByKey("classfy_sync_update",Constants.HEADER_APP_NAME);
+        //获取请求
+        String res =  HttpClientUtil.doPutUrl(updateClassfyUrl,headerMap,paramMap,"UTF-8");
+        logger.debug(res);
         return resultMap;
     }
 
