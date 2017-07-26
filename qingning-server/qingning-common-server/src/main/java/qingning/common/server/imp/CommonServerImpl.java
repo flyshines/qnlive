@@ -1087,7 +1087,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String,String> checkWeixinPayBill (RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String pre_pay_no = reqMap.get("payment_id").toString();
-        Map<String,Object> billInfo = commonModuleServer.findTradeBillByPaymentid(pre_pay_no);
+        Map<String,Object> billInfo = commonModuleServer.findTradeBillByPrePayNo(pre_pay_no);
 
         Map<String, String> result = new HashMap<>();
         if (billInfo != null) {
@@ -5341,6 +5341,37 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         resultMap.put("nick_name", userMap.get("nick_name"));
         return resultMap;
     }
+
+    /**
+     *  发送验证码
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("queryOrder")
+    public Map<String, Object> queryOrder (RequestEntity reqEntity) throws Exception{
+        Map<String,String> reqMap = (Map<String, String>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        String user_id = reqMap.get("user_id").toString();
+        String pre_pay_no = reqMap.get("pre_pay_no").toString();
+
+        Map<String, Object> tradeBill = commonModuleServer.findTradeBillByPrePayNo(pre_pay_no);
+        String trade_id = tradeBill.get("trade_id").toString();
+        TenPayUtils.TradeState tradeState = TenPayUtils.queryOrder(null, trade_id, appName);
+        if(tradeState.getCode()==0){
+            System.out.println("支付成功");
+        }else{
+            System.out.println("=========================="+tradeState.getStateInfo());
+        }
+
+
+        return null;
+    }
+
+
+
+
+
 
 
 }

@@ -1060,6 +1060,19 @@
 				<outputs>
 				</outputs>
 			</function>
+
+			<function name="queryOrder">
+				<auth>
+					<accessToken require="N" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+					<param name="user_id" type="string" require="Y,000100"/>
+					<param name="trade_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
         <version num="1.0.0" class="">

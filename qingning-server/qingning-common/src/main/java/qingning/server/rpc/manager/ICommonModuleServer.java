@@ -33,7 +33,7 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findTradebillByOutTradeNo(String outTradeNo);
 
-	Map<String,Object> findTradeBillByPaymentid(String pre_pay_no);
+	Map<String,Object> findTradeBillByPrePayNo(String pre_pay_no);
 
 	Map<String,Object> handleWeixinPayResult(Map<String, Object> requestMapData) throws Exception;
 	
