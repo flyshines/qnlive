@@ -805,6 +805,7 @@
 						<param name="classify_id" type="string" />
 						<param name="classify_name" type="string" />
 						<param name="course_num" type="long" />
+						<param name="zx_course_num" type="long" />
 						<param name="position" type="int" />
 						<param name="is_use" type="string" />
 					</param>
