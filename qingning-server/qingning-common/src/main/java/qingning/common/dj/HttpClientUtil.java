@@ -69,7 +69,7 @@ public class HttpClientUtil {
         }  
         return result;  
     }
-    public static String doPostUrl(String url,Map<String,String> headerParams,Map<String,String> map,String charset){
+    public static String doPostUrl(String url,Map<String,String> headerParams,Map<String,Object> map,String charset){
         HttpClient httpClient = null;
         HttpPost httpPost = null;
         String result = null;

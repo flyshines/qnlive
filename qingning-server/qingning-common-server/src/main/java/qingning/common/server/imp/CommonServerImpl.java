@@ -4591,7 +4591,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //更新知享分类列表
 
         //参数
-        Map<String,String> paramMap = new HashMap<>();
+        Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("qn_classify_id",result.get("classify_id").toString());
         paramMap.put("classify_name",param.get("classify_name").toString());
         paramMap.put("is_use",result.get("is_use").toString());
@@ -4653,15 +4653,37 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         	classifyIdCourseNumMap.put(classCourseNum.get("classify_id").toString(), 
         			classCourseNum.get("course_num"));
         }
-        
+        JSONArray array = new JSONArray();
         /*
          * 循环分类列表，进行一一赋值课程数量
          */
         for(Map<String, Object> classifyMap : classifyList){
         	String classId = classifyMap.get("classify_id").toString();
         	classifyMap.put("course_num", classifyIdCourseNumMap.get(classId));
+            array.add(classId);
         }
-        
+
+        //参数
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("qn_classify_ids",array);
+        //请求头
+        Map<String,String> headerMap = new HashMap<>();
+        headerMap.put("version","1.0");
+        headerMap.put("Content-Type","application/json;charset=UTF-8");
+
+        //获取知享课程数
+        String getUrl = MiscUtils.getConfigByKey("classfy_sync_get",Constants.HEADER_APP_NAME);
+        String result = HttpClientUtil.doPostUrl(getUrl,headerMap,paramMap,"UTF-8");
+        JSONObject obj = JSON.parseObject(result);
+        JSONObject resData = obj.getJSONObject("res_data");
+        JSONObject classfy = resData.getJSONObject("classify_course_num");
+
+        //插入知享数据
+        for(Map<String, Object> classifyMap : classifyList){
+            String classId = classifyMap.get("classify_id").toString();
+            classifyMap.put("zx_course_num", classfy.getString(classId));
+        }
+
         resultMap.put("classify_info_list", classifyList);
         return resultMap;
     }
