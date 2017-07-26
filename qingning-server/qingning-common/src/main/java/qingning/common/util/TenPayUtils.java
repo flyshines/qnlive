@@ -147,7 +147,8 @@ public class TenPayUtils {
 //        String outRefundNo = MiscUtils.getUUId();
 //        Integer totalFee = 1001;
 //        Integer refundFee=1001;
-//        sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null,null);
+        TradeState qnlive = queryOrder("", "010c4a032576481f81ce8a4740cdec14", "qnlive");
+        //sendRefundApply(outTradeNo, outRefundNo, totalFee, refundFee, null,null);
     }
 
 
@@ -186,7 +187,11 @@ public class TenPayUtils {
         params.put ("appid", TenPayConstant.getAppId(appName));
         params.put ("mch_id", TenPayConstant.getMchId(appName));
         params.put ("nonce_str", getRandomStr ());
-        params.put ("out_trade_no", outTradeNo);
+        if(MiscUtils.isEmpty(tradeState)){
+            params.put ("out_trade_no", outTradeNo);
+        }else{
+            params.put ("transaction_id", transactionId);
+        }
         params.put ("sign", getSign (params, "0",appName));
         String response = TenPayHttpClientUtil.doPost (TenPayHttpClientUtil.getHttpURLConnection(TenPayConstant.getOrderQueryUrl(appName)), TenPayXmlUtil.doXMLCreate(params).getBytes());
         Map<String, String> returnMap = TenPayXmlUtil.doXMLParse (response);

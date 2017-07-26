@@ -98,7 +98,7 @@
     select * from t_payment_bill where trade_id = #{tradeId,jdbcType=VARCHAR}
   </select>
 
-  <select id="findTradeBillByPaymentid" resultType="hashmap" parameterType="java.lang.String" >
+  <select id="findTradeBillByPrePayNo" resultType="hashmap" parameterType="java.lang.String" >
       select * from t_payment_bill where pre_pay_no = #{pre_pay_no,jdbcType=VARCHAR}
   </select>
 </mapper>
