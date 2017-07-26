@@ -264,6 +264,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * app 登录
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("userLogin")
     public Map<String,Object> userLogin (RequestEntity reqEntity) throws Exception{
@@ -346,9 +352,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+
+
+
+
+
+
     //<editor-fold desc="??????code???">
     /**
-     * ??????code???
+     * 微信登录
      * @param reqEntity
      * @return
      * @throws Exception
@@ -3957,25 +3969,83 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        String courseId = reqMap.get("course_id").toString();
+      //  String courseId = reqMap.get("course_id").toString();
         Jedis jedis = jedisUtils.getJedis(appName);
-        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-        for(String lecturerId : lecturerSet) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("lecturer_id",lecturerId);
-            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
-            jedis.del(lectureCourseKey);
+ //       Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+//        for(String lecturerId : lecturerSet) {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("lecturer_id",lecturerId);
+//            String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+//            jedis.del(lectureCourseKey);
+//
+//            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+//            for(Map<String, Object> course : lecturerCourseList){
+//                if(course.get("course_updown").toString().equals("2")){
+//                    //加入讲师下架课程列表
+//                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
+//                }
+//            }
+//
+//
+//        }
 
-            List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
-            for(Map<String, Object> course : lecturerCourseList){
-                if(course.get("course_updown").toString().equals("2")){
-                    //加入讲师下架课程列表
-                    jedis.zadd(lectureCourseKey, MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position"))), course.get("course_id").toString());
+
+        //</editor-fold>
+        //<editor-fold desc="刷新所有讲师的课程列表">
+        Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
+
+        if(!MiscUtils.isEmpty(lecturerSet)){
+//            String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+//            String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
+
+                   // Map<String,Object> map = new HashMap<>();
+
+
+            for(String lecturerId : lecturerSet) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("lecturer_id",lecturerId);
+                String predictionListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+                String finishListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
+                jedis.del(predictionListKey);
+                jedis.del(finishListKey);
+                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
+                for(Map<String, Object> course : lecturerCourseList){
+                    Long time = 0L ;
+                    String courseList = "";
+                    String course_id = course.get("course_id").toString();
+                    long position = MiscUtils.convertObjectToLong(course.get("position"));
+//                    if(position == 408L){
+//                        System.out.println(position);
+//                    }
+
+
+                    if(course.get("status").toString().equals("2")){
+                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, position);
+//                        if(lpos == 12290585000000404L){
+//                            System.out.println("-----------------------");
+//                        }
+
+                        jedis.zadd(finishListKey, lpos,course_id);//在结束中增加
+                        Double zscore = jedis.zscore(predictionListKey, course_id);
+                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
+
+                    }else if(course.get("status").toString().equals("1")){
+                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("end_time").toString());
+                        long lpos = MiscUtils.convertInfoToPostion(time, position);
+//                        if(lpos == 12290585000000404L){
+//                            System.out.println("-----------------------");
+//                        }
+                        jedis.zadd(predictionListKey, lpos,course_id);//在结束中增加
+                        Double zscore = jedis.zscore(predictionListKey, course_id);
+                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
+
+                    }
                 }
             }
-
-
         }
+        //</editor-fold>
+
 
 //            List<Map<String, Object>> seriesList = commonModuleServer.findSeriesByLecturer(lecturerId);
 //            for (Map<String, Object> series : seriesList) {
@@ -4041,52 +4111,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //        }
 
 
-        //</editor-fold>
-        //<editor-fold desc="刷新所有讲师的课程列表">
-//                Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-//        if(!MiscUtils.isEmpty(lecturerSet)){
-//            String predictionListKey = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-//            String finishListKey =  Constants.CACHED_KEY_PLATFORM_COURSE_FINISH;
-//            jedis.del(predictionListKey);
-//            jedis.del(finishListKey);
-//            for(String lecturerId : lecturerSet) {
-//                Map<String, Object> map = new HashMap<>();
-//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
-//                List<Map<String, Object>> lecturerCourseList = commonModuleServer.findLecturerCourseList(map);
-//                for(Map<String, Object> course : lecturerCourseList){
-//                    Long time = 0L ;
-//                    String courseList = "";
-//                    String course_id = course.get("course_id").toString();
-//                    long position = MiscUtils.convertObjectToLong(course.get("position"));
-////                    if(position == 408L){
-////                        System.out.println(position);
-////                    }
-//                    if(course.get("status").toString().equals("2")){
-//                        time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
-//                        long lpos = MiscUtils.convertInfoToPostion(time, position);
-////                        if(lpos == 12290585000000404L){
-////                            System.out.println("-----------------------");
-////                        }
-//
-//                        jedis.zadd(finishListKey, lpos,course_id);//在结束中增加
-//                        Double zscore = jedis.zscore(predictionListKey, course_id);
-//                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
-//
-//                    }else if(course.get("status").toString().equals("1")){
-//                        time = MiscUtils.convertObjectToLong(course.get("start_time"));//Long.valueOf(course.get("end_time").toString());
-//                        long lpos = MiscUtils.convertInfoToPostion(time, position);
-////                        if(lpos == 12290585000000404L){
-////                            System.out.println("-----------------------");
-////                        }
-//                        jedis.zadd(predictionListKey, lpos,course_id);//在结束中增加
-//                        Double zscore = jedis.zscore(predictionListKey, course_id);
-//                        System.out.println("course_id:"+course_id+","+"lpos:"+lpos+","+"zscore:"+zscore);
-//
-//                    }
-//                }
-//            }
-//        }
-        //</editor-fold>
+
 
         return resultMap;
     }
@@ -5228,5 +5253,72 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException("130001");
         }
     }
+
+
+    /**
+     *
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("userLoginByUserId")
+    public  Map<String, Object> userLoginByUserId (RequestEntity reqEntity) throws Exception{
+        Map<String,String> map = (Map<String, String>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Map<String,String> cacheMap = new HashMap<String,String>();
+        Map<String, Object> resultMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String user_id = map.get("user_id");
+        Map<String, Object> loginInfoMap = commonModuleServer.findLoginInfoByUserId(user_id);
+        MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
+        String last_login_date = (new Date()).getTime() + "";
+
+        //2.根据相关信息生成access_token
+        String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
+
+        map.put("access_token", access_token);
+        String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
+        jedis.hmset(process_access_token, cacheMap);
+        jedis.expire(process_access_token, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time",appName)));
+
+        Map<String,Object> query = new HashMap<String,Object>();
+        query.put("user_id", user_id);
+        jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query));
+        Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
+        String m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
+        String m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
+        //3.增加相关返回参数
+        resultMap.put("access_token", access_token);
+        resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
+        resultMap.put("m_user_id", m_user_id);
+        resultMap.put("user_id", user_id);
+        //注册店铺用到
+        loginInfoMap.put("user_name",userMap.get("nick_name"));
+        loginInfoMap.put("avatar_address",userMap.get("avatar_address"));
+
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
+        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryMap);
+        if(jedis.exists(lectureLiveRoomKey)){
+            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
+            String roomId = "";
+            if(roomKey!=null&&!roomKey.isEmpty()) {
+                for (String id : roomKey.keySet()) {
+                    roomId = id;
+                }
+            }
+            resultMap.put("room_id", roomId);
+        }
+        //</editor-fold>
+        String shop_id = "";
+        if(!MiscUtils.isEmpty(userMap.get("shop_id"))){
+            shop_id = userMap.get("shop_id");
+        }
+        resultMap.put("shop_id", shop_id);
+        resultMap.put("avatar_address", userMap.get("avatar_address"));
+        resultMap.put("nick_name", userMap.get("nick_name"));
+        return resultMap;
+    }
+
 
 }
