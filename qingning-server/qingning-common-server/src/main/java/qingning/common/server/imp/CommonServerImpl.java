@@ -4674,16 +4674,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //获取知享课程数
         String getUrl = MiscUtils.getConfigByKey("classfy_sync_get",Constants.HEADER_APP_NAME);
         String result = HttpClientUtil.doPostUrl(getUrl,headerMap,paramMap,"UTF-8");
-        JSONObject obj = JSON.parseObject(result);
-        JSONObject resData = obj.getJSONObject("res_data");
-        JSONObject classfy = resData.getJSONObject("classify_course_num");
+        try{
+            JSONObject obj = JSON.parseObject(result);
+            JSONObject resData = obj.getJSONObject("res_data");
+            JSONObject classfy = resData.getJSONObject("classify_course_num");
 
-        //插入知享数据
-        for(Map<String, Object> classifyMap : classifyList){
-            String classId = classifyMap.get("classify_id").toString();
-            classifyMap.put("zx_course_num", classfy.getString(classId));
+            //插入知享数据
+            for(Map<String, Object> classifyMap : classifyList){
+                String classId = classifyMap.get("classify_id").toString();
+                classifyMap.put("zx_course_num", classfy.getString(classId));
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
         }
-
         resultMap.put("classify_info_list", classifyList);
         return resultMap;
     }
