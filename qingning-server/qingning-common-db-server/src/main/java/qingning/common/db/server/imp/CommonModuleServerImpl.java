@@ -1132,4 +1132,67 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public void updateSeriesCmountByCourseId(Map<String, Object> course) {
 		seriesMapper.updateSeriesCmountByCourseId(course);
 	}
+
+	@Override
+	public boolean isStudentOfTheSeries(Map<String, Object> queryMap) {
+		return !MiscUtils.isEmpty( seriesStudentsMapper.isStudentOfTheSeries(queryMap));
+	}
+
+	@Override
+	public boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap) {
+		return !MiscUtils.isEmpty(coursesStudentsMapper.isStudentOfTheCourse(studentQueryMap));
+	}
+
+	@Override
+	public Map<String, Object> joinCourse(Map<String, String> courseMap) {
+		Date now = new Date();
+		Map<String, Object> student = new HashMap<String, Object>();
+		student.put("student_id", MiscUtils.getUUId());
+		student.put("user_id", courseMap.get("user_id"));
+		student.put("lecturer_id", courseMap.get("lecturer_id"));
+		student.put("room_id", courseMap.get("room_id"));
+		student.put("course_id", courseMap.get("course_id"));
+		student.put("value_from", courseMap.get("value_from"));
+		student.put("course_password", courseMap.get("course_password"));
+		student.put("student_type", "0"); //TODO distribution case
+		student.put("create_time", now);
+		student.put("create_date", now);
+		//students.setPaymentAmount();//TODO
+		Integer insertCount = coursesStudentsMapper.insertStudent(student);
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("insertCount", insertCount);
+		resultMap.put("student_id",student.get("student_id"));
+		return resultMap;
+	}
+
+	@Override
+	public void increaseStudentNumByCourseId(String course_id) {
+		coursesMapper.increaseStudent(course_id);
+	}
+
+	@Override
+	public Map<String, Object> joinSeries(Map<String, String> seriesMap) {
+		Date now = new Date();
+		Map<String, Object> student = new HashMap<String, Object>();
+		student.put("student_id", MiscUtils.getUUId());
+		student.put("user_id", seriesMap.get("user_id"));
+		student.put("lecturer_id", seriesMap.get("lecturer_id"));
+		student.put("series_id", seriesMap.get("series_id"));
+		student.put("student_type", "0"); //TODO distribution case
+		student.put("value_from", seriesMap.get("value_from"));
+		student.put("create_time", now);
+		student.put("create_date", now);
+		//students.setPaymentAmount();//TODO
+		Integer insertCount = seriesStudentsMapper.insertStudent(student);
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("insertCount", insertCount);
+		resultMap.put("student_id", student.get("student_id"));
+		return resultMap;
+	}
+
+	@Override
+	public void increaseStudentNumBySeriesId(String series_id) {
+		seriesMapper.increaseSeriesStudent(series_id);
+	}
+
 }

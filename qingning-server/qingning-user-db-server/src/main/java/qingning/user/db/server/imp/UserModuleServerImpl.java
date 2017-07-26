@@ -289,6 +289,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
         return res;
     }
 
+
     @Override
     public List<Map<String, Object>> findDistributionInfoByDistributerId(Map<String, Object> queryMap) {
         return distributerMapper.findDistributionInfoByDistributerId(queryMap);
@@ -514,5 +515,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
     public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
         return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
     }
+
+    @Override
+    public Map<String, Object> findUserOrderByCourse(Map<String, Object> queryTradeMap) {
+        return tradeBillMapper.findUserOrderByCourse(queryTradeMap);
+    }
+
 
 }

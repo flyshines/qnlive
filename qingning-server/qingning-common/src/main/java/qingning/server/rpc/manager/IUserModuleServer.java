@@ -174,4 +174,6 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	Map<String,Object> findOrderListAll(Map<String, Object> param);
+
+	Map<String,Object> findUserOrderByCourse(Map<String, Object> queryTradeMap);
 }

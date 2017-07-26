@@ -1,6 +1,10 @@
 package qingning.server.rpc.manager;
 
 
+import qingning.common.util.MiscUtils;
+
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -277,4 +281,20 @@ public interface ICommonModuleServer {
 	 * @param course
 	 */
 	void updateSeriesCmountByCourseId(Map<String, Object> course);
+
+
+
+	boolean isStudentOfTheSeries(Map<String, Object> queryMap);
+
+
+	boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap);
+
+
+	Map<String, Object> joinCourse(Map<String, String> courseMap);
+
+	void increaseStudentNumByCourseId(String course_id);
+
+	Map<String, Object> joinSeries(Map<String, String> seriesMap);
+
+	void increaseStudentNumBySeriesId(String series_id);
 }
