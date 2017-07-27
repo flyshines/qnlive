@@ -624,13 +624,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 resultMap.put("join_status", "1");
             }else {
                 resultMap.put("join_status", "0");
-//                Map<String,Object> queryTradeMap = new HashMap<>();
-//                queryTradeMap.put("course_id",courseMap.get("course_id"));
-//                queryTradeMap.put("user_id",userId);
-//                Map<String, Object> userOrderByCourse = userModuleServer.findUserOrderByCourse(queryTradeMap);//查询用户成功订单
-//                if(!MiscUtils.isEmpty(userOrderByCourse)){
-//                    resultMap.put("pre_pay_no",userOrderByCourse.get("pre_pay_no").toString());
-//                }
+                Map<String,Object> queryTradeMap = new HashMap<>();
+                queryTradeMap.put("course_id",courseMap.get("course_id"));
+                queryTradeMap.put("user_id",userId);
+                Map<String, Object> userOrderByCourse = userModuleServer.findUserOrderByCourse(queryTradeMap);//查询用户成功订单
+                if(!MiscUtils.isEmpty(userOrderByCourse)){
+                    resultMap.put("pre_pay_no",userOrderByCourse.get("pre_pay_no").toString());
+                }
             }
 
             //查询关注状态

@@ -5344,6 +5344,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
     /**
      * 查询订单
+     * 根据订单结果进行加入课或系列
+     * 1.查询当前订单结果
+     * 2.如果不为成功或失败 访问微信查询订单
+     * 3.根据订单结果进行处理
      * @param reqEntity
      * @throws Exception
      */
