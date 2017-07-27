@@ -3574,30 +3574,25 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     classifyList.add(classify_info);
                 }
             }
-        }else{ //没有
-            String likeAppNmae = "%"+appName+"%";
-            classifyList = commonModuleServer.findClassifyInfoByAppName(likeAppNmae);//读数据库
-            //根据优先级排序
-            Collections.sort(classifyList, new Comparator() {
-                @Override
-                public int compare(Object o1, Object o2) {
-                    int position1;
-                    int position2 = 0;
-                    Map<String, Object> map1 = (Map) o1;
-                    Map<String, Object> map2 = (Map) o2;
-                    if (map1.get("position") != null && StringUtils.isNotEmpty(map1.get("position") + "")) {
-                        position1 = Integer.valueOf(map1.get("position").toString());
-                    }else{
-                        return 1;
-                    }
-                    if (map2.get("position") != null && StringUtils.isNotEmpty(map2.get("position") + "")) {
-                        position2 = Integer.valueOf(map2.get("position").toString());
-                    }
-                    if (position1 > position2) return 1;
-                    else if (position1 < position2) return -1;
-                    else return 1;
-                }
-            });
+        }else{
+            //没有
+            Map<String,Object> param = new HashMap<>();
+            param.put("is_use","1");
+            param.put("appName",appName);
+
+            classifyList = commonModuleServer.getClassifyList(param);//读数据库
+            Map<String,String> classify_info = new HashMap<>();
+            for(Map<String, Object>classify : classifyList){
+                jedis.zadd(Constants.CACHED_KEY_CLASSIFY_ALL,System.currentTimeMillis(),classify.get("classify_id").toString());
+                classify_info.put("classify_id",classify.get("classify_id").toString());
+                classify_info.put("classify_name",classify.get("classify_name").toString());
+                classify_info.put("is_use",classify.get("is_use").toString());
+                classify_info.put("create_time",classify.get("create_time").toString());
+                Map<String,Object> map = new HashMap<>();
+                map.put("classify_id",classify.get("classify_id").toString());
+                jedis.hmset(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_CLASSIFY_INFO, map),classify_info);
+            }
+
         }
 //            Map<String,String> classify_info = new HashMap<>();
 //            for(Map<String, Object>classify : classifyList){
@@ -4674,16 +4669,19 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //获取知享课程数
         String getUrl = MiscUtils.getConfigByKey("classfy_sync_get",Constants.HEADER_APP_NAME);
         String result = HttpClientUtil.doPostUrl(getUrl,headerMap,paramMap,"UTF-8");
-        JSONObject obj = JSON.parseObject(result);
-        JSONObject resData = obj.getJSONObject("res_data");
-        JSONObject classfy = resData.getJSONObject("classify_course_num");
+        try{
+            JSONObject obj = JSON.parseObject(result);
+            JSONObject resData = obj.getJSONObject("res_data");
+            JSONObject classfy = resData.getJSONObject("classify_course_num");
 
-        //插入知享数据
-        for(Map<String, Object> classifyMap : classifyList){
-            String classId = classifyMap.get("classify_id").toString();
-            classifyMap.put("zx_course_num", classfy.getString(classId));
+            //插入知享数据
+            for(Map<String, Object> classifyMap : classifyList){
+                String classId = classifyMap.get("classify_id").toString();
+                classifyMap.put("zx_course_num", classfy.getString(classId));
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
         }
-
         resultMap.put("classify_info_list", classifyList);
         return resultMap;
     }
