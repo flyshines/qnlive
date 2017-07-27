@@ -1574,25 +1574,6 @@ public class CommonController extends AbstractController {
             @RequestParam(value="pre_pay_no", defaultValue="") String pre_pay_no,
             @RequestHeader(value="access_token", defaultValue="") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
-            @RequestHeader(value="version") String version) throws Exception {    /**
-     * 查询订单
-     * @param user_id 用户id
-     * @param pre_pay_no wx 预付订单号
-     * @param accessToken
-     * @param appName
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/order", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity  queryOrder (
-            @RequestParam(value="user_id", defaultValue="") String user_id,
-            @RequestParam(value="pre_pay_no", defaultValue="") String pre_pay_no,
-            @RequestHeader(value="access_token", defaultValue="") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader(value="version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "queryOrder", accessToken, version, appName);
         Map<String, Object> param = new HashMap<>();
