@@ -166,6 +166,7 @@
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
 					<param name="course_abstract" type="string" />
+					<param name="course_duration" type="long" />
 				</inputs>
 				<outputs>
 				</outputs>
@@ -184,6 +185,7 @@
 					<param name="course_image" type="string"  require="Y,000100"/>
 					<param name="price" type="double" default="0" />
 					<param name="details" type="string" />
+					<param name="course_duration" type="long" />
 				</inputs>
 				<outputs>
 				</outputs>
