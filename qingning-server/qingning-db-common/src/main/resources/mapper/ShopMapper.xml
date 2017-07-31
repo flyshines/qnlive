@@ -68,6 +68,12 @@
       <if test="create_time != null" >
         create_time,
       </if>
+      <if test="lecturer_identity != null" >
+        lecturer_identity,
+      </if>
+      <if test="lecturer_titile != null" >
+        lecturer_titile,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="shop_id != null" >

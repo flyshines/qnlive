@@ -420,7 +420,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         shop.put("room_id",room_id);
         shop.put("user_name",reqMap.get("nick_name")+"");
         shop.put("shop_name",reqMap.get("nick_name")+"的店铺");
-        shop.put("shop_remark","");
+        shop.put("shop_remark",reqMap.get("remark"));
+        shop.put("lecturer_titile",reqMap.get("lecturer_titile"));
+        shop.put("lecturer_identity",reqMap.get("lecturer_identity"));
         String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
         shop.put("shop_url",shopUrl);
         shop.put("status","1");
@@ -2435,17 +2437,21 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 title = courseMap.get("course_title");
                 ((Map<String, Object>) reqEntity.getParam()).put("room_id", courseMap.get("room_id"));//把roomid 放进参数中 传到后面
                 Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(courseMap.get("room_id"), reqEntity, readLiveRoomOperation, jedis, true);
+                Map<String,Object> query = new HashMap<>();
+                query.put("user_id",courseMap.get("lecturer_id"));
+                Map<String, String> shop = CacheUtils.readShopByUserId(courseMap.get("lecturer_id"), generateRequestEntity(null, null, null, query), readShopOperation, jedis);
+                String shopName = shop.get("shop_name");
                 if ("2".equals(courseMap.get("status"))) {    //2：已结束
-                    content = liveRoomMap.get("room_name") + "\n";
+                    content = shopName + "\n";
                 } else if ("1".equals(courseMap.get("status"))) {    //1：已发布
                     Date courseStartTime = new Date(Long.parseLong(courseMap.get("start_time")));
                     if (MiscUtils.isEmpty(content)) {
-                        content = liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time", appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
+                        content = shopName + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time", appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     } else {
-                        content += "\n" + liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time", appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
+                        content += "\n" + shopName + "\n" + MiscUtils.getConfigByKey("weixin_course_share_time", appName) + MiscUtils.parseDateToFotmatString(courseStartTime, "yyyy年MM月dd日 HH:mm");
                     }
                 } else if ("4".equals(courseMap.get("status"))) {    //4：直播中
-                    content = liveRoomMap.get("room_name") + "\n" + MiscUtils.getConfigByKey("weixin_course_share_content", appName);
+                    content = shopName + "\n" + MiscUtils.getConfigByKey("weixin_course_share_content", appName);
                 }
                 icon_url = liveRoomMap.get("avatar_address");    //直播间头像
                 simple_content = courseMap.get("course_title");
@@ -2468,8 +2474,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 simple_content = MiscUtils.getConfigByKey("weixin_live_room_simple_share_content", appName) + liveRoomInfoMap.get("room_name");
                 if (reqMap.get("png").toString().equals("Y"))
                     png_url = this.CreateRqPage(null, id, null, null, null, null, reqEntity.getAccessToken(), reqEntity.getVersion(), jedis, appName);
-
-
                 break;
 
             case "3":
