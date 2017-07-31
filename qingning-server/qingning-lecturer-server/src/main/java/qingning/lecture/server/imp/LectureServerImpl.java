@@ -3698,7 +3698,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
             Long start_time = Long.valueOf(courseMap.get("start_time"));
             long min30 = 30L * 60L * 1000L;
-            if( start_time > (now - min30)){//创建时间小于 当前时间减去30分钟
+            if( now > ( start_time- min30)){//创建时间小于 当前时间减去30分钟
                 resultMap.putAll(courseMap);
                 iskey = false;
             }

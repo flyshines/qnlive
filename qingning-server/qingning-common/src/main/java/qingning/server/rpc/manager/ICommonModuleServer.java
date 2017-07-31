@@ -297,4 +297,7 @@ public interface ICommonModuleServer {
 	Map<String, Object> joinSeries(Map<String, String> seriesMap);
 
 	void increaseStudentNumBySeriesId(String series_id);
+
+	Map<String, String> initializeAccountRegisterUser(Map<String, Object> reqMap);
+
 }

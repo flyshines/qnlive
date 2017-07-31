@@ -192,6 +192,72 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return resultMap;
 	}
 
+
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public Map<String, String> initializeAccountRegisterUser(Map<String, Object> reqMap) {
+		//1.插入t_user
+		Date now = new Date();
+		Map<String,Object> user = new HashMap<String,Object>();
+		String uuid = MiscUtils.getUUId();
+		user.put("user_id", uuid);
+		user.put("user_name", reqMap.get("user_name"));
+		user.put("nick_name", reqMap.get("nick_name"));
+		user.put("avatar_address", reqMap.get("avatar_address"));
+		user.put("phone_number", reqMap.get("phone_number"));
+		user.put("gender", reqMap.get("gender"));
+		user.put("create_time", now);
+		user.put("update_time", now);
+		user.put("app_name",reqMap.get("app_name"));
+		user.put("user_role", Constants.USER_ROLE_LISTENER);
+		//位置信息未插入由消息服务处理
+		userMapper.insertUser(user);
+		//2.插入login_info
+		Map<String,Object> loginInfo = new HashMap<String,Object>();
+		loginInfo.put("user_id", uuid);
+		String login_type = (String)reqMap.get("login_type");
+		if("0".equals(login_type)){
+			loginInfo.put("union_id", reqMap.get("login_id"));
+		} else if("1".equals(login_type)){
+
+		} else if("2".equals(login_type)){
+
+		} else if("3".equals(login_type)){
+			loginInfo.put("passwd",reqMap.get("certification"));
+		} else if("4".equals(login_type)){
+			loginInfo.put("union_id",reqMap.get("unionid"));
+			loginInfo.put("web_openid",reqMap.get("web_openid"));
+		}
+
+		loginInfo.put("app_name",reqMap.get("app_name"));
+		loginInfo.put("phone_number", reqMap.get("phone_number"));
+		loginInfo.put("m_user_id", reqMap.get("m_user_id"));
+		loginInfo.put("m_pwd", reqMap.get("m_pwd"));
+		loginInfo.put("user_role", Constants.USER_ROLE_LISTENER);
+		//位置信息未插入由消息服务处理
+		loginInfo.put("create_time", now);
+		user.put("subscribe",reqMap.get("subscribe"));
+		loginInfo.put("update_time", now);
+		loginInfoMapper.insertLoginInfo(loginInfo);
+
+		//初始化用户余额信息
+		Map<String,Object> gainsMap = new HashMap<>();
+		gainsMap.put("user_id",uuid);
+		gainsMap.put("live_room_total_amount","0");
+		gainsMap.put("live_room_real_incomes","0");
+		gainsMap.put("distributer_total_amount","0");
+		gainsMap.put("distributer_real_incomes","0");
+		gainsMap.put("user_total_amount","0");
+		gainsMap.put("user_total_real_incomes","0");
+		gainsMap.put("balance","0");
+		userGainsMapper.insertUserGainsByNewUser(gainsMap);
+
+		Map<String,String> resultMap = new HashMap<String,String>();
+		resultMap.put("user_id", uuid);
+		return resultMap;
+	}
+
+
 	@Override
 	public Map<String, Object> findLoginInfoByUserId(String user_id) {
 		return loginInfoMapper.findLoginInfoByUserId(user_id);

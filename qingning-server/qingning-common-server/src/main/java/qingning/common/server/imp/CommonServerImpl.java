@@ -381,6 +381,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
 
 
+        Map<String, String> dbResultMap = commonModuleServer.initializeAccountRegisterUser(reqMap);
+
+
+
+
+
 
         return resultMap;
     }
