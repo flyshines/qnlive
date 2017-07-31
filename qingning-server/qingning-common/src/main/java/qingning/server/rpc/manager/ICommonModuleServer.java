@@ -300,4 +300,8 @@ public interface ICommonModuleServer {
 
 	Map<String, String> initializeAccountRegisterUser(Map<String, Object> reqMap);
 
+	Map<String,Object> createLiveRoom(Map<String, Object> reqMap) ;
+
+	void openShop(Map<String, Object> shop);
+
 }

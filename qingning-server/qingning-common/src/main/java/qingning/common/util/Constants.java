@@ -269,6 +269,9 @@ public final class Constants {
 
 	public static final String USER_ROLE_LECTURER="lecturer";
 	public static final String USER_ROLE_LISTENER="listener";
+
+
+
 	public static final String USER_ROLE_ADMIN="admin";
 
 	public static final String USER_DEFAULT_GENDER="2";
@@ -276,6 +279,9 @@ public final class Constants {
 	public static final String USER_DEFAULT_PROVINCE="广东省";
 	public static final String USER_DEFAULT_CITY="深圳市";
 	public static final String USER_DEFAULT_DISTRICT="南山区";
+	public static final String USER_ROLE_DEFAULT="listener,lecturer";
+
+	public static final String USER_DEFAULT_MD5="_qnlive";
 
 
 	public static final String SERVICE_NO_ACCESS_TOKEN = "SERVICE_NO_ACCESS_TOKEN_MAP";

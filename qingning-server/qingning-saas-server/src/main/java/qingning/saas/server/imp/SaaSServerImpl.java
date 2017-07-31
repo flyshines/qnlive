@@ -245,7 +245,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         shop.put("room_id",roomId);
         shop.put("user_name",userMap.get("nick_name")+"");
-        shop.put("shop_name",userMap.get("nick_name")+"的店铺");
+        shop.put("shop_name",userMap.get("nick_name")+"的知识店铺");
         shop.put("shop_remark","");
         String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
         shop.put("shop_url",shopUrl);

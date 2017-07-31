@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import qingning.common.entity.QNLiveException;
-import qingning.common.util.Constants;
-import qingning.common.util.CountMoneyUtil;
-import qingning.common.util.DoubleUtil;
-import qingning.common.util.MiscUtils;
+import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
@@ -113,6 +110,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private SaaSCourseMapper saaSCourseMapper;
 
+	@Autowired(required = true)
+	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
+
+
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -207,39 +208,30 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		user.put("create_time", now);
 		user.put("update_time", now);
 		user.put("app_name",reqMap.get("app_name"));
-		user.put("user_role", Constants.USER_ROLE_LECTURER);
+		user.put("user_role", Constants.USER_ROLE_DEFAULT);
 		user.put("country", Constants.USER_DEFAULT_COUNTRY);
 		user.put("province", Constants.USER_DEFAULT_PROVINCE);
-		user.put("city", Constants.USER_DEFAULT_PROVINCE);
-
+		user.put("city", Constants.USER_DEFAULT_CITY);
+		user.put("district", Constants.USER_DEFAULT_DISTRICT);
 		//位置信息未插入由消息服务处理
 		userMapper.insertUser(user);
 		//2.插入login_info
 		Map<String,Object> loginInfo = new HashMap<String,Object>();
 		loginInfo.put("user_id", uuid);
 		String login_type = (String)reqMap.get("login_type");
-		if("0".equals(login_type)){
-			loginInfo.put("union_id", reqMap.get("login_id"));
-		} else if("1".equals(login_type)){
-
-		} else if("2".equals(login_type)){
-
-		} else if("3".equals(login_type)){
-			loginInfo.put("passwd",reqMap.get("certification"));
-		} else if("4".equals(login_type)){
-			loginInfo.put("union_id",reqMap.get("unionid"));
-			loginInfo.put("web_openid",reqMap.get("web_openid"));
-		}
-
+		//前端第一次加密 后端第二次加密
+		String passwd = MD5Util.getMD5(reqMap.get("passwd").toString()+Constants.USER_DEFAULT_MD5);
+		loginInfo.put("passwd",passwd);
+		loginInfo.put("account",reqMap.get("account"));
 		loginInfo.put("app_name",reqMap.get("app_name"));
-		loginInfo.put("phone_number", reqMap.get("phone_number"));
-		loginInfo.put("m_user_id", reqMap.get("m_user_id"));
-		loginInfo.put("m_pwd", reqMap.get("m_pwd"));
-		loginInfo.put("user_role", Constants.USER_ROLE_LISTENER);
+		loginInfo.put("user_role", Constants.USER_ROLE_DEFAULT);
 		//位置信息未插入由消息服务处理
 		loginInfo.put("create_time", now);
-		user.put("subscribe",reqMap.get("subscribe"));
 		loginInfo.put("update_time", now);
+		loginInfo.put("country", Constants.USER_DEFAULT_COUNTRY);
+		loginInfo.put("province", Constants.USER_DEFAULT_PROVINCE);
+		loginInfo.put("city", Constants.USER_DEFAULT_CITY);
+		loginInfo.put("district", Constants.USER_DEFAULT_DISTRICT);
 		loginInfoMapper.insertLoginInfo(loginInfo);
 
 		//初始化用户余额信息
@@ -1262,5 +1254,59 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public void increaseStudentNumBySeriesId(String series_id) {
 		seriesMapper.increaseSeriesStudent(series_id);
 	}
+
+
+	/**
+	 * 创建直播间
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public Map<String,Object> createLiveRoom(Map<String, Object> reqMap) {
+		Date now = new Date();
+		//1.插入直播间表
+		Map<String,Object> liveRoom = new HashMap<String,Object>();
+		liveRoom.put("room_id", reqMap.get("room_id"));
+		liveRoom.put("appName",reqMap.get("appName"));
+		liveRoom.put("user_id", reqMap.get("user_id"));
+		liveRoom.put("rq_code", reqMap.get("room_id"));
+		liveRoom.put("room_address", reqMap.get("room_address"));
+		liveRoom.put("room_name", reqMap.get("room_name"));
+		liveRoom.put("avatar_address", reqMap.get("avatar_address"));
+		liveRoom.put("room_remark", reqMap.get("room_remark"));
+		liveRoom.put("lecturer_id", reqMap.get("user_id"));
+		liveRoom.put("create_time", now);
+		liveRoom.put("update_time", now);
+		liveRoomMapper.insertLiveRoom(liveRoom);
+
+		//2.如果该用户为普通用户，则需要插入讲师表，并且修改登录信息表中的身份，
+		// 同时插入t_lecturer_distribution_info讲师分销信息表(统计冗余表)
+		boolean isLecturer = (Boolean)reqMap.get("isLecturer");
+		if(isLecturer == false){
+			//2.1插入讲师表
+			Map<String,Object> lecturer = new HashMap<String,Object>();
+			lecturer.put("lecturer_id", reqMap.get("user_id"));
+			lecturer.put("live_room_num", 1L);
+			lecturer.put("create_time", now);
+			lecturer.put("update_time", now);
+			lecturerMapper.insertLecture(lecturer);
+
+			//2.3插入讲师分销信息表(统计冗余表)
+			Map<String,Object> lecturerDistributionInfo = new HashMap<String,Object>();
+			lecturerDistributionInfo.put("lecturer_id", reqMap.get("user_id"));
+			lecturerDistributionInfo.put("create_time", now);
+			lecturerDistributionInfo.put("update_time", now);
+			lecturerDistributionInfoMapper.insertLecturerDistributionInfo(lecturerDistributionInfo);
+		}
+
+		Map<String,Object> resultMap = new HashMap<>();
+		resultMap.put("room_id", reqMap.get("room_id"));
+		return resultMap;
+	}
+
+	@Override
+	public void openShop(Map<String, Object> shop) {
+		shopMapper.insert(shop);
+	}
+
 
 }

@@ -370,24 +370,71 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Map<String, Object> resultMap = new HashMap<>();
+        /**
+         * 1.创建用户
+         */
         reqMap.put("login_type",5);
         Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
         Jedis jedis = jedisUtils.getJedis(appName);
         if(!MiscUtils.isEmpty(loginInfoMap)){
             throw new QNLiveException("310001");
         }
+        if(MiscUtils.isEmpty( reqMap.get("avatar_address"))){
+            reqMap.put("avatar_address",MiscUtils.getConfigByKey("default_avatar_address", appName));
+        }
+        Map<String, String> dbUserMap = commonModuleServer.initializeAccountRegisterUser(reqMap);
+        String userId = dbUserMap.get("user_id");
+        resultMap.put("user_id", userId);
+        /**
+         * 2.创建直播间
+         */
+        String room_id = MiscUtils.getUUId();
+        reqMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName) + room_id);
+        reqMap.put("room_id", room_id);
+        reqMap.put("appName",appName);
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
+            reqMap.put("avatar_address",reqMap.get("avatar_address"));
+        }
+        if(MiscUtils.isEmpty(reqMap.get("room_name"))){
+            reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), reqMap.get("nick_name")));
+        }
+        commonModuleServer.createLiveRoom(reqMap);
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
+        CacheUtils.readLecturer(userId, generateRequestEntity(null,null, null, map), readLecturerOperation, jedis);
+        jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
+        CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedis, true,true);
+        //3.缓存修改
+        //增加讲师缓存中的直播间数
+        jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+        resultMap.put("room_id", room_id);
 
+        /**
+         * 3.开通店铺
+         */
+        Map<String,Object> shop = new HashMap<>();
+        shop.put("user_id",userId);
+        shop.put("shop_id",MiscUtils.getUUId());
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        shop.put("room_id",room_id);
+        shop.put("user_name",reqMap.get("nick_name")+"");
+        shop.put("shop_name",reqMap.get("nick_name")+"的店铺");
+        shop.put("shop_remark","");
+        String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
+        shop.put("shop_url",shopUrl);
+        shop.put("status","1");
+        shop.put("create_time",new Date());
+        shop.put("shop_logo",reqMap.get("avatar_address"));
+        commonModuleServer.openShop(shop);
+        CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
 
-
-
-
-        Map<String, String> dbResultMap = commonModuleServer.initializeAccountRegisterUser(reqMap);
-
-
-
-
-
-
+        //更新用户缓存
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryMap);
+        jedis.hset(userKey,"shop_id",shop.get("shop_id").toString());
+        resultMap.put("shop_id",shop.get("shop_id").toString());
         return resultMap;
     }
 
