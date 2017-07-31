@@ -2108,7 +2108,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         /*
     	 * 判断提现余额是否大于10000
     	 */
-        if(initialAmount < 10000){
+        //提现测试代码
+        if(/*initialAmount < 10000*/true){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
         }else{
