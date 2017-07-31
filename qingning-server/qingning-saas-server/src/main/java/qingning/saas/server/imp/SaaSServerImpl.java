@@ -1389,15 +1389,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         
-        /*
-         * 判断是否加入了课程
-         */
-        boolean isStudent = isJoinCourse(userId, courseId, jedis);
-        if(!isStudent){	//未购买
-        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
-        	throw new QNLiveException("120007");
-        }
-        
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readCourseMap = new HashMap<String, Object>();
     	//从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
@@ -1405,9 +1396,23 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     	readCourseMap.put("course_id", courseId);
 		//获取课程详情
 		Map<String, String> courseMap = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
-		if(readCourseMap == null){
+		if(courseMap == null){
 			logger.error("saas_H5_课程-获取课程内容（音频或视频）>>>>课程不存在");
 			throw new QNLiveException("100004");
+		}
+		
+		/*
+         * 判断是否加入了课程
+         */
+        String lecturerId = courseMap.get("lecturer_id");
+		if(!userId.equals(lecturerId)){
+			boolean isStudent = isJoinCourse(userId, courseId, jedis);
+	        if(!isStudent){	//未购买
+	        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
+	        	throw new QNLiveException("120007");
+	        }
+		}else{
+			log.info("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
 		}
 		
 		/*
