@@ -343,7 +343,7 @@
       and res.series_course_updown = '0'
     </if>
     AND  res.course_updown != '0'
-    order by res.course_updown desc, res.updown_time desc
+    order by res.course_updown , res.updown_time desc
   </select>
 
   <select id="selectUpListByShopId" parameterType="java.lang.String" resultType="java.lang.String">

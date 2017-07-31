@@ -1877,11 +1877,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         userGains.put("user_total_amount",user_total_real_incomes-distributer_real_incomes);
 
 
-        double balance = Double.valueOf(userGains.get("balance").toString());
-
-        balance = DoubleUtil.sub(balance , DoubleUtil.mul(balance,Constants.SYS_WX_RATE));
-        userGains.put("balance",balance);
-
         if(MiscUtils.isEmpty(userGains)){
             throw new QNLiveException("170001");
         }
