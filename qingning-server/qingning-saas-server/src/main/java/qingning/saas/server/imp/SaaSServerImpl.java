@@ -242,7 +242,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 roomId = id;
             }
         }
-
         shop.put("room_id",roomId);
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的知识店铺");
