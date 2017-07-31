@@ -201,15 +201,17 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> user = new HashMap<String,Object>();
 		String uuid = MiscUtils.getUUId();
 		user.put("user_id", uuid);
-		user.put("user_name", reqMap.get("user_name"));
 		user.put("nick_name", reqMap.get("nick_name"));
 		user.put("avatar_address", reqMap.get("avatar_address"));
-		user.put("phone_number", reqMap.get("phone_number"));
-		user.put("gender", reqMap.get("gender"));
+		user.put("gender",  Constants.USER_DEFAULT_GENDER);
 		user.put("create_time", now);
 		user.put("update_time", now);
 		user.put("app_name",reqMap.get("app_name"));
-		user.put("user_role", Constants.USER_ROLE_LISTENER);
+		user.put("user_role", Constants.USER_ROLE_LECTURER);
+		user.put("country", Constants.USER_DEFAULT_COUNTRY);
+		user.put("province", Constants.USER_DEFAULT_PROVINCE);
+		user.put("city", Constants.USER_DEFAULT_PROVINCE);
+
 		//位置信息未插入由消息服务处理
 		userMapper.insertUser(user);
 		//2.插入login_info

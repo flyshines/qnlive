@@ -271,6 +271,13 @@ public final class Constants {
 	public static final String USER_ROLE_LISTENER="listener";
 	public static final String USER_ROLE_ADMIN="admin";
 
+	public static final String USER_DEFAULT_GENDER="2";
+	public static final String USER_DEFAULT_COUNTRY="中国";
+	public static final String USER_DEFAULT_PROVINCE="广东省";
+	public static final String USER_DEFAULT_CITY="深圳市";
+	public static final String USER_DEFAULT_DISTRICT="南山区";
+
+
 	public static final String SERVICE_NO_ACCESS_TOKEN = "SERVICE_NO_ACCESS_TOKEN_MAP";
 
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;

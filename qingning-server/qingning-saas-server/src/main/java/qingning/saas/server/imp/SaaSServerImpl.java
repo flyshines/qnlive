@@ -217,7 +217,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("openShop")
-    public Map<String,String> openShop(RequestEntity reqEntity) throws Exception{
+    public Map<String,Object> openShop(RequestEntity reqEntity) throws Exception{
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
@@ -261,8 +261,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         queryMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
         String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, queryMap);
         jedis.hset(userKey,"shop_id",shop.get("shop_id").toString());
-
-        return null;
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("shop_id",shop.get("shop_id").toString());
+        return resultMap;
     }
     /**
      * 店铺设置
