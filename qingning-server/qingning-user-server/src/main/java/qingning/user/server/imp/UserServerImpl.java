@@ -2154,14 +2154,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	//获得登录用户的余额信息
     	Map<String, Object> loginUserGainsMap = userModuleServer.findUserGainsByUserId(userId);
     	int balance = 0;
-        double balanceD= 0D;
     	if(loginUserGainsMap != null && !loginUserGainsMap.isEmpty()){
-    		balance = Integer.valueOf(loginUserGainsMap.get("balance").toString());
-            balanceD = Double.valueOf(balance);
-            balanceD = DoubleUtil.sub(balanceD , DoubleUtil.mul(balanceD,Constants.SYS_WX_RATE));
-
-        }
-    	if(initialAmount*100 > (DoubleUtil.mul(balanceD,100D)).intValue()){
+    		balance = Integer.parseInt(loginUserGainsMap.get("balance").toString());
+    	}
+    	if(initialAmount > balance){
     	    // logger.error("提现金额大于账户余额");
     		throw new QNLiveException("180001");
     	}

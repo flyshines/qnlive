@@ -244,7 +244,7 @@
 		<if test="keyword != null" >
 			AND t.series_title like '%${keyword}%'
 		</if>
-		ORDER BY t.update_course_time DESC
+		ORDER BY t.updown,t.update_course_time DESC
 	</select>
 
 	<select id="findSeriesListByLiturere" resultType="hashmap" parameterType="hashmap" >
