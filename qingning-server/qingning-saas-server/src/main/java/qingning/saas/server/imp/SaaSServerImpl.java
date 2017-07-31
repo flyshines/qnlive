@@ -1314,15 +1314,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
         
-        /*
-         * 判断是否加入了课程
-         */
-        boolean isStudent = isJoinCourse(userId, articleId, jedis);
-        if(!isStudent){	//未购买
-        	log.error("Saas_H5_课程-获取图文课程内容>>>>用户未加入该课程(articleId=" + articleId + ")");
-        	throw new QNLiveException("120007");
-        }
-        
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readArticleMap = new HashMap<String, Object>();
     	//从产品原型上看，调用该接口为图文课程点播，所以直接从t_saas_course查找
@@ -1333,6 +1324,20 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		if(articleMap == null){
 			logger.error("saas_H5_课程-获取图文课程内容>>>>课程不存在");
 			throw new QNLiveException("100004");
+		}
+		
+		/*
+		 * 判断登录是否购买该课程
+		 */
+		String lecturerId = articleMap.get("lecturer_id");
+		if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+			boolean isStudent = isJoinCourse(userId, articleId, jedis);
+	        if(!isStudent){	//未购买
+	        	log.error("saas_H5_课程-获取图文课程内容>>>>用户未加入该图文课程(courseId=" + articleId + ")");
+	        	throw new QNLiveException("120007");
+	        }
+		}else{
+			log.info("saas_H5_课程-获取图文课程内容>>>>用户为课程(courseId=" + articleId + ")的讲师，不用判断是否购买");
 		}
 		
 		/*
@@ -1405,7 +1410,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
          * 判断是否加入了课程
          */
         String lecturerId = courseMap.get("lecturer_id");
-		if(!userId.equals(lecturerId)){
+		if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
 			boolean isStudent = isJoinCourse(userId, courseId, jedis);
 	        if(!isStudent){	//未购买
 	        	log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
@@ -1544,13 +1549,23 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         List<Map<String, String>> messageInfoList = new ArrayList<>();
         
         /*
+         * 获取课程讲师id
+         */
+        Map<String, String> courseMap = CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+        
+        /*
          * 判断是否加入了课程
          */
-        boolean isStudent = isJoinCourse(userId, courseId, jedis);
-        if(!isStudent){	//未购买
-        	log.error("Saas_H5_课程-获取课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
-        	throw new QNLiveException("120007");
-        }
+        String lecturerId = courseMap.get("lecturer_id");
+		if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+			boolean isStudent = isJoinCourse(userId, courseId, jedis);
+	        if(!isStudent){	//未购买
+	        	log.error("Saas_H5_课程-获取课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
+	        	throw new QNLiveException("120007");
+	        }
+		}else{
+			log.info("Saas_H5_课程-获取课程留言列表>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
+		}
         
     	/*
          * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
@@ -1659,13 +1674,22 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Date now = new Date();
         
         /*
+         * 获取课程详情
+         */
+        Map<String, String> courseMap = CacheUtils.readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+        /*
          * 判断是否加入了课程
          */
-        boolean isStudent = isJoinCourse(userId, courseId, jedis);
-        if(!isStudent){	//未购买
-        	log.error("Saas_H5_课程-添加课程留言>>>>用户未加入该课程(courseId=" + courseId + ")");
-        	throw new QNLiveException("120007");
-        }
+        String lecturerId = courseMap.get("lecturer_id");
+		if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+			boolean isStudent = isJoinCourse(userId, courseId, jedis);
+	        if(!isStudent){	//未购买
+	        	log.error("Saas_H5_课程-添加课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
+	        	throw new QNLiveException("120007");
+	        }
+		}else{
+			log.info("Saas_H5_课程-添加课程留言列表>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
+		}
         
         /*
          * 获得课程信息，主要用于后续获取店铺id进行存储

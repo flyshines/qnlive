@@ -2,7 +2,6 @@
 package qingning.user.db.server.imp;
 
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
@@ -519,6 +518,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
     @Override
     public Map<String, Object> findUserOrderByCourse(Map<String, Object> queryTradeMap) {
         return tradeBillMapper.findUserOrderByCourse(queryTradeMap);
+    }
+
+    @Override
+    public Map<String, Object> getShopInfo(Map<String, Object> param) {
+        return shopMapper.selectByPrimaryKey(param);
     }
 
 

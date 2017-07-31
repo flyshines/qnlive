@@ -38,6 +38,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     private ReadLecturerOperation readLecturerOperation;
     private ReadRoomDistributerOperation readRoomDistributerOperation;
     private ReadSeriesOperation readSeriesOperation;
+    private ReadShopOperation readShopOperation;
     private static Logger logger = LoggerFactory.getLogger(UserServerImpl.class);
 
     @Override
@@ -52,6 +53,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             readLecturerOperation = new ReadLecturerOperation(userModuleServer);
             readRoomDistributerOperation = new ReadRoomDistributerOperation(userModuleServer);
             readSeriesOperation = new ReadSeriesOperation(userModuleServer);
+            readShopOperation = new ReadShopOperation(userModuleServer);
         }
     }
 
@@ -668,6 +670,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         
         if(!resultMap.get("status").equals("2")){
             resultMap.put("status",courseMap.get("status"));
+        }
+        //查询店铺信息
+        reqMap.put("user_id",courseMap.get("lecturer_id"));
+        Map<String, String> shopInfo = CacheUtils.readShopByUserId(courseMap.get("lecturer_id"), reqEntity, readShopOperation, jedis);
+        if(shopInfo!=null){
+            resultMap.put("shop_id",shopInfo.get("shop_id"));
+            resultMap.put("shop_name",shopInfo.get("shop_name"));
         }
         return resultMap;
     }
@@ -2554,7 +2563,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 }
             }
         }
-
+        reqMap.put("user_id",lecturer_id);
+        Map<String, String> shopInfo = CacheUtils.readShopByUserId(lecturer_id, reqEntity, readShopOperation, jedis);
+        if(shopInfo!=null){
+            resultMap.put("shop_id",shopInfo.get("shop_id"));
+            resultMap.put("shop_name",shopInfo.get("shop_name"));
+        }
         resultMap.put("roles", roles);
         resultMap.put("qr_code",getQrCode(seriesMap.get("lecturer_id"),userId,jedis,appName));
         resultMap.put("series_status",seriesMap.get("series_status"));
