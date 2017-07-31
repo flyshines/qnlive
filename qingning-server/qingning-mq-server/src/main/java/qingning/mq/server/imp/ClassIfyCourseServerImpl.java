@@ -43,7 +43,9 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     Map<String,Object> map = new HashMap<>();
                     map.put("lecturer_id",lecturer_id);
                     String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);
+                  //  String lecturerCoursesPredicionAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION_ALL, map);
                     jedis.del(lecturerCoursesAllKey);
+                 //   jedis.del(lecturerCoursesPredicionAllKey);
                 }
                 //删除平台
                 jedis.del(Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION);
@@ -61,6 +63,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     List<Map<String, Object>> courseByClassifyId = coursesMapper.findCourseByClassifyId(map);
                     for(Map<String, Object> course : courseByClassifyId){
                         String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, course);
+                       // String lecturerCoursesPredicionAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION_ALL, map);
                         long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
                         jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id").toString());
                         if( course.get("course_updown").toString().equals("1")){

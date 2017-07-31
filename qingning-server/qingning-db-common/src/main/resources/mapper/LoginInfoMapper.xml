@@ -16,6 +16,10 @@
       <!--web openid登录-->
       web_openid = #{web_openid}
     </if>
+    <if test='login_type != null and login_type == "5"'>
+      <!--web openid登录-->
+      account = #{account}
+    </if>
   </select>
 
   <select id="findLoginInfoByUserId" resultType="hashmap" parameterType="string" >

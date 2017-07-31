@@ -175,6 +175,7 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";
 
 	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程
+	public static final String CACHED_KEY_COURSE_PREDICTION_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION:ALL";//讲师所有预告和直播
 	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
 	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
 	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程  直播

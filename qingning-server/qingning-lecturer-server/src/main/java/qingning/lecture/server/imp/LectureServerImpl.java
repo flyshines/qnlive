@@ -3675,7 +3675,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String lecturer_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String,Object> map = new HashMap<>();
         map.put("lecturer_id",lecturer_id);
-        String lecturerPredictionCourseListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//讲师预告和直播课程list key
+        String lecturerCourseAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);//讲师预告和直播课程list key
 
         String startIndex ;//坐标起始位
         String endIndex ;//坐标结束位
@@ -3688,7 +3688,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //预告
         startIndex ="("+courseScoreByRedis;//设置结束位置
         endIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
-        Set<String> previewCourseIdSet = jedis.zrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
+        Set<String> previewCourseIdSet = jedis.zrangeByScore(lecturerCourseAllKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
         if(!MiscUtils.isEmpty(previewCourseIdSet)){
             for(String course_id : previewCourseIdSet){
                 courseId = course_id;
@@ -3706,7 +3706,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(iskey){
             startIndex =courseScoreByRedis+"";//设置结束位置
             endIndex = "-inf";//
-            Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerPredictionCourseListKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
+            Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerCourseAllKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
             if(!MiscUtils.isEmpty(liveCourseIdSet)) {
                 for (String course_id : liveCourseIdSet) {
                     courseId = course_id;

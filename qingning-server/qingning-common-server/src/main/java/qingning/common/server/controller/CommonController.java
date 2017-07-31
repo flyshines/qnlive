@@ -138,6 +138,55 @@ public class CommonController extends AbstractController {
 
     }
 
+
+
+    /**
+     * 账号用户登录
+     *
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/account/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity accountLogin(
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "accountLogin", null, version,appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 账号用户注册
+     *1.用户注册
+     * 2.开通店铺
+     * 3,开通直播间
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/account/register", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity accountRegister(
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "accountRegister", null, version,appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
     /**
      *  获取所有连接
      * @param version

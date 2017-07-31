@@ -128,6 +128,7 @@
 				<entry key="210009" value="暂不支持此空间的文件截取"/>
 
 				<entry key="210006" value="用户操作失败"/>
+				<entry key="310001" value="用户账号已存在"/>
 			</map>
 
 
