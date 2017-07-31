@@ -43,8 +43,12 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     Map<String,Object> map = new HashMap<>();
                     map.put("lecturer_id",lecturer_id);
                     String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);
+                    String courseLecturePredictionKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+                    String courseLectureFinishKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);
                   //  String lecturerCoursesPredicionAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION_ALL, map);
                     jedis.del(lecturerCoursesAllKey);
+                    jedis.del(courseLecturePredictionKey);
+                    jedis.del(courseLectureFinishKey);
                  //   jedis.del(lecturerCoursesPredicionAllKey);
                 }
                 //删除平台
@@ -60,6 +64,12 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                     Map<String,Object> map = new HashMap<>();
                     map.put("appName",appName);
                     map.put("classify_id",classify_id);
+                    String courseClassifyIdFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
+                    String courseClassifyIdPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????
+                    jedis.del(courseClassifyIdFinishKey);
+                    jedis.del(courseClassifyIdPredictionKey);
+
+
                     List<Map<String, Object>> courseByClassifyId = coursesMapper.findCourseByClassifyId(map);
                     for(Map<String, Object> course : courseByClassifyId){
                         String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, course);
@@ -135,6 +145,9 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
 //                    List<Map<String, Object>> lecturerCourseList = coursesMapper.findLecturerCourseList(map);
 //                    for(Map<String, Object> course : lecturerCourseList){
 //                        Long time = 0L ;
+//                        if(course.){
+//
+//                        }
 //                        if(course.get("status").toString().equals("2")){
 //                            time = MiscUtils.convertObjectToLong(course.get("end_time"));//Long.valueOf(course.get("end_time").toString());
 //                            long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
