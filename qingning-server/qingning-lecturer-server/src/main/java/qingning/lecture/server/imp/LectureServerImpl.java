@@ -3718,7 +3718,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         if(!MiscUtils.isEmpty(courseMap)){
             MiscUtils.courseTranferState(now, courseMap);
-            resultMap.putAll(courseMap);
+            if(courseMap.get("status").toString().equals("4")){
+                resultMap.putAll(courseMap);
+            }
         }
         return resultMap ;
     }
