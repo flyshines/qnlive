@@ -114,6 +114,8 @@
 					<param name="share_url" type="string"/>
 					<param name="update_time" type="long"/>
 					<param name="im_course_id" type="string"/>
+					<param name="shop_id" type="string"/>
+					<param name="shop_name" type="string"/>
 					<param name="qr_code" type="map">
 						<param name="qr_code_url" type="string"/>
 						<param name="qr_code_title" type="string"/>
@@ -591,6 +593,8 @@
 					<param name="series_remark" type="rstring"/>
 					<param name="series_amount" type="long"/>
 					<param name="room_id" type="string"/>
+					<param name="shop_id" type="string"/>
+					<param name="shop_name" type="string"/>
 					<param name="roles" type="list"/>
 					<param name="series_join_status" type="string"/>
 					<param name="follow_status" type="string"/>
