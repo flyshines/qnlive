@@ -2237,6 +2237,27 @@ public class UserServerImpl extends AbstractQNLiveServer {
 		return userModuleServer.findWithdrawListAll(param);
     }
 
+    /**
+     * 获取提现记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawListSaaS")
+    public Map<String, Object> getWithdrawListSaaS(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        param.put("app_name", reqEntity.getAppName());
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        param.put("user_id",userId);
+        /*
+         * 查询提现记录列表
+         */
+		return userModuleServer.findWithdrawListAll(param);
+    }
+
 
     /**
      * 后台_处理提现

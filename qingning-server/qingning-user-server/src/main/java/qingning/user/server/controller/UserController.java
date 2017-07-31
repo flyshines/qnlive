@@ -511,6 +511,41 @@ public class UserController extends AbstractController{
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+	/**
+	 * 获取提现记录-saas端
+	 * @param page_count
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/saas/withdraw/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getWithdrawListSaaS(
+    		@RequestParam(value="page_count", defaultValue="10") String page_count,
+    		@RequestParam(value="page_num", defaultValue="1") String page_num,
+    		@RequestParam(value="user_name",defaultValue="") String user_name,
+    		@RequestParam(value="user_id",defaultValue="") String user_id,
+    		@RequestParam(value="status",defaultValue="") String status,
+    		@RequestHeader(value="access_token", defaultValue = "") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader(value="version",defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListSaaS", accessToken, version, appName);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("page_count", page_count);
+        paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name))
+			paramMap.put("user_name", user_name);
+		if(StringUtils.isNotEmpty(user_id))
+			paramMap.put("user_id", user_id);
+		if(StringUtils.isNotEmpty(status))
+        	paramMap.put("status", status);
+        requestEntity.setParam(paramMap);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
 	/**
 	 * 后台_处理提现申请

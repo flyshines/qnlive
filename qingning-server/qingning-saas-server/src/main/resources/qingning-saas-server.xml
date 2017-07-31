@@ -668,6 +668,7 @@
 					<param name="details" type="string" />
 					<param name="course_remark" type="string" />
 					<param name="course_abstract" type="string" />
+					<param name="course_duration" type="long" />
 				</outputs>
 			</function>
 			
