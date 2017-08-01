@@ -2176,7 +2176,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	insertMap.put("user_phone", loginUserMap.get("phone_number"));
     	insertMap.put("alipay_account_number", reqMap.get("alipay_account_number"));
     	insertMap.put("initial_amount", amount);
-    	insertMap.put("actual_amount", amount);
+        //实际提现金额
+        BigDecimal actualAmount = BigDecimal.valueOf(DoubleUtil.sub(amount.doubleValue() , DoubleUtil.mul(amount.doubleValue(),Constants.SYS_WX_RATE)));
+        insertMap.put("actual_amount", actualAmount.longValue());
     	insertMap.put("state", '0');
     	insertMap.put("create_time", nowStr);
     	insertMap.put("update_time", nowStr);
