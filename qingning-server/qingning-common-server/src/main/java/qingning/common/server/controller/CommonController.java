@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.server.util.Base64;
 import qingning.common.server.util.ServerUtils;
 import qingning.common.util.Constants;
 import qingning.common.util.HttpTookit;
@@ -228,6 +229,7 @@ public class CommonController extends AbstractController {
     public void weixinLogin(
             @RequestParam("code") String code,
             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+            @RequestParam(value="key",defaultValue = "") String paramKey,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
         Map<String,String> map = new HashMap<>();
         String appName = state;
@@ -245,7 +247,14 @@ public class CommonController extends AbstractController {
         if(key == 1){
             String userWeixinAccessToken = (String) resultMap.get("access_token");
             if(state.equals("qnsaas")){//跳转h5店铺
-                response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index",appName)+userWeixinAccessToken);
+                logger.debug("key:"+paramKey);
+                if(StringUtils.isNotEmpty(paramKey)){
+                    String newUrl = new String(Base64.decode(paramKey));
+                    logger.debug("url:"+newUrl);
+                    response.sendRedirect(newUrl+"&token="+userWeixinAccessToken);
+                }else{
+                    response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index",appName)+userWeixinAccessToken);
+                }
             }else{//跳转直播
                 response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
             }
