@@ -898,13 +898,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             url = IMMsgUtil.configMap.get("images_space_domain_name");
             token = auth.uploadToken(IMMsgUtil.configMap.get("image_space"), null, expiredTime, new StringMap()
                     .putNotEmpty("returnBody", "{\"key\": $(key), \"hash\": $(etag), \"width\": $(imageInfo.width), \"height\": $(imageInfo.height)}"));
-
         } else if ("2".equals(reqMap.get("upload_type"))) { //音频
+            StringMap map = new StringMap();
+            map.putNotEmpty("returnBody","{\"key\": $(key), \"hash\": $(etag),\"duration\": $(avinfo.format.duration),\"fsize\": $(fsize),\"mimeType\": $(mimeType)}");
             url = IMMsgUtil.configMap.get("audio_space_domain_name");
-            token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, null);
-        } else if ("3".equals(reqMap.get("upload_type"))) {
+            token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, map);
+        } else if ("3".equals(reqMap.get("upload_type"))) {//视频
+            StringMap map = new StringMap();
+            map.putNotEmpty("returnBody","{\"key\": $(key), \"hash\": $(etag),\"duration\": $(avinfo.format.duration),\"fsize\": $(fsize),\"mimeType\": $(mimeType)}");
             url = IMMsgUtil.configMap.get("video_space_domain_name");
-            token = auth.uploadToken(IMMsgUtil.configMap.get("video_space"), null, expiredTime, null);
+            token = auth.uploadToken(IMMsgUtil.configMap.get("video_space"), null, expiredTime, map);
         }
         resultMap.put("upload_token", token);
         resultMap.put("access_prefix_url", url);

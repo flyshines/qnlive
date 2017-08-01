@@ -241,5 +241,5 @@ public interface ISaaSModuleServer {
      * @param reqMap
      * @return
      */
-    Map<String,Object> getUserWithdrawList(Map<String, Object> reqMap);
+   // Map<String,Object> getUserWithdrawList(Map<String, Object> reqMap);
 }

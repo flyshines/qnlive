@@ -463,6 +463,14 @@ public class UserModuleServerImpl implements IUserModuleServer {
     public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
         PageList<Map<String,Object>> result = withdrawCashMapper.selectWithdrawListAll(param,page);
+        //提现实际提现金额
+        for(Map<String,Object> map:result){
+            long initial_amount = (Long)map.get("initial_amount");
+            long actual_amount = (Long)map.get("actual_amount");
+            long filter_amount = initial_amount - actual_amount;
+            map.put("filter_amount",filter_amount);
+
+        }
         Map<String,Object> res = new HashMap<>();
         res.put("user_list",result);
         res.put("total_count",result.getTotal());

@@ -486,7 +486,11 @@
 						<param name="user_name" type="string" />
 						<param name="nick_name" type="string" />
 						<param name="alipay_account_number" type="string" />
-						<param name="actual_amount" type="double" fieldname="initial_amount" />
+						<param name="actual_amount" type="double" />
+						<param name="filter_amount" type="double" />
+						<param name="initial_amount" type="double" />
+						<param name="user_total_amount" type="double" />
+						<param name="balance" type="double" />
 						<param name="create_time" type="long" />
 						<param name="status" type="string" />
 						<param name="remark" type="string" />
@@ -521,6 +525,7 @@
 						<param name="status" type="string" />
 						<param name="remark" type="string" />
 						<param name="handle_name" type="string" />
+						<param name="handle_time" type="long" />
 					</param>
 					<param name="total_count" type="long" />
 				</outputs>

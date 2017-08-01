@@ -765,25 +765,4 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-    /**
-     * 提现记录
-     * @param accessToken 用户安全证书
-     * @param version 版本
-     * @throws Exception
-     */
-    @RequestMapping(value = "/sys/withdraw/list", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity withdrawList(
-            @RequestHeader("access_token") String accessToken,
-            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
-            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-            @RequestHeader("version") String version)throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "sysWithdraw", accessToken, version,appName);
-        Map<String,Object> param = new HashMap<>();
-        param.put("page_size",pageSize);
-        param.put("page_num",pageNum);
-        requestEntity.setParam(param);
-        return this.process(requestEntity, serviceManger, message);
-    }
-
 }

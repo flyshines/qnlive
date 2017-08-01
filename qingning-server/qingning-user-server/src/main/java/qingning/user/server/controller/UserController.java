@@ -489,7 +489,7 @@ public class UserController extends AbstractController{
     public
     @ResponseBody
     ResponseEntity getWithdrawListAll(
-    		@RequestParam(value="page_count", defaultValue="10") String page_count,
+    		@RequestParam(value="page_count", defaultValue="20") String page_count,
     		@RequestParam(value="page_num", defaultValue="1") String page_num,
     		@RequestParam(value="user_name",defaultValue="") String user_name,
     		@RequestParam(value="user_id",defaultValue="") String user_id,
@@ -746,7 +746,7 @@ public class UserController extends AbstractController{
 	public
 	@ResponseBody
 	ResponseEntity getOrderListAll(
-			@RequestParam(value="page_count", defaultValue="10") String page_count,
+			@RequestParam(value="page_count", defaultValue="20") String page_count,
 			@RequestParam(value="page_num", defaultValue="1") String page_num,
 			@RequestParam(value="user_name",defaultValue="") String user_name,
 			@RequestParam(value="user_id",defaultValue="") String user_id,
