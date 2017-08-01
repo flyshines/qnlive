@@ -521,6 +521,7 @@
 						<param name="status" type="string" />
 						<param name="remark" type="string" />
 						<param name="handle_name" type="string" />
+						<param name="handle_time" type="long" />
 					</param>
 					<param name="total_count" type="long" />
 				</outputs>

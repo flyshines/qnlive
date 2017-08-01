@@ -907,7 +907,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             map.putNotEmpty("returnBody","{\"key\": $(key), \"hash\": $(etag),\"duration\": $(avinfo.format.duration),\"fsize\": $(fsize),\"mimeType\": $(mimeType)}");
             url = IMMsgUtil.configMap.get("audio_space_domain_name");
             token = auth.uploadToken(IMMsgUtil.configMap.get("audio_space"), null, expiredTime, map);
-        } else if ("3".equals(reqMap.get("upload_type"))) {
+        } else if ("3".equals(reqMap.get("upload_type"))) {//视频
             StringMap map = new StringMap();
             map.putNotEmpty("returnBody","{\"key\": $(key), \"hash\": $(etag),\"duration\": $(avinfo.format.duration),\"fsize\": $(fsize),\"mimeType\": $(mimeType)}");
             url = IMMsgUtil.configMap.get("video_space_domain_name");

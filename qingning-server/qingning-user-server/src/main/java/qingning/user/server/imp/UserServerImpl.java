@@ -2238,7 +2238,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取提现记录列表-后台
+     * 获取提现记录列表-SaaS
      * @param reqEntity
      * @return
      * @throws Exception

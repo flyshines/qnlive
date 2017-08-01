@@ -555,7 +555,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
      * @param param
      * @return
      */
-    @Override
+ /*   @Override
     public Map<String, Object> getUserWithdrawList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String, Object>> result = withdrawCashMapper.selectSaaSWithdrawList(param, page);
@@ -564,6 +564,6 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         res.put("total_count", result.getTotal());
         res.put("total_page", result.getPaginator().getTotalPages());
         return res;
-    }
+    }*/
 
 }

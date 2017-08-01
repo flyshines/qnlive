@@ -148,7 +148,8 @@
         t.create_time,
         t.state AS status,
         t.remark,
-      	t.handle_name
+      	t.handle_name,
+        t.update_time as handle_time
       FROM
           `t_withdraw_cash` t
       WHERE app_name = #{app_name}
@@ -174,7 +175,7 @@
         t.withdraw_cash_id = #{withdraw_cash_id} and app_name = #{app_name}
 	</select>
   <!-- 查询-提现记录 -->
-	<select id="selectSaaSWithdrawList" resultType="hashmap" parameterType="hashmap">
+<!--	<select id="selectSaaSWithdrawList" resultType="hashmap" parameterType="hashmap">
       SELECT
           t.withdraw_cash_id,
           t.user_id,
@@ -191,6 +192,6 @@
       WHERE
           t.user_id = #{user_id}
       ORDER BY t.create_time desc
-	</select>
+	</select>-->
 
 </mapper>

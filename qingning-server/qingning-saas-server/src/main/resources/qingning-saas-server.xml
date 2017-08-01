@@ -938,7 +938,7 @@
 				</outputs>
 			</function>
 			<!-- 提现记录 -->
-			<function name="sysWithdraw">
+			<!--<function name="sysWithdraw">
 				<auth>
 					<accessToken require="Y" />
 				</auth>
@@ -964,7 +964,7 @@
 					<param name="total_count" type="long" default="0"/>
 					<param name="total_page" type="long" default="0"/>
 				</outputs>
-			</function>
+			</function>-->
 		</default>
 		<version num="1.0.0" class="">
 		</version>
