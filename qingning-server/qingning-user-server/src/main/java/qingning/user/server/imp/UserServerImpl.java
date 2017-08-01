@@ -677,6 +677,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(shopInfo!=null){
             resultMap.put("shop_id",shopInfo.get("shop_id"));
             resultMap.put("shop_name",shopInfo.get("shop_name"));
+            resultMap.put("shop_logo",shopInfo.get("shop_logo"));
         }
         return resultMap;
     }
@@ -2596,6 +2597,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(shopInfo!=null){
             resultMap.put("shop_id",shopInfo.get("shop_id"));
             resultMap.put("shop_name",shopInfo.get("shop_name"));
+            resultMap.put("shop_logo",shopInfo.get("shop_logo"));
         }
         resultMap.put("roles", roles);
         resultMap.put("qr_code",getQrCode(seriesMap.get("lecturer_id"),userId,jedis,appName));
