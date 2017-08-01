@@ -2090,54 +2090,67 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         resultMap.put("total_page",records.get("total_page"));
 
         List<Map<String,Object>> list = (List<Map<String,Object>>)records.get("list");
+        for(Map<String,Object> recordMap : list){
+            String course_id =  recordMap.get("course_id").toString();
+            Map<String ,Object> queryMap = new HashMap<>();
+            queryMap.put("course_id",course_id);
+            Map<String, String> courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
 
-        if(list!=null&&!list.isEmpty()){
-                Map<String,Object> cacheQueryMap = new HashMap<>();
-                JedisBatchCallback callBack = (JedisBatchCallback)jedis;
-                //从缓存中查询用户的名字
-                callBack.invoke(new JedisBatchOperation(){
-                    @Override
-                    public void batchOperation(Pipeline pipeline, Jedis jedis) {
-                        /*for(Map<String,Object> recordMap : list){
-                            cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
-                            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
-                            Response<String> nackName = pipeline.hget(lecturerKey, "nick_name");
-                            Response<String> userAvatar = pipeline.hget(lecturerKey, "avatar_address");
-                            recordMap.put("cacheLecturerName",nackName);
-                            recordMap.put("userAvatar",userAvatar);
-                        }*/
-                        for(Map<String,Object> recordMap : list){
-                            cacheQueryMap.clear();
-                            cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
-                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
-                            Response<String> courseName = pipeline.hget(courseKey, "course_title");
-                            Response<String> coursePrice = pipeline.hget(courseKey, "course_price");
-                            recordMap.put("courseTitle", courseName);
-                            recordMap.put("coursePrice", coursePrice);
-                        }
-                        pipeline.sync();
-
-                        for(Map<String,Object> recordMap : list){
-                            /*Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
-                            Response<String> userAvatar = (Response)recordMap.get("userAvatar");*/
-
-                            Response<String> courseName = (Response)recordMap.get("courseTitle");
-                            Response<String> coursePrice = (Response)recordMap.get("coursePrice");
-                            /*recordMap.put("nick_name",cacheLecturerName.get());
-                            recordMap.put("user_avatar",userAvatar.get());*/
-                            if(recordMap.get("goods_name")==null) {
-                                recordMap.put("goods_name", courseName.get());
-                                recordMap.put("price", coursePrice.get());
-                            }
-                            Date recordTime = (Date)recordMap.get("create_time");
-                            recordMap.put("create_time", recordTime);
-                        }
-                    }
-                });
-
-                resultMap.put("list", list);
+            recordMap.put("goods_name", courseMap.get("course_title"));
+            recordMap.put("price",  courseMap.get("coursePrice"));
+            recordMap.put("create_time", courseMap.get("create_time"));
 
         }
+        resultMap.put("list", list);
+
+//
+//        if(list!=null&&!list.isEmpty()){
+//                Map<String,Object> cacheQueryMap = new HashMap<>();
+//                JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+//                //从缓存中查询用户的名字
+//                callBack.invoke(new JedisBatchOperation(){
+//                    @Override
+//                    public void batchOperation(Pipeline pipeline, Jedis jedis) {
+//                        /*for(Map<String,Object> recordMap : list){
+//                            cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("user_id"));
+//                            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
+//                            Response<String> nackName = pipeline.hget(lecturerKey, "nick_name");
+//                            Response<String> userAvatar = pipeline.hget(lecturerKey, "avatar_address");
+//                            recordMap.put("cacheLecturerName",nackName);
+//                            recordMap.put("userAvatar",userAvatar);
+//                        }*/
+//                        for(Map<String,Object> recordMap : list){
+//                            cacheQueryMap.clear();
+//                            cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+//                            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+//                            Response<String> courseName = pipeline.hget(courseKey, "course_title");
+//                            Response<String> coursePrice = pipeline.hget(courseKey, "course_price");
+//                            recordMap.put("courseTitle", courseName);
+//                            recordMap.put("coursePrice", coursePrice);
+//                        }
+//                        pipeline.sync();
+//
+//                        for(Map<String,Object> recordMap : list){
+//                            /*Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
+//                            Response<String> userAvatar = (Response)recordMap.get("userAvatar");*/
+//
+//                            Response<String> courseName = (Response)recordMap.get("courseTitle");
+//                            Response<String> coursePrice = (Response)recordMap.get("coursePrice");
+//                            /*recordMap.put("nick_name",cacheLecturerName.get());
+//                            recordMap.put("user_avatar",userAvatar.get());*/
+//                            if(recordMap.get("goods_name")==null) {
+//                                recordMap.put("goods_name", courseName.get());
+//                                recordMap.put("price", coursePrice.get());
+//                            }
+//                            Date recordTime = (Date)recordMap.get("create_time");
+//                            recordMap.put("create_time", recordTime);
+//                        }
+//                    }
+//                });
+//
+//                resultMap.put("list", list);
+//
+//        }
         return resultMap;
     }
     
