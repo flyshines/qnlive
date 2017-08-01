@@ -129,6 +129,7 @@
 
 				<entry key="210006" value="用户操作失败"/>
 				<entry key="310001" value="用户账号已存在"/>
+				<entry key="310002" value="账号密码错误"/>
 			</map>
 
 
