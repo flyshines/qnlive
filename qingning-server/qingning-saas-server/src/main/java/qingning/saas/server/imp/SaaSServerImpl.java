@@ -2100,7 +2100,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 courseMap = CacheUtils.readSeries(course_id, generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
             }else if("1".equals(recordMap.get("course_type")+"")){
                 queryMap.put("course_id",course_id);
-               courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
+               courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, "findCourseByCourseId", queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
             }else{
                 queryMap.put("course_id",course_id);
                 courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
