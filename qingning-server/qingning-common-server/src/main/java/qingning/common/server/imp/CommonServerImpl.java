@@ -373,7 +373,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         /**
          * 1.创建用户
          */
-        reqMap.put("login_type",5);
+        reqMap.put("login_type","5");
         Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
         Jedis jedis = jedisUtils.getJedis(appName);
         if(!MiscUtils.isEmpty(loginInfoMap)){
@@ -394,12 +394,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         reqMap.put("appName",appName);
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
-            reqMap.put("avatar_address",reqMap.get("avatar_address"));
-        }
-        if(MiscUtils.isEmpty(reqMap.get("room_name"))){
-            reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), reqMap.get("nick_name")));
-        }
+        reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), reqMap.get("nick_name")));
+        reqMap.put("isLecturer", false);
         commonModuleServer.createLiveRoom(reqMap);
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
         CacheUtils.readLecturer(userId, generateRequestEntity(null,null, null, map), readLecturerOperation, jedis);
@@ -419,7 +415,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         shop.put("room_id",room_id);
         shop.put("user_name",reqMap.get("nick_name")+"");
-        shop.put("shop_name",reqMap.get("nick_name")+"的店铺");
+        shop.put("shop_name",reqMap.get("nick_name")+"的知识店铺");
         shop.put("shop_remark",reqMap.get("remark"));
         shop.put("lecturer_titile",reqMap.get("lecturer_titile"));
         shop.put("lecturer_identity",reqMap.get("lecturer_identity"));
@@ -2553,7 +2549,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     liveRoomMap = null;
                 }
 
-                content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
+                content =  loginedUserMap.get("nick_name").toString() + "推荐了一个系列课";
                 /*
                  * 优先使用直播间头像，若直播间头像不存在使用课程封面
                  */
