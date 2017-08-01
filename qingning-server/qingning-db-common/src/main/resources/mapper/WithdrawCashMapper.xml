@@ -155,7 +155,7 @@
         w.balance
       FROM
           `t_withdraw_cash` t
-      LEFT JOIN t_user_gains w ON w.user_id = t.user_id = w.user_id
+      JOIN t_user_gains w ON w.user_id = t.user_id
       WHERE app_name = #{app_name}
 	      <if test="status != null" >
 	        AND t.state = #{status}
