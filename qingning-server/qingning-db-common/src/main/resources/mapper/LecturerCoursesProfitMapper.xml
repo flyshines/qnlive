@@ -292,7 +292,8 @@
       se.series_title as goods_name,
       se.series_price AS price,
       u.nick_name,
-      u.avatar_address as user_avatar
+      u.avatar_address as user_avatar,
+      t.course_type
     FROM
     t_lecturer_courses_profit t
     LEFT JOIN t_series se ON se.series_id = t.course_id
