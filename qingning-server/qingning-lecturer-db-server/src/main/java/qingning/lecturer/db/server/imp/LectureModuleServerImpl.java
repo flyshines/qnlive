@@ -638,6 +638,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("create_time",now);
 		series.put("update_time", now);
 		series.put("update_course_time", now);
+		series.put("classify_id", reqMap.get("classify_id"));
 		series.put("rq_code",  series.get("series_id"));
 		series.put("series_course_type", reqMap.get("series_course_type"));
 		series.put("appName",reqMap.get("appName"));

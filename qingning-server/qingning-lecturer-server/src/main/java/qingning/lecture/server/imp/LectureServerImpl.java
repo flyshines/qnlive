@@ -425,7 +425,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         reqMap.put("user_id", userId);
 
-
         //2.1创建IM 聊天群组
         Map<String,String> queryParam = new HashMap<>();                
         queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
@@ -485,11 +484,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(!lecturer_id.equals(userId)){
                     throw new QNLiveException("210001");
                 }
-
                 String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
                 long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
                 jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
-
                 lectureModuleServer.increaseSeriesCourse(series_id);
                 jedis.del(seriesKey);
                 //获取系列课程详情
@@ -498,8 +495,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 jedis.zrem(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,series_id);
                 long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));
                 jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,lpos,series_id);
-
-
                 //TODO 订阅的系列发布了新的课程 推送提醒
                 map.put("lecturer_id", userId);
                 Map<String, String> lecturer = CacheUtils.readLecturer(userId, generateRequestEntity(null, null, null, map), readLecturerOperation, jedis);
@@ -552,8 +547,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     mqRequestEntity.setAppName(appName);
                     this.mqUtils.sendMessage(mqRequestEntity);
                 }
-
-
             }else{
                 /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
                 map.clear();
@@ -1171,8 +1164,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             messageMap.put("mid",infomation.get("message_id"));
             String content = JSON.toJSONString(messageMap);
             IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
-
         }
+
+
         //</editor-fold>
 
 
@@ -3041,8 +3035,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String query_type = reqMap.get("query_type").toString();//查詢類型 0 app 1 saas
         String user_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
         String updown = reqMap.get("updown").toString();//上下架
+
         if(!updown.equals("1") && !updown.equals("2")){
             reqMap.put("updown","2");
+        }
+        if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
+            reqMap.put("classify_id",Constants.COURSE_DEFAULT_CLASSINFY);
         }
         if(query_type.equals("0")){
             //1.判断直播间是否属于当前讲师

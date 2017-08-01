@@ -89,6 +89,9 @@
 			<if test="series_pay_remark != null" >
 				series_pay_remark,
 			</if>
+			<if test="classify_id != null" >
+				classify_id,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="series_id != null" >
@@ -142,6 +145,9 @@
 			<if test="series_pay_remark != null" >
 				#{series_pay_remark},
 			</if>
+			<if test="classify_id != null" >
+				#{classify_id},
+			</if>
 		</trim>
 	</insert>
 	<update id="updateSeries" parameterType="hashmap" >
@@ -173,6 +179,9 @@
 			</if>
 			<if test="series_status == 1" >
 				end_time=#{update_time},
+			</if>
+			<if test="classify_id != null" >
+				classify_id=#{classify_id},
 			</if>
 		</set>
 		where series_id = #{series_id}
