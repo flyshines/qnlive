@@ -2093,17 +2093,28 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         for(Map<String,Object> recordMap : list){
             String course_id =  recordMap.get("course_id").toString();
             Map<String ,Object> queryMap = new HashMap<>();
-            queryMap.put("course_id",course_id);
+
             Map<String, String> courseMap = new HashMap<>();
-            if("1".equals(recordMap.get("course_type")+"")){
+            if("2".equals(recordMap.get("profit_type")+"")){
+                queryMap.put("series_id",course_id);
+                courseMap = CacheUtils.readSeries(course_id, generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
+            }else if("1".equals(recordMap.get("course_type")+"")){
+                queryMap.put("course_id",course_id);
                courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
             }else{
+                queryMap.put("course_id",course_id);
                 courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
             }
+            if("2".equals(recordMap.get("profit_type")+"")){
+                recordMap.put("goods_name", courseMap.get("series_title"));
+                recordMap.put("price",  courseMap.get("series_price"));
+                recordMap.put("create_time", courseMap.get("create_time"));
+            }else{
+                recordMap.put("goods_name", courseMap.get("course_title"));
+                recordMap.put("price",  courseMap.get("course_price"));
+                recordMap.put("create_time", courseMap.get("create_time"));
+            }
 
-            recordMap.put("goods_name", courseMap.get("course_title"));
-            recordMap.put("price",  courseMap.get("course_price"));
-            recordMap.put("create_time", courseMap.get("create_time"));
 
         }
         resultMap.put("list", list);
