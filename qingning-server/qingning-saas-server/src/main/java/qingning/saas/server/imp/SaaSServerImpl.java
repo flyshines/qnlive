@@ -2094,10 +2094,15 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             String course_id =  recordMap.get("course_id").toString();
             Map<String ,Object> queryMap = new HashMap<>();
             queryMap.put("course_id",course_id);
-            Map<String, String> courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
+            Map<String, String> courseMap = new HashMap<>();
+            if("1".equals(recordMap.get("course_type")+"")){
+               courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
+            }else{
+                courseMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
+            }
 
             recordMap.put("goods_name", courseMap.get("course_title"));
-            recordMap.put("price",  courseMap.get("coursePrice"));
+            recordMap.put("price",  courseMap.get("course_price"));
             recordMap.put("create_time", courseMap.get("create_time"));
 
         }

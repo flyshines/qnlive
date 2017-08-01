@@ -328,7 +328,8 @@
       co.course_title
       ) AS goods_name,
       u.nick_name,
-      u.avatar_address as user_avatar
+      u.avatar_address as user_avatar,
+      t.course_type
     FROM
     t_lecturer_courses_profit t
     LEFT JOIN t_series se ON se.series_id = t.course_id
