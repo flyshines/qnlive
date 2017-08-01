@@ -369,11 +369,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> accountRegister(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
+        reqMap.put("appName",appName);
         Map<String, Object> resultMap = new HashMap<>();
         /**
          * 1.创建用户
          */
-        reqMap.put("login_type",5);
+    //    reqMap.put("login_type","5");
         Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
         Jedis jedis = jedisUtils.getJedis(appName);
         if(!MiscUtils.isEmpty(loginInfoMap)){
@@ -385,26 +386,25 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, String> dbUserMap = commonModuleServer.initializeAccountRegisterUser(reqMap);
         String userId = dbUserMap.get("user_id");
         resultMap.put("user_id", userId);
+        reqMap.put("user_id", userId);
+
         /**
          * 2.创建直播间
          */
         String room_id = MiscUtils.getUUId();
         reqMap.put("room_address", MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName) + room_id);
         reqMap.put("room_id", room_id);
-        reqMap.put("appName",appName);
+
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        if(MiscUtils.isEmpty(reqMap.get("avatar_address"))){
-            reqMap.put("avatar_address",reqMap.get("avatar_address"));
-        }
-        if(MiscUtils.isEmpty(reqMap.get("room_name"))){
-            reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), reqMap.get("nick_name")));
-        }
+        reqMap.put("room_name", String.format(MiscUtils.getConfigByKey("room.default.name",appName), reqMap.get("nick_name")));
+        reqMap.put("isLecturer", false);
         commonModuleServer.createLiveRoom(reqMap);
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
+
         CacheUtils.readLecturer(userId, generateRequestEntity(null,null, null, map), readLecturerOperation, jedis);
         jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
-        CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedis, true,true);
+        CacheUtils.readLiveRoom(room_id, this.generateRequestEntity(null, null, null, reqMap), readLiveRoomOperation, jedis, true,true);
         //3.缓存修改
         //增加讲师缓存中的直播间数
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
@@ -419,7 +419,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
         shop.put("room_id",room_id);
         shop.put("user_name",reqMap.get("nick_name")+"");
-        shop.put("shop_name",reqMap.get("nick_name")+"的店铺");
+        shop.put("shop_name",reqMap.get("nick_name")+"的知识店铺");
         shop.put("shop_remark",reqMap.get("remark"));
         shop.put("lecturer_titile",reqMap.get("lecturer_titile"));
         shop.put("lecturer_identity",reqMap.get("lecturer_identity"));
@@ -453,8 +453,20 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Map<String, Object> resultMap = new HashMap<>();
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("login_type",reqMap.get("login_type"));
+        queryMap.put("account",reqMap.get("account"));
         Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+
+        if(MiscUtils.isEmpty(loginInfoMap)){
+            throw new QNLiveException("000005");
+        }
+        String passwd = MD5Util.getMD5(reqMap.get("passwd").toString()+Constants.USER_DEFAULT_MD5);
+        if(!loginInfoMap.get("passwd").toString().equals(passwd)){
+            throw new QNLiveException("310002");
+        }
+        processLoginSuccess(5,null,loginInfoMap,resultMap,appName);
         return resultMap;
     }
 
@@ -836,13 +848,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
             }
+        }else if(type == 5){
+            user_id = loginInfoMap.get("user_id").toString();
         }
 
-        //1.将objectMap转为StringMap
-        m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
-        m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
+        if(type != 5){
+            //1.将objectMap转为StringMap
+            m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
+            m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
+        }
         MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
-
         //2.根据相关信息生成access_token
         String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -858,9 +873,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //3.增加相关返回参数
         resultMap.put("access_token", access_token);
-        resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
-        resultMap.put("m_user_id", m_user_id);
-        resultMap.put("user_id", user_id);
+        if(type != 5){
+            resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
+            resultMap.put("m_user_id", m_user_id);
+            resultMap.put("user_id", user_id);
+        }
+
 
 
         //注册店铺用到
@@ -2556,7 +2574,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     liveRoomMap = null;
                 }
 
-                content = "【" + loginedUserMap.get("nick_name").toString() + "】推荐了一个系列课\n";
+                content =  loginedUserMap.get("nick_name").toString() + "推荐了一个系列课";
                 /*
                  * 优先使用直播间头像，若直播间头像不存在使用课程封面
                  */

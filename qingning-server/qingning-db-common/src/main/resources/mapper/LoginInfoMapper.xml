@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.LoginInfoMapper" >
   <select id="getLoginInfoByLoginIdAndLoginType" resultType="hashmap" parameterType="hashmap" >
-    select * from t_login_info
-    where
+    select * from t_login_info where
+
     <if test='login_type != null and login_type == "0"'>
       union_id = #{login_id}
       <!--微信登录-->
@@ -17,7 +17,6 @@
       web_openid = #{web_openid}
     </if>
     <if test='login_type != null and login_type == "5"'>
-      <!--web openid登录-->
       account = #{account}
     </if>
   </select>
@@ -55,7 +54,10 @@
         union_id,
       </if>
       <if test="qq_id != null" >
-        qq_id,
+      qq_id,
+      </if>
+      <if test="account != null" >
+        account,
       </if>
       <if test="phone_number != null" >
         phone_number,
@@ -115,6 +117,9 @@
       </if>
       <if test="qq_id != null" >
         #{qq_id},
+      </if>
+      <if test="account != null" >
+        #{account},
       </if>
       <if test="phone_number != null" >
         #{phone_number},
