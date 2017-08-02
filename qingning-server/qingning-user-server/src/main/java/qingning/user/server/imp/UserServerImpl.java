@@ -673,7 +673,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         }
         //查询店铺信息
         reqMap.put("user_id",courseMap.get("lecturer_id"));
-        Map<String, String> shopInfo = CacheUtils.readShopByUserId(courseMap.get("lecturer_id"), reqEntity, readShopOperation, jedis);
+        Map<String, String> shopInfo = null;
+        try{
+            shopInfo = CacheUtils.readShopByUserId(courseMap.get("lecturer_id"), reqEntity, readShopOperation, jedis);
+        }catch (Exception e){
+
+        }
+
         if(shopInfo!=null){
             resultMap.put("shop_id",shopInfo.get("shop_id"));
             resultMap.put("shop_name",shopInfo.get("shop_name"));
@@ -2593,7 +2599,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         reqMap.put("user_id",lecturer_id);
-        Map<String, String> shopInfo = CacheUtils.readShopByUserId(lecturer_id, reqEntity, readShopOperation, jedis);
+        Map<String, String> shopInfo = null;
+        try{
+            shopInfo = CacheUtils.readShopByUserId(lecturer_id, reqEntity, readShopOperation, jedis);
+        }catch (Exception e){
+
+        }
         if(shopInfo!=null){
             resultMap.put("shop_id",shopInfo.get("shop_id"));
             resultMap.put("shop_name",shopInfo.get("shop_name"));
