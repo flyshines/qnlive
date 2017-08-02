@@ -251,7 +251,7 @@ public class CommonController extends AbstractController {
                 if(StringUtils.isNotEmpty(paramKey)){
                     String newUrl = new String(Base64.decode(paramKey));
                     logger.debug("url:"+newUrl);
-                    response.sendRedirect(newUrl+"&token="+userWeixinAccessToken);
+                    response.sendRedirect(newUrl+"token="+userWeixinAccessToken);
                 }else{
                     response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index",appName)+userWeixinAccessToken);
                 }
