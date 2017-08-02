@@ -183,6 +183,10 @@
 			<if test="classify_id != null" >
 				classify_id=#{classify_id},
 			</if>
+			<if test="shelves_sharing != null" >
+				shelves_sharing=#{shelves_sharing},
+			</if>
+
 		</set>
 		where series_id = #{series_id}
 	</update>

@@ -3039,9 +3039,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(!updown.equals("1") && !updown.equals("2")){
             reqMap.put("updown","2");
         }
-//        if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
-//            reqMap.put("classify_id",Constants.COURSE_DEFAULT_CLASSINFY);
-//        }
+        if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
+            reqMap.put("classify_id",Constants.COURSE_DEFAULT_CLASSINFY);
+        }
         if(query_type.equals("0")){
             //1.判断直播间是否属于当前讲师
             String liveRoomOwner = CacheUtils.readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readLiveRoomOperation, jedis, true);

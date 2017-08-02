@@ -294,9 +294,10 @@
       <if test="update_time != null" >
         update_time = #{update_time,jdbcType=TIMESTAMP},
       </if>
-      <if test="updown_time != null" >
-        updown_time = #{update_time,jdbcType=TIMESTAMP},
+      <if test="shelves_sharing != null" >
+        shelves_sharing = #{shelves_sharing},
       </if>
+
     </set>
     where course_id = #{course_id,jdbcType=VARCHAR}
   </update>
@@ -319,6 +320,9 @@
       <if test="update_time != null" >
         update_time=#{update_time},
       </if>
+      <if test="classify_id != null" >
+      classify_id=#{classify_id},
+    </if>
     </set>
     where course_id = #{course_id}
   </update>

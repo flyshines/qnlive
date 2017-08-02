@@ -458,7 +458,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         queryMap.put("account",reqMap.get("account"));
         Map<String, Object> loginInfoMap = commonModuleServer.getLoginInfoByLoginIdAndLoginType(reqMap);
 
-
         if(MiscUtils.isEmpty(loginInfoMap)){
             throw new QNLiveException("000005");
         }

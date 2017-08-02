@@ -765,4 +765,33 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+
+    /**
+     * 上架知享
+     * @param accessToken  token
+     * @param shelves_id  上架id
+     * @param shelves_type 上架类型  0课程 1系列
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/qnsharing/shelves", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity shelvesQNSharing(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "shelves_id", defaultValue = "") String shelves_id,
+            @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shelvesQNSharing", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shelves_id",shelves_id);
+        param.put("shelves_type",shelves_type);
+
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 }
