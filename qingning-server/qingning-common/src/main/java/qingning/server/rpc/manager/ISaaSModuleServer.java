@@ -242,4 +242,11 @@ public interface ISaaSModuleServer {
      * @return
      */
    // Map<String,Object> getUserWithdrawList(Map<String, Object> reqMap);
+
+    /**
+     * 获取店铺列表
+     * @param param
+     * @return
+     */
+    List<Map<String,Object>> getShopInfoList(Map<String, Object> param);
 }

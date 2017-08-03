@@ -801,7 +801,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String course_id = (String)reqMap.get("course_id");
         String query_type = reqMap.get("query_type").toString();
         map.put("course_id", course_id);
-        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, false);
+        Map<String, String> courseInfoMap = new HashMap<>();
+        if(query_type.equals("0")){
+            courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+        }else{
+            courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);
+        }
         if(MiscUtils.isEmpty(courseInfoMap)){
         	throw new QNLiveException("100004");
         }
@@ -865,7 +870,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         studentQueryMap.put("user_id",userId);
         studentQueryMap.put("course_id",course_id);
         if(userModuleServer.isStudentOfTheCourse(studentQueryMap)){
-            throw new QNLiveException("100004");
+            throw new QNLiveException("1000035");
         }
 
         //5.将学员信息插入到学员参与表中
@@ -901,7 +906,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             jedis.del(courseKey);
              HashMap<String,Object> queryMap = new HashMap<>();
              queryMap.put("course_id",course_id);
-            Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, false);
+            Map<String,String> courseMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
             switch (courseMap.get("status")){
                 case "1":
                     MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
@@ -915,22 +920,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
                     jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH,1,course_id);
                     break;
             }
-//            if(jedis.exists(courseKey)){
-//                //jedis.hincrBy(courseKey, "student_num", 1);
-//                map.clear();
-//                map.put("course_id", course_id);
-//                userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
-//                Map<String,Object> numInfo = userModuleServer.findCourseRecommendUserNum(map);
-//                long num = 0;
-//                if(!MiscUtils.isEmpty(numInfo)){
-//                    num=MiscUtils.convertObjectToLong(numInfo.get("recommend_num"));
-//                }
-//                jedis.hset(courseKey, "student_num", num+"");
-//                Map<String, String> courseMap = jedis.hgetAll(courseKey);
-//
-//            }else {
-//                userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
-//            }
+
 
             //7.修改用户缓存信息中的加入课程数
             map.clear();

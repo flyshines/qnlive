@@ -357,12 +357,12 @@ public class SaaSManageController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity getSingleList(
-            @RequestHeader("access_token") String accessToken,
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "type",defaultValue = "") String type,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version, appName);
@@ -780,9 +780,9 @@ public class SaaSManageController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity shelvesQNSharing(
-            @RequestHeader("access_token") String accessToken,
             @RequestParam(value = "shelves_id", defaultValue = "") String shelves_id,
             @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
+            @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shelvesQNSharing", accessToken, version, appName);
@@ -793,5 +793,44 @@ public class SaaSManageController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
+
+    /**
+     * saas讲师列表
+     * @param page_size 每页大小（默认10条）
+     * @param page_num 页码（默认第一页）
+     * @param lecturer_name 讲师名称
+     * @param lecturer_identity 讲师身份 讲师身份  0:普通讲师  1:签约讲师
+     * @param create_from 创建来源  0:saas 1:内部
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/saas/shops", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getShops(
+            @RequestParam(value = "page_size", defaultValue = "10") long page_size,
+            @RequestParam(value = "page_num", defaultValue = "1") long page_num,
+            @RequestParam(value = "lecturer_name", defaultValue = "") String lecturer_name,
+            @RequestParam(value = "lecturer_identity") String lecturer_identity,
+            @RequestParam(value = "create_from") String create_from,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShops", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("page_size",page_size);
+        param.put("page_num",page_num);
+        param.put("lecturer_name","%"+lecturer_name+"%");
+        param.put("lecturer_identity",lecturer_identity);
+        param.put("create_from",create_from);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
 
 }

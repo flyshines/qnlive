@@ -1,5 +1,9 @@
 package qingning.db.common.mybatis.persistence;
 
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,6 +15,8 @@ public interface SaaSShopMapper {
     int insert(Map<String,Object> record);
 
     Map<String,Object> selectByPrimaryKey(Map<String,Object> record);
+
+    PageList<Map<String,Object>> getShopInfoList(Map<String, Object> param, PageBounds page);
 
     int updateByPrimaryKey(Map<String,Object> record);
 

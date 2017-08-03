@@ -566,4 +566,9 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return res;
     }*/
 
+    @Override
+    public List<Map<String,Object>> getShopInfoList(Map<String, Object> param) {
+        return null;
+    }
+
 }

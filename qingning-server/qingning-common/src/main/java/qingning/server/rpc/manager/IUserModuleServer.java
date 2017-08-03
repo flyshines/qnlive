@@ -182,4 +182,6 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
+
+	Map<String, Object> findSaasCourseByCourseId(String courseId);
 }

@@ -1,6 +1,7 @@
 package qingning.user.server.other;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.IUserModuleServer;
 
@@ -22,8 +23,16 @@ public class ReadCourseOperation implements CommonReadOperation {
     @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
 
-        return userModuleServer.findCourseByCourseId((String)reqMap.get("course_id"));
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        String functionName = requestEntity.getFunctionName();
+        if (Constants.SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程
+            return userModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
+        } else {
+            return userModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+        }
+
+
+
     }
 }

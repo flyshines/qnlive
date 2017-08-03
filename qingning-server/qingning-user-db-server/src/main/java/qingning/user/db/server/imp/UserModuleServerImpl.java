@@ -77,6 +77,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
     @Autowired(required = true)
     private TradeBillMapper tradeBillMapper;
 
+    @Autowired(required = true)
+    private SaaSCourseMapper saasCourseMapper;
+
     @Override
     public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
         Map<String, Object> dbResultMap = new HashMap<>();
@@ -533,5 +536,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
         return shopMapper.selectByPrimaryKey(param);
     }
 
-
+    @Override
+    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+        return saasCourseMapper.selectByPrimaryKey(courseId);
+    }
 }

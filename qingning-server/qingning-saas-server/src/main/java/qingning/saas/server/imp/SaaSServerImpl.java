@@ -2253,11 +2253,32 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             queryMap.put("series_id",reqMap.get("shelves_id"));
             queryMap.put("shelves_sharing","1");
             saaSModuleServer.updateSeriesByMap(queryMap);
-
         }
+
+        
 
 
         return null;
     }
+
+
+    /**
+     * 上架到知享
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getShops")
+    public Map<String, Object>  getShops(RequestEntity reqEntity) throws Exception{
+        Map<String,String> reqMap = (Map<String, String>) reqEntity.getParam();
+        Map<String,Object> queryMap = new HashMap<>();
+        //saaSModuleServer.getShopInfo()
+
+
+
+        return null;
+    }
+
+
 
 }
