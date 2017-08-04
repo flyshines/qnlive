@@ -782,6 +782,7 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shelvesQNSharing(
             @RequestParam(value = "shelves_id", defaultValue = "") String shelves_id,
             @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
+            @RequestParam(value = "classify_id", defaultValue = "1") int classify_id,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -789,7 +790,7 @@ public class SaaSManageController extends AbstractController {
         Map<String, Object> param = new HashMap<>();
         param.put("shelves_id",shelves_id);
         param.put("shelves_type",shelves_type);
-
+        param.put("classify_id",classify_id);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }

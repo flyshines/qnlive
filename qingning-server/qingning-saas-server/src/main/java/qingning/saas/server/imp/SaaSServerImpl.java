@@ -2243,19 +2243,44 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("shelvesQNSharing")
     public Map<String, Object>  shelvesQNSharing(RequestEntity reqEntity) throws Exception{
         Map<String,String> reqMap = (Map<String, String>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
         String shelves_type = reqMap.get("shelves_type");
         Map<String,Object> queryMap = new HashMap<>();
+
+        if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+            queryMap.put("classify_id",reqMap.get("classify_id"));
+        }
+        queryMap.put("shelves_sharing","1");
         if(shelves_type.equals("0")){//课程
             queryMap.put("course_id",reqMap.get("shelves_id"));
-            queryMap.put("shelves_sharing","1");
+            RequestEntity entity = new RequestEntity();
+            entity.setFunctionName("findSaasCourseByCourseId");
+            entity.setParam(reqMap);
+            Map<String, String> saasCourse = CacheUtils.readCourse(reqMap.get("shelves_id"), generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
+            if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
+                throw new QNLiveException("310003");
+            }
+
+
+
             saaSModuleServer.updateCourse(queryMap);
         }else if(shelves_type.equals("1")){//系列
             queryMap.put("series_id",reqMap.get("shelves_id"));
-            queryMap.put("shelves_sharing","1");
+
+            Map<String, String> seriesInfoMap = CacheUtils.readSeries(reqMap.get("shelves_id"), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
+            if(seriesInfoMap.get("series_course_type").equals("0") || seriesInfoMap.get("series_course_type").equals("3")){
+                throw new QNLiveException("310003");
+            }
+
+
+
+
             saaSModuleServer.updateSeriesByMap(queryMap);
         }
 
-        
+
+
 
 
         return null;
@@ -2270,13 +2295,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
      */
     @FunctionName("getShops")
     public Map<String, Object>  getShops(RequestEntity reqEntity) throws Exception{
-        Map<String,String> reqMap = (Map<String, String>) reqEntity.getParam();
-        Map<String,Object> queryMap = new HashMap<>();
-        //saaSModuleServer.getShopInfo()
-
-
-
-        return null;
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        return saaSModuleServer.getShopInfoList(reqMap);
     }
 
 
