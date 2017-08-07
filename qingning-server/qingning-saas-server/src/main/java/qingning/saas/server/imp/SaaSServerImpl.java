@@ -6,6 +6,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
@@ -2244,9 +2245,18 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, Object>  shelvesQNSharing(RequestEntity reqEntity) throws Exception{
         Map<String,String> reqMap = (Map<String, String>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis(appName);
         String shelves_type = reqMap.get("shelves_type");
         Map<String,Object> queryMap = new HashMap<>();
+
+        Map<String,String> headerParams = new HashMap<>();
+        headerParams.put("version", Constants.SYS_QN_SHARING_VERSION);
+        headerParams.put("Content-Type",Constants.SYS_QN_SHARING_CONTENT_TYPE);
+        headerParams.put("access_token",reqEntity.getAccessToken());
+
+        Map<String,Object> requestMap = new HashMap<>();
+
 
         if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
             queryMap.put("classify_id",reqMap.get("classify_id"));
@@ -2261,25 +2271,23 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
                 throw new QNLiveException("310003");
             }
-
+            requestMap.put("type","add_course");
 
 
             saaSModuleServer.updateCourse(queryMap);
         }else if(shelves_type.equals("1")){//系列
             queryMap.put("series_id",reqMap.get("shelves_id"));
-
             Map<String, String> seriesInfoMap = CacheUtils.readSeries(reqMap.get("shelves_id"), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
             if(seriesInfoMap.get("series_course_type").equals("0") || seriesInfoMap.get("series_course_type").equals("3")){
                 throw new QNLiveException("310003");
             }
-
-
+            requestMap.put("type","add_series");
 
 
             saaSModuleServer.updateSeriesByMap(queryMap);
         }
 
-
+        HttpClientUtil.doPostUrl("",headerParams,requestMap,"UTF-8");
 
 
 
@@ -2299,6 +2307,52 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         return saaSModuleServer.getShopInfoList(reqMap);
     }
 
+    /**
+     * 开通知享
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("sharingOpen")
+    public Map<String, Object>  sharingOpen(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
+        //清空店铺缓存
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
+        jedis.del(shopKey);
+
+        Map<String,Object> param = new HashMap<>();
+        param.put("user_id",userId);
+        param.put("open_sharing",1);
+        saaSModuleServer.updateShop(param);
+
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("version", "1.2.0");
+        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+        headerMap.put("access_token",reqEntity.getAccessToken() );
+
+        try{
+            map.clear();
+            map.put("avatar_address",shopInfo.get("shop_logo"));
+            map.put("lecturer_name",shopInfo.get("user_name"));
+            map.put("lecturer_title",shopInfo.get("lecturer_title"));
+            map.put("lecturer_remark",shopInfo.get("shop_remark"));
+            //获取知享课程数
+            String result = HttpClientUtil.doPostUrl("http://120.25.104.68:9999/sharing-server-user-common/user/common/sharing/open", headerMap, map, "UTF-8");
+            map.clear();
+            map.put("result",result);
+            return map;
+        }catch (Exception e){
+            param.put("open_sharing",0);
+            saaSModuleServer.updateShop(param);
+        }
+
+        return null;
+    }
 
 
 }

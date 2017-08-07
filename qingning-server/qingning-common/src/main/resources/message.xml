@@ -61,7 +61,7 @@
 				<entry key="100032" value="课程没开始前，不可以结束"/>
 				<entry key="100033" value="获取图片失败"/>
 				<entry key="100034" value="修改的课程开始时间不能早于当前时间"/>
-				<entry key="1000035" value="已加入过课程"/>
+				<entry key="100035" value="已加入过课程"/>
 				<entry key="110003" value="关注直播间操作失败"/>
 				<entry key="110004" value="无法关注自己的直播间"/>
 				<entry key="110005" value="用户已经关注直播间"/>
@@ -130,6 +130,11 @@
 				<entry key="210006" value="用户操作失败"/>
 				<entry key="310001" value="用户账号已存在"/>
 				<entry key="310002" value="账号密码错误"/>
+				<entry key="310003" value="商品内容不支持上架到知享"/>
+				<entry key="310004" value="非收费科不支持上架到知享"/>
+
+
+
 			</map>
 
 

@@ -143,51 +143,54 @@
     update t_saas_shop
     <set >
       <if test="user_id != null" >
-        user_id = #{user_id,jdbcType=VARCHAR},
+        user_id = #{user_id},
       </if>
       <if test="room_id != null" >
-        room_id = #{room_id,jdbcType=VARCHAR},
+        room_id = #{room_id},
       </if>
       <if test="user_name != null" >
-        user_name = #{user_name,jdbcType=VARCHAR},
+        user_name = #{user_name},
       </if>
       <if test="shop_name != null" >
-        shop_name = #{shop_name,jdbcType=VARCHAR},
+        shop_name = #{shop_name},
       </if>
       <if test="shop_url != null" >
-        shop_url = #{shop_url,jdbcType=VARCHAR},
+        shop_url = #{shop_url},
       </if>
       <if test="shop_remark != null" >
-        shop_remark = #{shop_remark,jdbcType=VARCHAR},
+        shop_remark = #{shop_remark},
       </if>
       <if test="shop_logo != null" >
-        shop_logo = #{shop_logo,jdbcType=VARCHAR},
+        shop_logo = #{shop_logo},
       </if>
       <if test="open_url != null" >
-        open_url = #{open_url,jdbcType=VARCHAR},
+        open_url = #{open_url},
       </if>
       <if test="weixin_code != null" >
-        weixin_code = #{weixin_code,jdbcType=VARCHAR},
+        weixin_code = #{weixin_code},
       </if>
       <if test="status != null" >
-        status = #{status,jdbcType=CHAR},
+        status = #{status},
       </if>
       <if test="create_time != null" >
-        create_time = #{create_time,jdbcType=TIMESTAMP},
+        create_time = #{create_time},
       </if>
       <if test="lecturer_identity != null" >
         lecturer_identity = #{lecturer_identity},
       </if>
-      <if test="lecturer_titile != null" >
-        lecturer_titile = #{lecturer_titile},
+      <if test="lecturer_title != null" >
+        lecturer_title = #{lecturer_title},
+      </if>
+      <if test="open_sharing != null" >
+        open_sharing = #{open_sharing},
       </if>
     </set>
     where
     <if test="shop_id != null" >
-      shop_id = #{shop_id,jdbcType=VARCHAR}
+      shop_id = #{shop_id}
     </if>
     <if test="user_id != null" >
-      user_id = #{user_id,jdbcType=VARCHAR}
+      user_id = #{user_id}
     </if>
   </update>
 
