@@ -900,7 +900,24 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //</editor-fold>
         String shop_id = "";
         if (!MiscUtils.isEmpty(userMap.get("shop_id"))) {
+            query.clear();
             shop_id = userMap.get("shop_id");
+            query.put("shop_id", shop_id);
+            Map<String, String> shopInfo = CacheUtils.readShop(userMap.get("shop_id"), generateRequestEntity(null, null, null, query), readShopOperation, jedis);
+
+            if(shopInfo.get("open_sharing").equals("1")){
+                logger.debug("同步讲师token  user_id : "+user_id +" token : "+access_token);
+                Map<String, String> headerMap = new HashMap<>();
+                headerMap.put("version", "1.2.0");
+                headerMap.put("Content-Type", "application/json;charset=UTF-8");
+                headerMap.put("access_token",access_token);
+                //获取知享课程数
+                String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                        +SharingConstants.SHARING_SERVER_COURSE
+                        +SharingConstants.SHARING_GENERATE_TOKEN;
+                String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+                resultMap.put("open_sharing", shopInfo.get("open_sharing"));
+            }
         }
         resultMap.put("shop_id", shop_id);
         resultMap.put("avatar_address", userMap.get("avatar_address"));
@@ -4688,7 +4705,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("version", "1.0");
         headerMap.put("Content-Type", "application/json;charset=UTF-8");
-        String addClassfyUrl = MiscUtils.getConfigByKey("classfy_sync_add", Constants.HEADER_APP_NAME);
+
+        String addClassfyUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_COURSE
+                +SharingConstants.SHARING_COURSE_CLASSIFY_NEW;
         //获取请求
         String res = HttpClientUtil.doPostUrl(addClassfyUrl, headerMap, paramMap, "UTF-8");
         logger.debug(res);
@@ -4758,7 +4778,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         headerMap.put("Content-Type", "application/json;charset=UTF-8");
 
         //获取知享课程数
-        String getUrl = MiscUtils.getConfigByKey("classfy_sync_get", Constants.HEADER_APP_NAME);
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_COURSE
+                +SharingConstants.SHARING_COURSE_CLASSIFY_COURSE_NUM;
         String result = HttpClientUtil.doPostUrl(getUrl, headerMap, paramMap, "UTF-8");
         try {
             JSONObject obj = JSON.parseObject(result);
@@ -4811,7 +4833,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("version", "1.0");
         headerMap.put("Content-Type", "application/json;charset=UTF-8");
-        String updateClassfyUrl = MiscUtils.getConfigByKey("classfy_sync_update", Constants.HEADER_APP_NAME);
+        String updateClassfyUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_COURSE
+                +SharingConstants.SHARING_COURSE_CLASSIFY_UPDATE;
         //获取请求
         String res = HttpClientUtil.doPutUrl(updateClassfyUrl, headerMap, paramMap, "UTF-8");
         logger.debug(res);

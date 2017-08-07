@@ -6,9 +6,7 @@
     weixin_code, status, create_time
   </sql>
   <select id="selectByPrimaryKey" resultType="hashmap" parameterType="hashmap" >
-    select 
-    <include refid="Base_Column_List" />
-    from t_saas_shop
+    select * from t_saas_shop
     where
     <if test="shop_id != null" >
       shop_id = #{shop_id,jdbcType=VARCHAR}

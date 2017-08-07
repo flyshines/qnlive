@@ -132,8 +132,8 @@
 				<entry key="310002" value="账号密码错误"/>
 				<entry key="310003" value="商品内容不支持上架到知享"/>
 				<entry key="310004" value="非收费科不支持上架到知享"/>
-
-
+				<entry key="310005" value="已开通知享"/>
+				<entry key="310006" value="开通失败,请联系客服"/>
 
 			</map>
 

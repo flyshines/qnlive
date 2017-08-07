@@ -1,6 +1,8 @@
 package qingning.saas.server.imp;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -2318,12 +2320,18 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        reqMap.put("user_id",userId);
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        if(shopInfo.get("open_sharing").equals("1")){
+            throw new QNLiveException("310005");
+        }
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
         //清空店铺缓存
         String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
         jedis.del(shopKey);
+
+
 
         Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
@@ -2341,11 +2349,22 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             map.put("lecturer_name",shopInfo.get("user_name"));
             map.put("lecturer_title",shopInfo.get("lecturer_title"));
             map.put("lecturer_remark",shopInfo.get("shop_remark"));
+            map.put("open_code",reqMap.get("open_code"));
             //获取知享课程数
-            String result = HttpClientUtil.doPostUrl("http://120.25.104.68:9999/sharing-server-user-common/user/common/sharing/open", headerMap, map, "UTF-8");
-            map.clear();
-            map.put("result",result);
-            return map;
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                    +SharingConstants.SHARING_SERVER_USER_COMMON
+                    +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
+            String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+            Map<String, String> resultMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
+            if(resultMap.get("code").equals("0")){
+                map.clear();
+                map.put("result",result);
+                return map;
+            }else{
+                param.put("open_sharing",0);
+                saaSModuleServer.updateShop(param);
+                throw new QNLiveException("310006");
+            }
         }catch (Exception e){
             param.put("open_sharing",0);
             saaSModuleServer.updateShop(param);
@@ -2356,3 +2375,19 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
 
 }
+
+//class T {
+//    public static void main(String[] args) {
+//        Map<String, String> headerMap = new HashMap<>();
+//        headerMap.put("version", "1.2.0");
+//        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+//        headerMap.put("access_token", "099996y3v302238u95uxvz1u27x20v921wz6w408174096399");
+//
+//        //获取知享课程数
+//        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//                + SharingConstants.SHARING_SERVER_COURSE
+//                + SharingConstants.SHARING_GENERATE_TOKEN;
+//        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, null, "UTF-8");
+//
+//    }
+//}
