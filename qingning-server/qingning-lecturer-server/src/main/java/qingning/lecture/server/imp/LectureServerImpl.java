@@ -3428,7 +3428,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         jedis.del(courseKey);
         Map<String,Object> course = new HashMap<>();
         course.put("course_id",course_id);
-        if(query_type.equals("1")){//移除系列
+        if(query_type.equals("1")){//移出系列
             map.clear();
             String oldSeriesId =courseInfo.get("series_id");
             map.put("series_id",oldSeriesId);
@@ -3436,10 +3436,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
             jedis.del(seriesKey);
             //获取系列课程详情
-            Map<String, String> seriesInfo = CacheUtils.readSeries(oldSeriesId, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
+            Map<String, String> oldSeriesInfo = CacheUtils.readSeries(oldSeriesId, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
             String series_course_updown = courseInfo.get("series_course_updown");
             String course_updown =courseInfo.get("course_updown");
-            String series_course_type =seriesInfo.get( "series_course_type");
+            String series_course_type =oldSeriesInfo.get( "series_course_type");
             course.put("series_course_updown","0");
             course.put("series_id","");
             if(courseInfo.get("course_updown").equals("0")){
@@ -3469,10 +3469,28 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
             map.clear();
             map.put("course_id", course_id);
+
             courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);//获取课程信息
             if(MiscUtils.isEmpty(courseInfo)){
-               CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);//获取课程信息
+                courseInfo =  CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);//获取课程信息
             }
+
+            if(oldSeriesInfo.get("shelves_sharing").equals("1")){
+                Map<String, String> headerMap = new HashMap<>();
+                headerMap.put("version", "1.2.0");
+                headerMap.put("Content-Type", "application/json;charset=UTF-8");
+                headerMap.put("access_token",reqEntity.getAccessToken() );
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("s_course_id",course_id);
+
+                String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+                        +SharingConstants.SHARING_SERVER_COURSE
+                        +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD_REMOVE;
+                String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
+                Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
+                resltMap.put("synchronization",resMap);
+            }
+
         }else if(query_type.equals("0")){//加入系列
             if(MiscUtils.isEmpty(reqMap.get("series_id"))){
                 throw new QNLiveException("000004");
@@ -3507,6 +3525,41 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
             long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
             jedis.zadd(lectureSeriesKey, seriesLpos, course_id);
+
+            map.put("course_id",course_id);
+            courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);//获取课程信息
+            if(MiscUtils.isEmpty(courseInfo)){
+                courseInfo = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, map), readCourseOperation, jedis, true);//获取课程信息
+            }
+
+
+            if(seriesMap.get("shelves_sharing").equals("1")){
+                Map<String, String> headerMap = new HashMap<>();
+                headerMap.put("version", "1.2.0");
+                headerMap.put("Content-Type", "application/json;charset=UTF-8");
+                headerMap.put("access_token",reqEntity.getAccessToken() );
+
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("course_id",series_id);
+                courseMap.put("s_course_id",courseInfo.get("course_id"));
+                courseMap.put("series_id",courseInfo.get("series_id"));
+                courseMap.put("course_title",courseInfo.get("course_title"));
+                courseMap.put("course_url",courseInfo.get("course_image"));
+                courseMap.put("course_duration",courseInfo.get("course_duration"));
+                courseMap.put("course_remark",MiscUtils.isEmpty(courseInfo.get("course_remark")));
+                courseMap.put("file_path",courseInfo.get("course_url"));
+                if(courseInfo.get("series_course_updown").equals("1")){
+                    courseMap.put("status",0);
+                }else if(courseInfo.get("series_course_updown").equals("2")){
+                    courseMap.put("status",1);
+                }
+                String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+                        +SharingConstants.SHARING_SERVER_COURSE
+                        +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
+                String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
+                Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
+                resltMap.put("synchronization",resMap);
+            }
         }else {
             throw new QNLiveException("000004");
         }
@@ -3685,7 +3738,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         	seriesInfoMap.put("ticket_amount", String.valueOf(seriesProfitStatistics.get(0).get("amount")));
         	seriesInfoMap.put("totle_amount", String.valueOf(seriesProfitStatistics.get(1).get("amount")));
         }
-        
         resultMap.put("series_info", seriesInfoMap);
         resultMap.put("profit_info_list", profitInfoList);
         return resultMap;

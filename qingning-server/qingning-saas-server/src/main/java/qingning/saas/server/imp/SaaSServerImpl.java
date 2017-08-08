@@ -773,6 +773,35 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	seriesScore = MiscUtils.convertLongByDesc(seriesScore);	//实现指定时间越大，返回值越小
             jedis.zadd(lecturerSeriesUpKey, seriesScore, seriesId);
         }
+
+        if(seriesInfoMap.get("shelves_sharing").equals("1")){
+            Map<String, String> headerMap = new HashMap<>();
+            headerMap.put("version", "1.2.0");
+            headerMap.put("Content-Type", "application/json;charset=UTF-8");
+            headerMap.put("access_token",reqEntity.getAccessToken() );
+
+            Map<String,Object> map = new HashMap<>();
+            map.put("course_id",courseId);
+            Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, "findSaasCourseByCourseId", map), readCourseOperation, jedis, true);
+            Map<String, Object> courseMap = new HashMap<>();
+            courseMap.put("course_id",seriesId);
+            courseMap.put("s_course_id",courseInfoMap.get("course_id"));
+            courseMap.put("series_id",courseInfoMap.get("series_id"));
+            courseMap.put("course_title",courseInfoMap.get("course_title"));
+            courseMap.put("course_url",courseInfoMap.get("course_image"));
+            courseMap.put("course_duration",courseInfoMap.get("course_duration"));
+            courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
+            courseMap.put("file_path",courseInfoMap.get("course_url"));
+            if(courseInfoMap.get("series_course_updown").equals("1")){
+                courseMap.put("status",0);
+            }else if(courseInfoMap.get("series_course_updown").equals("2")){
+                courseMap.put("status",1);
+            }
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+                +SharingConstants.SHARING_SERVER_COURSE
+                +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
+        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
+        }
     }
 
     /**
@@ -809,36 +838,38 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //编辑课程
         saaSModuleServer.updateCourse(reqMap);
 
-        CacheUtils.readCourse(courseId, entity, readCourseOperation,jedis,true);
+        Map<String, String> saasCourse = CacheUtils.readCourse(courseId, entity, readCourseOperation, jedis, true);
         Map<String,Object> requestMap = new HashMap<>();
-        Map<String, String> saasCourse = CacheUtils.readCourse(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, "findSaasCourseByCourseId", query), readCourseOperation, jedis, true);
         if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
             throw new QNLiveException("310003");
         }
-        Map<String, String> headerParams = new HashMap<>();
-        headerParams.put("version", "1.2.0");
-        headerParams.put("Content-Type", "application/json;charset=UTF-8");
-        headerParams.put("access_token",reqEntity.getAccessToken() );
 
-        requestMap.put("course_id",saasCourse.get("course_id"));
-        requestMap.put("course_title",saasCourse.get("course_title"));
-        requestMap.put("course_url",saasCourse.get("course_image"));
-        requestMap.put("course_type",saasCourse.get("goods_type"));
-        requestMap.put("classify_id",saasCourse.get("classify_id"));
-        requestMap.put("course_remark",saasCourse.get("course_remark"));
-        requestMap.put("course_price",saasCourse.get("course_price"));
-        requestMap.put("file_path",saasCourse.get("course_url"));
-        requestMap.put("status",saasCourse.get("course_updown"));
-        requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration"))?"1":saasCourse.get("course_duration"));
-        requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"1":saasCourse.get("target_user"));
-        requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"1":saasCourse.get("buy_tips"));
+        if(saasCourse.get("shelves_sharing").equals("1")){
+            Map<String, String> headerParams = new HashMap<>();
+            headerParams.put("version", "1.2.0");
+            headerParams.put("Content-Type", "application/json;charset=UTF-8");
+            headerParams.put("access_token",reqEntity.getAccessToken() );
 
-        //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-        String getUrl = "http://192.168.1.197:8088"
-                +SharingConstants.SHARING_SERVER_COURSE
-                +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
-        String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
-        Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            requestMap.put("course_id",saasCourse.get("course_id"));
+            requestMap.put("course_title",saasCourse.get("course_title"));
+            requestMap.put("course_url",saasCourse.get("course_image"));
+            requestMap.put("course_type",saasCourse.get("goods_type"));
+            requestMap.put("classify_id",saasCourse.get("classify_id"));
+            requestMap.put("course_remark",saasCourse.get("course_remark"));
+            requestMap.put("course_price",saasCourse.get("course_price"));
+            requestMap.put("file_path",saasCourse.get("course_url"));
+            requestMap.put("status",saasCourse.get("course_updown"));
+            requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration"))?"1":saasCourse.get("course_duration"));
+            requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"1":saasCourse.get("target_user"));
+            requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"1":saasCourse.get("buy_tips"));
+
+            //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+            String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME) /*"http://192.168.1.197:8088"*/
+                    +SharingConstants.SHARING_SERVER_COURSE
+                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
+            String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
+            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+        }
 
     }
     
@@ -2323,7 +2354,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
        //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
 
-            String getUrl = "http://192.168.1.197:8088"
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
@@ -2353,46 +2384,54 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_url",seriesInfoMap.get("series_img"));
             requestMap.put("course_type",seriesInfoMap.get("series_course_type"));
             requestMap.put("update_type","2");
+            requestMap.put("cycle",seriesInfoMap.get("update_plan"));
             requestMap.put("update_status",seriesInfoMap.get("series_status"));
             requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
             requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
-            requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
+            requestMap.put("course_remark",MiscUtils.isEmpty(seriesInfoMap.get("series_remark")));
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
-
+            requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
+            if(seriesInfoMap.get("updown").equals("1")){
+                requestMap.put("status",0);
+            }else if(seriesInfoMap.get("updown").equals("2")){
+                requestMap.put("status",1);
+            }
             List<Map<String, Object>> seriesCourseList = saaSModuleServer.findCourseBySeriesId(seriesInfoMap.get("series_id"));
             List<Map<String, Object>> requestCourseList = new ArrayList<>();
             for(Map<String, Object> course:seriesCourseList ){
                 Map<String, Object> courseMap = new HashMap<>();
-                courseMap.put("course_id",course.get("course_id"));
+                courseMap.put("course_id",seriesInfoMap.get("series_id"));
+                courseMap.put("s_course_id",course.get("course_id"));
                 courseMap.put("series_id",course.get("series_id"));
                 courseMap.put("course_title",course.get("course_title"));
                 courseMap.put("course_url",course.get("course_image"));
-                courseMap.put("course_type",course.get("goods_type"));
-                courseMap.put("classify_id",course.get("classify_id"));
-                courseMap.put("course_remark",course.get("course_remark"));
-                courseMap.put("course_price",course.get("course_price"));
+                courseMap.put("course_duration",course.get("course_duration"));
+                courseMap.put("course_remark",MiscUtils.isEmpty(course.get("course_remark")));
                 courseMap.put("file_path",course.get("course_url"));
-                courseMap.put("status",course.get("series_course_updown"));
+                if(course.get("series_course_updown").equals("1")){
+                    courseMap.put("status",0);
+                }else if(course.get("series_course_updown").equals("2")){
+                    courseMap.put("status",1);
+                }
                 requestCourseList.add(courseMap);
             }
-            requestMap.put("course_list",requestCourseList);
+            requestMap.put("list",requestCourseList);
 
-            String getUrl = "http://192.168.1.197:8088"
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
-            Map<String, Object> resMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
             resultMap.put("synchronization",resMap);
-            CacheUtils.readCourse(reqMap.get("shelves_id").toString(),
-                    generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap),
-                    readCourseOperation, jedis, true);
+            CacheUtils.readSeries(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
+
         }
         return resultMap;
     }
 
 
     /**
-     * 上架到知享
+     * 获取店铺
      * @param reqEntity
      * @return
      * @throws Exception
@@ -2470,21 +2509,21 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
 }
 
-class T {
-    public static void main(String[] args) {
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("version", "1.2.0");
-        headerMap.put("Content-Type", "application/json;charset=UTF-8");
-        headerMap.put("access_token", "100003Y6V697761U04UXVZ8U72X79V078WZ3W4096395639397");
-
-        //获取知享课程数
-      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-        String getUrl = "http://192.168.1.197:8088"
-                + SharingConstants.SHARING_SERVER_USER_COMMON
-                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
-
-
-        String result = HttpClientUtil.doGet(getUrl, headerMap,null,"utf-8");
-        System.out.println(result);
-    }
-}
+//class T {
+//    public static void main(String[] args) {
+//        Map<String, String> headerMap = new HashMap<>();
+//        headerMap.put("version", "1.2.0");
+//        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+//        headerMap.put("access_token", "0999959uw917x42wx516y10x059w28x9w6wy5408239585291");
+//
+//        //获取知享课程数
+//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//        String getUrl = "http://192.168.1.197:8088"
+//                + SharingConstants.SHARING_SERVER_USER_COMMON
+//                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+//
+//
+//        String result = HttpClientUtil.doGet(getUrl, headerMap,null,"utf-8");
+//        System.out.println(result);
+//    }
+//}
