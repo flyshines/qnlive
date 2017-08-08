@@ -955,7 +955,15 @@
 				<outputs>
 				</outputs>
 			</function>
-
+			<function name="shelvesQNSharing">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 
 			<!-- 提现记录 -->
 			<!--<function name="sysWithdraw">

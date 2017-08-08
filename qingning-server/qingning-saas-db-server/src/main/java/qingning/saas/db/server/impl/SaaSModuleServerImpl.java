@@ -586,4 +586,10 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return res;
     }
 
+
+    @Override
+    public List<Map<String,Object>> findCourseBySeriesId(String series_id){
+        return saasCourseMapper.findCourseBySeries(series_id);
+    }
+
 }

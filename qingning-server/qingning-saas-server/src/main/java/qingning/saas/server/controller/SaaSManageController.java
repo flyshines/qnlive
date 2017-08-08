@@ -771,6 +771,7 @@ public class SaaSManageController extends AbstractController {
      * @param accessToken  token
      * @param shelves_id  上架id
      * @param shelves_type 上架类型  0课程 1系列
+     * @param classify_id 分类id
      * @param appName
      * @param version
      * @return
@@ -782,7 +783,7 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shelvesQNSharing(
             @RequestParam(value = "shelves_id", defaultValue = "") String shelves_id,
             @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
-            @RequestParam(value = "classify_id", defaultValue = "1") int classify_id,
+            @RequestParam(value = "classify_id") Integer classify_id,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
