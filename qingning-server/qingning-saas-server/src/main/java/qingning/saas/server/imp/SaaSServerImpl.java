@@ -2491,7 +2491,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             Map<String, String> resultMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
             if(resultMap.get("code").equals("0")){
                 map.clear();
-                map.put("result",result);
+                map.put("synchronization",result);
                 return map;
             }else{
                 param.put("open_sharing",0);
@@ -2502,7 +2502,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             param.put("open_sharing",0);
             saaSModuleServer.updateShop(param);
         }
-
         return null;
     }
 

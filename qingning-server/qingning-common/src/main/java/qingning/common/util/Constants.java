@@ -85,16 +85,6 @@ public final class Constants {
 	public static final String LAST_VISIT_FUN="LAST_VISIT_FUN";
 	public static final String LAST_VISIT_TIME="LAST_VISIT_TIME";
 
-//	public static final String MONGODB_IP="mongodb.ip";
-//	public static final String MONGODB_PORT="mongodb.port";
-//	public static final String MONGODB_MAXCONNECTTIMEOUT="mongodb.maxConnectTimeout";
-//	public static final String MONGODB_MAXCONNECTIONS="mongodb.maxConnections";
-//	public static final String MONGODB_MAXWAITTIME="mongodb.maxWaitTime";
-//	public static final String MONGODB_MAXWAITTHREADS="mongodb.maxWaitThreads";
-//	public static final String MONGODB_MAXIDLETIME="mongodb.maxIdleTime";
-//	public static final String MONGODB_MAXLIFETIME="mongodb.maxLifeTime";
-//	public static final String MONGODB_SOKETTIMEOUT="mongodb.soketTimeout";
-//	public static final String MONGODB_SOKETKEEPALIVE="mongodb.soketKeepAlive";
 
 	public static final String FUNCTION = "function";
 	public static final String VALIDATION = "validation";
