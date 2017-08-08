@@ -771,6 +771,7 @@ public class SaaSManageController extends AbstractController {
      * @param accessToken  token
      * @param shelves_id  上架id
      * @param shelves_type 上架类型  0课程 1系列
+     * @param classify_id 分类id
      * @param appName
      * @param version
      * @return
@@ -782,6 +783,7 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shelvesQNSharing(
             @RequestParam(value = "shelves_id", defaultValue = "") String shelves_id,
             @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
+            @RequestParam(value = "classify_id") Integer classify_id,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
@@ -789,7 +791,7 @@ public class SaaSManageController extends AbstractController {
         Map<String, Object> param = new HashMap<>();
         param.put("shelves_id",shelves_id);
         param.put("shelves_type",shelves_type);
-
+        param.put("classify_id",classify_id);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
@@ -831,6 +833,31 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+
+
+    /**
+     * 开通知享
+     * @param open_code 邀请码(当前邀请码：137258)
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/sharing/open", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity sharingOpen(
+            @RequestParam(value = "open_code") String open_code,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "sharingOpen", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("open_code",open_code);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
 }

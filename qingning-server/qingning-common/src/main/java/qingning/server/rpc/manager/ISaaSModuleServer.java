@@ -248,5 +248,7 @@ public interface ISaaSModuleServer {
      * @param param
      * @return
      */
-    List<Map<String,Object>> getShopInfoList(Map<String, Object> param);
+    Map<String,Object> getShopInfoList(Map<String, Object> param);
+
+    List<Map<String,Object>> findCourseBySeriesId(String series_id);
 }

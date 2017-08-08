@@ -399,6 +399,14 @@
   </select>
 
 
+  <select id="findCourseBySeries" parameterType="java.lang.String" resultType="hashmap">
+    SELECT * FROM
+    `t_saas_course` t
+    WHERE
+    t.series_id = #{series_id}
+  </select>
+
+
   <select id="findCourseListBySeriesId" parameterType="java.lang.String" resultType="hashmap">
     SELECT * FROM t_saas_course WHERE series_id = #{series_id}
   </select>

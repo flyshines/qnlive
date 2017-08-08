@@ -14,6 +14,9 @@ public final class Constants {
 	public static final double SYS_WX_RATE = 0.006D;
 
 
+
+
+
 	public static final String WE_CHAT_PUSH_COLOR = "#595959";
 	public static final String WE_CHAT_PUSH_COLOR_QNCOLOR = "#5AD1A1";
 	public static final String WE_CHAT_PUSH_COLOR_DLIVE = "#FD6924";
@@ -421,7 +424,7 @@ public final class Constants {
 	public static final double USER_RATE = 0.7;
 
 
-
-
+	public static final String SYS_QN_SHARING_VERSION ="1.2";
+	public static final String SYS_QN_SHARING_CONTENT_TYPE ="application/json;charset=UTF-8";
 
 }
