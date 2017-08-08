@@ -270,8 +270,9 @@ public class CommonController extends AbstractController {
 
     @RequestMapping(value = "/common/saas/login", method = RequestMethod.GET)
     public void pcLoginForSaaS(     @RequestParam("code") String code,
-                             @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
-                             HttpServletRequest request,HttpServletResponse response) throws Exception {
+                                    @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+                                    @RequestParam(value="key",defaultValue = "") String paramKey,
+                                    HttpServletRequest request,HttpServletResponse response) throws Exception {
         Map<String, String> map = new HashMap<>();
         map.put("code", code);
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "pcCodeUserLogin", null, "",state);
@@ -287,8 +288,13 @@ public class CommonController extends AbstractController {
         String weName = (String) resultMap.get("name");
         String shopId = (String) resultMap.get("shop_id");
         String roomId = (String) resultMap.get("room_id");
-
-        response.sendRedirect(MiscUtils.getConfigByKey("wx_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPFROME",appName).replace("ROOMID",roomId).replace("SHOPID",shopId));
+        logger.debug("key:"+paramKey);
+        if(StringUtils.isNotEmpty(paramKey)){
+            String newUrl = new String(Base64.decode(paramKey));
+            response.sendRedirect(newUrl+"token="+access_token);
+        }else{
+            response.sendRedirect(MiscUtils.getConfigByKey("wx_url_shop_index",state).replace("ACCESSTOKEN", access_token).replace("NAME", URLEncoder.encode(weName, "utf-8")).replace("APPFROME",appName).replace("ROOMID",roomId).replace("SHOPID",shopId));
+        }
     }
 
     @RequestMapping(value = "/common/weixin/pclogin", method = RequestMethod.GET)
