@@ -1127,7 +1127,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         reqMap.put("shop_id",shopInfo.get("shop_id"));
         return saaSModuleServer.getSingleList(reqMap);
-
     }
     /**
      * 店铺-单品列表

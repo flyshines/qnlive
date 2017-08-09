@@ -246,6 +246,8 @@
 			t.series_student_num,
 			t.updown,
 			t.series_status,
+			t.shelves_sharing,
+			t.target_user,
 			t.course_num
 		FROM
 			`t_series` t
