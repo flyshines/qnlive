@@ -365,7 +365,7 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version, appName);
+            RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version, appName);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);

@@ -2463,8 +2463,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
         jedis.del(shopKey);
 
-
-
         Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
         param.put("open_sharing",1);

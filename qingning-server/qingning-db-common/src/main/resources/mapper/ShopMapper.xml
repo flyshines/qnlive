@@ -3,7 +3,7 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSShopMapper" >
   <sql id="Base_Column_List" >
     shop_id,room_id, user_id, user_name, shop_name, shop_url, shop_remark, shop_logo, open_url,
-    weixin_code, status, create_time
+    weixin_code, status, create_time,open_sharing,lecturer_title,lecturer_identity
   </sql>
   <select id="selectByPrimaryKey" resultType="hashmap" parameterType="hashmap" >
     select * from t_saas_shop
