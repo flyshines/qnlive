@@ -2473,53 +2473,59 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         headerMap.put("Content-Type", "application/json;charset=UTF-8");
         headerMap.put("access_token",reqEntity.getAccessToken() );
 
-        try{
+     //   try{
+        map.clear();
+        map.put("avatar_address",shopInfo.get("shop_logo"));
+        map.put("lecturer_name",shopInfo.get("user_name"));
+        map.put("lecturer_title",shopInfo.get("lecturer_title"));
+        map.put("lecturer_remark",shopInfo.get("shop_remark"));
+        map.put("open_code",reqMap.get("open_code"));
+        //获取知享课程数
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_USER_COMMON
+                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
+        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+        Map<String, String> resultMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
+        if(resultMap.get("code").equals("0")){
             map.clear();
-            map.put("avatar_address",shopInfo.get("shop_logo"));
-            map.put("lecturer_name",shopInfo.get("user_name"));
-            map.put("lecturer_title",shopInfo.get("lecturer_title"));
-            map.put("lecturer_remark",shopInfo.get("shop_remark"));
-            map.put("open_code",reqMap.get("open_code"));
-            //获取知享课程数
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-                    +SharingConstants.SHARING_SERVER_USER_COMMON
-                    +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
-            String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
-            Map<String, String> resultMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
-            if(resultMap.get("code").equals("0")){
-                map.clear();
-                map.put("synchronization",result);
-                return map;
-            }else{
-                param.put("open_sharing",0);
-                saaSModuleServer.updateShop(param);
-                throw new QNLiveException("310006");
-            }
-        }catch (Exception e){
+            map.put("synchronization",result);
+            return map;
+        }else{
             param.put("open_sharing",0);
             saaSModuleServer.updateShop(param);
+            throw new QNLiveException("310006");
         }
-        return null;
+//        }catch (Exception e){
+//            param.put("open_sharing",0);
+//            saaSModuleServer.updateShop(param);
+//
+//        }
     }
-
-
 }
 
-//class T {
-//    public static void main(String[] args) {
-//        Map<String, String> headerMap = new HashMap<>();
-//        headerMap.put("version", "1.2.0");
-//        headerMap.put("Content-Type", "application/json;charset=UTF-8");
-//        headerMap.put("access_token", "0999959uw917x42wx516y10x059w28x9w6wy5408239585291");
-//
-//        //获取知享课程数
-//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+class T {
+    public static void main(String[] args) {
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("version", "1.2.0");
+        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+        headerMap.put("access_token", "099990096z104359v52vuyz94x556z33206x5408385561239");
+
+        //获取知享课程数
+      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
 //        String getUrl = "http://192.168.1.197:8088"
 //                + SharingConstants.SHARING_SERVER_USER_COMMON
 //                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
-//
-//
-//        String result = HttpClientUtil.doGet(getUrl, headerMap,null,"utf-8");
-//        System.out.println(result);
-//    }
-//}
+        Map<String, Object> map = new HashMap<>();
+        map.put("avatar_address","123");
+        map.put("lecturer_name","123");
+        map.put("lecturer_title","123");
+        map.put("lecturer_remark","123");
+        map.put("open_code","125613");
+        //获取知享课程数
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_USER_COMMON
+                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
+        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+        System.out.println(result);
+    }
+}
