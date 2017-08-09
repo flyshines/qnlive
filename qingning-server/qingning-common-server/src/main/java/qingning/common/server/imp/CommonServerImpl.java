@@ -903,8 +903,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             query.clear();
             shop_id = userMap.get("shop_id");
             query.put("shop_id", shop_id);
-            Map<String, String> shopInfo = CacheUtils.readShop(userMap.get("shop_id"), generateRequestEntity(null, null, null, query), readShopOperation, jedis);
-
+            Map<String, String> shopInfo = CacheUtils.readShop(shop_id, generateRequestEntity(null, null, null, query), readShopOperation, jedis);
             if(shopInfo.get("open_sharing").equals("1")){
                 logger.debug("同步讲师token  user_id : "+user_id +" token : "+access_token);
                 Map<String, String> headerMap = new HashMap<>();
