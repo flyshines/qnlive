@@ -643,6 +643,8 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("series_course_type", reqMap.get("series_course_type"));
 		series.put("appName",reqMap.get("appName"));
 
+		series.put("target_user", reqMap.get("target_user"));
+
 		seriesMapper.insertSeries(series);
 		return series;
 	}

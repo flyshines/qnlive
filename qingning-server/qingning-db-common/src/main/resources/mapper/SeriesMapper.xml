@@ -92,6 +92,9 @@
 			<if test="classify_id != null" >
 				classify_id,
 			</if>
+			<if test="target_user != null" >
+				target_user,
+			</if>
 		</trim>
 		<trim prefix="values (" suffix=")" suffixOverrides="," >
 			<if test="series_id != null" >
@@ -147,6 +150,9 @@
 			</if>
 			<if test="classify_id != null" >
 				#{classify_id},
+			</if>
+			<if test="target_user != null" >
+				#{target_user},
 			</if>
 		</trim>
 	</insert>
