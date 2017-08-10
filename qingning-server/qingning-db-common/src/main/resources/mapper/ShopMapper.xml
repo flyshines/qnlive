@@ -28,10 +28,10 @@
     <if test="lecturer_name != null" >
       AND user_name LIKE #{lecturer_name}
     </if>
-    <if test='"create_from == "0"' >
+    <if test="create_from == 0" >
       AND tlogin.account IS NULL
     </if>
-    <if test='"create_from == "1"' >
+    <if test="create_from == 1" >
       AND tlogin.account IS NOT NULL
     </if>
     ORDER BY  tshop.create_time DESC

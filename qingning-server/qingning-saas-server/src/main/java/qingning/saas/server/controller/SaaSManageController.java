@@ -817,8 +817,8 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_size", defaultValue = "10") long page_size,
             @RequestParam(value = "page_num", defaultValue = "1") long page_num,
             @RequestParam(value = "lecturer_name", defaultValue = "") String lecturer_name,
-            @RequestParam(value = "lecturer_identity") String lecturer_identity,
-            @RequestParam(value = "create_from") String create_from,
+            @RequestParam(value = "lecturer_identity", defaultValue = "") String lecturer_identity,
+            @RequestParam(value = "create_from", defaultValue = "") String create_from,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {
