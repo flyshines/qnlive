@@ -63,7 +63,7 @@
 					<param name="nick_name" type="string" />
 					<param name="phone_num" type="string" />
 					<param name="open_sharing" type="string" />
-					<param name="synchronization_token" type="string" />
+					<param name="synchronization_token" type="map" />
 					<param name="shop_preview_url" type="string"/>
 					<param name="pc_introduce_url" type="string" />
 					<param name="use_url" type="string" />
