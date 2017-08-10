@@ -7,11 +7,13 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
+import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.MissingFormatArgumentException;
 
 @RestController
 @RequestMapping("/manage")
@@ -826,9 +828,15 @@ public class SaaSManageController extends AbstractController {
         Map<String, Object> param = new HashMap<>();
         param.put("page_size",page_size);
         param.put("page_num",page_num);
-        param.put("lecturer_name","%"+lecturer_name+"%");
-        param.put("lecturer_identity",lecturer_identity);
-        param.put("create_from",create_from);
+        if(!MiscUtils.isEmpty(lecturer_name)){
+            param.put("lecturer_name","%"+lecturer_name+"%");
+        }
+        if(!MiscUtils.isEmpty(lecturer_identity)){
+            param.put("lecturer_identity",lecturer_identity);
+        }
+        if(!MiscUtils.isEmpty(create_from)){
+            param.put("create_from",create_from);
+        }
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
