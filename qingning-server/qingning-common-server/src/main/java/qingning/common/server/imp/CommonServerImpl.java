@@ -915,6 +915,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                         +SharingConstants.SHARING_SERVER_USER_COMMON
                         +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
                 String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
+                resultMap.put("synchronization_token",result);
                 resultMap.put("open_sharing", shopInfo.get("open_sharing"));
             }
         }
