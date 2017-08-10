@@ -914,7 +914,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
                         +SharingConstants.SHARING_SERVER_USER_COMMON
                         +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
-                String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+                String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
                 resultMap.put("open_sharing", shopInfo.get("open_sharing"));
             }
         }
