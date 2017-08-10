@@ -179,6 +179,21 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         Map<String,String> shop = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
+        if(shop.get("open_sharing").equals("1")){
+            logger.debug("同步讲师token  user_id : "+userId +" token : "+reqEntity.getAccessToken());
+            Map<String, String> headerMap = new HashMap<>();
+            headerMap.put("version", "1.2.0");
+            headerMap.put("Content-Type", "application/json;charset=UTF-8");
+            headerMap.put("access_token",reqEntity.getAccessToken());
+            //获取知享课程数
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                    +SharingConstants.SHARING_SERVER_USER_COMMON
+                    +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+            String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
+            shop.put("synchronization_token",result);
+        }
+
+
         shop.put("avatar_address",userMap.get("avatar_address"));
         if(shop == null){
             //店铺不存在
