@@ -461,6 +461,9 @@
 						<param name="create_time" type="long" />
 						<param name="single_type" type="string" fieldname="goods_type" />
 						<param name="series_course_updown" type="string" />
+						<param name="shelves_sharing" type="string" />
+						<param name="buy_tips" type="string" />
+						<param name="target_user" type="string" />
 					</param>
 					<param name="series_id" type="string" />
 					<param name="is_join_series" type="string" />
@@ -673,6 +676,9 @@
 					<param name="course_remark" type="string" />
 					<param name="course_abstract" type="string" />
 					<param name="course_duration" type="long" />
+					<param name="shelves_sharing" type="string" />
+					<param name="buy_tips" type="string" />
+					<param name="target_user" type="string" />
 				</outputs>
 			</function>
 			

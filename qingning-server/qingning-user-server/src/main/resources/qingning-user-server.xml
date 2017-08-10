@@ -622,6 +622,11 @@
 					<param name="update_course_time" type="long"/>
 					<param name="series_student_num" type="long"/>
 					<param name="course_num" type="long"/>
+
+					<param name="classify_id" type="string"/>
+					<param name="shelves_sharing" type="string"/>
+					<param name="target_user" type="string"/>
+
 					<param name="avatar_address" type="string"/>
 					<param name="room_name" type="rstring"/>
 					<param name="room_remark" type="rstring"/>
