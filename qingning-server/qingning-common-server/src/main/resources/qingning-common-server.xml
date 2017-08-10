@@ -120,7 +120,7 @@
 					<param name="shop_id" type="string"/>
 					<param name="open_sharing" type="string"/>
 					<param name="room_id" type="string"/>
-					<param name="synchronization_token" type="map"/>
+					<param name="synchronization_token" type="string"/>
 					<param name="name" type="string"/>
 				</outputs>
 			</function>
