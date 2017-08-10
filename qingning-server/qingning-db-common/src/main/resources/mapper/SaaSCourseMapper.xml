@@ -202,9 +202,6 @@
       <if test="update_time != null" >
         #{update_time,jdbcType=TIMESTAMP},
       </if>
-      <if test="updown_time != null" >
-        #{updown_time,jdbcType=TIMESTAMP},
-      </if>
       <if test="target_user != null" >
         #{target_user},
       </if>
