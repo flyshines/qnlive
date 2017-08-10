@@ -2351,7 +2351,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
                 throw new QNLiveException("310003");
             }
-            saaSModuleServer.updateCourse(queryMap);
+
 
             requestMap.put("course_id",saasCourse.get("course_id"));
             requestMap.put("course_title",saasCourse.get("course_title"));
@@ -2373,9 +2373,13 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
             Map<String, Object> resMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
-            resultMap.put("synchronization",resMap);
-
-         CacheUtils.readCourse(reqMap.get("shelves_id").toString(),
+            if (resMap.get("code").equals("0")) {
+                resultMap.put("synchronization",result);
+            }else {
+                throw new QNLiveException("310008");
+            }
+            saaSModuleServer.updateCourse(queryMap);
+            CacheUtils.readCourse(reqMap.get("shelves_id").toString(),
                  generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap),
                  readCourseOperation, jedis, true);
 
@@ -2390,8 +2394,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             if(seriesInfoMap.get("series_course_type").equals("0") || seriesInfoMap.get("series_course_type").equals("3")){
                 throw new QNLiveException("310003");
             }
-            saaSModuleServer.updateSeriesByMap(queryMap);
-
 
             requestMap.put("course_id",seriesInfoMap.get("series_id"));
             requestMap.put("course_title",seriesInfoMap.get("series_title"));
@@ -2436,7 +2438,12 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
             Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
-            resultMap.put("synchronization",resMap);
+            if (resMap.get("code").equals("0")) {
+                resultMap.put("synchronization",result);
+            }else {
+                throw new QNLiveException("310008");
+            }
+            saaSModuleServer.updateSeriesByMap(queryMap);
             CacheUtils.readSeries(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
 
         }
@@ -2518,38 +2525,43 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
 class T {
     public static void main(String[] args) {
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("version", "1.2.0");
-        headerMap.put("Content-Type", "application/json;charset=UTF-8");
-        headerMap.put("access_token", "100003Y6V697761U04UXVZ8U72X79V078WZ3W4093757118481");
-
-        //获取知享课程数
-      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-//        String getUrl = "http://192.168.1.197:8088"
-//                + SharingConstants.SHARING_SERVER_USER_COMMON
-//                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
-
-
-        //获取知享课程数
-        /*//"http://192.168.1.197:8088"*/
-        String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-                +SharingConstants.SHARING_SERVER_USER_COMMON
-                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
-        String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
-     //   resultMap.put("synchronization_token",result);
-
-
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("avatar_address","123");
-//        map.put("lecturer_name","123");
-//        map.put("lecturer_title","123");
-//        map.put("lecturer_remark","123");
-//        map.put("open_code","125613");
+//        Map<String, String> headerMap = new HashMap<>();
+//        headerMap.put("version", "1.2.0");
+//        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+//        headerMap.put("access_token", "100003Y6V697761U04UXVZ8U72X79V078WZ3W4093757118481");
+//
 //        //获取知享课程数
-//        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+////        String getUrl = "http://192.168.1.197:8088"
+////                + SharingConstants.SHARING_SERVER_USER_COMMON
+////                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+//
+//
+//        //获取知享课程数
+//        /*//"http://192.168.1.197:8088"*/
+//        String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
 //                +SharingConstants.SHARING_SERVER_USER_COMMON
-//                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
-//        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
-        System.out.println(result);
+//                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+//        String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
+//     //   resultMap.put("synchronization_token",result);
+//
+//
+////        Map<String, Object> map = new HashMap<>();
+////        map.put("avatar_address","123");
+////        map.put("lecturer_name","123");
+////        map.put("lecturer_title","123");
+////        map.put("lecturer_remark","123");
+////        map.put("open_code","125613");
+////        //获取知享课程数
+////        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+////                +SharingConstants.SHARING_SERVER_USER_COMMON
+////                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
+////        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+//        System.out.println(result);
+
+        System.out.println(8066.65-(3001.48+5031.45));
+
+
+
     }
 }
