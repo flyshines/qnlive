@@ -22,11 +22,11 @@
   <select id="getShopInfoList" resultType="hashmap" parameterType="hashmap" >
     SELECT tshop.* FROM t_saas_shop tshop,t_login_info tlogin
     WHERE tshop.user_id = tlogin.user_id
-    <if test="lecturer_identity != null" >
-      AND lecturer_identity = #{lecturer_identity}
+    <if test='lecturer_identity != null and lecturer_identity != ""' >
+      AND tshop.lecturer_identity = #{lecturer_identity}
     </if>
     <if test="lecturer_name != null" >
-      AND user_name LIKE #{lecturer_name}
+      AND tshop.user_name LIKE #{lecturer_name}
     </if>
     <if test="create_from == 0" >
       AND tlogin.account IS NULL

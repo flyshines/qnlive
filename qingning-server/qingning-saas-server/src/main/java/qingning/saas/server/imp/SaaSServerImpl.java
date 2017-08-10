@@ -2452,10 +2452,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
             if (resMap.get("code").equals("0")) {
                 resultMap.put("synchronization",result);
+                saaSModuleServer.updateSeriesByMap(queryMap);
             }else {
                 throw new QNLiveException("310008");
             }
-            saaSModuleServer.updateSeriesByMap(queryMap);
             CacheUtils.readSeries(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
 
         }
