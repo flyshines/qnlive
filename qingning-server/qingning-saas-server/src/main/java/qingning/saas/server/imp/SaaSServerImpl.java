@@ -2457,7 +2457,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 requestMap.put("classify_id",9);
             }
 
-            requestMap.put("course_remark",MiscUtils.isEmpty(seriesInfoMap.get("series_remark")));
+            requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
             if(seriesInfoMap.get("updown").equals("1")){
@@ -2479,7 +2479,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 courseMap.put("course_title",course.get("course_title"));
                 courseMap.put("course_url",course.get("course_image"));
                 courseMap.put("course_duration",course.get("course_duration"));
-                courseMap.put("course_remark",MiscUtils.isEmpty(course.get("course_remark")));
+                courseMap.put("course_remark",course.get("course_remark"));
                 courseMap.put("file_path",course.get("course_url"));
                 if(course.get("series_course_updown").equals("1")){
                     courseMap.put("status",0);
