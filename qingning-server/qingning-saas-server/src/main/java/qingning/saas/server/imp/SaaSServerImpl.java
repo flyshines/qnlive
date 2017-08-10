@@ -2515,19 +2515,30 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
     }
 }
-//
-//class T {
-//    public static void main(String[] args) {
-//        Map<String, String> headerMap = new HashMap<>();
-//        headerMap.put("version", "1.2.0");
-//        headerMap.put("Content-Type", "application/json;charset=UTF-8");
-//        headerMap.put("access_token", "099990096z104359v52vuyz94x556z33206x5408385561239");
-//
-//        //获取知享课程数
-//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-////        String getUrl = "http://192.168.1.197:8088"
-////                + SharingConstants.SHARING_SERVER_USER_COMMON
-////                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+
+class T {
+    public static void main(String[] args) {
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("version", "1.2.0");
+        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+        headerMap.put("access_token", "100003Y6V697761U04UXVZ8U72X79V078WZ3W4093757118481");
+
+        //获取知享课程数
+      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//        String getUrl = "http://192.168.1.197:8088"
+//                + SharingConstants.SHARING_SERVER_USER_COMMON
+//                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+
+
+        //获取知享课程数
+        /*//"http://192.168.1.197:8088"*/
+        String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_USER_COMMON
+                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+        String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
+     //   resultMap.put("synchronization_token",result);
+
+
 //        Map<String, Object> map = new HashMap<>();
 //        map.put("avatar_address","123");
 //        map.put("lecturer_name","123");
@@ -2539,6 +2550,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 //                +SharingConstants.SHARING_SERVER_USER_COMMON
 //                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
 //        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
-//        System.out.println(result);
-//    }
-//}
+        System.out.println(result);
+    }
+}

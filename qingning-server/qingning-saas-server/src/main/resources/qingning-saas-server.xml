@@ -679,6 +679,7 @@
 					<param name="shelves_sharing" type="string" />
 					<param name="buy_tips" type="string" />
 					<param name="target_user" type="string" />
+					<param name="classify_id" type="string" />
 				</outputs>
 			</function>
 			
