@@ -113,7 +113,6 @@
       <if test="buy_tips != null" >
         buy_tips,
       </if>
-
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -307,7 +306,12 @@
       <if test="shelves_sharing != null" >
         shelves_sharing = #{shelves_sharing},
       </if>
-
+      <if test="buy_tips != null" >
+        buy_tips = #{buy_tips},
+      </if>
+      <if test="target_user != null" >
+        target_user = #{target_user},
+      </if>
     </set>
     where course_id = #{course_id,jdbcType=VARCHAR}
   </update>
