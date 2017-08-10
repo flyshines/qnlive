@@ -136,6 +136,7 @@
 				<entry key="310006" value="开通失败,请联系客服"/>
 				<entry key="310007" value="用户没有权限"/>
 				<entry key="310008" value="同步失败"/>
+				<entry key="310009" value="请至少上架一节子课程后进行知享分销"/>
 
 			</map>
 

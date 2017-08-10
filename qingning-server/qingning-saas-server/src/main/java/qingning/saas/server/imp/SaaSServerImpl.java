@@ -2413,6 +2413,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 requestMap.put("status",1);
             }
             List<Map<String, Object>> seriesCourseList = saaSModuleServer.findCourseBySeriesId(seriesInfoMap.get("series_id"));
+            if(MiscUtils.isEmpty(seriesCourseList)){
+                throw new QNLiveException("310009");
+            }
+
             List<Map<String, Object>> requestCourseList = new ArrayList<>();
             for(Map<String, Object> course:seriesCourseList ){
                 Map<String, Object> courseMap = new HashMap<>();
