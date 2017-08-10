@@ -2361,7 +2361,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             }else if((saasCourse.get("goods_type")).equals("2")){
                 requestMap.put("course_type","1");
             }
-            requestMap.put("classify_id",saasCourse.get("classify_id"));
+            if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+                requestMap.put("classify_id",reqMap.get("classify_id"));
+            }else if(!MiscUtils.isEmpty(saasCourse.get("classify_id"))){
+                requestMap.put("classify_id",saasCourse.get("classify_id"));
+            }else{
+                requestMap.put("classify_id",9);
+            }
+
             requestMap.put("course_remark",saasCourse.get("course_remark"));
             requestMap.put("course_price",saasCourse.get("course_price"));
             requestMap.put("file_path",saasCourse.get("course_url"));
@@ -2411,7 +2418,15 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("cycle",seriesInfoMap.get("update_plan"));
             requestMap.put("update_status",seriesInfoMap.get("series_status"));
             requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
-            requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
+
+            if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+                requestMap.put("classify_id",reqMap.get("classify_id"));
+            }else if(!MiscUtils.isEmpty(seriesInfoMap.get("classify_id"))){
+                requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
+            }else{
+                requestMap.put("classify_id",9);
+            }
+
             requestMap.put("course_remark",MiscUtils.isEmpty(seriesInfoMap.get("series_remark")));
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
