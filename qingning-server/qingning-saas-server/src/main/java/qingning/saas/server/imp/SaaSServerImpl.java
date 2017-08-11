@@ -900,9 +900,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_price",saasCourse.get("course_price"));
             requestMap.put("file_path",saasCourse.get("course_url"));
             requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
-            requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration"))?"1":saasCourse.get("course_duration"));
-            requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"1":saasCourse.get("target_user"));
-            requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"1":saasCourse.get("buy_tips"));
+            requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration")));
+            requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user")));
+            requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips")));
 
             //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
             String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME) /*"http://192.168.1.197:8088"*/
