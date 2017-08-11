@@ -2420,6 +2420,10 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 throw new QNLiveException("310008");
             }
             saaSModuleServer.updateCourse(queryMap);
+
+
+            jedis.del( MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE,queryMap));
+
             CacheUtils.readCourse(reqMap.get("shelves_id").toString(),
                  generateRequestEntity(null, null, "findSaasCourseByCourseId", queryMap),
                  readCourseOperation, jedis, true);
