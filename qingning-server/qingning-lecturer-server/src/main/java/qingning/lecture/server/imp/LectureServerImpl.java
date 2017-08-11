@@ -3154,31 +3154,31 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> resultMap = lectureModuleServer.updateSeries(reqMap);
         jedis.del(key);//删除现在的缓存 进行更新
         Map<String, String> seriesInfoMap = CacheUtils.readSeries(series_id, generateRequestEntity(null, null, null, reqMap), readSeriesOperation, jedis, true);
+        if(seriesInfoMap.get("shelves_sharing").equals("1")){
+            Map<String,String> headerParams = new HashMap<>();
+            headerParams.put("version", Constants.SYS_QN_SHARING_VERSION);
+            headerParams.put("Content-Type",Constants.SYS_QN_SHARING_CONTENT_TYPE);
+            headerParams.put("access_token",reqEntity.getAccessToken());
 
-        Map<String,String> headerParams = new HashMap<>();
-        headerParams.put("version", Constants.SYS_QN_SHARING_VERSION);
-        headerParams.put("Content-Type",Constants.SYS_QN_SHARING_CONTENT_TYPE);
-        headerParams.put("access_token",reqEntity.getAccessToken());
+            Map<String,Object> requestMap = new HashMap<>();
+            requestMap.put("course_id",seriesInfoMap.get("series_id"));
+            requestMap.put("course_title",seriesInfoMap.get("series_title"));
+            requestMap.put("course_url",seriesInfoMap.get("series_img"));
+            requestMap.put("course_type",seriesInfoMap.get("series_course_type"));
+            requestMap.put("update_type","2");
+            requestMap.put("update_status",seriesInfoMap.get("series_status"));
+            requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
+            requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
+            requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
+            requestMap.put("course_price",seriesInfoMap.get("series_price"));
 
-        Map<String,Object> requestMap = new HashMap<>();
-        requestMap.put("course_id",seriesInfoMap.get("series_id"));
-        requestMap.put("course_title",seriesInfoMap.get("series_title"));
-        requestMap.put("course_url",seriesInfoMap.get("series_img"));
-        requestMap.put("course_type",seriesInfoMap.get("series_course_type"));
-        requestMap.put("update_type","2");
-        requestMap.put("update_status",seriesInfoMap.get("series_status"));
-        requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
-        requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
-        requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
-        requestMap.put("course_price",seriesInfoMap.get("series_price"));
-
-
-        String getUrl = "http://192.168.1.197:8088"
-                +SharingConstants.SHARING_SERVER_COURSE
-                +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
-        String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
-        Map<String, Object> resMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
-        resultMap.put("synchronization",resMap);
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                    +SharingConstants.SHARING_SERVER_COURSE
+                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
+            String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
+            Map<String, Object> resMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            resultMap.put("synchronization",resMap);
+        }
         return resultMap ;
     }
 
