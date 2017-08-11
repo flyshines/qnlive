@@ -2525,6 +2525,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
         reqMap.put("user_id", userId);
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
+        Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
         if (shopInfo.get("open_sharing").equals("1")) {
             throw new QNLiveException("310005");
         }
@@ -2546,7 +2547,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         //   try{
         map.clear();
-        map.put("avatar_address", shopInfo.get("shop_logo"));
+        map.put("avatar_address", userMap.get("avatar_address"));
         map.put("lecturer_name", shopInfo.get("user_name"));
         map.put("lecturer_title", shopInfo.get("lecturer_title"));
         map.put("lecturer_remark", shopInfo.get("shop_remark"));
