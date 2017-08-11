@@ -88,8 +88,8 @@
       <if test="lecturer_identity != null" >
         lecturer_identity,
       </if>
-      <if test="lecturer_titile != null" >
-        lecturer_titile,
+      <if test="lecturer_title != null" >
+        lecturer_title,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
@@ -132,8 +132,8 @@
       <if test="lecturer_identity != null" >
         #{lecturer_identity},
       </if>
-      <if test="lecturer_titile != null" >
-        #{lecturer_titile},
+      <if test="lecturer_title != null" >
+        #{lecturer_title},
       </if>
     </trim>
   </insert>

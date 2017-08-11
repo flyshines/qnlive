@@ -421,7 +421,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         shop.put("user_name",reqMap.get("nick_name")+"");
         shop.put("shop_name",reqMap.get("nick_name")+"的知识店铺");
         shop.put("shop_remark",reqMap.get("remark"));
-        shop.put("lecturer_titile",reqMap.get("lecturer_titile"));
+        shop.put("lecturer_title",reqMap.get("lecturer_title"));
         shop.put("lecturer_identity",reqMap.get("lecturer_identity"));
         String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
         shop.put("shop_url",shopUrl);
