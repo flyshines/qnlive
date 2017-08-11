@@ -837,11 +837,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             courseMap.put("course_duration",courseInfoMap.get("course_duration"));
             courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
             courseMap.put("file_path",courseInfoMap.get("course_url"));
-            if(courseInfoMap.get("series_course_updown").equals("1")){
-                courseMap.put("status",0);
-            }else if(courseInfoMap.get("series_course_updown").equals("2")){
-                courseMap.put("status",1);
-            }
+            courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
         String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
                 +SharingConstants.SHARING_SERVER_COURSE
                 +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
@@ -903,7 +899,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_remark",saasCourse.get("course_remark"));
             requestMap.put("course_price",saasCourse.get("course_price"));
             requestMap.put("file_path",saasCourse.get("course_url"));
-            requestMap.put("status",saasCourse.get("course_updown"));
+            requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
             requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration"))?"1":saasCourse.get("course_duration"));
             requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"1":saasCourse.get("target_user"));
             requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"1":saasCourse.get("buy_tips"));
@@ -2402,10 +2398,14 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_remark",saasCourse.get("course_remark"));
             requestMap.put("course_price",saasCourse.get("course_price"));
             requestMap.put("file_path",saasCourse.get("course_url"));
-            requestMap.put("status",saasCourse.get("course_updown"));
-            requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration"))?"1":saasCourse.get("course_duration"));
-            requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"1":saasCourse.get("target_user"));
-            requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"1":saasCourse.get("buy_tips"));
+            requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
+            if(MiscUtils.isEmpty(saasCourse.get("course_duration"))){
+                requestMap.put("course_duration",0);
+            }else{
+                requestMap.put("course_duration",saasCourse.get("course_duration"));
+            }
+            requestMap.put("target_user",saasCourse.get("target_user"));
+            requestMap.put("buy_tips",saasCourse.get("buy_tips"));
 
        //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
 
@@ -2460,11 +2460,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
-            if(seriesInfoMap.get("updown").equals("1")){
-                requestMap.put("status",0);
-            }else if(seriesInfoMap.get("updown").equals("2")){
-                requestMap.put("status",1);
-            }
+            requestMap.put("status",Integer.parseInt(seriesInfoMap.get("updown"))-1);
             List<Map<String, Object>> seriesCourseList = saaSModuleServer.findCourseBySeriesId(seriesInfoMap.get("series_id"));
             if(MiscUtils.isEmpty(seriesCourseList)){
                 throw new QNLiveException("310009");
@@ -2481,11 +2477,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 courseMap.put("course_duration",course.get("course_duration"));
                 courseMap.put("course_remark",course.get("course_remark"));
                 courseMap.put("file_path",course.get("course_url"));
-                if(course.get("series_course_updown").equals("1")){
-                    courseMap.put("status",0);
-                }else if(course.get("series_course_updown").equals("2")){
-                    courseMap.put("status",1);
-                }
+                courseMap.put("status",Integer.parseInt(course.get("series_course_updown").toString())-1);
                 requestCourseList.add(courseMap);
             }
             requestMap.put("list",requestCourseList);
