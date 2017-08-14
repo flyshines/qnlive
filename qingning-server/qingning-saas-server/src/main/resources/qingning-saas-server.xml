@@ -73,7 +73,7 @@
 			<!--店铺-店铺设置-->
 			<function name="shopEdit">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="N" />
 					<version require="N" />
 				</auth>
 				<inputs>
