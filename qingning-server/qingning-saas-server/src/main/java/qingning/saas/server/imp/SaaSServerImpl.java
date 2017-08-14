@@ -730,6 +730,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> readSeriesMap = new HashMap<>();
         readSeriesMap.put("series_id", seriesId);
         RequestEntity readSeriesReqEntity = this.generateRequestEntity(null, null, "findSeriesBySeriesId", readSeriesMap);
+        jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES,readSeriesMap));
         Map<String, String> seriesInfoMap = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
         if(MiscUtils.isEmpty(seriesInfoMap)){
         	log.error("saas_店铺-系列-添加课程>>>>系列课程不存在");
@@ -817,7 +818,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             jedis.zadd(lecturerSeriesUpKey, seriesScore, seriesId);
         }
 
-        if(seriesInfoMap.get("shelves_sharing").equals("1")){
+        if( !MiscUtils.isEmpty(seriesInfoMap.get("shelves_sharing")) && seriesInfoMap.get("shelves_sharing").equals("1")){
             Map<String, String> headerMap = new HashMap<>();
             headerMap.put("version", "1.2.0");
             headerMap.put("Content-Type", "application/json;charset=UTF-8");
