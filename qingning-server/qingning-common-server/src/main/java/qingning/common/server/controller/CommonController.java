@@ -189,6 +189,29 @@ public class CommonController extends AbstractController {
 
 
     /**
+     * 账号用户修改
+     * @param entity
+     * @param version
+     * @param appName
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/account/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity accountEdit(
+            HttpEntity<Object> entity,
+            @RequestHeader("version") String version,
+            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "accountEdit", null, version,appName);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+    /**
      *  获取所有连接
      * @param version
      * @return

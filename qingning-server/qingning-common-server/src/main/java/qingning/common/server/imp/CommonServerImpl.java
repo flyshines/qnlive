@@ -354,6 +354,28 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * 账号用户修改
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("accountEdit")
+    public Map<String, Object> accountEdit(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        if(MiscUtils.isEmpty(reqMap.get("user_id"))){
+            throw new QNLiveException("120002");
+        }
+        if(MiscUtils.isEmpty(reqMap.get("shop_id"))){
+            throw new QNLiveException("120002");
+        }
+
+        commonModuleServer.updateAccountUser(reqMap);
+        return null;
+    }
+
 
     /**
      * 账号用户注册
@@ -5758,5 +5780,14 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, seriesInfoMap.get("lecturer_id").toString());
         return resultMap;
     }
+
+
+
+
+
+
+
+
+
 
 }

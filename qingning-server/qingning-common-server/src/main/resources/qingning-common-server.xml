@@ -1097,6 +1097,16 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="accountEdit">
+				<auth>
+					<accessToken require="N" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
         <version num="1.0.0" class="">

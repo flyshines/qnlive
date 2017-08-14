@@ -304,4 +304,6 @@ public interface ICommonModuleServer {
 
 	void openShop(Map<String, Object> shop);
 
+
+	void updateAccountUser(Map<String, Object> reqMap);
 }

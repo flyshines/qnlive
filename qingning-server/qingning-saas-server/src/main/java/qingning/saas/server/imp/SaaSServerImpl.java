@@ -2581,7 +2581,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         //   try{
         map.clear();
-        map.put("avatar_address", userMap.get("avatar_address"));
+        map.put("avatar_address", shopInfo.get("shop_logo"));
         map.put("lecturer_name", shopInfo.get("user_name"));
         map.put("lecturer_title", shopInfo.get("lecturer_title"));
         map.put("lecturer_remark", shopInfo.get("shop_remark"));
