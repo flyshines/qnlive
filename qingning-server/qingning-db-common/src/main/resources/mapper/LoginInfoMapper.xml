@@ -187,6 +187,9 @@
       <if test="passwd != null" >
         passwd=#{passwd},
       </if>
+      <if test="account != null" >
+        account=#{account},
+      </if>
       <if test="m_user_id != null" >
         m_user_id=#{m_user_id},
       </if>

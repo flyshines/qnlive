@@ -1315,11 +1315,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> loginInfo = new HashMap<String,Object>();
 		loginInfo.put("user_id", reqMap.get("user_id"));
 		//前端第一次加密 后端第二次加密
-		String passwd = MD5Util.getMD5(reqMap.get("passwd").toString()+Constants.USER_DEFAULT_MD5);
-		loginInfo.put("passwd",passwd);
+		if(!MiscUtils.isEmpty(reqMap.get("passwd"))){
+			String passwd = MD5Util.getMD5(reqMap.get("passwd").toString()+Constants.USER_DEFAULT_MD5);
+			loginInfo.put("passwd",passwd);
+		}
 		loginInfo.put("account",reqMap.get("account"));
 		loginInfo.put("app_name",reqMap.get("app_name"));
-		loginInfoMapper.insertLoginInfo(loginInfo);
+		loginInfoMapper.updateLoginInfo(loginInfo);
 
 		Map<String,Object> shop = new HashMap<String,Object>();
 		shop.put("shop_id",reqMap.get("shop_id"));
