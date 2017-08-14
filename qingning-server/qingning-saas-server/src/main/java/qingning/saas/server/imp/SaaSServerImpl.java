@@ -831,7 +831,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             Map<String, Object> courseMap = new HashMap<>();
             courseMap.put("course_id",seriesId);
             courseMap.put("s_course_id",courseInfoMap.get("course_id"));
-            courseMap.put("series_id",courseInfoMap.get("series_id"));
             courseMap.put("course_title",courseInfoMap.get("course_title"));
             courseMap.put("course_url",courseInfoMap.get("course_image"));
             courseMap.put("course_duration",courseInfoMap.get("course_duration"));
