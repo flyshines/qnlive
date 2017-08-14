@@ -20,7 +20,7 @@
   </select>
 
   <select id="getShopInfoList" resultType="hashmap" parameterType="hashmap" >
-    SELECT tshop.* FROM t_saas_shop tshop,t_login_info tlogin
+    SELECT tshop.*,t_login_info.account FROM t_saas_shop tshop,t_login_info tlogin
     WHERE tshop.user_id = tlogin.user_id
     <if test='lecturer_identity != null and lecturer_identity != ""' >
       AND tshop.lecturer_identity = #{lecturer_identity}
