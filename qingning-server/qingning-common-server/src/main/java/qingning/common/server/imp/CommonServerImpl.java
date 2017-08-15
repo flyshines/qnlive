@@ -371,7 +371,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(reqMap.get("shop_id"))){
             throw new QNLiveException("120002");
         }
-
         commonModuleServer.updateAccountUser(reqMap);
         return null;
     }
