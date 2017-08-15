@@ -5401,7 +5401,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //获取知享课程数
         String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
                 +SharingConstants.SHARING_SERVER_USER_COMMON
-                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN+"?type=admin";
         String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
         resultMap.put("synchronization_token",result);
         return resultMap;
