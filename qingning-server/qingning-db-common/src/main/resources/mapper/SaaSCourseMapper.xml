@@ -113,6 +113,9 @@
       <if test="buy_tips != null" >
         buy_tips,
       </if>
+      <if test="course_duration != null" >
+        course_duration,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -207,6 +210,9 @@
       </if>
       <if test="buy_tips != null" >
         #{buy_tips},
+      </if>
+      <if test="course_duration != null" >
+        #{course_duration},
       </if>
     </trim>
   </insert>

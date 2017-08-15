@@ -1101,7 +1101,7 @@
 			<function name="accountEdit">
 				<auth>
 					<accessToken require="N" />
-					<appName require="Y" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 				</inputs>
