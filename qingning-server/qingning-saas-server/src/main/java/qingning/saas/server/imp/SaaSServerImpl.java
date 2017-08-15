@@ -2603,6 +2603,26 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException(result);
         }
     }
+
+
+    /**
+     * 删除店铺轮播图
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("bannerRemove")
+    public Map<String, Object>  bannerRemove(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String banner_id = reqMap.get("banner_id").toString();
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("user_id",userId);
+        queryMap.put("banner_id",banner_id);
+        saaSModuleServer.deleteBanner(queryMap);
+        return null;
+    }
+
 }
 
 class T {
