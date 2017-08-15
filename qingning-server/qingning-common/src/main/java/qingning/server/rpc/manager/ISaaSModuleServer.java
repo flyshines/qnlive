@@ -258,4 +258,9 @@ public interface ISaaSModuleServer {
      * @return
      */
     int deleteBanner(Map<String,Object> record);
+
+    /**讲师收益统计(运营后台)
+     * @return
+     */
+    Map<String,Object> getLecturerImcome(String userId);
 }

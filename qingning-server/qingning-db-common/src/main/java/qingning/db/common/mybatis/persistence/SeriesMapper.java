@@ -37,4 +37,10 @@ public interface SeriesMapper {
     PageList<Map<String,Object>> findSeriesListByLiturere(Map<String, Object> param, PageBounds page);
 
     void updateSeriesCmountByCourseId(Map<String, Object> course);
+
+    /**讲师系列数
+     * @param userId
+     * @return
+     */
+    int selectCountByUserId(String userId);
 }

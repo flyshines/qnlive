@@ -284,6 +284,16 @@
 		ORDER BY t.update_course_time DESC
 
 	</select>
+	<!--讲师系列数-->
+	<select id="selectCountByUserId" resultType="java.lang.Integer" parameterType="java.lang.String" >
+		SELECT
+			count(*)
+		FROM
+			t_series s
+		WHERE
+		s.lecturer_id = #{userId}
+
+	</select>
 
 	<update id="updateSeriesCmountByCourseId" parameterType="hashmap" >
 		update t_series set
