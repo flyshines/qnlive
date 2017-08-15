@@ -5270,6 +5270,17 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         adminUserMap.put("access_token", accessToken);
         adminUserMap.put("version", "1.2.0");    //暂时写死
         resultMap.putAll(adminUserMap);
+
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("version", "1.2.0");
+        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+        headerMap.put("access_token",accessToken);
+        //获取知享课程数
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                +SharingConstants.SHARING_SERVER_USER_COMMON
+                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
+        String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
+        resultMap.put("synchronization_token",result);
         return resultMap;
     }
 

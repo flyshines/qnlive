@@ -993,6 +993,7 @@
 					<param name="user_id" type="string" />
 					<param name="username" type="string" />
 					<param name="version" type="string" />
+					<param name="synchronization_token" type="string" />
 				</outputs>
 			</function>
 
