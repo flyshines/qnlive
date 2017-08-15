@@ -160,7 +160,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         if (sysConfig != null && sysConfig.get("config_key") != null) {
             size = Integer.valueOf(sysConfig.get("config_value").toString());
         }
-        if (i >= size&& "1".equals(param.get("status").toString())) {
+        if (i >= size&& "1".equals(param.get("status")+"")) {
             return 1;
         }
         bannerMapper.updateByPrimaryKey(param);
@@ -590,6 +590,18 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public int deleteBanner(Map<String, Object> record) {
         return saaSBannerMapper.deleteBanner(record);
+    }
+
+    @Override
+    public Map<String, Object> getLecturerImcome(String userId) {
+        int courseCount = saasCourseMapper.selectCountByUserId(userId);
+        int seriesCount = seriesMapper.selectCountByUserId(userId);
+        Map<String,Object> gainsInfo = userGainsMapper.findUserGainsByUserId(userId);
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("courseCount",courseCount);
+        resultMap.put("seriesCount",seriesCount);
+        resultMap.put("user_total_real_incomes",gainsInfo.get("user_total_real_incomes"));
+        return resultMap;
     }
 
 }

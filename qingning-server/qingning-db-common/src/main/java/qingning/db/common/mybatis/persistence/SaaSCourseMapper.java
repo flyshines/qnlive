@@ -46,4 +46,6 @@ public interface SaaSCourseMapper {
     List<Map<String,Object>> findCourseListBySeriesId(String series_id);
 
     List<Map<String,Object>> findCourseBySeries(String series_id);
+
+    int selectCountByUserId(String userId);
 }
