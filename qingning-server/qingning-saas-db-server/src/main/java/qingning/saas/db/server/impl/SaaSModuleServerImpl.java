@@ -584,4 +584,9 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         return saasCourseMapper.findCourseBySeries(series_id);
     }
 
+    @Override
+    public int deleteBanner(Map<String, Object> record) {
+        return 0;
+    }
+
 }

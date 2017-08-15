@@ -251,4 +251,11 @@ public interface ISaaSModuleServer {
     Map<String,Object> getShopInfoList(Map<String, Object> param);
 
     List<Map<String,Object>> findCourseBySeriesId(String series_id);
+
+    /**
+     * 删除店铺轮播图
+     * @param record
+     * @return
+     */
+    int deleteBanner(Map<String,Object> record);
 }

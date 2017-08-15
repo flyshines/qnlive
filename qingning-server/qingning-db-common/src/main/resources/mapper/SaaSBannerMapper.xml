@@ -14,6 +14,13 @@
     delete from t_saas_banner
     where banner_id = #{banner_id,jdbcType=VARCHAR}
   </delete>
+
+  <delete id="deleteBanner" parameterType="java.util.Map" >
+    delete from t_saas_banner
+    where banner_id = #{banner_id,jdbcType=VARCHAR}
+    and user_id = #{user_id,jdbcType=VARCHAR}
+  </delete>
+
   <insert id="insert" parameterType="java.util.Map" >
     insert into t_saas_banner
     <trim prefix="(" suffix=")" suffixOverrides="," >

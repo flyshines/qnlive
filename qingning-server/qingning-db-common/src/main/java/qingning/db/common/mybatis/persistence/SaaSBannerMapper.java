@@ -35,4 +35,8 @@ public interface SaaSBannerMapper {
      * @return
      */
     int selectUpCount(String user_id);
+
+    int deleteBanner(Map<String,Object> record);
+
+
 }

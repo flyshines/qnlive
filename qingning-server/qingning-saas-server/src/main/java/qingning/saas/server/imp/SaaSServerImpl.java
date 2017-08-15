@@ -686,6 +686,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
                 reqMap.put("course_updown","2");
             }
         }
+        reqMap.put("course_duration",reqMap.get("course_duration"));
 
         //默认上架
         reqMap.put("series_course_updown","0");
@@ -699,9 +700,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(reqMap.get("target_user"))){
             reqMap.put("target_user",reqMap.get("target_user"));
         }
-
-
-
 
         reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
@@ -769,7 +767,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("course_amount",0);
         //默认上架
         reqMap.put("course_updown","0");
-
+        reqMap.put("course_duration",reqMap.get("course_duration"));
         //默认上架
         reqMap.put("series_course_updown","1");
         if(!MiscUtils.isEmpty(reqMap.get("updown"))){
@@ -2618,6 +2616,26 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             throw new QNLiveException(result);
         }
     }
+
+
+    /**
+     * 删除店铺轮播图
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("bannerRemove")
+    public Map<String, Object>  bannerRemove(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String banner_id = reqMap.get("banner_id").toString();
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("user_id",userId);
+        queryMap.put("banner_id",banner_id);
+        saaSModuleServer.deleteBanner(queryMap);
+        return null;
+    }
+
 }
 
 class T {

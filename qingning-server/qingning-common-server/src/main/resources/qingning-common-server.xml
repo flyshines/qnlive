@@ -993,6 +993,7 @@
 					<param name="user_id" type="string" />
 					<param name="username" type="string" />
 					<param name="version" type="string" />
+					<param name="synchronization_token" type="string" />
 				</outputs>
 			</function>
 
@@ -1100,7 +1101,7 @@
 			<function name="accountEdit">
 				<auth>
 					<accessToken require="N" />
-					<appName require="Y" />
+					<appName require="N" />
 				</auth>
 				<inputs>
 				</inputs>

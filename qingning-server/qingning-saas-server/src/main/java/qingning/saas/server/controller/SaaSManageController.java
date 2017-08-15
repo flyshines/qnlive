@@ -890,4 +890,26 @@ public class SaaSManageController extends AbstractController {
     }
 
 
+    /**
+     * 删除店铺轮播图
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/remove", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity bannerRemove(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bannerRemove", accessToken, version, appName);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
 }
