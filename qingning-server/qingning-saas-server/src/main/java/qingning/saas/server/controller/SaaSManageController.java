@@ -841,6 +841,28 @@ public class SaaSManageController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 讲师详情
+     * @param accessToken
+     * @param appName
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/lecturer/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getShops(
+            @RequestParam(value = "lecturer_id", defaultValue = "") long lecturer_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "lecturerInfo", accessToken, version, appName);
+        Map<String, Object> param = new HashMap<>();
+        param.put("lecturer_id",lecturer_id);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
     /**

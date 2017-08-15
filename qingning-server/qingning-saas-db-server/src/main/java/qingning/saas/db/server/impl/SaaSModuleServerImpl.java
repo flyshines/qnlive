@@ -157,7 +157,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         if (sysConfig != null && sysConfig.get("config_key") != null) {
             size = Integer.valueOf(sysConfig.get("config_value").toString());
         }
-        if (i >= size) {
+        if (i >= size&& "1".equals(param.get("status").toString())) {
             return 1;
         }
         bannerMapper.updateByPrimaryKey(param);

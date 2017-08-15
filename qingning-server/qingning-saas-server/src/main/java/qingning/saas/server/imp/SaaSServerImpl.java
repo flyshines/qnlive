@@ -2545,6 +2545,19 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         return saaSModuleServer.getShopInfoList(reqMap);
     }
+    /**
+     * 获取讲师详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("lecturerInfo")
+    public Map<String, Object>  lecturerInfo(RequestEntity reqEntity) throws Exception{
+
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+
+        return saaSModuleServer.getShopInfoList(reqMap);
+    }
 
     /**
      * 开通知享
