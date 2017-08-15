@@ -387,7 +387,7 @@
       `t_saas_course` t
   WHERE
       t.shop_id = #{shop_id,jdbcType=VARCHAR}
-  AND series_course_updown = '0'
+  AND course_updown = '1'
   AND goods_type !=0
     <if test="keyword != null" >
       course_title like '%${keyword}%'

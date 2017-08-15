@@ -957,6 +957,16 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="lecturerInfo">
+				<auth>
+					<accessToken require="N" />
+				</auth>
+				<inputs>
+					<param name="lecturer_id" type="string" require="Y,000100"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<function name="sharingOpen">
 				<auth>
 					<accessToken require="Y" />
