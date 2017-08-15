@@ -767,6 +767,9 @@
 					<param name="series_remark" type="rstring"  />
 					<param name="series_img" type="string"  />
 					<param name="series_title" type="rstring"  />
+					<param name="shelves_sharing" type="string"  />
+					<param name="target_user" type="string"  />
+					<param name="classify_id" type="string"  />
 					<param name="series_status" type="string"  />
 				</inputs>
 				<outputs>
