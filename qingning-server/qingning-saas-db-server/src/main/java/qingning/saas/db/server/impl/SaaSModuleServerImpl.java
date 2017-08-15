@@ -52,6 +52,9 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     private TradeBillMapper tradeBillMapper;
     @Autowired(required = true)
     private WithdrawCashMapper withdrawCashMapper;
+    @Autowired(required = true)
+    private SaaSBannerMapper saaSBannerMapper;
+
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -586,7 +589,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public int deleteBanner(Map<String, Object> record) {
-        return 0;
+        return saaSBannerMapper.deleteBanner(record);
     }
 
     @Override

@@ -2490,6 +2490,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             }
 
             requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
+            requestMap.put("target_user",seriesInfoMap.get("target_user"));
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
             requestMap.put("status",Integer.parseInt(seriesInfoMap.get("updown"))-1);

@@ -192,7 +192,9 @@
 			<if test="shelves_sharing != null" >
 				shelves_sharing=#{shelves_sharing},
 			</if>
-
+			<if test="target_user != null" >
+				target_user=#{target_user},
+			</if>
 		</set>
 		where series_id = #{series_id}
 	</update>

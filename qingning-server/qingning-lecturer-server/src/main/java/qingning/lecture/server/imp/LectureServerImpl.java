@@ -3179,7 +3179,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             requestMap.put("course_price",seriesInfoMap.get("series_price"));
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
             requestMap.put("cycle",seriesInfoMap.get("update_plan"));
-
+            requestMap.put("target_user",seriesInfoMap.get("target_user"));
 
             String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
                     +SharingConstants.SHARING_SERVER_COURSE
