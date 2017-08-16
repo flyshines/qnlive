@@ -632,7 +632,7 @@
 					<param name="room_remark" type="rstring"/>
 					<param name="series_pay_remark" type="rstring"/>
 					<param name="series_remark" type="rstring"/>
-					<param name="series_amount" type="long"/>
+					<param name="series_amount" type="double"/>
 					<param name="room_id" type="string"/>
 					<param name="shop_id" type="string"/>
 					<param name="shop_name" type="string"/>

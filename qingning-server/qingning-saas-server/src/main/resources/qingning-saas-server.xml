@@ -965,6 +965,9 @@
 					<param name="lecturer_id" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
+					<param name="course_count" type="string" />
+					<param name="series_count" type="string" />
+					<param name="user_total_real_incomes" type="double" />
 				</outputs>
 			</function>
 			<function name="sharingOpen">
