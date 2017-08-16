@@ -68,6 +68,8 @@
 					<param name="pc_introduce_url" type="string" />
 					<param name="use_url" type="string" />
 					<param name="live_url" type="string" />
+					<param name="lecturer_title" type="string" />
+					<param name="lecturer_identity" type="string" />
 				</outputs>
 			</function>
 			<!--店铺-店铺设置-->
