@@ -601,7 +601,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
             Map<String,Object> resultMap = new HashMap<>();
             resultMap.put("course_count",courseCount);
             resultMap.put("series_count",seriesCount);
-            resultMap.put("user_total_real_incomes",gainsInfo.get("user_total_real_incomes"));
+            resultMap.put("real_incomes",gainsInfo.get("user_total_real_incomes"));
+            resultMap.put("total_incomes",gainsInfo.get("user_total_real_incomes"));
             return resultMap;
         }
         return null;
