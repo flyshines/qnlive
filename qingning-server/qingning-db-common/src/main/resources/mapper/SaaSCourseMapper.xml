@@ -400,6 +400,7 @@
       t.course_id,
       t.course_title,
       t.course_image,
+      t.course_url,
       t.goods_type AS type,
       t.create_time,
       t.click_num AS view_num,
