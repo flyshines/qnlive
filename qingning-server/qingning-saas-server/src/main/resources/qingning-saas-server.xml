@@ -628,6 +628,7 @@
 						<param name="course_id" type="string" />
 						<param name="course_title" type="string" />
 						<param name="course_image" type="string" />
+						<param name="course_url" type="string" />
 						<param name="type" type="string" />
 						<param name="create_time" type="long" />
 						<param name="view_num" type="long" />
