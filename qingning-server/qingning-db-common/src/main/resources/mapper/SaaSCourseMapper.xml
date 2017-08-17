@@ -413,15 +413,11 @@
     t.series_id = #{series_id}
     ORDER BY
     t.create_time DESC
-
   </select>
 
 
   <select id="findCourseBySeries" parameterType="java.lang.String" resultType="hashmap">
-    SELECT * FROM
-    `t_saas_course` t
-    WHERE
-    t.series_id = #{series_id}
+    SELECT * FROM t_saas_course WHERE series_id = #{series_id} ORDER BY create_time
   </select>
 
 
