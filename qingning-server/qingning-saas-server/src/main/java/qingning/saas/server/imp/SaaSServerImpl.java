@@ -2555,6 +2555,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String lecturerId = reqMap.get("lecturer_id").toString();
         Map<String,Object> userInfo = saaSModuleServer.getLecturerImcome(lecturerId);
+        if(userInfo==null)
+            throw new QNLiveException("120002");
         return userInfo;
     }
 

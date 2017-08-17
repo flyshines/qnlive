@@ -853,7 +853,7 @@ public class SaaSManageController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity getShops(
-            @RequestParam(value = "lecturer_id", defaultValue = "") long lecturer_id,
+            @RequestParam(value = "lecturer_id", defaultValue = "") String lecturer_id,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader("version") String version) throws Exception {

@@ -594,14 +594,18 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
 
     @Override
     public Map<String, Object> getLecturerImcome(String userId) {
-        int courseCount = saasCourseMapper.selectCountByUserId(userId);
-        int seriesCount = seriesMapper.selectCountByUserId(userId);
         Map<String,Object> gainsInfo = userGainsMapper.findUserGainsByUserId(userId);
-        Map<String,Object> resultMap = new HashMap<>();
-        resultMap.put("courseCount",courseCount);
-        resultMap.put("seriesCount",seriesCount);
-        resultMap.put("user_total_real_incomes",gainsInfo.get("user_total_real_incomes"));
-        return resultMap;
+        if(gainsInfo!=null){
+            int courseCount = saasCourseMapper.selectCountByUserId(userId);
+            int seriesCount = seriesMapper.selectCountByUserId(userId);
+            Map<String,Object> resultMap = new HashMap<>();
+            resultMap.put("course_count",courseCount);
+            resultMap.put("series_count",seriesCount);
+            resultMap.put("real_incomes",gainsInfo.get("user_total_real_incomes"));
+            resultMap.put("total_incomes",gainsInfo.get("user_total_real_incomes"));
+            return resultMap;
+        }
+        return null;
     }
 
 }
