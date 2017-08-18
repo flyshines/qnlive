@@ -2526,6 +2526,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             }else {
                 throw new QNLiveException("310008");
             }
+            String keyOfCachedData = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryMap);
+            jedis.del(keyOfCachedData);
             CacheUtils.readSeries(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, null, queryMap), readSeriesOperation, jedis, true);
 
         }
