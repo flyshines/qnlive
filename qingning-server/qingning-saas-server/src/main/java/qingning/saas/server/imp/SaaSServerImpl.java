@@ -839,7 +839,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
             courseMap.put("file_path",courseInfoMap.get("course_url"));
             courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
-        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
                 +SharingConstants.SHARING_SERVER_COURSE
                 +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
         String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
