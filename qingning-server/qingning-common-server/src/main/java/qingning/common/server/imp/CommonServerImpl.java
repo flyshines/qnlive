@@ -6276,7 +6276,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
 
         String resultStr = TenPayConstant.SUCCESS;
-        logger.debug("====> 微信支付流水: " + outTradeNo + " 更新成功, return success === ");
+       // logger.debug("====> 微信支付流水: " + outTradeNo + " 更新成功, return success === ");
 
         String user_id = (String) billMap.get("user_id");
         String course_id = (String) billMap.get("course_id");
