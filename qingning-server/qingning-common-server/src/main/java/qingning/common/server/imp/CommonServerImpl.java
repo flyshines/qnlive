@@ -1679,6 +1679,37 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 //                    }
 //                }
 //                //</editor-fold>
+
+                //加入课程/加入系列
+                String query_type = billMap.get("course_type").toString();
+                if( billMap.get("profit_type").toString().equals("0")) {//课程收益
+                    //3.检测学生是否参与了该课程
+                    Map<String, Object> studentQueryMap = new HashMap<>();
+                    studentQueryMap.put("user_id", billMap.get("user_id").toString());
+                    studentQueryMap.put("course_id", billMap.get("course_id").toString());
+                    if (!commonModuleServer.isStudentOfTheCourse(studentQueryMap)) {
+                        try {
+                            Map<String, Object> join = joinCourse(billMap.get("course_id").toString(), jedis, billMap.get("user_id").toString(), query_type);
+                        } catch (Exception e) {
+                            logger.error(e.toString());
+                        }
+                    }
+                }
+
+                
+                if( billMap.get("profit_type").toString().equals("2")){//系列课程
+                    Map<String, Object> studentQueryMap = new HashMap<>();
+                    studentQueryMap.put("user_id", billMap.get("user_id").toString());
+                    studentQueryMap.put("series_id", billMap.get("course_id").toString());
+                    if (!commonModuleServer.isStudentOfTheSeries(studentQueryMap)) {//判断是否有加入课程
+                        try{
+                            Map<String, Object> join = joinSeries(billMap.get("course_id").toString(), jedis, billMap.get("user_id").toString(), query_type);
+                        }catch (Exception e){
+                            logger.error(e.toString());
+                        }
+
+                    }
+                }
             } else {
                 logger.debug("==> 微信支付失败 ,流水 ：" + outTradeNo);
                 resultStr = TenPayConstant.FAIL;
@@ -5623,9 +5654,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, Object> billMap = commonModuleServer.findTradebillByOutTradeNo(trade_id);
 
         TenPayUtils.TradeState tradeState = TenPayUtils.queryOrder(null, trade_id, appName);
-        resutltMap.put("tenPay",tradeState.getCode());
+
         if (tradeState.getCode() == 0) {//订单处理成功
             //加入课程/加入系列
+            resutltMap.put("tenPay",tradeState.getCode());
             String query_type = billMap.get("course_type").toString();
             if( billMap.get("profit_type").toString().equals("0")){//课程收益
                 //3.检测学生是否参与了该课程
