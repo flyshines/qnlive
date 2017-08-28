@@ -1060,9 +1060,13 @@
 					<appName require="N" />
 				</auth>
 				<inputs>
-					<param name="user_id" type="string" require="Y,000100"/>
 				</inputs>
 				<outputs>
+					<param name="num" type="string"/>
+					<param name="loginArray" type="list">
+						<param name="access_token" type="string" />
+					</param>
+
 				</outputs>
 			</function>
 

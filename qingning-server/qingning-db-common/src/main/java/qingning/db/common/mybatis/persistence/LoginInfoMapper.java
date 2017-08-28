@@ -13,5 +13,8 @@ public interface LoginInfoMapper {
 
     int insertLoginInfo(Map<String, Object> record);
     int updateLoginInfo(Map<String, Object> record);
+
+    List< Map<String,Object>> findLoginInfo();
+
     List<String> findLoginInfoByUserIds(Map<String, Object> map);
 }

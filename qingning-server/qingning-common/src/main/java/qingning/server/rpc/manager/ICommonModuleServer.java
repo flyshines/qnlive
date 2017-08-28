@@ -306,4 +306,8 @@ public interface ICommonModuleServer {
 
 
 	void updateAccountUser(Map<String, Object> reqMap);
+
+
+	List<Map<String,Object>> findLoginInfo();
+
 }

@@ -1696,7 +1696,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     }
                 }
 
-                
+
                 if( billMap.get("profit_type").toString().equals("2")){//系列课程
                     Map<String, Object> studentQueryMap = new HashMap<>();
                     studentQueryMap.put("user_id", billMap.get("user_id").toString());
@@ -5596,37 +5596,39 @@ public class CommonServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("userLoginByUserId")
     public Map<String, Object> userLoginByUserId(RequestEntity reqEntity) throws Exception {
-        Map<String, String> map = (Map<String, String>) reqEntity.getParam();
+        Map<String, String> map =  new HashMap<String, String>();
         String appName = reqEntity.getAppName();
         Map<String, String> cacheMap = new HashMap<String, String>();
         Map<String, Object> resultMap = new HashMap<>();
         Jedis jedis = jedisUtils.getJedis(appName);
-        String user_id = map.get("user_id");
-        Map<String, Object> loginInfoMap = commonModuleServer.findLoginInfoByUserId(user_id);
-        MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
-        String last_login_date = (new Date()).getTime() + "";
 
-        //2.根据相关信息生成access_token
-        String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
+        List<Map<String, Object>> loginInfos = commonModuleServer.findLoginInfo();
 
-        map.put("access_token", access_token);
-        String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
-        jedis.hmset(process_access_token, cacheMap);
-        jedis.expire(process_access_token, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time", appName)));
+        for(Map<String, Object> login : loginInfos){
+            String user_id = login.get("user_id").toString();
+            Map<String, Object> loginInfoMap = commonModuleServer.findLoginInfoByUserId(user_id);
+            MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
+            String last_login_date = (new Date()).getTime() + "";
 
-        Map<String, Object> query = new HashMap<String, Object>();
-        query.put("user_id", user_id);
-        jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query));
-        Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
-        String m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
-        String m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
-        //3.增加相关返回参数
-        resultMap.put("access_token", access_token);
-        resultMap.put("im_account_info", encryptIMAccount(m_user_id, m_pwd));
-        resultMap.put("m_user_id", m_user_id);
-        resultMap.put("user_id", user_id);
-        resultMap.put("avatar_address", userMap.get("avatar_address"));
-        resultMap.put("nick_name", userMap.get("nick_name"));
+            //2.根据相关信息生成access_token
+            String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
+
+            map.put("access_token", access_token);
+            String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
+            jedis.hmset(process_access_token, cacheMap);
+            jedis.expire(process_access_token, Integer.parseInt(MiscUtils.getConfigByKey("access_token_expired_time", appName)));
+
+            Map<String, Object> query = new HashMap<String, Object>();
+            query.put("user_id", user_id);
+            jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query));
+            Map<String, String> userMap = CacheUtils.readUser(user_id, this.generateRequestEntity(null, null, null, query), readUserOperation, jedis);
+            String m_user_id = loginInfoMap.get("m_user_id") == null ? null : loginInfoMap.get("m_user_id").toString();
+            String m_pwd = loginInfoMap.get("m_pwd") == null ? null : loginInfoMap.get("m_pwd").toString();
+            //3.增加相关返回参数
+            login.put("access_token", access_token);
+        }
+        resultMap.put("loginArray",loginInfos);
+        resultMap.put("num",loginInfos.size());
         return resultMap;
     }
 

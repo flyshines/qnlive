@@ -1336,5 +1336,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		shopMapper.updateByPrimaryKey(shop);
 	}
 
+	@Override
+	public List<Map<String, Object>> findLoginInfo() {
+		return loginInfoMapper.findLoginInfo();
+	}
+
 
 }
