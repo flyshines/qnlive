@@ -771,6 +771,9 @@
 					<param name="target_user" type="string"  />
 					<param name="classify_id" type="string"  />
 					<param name="series_status" type="string"  />
+
+					<param name="series_type" type="string"  />
+					<param name="series_price" type="string"  />
 				</inputs>
 				<outputs>
 				</outputs>
