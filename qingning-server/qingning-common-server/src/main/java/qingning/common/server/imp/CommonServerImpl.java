@@ -1247,6 +1247,12 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         }
     }
 
+    /**
+     * 判断支付订单
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @FunctionName("checkWeixinPayBill")
     public Map<String, String> checkWeixinPayBill(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
