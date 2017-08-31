@@ -133,9 +133,11 @@ public interface IUserModuleServer {
 	 * @param userId
 	 * @param result
 	 * @param initial_amount
-	 * @return
+	 * @param adminId
+	 *@param role
+	 * @param adminName @return
 	 */
-	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long initial_amount);
+	int updateWithdraw(String withdrawId, String remark, String userId, String result, Long initial_amount, String adminId, String role, String adminName);
 	/**分页查询-后台提现记录
 	 * @param param
 	 * @return
@@ -184,4 +186,10 @@ public interface IUserModuleServer {
 	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
 
 	Map<String, Object> findSaasCourseByCourseId(String courseId);
+
+	/**查看审核人员信息
+	 * @param userId
+	 * @return
+	 */
+	Map<String,Object> selectAdminUserById(String userId);
 }

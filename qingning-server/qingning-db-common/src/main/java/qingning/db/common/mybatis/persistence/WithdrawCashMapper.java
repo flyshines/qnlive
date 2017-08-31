@@ -42,6 +42,14 @@ public interface WithdrawCashMapper {
 	 */
 	PageList<Map<String,Object>> selectWithdrawListAll(Map<String, Object> param, PageBounds pageBounds);
 
+	/**查询财务未处理数
+	 * @param param
+	 * @return
+	 */
+	int selectWithdrawCountFinance(Map<String, Object> param);
+
+	int selectWithdrawCountOperate(Map<String, Object> param);
+
 	/**提现记录(SaaS)
 	 * @param param
 	 * @param page

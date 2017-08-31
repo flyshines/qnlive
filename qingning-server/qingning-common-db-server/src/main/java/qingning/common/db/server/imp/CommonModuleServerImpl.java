@@ -567,10 +567,12 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				//dlive逻辑
 				//分销员总/实际 收益
 				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
-				distRealAmount = DoubleUtil.mulForLong(DoubleUtil.mulForLong(amount,rate),Constants.USER_RATE);
+				//distRealAmount = DoubleUtil.mulForLong(DoubleUtil.mulForLong(amount,rate),Constants.USER_RATE);
+				distRealAmount = (long)CountMoneyUtil.getCashInAmount(String.valueOf(distTotalAmount));
 				//讲师总/实际 收益
 				lectureTotalAmount = amount - distTotalAmount;
-				lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
+				//lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
+				lectureRealAmount = (long)CountMoneyUtil.getCashInAmount(String.valueOf(lectureTotalAmount));
 			}
 		}else{
 			//直播间收益逻辑
@@ -585,7 +587,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				//讲师总收益
 				lectureTotalAmount = amount;
 				//讲师实际收益
-				lectureRealAmount = DoubleUtil.mulForLong(amount,Constants.USER_RATE);
+				lectureRealAmount = (long)CountMoneyUtil.getCashInAmount(String.valueOf(lectureTotalAmount));
 			}
 		}
 		//更新t_user_gains 讲师收益统计

@@ -2178,7 +2178,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
         insertMap.put("actual_amount", actualAmount.longValue());
     	insertMap.put("state", '0');
     	insertMap.put("create_time", nowStr);
-    	insertMap.put("update_time", nowStr);
     	insertMap.put("app_name", appName);
     	// 插入提现申请表
         try{
@@ -2231,9 +2230,33 @@ public class UserServerImpl extends AbstractQNLiveServer {
          */
         
         /*
-         * 查询提现记录列表
+         * 查询提现记录列表-运营
          */
-		return userModuleServer.findWithdrawListAll(param);
+        //记录数查询标识
+        param.put("is_sys","1");
+        Map<String,Object> result = userModuleServer.findWithdrawListAll(param);
+        return result;
+    }
+    /**
+     * 获取提现记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawListFinance")
+    public Map<String, Object> getWithdrawListFinance(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        param.put("app_name", reqEntity.getAppName());
+        /*
+         * 查询提现记录列表-财务
+         */
+        //记录数查询标识
+        param.put("is_sys","1");
+        param.put("finance","1");
+        return userModuleServer.findWithdrawListAll(param);
     }
 
     /**
@@ -2279,11 +2302,20 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String appName = reqEntity.getAppName();
         param.put("app_name", appName);
         String result = param.get("result").toString();
-        
-        /*
-         * TODO 获取登录帐号
-         */
-        
+
+        //审核人员ID
+        String adminId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        if(adminId == null){
+            throw new QNLiveException("000005","系统用户不存在");
+        }
+        //验证审核人员
+        Map<String,Object> adminInfo = userModuleServer.selectAdminUserById(adminId);
+        if(adminInfo == null){
+            throw new QNLiveException("000005","系统用户不存在");
+        }
+        //角色
+        String role = adminInfo.get("role_id").toString();
+        String adminName = adminInfo.get("username").toString();
         /*
          * 查询提现记录
          */
@@ -2292,14 +2324,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
         selectMap.put("withdraw_cash_id", withdrawId);
         Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(selectMap);
         
-        if(withdraw==null||!"0".equals(withdraw.get("state"))){
+        if(withdraw==null||!"0".equals(withdraw.get("state"))||(("2").equals(role)&&withdraw.get("handle_id")!=null)){
             //未找到提现记录或重复提现
             throw new QNLiveException("170004");
         }else {
             //同意提现，更新提现记录，用户余额
         	long initial_amount = Long.valueOf(withdraw.get("initial_amount").toString());
-            userModuleServer.updateWithdraw(withdrawId, remark, 
-            		withdraw.get("user_id").toString(), result, initial_amount);
+            userModuleServer.updateWithdraw(withdrawId, remark, withdraw.get("user_id").toString(), result, initial_amount,adminId,role,adminName);
         }
 		return resultMap;
     }

@@ -69,7 +69,7 @@ public class CSVUtils {
                         }
                     }else{
                         try {
-							if("create_time".equals(key)){
+							if("create_time".equals(key)||"handle_time".equals(key)||"finance_time".equals(key)){
 								val = MiscUtils.formatDateHrous1(val);
 							}else if("update_time".equals(key) && val.indexOf("-") != -1){
 								val = MiscUtils.formatDateHrous1(val);
@@ -84,6 +84,14 @@ public class CSVUtils {
                                     val = "课程分销收益";
                                 }else if("3".equals(val)){
                                     val = "分销者收益";
+                                }
+							}else if("status".equals(key)){
+                                if("0".equals(val)){
+                                    val = "处理中";
+                                }else if("1".equals(val)){
+                                    val = "已处理";
+                                }else if("2".equals(val)){
+                                    val = "已驳回";
                                 }
 							}
 						} catch (Exception e) {
