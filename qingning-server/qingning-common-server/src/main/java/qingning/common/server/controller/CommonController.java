@@ -1630,14 +1630,10 @@ public class CommonController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity userlogin(
-            @RequestParam(value="user_id", defaultValue="") String user_id,
             @RequestHeader(value="access_token", defaultValue="") String accessToken,
             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
             @RequestHeader(value="version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLoginByUserId", accessToken, version, appName);
-        Map<String, Object> param = new HashMap<>();
-        param.put("user_id", user_id);
-        requestEntity.setParam(param);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }

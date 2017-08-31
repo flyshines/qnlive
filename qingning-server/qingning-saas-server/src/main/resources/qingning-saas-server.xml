@@ -210,6 +210,8 @@
 					<param name="details" type="string"  require="N"/>
 					<param name="course_abstract" type="string"  require="N"/>
 					<param name="course_remark" type="string"  require="N"/>
+					<param name="course_type" type="string"  require="N"/>
+					<param name="course_price" type="string"  require="N"/>
 				</inputs>
 				<outputs>
 				</outputs>
