@@ -2323,7 +2323,12 @@ public class UserServerImpl extends AbstractQNLiveServer {
         selectMap.put("app_name", appName);
         selectMap.put("withdraw_cash_id", withdrawId);
         Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(selectMap);
-        
+
+        if("3".equals(role)&&withdraw.get("handle_id")==null){
+            //未经过运营审核
+            throw new QNLiveException("170005","未经过运营审核");
+        }
+
         if(withdraw==null||!"0".equals(withdraw.get("state"))||(("2").equals(role)&&withdraw.get("handle_id")!=null)){
             //未找到提现记录或重复提现
             throw new QNLiveException("170004");
