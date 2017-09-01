@@ -203,6 +203,16 @@
         and t.state = 0
 	</select>
 
+	<select id="selectWithdrawCountUser" resultType="java.lang.Integer" parameterType="java.lang.String">
+      SELECT
+        count(*)
+      FROM
+          `t_withdraw_cash` t
+      WHERE
+        t.state = 0
+        AND t.user_id = #{userId}
+	</select>
+
   <!-- 查询-提现记录 -->
 	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="hashmap">
       SELECT

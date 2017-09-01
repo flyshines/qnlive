@@ -835,6 +835,7 @@
 					<param name="today_pay" type="long"/>
 					<param name="total_income" fieldname="user_total_amount" type="double"/>
 					<param name="balance" type="double"/>
+					<param name="withdrawing_count" type="long"/>
 				</outputs>
 			</function>
 			<!-- 用户-提交-收入统计 -->

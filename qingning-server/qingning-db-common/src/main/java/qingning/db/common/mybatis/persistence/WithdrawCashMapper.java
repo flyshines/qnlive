@@ -50,6 +50,12 @@ public interface WithdrawCashMapper {
 
 	int selectWithdrawCountOperate(Map<String, Object> param);
 
+	/**用户提现中数量
+	 * @param userId
+	 * @return
+	 */
+	int selectWithdrawCountUser(String userId);
+
 	/**提现记录(SaaS)
 	 * @param param
 	 * @param page

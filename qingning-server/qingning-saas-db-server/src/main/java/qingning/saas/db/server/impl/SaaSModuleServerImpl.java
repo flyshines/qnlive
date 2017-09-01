@@ -403,20 +403,22 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Override
     public Map<String, Object> findUserGainsByUserId(String userId) {
         Map<String, Object> result = userGainsMapper.findUserGainsByUserId(userId);
+        //返回提现信息
+        int count = withdrawCashMapper.selectWithdrawCountUser(userId);
         if (result == null) {
             //初始化用户余额信息
-            Map<String, Object> gainsMap = new HashMap<>();
-            gainsMap.put("user_id", userId);
-            gainsMap.put("live_room_total_amount", "0");
-            gainsMap.put("live_room_real_incomes", "0");
-            gainsMap.put("distributer_total_amount", "0");
-            gainsMap.put("distributer_real_incomes", "0");
-            gainsMap.put("user_total_amount", "0");
-            gainsMap.put("user_total_real_incomes", "0");
-            gainsMap.put("balance", "0");
-            userGainsMapper.insertUserGainsByNewUser(gainsMap);
-            return gainsMap;
+            result = new HashMap<>();
+            result.put("user_id", userId);
+            result.put("live_room_total_amount", "0");
+            result.put("live_room_real_incomes", "0");
+            result.put("distributer_total_amount", "0");
+            result.put("distributer_real_incomes", "0");
+            result.put("user_total_amount", "0");
+            result.put("user_total_real_incomes", "0");
+            result.put("balance", "0");
+            userGainsMapper.insertUserGainsByNewUser(result);
         }
+        result.put("withdrawing_count",count);
         return result;
     }
 
