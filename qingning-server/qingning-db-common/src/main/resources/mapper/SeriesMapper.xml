@@ -198,7 +198,9 @@
 			<if test="series_price != null" >
 				series_price=#{series_price},
 			</if>
-
+			<if test="series_type != null" >
+				series_type=#{series_type},
+			</if>
 		</set>
 		where series_id = #{series_id}
 	</update>
