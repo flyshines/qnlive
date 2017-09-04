@@ -575,7 +575,13 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     public Map<String,Object> getShopInfoList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
         PageList<Map<String, Object>> result = shopMapper.getShopInfoList(param, page);
-
+        for(Map<String, Object> map : result){
+            if(MiscUtils.isEmpty(map.get("account"))){
+                map.put("create_from",0);
+            }else{
+                map.put("create_from",1);
+            }
+        }
         Map<String, Object> res = new HashMap<>();
         res.put("list", result);
         res.put("total_count", result.getTotal());
