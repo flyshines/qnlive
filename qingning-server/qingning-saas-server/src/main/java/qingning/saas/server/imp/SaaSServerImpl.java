@@ -882,62 +882,60 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 
         Map<String, String> saasCourse = CacheUtils.readCourse(courseId, entity, readCourseOperation, jedis, true);
         Map<String,Object> requestMap = new HashMap<>();
-        if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
-            throw new QNLiveException("310003");
-        }
+        if(!saasCourse.get("goods_type").equals("0") && !saasCourse.get("goods_type").equals("3")){
+            if(saasCourse.get("shelves_sharing").equals("1")){
+                Map<String, String> headerParams = new HashMap<>();
+                headerParams.put("version", "1.2.0");
+                headerParams.put("Content-Type", "application/json;charset=UTF-8");
+                headerParams.put("access_token",reqEntity.getAccessToken() );
 
-        if(saasCourse.get("shelves_sharing").equals("1")){
-            Map<String, String> headerParams = new HashMap<>();
-            headerParams.put("version", "1.2.0");
-            headerParams.put("Content-Type", "application/json;charset=UTF-8");
-            headerParams.put("access_token",reqEntity.getAccessToken() );
+                requestMap.put("course_id",saasCourse.get("course_id"));
+                requestMap.put("course_title",saasCourse.get("course_title"));
+                requestMap.put("course_url",saasCourse.get("course_image"));
+                if((saasCourse.get("goods_type")).equals("1")){
+                    requestMap.put("course_type","0");
+                }else if((saasCourse.get("goods_type")).equals("2")){
+                    requestMap.put("course_type","1");
+                }
 
-            requestMap.put("course_id",saasCourse.get("course_id"));
-            requestMap.put("course_title",saasCourse.get("course_title"));
-            requestMap.put("course_url",saasCourse.get("course_image"));
-            if((saasCourse.get("goods_type")).equals("1")){
-                requestMap.put("course_type","0");
-            }else if((saasCourse.get("goods_type")).equals("2")){
-                requestMap.put("course_type","1");
+                requestMap.put("classify_id",saasCourse.get("classify_id"));
+                requestMap.put("course_remark",saasCourse.get("course_remark"));
+                requestMap.put("course_price",saasCourse.get("course_price"));
+                requestMap.put("file_path",saasCourse.get("course_url"));
+                requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
+                requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration")));
+                requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"":saasCourse.get("target_user").toString());
+                requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"":saasCourse.get("target_user").toString());
+
+                //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+                String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME) /*"http://192.168.1.197:8088"*/
+                        +SharingConstants.SHARING_SERVER_COURSE
+                        +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
+                String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
+                Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            }else if(!saasCourse.get("series_course_updown").equals("0")){
+                Map<String, String> headerMap = new HashMap<>();
+                headerMap.put("version", "1.2.0");
+                headerMap.put("Content-Type", "application/json;charset=UTF-8");
+                headerMap.put("access_token",reqEntity.getAccessToken() );
+
+                Map<String,Object> map = new HashMap<>();
+                map.put("course_id",courseId);
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, "findSaasCourseByCourseId", map), readCourseOperation, jedis, true);
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("course_id",saasCourse.get("series_id"));
+                courseMap.put("s_course_id",courseInfoMap.get("course_id"));
+                courseMap.put("course_title",courseInfoMap.get("course_title"));
+                courseMap.put("course_url",courseInfoMap.get("course_image"));
+                courseMap.put("course_duration",courseInfoMap.get("course_duration"));
+                courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
+                courseMap.put("file_path",courseInfoMap.get("course_url"));
+                courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
+                String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+                        +SharingConstants.SHARING_SERVER_COURSE
+                        +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
+                String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
             }
-
-            requestMap.put("classify_id",saasCourse.get("classify_id"));
-            requestMap.put("course_remark",saasCourse.get("course_remark"));
-            requestMap.put("course_price",saasCourse.get("course_price"));
-            requestMap.put("file_path",saasCourse.get("course_url"));
-            requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
-            requestMap.put("course_duration",MiscUtils.isEmpty(saasCourse.get("course_duration")));
-            requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"":saasCourse.get("target_user").toString());
-            requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"":saasCourse.get("target_user").toString());
-
-            //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-            String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME) /*"http://192.168.1.197:8088"*/
-                    +SharingConstants.SHARING_SERVER_COURSE
-                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
-            String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
-            Map<String, Object> resultMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
-        }else if(!saasCourse.get("series_course_updown").equals("0")){
-            Map<String, String> headerMap = new HashMap<>();
-            headerMap.put("version", "1.2.0");
-            headerMap.put("Content-Type", "application/json;charset=UTF-8");
-            headerMap.put("access_token",reqEntity.getAccessToken() );
-
-            Map<String,Object> map = new HashMap<>();
-            map.put("course_id",courseId);
-            Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, "findSaasCourseByCourseId", map), readCourseOperation, jedis, true);
-            Map<String, Object> courseMap = new HashMap<>();
-            courseMap.put("course_id",saasCourse.get("series_id"));
-            courseMap.put("s_course_id",courseInfoMap.get("course_id"));
-            courseMap.put("course_title",courseInfoMap.get("course_title"));
-            courseMap.put("course_url",courseInfoMap.get("course_image"));
-            courseMap.put("course_duration",courseInfoMap.get("course_duration"));
-            courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
-            courseMap.put("file_path",courseInfoMap.get("course_url"));
-            courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
-                    +SharingConstants.SHARING_SERVER_COURSE
-                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
-            String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
         }
 
     }
