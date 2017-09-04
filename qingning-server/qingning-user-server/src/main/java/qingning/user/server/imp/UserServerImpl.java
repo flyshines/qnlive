@@ -2106,7 +2106,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	 * 判断提现余额是否大于10000
     	 */
         //提现测试代码
-        if(amount.compareTo(new BigDecimal("10000"))!=1){
+        if(amount.compareTo(new BigDecimal("10000"))==-1){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
         }else{
@@ -2150,7 +2150,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	if(loginUserGainsMap != null && !loginUserGainsMap.isEmpty()){
     		balance = Integer.parseInt(loginUserGainsMap.get("balance").toString());
     	}
-        if(amount.compareTo(new BigDecimal(balance))!=1){
+        if(amount.compareTo(new BigDecimal(balance))==-1){
     	    // logger.error("提现金额大于账户余额");
     		throw new QNLiveException("180001");
     	}
