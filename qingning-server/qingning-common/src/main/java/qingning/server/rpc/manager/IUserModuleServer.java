@@ -115,7 +115,7 @@ public interface IUserModuleServer {
 	 * @param balance
 	 * @return
 	 */
-	int insertWithdrawCash(Map<String, Object> record, int balance);
+	int insertWithdrawCash(Map<String, Object> record, long balance);
 	/**分页查询-用户提现记录
 	 * @param param
 	 * @return

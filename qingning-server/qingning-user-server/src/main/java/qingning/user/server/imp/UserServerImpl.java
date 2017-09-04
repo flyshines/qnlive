@@ -2100,21 +2100,17 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	 */
     	Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
     	//获取请求金额
-        BigDecimal amount = BigDecimal.valueOf(DoubleUtil.mul(Double.valueOf(reqMap.get("initial_amount").toString()),100D));
-        Integer initialAmount = amount.intValue();
+        //BigDecimal amount = BigDecimal.valueOf(DoubleUtil.mul(Double.valueOf(reqMap.get("initial_amount").toString()),100D));
+        BigDecimal amount = new BigDecimal(reqMap.get("initial_amount").toString()).multiply(new BigDecimal("100"));
         /*
     	 * 判断提现余额是否大于10000
     	 */
         //提现测试代码
-        /*if(initialAmount < 10000){
+        if(amount.compareTo(new BigDecimal("10000"))!=1){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
-        }*/
-        if(initialAmount < 100){
-            logger.error("提现金额不能小于1元");
-            throw new QNLiveException("170003","测试，不能小于1元");
         }else{
-            reqMap.put("actual_amount",initialAmount);
+            reqMap.put("actual_amount",amount.longValue());
         }
     	//获取登录用户userId
     	String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -2154,7 +2150,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	if(loginUserGainsMap != null && !loginUserGainsMap.isEmpty()){
     		balance = Integer.parseInt(loginUserGainsMap.get("balance").toString());
     	}
-    	if(initialAmount > balance){
+        if(amount.compareTo(new BigDecimal(balance))!=1){
     	    // logger.error("提现金额大于账户余额");
     		throw new QNLiveException("180001");
     	}
@@ -2181,10 +2177,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	insertMap.put("app_name", appName);
     	// 插入提现申请表
         try{
-            balance = balance - initialAmount;
-            userModuleServer.insertWithdrawCash(insertMap,balance);
+            //balance = balance - initialAmount;
+            userModuleServer.insertWithdrawCash(insertMap,new BigDecimal(balance).subtract(amount).longValue());
         }catch(Exception e){
-            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+initialAmount);
+            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+amount.toString());
             throw new QNLiveException("000099");
         }
 		return resultMap;

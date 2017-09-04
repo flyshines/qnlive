@@ -13,6 +13,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserModuleServer;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -409,7 +410,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertWithdrawCash(Map<String, Object> record, int balance) {
+    public int insertWithdrawCash(Map<String, Object> record, long balance) {
         int i = withdrawCashMapper.insertWithdrawCashByNewUser(record);
         if(i>0) {
             Map<String ,Object> withdraw = new HashMap<>();
@@ -459,10 +460,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
             //返还用户余额
             Map<String ,Object> user = userGainsMapper.findUserGainsByUserId(userId);
             long balance = Integer.valueOf(user.get("balance").toString());
-            balance = balance + initial_amount;
             Map<String ,Object> reqMap = new HashMap<>();
             reqMap.put("user_id",userId);
-            reqMap.put("balance",balance);
+            reqMap.put("balance",new BigDecimal(balance).add(new BigDecimal(initial_amount)).longValue());
             userGainsMapper.updateUserGains(reqMap);
         }
         paramMap.put("withdraw_cash_id",withdrawId);
