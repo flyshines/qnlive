@@ -918,13 +918,13 @@ public class UserController extends AbstractController{
 
 		LinkedHashMap<String,String> headMap = new LinkedHashMap<>();
 		headMap.put("withdraw_cash_id", "提现记录ID");
-		headMap.put("user_name", "用户真实姓名");
+		headMap.put("user_name", "真实姓名");
 		headMap.put("nick_name", "用户昵称");
 		headMap.put("alipay_account_number", "支付宝账号");
 		headMap.put("filter_amount", "手续费");
 		headMap.put("initial_amount", "实际提现金额");
 		headMap.put("user_total_amount", "用户总金额");
-		headMap.put("balance", "余额");
+		headMap.put("balance", "提现后余额");
 		headMap.put("create_time", "创建时间");
 		headMap.put("status", "状态");
 		headMap.put("remark", "备注");
@@ -971,13 +971,13 @@ public class UserController extends AbstractController{
 
 		LinkedHashMap<String,String> headMap = new LinkedHashMap<>();
 		headMap.put("withdraw_cash_id", "提现记录ID");
-		headMap.put("user_name", "用户真实姓名");
+		headMap.put("user_name", "真实姓名");
 		headMap.put("nick_name", "用户昵称");
 		headMap.put("alipay_account_number", "支付宝账号");
 		headMap.put("filter_amount", "手续费");
 		headMap.put("initial_amount", "实际提现金额");
 		headMap.put("user_total_amount", "用户总金额");
-		headMap.put("balance", "余额");
+		headMap.put("balance", "提现后余额");
 		headMap.put("create_time", "创建时间");
 		headMap.put("status", "状态");
 		headMap.put("remark", "备注");
