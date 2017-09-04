@@ -48,6 +48,9 @@
     <if test="web_openid != null" >
       web_openid,
     </if>
+    <if test="balance != null" >
+      balance,
+    </if>
     initial_amount,
     actual_amount,
     state,
@@ -66,6 +69,9 @@
     </if>
     <if test="web_openid != null" >
       #{web_openid},
+    </if>
+    <if test="balance != null" >
+      #{balance},
     </if>
       #{initial_amount},
       #{actual_amount},
@@ -162,7 +168,7 @@
         t.update_time as handle_time,
         t.handle_id,
         w.user_total_amount,
-        w.balance,
+        t.balance,
         t.finance_update_time as finance_time
       FROM
           `t_withdraw_cash` t
