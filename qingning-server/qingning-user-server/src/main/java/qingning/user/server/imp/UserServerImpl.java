@@ -2102,10 +2102,13 @@ public class UserServerImpl extends AbstractQNLiveServer {
     	//获取请求金额
         //BigDecimal amount = BigDecimal.valueOf(DoubleUtil.mul(Double.valueOf(reqMap.get("initial_amount").toString()),100D));
         BigDecimal amount = new BigDecimal(reqMap.get("initial_amount").toString()).multiply(new BigDecimal("100"));
-        /*
+        //超出最大提现金额
+        if(amount.compareTo(new BigDecimal("100000000"))==1){
+            throw new QNLiveException("170005");
+        }
+         /*
     	 * 判断提现余额是否大于10000
     	 */
-        //提现测试代码
         if(amount.compareTo(new BigDecimal("10000"))==-1){
             logger.error("提现金额不能小于100元");
             throw new QNLiveException("170003");
