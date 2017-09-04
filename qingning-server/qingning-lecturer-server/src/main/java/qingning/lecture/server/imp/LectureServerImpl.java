@@ -3391,7 +3391,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                         score = MiscUtils.convertLongByDesc(score);	//获取新的排序分值
                         jedis.zadd(lecturerSeriesUpKey, score, series_id);
                     }
-
                 }else{//往下架加入
                     jedis.zrem(seriesCourseUpKey,courseId);
                     jedis.zadd(seriesCourseDownKey, courselops, courseId);
