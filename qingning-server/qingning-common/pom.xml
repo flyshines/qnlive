@@ -7,7 +7,46 @@
   </parent>
   <groupId>qingning.common</groupId>
   <artifactId>qingning-common</artifactId>
+
+  <profiles>
+    <profile>
+      <!-- 开发环境 -->
+      <id>development</id>
+      <properties>
+        <profiles.active>development</profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <!-- 测试环境 -->
+      <id>test</id>
+      <properties>
+        <profiles.active>test</profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <!-- 生产环境 -->
+      <id>production</id>
+      <properties>
+        <profiles.active>production</profiles.active>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
 	<finalName>qingning-common</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <!-- 资源根目录排除各环境的配置，使用单独的资源目录来指定 -->
+        <excludes>
+          <exclude>conf/test/*</exclude>
+          <exclude>conf/development/*</exclude>
+          <exclude>conf/production/*</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>src/main/resources/conf/${profiles.active}</directory>
+      </resource>
+    </resources>
   </build>
 </project>
