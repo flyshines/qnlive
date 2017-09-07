@@ -142,6 +142,9 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
 	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
 	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
+	
+	public static final String USER_SHOP_COURSE_ZSET = "USER:{user_id}:SHOP:{shop_id}:COURSES";//用户在指定店铺加入的单品课程
+	public static final String USER_SHOP_SERIES_ZSET = "USER:{user_id}:SHOP:{shop_id}:SERIES";//用户在指定店铺加入的系列课程
 
 	public static final String CACHED_KEY_COURSE = "SYS:COURSE:{course_id}";
 	public static final String CACHED_KEY_COURSE_FIELD = "course_id";

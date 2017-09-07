@@ -85,7 +85,9 @@
   </select>
   
   <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.course_id, student.student_pos ,course.status from t_courses_students student,t_courses course where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
+  	select student.course_id, student.student_pos ,course.status 
+  	from t_courses_students student,t_courses course 
+  	where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
     and student.course_id=course.course_id and student.value_from = 0
   	<if test="student_pos != null">
   	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
@@ -222,5 +224,18 @@
     <if test="distributer_id != null">
     	and distributer_id = #{distributer_id}
     </if>
+  </select>
+  
+  <!-- 根据条件查询课程学员列表 -->
+  <select id="selectCourseStudentByMap" parameterType="hashmap" resultType="hashmap">
+  	select * from t_courses_students
+  	<where>
+  		<if test="user_id != null">
+  			and user_id = #{user_id}
+  		</if>
+  		<if test="lecturer_id != null">
+  			and lecturer_id = #{lecturer_id}
+  		</if>
+  	</where>
   </select>
 </mapper>

@@ -21,4 +21,10 @@ public interface CoursesStudentsMapper {
     Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
     
     List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+    /**
+     * 根据条件查询课程学员列表
+     * @param selectCourseStudentMap
+     * @return
+     */
+	List<Map<String, Object>> selectCourseStudentByMap(Map<String, Object> selectCourseStudentMap);
 }

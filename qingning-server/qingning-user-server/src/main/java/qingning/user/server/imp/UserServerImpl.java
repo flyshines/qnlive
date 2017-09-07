@@ -2843,4 +2843,89 @@ public class UserServerImpl extends AbstractQNLiveServer {
         //查询提现记录列表
         return userModuleServer.findOrderListAll(param);
     }
+    
+    
+    
+    
+    /***************************** V1.4.0 ********************************/
+    /**
+     * 获取已购买的单品课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("mySingleCourseList")
+    public Map<String, Object> mySingleCourseList(RequestEntity reqEntity) throws Exception{
+    	Map<String, Object> resultMap = new HashMap<>();
+    	List<Map<String, String>> courseInfoList = new ArrayList<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map)reqEntity.getParam();
+        String loginedUserId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", loginedUserId);
+        String lastCourseId = (String) reqMap.get("last_course_id");
+        int pageCount = ((Long)reqMap.get("page_count")).intValue();
+        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
+        String shopId = (String) reqMap.get("shop_id");
+        
+        /*
+         * 分页获取用户加入的单品课程id列表
+         */
+        Set<String> courseIdSet = null;
+        Map<String, Object> readUserCourseMap = new HashMap<>();
+    	readUserCourseMap.put("user_id", loginedUserId);
+        if (MiscUtils.isEmpty(shopId)) {	//请求中没有传递店铺id，说明获取用户在全平台下的已购单品
+        	RequestEntity readUserCourseReqEntity = this.generateRequestEntity(null, null, "getCourseStudentListByMap", readUserCourseMap);
+            courseIdSet = CacheUtils.readUserCoursesSet(loginedUserId, lastCourseId, pageCount, 
+            		readUserCourseReqEntity, readUserOperation, jedis);
+        } else {	//请求中传递店铺id，说明获取用户在该店铺下的已购单品
+        	/*
+        	 * 根据请求店铺获得该店铺的讲师id
+        	 */
+        	Map<String, Object> readShopMap = new HashMap<>();
+        	readShopMap.put("shop_id", shopId);
+        	RequestEntity readShopReqEntity = this.generateRequestEntity(null, null, "getShopInfoByMap", readShopMap);
+        	Map<String, String> shopInfo = CacheUtils.readShop(shopId, readShopReqEntity, readShopOperation, jedis);
+        	if (MiscUtils.isEmpty(shopInfo)) {
+        		logger.error("获取已购买的单品课程>>>>请求的店铺不存在");
+        		throw new QNLiveException("190001");
+        	}
+        	readUserCourseMap.put("lecturer_id", shopInfo.get("user_id"));
+        	RequestEntity readUserShopCourseReqEntity = this.generateRequestEntity(null, null, "getCourseStudentListByMap", readUserCourseMap);
+            courseIdSet = CacheUtils.readUserShopCoursesSet(loginedUserId, shopId, lastCourseId, pageCount, 
+            		readUserShopCourseReqEntity, readUserOperation, jedis);
+        }
+        
+        if (!MiscUtils.isEmpty(courseIdSet)) {
+        	logger.info("获取已购买的单品课程>>>>分页获取到用户加入的单品课程id列表：" + courseIdSet.toString());
+        	/*
+        	 * 遍历课程id列表获取课程详情
+        	 */
+        	Map<String, Object> readCourseMap = new HashMap<>();
+        	RequestEntity readCourseReqEntity = this.generateRequestEntity(null, null, "getCourseByCourseId", readCourseMap);
+        	Map<String, String> courseInfo = new HashMap<>();
+			for (String courseId : courseIdSet) {
+				readCourseMap.put("course_id", courseId);
+				courseInfo = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+				if (!MiscUtils.isEmpty(courseInfo)) {
+					courseInfo.put("goods_type", "0");	//0：直播；1：语音；2：视频；3：图文
+					courseInfo.put("course_image", courseInfo.get("course_url"));
+					courseInfoList.add(courseInfo);
+				} else {
+					logger.info("获取已购买的单品课程>>>>遍历课程id列表获取课程详情发现课程不是直播课程");
+					readCourseReqEntity = this.generateRequestEntity(null, null, Constants.SYS_READ_SAAS_COURSE, readCourseMap);
+					courseInfo = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+					if (!MiscUtils.isEmpty(courseInfo)) {
+						courseInfoList.add(courseInfo);
+					} else {
+						logger.error("获取已购买的单品课程>>>>遍历课程id列表获取课程详情发现课程不存在，course_id=" + courseId);
+					}
+				}
+			}
+        }
+
+        resultMap.put("course_info_list", courseInfoList);
+        return resultMap;
+    }
 }

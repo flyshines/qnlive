@@ -540,4 +540,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
     public Map<String, Object> findSaasCourseByCourseId(String courseId) {
         return saasCourseMapper.selectByPrimaryKey(courseId);
     }
+    /**
+     * 获取用户加入的单品课程列表
+     */
+	@Override
+	public List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> selectCourseStudentMap) {
+		return coursesStudentsMapper.selectCourseStudentByMap(selectCourseStudentMap);
+	}
 }
