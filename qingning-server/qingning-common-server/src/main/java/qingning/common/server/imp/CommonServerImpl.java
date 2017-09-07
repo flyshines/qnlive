@@ -566,14 +566,25 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String userWeixinAccessToken = getCodeResultJson.getString("access_token");
             JSONObject userJson = WeiXinUtil.getUserInfoByAccessToken(userWeixinAccessToken, openid, app_name);
             // 根据得到的相关用户信息注册用户，并且进行登录流程。
-            if (userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null) {
-                if (userJson.getString("unionid") == null) {
-                    resultMap.put("key", "0");
-                    return resultMap;
+            //开发环境配置
+            if("dev".equals(MiscUtils.getConfigByKey("environment",app_name))){
+                if (userJson == null || userJson.getInteger("errcode") != null) {
+                    if (userJson.getString("unionid") == null) {
+                        resultMap.put("key", "0");
+                        return resultMap;
+                    }
+                    throw new QNLiveException("120008");
                 }
-                throw new QNLiveException("120008");
+                userJson.put("unionid",openid);
+            }else{
+                if (userJson == null || userJson.getInteger("errcode") != null || userJson.getString("unionid") == null) {
+                    if (userJson.getString("unionid") == null) {
+                        resultMap.put("key", "0");
+                        return resultMap;
+                    }
+                    throw new QNLiveException("120008");
+                }
             }
-
             queryMap.clear();
             queryMap.put("login_type", "0");//0.微信方式登录
             queryMap.put("login_id", userJson.getString("unionid"));//unionid 登录
