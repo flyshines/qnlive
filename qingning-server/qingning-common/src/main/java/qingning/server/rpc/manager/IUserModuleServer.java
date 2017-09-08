@@ -184,4 +184,10 @@ public interface IUserModuleServer {
 	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
 
 	Map<String, Object> findSaasCourseByCourseId(String courseId);
+	/**
+	 * 获取用户加入的单品课程列表
+	 * @param selectCourseStudentMap
+	 * @return
+	 */
+	List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> selectCourseStudentMap);
 }

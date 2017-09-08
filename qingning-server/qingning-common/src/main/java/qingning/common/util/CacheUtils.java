@@ -823,4 +823,100 @@ public final class CacheUtils {
 		return studentSet;
 	}
 	
+	/**
+	 * 分页读取用户加入的单品课程id列表
+	 * @param userId 
+	 * @param lastCourseId 上一页最后一条数据的课程id
+	 * @param pageCount
+	 * @param requestEntity
+	 * @param operation
+	 * @param jedis
+	 * @return
+	 * @throws Exception
+	 */
+	public static Set<String> readUserCoursesSet(String userId, String lastCourseId, int pageCount, 
+			RequestEntity requestEntity, CommonReadOperation operation, Jedis jedis) throws Exception {
+		//返回结果集
+		Set<String> courseIdSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String userCoursesSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, keyMap);
+        if(!jedis.exists(userCoursesSetKey)){
+        	//缓存中不存在，从数据库中查询并写入缓存中
+			List<Map<String, Object>> resultList = (List) operation.invokeProcess(requestEntity);
+			if(resultList != null && !MiscUtils.isEmpty(resultList)){
+				for(Map<String, Object> map : resultList){
+					Long createTimeL = ((Date)map.get("create_time")).getTime();
+					jedis.zadd(userCoursesSetKey, createTimeL, map.get("course_id").toString());
+				}
+			}
+        }
+        //获取上一页最后一条数据的score
+        if(!MiscUtils.isEmpty(lastCourseId) && !"0".equals(lastCourseId)){	//不是获取第一页数据
+	        Double lastScore = jedis.zscore(userCoursesSetKey, lastCourseId);
+	        /*
+	         * 分页获取课程的id列表
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+	        courseIdSet = jedis.zrevrangeByScore(userCoursesSetKey, "("+lastScore, "-inf", 0, pageCount);
+        }else{	//获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+        	courseIdSet = jedis.zrevrangeByScore(userCoursesSetKey, "+inf", "-inf", 0, pageCount);
+        }
+		return courseIdSet;
+	}
+
+	/**
+	 * 分页读取用户在指定店铺加入的单品课程id列表
+	 * @param userId
+	 * @param shopId
+	 * @param lastCourseId
+	 * @param pageCount
+	 * @param requestEntity
+	 * @param operation
+	 * @param jedis
+	 * @return
+	 * @throws Exception
+	 */
+	public static Set<String> readUserShopCoursesSet(String userId, String shopId, String lastCourseId, int pageCount, 
+			RequestEntity requestEntity, CommonReadOperation operation, Jedis jedis) throws Exception {
+		//返回结果集
+		Set<String> courseIdSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        keyMap.put(Constants.CACHED_KEY_SHOP_FIELD, shopId);
+        String userShopCoursesSetKey = MiscUtils.getKeyOfCachedData(Constants.USER_SHOP_COURSE_ZSET, keyMap);
+        if(!jedis.exists(userShopCoursesSetKey)){
+        	//缓存中不存在，从数据库中查询并写入缓存中
+			List<Map<String, Object>> resultList = (List) operation.invokeProcess(requestEntity);
+			if(resultList != null && !MiscUtils.isEmpty(resultList)){
+				for(Map<String, Object> map : resultList){
+					Long createTimeL = ((Date)map.get("create_time")).getTime();
+					jedis.zadd(userShopCoursesSetKey, createTimeL, map.get("course_id").toString());
+				}
+			}
+        }
+        //获取上一页最后一条数据的score
+        if(!MiscUtils.isEmpty(lastCourseId) && !"0".equals(lastCourseId)){	//不是获取第一页数据
+	        Double lastScore = jedis.zscore(userShopCoursesSetKey, lastCourseId);
+	        /*
+	         * 分页获取课程的id列表
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+	        courseIdSet = jedis.zrevrangeByScore(userShopCoursesSetKey, "("+lastScore, "-inf", 0, pageCount);
+        }else{	//获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         * 倒序获取：因为缓存中是按创建时间递增排序，而需求是按照创建时间递减
+	         */
+        	courseIdSet = jedis.zrevrangeByScore(userShopCoursesSetKey, "+inf", "-inf", 0, pageCount);
+        }
+		return courseIdSet;
+	}
+	
 }
