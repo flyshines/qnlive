@@ -9,7 +9,7 @@
 
 	<select id="findCourseGuestByUserAndCourse" resultType="hashmap" parameterType="hashmap" >
 		SELECT * from t_course_guest where
-		user_id = #{user_id} and course_id = #{course_id},
+		user_id = #{user_id} and course_id = #{course_id}
 	</select>
 
 	<select id="findCourseGuestByCourseId" resultType="hashmap" parameterType="java.lang.String" >
