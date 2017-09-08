@@ -26,18 +26,7 @@ public interface CoursesStudentsMapper {
      * @param selectCourseStudentMap
      * @return
      */
-	List<Map<String, Object>> selectCourseStudentByMap(Map<String, Object> selectCourseStudentMap);<<<<<<< .mine
+	List<Map<String, Object>> selectCourseStudentByMap(Map<String, Object> selectCourseStudentMap);
     int updateStudent(Map<String, Object> queryMap);
 
-=======
-     * 根据条件查询课程学员列表
-     * @param selectCourseStudentMap
->>>>>>> .theirs
-    int updateStudent(Map<String, Object> queryMap);<<<<<<< .mine
-
-
-=======
-     */
-	List<Map<String, Object>> selectCourseStudentByMap(Map<String, Object> selectCourseStudentMap);
->>>>>>> .theirs
 }

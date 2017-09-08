@@ -225,14 +225,7 @@
     	and distributer_id = #{distributer_id}
     </if>
   </select>
-<<<<<<< .mine
 
-
-=======
-  
-  <!-- 根据条件查询课程学员列表 -->
->>>>>>> .theirs
-      
   <!-- 根据条件查询课程学员列表 -->
   <select id="selectCourseStudentByMap" parameterType="hashmap" resultType="hashmap">
   	select * from t_courses_students
@@ -244,13 +237,9 @@
   			and lecturer_id = #{lecturer_id}
   		</if>
   	</where>
-  </select><<<<<<< .mine
-  <update id="updateStudent" parameterType="hashmap" >
-    update t_courses_students
-=======
-  	select * from t_courses_students
-  	<where>
->>>>>>> .theirs
+  </select>
+
+
   <update id="updateStudent" parameterType="hashmap" >
     update t_courses_students
     <set >
@@ -265,31 +254,5 @@
       </if>
     </set>
     where user_id = #{user_id} and course_id = #{course_id}
-  </update><<<<<<< .mine
-      <if test="guest_tag != null" >
-        guest_tag = #{guest_tag},
-      </if>
-      <if test="status != null" >
-        guest_status = #{status},
-      </if>
-      <if test="update_time != null" >
-        update_time = #{update_time},
-      </if>
-    </set>
-    where user_id = #{user_id} and course_id = #{course_id}
   </update>
-=======
-  			and user_id = #{user_id}
-  		</if>
-  		<if test="lecturer_id != null">
-  			and lecturer_id = #{lecturer_id}
-  		</if>
-  	</where>
-  </select>
-
-
-
-
-
->>>>>>> .theirs
 </mapper>
