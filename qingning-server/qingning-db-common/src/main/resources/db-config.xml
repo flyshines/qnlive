@@ -20,8 +20,6 @@
 	<!--本示例采用druid连接池。 连接池配置如下 -->
 	<!-- 配置数据源 -->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
-        <!-- 数据库基本信息配置 -->
-        <property name="driverClassName" value="${jdbc.driverClassName}" />
         <!-- 初始化连接数量 -->
         <property name="initialSize" value="${druid.initialSize}" />
         <!-- 最大并发连接数 -->
