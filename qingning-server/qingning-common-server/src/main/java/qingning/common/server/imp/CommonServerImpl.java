@@ -3155,7 +3155,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             resultMap.put("user_type", "0");
         } else {//学生
             resultMap = getCourseInfoByUser(reqEntity);
-            resultMap.put("user_type", "1");//用户类型
+            Map<String, Object> courseGuest = commonModuleServer.findCourseGuestByUserAndCourse(userId,courseId);
+            if(MiscUtils.isEmpty(courseGuest)){
+                resultMap.put("user_type", "1");//用户类型  学生
+            }else{
+                resultMap.put("user_type", "5");//用户类型  嘉宾
+                resultMap.put("guest_role",courseGuest.get("guest_role"));
+                resultMap.put("guest_tag",courseGuest.get("guest_tag"));
+            }
+
             Map<String, Object> roomMap = new HashMap<>();
             roomMap.put("room_id", courseMap.get("room_id"));//课程直播间
             roomMap.put("user_id", userId);//用户id
@@ -3166,7 +3174,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                 resultMap.put("follow_status", "1");
             }
         }
-
         if (!resultMap.get("status").equals("2")) {
             if (Long.parseLong(resultMap.get("start_time").toString()) <= System.currentTimeMillis()) {//如果课程开始时间小于服务器时间
                 resultMap.put("status", 4);

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import javafx.beans.binding.ObjectBinding;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.node.MissingNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -1562,7 +1563,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
- 
+    /**
+     * 查询课程学生列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     @FunctionName("courseStudents")
     public Map<String, Object> getCourseStudentList(RequestEntity reqEntity) throws Exception {
@@ -1627,7 +1633,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     			}
     		}
     	}
-
     	Map<String, Object> queryMap = new HashMap<>();
     	if(studentList.size()< pageCount){
     		Set<Tuple> allBanUserIdList = jedis.zrangeByScoreWithScores(bandKey, "-inf", "+inf");
@@ -3819,6 +3824,76 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }
         return resultMap ;
+    }
+
+    /**
+     * 编辑学员成为嘉宾 或者取消嘉宾
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("editStudentOrGuest")
+    public Map<String, Object> editStudentOrGuest(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String inviter_user = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//邀请人 通过token获取 先判断是否是讲师
+        String query_type = reqMap.get("query_type").toString();// 0创建嘉宾 1取消嘉宾
+        String course_id = reqMap.get("course_id").toString();//课程id
+        String guest_user_id = reqMap.get("guest_user_id").toString();//嘉宾用户id
+
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("course_id",course_id);
+        Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+
+        map.clear();
+        map.put("user_id",guest_user_id);
+        Map<String, String> userMap = CacheUtils.readUser(guest_user_id, this.generateRequestEntity(null, null, null, map), readUserOperation, jedis);
+
+        if(!inviter_user.equals(courseInfoMap.get("lecturer_id"))){
+            throw new QNLiveException("410001");
+        }
+
+        String guest_role = 0+"";
+        String guest_tag =Constants.DEFAULT_GUEST_TAG;
+        if(!MiscUtils.isEmpty(reqMap.get("guest_role"))){
+            guest_role = reqMap.get("guest_role").toString();
+        }
+        if(!MiscUtils.isEmpty(reqMap.get("guest_tag"))){
+            guest_tag = reqMap.get("guest_tag").toString();
+        }
+        Map<String,Object> guestMap = new HashMap<>();
+        guestMap.put("guest_id",MiscUtils.getUUId());
+        guestMap.put("course_id",course_id);
+        guestMap.put("user_id",guest_user_id);
+        guestMap.put("guest_role",guest_role);
+        guestMap.put("status",query_type);
+        guestMap.put("guest_tag",guest_tag);
+        guestMap.put("inviter_user",inviter_user);
+        Map<String, Object> stringObjectMap = lectureModuleServer.courseGurest(guestMap);
+        String mGroupId = courseInfoMap.get("im_course_id");//获取课程imid
+
+        //发送成为嘉宾接口
+        String sender = "system";
+        Map<String,Object> infomation = new HashMap<>();
+        infomation.put("ban_status",query_type);
+        infomation.put("user_id",guest_user_id);
+        infomation.put("course_id", course_id);
+        infomation.put("nick_name",userMap.get("nick_name"));
+        infomation.put("create_time", System.currentTimeMillis());
+        Map<String,Object> messageMap = new HashMap<>();
+        messageMap.put("msg_type","5");
+        messageMap.put("app_name",appName);
+        messageMap.put("send_time", System.currentTimeMillis());
+        messageMap.put("create_time", System.currentTimeMillis());
+        messageMap.put("information",infomation);
+        messageMap.put("mid",infomation.get("message_id"));
+        String content = JSON.toJSONString(messageMap);
+        IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+        return stringObjectMap;
     }
 
 

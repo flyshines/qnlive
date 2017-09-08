@@ -988,4 +988,29 @@ public class LectureController extends AbstractController {
 
 
 
+	/**
+	 * 编辑学员成为嘉宾 或者取消嘉宾
+	 * @param entity
+	 * 			query_type = 0创建嘉宾 1取消嘉宾
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/guest", method = RequestMethod.POST)
+	public
+	@ResponseBody ResponseEntity editStudentOrGuest(
+			HttpEntity<Object> entity,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "editStudentOrGuest", accessToken, version, appName);
+		requestEntity.setParam(entity.getBody());
+		return this.process(requestEntity, serviceManger, message);
+	}
+
+
+
 }

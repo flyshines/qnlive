@@ -310,4 +310,6 @@ public interface ICommonModuleServer {
 
 	List<Map<String,Object>> findLoginInfo();
 
+	Map<String,Object> findCourseGuestByUserAndCourse(String user_id,String course_id);
+
 }

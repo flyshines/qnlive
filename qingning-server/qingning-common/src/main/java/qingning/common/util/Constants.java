@@ -417,4 +417,14 @@ public final class Constants {
 	public static final String SYS_QN_SHARING_VERSION ="1.2";
 	public static final String SYS_QN_SHARING_CONTENT_TYPE ="application/json;charset=UTF-8";
 
+
+
+	/*********************************嘉宾START**************************/
+	public static final String DEFAULT_GUEST_TAG ="嘉宾";
+
+
+	/*********************************嘉宾END**************************/
+
+
+
 }

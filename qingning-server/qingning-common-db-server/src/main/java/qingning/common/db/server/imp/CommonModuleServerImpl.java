@@ -111,9 +111,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	private SaaSCourseMapper saaSCourseMapper;
 
 	@Autowired(required = true)
+	private CourseGuestMapper courseGuestMapper;
+
+	@Autowired(required = true)
 	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
-
-
 	@Override
 	public List<Map<String, Object>> getServerUrls() {
 		return serverFunctionMapper.getServerUrls();
@@ -1339,6 +1340,14 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public List<Map<String, Object>> findLoginInfo() {
 		return loginInfoMapper.findLoginInfo();
+	}
+
+	@Override
+	public Map<String, Object> findCourseGuestByUserAndCourse(String user_id,String course_id) {
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("user_id",user_id);
+		map.put("course_id",course_id);
+		return courseGuestMapper.findCourseGuestByUserAndCourse(map);
 	}
 
 

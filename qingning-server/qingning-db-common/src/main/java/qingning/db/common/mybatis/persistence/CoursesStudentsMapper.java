@@ -21,4 +21,7 @@ public interface CoursesStudentsMapper {
     Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
     
     List<Map<String,Object>> findCourseIdByStudent(Map<String, Object> reqMap);
+
+    int updateStudent(Map<String, Object> queryMap);
+
 }

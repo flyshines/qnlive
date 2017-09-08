@@ -190,4 +190,7 @@ public interface ILectureModuleServer {
 
 
 	Map<String, Object> findSaasCourseByCourseId(String courseId);
+
+	Map<String, Object> courseGurest(Map<String, Object> reqMap);
+
 }

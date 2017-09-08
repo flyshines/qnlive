@@ -309,6 +309,8 @@
 					<param name="student_num" type="long"/>
 					<param name="student_list" type="list">
 						<param name="avatar_address" type="string"/>
+						<param name="guest_tag" type="rstring"/>
+						<param name="guest_status" type="string"/>
 						<param name="nick_name" type="rstring"/>
 						<param name="create_time" type="long"/>
 						<param name="ban_status" type="string"/>
@@ -896,7 +898,16 @@
 					<param name="share_url" type="string"/>
 				</outputs>
 			</function>
-
+			<function name="editStudentOrGuest">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">

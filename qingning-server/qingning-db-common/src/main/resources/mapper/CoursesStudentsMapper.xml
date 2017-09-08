@@ -4,7 +4,7 @@
 
   <select id="findCourseStudentList" resultType="hashmap" parameterType="hashmap" >
     select
-    cs.user_id, cs.create_time, cs.student_pos, u.nick_name, u.avatar_address
+    cs.user_id, cs.create_time, cs.student_pos,cs.guest_tag,cs.guest_status, u.nick_name, u.avatar_address
     from t_courses_students cs join t_user u on cs.user_id = u.user_id
     where 1 = 1
     and cs.course_id = #{course_id}
@@ -18,7 +18,7 @@
         #{item}
       </foreach>
     </if>
-    order by cs.student_pos desc
+    order by cs.guest_status desc,cs.student_pos desc
     limit #{page_count}
   </select>
 
@@ -65,7 +65,7 @@
 
   <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.Map" >
     select
-    u.user_id, u.nick_name, u.avatar_address, cs.create_time
+    u.user_id, u.nick_name, u.avatar_address, cs.create_time,cs.guest_tag,cs.guest_status
     from t_courses_students cs join t_user u on cs.user_id = u.user_id
     where
     cs.user_id in
@@ -223,4 +223,22 @@
     	and distributer_id = #{distributer_id}
     </if>
   </select>
+
+
+
+  <update id="updateStudent" parameterType="hashmap" >
+    update t_courses_students
+    <set >
+      <if test="guest_tag != null" >
+        guest_tag = #{guest_tag},
+      </if>
+      <if test="status != null" >
+        guest_status = #{status},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+    </set>
+    where user_id = #{user_id} and course_id = #{course_id}
+  </update>
 </mapper>
