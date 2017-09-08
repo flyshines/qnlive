@@ -31,6 +31,8 @@ public class ReadUserOperation implements CommonReadOperation {
             result = userModuleServer.findSeriesIdByStudent(reqMap);
         } else if ("getCourseStudentListByMap".equals(functionName)) {	//根据条件获取课程学员列表
         	result = userModuleServer.findCourseStudentByMap(reqMap);
+        } else if ("getSeriesStudentListByMap".equals(functionName)) {	//根据条件获取系列学员列表
+        	result = userModuleServer.findSeriesStudentByMap(reqMap);
         } else{
         	result = userModuleServer.findUserInfoByUserId(userId);
         }        

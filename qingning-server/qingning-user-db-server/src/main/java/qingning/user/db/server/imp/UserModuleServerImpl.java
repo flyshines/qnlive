@@ -547,4 +547,11 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	public List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> selectCourseStudentMap) {
 		return coursesStudentsMapper.selectCourseStudentByMap(selectCourseStudentMap);
 	}
+	/**
+	 * 获取用户加入的系列列表
+	 */
+	@Override
+	public List<Map<String, Object>> findSeriesStudentByMap(Map<String, Object> reqMap) {
+		return seriesStudentsMapper.selectSeriesStudentsByMap(reqMap);
+	}
 }
