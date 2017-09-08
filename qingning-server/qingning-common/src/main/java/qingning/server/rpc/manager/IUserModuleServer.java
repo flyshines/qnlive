@@ -190,4 +190,10 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> selectCourseStudentMap);
+	/**
+	 * 获取用户加入的系列列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findSeriesStudentByMap(Map<String, Object> reqMap);
 }
