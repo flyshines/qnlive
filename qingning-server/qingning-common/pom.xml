@@ -47,6 +47,6 @@
         <directory>src/main/resources/conf/${profiles.active}</directory>
       </resource>
     </resources>
-    <finalName>qingning-common</finalName>
+    <finalName>qingning-common-0.0.1-SNAPSHOT.jar</finalName>
   </build>
 </project>

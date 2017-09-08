@@ -801,6 +801,27 @@
 					</param>
 				</outputs>
 			</function>
+			
+			<!-- 获取已购买的系列课程-->
+			<function name="mySeriesCourseList">
+				<auth>
+					<accessToken require="Y, 000100" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+					<param name="page_count" type="long" require="N" />
+					<param name="shop_id" type="string" require="N" />
+					<param name="last_series_id" type="string" require="N" />
+				</inputs>
+				<outputs>
+					<param name="series_info_list" type="list">
+						<param name="series_id" type="string" />
+						<param name="series_image" type="string" />
+						<param name="series_title" type="string" />
+						<param name="goods_type" type="string" fieldname="series_course_type" />
+					</param>
+				</outputs>
+			</function>
 
 
 
