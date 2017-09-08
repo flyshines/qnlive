@@ -282,20 +282,28 @@ public class ImMsgServiceImp implements ImMsgService {
 				information.get("send_type").equals("4")  ||	//用户互动
 				information.get("send_type").equals("5")  ||	//课程开始
 				information.get("send_type").equals("6")  ||	//结束消息
-				information.get("send_type").equals("7")){		//老师回复
+				information.get("send_type").equals("7")  ||	//老师互动
+				information.get("send_type").equals("9")  ||	//嘉宾讲解
+				information.get("send_type").equals("10") ||	//嘉宾回答
+				information.get("send_type").equals("11")) { 	//嘉宾互动
 			String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
 			jedis.zadd(messageLecturerListKey, createTime, imid);
 			if(information.get("send_type").equals("0") && information.get("message_type").equals("0")){//老师的语音消息
 				String messageLecturerVoiceListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
 				jedis.zadd(messageLecturerVoiceListKey, createTime, imid);
 			}
-			if(information.get("send_type").equals("1") || information.get("send_type").equals("7")){//讲师回答 和 讲师回复
+			if(information.get("send_type").equals("1") || information.get("send_type").equals("7")){//讲师回答 和 讲师互动
   				Map<String, Object> map1 = JSON.parseObject(information.get("message_question").toString(), HashMap.class);
 				map1.put("course_id",information.get("course_id"));
 				String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map1);
 				jedis.hset(key,"message_status","1");
-
 			}
+
+
+
+
+
+
 		}
 		//4.将聊天信息放入redis的map中
 		map.put(Constants.FIELD_MESSAGE_ID, imid);
