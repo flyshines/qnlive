@@ -3974,17 +3974,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         messageMap.put("mid",infomation.get("message_id"));
         String content = JSON.toJSONString(messageMap);
         IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
-
-
-
-
-
         return stringObjectMap;
     }
 
 
     /**
-     * 编辑学员成为嘉宾 或者取消嘉宾
+     * 嘉宾
      * @param reqEntity
      * @return
      * @throws Exception

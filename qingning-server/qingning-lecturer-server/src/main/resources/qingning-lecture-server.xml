@@ -908,6 +908,16 @@
 				<outputs>
 				</outputs>
 			</function>
+			<function name="guestCourses">
+				<auth>
+					<accessToken require="Y" />
+					<appName require="Y" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
 		<version num="1.0.0" class="">
