@@ -521,8 +521,8 @@
 		<if test="lecturer_id != null and lecturer_id != ''">
 			and lecturer_id = #{lecturer_id}
 		</if>
-		<if test="status != null and status != ''">
-			and status in (${status})
+		<if test="status_in != null and status_in != ''">
+			and status in (${status_in})
 		</if>
 		<if test="create_time != null"><!-- 排除前端获取第一页后新增的数据 -->
 			and create_time <![CDATA[ <= ]]> #{create_time}

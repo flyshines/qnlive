@@ -3826,7 +3826,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 获取讲师单个课程
+     * 获取等待直播课程
      *  1、显示当天内将要开始的直播
      2、如果直播已经开始，而接下去没有其他直播，那么就一直显示这个直播，知道直播结束
      3、如果上一个直播已经开始，有下一个直播，那么在下一个直播的前30分钟，开始显示下一个直播
@@ -3835,60 +3835,157 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     @SuppressWarnings("unchecked")
     @FunctionName("getSingleLecturerLiveCourse")
     public Map<String, Object> getSingleLecturerLiveCourse(RequestEntity reqEntity) throws Exception {
+    	/*
+    	 * 查找登录用户作为讲师最靠近当前时间（时间往后找）的1门直播课程
+    	 * 查找登录用户作为嘉宾最靠近当前时间（时间往后找）的1门直播课程
+    	 * 判断这2门课程是否30min内要直播的课程
+    	 * 	是：获取30min内最近要直播的课程详情，返回该课程
+    	 * 查找登录用户作为讲师最近直播（时间往前找）的1门直播课程
+    	 * 查找登录用户作为嘉宾最近直播（时间往前找）的1门直播课程
+    	 * 获取这2门课程最近直播的课程详情，返回该课程
+    	 */
+    	Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
         Jedis jedis = jedisUtils.getJedis(appName);
-        Map<String, Object> resultMap = new HashMap<>();
-        String lecturer_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Map<String,Object> map = new HashMap<>();
-        map.put("lecturer_id",lecturer_id);
-        String lecturerCourseAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, map);//讲师预告和直播课程list key
-
-        String startIndex ;//坐标起始位
-        String endIndex ;//坐标结束位
-        Map<String, String> courseMap = new HashMap<>();
+        String loginedUserId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Long now = System.currentTimeMillis();
-        boolean iskey = true;
-        //直播的
-        long courseScoreByRedis = MiscUtils.convertInfoToPostion( now,0L);
-        String courseId = "";
-        //预告
-        startIndex ="("+courseScoreByRedis;//设置结束位置
-        endIndex = "+inf";//设置起始位置 '(' 是要求大于这个参数
-        Set<String> previewCourseIdSet = jedis.zrangeByScore(lecturerCourseAllKey,startIndex,endIndex,0,1);//找出最靠近当前时间的预告直播课程
-        if(!MiscUtils.isEmpty(previewCourseIdSet)){
-            for(String course_id : previewCourseIdSet){
-                courseId = course_id;
-            }
-            map.clear();
-            map.put("course_id",courseId);
-            courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
-            Long start_time = Long.valueOf(courseMap.get("start_time"));
-            long min30 = 30L * 60L * 1000L;
-            if( now > ( start_time- min30)){//创建时间小于 当前时间减去30分钟
-                resultMap.putAll(courseMap);
-                iskey = false;
-            }
+        /*
+         * 查找登录用户作为讲师最靠近当前时间（时间往后找）的1门直播课程
+         */
+        //获取系统当前时间在zset对应的排序分值
+        long nowScore = MiscUtils.convertInfoToPostion(now, 0L);
+        //生成当缓存中没有讲师所有直播课程时从数据库读取数据的必须参数
+        Map<String, Object> readLecturerCourseMap = new HashMap<>();
+        readLecturerCourseMap.put("lecturer_id", loginedUserId);
+        readLecturerCourseMap.put("status_in", "'1','2'");	//0:草稿 1：已发布 2:已结束 3:已撤销 4直播中（4状态不会出现在数据库中，仅出现在缓存中） 5已删除
+        readLecturerCourseMap.put("app_name", appName);
+        RequestEntity readLecturerCourseReqEntity = this.generateRequestEntity(null, null, "getCourseByMap", readLecturerCourseMap);
+        Set<Tuple> lecturerCourseSet = CacheUtils.readLecturerAllCourseIdSet(loginedUserId, nowScore, 1, 
+        		readLecturerCourseReqEntity, readCourseOperation, jedis, true); 
+        /*
+         * 查找登录用户作为嘉宾最靠近当前时间（时间往后找）的1门直播课程
+         */
+        //生成当缓存中没有嘉宾所有直播课程时从数据库读取数据的必须参数
+        Map<String, Object> readGuestCourseMap = new HashMap<>();
+        readGuestCourseMap.put("user_id", loginedUserId);
+        readGuestCourseMap.put("status", "1");	//状态 1是嘉宾 0不是嘉宾
+        RequestEntity readGuestCourseReqEntity = this.generateRequestEntity(null, null, "getGuestAndCourseInfoByMap", readGuestCourseMap);
+        Set<Tuple> guestCourseSet = CacheUtils.readCuestCourseIdSet(loginedUserId, nowScore, 1, 
+        		readGuestCourseReqEntity, readCourseOperation, jedis, true);
+        /*
+         * 判断这2门课程是否30min内要直播的课程
+    	 * 	是：获取30min内最近要直播的课程详情，返回该课程
+         */
+        long end = now + 30*60*1000;	//当前时间30分钟后的毫秒值
+        long endScore = MiscUtils.convertInfoToPostion(end, 0L);
+        Map<String, String> nextStartCourseInfo = null;	//记录30分钟内开始直播且开始直播时间最早的课程详情
+        if (!MiscUtils.isEmpty(lecturerCourseSet)) {
+	        for (Tuple lecturerCourse : lecturerCourseSet) {
+	        	long courseStartTimeL = (long) lecturerCourse.getScore();
+	        	if (courseStartTimeL <= endScore) {	//30min内开始直播
+	        		log.info("获取等待直播课程>>>>有作为讲师30min内要直播的课程");
+	        		//还未记录30分钟内开始直播 或者 遍历到的开始直播时间比记录的课程早，则将该课程认为是最近待直播课程
+	        		if (MiscUtils.isEmpty(nextStartCourseInfo) ||
+	        				courseStartTimeL < Long.parseLong(nextStartCourseInfo.get("score"))) {
+	        			nextStartCourseInfo.put("course_id", lecturerCourse.getElement());
+	        			nextStartCourseInfo.put("score", String.valueOf(lecturerCourse.getScore()));
+	        			nextStartCourseInfo.put("user_type", "0");	//用户类型	0：讲师；1：嘉宾
+	        		}
+	        	}
+	        }
         }
-        if(iskey){
-            startIndex =courseScoreByRedis+"";//设置结束位置
-            endIndex = "-inf";//
-            Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerCourseAllKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
-            if(!MiscUtils.isEmpty(liveCourseIdSet)) {
-                for (String course_id : liveCourseIdSet) {
-                    courseId = course_id;
-                }
-                map.clear();
-                map.put("course_id", courseId);
-                courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
-            }
+        if (!MiscUtils.isEmpty(guestCourseSet)) {
+	        for (Tuple guestCourse : guestCourseSet) {
+	        	long courseStartTimeL = (long) guestCourse.getScore();
+	        	if (courseStartTimeL <= endScore) {	//30min内开始直播
+	        		log.info("获取等待直播课程>>>>有作为嘉宾30min内要直播的课程");
+	        		//还未记录30分钟内开始直播 或者 遍历到的开始直播时间比记录的课程早，则将该课程认为是最近待直播课程
+	        		if (MiscUtils.isEmpty(nextStartCourseInfo) ||
+	        				courseStartTimeL < Long.parseLong(nextStartCourseInfo.get("score"))) {
+	        			nextStartCourseInfo.put("course_id", guestCourse.getElement());
+	        			nextStartCourseInfo.put("score", String.valueOf(guestCourse.getScore()));
+	        			nextStartCourseInfo.put("user_type", "1");	//用户类型	0：讲师；1：嘉宾
+	        		}
+	        	}
+	    	}
         }
-        if(!MiscUtils.isEmpty(courseMap)){
-            MiscUtils.courseTranferState(now, courseMap);
-            if(courseMap.get("status").toString().equals("4")){
-                resultMap.putAll(courseMap);
-            }
+        //以上步骤执行后，nextStartCourseInfo中就是30min内最近开始直播的课程
+        //获取该课程的详情
+        if (!MiscUtils.isEmpty(nextStartCourseInfo)) {
+        	String userType = nextStartCourseInfo.get("user_type");	//将登录用户的类型暂存
+        	String nextCourseId = nextStartCourseInfo.get("course_id");
+        	nextStartCourseInfo = CacheUtils.readCourse(nextCourseId, 
+        			this.generateRequestEntity(null, null, null, nextStartCourseInfo), 
+        			readCourseOperation, jedis, true);
+        	if (!MiscUtils.isEmpty(nextStartCourseInfo)) {
+        		nextStartCourseInfo.put("user_type", userType);	//返回数据前登记用户类型
+        		//返回30min内要直播的课程数据
+        		resultMap.putAll(nextStartCourseInfo);
+        		return resultMap;
+        	}
         }
+        
+        log.info("获取等待直播课程>>>>没有30min内要直播的课程，开始判断是否有正在直播的课程");
+        /*
+         * 查找登录用户作为讲师最近直播（时间往前找）的1门直播课程
+         */
+        lecturerCourseSet = CacheUtils.readLecturerAllCourseIdSet(loginedUserId, nowScore, 1, 
+        		readLecturerCourseReqEntity, readCourseOperation, jedis, false); 
+        /*
+         * 查找登录用户作为嘉宾最近直播（时间往前找）的1门直播课程
+         */
+        guestCourseSet = CacheUtils.readCuestCourseIdSet(loginedUserId, nowScore, 1, 
+        		readGuestCourseReqEntity, readCourseOperation, jedis, false);
+        /*
+         * 获取这2门课程最近直播的课程详情，返回该课程
+         */
+        Map<String, String> livingCourseInfo = null;	//记录开始直播且开始直播时间最晚的课程详情
+        if (!MiscUtils.isEmpty(lecturerCourseSet)) {
+	        for (Tuple lecturerCourse : lecturerCourseSet) {
+	        	long courseStartTimeL = (long) lecturerCourse.getScore();
+        		log.info("获取等待直播课程>>>>有作为讲师正在直播的课程");
+        		//还未记录正在直播 或者 遍历到的开始直播时间比记录的课程晚，则将该课程认为是最近正在直播课程
+        		if (MiscUtils.isEmpty(livingCourseInfo) ||
+        				courseStartTimeL > Long.parseLong(livingCourseInfo.get("score"))) {
+        			livingCourseInfo.put("course_id", lecturerCourse.getElement());
+        			livingCourseInfo.put("score", String.valueOf(lecturerCourse.getScore()));
+        			livingCourseInfo.put("user_type", "0");	//用户类型	0：讲师；1：嘉宾
+        		}
+	        }
+        }
+        if (!MiscUtils.isEmpty(guestCourseSet)) {
+	        for (Tuple guestCourse : guestCourseSet) {
+	        	long courseStartTimeL = (long) guestCourse.getScore();
+        		log.info("获取等待直播课程>>>>有作为嘉宾正在直播的课程");
+        		//还未记录正在直播 或者 遍历到的开始直播时间比记录的课程玩，则将该课程认为是最近正在直播课程
+        		if (MiscUtils.isEmpty(livingCourseInfo) ||
+        				courseStartTimeL > Long.parseLong(livingCourseInfo.get("score"))) {
+        			livingCourseInfo.put("course_id", guestCourse.getElement());
+        			livingCourseInfo.put("score", String.valueOf(guestCourse.getScore()));
+        			livingCourseInfo.put("user_type", "1");	//用户类型	0：讲师；1：嘉宾
+        		}
+	    	}
+        }
+        //以上步骤执行后，livingCourseInfo中就是最近正在直播的课程
+        //获取该课程的详情
+        if (!MiscUtils.isEmpty(livingCourseInfo)) {
+        	String userType = livingCourseInfo.get("user_type");	//将登录用户的类型暂存
+        	String livingCourseId = livingCourseInfo.get("course_id");
+        	livingCourseInfo = CacheUtils.readCourse(livingCourseId, 
+        			this.generateRequestEntity(null, null, null, livingCourseInfo), 
+        			readCourseOperation, jedis, true);
+        	if (!MiscUtils.isEmpty(livingCourseInfo)) {
+        		livingCourseInfo.put("user_type", userType);	//返回数据前登记用户类型
+        		//返回30min内要直播的课程数据
+        		resultMap.putAll(livingCourseInfo);
+        		return resultMap;
+        	}
+        }
+        
         return resultMap ;
     }
 
@@ -3980,7 +4077,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 嘉宾
+     * 嘉宾课程列表
      * @param reqEntity
      * @return
      * @throws Exception
@@ -4015,22 +4112,33 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> queryMap = new HashMap<String,Object>();
         queryMap.put("user_id",guestUserId);
 
+        List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+        Map<String ,Map<String, Object>> guestCourseMap = new HashMap<>();
+        for(Map<String, Object> guest:guestCourses ){
+            guestCourseMap.put(guest.get("course_id").toString(),guest);
+        }
+
         if(!jedis.exists(predictionKey)){
             queryMap.put("status",1);
-            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+           // List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
             for(Map<String, Object> course:guestCourses ){
-                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
-                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                if(course.get("course_status").toString().equals("1")){
+                    Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                    jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                }
+
             }
         }
         if(!jedis.exists(finishKey)){
             queryMap.put("status",2);
-            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+       //     List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
             for(Map<String, Object> course:guestCourses ){
-                Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
-                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                if(course.get("course_status").toString().equals("2")){
+                    Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
+                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                    jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                }
             }
         }
 
@@ -4155,9 +4263,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
+
+          //      lectureModuleServer.findGuestCourses()
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+
+
                 if(!MiscUtils.isEmpty(courseInfoMap)){
                     MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    Map<String, Object> stringObjectMap = guestCourseMap.get(course_id);
+                    courseInfoMap.put("guest_status",stringObjectMap.get("status").toString());
+                    courseInfoMap.put("guest_role",stringObjectMap.get("guest_role").toString());
+                    courseInfoMap.put("guest_tag",stringObjectMap.get("guest_tag").toString());
                     courseList.add(courseInfoMap);
                 }
             }

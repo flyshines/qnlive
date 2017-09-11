@@ -1016,4 +1016,117 @@ public final class CacheUtils {
 		return seriesIdSet;
 	}
 	
+	/**
+	 * 分页获取讲师所有的直播课程（单品和系列子课） Id集合
+	 * @param lecturerId 讲师id
+	 * @param startScore 上一页最后一条记录在该缓存zset中的排序score，获取首页传0
+	 * @param pageCount
+	 * @param requestEntity
+	 * @param operation
+	 * @param jedis
+	 * @param isAsc 是否在缓存中正序获取
+	 * @return
+	 * @throws Exception
+	 */
+	public static Set<Tuple> readLecturerAllCourseIdSet(String lecturerId, long startScore, int pageCount,
+			RequestEntity requestEntity, CommonReadOperation operation, Jedis jedis, boolean isAsc) throws Exception {
+		//返回结果集
+		Set<Tuple> courseSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, lecturerId);
+        String lecturerCourseAllSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, keyMap);
+        if(!jedis.exists(lecturerCourseAllSetKey)){
+        	//缓存中不存在，从数据库中查询并写入缓存中
+			List<Map<String, Object>> resultList = (List) operation.invokeProcess(requestEntity);
+			if(resultList != null && !MiscUtils.isEmpty(resultList)){
+				long scorse;
+				for(Map<String, Object> map : resultList){
+					scorse = MiscUtils.convertInfoToPostion(
+							MiscUtils.convertObjectToLong(map.get("start_time")), 
+							MiscUtils.convertObjectToLong(map.get("position")));
+					jedis.zadd(lecturerCourseAllSetKey, scorse, map.get("course_id").toString());
+				}
+			}
+        }
+        
+        if(0 != startScore){	//不是获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         */
+        	if (isAsc) {
+        		courseSet = jedis.zrangeByScoreWithScores(lecturerCourseAllSetKey, "("+startScore, "+inf", 0, pageCount);
+        	} else {
+        		courseSet = jedis.zrevrangeByScoreWithScores(lecturerCourseAllSetKey, "("+startScore, "-inf", 0, pageCount);
+        	}
+        }else{	//获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         */
+        	if (isAsc) {
+        		courseSet = jedis.zrangeByScoreWithScores(lecturerCourseAllSetKey, "-inf", "+inf", 0, pageCount);
+        	} else {
+        		courseSet = jedis.zrevrangeByScoreWithScores(lecturerCourseAllSetKey, "+inf", "-inf", 0, pageCount);
+        	}
+        }
+        
+		return courseSet;
+	}
+
+	/**
+	 * 分页获取嘉宾所有预告和正在直播的直播课程（单品和系列子课） Id集合
+	 * @param guestId
+	 * @param startScore
+	 * @param pageCount
+	 * @param requestEntity
+	 * @param operation
+	 * @param jedis
+	 * @param isAsc 是否在缓存中正序获取
+	 * @return
+	 * @throws Exception 
+	 */
+	public static Set<Tuple> readCuestCourseIdSet(String guestId, long startScore, int pageCount,
+			RequestEntity requestEntity, CommonReadOperation operation, Jedis jedis, boolean isAsc) throws Exception {
+		//返回结果集
+		Set<Tuple> courseSet = null;
+		
+		Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.GUEST_ID, guestId);
+        String guestCourseAllSetKey = MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, keyMap);
+        if(!jedis.exists(guestCourseAllSetKey)){
+        	//缓存中不存在，从数据库中查询并写入缓存中
+			List<Map<String, Object>> resultList = (List) operation.invokeProcess(requestEntity);
+			if(resultList != null && !MiscUtils.isEmpty(resultList)){
+				long scorse;
+				for(Map<String, Object> map : resultList){
+					scorse = MiscUtils.convertInfoToPostion(
+							MiscUtils.convertObjectToLong(map.get("start_time")), 
+							MiscUtils.convertObjectToLong(map.get("position")));
+					jedis.zadd(guestCourseAllSetKey, scorse, map.get("course_id").toString());
+				}
+			}
+        }
+        
+        if(0 != startScore){	//不是获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         */
+        	if (isAsc) {
+        		courseSet = jedis.zrangeByScoreWithScores(guestCourseAllSetKey, "("+startScore, "+inf", 0, pageCount);
+        	} else {
+        		courseSet = jedis.zrevrangeByScoreWithScores(guestCourseAllSetKey, "("+startScore, "-inf", 0, pageCount);
+        	}
+        }else{	//获取第一页数据
+	        /*
+	         * 分页获取课程的id列表
+	         */
+        	if (isAsc) {
+        		courseSet = jedis.zrangeByScoreWithScores(guestCourseAllSetKey, "-inf", "+inf", 0, pageCount);
+        	} else {
+        		courseSet = jedis.zrevrangeByScoreWithScores(guestCourseAllSetKey, "-inf", "+inf", 0, pageCount);
+        	}
+        }
+        
+		return courseSet;
+	}
 }
