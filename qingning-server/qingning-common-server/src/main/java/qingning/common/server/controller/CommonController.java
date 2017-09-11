@@ -39,118 +39,118 @@ public class CommonController extends AbstractController {
 
 
 
-
-    /**
-     * 微信公众号授权
-     * @param request
-     * @param response
-     * @throws Exception
-     */
-    @RequestMapping(value = "/weixin/weixinlogin", method = RequestMethod.GET)
-    public void weChatLogin(
-            @RequestParam(value="code",defaultValue = "") String code,
-            @RequestParam(value="state",defaultValue = "") String state,
-            @RequestParam(value="key",defaultValue = "") String paramKey,
-            @RequestParam(value="user_id",defaultValue = "") String userId,
-            HttpServletRequest request,HttpServletResponse response) throws Exception {
-        //第一次进行跳
-        if(MiscUtils.isEmpty(state)){
-            String authorization_url = MiscUtils.getConfigByKey("base_authorization_url",Constants.HEADER_APP_NAME);//静默授权
-            String appid = MiscUtils.getConfigByKey("old_appid",Constants.HEADER_APP_NAME);
-            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
-            if(paramKey != null){
-                redireceUrl = redireceUrl.replace("KEY", paramKey);
-            }
-            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
-            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","old");//修改参数
-            response.sendRedirect(authorizationUrl);
-            return ;
-        }
-
-        if(state.equals("old")){
-            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
-            Map<String,String> map = new HashMap<>();
-            map.put("code",code);
-            map.put("state",state);
-            requestEntity.setParam(map);
-            map.put("code",code);
-            map.put("user_id",userId);
-            map.put("state",state);
-
-            requestEntity.setParam(map);
-            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-            Integer key = Integer.valueOf(resultMap.get("key").toString());
-            if(key == 1){
-                String authorization_url = MiscUtils.getConfigByKey("base_authorization_url",Constants.HEADER_APP_NAME);//静默授权url
-                String appid = MiscUtils.getConfigByKey("appid",Constants.HEADER_APP_NAME);
-                String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
-                redireceUrl = redireceUrl.replace("KEY", paramKey);
-                if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
-                    String user_id = resultMap.get("user_id").toString();
-                    redireceUrl = redireceUrl.replace("USER_ID",user_id);
-                }
-                String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
-
-                String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","new");//修改参数
-                response.sendRedirect(authorizationUrl);
-                return ;
-            }
-
-            //没有拿到旧账号的openid 重新登录
-            logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-            String authorization_url = MiscUtils.getConfigByKey("authorization_url",Constants.HEADER_APP_NAME);//手动授权url
-            String appid = MiscUtils.getConfigByKey("old_appid",Constants.HEADER_APP_NAME);
-            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
-            redireceUrl = redireceUrl.replace("KEY", paramKey);
-            if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
-                String user_id = resultMap.get("user_id").toString();
-                redireceUrl = redireceUrl.replace("USER_ID",user_id);
-            }
-            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
-            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","old");;//修改参数
-            response.sendRedirect(authorizationUrl);
-            return ;
-        }
-
-        //新登路
-        if(state.equals("new")){
-            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
-            Map<String,String> map = new HashMap<>();
-            map.put("code",code);
-            map.put("user_id",userId);
-            map.put("state",state);
-            requestEntity.setParam(map);
-            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-            Integer key = Integer.valueOf(resultMap.get("key").toString());
-            if(key == 1){
-                String userWeixinAccessToken = (String) resultMap.get("access_token");
-                if(StringUtils.isNotEmpty(paramKey) && !paramKey.equals("KEY") ) {
-                    String newUrl = new String(Base64.decode(paramKey));
-                    response.sendRedirect(newUrl + "token=" + userWeixinAccessToken);
-                }else{
-                    response.sendRedirect(MiscUtils.getConfigByKey("web_index",Constants.HEADER_APP_NAME)+userWeixinAccessToken);
-                }
-                return ;
-            }
-            String authorization_url = MiscUtils.getConfigByKey("authorization_url",Constants.HEADER_APP_NAME);//手动授权url
-            String appid = MiscUtils.getConfigByKey("appid",Constants.HEADER_APP_NAME);
-            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
-            redireceUrl = redireceUrl.replace("KEY", paramKey);
-            if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
-                String user_id = resultMap.get("user_id").toString();
-                redireceUrl = redireceUrl.replace("USER_ID",user_id);
-            }
-            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
-
-            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","new");//修改参数
-            response.sendRedirect(authorizationUrl);
-            return ;
-        }
-
-    }
-
+//
+//    /**
+//     * 微信公众号授权
+//     * @param request
+//     * @param response
+//     * @throws Exception
+//     */
+//    @RequestMapping(value = "/weixin/weixinlogin", method = RequestMethod.GET)
+//    public void weChatLogin(
+//            @RequestParam(value="code",defaultValue = "") String code,
+//            @RequestParam(value="state",defaultValue = "") String state,
+//            @RequestParam(value="key",defaultValue = "") String paramKey,
+//            @RequestParam(value="user_id",defaultValue = "") String userId,
+//            HttpServletRequest request,HttpServletResponse response) throws Exception {
+//        //第一次进行跳
+//        if(MiscUtils.isEmpty(state)){
+//            String authorization_url = MiscUtils.getConfigByKey("base_authorization_url",Constants.HEADER_APP_NAME);//静默授权
+//            String appid = MiscUtils.getConfigByKey("old_appid",Constants.HEADER_APP_NAME);
+//            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
+//            if(paramKey != null){
+//                redireceUrl = redireceUrl.replace("KEY", paramKey);
+//            }
+//            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
+//            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","old");//修改参数
+//            response.sendRedirect(authorizationUrl);
+//            return ;
+//        }
+//
+//        if(state.equals("old")){
+//            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
+//            Map<String,String> map = new HashMap<>();
+//            map.put("code",code);
+//            map.put("state",state);
+//            requestEntity.setParam(map);
+//            map.put("code",code);
+//            map.put("user_id",userId);
+//            map.put("state",state);
+//
+//            requestEntity.setParam(map);
+//            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+//            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+//            Integer key = Integer.valueOf(resultMap.get("key").toString());
+//            if(key == 1){
+//                String authorization_url = MiscUtils.getConfigByKey("base_authorization_url",Constants.HEADER_APP_NAME);//静默授权url
+//                String appid = MiscUtils.getConfigByKey("appid",Constants.HEADER_APP_NAME);
+//                String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
+//                redireceUrl = redireceUrl.replace("KEY", paramKey);
+//                if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
+//                    String user_id = resultMap.get("user_id").toString();
+//                    redireceUrl = redireceUrl.replace("USER_ID",user_id);
+//                }
+//                String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
+//
+//                String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","new");//修改参数
+//                response.sendRedirect(authorizationUrl);
+//                return ;
+//            }
+//
+//            //没有拿到旧账号的openid 重新登录
+//            logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
+//            String authorization_url = MiscUtils.getConfigByKey("authorization_url",Constants.HEADER_APP_NAME);//手动授权url
+//            String appid = MiscUtils.getConfigByKey("old_appid",Constants.HEADER_APP_NAME);
+//            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
+//            redireceUrl = redireceUrl.replace("KEY", paramKey);
+//            if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
+//                String user_id = resultMap.get("user_id").toString();
+//                redireceUrl = redireceUrl.replace("USER_ID",user_id);
+//            }
+//            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
+//            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","old");;//修改参数
+//            response.sendRedirect(authorizationUrl);
+//            return ;
+//        }
+//
+//        //新登路
+//        if(state.equals("new")){
+//            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
+//            Map<String,String> map = new HashMap<>();
+//            map.put("code",code);
+//            map.put("user_id",userId);
+//            map.put("state",state);
+//            requestEntity.setParam(map);
+//            ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+//            Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+//            Integer key = Integer.valueOf(resultMap.get("key").toString());
+//            if(key == 1){
+//                String userWeixinAccessToken = (String) resultMap.get("access_token");
+//                if(StringUtils.isNotEmpty(paramKey) && !paramKey.equals("KEY") ) {
+//                    String newUrl = new String(Base64.decode(paramKey));
+//                    response.sendRedirect(newUrl + "token=" + userWeixinAccessToken);
+//                }else{
+//                    response.sendRedirect(MiscUtils.getConfigByKey("web_index",Constants.HEADER_APP_NAME)+userWeixinAccessToken);
+//                }
+//                return ;
+//            }
+//            String authorization_url = MiscUtils.getConfigByKey("authorization_url",Constants.HEADER_APP_NAME);//手动授权url
+//            String appid = MiscUtils.getConfigByKey("appid",Constants.HEADER_APP_NAME);
+//            String redireceUrl = MiscUtils.getConfigByKey("new_redirect_url",Constants.HEADER_APP_NAME);
+//            redireceUrl = redireceUrl.replace("KEY", paramKey);
+//            if(!MiscUtils.isEmpty(resultMap.get("user_id"))){
+//                String user_id = resultMap.get("user_id").toString();
+//                redireceUrl = redireceUrl.replace("USER_ID",user_id);
+//            }
+//            String encodeUrl = URLEncoder.encode(redireceUrl, "utf-8");
+//
+//            String authorizationUrl = authorization_url.replace("APPID", appid).replace("REDIRECTURL", encodeUrl).replace("STATE","new");//修改参数
+//            response.sendRedirect(authorizationUrl);
+//            return ;
+//        }
+//
+//    }
+//
 
 
 
@@ -382,61 +382,61 @@ public class CommonController extends AbstractController {
 
 
 
-//    /**
-//     *  微信公众号授权后的回调
-//     * 前端 默认进行 微信静默授权
-//     *  授权回调进入后台在后台获取code进行判断时候获取 openid
-//     *  如果有就进行正常跳转
-//     *  如果没有就进行手动授权
-//     *
-//     *  1.3 修改：新增SaaS登录回调逻辑17-06-24
-//     *
-//     * @param request
-//     * @param response
-//     * @throws Exception
-//     */
-//    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
-//    public void weixinLogin(
-//            @RequestParam("code") String code,
-//            @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
-//            @RequestParam(value="key",defaultValue = "") String paramKey,
-//            HttpServletRequest request,HttpServletResponse response) throws Exception {
-//        Map<String,String> map = new HashMap<>();
-//        String appName = state;
-//        map.put("code",code);
-//        if(state.equals("qnsaas")){
-//            appName = "qnlive";
-//        }
-//        map.put("state",appName);
-//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",appName);
-//        requestEntity.setParam(map);
-//        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-//
-//        Integer key = Integer.valueOf(resultMap.get("key").toString());
-//        if(key == 1){
-//            String userWeixinAccessToken = (String) resultMap.get("access_token");
-//            if(state.equals("qnsaas")){//跳转h5店铺
-//                logger.debug("key:"+paramKey);
-//                if(StringUtils.isNotEmpty(paramKey)){
-//                    String newUrl = new String(Base64.decode(paramKey));
-//                    logger.debug("url:"+newUrl);
-//                    response.sendRedirect(newUrl+"token="+userWeixinAccessToken);
-//                }else{
-//                    response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index",appName)+userWeixinAccessToken);
-//                }
-//            }else{//跳转直播
-//                response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
-//            }
-//             return ;
-//        }
-//        //如果没有拿到
-//        logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-//        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url",appName);//手动授权url
-//        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",appName)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",appName)).replace("STATE", state);//修改参数
-//        response.sendRedirect(authorizationUrl);
-//        return ;
-//    }
+    /**
+     *  微信公众号授权后的回调
+     * 前端 默认进行 微信静默授权
+     *  授权回调进入后台在后台获取code进行判断时候获取 openid
+     *  如果有就进行正常跳转
+     *  如果没有就进行手动授权
+     *
+     *  1.3 修改：新增SaaS登录回调逻辑17-06-24
+     *
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
+    public void weixinLogin(
+            @RequestParam("code") String code,
+            @RequestParam(value="state",defaultValue = Constants.HEADER_APP_NAME) String state,
+            @RequestParam(value="key",defaultValue = "") String paramKey,
+            HttpServletRequest request,HttpServletResponse response) throws Exception {
+        Map<String,String> map = new HashMap<>();
+        String appName = state;
+        map.put("code",code);
+        if(state.equals("qnsaas")){
+            appName = "qnlive";
+        }
+        map.put("state",appName);
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "",appName);
+        requestEntity.setParam(map);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+        Integer key = Integer.valueOf(resultMap.get("key").toString());
+        if(key == 1){
+            String userWeixinAccessToken = (String) resultMap.get("access_token");
+            if(state.equals("qnsaas")){//跳转h5店铺
+                logger.debug("key:"+paramKey);
+                if(StringUtils.isNotEmpty(paramKey)){
+                    String newUrl = new String(Base64.decode(paramKey));
+                    logger.debug("url:"+newUrl);
+                    response.sendRedirect(newUrl+"token="+userWeixinAccessToken);
+                }else{
+                    response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index",appName)+userWeixinAccessToken);
+                }
+            }else{//跳转直播
+                response.sendRedirect(MiscUtils.getConfigByKey("web_index",appName)+userWeixinAccessToken);
+            }
+             return ;
+        }
+        //如果没有拿到
+        logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
+        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url",appName);//手动授权url
+        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid",appName)).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url",appName)).replace("STATE", state);//修改参数
+        response.sendRedirect(authorizationUrl);
+        return ;
+    }
 
 
 
