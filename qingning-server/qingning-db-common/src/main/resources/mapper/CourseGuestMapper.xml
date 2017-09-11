@@ -112,7 +112,6 @@
 		from t_course_guest g,t_courses co
 		where g.course_id = co.course_id
 		and g.user_id = #{user_id}
-		and co.status = #{query_type}
 	</select>
 	
 	<!-- 根据条件获取嘉宾课程列表，并关联查询出课程详情 -->

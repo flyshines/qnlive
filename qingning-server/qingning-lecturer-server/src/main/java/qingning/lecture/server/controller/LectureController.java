@@ -1025,7 +1025,7 @@ public class LectureController extends AbstractController {
 	@RequestMapping(value = "/lecturer/guest/courses", method = RequestMethod.GET)
 	public
 	@ResponseBody ResponseEntity guestCourses(
-			@PathVariable("course_id") String course_id,
+			@RequestParam(value="course_id",defaultValue="") String course_id,
 			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 			@RequestHeader("access_token") String accessToken,
 			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
