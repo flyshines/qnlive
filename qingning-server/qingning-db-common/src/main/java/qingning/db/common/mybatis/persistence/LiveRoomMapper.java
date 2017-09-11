@@ -22,4 +22,10 @@ public interface LiveRoomMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> findLiveRoomListBySearch(Map<String, Object> reqMap);
+
+	/**查找直播间ID
+	 * @param lecturer_id
+	 * @return
+	 */
+	String findLiveRoomIdByLectureId(String lecturer_id);
 }

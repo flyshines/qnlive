@@ -390,8 +390,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		//分销员ID
 		String distributerId = null;
 
-		if(!MiscUtils.isEmpty(courseMap)){
+		if(tradeBill.get("guest_id")!=null){
+			//嘉宾打赏
+			lecturerId = tradeBill.get("guest_id").toString();
 			profitRecord.put("lecturer_id", lecturerId);
+			profitRecord.put("reward_type","2"); //0:门票收益,1:直播间打赏,2:嘉宾打赏
+		}else if(!MiscUtils.isEmpty(courseMap)){
+			//讲师收益或打赏
+			profitRecord.put("lecturer_id", lecturerId);
+			if("1".equals(tradeBill.get("profit_type"))){
+				//直播间打赏
+				profitRecord.put("reward_type","1");
+			}else{
+				//门票收益
+				profitRecord.put("reward_type","0");
+			}
 		}
 		//课程收益
 		if("0".equals(tradeBill.get("profit_type"))){
@@ -407,10 +420,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//收益类型（1:直播课，2：店铺课（非直播课））
 		profitRecord.put("course_type",tradeBill.get("course_type"));
-
-		//插入讲师收益
-		updateShopUser(lecturerId,userId,amount);
-
+		if(tradeBill.get("guest_id")==null) {
+			//插入讲师收益
+			updateShopUser(lecturerId, userId, amount);
+		}
 		lecturerCoursesProfitMapper.insertLecturerCoursesProfit(profitRecord);
 		//4.如果该用户属于某个分销员的用户，则更新推荐用户信息 t_room_distributer_recommend
 		if("0".equals(tradeBill.get("profit_type"))){
@@ -532,9 +545,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	 * @param appName			app名称
 	 * @param lecturerId		讲师ID
 	 * @param distributeRate	分销员收益比例
-	 * @param type	            1:直播收入,2:店铺收入（非直播间收入）
+	 * @param courseType	            1:直播收入,2:店铺收入（非直播间收入）
 	 */
-	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate,String type,Map<String,Object> profitRecord){
+	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate,String courseType,Map<String,Object> profitRecord){
 		double rate = DoubleUtil.divide( (double) distributeRate,10000D);
 		//讲师收益
 		Map<String,Object> lectureGains = new HashMap<>();
@@ -591,7 +604,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//更新t_user_gains 讲师收益统计
 		//直播间收入
-		if("1".equals(type)){
+		if("1".equals(courseType)){
 			long lectureRoomTotalAmountOld = Long.valueOf(lectureGainsOld.get("live_room_total_amount").toString());
 			long lectureRoomRealAmountOld = Long.valueOf(lectureGainsOld.get("live_room_real_incomes").toString());
 			lectureRoomTotalAmountOld = lectureTotalAmount + lectureRoomTotalAmountOld;
@@ -1358,6 +1371,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void updateUserCommonInfo(Map<String, Object> queryMap) {
 		userMapper.updateUser(queryMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findLiveRoomByLectureId(String lecturer_id) {
+		return liveRoomMapper.findLiveRoomByLectureId(lecturer_id);
+	}
+
+	@Override
+	public String findLiveRoomIdByLectureId(String lecturer_id) {
+		return liveRoomMapper.findLiveRoomIdByLectureId(lecturer_id);
 	}
 
 

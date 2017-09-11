@@ -19,6 +19,10 @@
     select * from t_live_room where lecturer_id = #{lecturer_id}
   </select>
 
+  <select id="findLiveRoomIdByLectureId" resultType="java.lang.String" parameterType="java.lang.String" >
+    select room_id from t_live_room where lecturer_id = #{lecturer_id}
+  </select>
+
   <insert id="insertLiveRoom" parameterType="hashmap" >  
     insert into t_live_room
     <trim prefix="(" suffix=")" suffixOverrides="," >

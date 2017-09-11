@@ -17,6 +17,9 @@
       <if test="shop_id != null" >
         shop_id,
       </if>
+      <if test="guest_id != null" >
+        guest_id,
+      </if>
       <if test="course_id != null" >
         course_id,
       </if>
@@ -60,6 +63,9 @@
       </if>
       <if test="shop_id != null" >
         #{shop_id},
+      </if>
+      <if test="guest_id != null" >
+        #{guest_id},
       </if>
       <if test="course_id != null" >
         #{course_id},
