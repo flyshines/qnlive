@@ -1723,8 +1723,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.FIELD_ROOM_ID, room_id);
         String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String liveRoomOwner = jedis.hget(liveRoomKey, "lecturer_id");
-        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+        String lecturerId = jedis.hget(liveRoomKey, "lecturer_id");
+        if (lecturerId == null || !lecturerId.equals(userId)) {
             throw new QNLiveException("100002");
         }
         Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedis,false);
@@ -1735,7 +1735,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         for(String key:courseInfoMap.keySet()){
             result.put(key, courseInfoMap.get(key));
         }
-
+        //直播间ID，V1.4新增嘉宾查询直播间收益（打赏收益）
+        reqMap.put("lecturer_id",lecturerId);
         List<Map<String,Object>> list = lectureModuleServer.findCourseProfitList(reqMap);
         result.put("profit_list", list);   
         //key:distributer_id; value:收益流水list

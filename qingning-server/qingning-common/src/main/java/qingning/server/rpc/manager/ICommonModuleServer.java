@@ -315,4 +315,16 @@ public interface ICommonModuleServer {
     void updateLoginInfo(Map<String, Object> queryMap);
 
 	void updateUserCommonInfo(Map<String, Object> queryMap);
+
+	/**查找直播间信息
+	 * @param lecturer_id
+	 * @return
+	 */
+	List<Map<String, Object>> findLiveRoomByLectureId(String lecturer_id);
+
+	/**查找直播间ID
+	 * @param lecturer_id
+	 * @return
+	 */
+	String findLiveRoomIdByLectureId(String lecturer_id);
 }
