@@ -934,6 +934,10 @@
 						<param name="course_price" type="double" />
 						<param name="course_title" type="rstring" />
 						<param name="create_time" type="long" />
+
+						<param name="guest_status" type="string" />
+						<param name="guest_role" type="string" />
+						<param name="guest_tag" type="string" />
 					</param>
 				</outputs>
 			</function>

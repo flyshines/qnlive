@@ -4014,22 +4014,33 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         Map<String,Object> queryMap = new HashMap<String,Object>();
         queryMap.put("user_id",guestUserId);
 
+        List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+        Map<String ,Map<String, Object>> guestCourseMap = new HashMap<>();
+        for(Map<String, Object> guest:guestCourses ){
+            guestCourseMap.put(guest.get("course_id").toString(),guest);
+        }
+
         if(!jedis.exists(predictionKey)){
             queryMap.put("status",1);
-            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+           // List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
             for(Map<String, Object> course:guestCourses ){
-                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
-                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                if(course.get("course_status").toString().equals("1")){
+                    Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                    jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                }
+
             }
         }
         if(!jedis.exists(finishKey)){
             queryMap.put("status",2);
-            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+       //     List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
             for(Map<String, Object> course:guestCourses ){
-                Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
-                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                if(course.get("course_status").toString().equals("2")){
+                    Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
+                    long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                    jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                }
             }
         }
 
@@ -4154,9 +4165,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
+
+          //      lectureModuleServer.findGuestCourses()
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+
+
                 if(!MiscUtils.isEmpty(courseInfoMap)){
                     MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    Map<String, Object> stringObjectMap = guestCourseMap.get(course_id);
+                    courseInfoMap.put("guest_status",stringObjectMap.get("status").toString());
+                    courseInfoMap.put("guest_role",stringObjectMap.get("guest_role").toString());
+                    courseInfoMap.put("guest_tag",stringObjectMap.get("guest_tag").toString());
                     courseList.add(courseInfoMap);
                 }
             }
