@@ -1012,5 +1012,32 @@ public class LectureController extends AbstractController {
 	}
 
 
+	/**
+	 * 嘉宾直播列表
+	 * @param course_id 课程id
+	 * @param page_count 分页参数
+	 * @param accessToken
+	 * @param appName
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/lecturer/guest/courses", method = RequestMethod.GET)
+	public
+	@ResponseBody ResponseEntity guestCourses(
+			@PathVariable("course_id") String course_id,
+			@RequestParam(value = "page_count", defaultValue = "20") String page_count,
+			@RequestHeader("access_token") String accessToken,
+			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+			@RequestHeader("version") String version) throws Exception {
+		RequestEntity requestEntity = this.createResponseEntity("LectureServer", "guestCourses", accessToken, version, appName);
+		Map<String, Object> param = new HashMap<>();
+		param.put("course_id", course_id);
+		param.put("page_count", page_count);
+		requestEntity.setParam(param);
+		return this.process(requestEntity, serviceManger, message);
+	}
+
 
 }

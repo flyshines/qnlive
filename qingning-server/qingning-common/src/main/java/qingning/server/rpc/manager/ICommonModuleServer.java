@@ -117,7 +117,7 @@ public interface ICommonModuleServer {
 
 	List<Map<String,Object>> findRewardConfigurationList();
 
-	Map<String,Object> findByPhone(Map<String,String> record);
+	Map<String,Object> findByPhone(Map<String,Object> record);
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
@@ -312,4 +312,7 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findCourseGuestByUserAndCourse(String user_id,String course_id);
 
+    void updateLoginInfo(Map<String, Object> queryMap);
+
+	void updateUserCommonInfo(Map<String, Object> queryMap);
 }

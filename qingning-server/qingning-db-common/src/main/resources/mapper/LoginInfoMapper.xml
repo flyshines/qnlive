@@ -240,5 +240,10 @@
        and update_time=#{last_update_time}
     </if>  
   </update>
+
+
+  <delete id="delectLoginByUserId" parameterType="java.lang.String">
+      DELETE  FROM  t_login_info where user_id = #{user_id}
+  </delete>
   
 </mapper>

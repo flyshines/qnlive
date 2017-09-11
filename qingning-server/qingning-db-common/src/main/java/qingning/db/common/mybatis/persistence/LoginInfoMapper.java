@@ -17,4 +17,7 @@ public interface LoginInfoMapper {
     List< Map<String,Object>> findLoginInfo();
 
     List<String> findLoginInfoByUserIds(Map<String, Object> map);
+
+    int delectLoginByUserId(String user_id);
+
 }

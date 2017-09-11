@@ -822,4 +822,26 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		dbResultMap.put("update_time", new Date());
 		return dbResultMap;
 	}
+
+	@Override
+	public List<Map<String, Object>> findGuestCourses(Map<String, Object> reqMap) {
+		return courseGuestMapper.findGuestCourses(reqMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCourseGuestByCourseId(String course_id) {
+		return courseGuestMapper.findCourseGuestByCourseId(course_id);
+	}
+
+	@Override
+	public Map<String, Object> findByPhone(Map<String, Object> record) {
+		return userMapper.findByPhone(record);
+	}
+
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public void deleteUserAndLogin(String user_id) {
+		userMapper.deleteUserByUserId(user_id);
+		loginInfoMapper.delectLoginByUserId(user_id);
+	}
 }

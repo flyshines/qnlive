@@ -321,6 +321,16 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
+    public static JSONObject getUserInfoByCode(String code,String appid,String appsecret,String appName) {
+        String requestUrl =  MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL,appName).replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
+        log.debug("------微信--通过H5传递code获得access_token-请求URL  "+requestUrl);
+        String requestResult = HttpTookit.doGet(requestUrl);
+        JSONObject jsonObject = JSON.parseObject(requestResult);
+        log.debug("------微信--通过H5传递code获得access_token-返回参数  "+requestResult);
+        return jsonObject;
+    }
+
+
     /**
      * 通过微信openId 来判断是否关注公众号
      * @param accessToken 调用接口凭证 公众号的通用凭证accesstoken

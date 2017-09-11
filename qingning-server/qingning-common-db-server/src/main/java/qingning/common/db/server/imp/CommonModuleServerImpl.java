@@ -888,7 +888,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String,Object> findByPhone(Map<String,String> record){
+	public Map<String,Object> findByPhone(Map<String,Object> record){
 		return userMapper.findByPhone(record);
 	}
 
@@ -1348,6 +1348,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		map.put("user_id",user_id);
 		map.put("course_id",course_id);
 		return courseGuestMapper.findCourseGuestByUserAndCourse(map);
+	}
+
+	@Override
+	public void updateLoginInfo(Map<String, Object> queryMap) {
+		loginInfoMapper.updateLoginInfo(queryMap);
+	}
+
+	@Override
+	public void updateUserCommonInfo(Map<String, Object> queryMap) {
+		userMapper.updateUser(queryMap);
 	}
 
 

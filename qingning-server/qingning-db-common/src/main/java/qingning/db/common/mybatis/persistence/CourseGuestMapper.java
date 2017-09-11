@@ -40,4 +40,12 @@ public interface CourseGuestMapper {
 	 */
 	int updateCourseGuest(Map<String, Object> courseGuestMap);
 
+	/**
+	 * 获取课程列表
+	 * @param map
+	 * @return
+	 */
+	List<Map<String, Object>> findGuestCourses(Map<String, Object> map);
+
+
 }

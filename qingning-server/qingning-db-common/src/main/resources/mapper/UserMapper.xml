@@ -15,6 +15,7 @@
   </select>
   <select id="findByPhone" resultType="hashmap" parameterType="hashmap" >
     select * from t_user where phone_number = #{phone_number} and app_name = #{appName}
+    and old_user=#{old_user}
   </select>
   <update id="updateLiveRoomNumForUser" parameterType="hashmap" >
     update t_user
@@ -214,6 +215,9 @@
       <if test="update_time != null" >     
         update_time = #{update_time},
       </if>
+      <if test="old_user != null">
+        old_user = #{old_user},
+      </if>
     </set>
     where user_id = #{user_id}
     <if test="last_update_time != null" >
@@ -224,6 +228,10 @@
   <select id="findRobotUsers" resultType="hashmap" parameterType="java.lang.String">
     SELECT * FROM t_user WHERE user_role = #{user_role} limit 500
   </select>
+
+  <delete id="deleteUserByUserId" parameterType="java.lang.String">
+    DELETE FROM t_user where user_id = #{user_id}
+  </delete>
   
   <!-- 获取没有t_user_gains记录的user_id -->
   <select id="selectNotGainsUserId"  resultType="hashmap">

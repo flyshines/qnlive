@@ -14,11 +14,7 @@
 
 	<select id="findCourseGuestByCourseId" resultType="hashmap" parameterType="java.lang.String" >
 		SELECT * from t_course_guest
-		<where>
-			<if test="course_id != null" >
-				course_id = #{course_id}
-			</if>
-		</where>
+		where course_id = #{course_id}
 	</select>
 
 
@@ -109,6 +105,15 @@
 		</set>
 		where user_id = #{user_id} and course_id = #{course_id}
 	</update>
+
+
+	<select id="findGuestCourses" resultType="hashmap" parameterType="hashmap" >
+		SELECT g.*,co.status as course_status,co.start_time,co.end_time,co.position from t_course_guest g,t_courses co
+		where g.course_id = co.course_id
+		and g.user_id = #{user_id}
+		and co.status = #{query_type}
+	</select>
+
 
 
 </mapper>

@@ -1385,6 +1385,17 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         //</editor-fold>
         jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+
+
+        List<Map<String, Object>> courseGuestByCourseId = lectureModuleServer.findCourseGuestByCourseId(course_id);
+        for(Map<String, Object> courseGuest : courseGuestByCourseId){
+            map.clear();
+            map.put(Constants.GUEST_ID, courseGuest.get("user_id"));
+            String predictionKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, map);//讲师
+            String finishKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_FINISH, map);//讲师
+            jedis.del(predictionKey);
+            jedis.del(finishKey);
+        }
         return resultMap;
     }
     /**
@@ -2790,12 +2801,66 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
         String phoneKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_PHONE, phoneMap);//根据userId 拿到 key
         String phone = jedis.get(phoneKey);//拿到电话
-        if(!appName.equals(Constants.HEADER_APP_NAME)){//不是qnlive
-            boolean key = DjSendMsg.checkVerificationCode(phone, code, verification_code,jedis);
-            if(!key){
-                throw new QNLiveException("130002");
-            }
+
+        //判断输入的手机号码是否已被绑定
+        Map<String,Object> parameter = new HashMap<>();
+        parameter.put("phone_number",phone);
+        parameter.put("old_user",0);
+        if(!CollectionUtils.isEmpty(lectureModuleServer.findByPhone(parameter))){
+            log.error("绑定手机号码>>>>手机号码已被绑定过");
+            throw new QNLiveException("120023");
         }
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("user_id", userId);
+        Map<String, String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, queryMap), readUserOperation, jedis);
+
+        queryMap.put("phone_number", phone);
+        queryMap.put("app_name", Constants.HEADER_APP_NAME);
+        queryMap.put("old_user", 1);
+        Map<String, Object> oldUser = lectureModuleServer.findByPhone(queryMap);
+
+
+        if (!MiscUtils.isEmpty(oldUser)) {//有老用户
+            Map<String, Object> newMap = new HashMap<String, Object>();
+            newMap.put("user_id", oldUser.get("user_id"));
+            newMap.put("update_time", new Date());
+            newMap.put("old_user", 0);
+            lectureModuleServer.updateUser(newMap);
+
+            Map<String, Object> newUserLogin = lectureModuleServer.findLoginInfoByUserId(userId);
+            if (!MiscUtils.isEmpty(newUserLogin)) {
+                lectureModuleServer.deleteUserAndLogin(userId);
+
+                Map oldUserMap = new HashMap();
+                //  oldUserMap.putAll(newUserLogin);
+                oldUserMap.put("user_id", oldUser.get("user_id"));
+                oldUserMap.put("update_time", new Date());
+                oldUserMap.put("union_id", newUserLogin.get("union_id"));
+                oldUserMap.put("web_openid", newUserLogin.get("web_openid"));
+                oldUserMap.put("app_openid", newUserLogin.get("app_openid"));
+                lectureModuleServer.updateLoginInfo(oldUserMap);
+                userId = oldUser.get("user_id").toString();
+
+            }
+            //删除旧用户token
+            Map<String, Object> cacheKey = new HashMap<>();
+            cacheKey.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+            String token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, cacheKey);
+            jedis.del(token);
+
+            cacheKey.put("user_id", oldUser.get("user_id"));
+            String userKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheKey);
+            jedis.del(userKey);
+            throw new QNLiveException("000003");
+            }
+
+
+//        if(!appName.equals(Constants.HEADER_APP_NAME)){//不是qnlive
+//            boolean key = DjSendMsg.checkVerificationCode(phone, code, verification_code,jedis);
+//            if(!key){
+//                throw new QNLiveException("130002");
+//            }
+//        }
 
         //判断当前用户是否有直播间
         Map<String, Object> roomMap = new HashMap<>();
@@ -3873,8 +3938,25 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         guestMap.put("guest_tag",guest_tag);
         guestMap.put("inviter_user",inviter_user);
         Map<String, Object> stringObjectMap = lectureModuleServer.courseGurest(guestMap);
-        String mGroupId = courseInfoMap.get("im_course_id");//获取课程imid
 
+        map.clear();
+        map.put("course_id", course_id);
+        String sys_course_guest =  MiscUtils.getKeyOfCachedData(Constants.SYS_COURSE_GUEST, map);
+        if(query_type.equals("1")){
+            jedis.zadd(sys_course_guest,System.currentTimeMillis(),course_id);
+        }else{
+            jedis.zrem(sys_course_guest,course_id);
+        }
+
+
+        map.clear();
+        map.put(Constants.GUEST_ID, guest_user_id);
+        String predictionKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, map);
+        String finishKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_FINISH, map);
+        jedis.del(predictionKey);
+        jedis.del(finishKey);
+
+        String mGroupId = courseInfoMap.get("im_course_id");//获取课程imid
         //发送成为嘉宾接口
         String sender = "system";
         Map<String,Object> infomation = new HashMap<>();
@@ -3893,8 +3975,201 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String content = JSON.toJSONString(messageMap);
         IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
 
+
+
+
+
         return stringObjectMap;
     }
 
+
+    /**
+     * 编辑学员成为嘉宾 或者取消嘉宾
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("guestCourses")
+    public Map<String, Object> guestCourses(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String appName = reqEntity.getAppName();
+        Jedis jedis = jedisUtils.getJedis(appName);
+        String guestUserId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//邀请人 通过token获取 先判断是否是讲师
+        Long currentTime = System.currentTimeMillis();
+        String courseId = null;
+        Integer pageCount = Integer.valueOf(reqMap.get("page_count").toString());
+        Integer status = 4;
+        if(!MiscUtils.isEmpty(reqMap.get("course_id"))){
+            courseId = reqMap.get("course_id").toString();
+            Map<String,Object> map = new HashMap<>();
+            map.put("course_id",courseId);
+            Map<String, String> courseInfoMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+            MiscUtils.courseTranferState(currentTime, courseInfoMap);//判断课程状态
+            status = Integer.valueOf(courseInfoMap.get("status"));
+        }
+
+
+        //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put(Constants.GUEST_ID, guestUserId);
+        String predictionKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, map);//讲师
+        String finishKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_FINISH, map);//讲师
+
+        Map<String,Object> queryMap = new HashMap<String,Object>();
+        queryMap.put("user_id",guestUserId);
+
+        if(!jedis.exists(predictionKey)){
+            queryMap.put("status",1);
+            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+            for(Map<String, Object> course:guestCourses ){
+                Long time = MiscUtils.convertObjectToLong(course.get("start_time"));
+                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+            }
+        }
+        if(!jedis.exists(finishKey)){
+            queryMap.put("status",2);
+            List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
+            for(Map<String, Object> course:guestCourses ){
+                Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
+                long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
+                jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+            }
+        }
+
+        int offset = 0;//偏移值
+        Set<String> courseIdSet;//查询的课程idset
+        List<String> courseIdList = new ArrayList<>();//课程id列表
+        List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
+        Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
+
+        if(status == 4){
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+            //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+            getCourseIdKey = predictionKey;//讲师
+            if(MiscUtils.isEmpty(courseId)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(currentTime,0L);
+                startIndex = "-inf";//设置起始位置 '(' 是要求大于这个参数
+                endIndex =courseScoreByRedis+"";//设置结束位置
+            }else{//传了courseid
+                Map<String,String> queryParam = new HashMap<String,String>();
+                queryParam.put("course_id", courseId);
+                RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex =MiscUtils.convertInfoToPostion(currentTime,0L)+"";//设置结束位置
+            }
+            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            //courseIdSet = jedis.zrevrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                courseIdList.add(course_id);
+            }
+
+            pageCount =  pageCount - courseIdSet.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
+                status = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+
+
+        /**
+         * 预告
+         */
+        if(status == 1 ){//如果预告或者是正在直播的课程
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+
+
+            getCourseIdKey = predictionKey;//讲师
+            if(MiscUtils.isEmpty(courseId)){
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(currentTime,0L);
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
+            }else{//传了courseid
+                Map<String,String> queryParam = new HashMap<String,String>();
+                queryParam.put("course_id", courseId);
+                RequestEntity requestParam = this.generateRequestEntity(null, null, null, queryParam);
+                Map<String, String> course = CacheUtils.readCourse(courseId, requestParam, readCourseOperation, jedis, true);//获取当前课程参数
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
+            }
+            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                courseIdList.add(course_id);
+            }
+
+            pageCount =  pageCount - courseIdSet.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                courseId = null;//把课程id设置为null  用来在下面的代码中进行判断
+                status = 2;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+
+
+        //=========================下面的缓存使用另外一种方式获取====================================
+        /**
+         * 结束
+         */
+        if(status == 2 ){//查询结束课程
+            boolean key = true;//作为开关 用于下面是否需要接着执行方法
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            String getCourseIdKey ;
+            getCourseIdKey = finishKey;//讲师
+            long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(courseId)){//如果课程ID没有 那么就从最近结束的课程找起
+                endIndex = -1;
+                startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                long endRank = jedis.zrank(getCourseIdKey, courseId);
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }else{
+                    key = false;//因为已经查到最后的课程没有必要往下查了
+                }
+            }
+            if(key){
+                courseIdSet = jedis.zrange(getCourseIdKey, startIndex, endIndex);
+                List<String> transfer = new ArrayList<>();
+                for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                    transfer.add(course_id);
+                }
+                Collections.reverse(transfer);
+                courseIdList.addAll(transfer);
+        }
+    }
+
+        if(courseIdList.size() > 0){
+            Map<String,String> queryParam = new HashMap<String,String>();
+            Map<String,Object> query = new HashMap<String,Object>();
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            for(String course_id : courseIdList){
+                queryParam.put("course_id", course_id);
+                Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
+                if(!MiscUtils.isEmpty(courseInfoMap)){
+                    MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    courseList.add(courseInfoMap);
+                }
+            }
+        }
+        //</editor-fold>
+        resultMap.put("course_list", courseList);
+        resultMap.put("course_list_size", courseList.size());
+        return resultMap;
+    }
 
 }

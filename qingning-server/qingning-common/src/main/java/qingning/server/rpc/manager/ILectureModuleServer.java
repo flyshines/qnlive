@@ -193,4 +193,18 @@ public interface ILectureModuleServer {
 
 	Map<String, Object> courseGurest(Map<String, Object> reqMap);
 
+	/**
+	 * 获取嘉宾加入过的列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> findGuestCourses(Map<String, Object> reqMap);
+
+	List<Map<String, Object>> findCourseGuestByCourseId(String course_id);
+
+	Map<String,Object> findByPhone(Map<String,Object> record);
+
+
+	void deleteUserAndLogin(String user_id);
+
 }
