@@ -127,6 +127,22 @@
 			</if>
 		</where>
 	</select>
+	
+	<!-- 根据条件获取课程嘉宾记录 -->
+	<select id="findGuestCourseByMap" parameterType="hashmap" resultType="hashmap">
+		select * from t_course_guest
+		<where>
+			<if test="user_id != null">
+				and user_id = #{user_id}
+			</if>
+			<if test="course_id != null">
+				and course_id = #{course_id}
+			</if>
+			<if test="status != null">
+				and status = #{status}
+			</if>
+		</where>
+	</select>
 
 
 

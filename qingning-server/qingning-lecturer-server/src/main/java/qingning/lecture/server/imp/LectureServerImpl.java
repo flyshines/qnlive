@@ -3881,7 +3881,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
          */
         long end = now + 30*60*1000;	//当前时间30分钟后的毫秒值
         long endScore = MiscUtils.convertInfoToPostion(end, 0L);
-        Map<String, String> nextStartCourseInfo = null;	//记录30分钟内开始直播且开始直播时间最早的课程详情
+        Map<String, String> nextStartCourseInfo = new HashMap<>();	//记录30分钟内开始直播且开始直播时间最早的课程详情
         if (!MiscUtils.isEmpty(lecturerCourseSet)) {
 	        for (Tuple lecturerCourse : lecturerCourseSet) {
 	        	long courseStartTimeL = (long) lecturerCourse.getScore();
@@ -3922,6 +3922,20 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         			readCourseOperation, jedis, true);
         	if (!MiscUtils.isEmpty(nextStartCourseInfo)) {
         		nextStartCourseInfo.put("user_type", userType);	//返回数据前登记用户类型
+        		if ("1".equals(userType)) {	//是嘉宾
+	        		/*
+	        		 * 获取登录用户在该门课程的嘉宾便签
+	        		 */
+	        		Map<String, Object> selectCourseGuestMap = new HashMap<>();
+	        		selectCourseGuestMap.put("course_id", nextCourseId);
+	        		selectCourseGuestMap.put("user_id", loginedUserId);
+	        		selectCourseGuestMap.put("status", 1);	//状态 1是嘉宾 0不是嘉宾
+	        		List<Map<String, Object>> courseGuest = lectureModuleServer.getCourseGuestByMap(selectCourseGuestMap);
+	        		if (!MiscUtils.isEmpty(courseGuest)) {
+	        			nextStartCourseInfo.put("guest_tag", courseGuest.get(0).get("guest_tag").toString());
+	        		}
+        		}
+        		
         		//返回30min内要直播的课程数据
         		resultMap.putAll(nextStartCourseInfo);
         		return resultMap;
@@ -3942,7 +3956,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         /*
          * 获取这2门课程最近直播的课程详情，返回该课程
          */
-        Map<String, String> livingCourseInfo = null;	//记录开始直播且开始直播时间最晚的课程详情
+        Map<String, String> livingCourseInfo = new HashMap<>();	//记录开始直播且开始直播时间最晚的课程详情
         if (!MiscUtils.isEmpty(lecturerCourseSet)) {
 	        for (Tuple lecturerCourse : lecturerCourseSet) {
 	        	long courseStartTimeL = (long) lecturerCourse.getScore();
@@ -3979,6 +3993,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         			readCourseOperation, jedis, true);
         	if (!MiscUtils.isEmpty(livingCourseInfo)) {
         		livingCourseInfo.put("user_type", userType);	//返回数据前登记用户类型
+        		if ("1".equals(userType)) {	//是嘉宾
+	        		/*
+	        		 * 获取登录用户在该门课程的嘉宾便签
+	        		 */
+	        		Map<String, Object> selectCourseGuestMap = new HashMap<>();
+	        		selectCourseGuestMap.put("course_id", livingCourseId);
+	        		selectCourseGuestMap.put("user_id", loginedUserId);
+	        		selectCourseGuestMap.put("status", 1);	//状态 1是嘉宾 0不是嘉宾
+	        		List<Map<String, Object>> courseGuest = lectureModuleServer.getCourseGuestByMap(selectCourseGuestMap);
+	        		if (!MiscUtils.isEmpty(courseGuest)) {
+	        			livingCourseInfo.put("guest_tag", courseGuest.get(0).get("guest_tag").toString());
+	        		}
+        		}
         		//返回30min内要直播的课程数据
         		resultMap.putAll(livingCourseInfo);
         		return resultMap;
