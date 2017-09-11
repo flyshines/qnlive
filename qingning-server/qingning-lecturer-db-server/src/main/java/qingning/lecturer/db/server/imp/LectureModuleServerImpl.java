@@ -844,4 +844,19 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		userMapper.deleteUserByUserId(user_id);
 		loginInfoMapper.delectLoginByUserId(user_id);
 	}
+	/**
+	 * 根据条件查询课程列表
+	 */
+	@Override
+	public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
+		return coursesMapper.findCourseByMap(reqMap);
+
+	}
+	/**
+	 * 根据条件获取嘉宾课程列表，并关联查询出课程详情
+	 */
+	@Override
+	public List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap) {
+		return courseGuestMapper.findGuestAndCourseInfoByMap(reqMap);
+	}
 }

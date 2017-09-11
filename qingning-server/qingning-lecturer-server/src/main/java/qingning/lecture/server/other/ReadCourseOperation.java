@@ -13,10 +13,10 @@ import java.util.Map;
  * 创建日期: 2016/12/4
  */
 public class ReadCourseOperation implements CommonReadOperation {
-    private ILectureModuleServer lectureModuleServer;
+    private ILectureModuleServer lecturerModuleServer;
 
-    public ReadCourseOperation(ILectureModuleServer lectureModuleServer) {
-        this.lectureModuleServer = lectureModuleServer;
+    public ReadCourseOperation(ILectureModuleServer lecturerModuleServer) {
+        this.lecturerModuleServer = lecturerModuleServer;
     }
 
 
@@ -26,11 +26,15 @@ public class ReadCourseOperation implements CommonReadOperation {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
         if (Constants.SYS_READ_LAST_COURSE.equals(functionName)) {
-            return lectureModuleServer.findLastestFinishCourse(reqMap);
+            return lecturerModuleServer.findLastestFinishCourse(reqMap);
         } else if (Constants.SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程
-            return lectureModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
+            return lecturerModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
+        } else if ("getCourseByMap".equals(functionName)) {	//根据条件获取直播课程详情
+        	return lecturerModuleServer.getCourseListByMap(reqMap);
+        } else if ("getGuestAndCourseInfoByMap".equals(functionName)) {	//根据条件获取嘉宾课程列表，并关联查询出课程详情
+        	return lecturerModuleServer.getGuestAndCourseInfoByMap(reqMap);
         } else {
-            return lectureModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+            return lecturerModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
         }
     }
 }

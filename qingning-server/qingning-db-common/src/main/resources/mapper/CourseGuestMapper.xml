@@ -108,10 +108,25 @@
 
 
 	<select id="findGuestCourses" resultType="hashmap" parameterType="hashmap" >
-		SELECT g.*,co.status as course_status,co.start_time,co.end_time,co.position from t_course_guest g,t_courses co
+		SELECT g.*,co.status as course_status,co.start_time,co.end_time,co.position 
+		from t_course_guest g,t_courses co
 		where g.course_id = co.course_id
 		and g.user_id = #{user_id}
 		and co.status = #{query_type}
+	</select>
+	
+	<!-- 根据条件获取嘉宾课程列表，并关联查询出课程详情 -->
+	<select id="findGuestAndCourseInfoByMap" resultType="hashmap" parameterType="hashmap">
+		select course.* from t_course_guest guest
+		join t_courses course on course.course_id = guest.course_id
+		<where>
+			<if test="user_id != null">
+				and guest.user_id = #{user_id}
+			</if>
+			<if test="status != null">
+				and guest.status = #{status}
+			</if>
+		</where>
 	</select>
 
 

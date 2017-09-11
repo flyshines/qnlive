@@ -601,7 +601,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
          * 从数据库查询讲师的所有直播课程列表（同时包括预告和已完成）
          */
         reqMap.put("lecturer_id", lecturerId);
-        reqMap.put("status", "1,2,4");	//用于sql的where `status` in (1：已发布 2:已结束 4直播中)
+        reqMap.put("status_in", "'1','2','4'");	//用于sql的where `status` in (1：已发布 2:已结束 4直播中)
         if(readedCount == 0 && lastUpdateTime == 0){
         	//前端请求第一页数据
         	reqMap.put("create_time", now);	//用于sql进行条件查询：create_time <= now

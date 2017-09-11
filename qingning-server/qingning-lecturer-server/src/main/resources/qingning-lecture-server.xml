@@ -876,28 +876,27 @@
 				</outputs>
 			</function>
 
+			<!-- 获取等待直播课程 -->
 			<function name="getSingleLecturerLiveCourse">
 				<auth>
-					<accessToken require="Y" />
-					<appName require="Y" />
+					<accessToken require="Y,000100" />
+					<appName require="Y,000100" />
 				</auth>
 				<inputs>
 				</inputs>
 				<outputs>
-					<param name="room_id" type="string" />
 					<param name="course_id" type="string"/>
-					<param name="course_type" type="string"/>
-					<param name="status" type="string"/>
-					<param name="course_url" type="string"/>
 					<param name="course_title" type="rstring"/>
+					<param name="course_type" type="string"/>
+					<param name="course_url" type="string"/>
+					<param name="guest_tag" type="string"/>
+					<param name="room_id" type="string" />
 					<param name="start_time" type="long"/>
-					<param name="student_num" type="long"/>
-					<param name="avatar_address" type="string"/>
-					<param name="update_time" type="long"/>
-					<param name="room_id" type="string"/>
-					<param name="share_url" type="string"/>
+					<param name="status" type="string"/>
 				</outputs>
 			</function>
+			
+			
 			<function name="editStudentOrGuest">
 				<auth>
 					<accessToken require="Y" />

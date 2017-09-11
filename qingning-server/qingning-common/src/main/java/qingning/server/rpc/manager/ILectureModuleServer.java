@@ -192,6 +192,13 @@ public interface ILectureModuleServer {
 	Map<String, Object> findSaasCourseByCourseId(String courseId);
 
 	Map<String, Object> courseGurest(Map<String, Object> reqMap);
+	/**
+	 * 根据条件查询课程列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap);
+	
 
 	/**
 	 * 获取嘉宾加入过的列表
@@ -206,5 +213,11 @@ public interface ILectureModuleServer {
 
 
 	void deleteUserAndLogin(String user_id);
+	/**
+	 * 根据条件获取嘉宾课程列表，并关联查询出课程详情
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap);
 
 }

@@ -960,8 +960,7 @@ public class LectureController extends AbstractController {
 
 
 	/**
-	 * 获取讲师待直播课程
-	 *
+	 * 获取等待直播课程
 	 * @param accessToken
 	 * @param appName
 	 * @param version

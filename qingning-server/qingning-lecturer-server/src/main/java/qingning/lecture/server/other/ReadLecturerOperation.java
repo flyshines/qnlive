@@ -24,7 +24,8 @@ public class ReadLecturerOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        if(Constants.LECTURER_ROOM_LOAD.equals(requestEntity.getFunctionName())){
+        String functionName = requestEntity.getFunctionName();
+        if(Constants.LECTURER_ROOM_LOAD.equals(functionName)){
         	return lectureModuleServer.findLiveRoomByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
         } else {
         	return lectureModuleServer.findLectureByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
