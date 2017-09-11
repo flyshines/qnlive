@@ -3979,7 +3979,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
     /**
-     * 嘉宾
+     * 嘉宾课程列表
      * @param reqEntity
      * @return
      * @throws Exception

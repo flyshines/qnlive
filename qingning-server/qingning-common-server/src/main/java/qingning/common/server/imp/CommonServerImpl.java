@@ -3347,9 +3347,9 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             if(MiscUtils.isEmpty(courseGuest)){
                 resultMap.put("user_type", "1");//用户类型  学生
             }else{
-                resultMap.put("user_type", "5");//用户类型  嘉宾
+                resultMap.put("user_type", "2");//用户类型  嘉宾
                 resultMap.put("guest_role",courseGuest.get("guest_role"));
-                resultMap.put("guest_tag",courseGuest.get("guest_tag"));
+                resultMap.put("user_tag",courseGuest.get("guest_tag"));
             }
 
             Map<String, Object> roomMap = new HashMap<>();
