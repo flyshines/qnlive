@@ -14,7 +14,7 @@
     SELECT count(*) FROM t_user t WHERE t.phone_number = #{phone_number}
   </select>
   <select id="findByPhone" resultType="hashmap" parameterType="hashmap" >
-    select * from t_user where phone_number = #{phone_number} and app_name = #{appName}
+    select * from t_user where phone_number = #{phone_number} and app_name = #{app_name}
     and old_user=#{old_user}
   </select>
   <update id="updateLiveRoomNumForUser" parameterType="hashmap" >
