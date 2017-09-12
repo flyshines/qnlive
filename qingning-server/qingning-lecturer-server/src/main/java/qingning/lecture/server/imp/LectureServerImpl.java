@@ -4140,7 +4140,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         queryMap.put("user_id",guestUserId);
 
         List<Map<String, Object>> guestCourses = lectureModuleServer.findGuestCourses(queryMap);
-        Map<String ,Map<String, Object>> guestCourseMap = new HashMap<>();
+        Map<String ,Map<String, Object>> guestCourseMap = new HashMap<>();//这个嘉宾的所有课程
         for(Map<String, Object> guest:guestCourses ){
             guestCourseMap.put(guest.get("course_id").toString(),guest);
         }
@@ -4287,7 +4287,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         if(courseIdList.size() > 0){
             Map<String,String> queryParam = new HashMap<String,String>();
             Map<String,Object> query = new HashMap<String,Object>();
-            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            query.put(Constants.GUEST_ID,guestUserId);
+            String guestRewardProfit = MiscUtils.getKeyOfCachedData(Constants. SYS_GUEST_COURSE_PROFIT, query);//用来查询当前用户加入了那些课程
+            Map<String, String> guestRewardProfitMap = jedis.hgetAll(guestRewardProfit);
+
             for(String course_id : courseIdList){
                 queryParam.put("course_id", course_id);
 
@@ -4301,6 +4304,11 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     courseInfoMap.put("guest_status",stringObjectMap.get("status").toString());
                     courseInfoMap.put("guest_role",stringObjectMap.get("guest_role").toString());
                     courseInfoMap.put("guest_tag",stringObjectMap.get("guest_tag").toString());
+                    if(MiscUtils.isEmpty(guestRewardProfitMap.get(course_id))){
+                        courseInfoMap.put("total_amount",0+"");
+                    }else{
+                        courseInfoMap.put("total_amount",guestRewardProfitMap.get(course_id));
+                    }
                     courseList.add(courseInfoMap);
                 }
             }

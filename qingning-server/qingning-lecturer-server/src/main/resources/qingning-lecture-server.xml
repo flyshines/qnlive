@@ -937,6 +937,8 @@
 						<param name="guest_status" type="string" />
 						<param name="guest_role" type="string" />
 						<param name="guest_tag" type="string" />
+
+						<param name="total_amount" type="double" />
 					</param>
 				</outputs>
 			</function>
