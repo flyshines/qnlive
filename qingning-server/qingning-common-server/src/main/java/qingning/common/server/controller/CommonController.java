@@ -68,7 +68,7 @@ public class CommonController extends AbstractController {
         }
 
         if(state.equals("old")){
-            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
+            RequestEntity requestEntity = this.createResponseEntity("CommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
             Map<String,String> map = new HashMap<>();
             map.put("code",code);
             map.put("state",state);
@@ -115,7 +115,7 @@ public class CommonController extends AbstractController {
 
         //新登路
         if(state.equals("new")){
-            RequestEntity requestEntity = this.createResponseEntity("UserCommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
+            RequestEntity requestEntity = this.createResponseEntity("CommonServer", "newWeixinCodeUserLogin", null, "",Constants.HEADER_APP_NAME);
             Map<String,String> map = new HashMap<>();
             map.put("code",code);
             map.put("user_id",userId);
