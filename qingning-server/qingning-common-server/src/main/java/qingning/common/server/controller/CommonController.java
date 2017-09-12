@@ -46,7 +46,7 @@ public class CommonController extends AbstractController {
      * @param response
      * @throws Exception
      */
-    @RequestMapping(value = "/weixin/weixinlogin", method = RequestMethod.GET)
+    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
     public void weChatLogin(
             @RequestParam(value="code",defaultValue = "") String code,
             @RequestParam(value="state",defaultValue = "") String state,
