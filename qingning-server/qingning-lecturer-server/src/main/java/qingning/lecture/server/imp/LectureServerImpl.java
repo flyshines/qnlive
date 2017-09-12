@@ -4154,7 +4154,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
                     jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
                 }
-
             }
         }
         if(!jedis.exists(finishKey)){
@@ -4283,6 +4282,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 courseIdList.addAll(transfer);
         }
     }
+
+
+
+
 
         if(courseIdList.size() > 0){
             Map<String,String> queryParam = new HashMap<String,String>();
