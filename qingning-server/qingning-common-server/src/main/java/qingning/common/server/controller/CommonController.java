@@ -50,8 +50,8 @@ public class CommonController extends AbstractController {
     public void weChatLogin(
             @RequestParam(value="code",defaultValue = "") String code,
             @RequestParam(value="state",defaultValue = "") String state,
-            @RequestParam(value="key",defaultValue = "") String paramKey,
-            @RequestParam(value="user_id",defaultValue = "") String userId,
+            @RequestParam(value="key",defaultValue = "KEY") String paramKey,
+            @RequestParam(value="user_id",defaultValue = "USER_ID") String userId,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
         //第一次进行跳
         if(MiscUtils.isEmpty(state)){
