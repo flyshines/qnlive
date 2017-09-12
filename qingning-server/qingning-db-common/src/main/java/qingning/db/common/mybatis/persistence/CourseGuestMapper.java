@@ -53,6 +53,12 @@ public interface CourseGuestMapper {
 	 * @return
 	 */
 	List<Map<String, Object>> findGuestAndCourseInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 根据条件获取课程嘉宾记录
+	 * @param selectCourseGuestMap
+	 * @return
+	 */
+	List<Map<String, Object>> findGuestCourseByMap(Map<String, Object> selectCourseGuestMap);
 
 
 }

@@ -219,5 +219,11 @@ public interface ILectureModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap);
+	/**
+	 * 根据条件获取课程嘉宾记录
+	 * @param selectCourseGuestMap
+	 * @return
+	 */
+	List<Map<String, Object>> getCourseGuestByMap(Map<String, Object> selectCourseGuestMap);
 
 }
