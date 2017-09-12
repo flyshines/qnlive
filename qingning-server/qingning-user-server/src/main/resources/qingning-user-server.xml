@@ -796,8 +796,8 @@
 						<param name="course_image" type="string" />
 						<param name="course_title" type="string" />
 						<param name="goods_type" type="string" />
-						<param name="end_time" type="long" />
 						<param name="start_time" type="long" />
+						<param name="status" type="string" />
 					</param>
 				</outputs>
 			</function>
@@ -815,10 +815,13 @@
 				</inputs>
 				<outputs>
 					<param name="series_info_list" type="list">
+						<param name="course_num" type="long" />
+						<param name="create_time" type="long" />
+						<param name="goods_type" type="string" fieldname="series_course_type" />
 						<param name="series_id" type="string" />
 						<param name="series_image" type="string" />
 						<param name="series_title" type="string" />
-						<param name="goods_type" type="string" fieldname="series_course_type" />
+						<param name="student_num" type="long" fieldname="series_student_num" />
 					</param>
 				</outputs>
 			</function>

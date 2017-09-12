@@ -1113,6 +1113,17 @@
 				<outputs>
 				</outputs>
 			</function>
+
+			<function name="newWeixinCodeUserLogin">
+				<auth>
+					<accessToken require="N" />
+					<appName require="N" />
+				</auth>
+				<inputs>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 		</default>
 
         <version num="1.0.0" class="">
