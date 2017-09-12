@@ -846,7 +846,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         try {
             Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            String appName = reqEntity.getAppName();
+            String appName = Constants.HEADER_APP_NAME;
+            if(reqEntity.getAppName()!=null){
+                appName = reqEntity.getAppName();
+            }
             Jedis jedis = jedisUtils.getJedis(appName);
             String subscribe = "0";
             resultMap.put("key", "0");//未绑定手机号码
