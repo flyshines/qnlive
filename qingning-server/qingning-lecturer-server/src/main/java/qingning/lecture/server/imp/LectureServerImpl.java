@@ -1720,13 +1720,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String room_id = (String)reqMap.get("room_id");
         String course_id = (String)reqMap.get("course_id");
         
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, room_id);
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String lecturerId = jedis.hget(liveRoomKey, "lecturer_id");
+        //查询直播间信息
+        Map<String,String> roomInfo = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedis,false);
+        if(roomInfo == null){
+            throw new QNLiveException("100002");
+        }
+        String lecturerId = roomInfo.get("lecturer_id");
         if (lecturerId == null || !lecturerId.equals(userId)) {
             throw new QNLiveException("100002");
         }
+
         Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedis,false);
         if(MiscUtils.isEmpty(courseInfoMap)){
             throw new QNLiveException("100013");
