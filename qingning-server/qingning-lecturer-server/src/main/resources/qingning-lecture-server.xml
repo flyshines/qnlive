@@ -893,6 +893,9 @@
 					<param name="room_id" type="string" />
 					<param name="start_time" type="long"/>
 					<param name="status" type="string"/>
+					
+					<param name="room_id" type="string"/>
+					<param name="student_num" type="long"/>
 				</outputs>
 			</function>
 			
