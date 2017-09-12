@@ -1309,7 +1309,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
         if (profit_type.equals("1")) {
             //打赏嘉宾ID
-            if(reqMap.get("guest_id")!=null&&!reqMap.get("guest_id").toString().equals(courseMap.get("lecturer_id").toLowerCase())){
+            if(reqMap.get("guest_id")!=null&&!reqMap.get("guest_id").toString().equals(courseMap.get("lecturer_id"))){
                 String guestId = reqMap.get("guest_id").toString();
                 insertMap.put("room_id",getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis));
                 insertMap.put("guest_id", guestId);
