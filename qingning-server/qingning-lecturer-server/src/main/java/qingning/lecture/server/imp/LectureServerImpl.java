@@ -1720,13 +1720,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         String room_id = (String)reqMap.get("room_id");
         String course_id = (String)reqMap.get("course_id");
         
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, room_id);
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
-        String lecturerId = jedis.hget(liveRoomKey, "lecturer_id");
+        //查询直播间信息
+        Map<String,String> roomInfo = CacheUtils.readLiveRoom(room_id,reqEntity,readLiveRoomOperation,jedis,false);
+        if(roomInfo == null){
+            throw new QNLiveException("100002");
+        }
+        String lecturerId = roomInfo.get("lecturer_id");
         if (lecturerId == null || !lecturerId.equals(userId)) {
             throw new QNLiveException("100002");
         }
+
         Map<String ,String> courseInfoMap = CacheUtils.readCourse(course_id,reqEntity,readCourseOperation, jedis,false);
         if(MiscUtils.isEmpty(courseInfoMap)){
             throw new QNLiveException("100013");
@@ -3892,7 +3895,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	        		if (MiscUtils.isEmpty(nextStartCourseInfo) ||
 	        				courseStartTimeL < Long.parseLong(nextStartCourseInfo.get("score"))) {
 	        			nextStartCourseInfo.put("course_id", lecturerCourse.getElement());
-	        			nextStartCourseInfo.put("score", String.valueOf(lecturerCourse.getScore()));
+	        			nextStartCourseInfo.put("score", String.valueOf(courseStartTimeL));
 	        			nextStartCourseInfo.put("user_type", "0");	//用户类型	0：讲师；1：嘉宾
 	        		}
 	        	}
@@ -3907,7 +3910,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	        		if (MiscUtils.isEmpty(nextStartCourseInfo) ||
 	        				courseStartTimeL < Long.parseLong(nextStartCourseInfo.get("score"))) {
 	        			nextStartCourseInfo.put("course_id", guestCourse.getElement());
-	        			nextStartCourseInfo.put("score", String.valueOf(guestCourse.getScore()));
+	        			nextStartCourseInfo.put("score", String.valueOf(courseStartTimeL));
 	        			nextStartCourseInfo.put("user_type", "1");	//用户类型	0：讲师；1：嘉宾
 	        		}
 	        	}
@@ -3966,7 +3969,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         		if (MiscUtils.isEmpty(livingCourseInfo) ||
         				courseStartTimeL > Long.parseLong(livingCourseInfo.get("score"))) {
         			livingCourseInfo.put("course_id", lecturerCourse.getElement());
-        			livingCourseInfo.put("score", String.valueOf(lecturerCourse.getScore()));
+        			livingCourseInfo.put("score", String.valueOf(courseStartTimeL));
         			livingCourseInfo.put("user_type", "0");	//用户类型	0：讲师；1：嘉宾
         		}
 	        }
@@ -3979,7 +3982,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         		if (MiscUtils.isEmpty(livingCourseInfo) ||
         				courseStartTimeL > Long.parseLong(livingCourseInfo.get("score"))) {
         			livingCourseInfo.put("course_id", guestCourse.getElement());
-        			livingCourseInfo.put("score", String.valueOf(guestCourse.getScore()));
+        			livingCourseInfo.put("score", String.valueOf(courseStartTimeL));
         			livingCourseInfo.put("user_type", "1");	//用户类型	0：讲师；1：嘉宾
         		}
 	    	}
@@ -4007,7 +4010,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 	        			livingCourseInfo.put("guest_tag", courseGuest.get(0).get("guest_tag").toString());
 	        		}
         		}
-        		//返回30min内要直播的课程数据
+        		//返回最近正在直播的课程数据
         		resultMap.putAll(livingCourseInfo);
         		return resultMap;
         	}
