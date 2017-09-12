@@ -6469,7 +6469,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             query.put("profit_type", "1");
             query.put("lecturer_id", guestId);
             sumInfo = commonModuleServer.findCoursesSumInfo(query);
-            query.put("guest_id",guestId);
+            query.put("user_id",guestId);
             String guestProfitKey = MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PROFIT, query);
             String guestProfit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit")) + "";
             //嘉宾-课程-->打赏收益
