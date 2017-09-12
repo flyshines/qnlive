@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 
 public class CommonServerImpl extends AbstractQNLiveServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(CommonServerImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(CommonServerImpl.class);
     private ICommonModuleServer commonModuleServer;
     private ReadDistributerOperation readDistributerOperation;
     private ReadUserOperation readUserOperation;
@@ -1315,12 +1315,15 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
         if (profit_type.equals("1")) {
             //打赏嘉宾ID
-            String guestId = null;
             if(reqMap.get("guest_id")!=null){
-                guestId = reqMap.get("guest_id").toString();
-                insertMap.put("room_id",getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis));
+                String guestId = reqMap.get("guest_id").toString();
+                String guestRoomId = getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis);
+                String roomId = courseMap.get("room_id");
+                if(guestRoomId!=null&&!guestRoomId.equals(roomId)){
+                    insertMap.put("room_id",guestRoomId);
+                    insertMap.put("guest_id", guestId);
+                }
             }
-            insertMap.put("guest_id", guestId);
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long) reqMap.get("reward_amount")).intValue();
             goodName = MiscUtils.getConfigByKey("weixin_pay_reward_course_good_name", appName) + "-" + MiscUtils.RecoveryEmoji(courseMap.get("course_title"));
