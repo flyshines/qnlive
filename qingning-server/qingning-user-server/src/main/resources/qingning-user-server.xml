@@ -796,8 +796,8 @@
 						<param name="course_image" type="string" />
 						<param name="course_title" type="string" />
 						<param name="goods_type" type="string" />
-						<param name="end_time" type="long" />
 						<param name="start_time" type="long" />
+						<param name="status" type="string" />
 					</param>
 				</outputs>
 			</function>
