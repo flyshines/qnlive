@@ -849,6 +849,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String appName = Constants.HEADER_APP_NAME;
             if(reqEntity.getAppName()!=null){
                 appName = reqEntity.getAppName();
+                reqMap.put("app_name",appName);
             }
             Jedis jedis = jedisUtils.getJedis(appName);
             String subscribe = "0";
