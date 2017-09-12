@@ -1315,14 +1315,10 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         //判断类型为 0:课程收益 1:打赏 2:系列课收益
         if (profit_type.equals("1")) {
             //打赏嘉宾ID
-            if(reqMap.get("guest_id")!=null){
+            if(reqMap.get("guest_id")!=null&&!reqMap.get("guest_id").toString().equals(courseMap.get("lecturer_id").toLowerCase())){
                 String guestId = reqMap.get("guest_id").toString();
-                String guestRoomId = getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis);
-                String roomId = courseMap.get("room_id");
-                if(guestRoomId!=null&&!guestRoomId.equals(roomId)){
-                    insertMap.put("room_id",guestRoomId);
-                    insertMap.put("guest_id", guestId);
-                }
+                insertMap.put("room_id",getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis));
+                insertMap.put("guest_id", guestId);
             }
             insertMap.put("amount", reqMap.get("reward_amount"));
             totalFee = ((Long) reqMap.get("reward_amount")).intValue();
