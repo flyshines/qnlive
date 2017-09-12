@@ -424,11 +424,11 @@ public final class Constants {
 
 	/*********************************嘉宾START**************************/
 	public static final String DEFAULT_GUEST_TAG ="嘉宾";
-	public static final String GUEST_ID ="guest_id";
+	public static final String GUEST_ID ="user_id";
 	public static final String SYS_COURSE_GUEST = "SYS:COURSE:{course_id}:GUEST";
-	public static final String SYS_GUEST_COURSE_PREDICTION = "SYS:GUEST:{guest_id}:COURSES:PREDICTION";//嘉宾的直播课 预告/正在直播
-	public static final String SYS_GUEST_COURSE_FINISH = "SYS:GUEST:{guest_id}:COURSES:FINISH";//嘉宾的直播课 已结束
-	public static final String SYS_GUEST_COURSE_PROFIT = "SYS:GUEST:REWARD_PROFIT:{guest_id}";//HashMap ，嘉宾在直播间产生的收益
+	public static final String SYS_GUEST_COURSE_PREDICTION = "SYS:GUEST:{user_id}:COURSES:PREDICTION";//嘉宾的直播课 预告/正在直播
+	public static final String SYS_GUEST_COURSE_FINISH = "SYS:GUEST:{user_id}:COURSES:FINISH";//嘉宾的直播课 已结束
+	public static final String SYS_GUEST_COURSE_PROFIT = "SYS:GUEST:REWARD_PROFIT:{user_id}";//HashMap ，嘉宾在直播间产生的收益
 
 	/*********************************嘉宾END**************************/
 

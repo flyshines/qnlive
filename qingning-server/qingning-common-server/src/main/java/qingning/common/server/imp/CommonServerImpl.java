@@ -1382,8 +1382,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid, platform, appName);
 
         //5.处理生成微信预付单接口
-        //if (payResultMap.get("return_code").equals("FAIL")) {
-        if (false) {
+        if (payResultMap.get("return_code").equals("FAIL")) {
+        //if (false) {
             //更新交易表
             Map<String, Object> failUpdateMap = new HashMap<>();
             failUpdateMap.put("status", "3");
@@ -1498,16 +1498,16 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         SortedMap<String, String> requestMapData = (SortedMap<String, String>) reqEntity.getParam();
         String outTradeNo = requestMapData.get("out_trade_no");
         String appid = requestMapData.get("appid");
-        //String appName = MiscUtils.getAppNameByAppid(appid);
-        String appName = "qnlive";
+        String appName = MiscUtils.getAppNameByAppid(appid);
+        //String appName = "qnlive";
         Jedis jedis = jedisUtils.getJedis(appName);
         Map<String, Object> billMap = commonModuleServer.findTradebillByOutTradeNo(outTradeNo);
         if (billMap != null && billMap.get("status").equals("2")) {
             logger.debug("====>　已经处理完成, 不需要继续。流水号是: " + outTradeNo);
             return TenPayConstant.SUCCESS;
         }
-        //if (TenPayUtils.isValidSign(requestMapData, appName)) {// MD5签名成功，处理课程打赏\购买课程等相关业务
-             if(true){
+        if (TenPayUtils.isValidSign(requestMapData, appName)) {// MD5签名成功，处理课程打赏\购买课程等相关业务
+             //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if ("SUCCESS".equals(requestMapData.get("return_code")) && "SUCCESS".equals(requestMapData.get("result_code"))) {
@@ -6469,7 +6469,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             query.put("profit_type", "1");
             query.put("lecturer_id", guestId);
             sumInfo = commonModuleServer.findCoursesSumInfo(query);
-            query.put("guest_id",guestId);
+            query.put("user_id",guestId);
             String guestProfitKey = MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PROFIT, query);
             String guestProfit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit")) + "";
             //嘉宾-课程-->打赏收益
