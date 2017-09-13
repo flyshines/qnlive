@@ -3926,6 +3926,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         			readCourseOperation, jedis, true);
         	if (!MiscUtils.isEmpty(nextStartCourseInfo)) {
         		nextStartCourseInfo.put("user_type", userType);	//返回数据前登记用户类型
+        		//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+        		MiscUtils.courseTranferState(now, nextStartCourseInfo);
         		if ("1".equals(userType)) {	//是嘉宾
 	        		/*
 	        		 * 获取登录用户在该门课程的嘉宾便签
@@ -4006,6 +4008,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         }
         
         if (!MiscUtils.isEmpty(livingCourseTmp)) {
+        	//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+    		MiscUtils.courseTranferState(now, livingCourseTmp);
     		if ("1".equals(livingCourseTmp.get("user_type"))) {	//是嘉宾
         		/*
         		 * 获取登录用户在该门课程的嘉宾便签
