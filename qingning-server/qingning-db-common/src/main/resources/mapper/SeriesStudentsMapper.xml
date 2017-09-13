@@ -206,13 +206,13 @@
   	JOIN t_series s ON ss.series_id = s.series_id
   	<where>
   		<if test="user_id != null">
-  			and user_id = #{user_id}
+  			and ss.user_id = #{user_id}
   		</if>
   		<if test="lecturer_id != null">
-  			and lecturer_id = #{lecturer_id}
+  			and ss.lecturer_id = #{lecturer_id}
   		</if>
   		<if test="series_id != null">
-  			and series_id = #{series_id}
+  			and ss.series_id = #{series_id}
   		</if>
   	</where>
   	

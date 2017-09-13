@@ -2992,7 +2992,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         	Map<String, String> seriesInfo = new HashMap<>();
 			for (String seriesId : seriesIdSet) {
 				readSeriesMap.put("series_id", seriesId);
-				seriesInfo = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readUserOperation, jedis, true);
+				seriesInfo = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
 				if (!MiscUtils.isEmpty(seriesInfo)) {
 					seriesInfoList.add(seriesInfo);
 				} else {
