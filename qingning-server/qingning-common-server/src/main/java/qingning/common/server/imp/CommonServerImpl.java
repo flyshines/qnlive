@@ -3348,6 +3348,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             }else{
                 resultMap.put("user_type", "2");//用户类型  嘉宾
                 resultMap.put("guest_role",courseGuest.get("guest_role"));
+                resultMap.put("guest_status",courseGuest.get("status"));
                 resultMap.put("user_tag",courseGuest.get("guest_tag"));
             }
 
