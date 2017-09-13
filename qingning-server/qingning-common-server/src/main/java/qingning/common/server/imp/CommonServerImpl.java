@@ -6182,6 +6182,8 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             courseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
         }
         String lecturerId = courseMap.get("lecturer_id");
+        //受益人ID
+        String profitUserId = billMap.get("guest_id")==null?lecturerId:billMap.get("guest_id").toString();
 
         if (MiscUtils.isEmpty(courseMap)) {
             throw new QNLiveException("100004");
@@ -6344,7 +6346,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
 
         //店铺今日统计
         query.clear();
-        query.put(Constants.CACHED_KEY_USER_FIELD, lecturerId);
+        query.put(Constants.CACHED_KEY_USER_FIELD, profitUserId);
         String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
         if (!jedis.exists(userCountKey)) {
             long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
