@@ -2868,6 +2868,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         int pageCount = ((Long)reqMap.get("page_count")).intValue();
         Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());
         String shopId = (String) reqMap.get("shop_id");
+        long now = System.currentTimeMillis();
         
         /*
          * 分页获取用户加入的单品课程id列表
@@ -2912,6 +2913,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 				readCourseMap.put("course_id", courseId);
 				courseInfo = CacheUtils.readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
 				if (!MiscUtils.isEmpty(courseInfo)) {
+					//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+		    		MiscUtils.courseTranferState(now, courseInfo);
 					courseInfo.put("goods_type", "0");	//0：直播；1：语音；2：视频；3：图文
 					courseInfo.put("course_image", courseInfo.get("course_url"));
 					courseInfoList.add(courseInfo);
@@ -2992,7 +2995,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         	Map<String, String> seriesInfo = new HashMap<>();
 			for (String seriesId : seriesIdSet) {
 				readSeriesMap.put("series_id", seriesId);
-				seriesInfo = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readUserOperation, jedis, true);
+				seriesInfo = CacheUtils.readSeries(seriesId, readSeriesReqEntity, readSeriesOperation, jedis, true);
 				if (!MiscUtils.isEmpty(seriesInfo)) {
 					seriesInfoList.add(seriesInfo);
 				} else {
