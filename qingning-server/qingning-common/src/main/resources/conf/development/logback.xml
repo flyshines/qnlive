@@ -155,7 +155,7 @@
         <appender-ref ref="qingning.server.error.log"/>
     </logger>
 
-    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="false">
+    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="true">
         <appender-ref ref="qingning.db.log"/>
     </logger>
     <logger name="java.sql" value="DEBUG">
