@@ -298,10 +298,10 @@ public class MessagePushServerImpl extends AbstractMsgService {
 
                         Jedis jedis = jedisUtils.getJedis(appName);
                         Set<String> guestIds = jedis.zrangeByScore(sys_course_guest,"-inf","+inf");
-                        for(String guestId : guestIds){
+                        for(String guest_user_id : guestIds){
                             JSONObject obj1 = new JSONObject();
                             obj1.put("body",String.format(MiscUtils.getConfigKey("jpush_course_start_per_short_notice"), MiscUtils.RecoveryEmoji(course_title),"5"));
-                            obj1.put("to",lecturer_id);
+                            obj1.put("to",guest_user_id);
                             obj1.put("msg_type","2");
                             Map<String,String> extrasMap1 = new HashMap<>();
                             extrasMap1.put("msg_type","2");

@@ -4082,9 +4082,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("course_id", course_id);
         String sys_course_guest =  MiscUtils.getKeyOfCachedData(Constants.SYS_COURSE_GUEST, map);
         if(query_type.equals("1")){
-            jedis.zadd(sys_course_guest,System.currentTimeMillis(),course_id);
+            jedis.zadd(sys_course_guest,System.currentTimeMillis(),guest_user_id);
         }else{
-            jedis.zrem(sys_course_guest,course_id);
+            jedis.zrem(sys_course_guest,guest_user_id);
         }
 
 
@@ -4113,6 +4113,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         messageMap.put("mid",infomation.get("message_id"));
         String content = JSON.toJSONString(messageMap);
         IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+
+
+
         return stringObjectMap;
     }
 
