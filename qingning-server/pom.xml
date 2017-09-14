@@ -117,14 +117,47 @@
     <dependency> 
       <groupId>ch.qos.logback</groupId> 
       <artifactId>logback-core</artifactId> 
-      <version>1.1.7</version> 
+      <version>1.2.2</version>
     </dependency> 
     <dependency> 
       <groupId>ch.qos.logback</groupId> 
       <artifactId>logback-classic</artifactId> 
-      <version>1.1.7</version>
+      <version>1.2.2</version>
     </dependency>
-    <!-- json -->
+      <!-- https://mvnrepository.com/artifact/org.logback-extensions/logback-ext-parent -->
+      <dependency>
+          <groupId>org.logback-extensions</groupId>
+          <artifactId>logback-ext-parent</artifactId>
+          <version>0.1.4</version>
+      </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>1.7.25</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+      <dependency>
+          <groupId>org.aspectj</groupId>
+          <artifactId>aspectjrt</artifactId>
+          <version>1.7.3</version>
+      </dependency>
+      <dependency>
+          <groupId>org.aspectj</groupId>
+          <artifactId>aspectjweaver</artifactId>
+          <version>1.7.3</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework/spring-aspects -->
+      <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-aspects</artifactId>
+          <version>${spring.version}</version>
+      </dependency>
+
+      <!-- json -->
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>

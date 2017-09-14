@@ -24,17 +24,13 @@
 	<dubbo:application name="qingning-user-server"/>
 	<dubbo:registry protocol="zookeeper" address="${zookeeper.address}" />
 	
-	 <!-- 
-	<dubbo:reference id="courseManagerServer" interface="gcw.server.rpc.manager.ICourseManagerServer" timeout="1200000"/>
-	<dubbo:reference id="billsManagerServer" interface="gcw.server.rpc.manager.IBillsManagerServer" timeout="1200000"/>
-	<dubbo:reference id="choreographerServer" interface="gcw.server.rpc.manager.IChoreographerServer" timeout="1200000"/>
-	<dubbo:reference id="userManagerServer" interface="gcw.server.rpc.manager.IUserManagerServer" timeout="1200000"/>
-	<dubbo:reference id="incomeManagerServer" interface="gcw.server.rpc.manager.IIncomeManagerServer" timeout="1200000"/>
-	<dubbo:reference id="distributorManagerServer" interface="gcw.server.rpc.manager.IDistributorManagerServer" timeout="1200000"/>
-	 -->
 
 	<dubbo:reference id="userModuleServer" interface="qingning.server.rpc.manager.IUserModuleServer" timeout="1200000"/>
-	 
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<bean class="qingning.server.advice.exception.ServiceExceptionAspect" />
+	<!--<bean class="qingning.server.advice.exception.WebExceptionAspect" />-->
+
+
 </beans>
 
 

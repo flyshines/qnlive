@@ -1,39 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false" scan="true" scanPeriod="1 seconds">
     <contextName>logback</contextName>
-    <property name="qingning.db.common.log.path" value="E:/logs/qingning.db.common.log" />
-    <property name="qingning.common.server.log.path" value="E:/logs/qingning.common.server.log" />
-    <property name="qingning.common.db.log.path" value="E:/logs/qingning.common.db.log" />
-    <property name="qingning.lecture.server.log.path" value="E:/logs/qingning.lecture.server.log" />
-    <property name="qingning.lecture.db.log.path" value="E:/logs/qingning.lecture.db.log" />
-    <!--<property name="qingning.saas.server.log.path" value="/usr/local/qingning-live/logs/qingning.saas.server.log" />
-    <property name="qingning.saas.db.log.path" value="/usr/local/qingning-live/logs/qingning.saas.db.log" />-->
-    <property name="qingning.saas.server.log.path" value="E:/logs/qingning.saas.server.log" />
-    <property name="qingning.saas.db.log.path" value="E:/logs/qingning.saas.db.log" />
+    <property name="qingning.common.server.log.path" value="E:/logs/qingning.server.common.log" />
+    <property name="qingning.lecture.server.log.path" value="E:/logs/qingning.server.lecture.log" />
+    <property name="qingning.saas.server.log.path" value="E:/logs/qingning.server.saas.log" />
 
-    <property name="qingning.user.server.log.path" value="E:/logs/qingning.user.server.log" />
-    <property name="qingning.user.db.log.path" value="E:/logs/qingning.user.db.log" />
+    <property name="qingning.user.server.log.path" value="E:/logs/qingning.server.user.log" />
     <property name="qingning.mq.log.path" value="E:/logs/qingning.mq.log" />
+    <property name="qingning.db.log.path" value="E:/logs/qingning.db.log" />
     <property name="qingning.log.path" value="E:/logs/qingning.log" />
-    <property name="sys.log.path" value="E:/logs/qingning.sys.log" />
-    
+    <property name="qingning.server.error.log.path" value="E:/logs/qingning.server.error.log" />
+
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-    	<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>DEBUG</level>
-		</filter>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    
-    <appender name="sys.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${sys.log.path}</file>
+
+    <appender name="qingning.db.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${qingning.db.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
+            <level>DEBUG</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${sys.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
+            <fileNamePattern>${qingning.db.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
@@ -43,7 +37,7 @@
     <appender name="qingning.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${qingning.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
+            <level>DEBUG</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${qingning.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
@@ -66,19 +60,7 @@
         </encoder>
     </appender>
 
-    <appender name="qingning.user.db.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.user.db.log.path}</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
-        </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.user.db.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
-        </encoder>
-    </appender>
-    
+
     <appender name="qingning.user.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${qingning.user.server.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -91,19 +73,7 @@
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
-        
-    <appender name="qingning.lecture.db.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.lecture.db.log.path}</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
-        </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.lecture.db.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
-        </encoder>
-    </appender>
+
 
     <appender name="qingning.lecture.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${qingning.lecture.server.log.path}</file>
@@ -130,31 +100,6 @@
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="qingning.saas.db.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.saas.db.log.path}</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
-        </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.saas.db.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="qingning.common.db.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.common.db.log.path}</file>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-              <level>DEBUG</level>
-        </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.common.db.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
-        </encoder>
-    </appender>
 
     <appender name="qingning.common.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${qingning.common.server.log.path}</file>
@@ -168,63 +113,64 @@
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
-
-    <appender name="qingning.db.common.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.db.common.log.path}</file>
+    <appender name="qingning.server.error.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${qingning.server.error.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
               <level>DEBUG</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.db.common.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
+            <fileNamePattern>${qingning.server.error.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="qingning.db.common" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.db.common.log" />
-    </logger>
-    
+
     <logger name="qingning.common.server" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.common.server.log" />
-    </logger>    
-    <logger name="qingning.common.db" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.common.db.log" />
+    	<appender-ref ref="console" />
     </logger>
-    
+
     <logger name="qingning.lecture.server" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.lecture.server.log" />
+    	<appender-ref ref="console" />
     </logger>
 
     <logger name="qingning.saas.server" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.saas.server.log" />
-    </logger>
-    <logger name="qingning.saas.db" level="DEBUG" additivity="false">
-        <appender-ref ref="qingning.saas.db.log" />
+    	<appender-ref ref="console" />
     </logger>
 
-    <logger name="qingning.lecture.db" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.lecture.db.log" />
-    </logger>
-    
     <logger name="qingning.user.server" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.user.server.log" />
+    	<appender-ref ref="console" />
     </logger>
-    <logger name="qingning.user.db" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.user.db.log" />
-    </logger>
-    
+
     <logger name="qingning.mq" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.mq.log" />
+    	<appender-ref ref="console" />
     </logger>
-  
+
     <logger name="qingning" level="DEBUG" additivity="false">
-    	<appender-ref ref="qingning.log" />
+    	<appender-ref ref="console" />
     </logger>
-    
+
+    <!--异常日志-->
+    <logger name="qingning.server.advice.exception" level="DEBUG" additivity="false">
+    	<appender-ref ref="console" />
+    </logger>
+    <!--数据库SQL日志-->
+    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="false">
+    	<appender-ref ref="console" />
+    </logger>
+    <logger name="java.sql" value="DEBUG" >
+        <appender-ref ref="console" />
+    </logger>
+    <logger name="org.mybatis" value="DEBUG" >
+        <appender-ref ref="console" />
+    </logger>
+    <logger name="o.s.jdbc" value="DEBUG" >
+        <appender-ref ref="console" />
+    </logger>
+
     <root level="debug">
-        <appender-ref ref="console" />       
+        <appender-ref ref="console" />
     </root>
 
 </configuration>

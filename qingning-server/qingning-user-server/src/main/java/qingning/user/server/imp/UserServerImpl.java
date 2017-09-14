@@ -544,7 +544,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> getCourseDetailInfo(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        String room_id = null;
+        String room_id;
         String series_id = null;
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id", userId);
@@ -598,6 +598,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         queryMap.put("course_id",reqMap.get("course_id").toString());
         resultMap.put("student_list", userModuleServer.findLatestStudentAvatarAddList(queryMap));
         //从缓存中获取直播间信息
+        reqMap.put("room_id",room_id);
         Map<String, String> liveRoomMap = CacheUtils.readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedis, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));

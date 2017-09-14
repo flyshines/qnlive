@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 public class UserController extends AbstractController{
