@@ -74,10 +74,15 @@
 
 	<bean id="PlatformCoursesServer" class="qingning.mq.server.imp.PlatformCoursesServerImpl"/>
 	<bean id="CacheSyncDatabaseServer" class="qingning.mq.server.imp.CacheSyncDatabaseServerImpl"/>
-	<bean id="MessagePushServer" class="qingning.mq.server.imp.MessagePushServerImpl">
-	</bean>
-	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl">
-	</bean>
+	<bean id="MessagePushServer" class="qingning.mq.server.imp.MessagePushServerImpl"></bean>
+
+
+	<bean id="LecturerCoursesServer" class="qingning.mq.server.imp.LecturerCoursesServerImpl"></bean>
+
+	<bean id="CreateCourseNoticeTaskServer" class="qingning.mq.server.imp.CreateCourseNoticeTaskServerImpl"></bean>
+
+	<bean id="ClassIfyCourseServer" class="qingning.mq.server.imp.ClassIfyCourseServerImpl"></bean>
+
 
 	<bean id="LogServer" class="qingning.mq.server.imp.LogServiceImpl"/>
 
