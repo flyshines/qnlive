@@ -68,7 +68,7 @@
     <where>
       cm.course_id = #{course_id}
       <if test="user_type == 0" >
-          and (cm.send_type = '0' or cm.send_type = '1' or cm.send_type = '4' or cm.send_type = '5' or cm.send_type = '6' or cm.send_type = '7')
+          and (cm.send_type = '0' or cm.send_type = '1' or cm.send_type = '4' or cm.send_type = '5' or cm.send_type = '6' or cm.send_type = '7' or cm.send_type = '9' or cm.send_type = '10' or cm.send_type = '11')
       </if>
       <if test="user_type == 1" >
         and  (cm.send_type = '2' or cm.send_type = '3' )
