@@ -124,12 +124,6 @@
       <artifactId>logback-classic</artifactId> 
       <version>1.2.2</version>
     </dependency>
-      <!-- https://mvnrepository.com/artifact/org.logback-extensions/logback-ext-parent -->
-      <dependency>
-          <groupId>org.logback-extensions</groupId>
-          <artifactId>logback-ext-parent</artifactId>
-          <version>0.1.4</version>
-      </dependency>
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>

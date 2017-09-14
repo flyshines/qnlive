@@ -148,7 +148,7 @@
     </logger>
 
     <logger name="qingning" level="DEBUG" additivity="false">
-        <appender-ref ref="console"/>
+        <appender-ref ref="qingning.log"/>
     </logger>
 
     <logger name="qingning.server.advice.exception" level="DEBUG" additivity="false">
