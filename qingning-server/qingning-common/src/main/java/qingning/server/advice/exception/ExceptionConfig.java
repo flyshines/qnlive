@@ -10,7 +10,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @Configuration
 @EnableAspectJAutoProxy
 @ComponentScan(value={
-        "qingning.user.server.imp",
+        "qingning.user.server",
         "qingning.saas.server",
         "qingning.lecture.server",
         "qingning.common.server",
