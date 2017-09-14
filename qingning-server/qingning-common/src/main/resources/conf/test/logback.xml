@@ -150,13 +150,15 @@
     <logger name="qingning" level="DEBUG" additivity="false">
         <appender-ref ref="qingning.log"/>
     </logger>
-
+    <!--异常日志-->
     <logger name="qingning.server.advice.exception" level="DEBUG" additivity="false">
         <appender-ref ref="qingning.server.error.log"/>
     </logger>
 
-    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="true">
+    <!--数据库SQL日志-->
+    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="false">
         <appender-ref ref="qingning.db.log"/>
+        <appender-ref ref="console" />
     </logger>
     <logger name="java.sql" value="DEBUG">
         <appender-ref ref="qingning.db.log"/>
