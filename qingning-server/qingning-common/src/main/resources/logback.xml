@@ -156,9 +156,8 @@
     	<appender-ref ref="console" />
     </logger>
     <!--数据库SQL日志-->
-    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="true">
-        <appender-ref ref="qingning.db.log"/>
-    	<!--<appender-ref ref="console" />-->
+    <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="false">
+    	<appender-ref ref="console" />
     </logger>
     <logger name="java.sql" value="DEBUG" >
         <appender-ref ref="console" />
