@@ -4149,8 +4149,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.GUEST_ID, guestUserId);
         String predictionKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, map);//讲师
         String finishKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_FINISH, map);//讲师
-//        jedis.del(predictionKey);
-//        jedis.del(finishKey);
+        jedis.del(predictionKey);
+        jedis.del(finishKey);
         Map<String,Object> queryMap = new HashMap<String,Object>();
         queryMap.put("user_id",guestUserId);
 
