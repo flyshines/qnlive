@@ -1095,19 +1095,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
         loginInfoMap.put("user_name", userMap.get("nick_name"));
         loginInfoMap.put("avatar_address", userMap.get("avatar_address"));
 
-        Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD, user_id);
-        String lectureLiveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, queryMap);
-        if (jedis.exists(lectureLiveRoomKey)) {
-            Map<String, String> roomKey = jedis.hgetAll(lectureLiveRoomKey);
-            String roomId = "";
-            if (roomKey != null && !roomKey.isEmpty()) {
-                for (String id : roomKey.keySet()) {
-                    roomId = id;
-                }
-            }
-            resultMap.put("room_id", roomId);
-        }
+        resultMap.put("room_id", getRoomIdFromCache(user_id,jedis));
         //</editor-fold>
         String shop_id = "";
         if (!MiscUtils.isEmpty(userMap.get("shop_id"))) {
