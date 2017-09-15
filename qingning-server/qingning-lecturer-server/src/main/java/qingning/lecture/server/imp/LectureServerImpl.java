@@ -4139,8 +4139,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 Map<String, String> lecturerCourseMap = new HashMap<>();
                 Map<String, String> guestCourseMap = new HashMap<>();
                 //讲师
-                if(!MiscUtils.isEmpty(previewCourseIdSet)){
-                    for(String course_id : previewCourseIdSet){
+                if(!MiscUtils.isEmpty(liveCourseIdSet)){
+                    for(String course_id : liveCourseIdSet){
                         courseId = course_id;
                     }
                     map.clear();
