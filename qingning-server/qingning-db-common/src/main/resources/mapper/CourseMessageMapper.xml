@@ -57,7 +57,7 @@
       </if>
       #{item.audio_time},#{item.message_pos},
       #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time},
-      #{item.audio_image},#{item.message_imid},#{item.message_status},
+      #{item.audio_image},#{item.message_imid},#{item.message_status}
      )
     </foreach>
   </insert>
