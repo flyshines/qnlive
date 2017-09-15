@@ -24,9 +24,9 @@
 
   <insert id="insertCourseMessageList" parameterType="list" >
     insert into t_course_message (message_id, course_id, message,
-    message_url, message_question, audio_time,
+    message_url, message_question,user_tag, audio_time,
     message_pos, message_type, send_type,
-    creator_id, create_time,audio_image,message_imid,message_status,user_tag
+    creator_id, create_time,audio_image,message_imid,message_status
     )
     values
     <foreach collection ="list" item="item" index= "index" separator =",">
@@ -49,9 +49,16 @@
       <if test="item.message_question == null" >
         null,
       </if>
+      <if test="item.user_tag != null" >
+        #{item.user_tag},
+      </if>
+      <if test="item.user_tag == null" >
+        null,
+      </if>
       #{item.audio_time},#{item.message_pos},
       #{item.message_type},#{item.send_type},#{item.creator_id},#{item.create_time},
-      #{item.audio_image},#{item.message_imid},#{item.message_status},#{item.user_tag})
+      #{item.audio_image},#{item.message_imid},#{item.message_status},
+     )
     </foreach>
   </insert>
 
