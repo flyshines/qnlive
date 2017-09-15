@@ -151,7 +151,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     updateMap.put("web_openid", openid);
                     updateMap.put("union_id", unionid);
                     commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-
                 }
             }
         }
@@ -181,6 +180,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     resultMap.putAll(loginInfoMapFromUnionid);
                     return resultMap;
                 }else{
+                    Map<String, Object> updateMap = new HashMap<>();
+                    updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+                    updateMap.put("web_openid", openid);
+                    updateMap.put("subscribe", subscribe);
+                    commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
                     processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap,Constants.HEADER_APP_NAME);
                     return resultMap;
                 }

@@ -54,6 +54,8 @@ public class CommonController extends AbstractController {
             @RequestParam(value="user_id",defaultValue = "USER_ID") String userId,
             HttpServletRequest request,HttpServletResponse response) throws Exception {
         //第一次进行跳
+
+
         if(MiscUtils.isEmpty(state)){
             String authorization_url = MiscUtils.getConfigByKey("base_authorization_url",Constants.HEADER_APP_NAME);//静默授权
             String appid = MiscUtils.getConfigByKey("old_appid",Constants.HEADER_APP_NAME);

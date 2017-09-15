@@ -236,9 +236,6 @@
       </if>
     </set>
     where user_id=#{user_id}
-    <if test="last_update_time != null" >
-       and update_time=#{last_update_time}
-    </if>  
   </update>
 
 
