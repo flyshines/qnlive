@@ -88,6 +88,8 @@ public final class Constants {
 	public static final String USER_ROLE_DEFAULT="listener,lecturer";
 	public static final String USER_DEFAULT_MD5="_qnlive";
 	public static final String SERIES_COURSE_TYPE = "series_course_type";
+	public static final String APP_REDIS_INDEX = "app_redis";//配置文件 app的redis 的分区index
+
 	/** COMMON 参数  end ***********************************************/
 	//</editor-fold>
 
@@ -184,6 +186,7 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
 	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
 	public static final String SYS_USER_BUY_LIST = "SYS:USER:BUY:{user_id}";	//用户已购课程ID set集合
+	public static final double USER_RATE = 0.7;
 	/** 用户相关 end **************************************/
 	//</editor-fold>
 
@@ -227,6 +230,7 @@ public final class Constants {
 	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";//直播间详情
 
 	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";//直播间分享shar code
+	public static final String CACHED_KEY_COURSE_ROBOT_FIELD = "course_id";
 
 	/** 直播间相关 end **************************************/
 	//</editor-fold>
@@ -236,6 +240,8 @@ public final class Constants {
 	/** 店铺 start **************************************/
 	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{shop_id}";	//店铺缓存
 	public static final String SHOP_DAY_COUNT = "SYS:SHOP:COUNT:{user_id}";	//店铺每日统计
+	public static final String USER_SHOP_COURSE_ZSET = "USER:{user_id}:SHOP:{shop_id}:COURSES";//用户在指定店铺加入的单品课程
+	public static final String USER_SHOP_SERIES_ZSET = "USER:{user_id}:SHOP:{shop_id}:SERIES";//用户在指定店铺加入的系列课程
 
 	/** 店铺 end **************************************/
 	//</editor-fold>
