@@ -1741,9 +1741,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         //判断课程与直播间的关系（讲师还是嘉宾）
         String courseLecturerId = courseInfoMap.get("lecturer_id");
         if(lecturerId.equals(courseLecturerId)){
-            result.put("user_identity","guest");
-        }else{
             result.put("user_identity","lecturer");
+        }else{
+            result.put("user_identity","guest");
         }
 
         //直播间ID，V1.4新增嘉宾查询直播间收益（打赏收益）
