@@ -1738,6 +1738,14 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         for(String key:courseInfoMap.keySet()){
             result.put(key, courseInfoMap.get(key));
         }
+        //判断课程与直播间的关系（讲师还是嘉宾）
+        String courseLecturerId = courseInfoMap.get("lecturer_id");
+        if(lecturerId.equals(courseLecturerId)){
+            result.put("user_identity","guest");
+        }else{
+            result.put("user_identity","lecturer");
+        }
+
         //直播间ID，V1.4新增嘉宾查询直播间收益（打赏收益）
         reqMap.put("lecturer_id",lecturerId);
         List<Map<String,Object>> list = lectureModuleServer.findCourseProfitList(reqMap);
