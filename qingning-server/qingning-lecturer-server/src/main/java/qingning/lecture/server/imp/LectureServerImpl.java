@@ -4098,7 +4098,19 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
             }
 
-            courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
+            if(startTime > 0 && guestCourseStartTime > 0){
+                courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
+            }else{
+                if(startTime > 0){
+                    courseMap = lecturerCourseMap;
+                }
+                if(guestCourseStartTime > 0){
+                    courseMap = guestCourseMap;
+                }
+            }
+
+
+
             if(!MiscUtils.isEmpty(courseMap)){
                 if( now > (  Long.valueOf(courseMap.get("start_time"))- min30)){//当前时间 小于 开始时间 减去30分钟  代表 30分钟后有课程开始
                     resultMap.putAll(courseMap);
@@ -4141,7 +4153,16 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
                 }
 
-                courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
+                if(startTime > 0 && guestCourseStartTime > 0){
+                    courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
+                }else{
+                    if(startTime > 0){
+                        courseMap = lecturerCourseMap;
+                    }
+                    if(guestCourseStartTime > 0){
+                        courseMap = guestCourseMap;
+                    }
+                }
             }
         }
         if(!MiscUtils.isEmpty(courseMap)){
