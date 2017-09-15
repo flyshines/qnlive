@@ -4170,7 +4170,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 }
 
                 if(startTime > 0 && guestCourseStartTime > 0){
-                    courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
+                    courseMap = startTime > guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
                 }else{
                     if(startTime > 0){
                         courseMap = lecturerCourseMap;
