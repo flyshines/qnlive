@@ -222,7 +222,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 
 	@Override
 	public Map<String, Object> updateCourse(Map<String, Object> reqMap) {
-		Integer updateCount = null;
+		Integer updateCount = 0;
 		Date now = (Date)reqMap.get("now");
 		Map<String,Object> course = new HashMap<String,Object>();
 		course.put("course_id", reqMap.get("course_id"));
@@ -255,6 +255,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		course.put("update_time", now);		
 		updateCount=coursesMapper.updateCourse(course);
 		
+
 		Map<String, Object> dbResultMap = new HashMap<String, Object>();
 		dbResultMap.put("update_count", updateCount);
 		dbResultMap.put("update_time", now);

@@ -143,7 +143,7 @@ public class CommonServerImpl extends AbstractQNLiveServer {
             String user_id = reqMap.get("user_id").toString();
             Map<String,String> userMap = CacheUtils.readUser(user_id,
                     this.generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
-            if(!MiscUtils.isEmpty(userMap)){
+            if(!MiscUtils.isEmpty(userMap.get("old_user"))){
                 if(userMap.get("old_user").equals("1")){
                     // 将open_id更新到login_info表中
                     Map<String, Object> updateMap = new HashMap<>();
@@ -151,7 +151,6 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     updateMap.put("web_openid", openid);
                     updateMap.put("union_id", unionid);
                     commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
-
                 }
             }
         }
@@ -181,6 +180,11 @@ public class CommonServerImpl extends AbstractQNLiveServer {
                     resultMap.putAll(loginInfoMapFromUnionid);
                     return resultMap;
                 }else{
+                    Map<String, Object> updateMap = new HashMap<>();
+                    updateMap.put("user_id", loginInfoMapFromUnionid.get("user_id").toString());
+                    updateMap.put("web_openid", openid);
+                    updateMap.put("subscribe", subscribe);
+                    commonModuleServer.updateUserWebOpenIdByUserId(updateMap);
                     processLoginSuccess(2, null, loginInfoMapFromUnionid, resultMap,Constants.HEADER_APP_NAME);
                     return resultMap;
                 }

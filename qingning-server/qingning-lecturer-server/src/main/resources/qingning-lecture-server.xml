@@ -285,6 +285,7 @@
 						<param name="message_type" type="string"/>
 						<param name="send_type" type="string"/>
 						<param name="message" type="rstring"/>
+						<param name="user_tag" type="rstring"/>
 						<param name="message_url" type="string"/>
 						<param name="audio_time" type="long"/>
 						<param name="create_time" type="long"/>

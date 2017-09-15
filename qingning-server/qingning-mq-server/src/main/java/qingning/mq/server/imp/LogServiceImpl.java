@@ -275,6 +275,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		Map<String,Object> query = new HashMap<String,Object>();
     		query.put("user_id", user_id);
     		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);
+    		log.debug("user_map "+info.toString());
 			jedis.hmset(key, info);
 
     	} catch (Exception e) {

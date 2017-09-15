@@ -339,12 +339,6 @@
   <update id="updateCourse" parameterType="hashmap" >
     update t_courses
     <set >
-      <if test="course_id != null" >
-        course_id=#{course_id},
-      </if>
-      <if test="room_id != null" >
-        room_id=#{room_id},
-      </if>
       <if test="im_course_id != null" >
         im_course_id=#{im_course_id},
       </if>
@@ -424,10 +418,7 @@
         classify_id = #{classify_id},
       </if>
     </set>
-    where course_id = #{course_id} and  `status` <![CDATA[ <> ]]> 5
-    <if test="last_update_time != null" >
-    	and update_time=#{last_update_time}
-    </if>
+    where course_id = #{course_id}
   </update>
   <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
     update t_courses

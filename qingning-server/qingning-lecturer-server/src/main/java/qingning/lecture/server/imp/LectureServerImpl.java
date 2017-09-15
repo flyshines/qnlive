@@ -4082,9 +4082,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put("course_id", course_id);
         String sys_course_guest =  MiscUtils.getKeyOfCachedData(Constants.SYS_COURSE_GUEST, map);
         if(query_type.equals("1")){
-            jedis.zadd(sys_course_guest,System.currentTimeMillis(),course_id);
+            jedis.zadd(sys_course_guest,System.currentTimeMillis(),guest_user_id);
         }else{
-            jedis.zrem(sys_course_guest,course_id);
+            jedis.zrem(sys_course_guest,guest_user_id);
         }
 
 
@@ -4113,6 +4113,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         messageMap.put("mid",infomation.get("message_id"));
         String content = JSON.toJSONString(messageMap);
         IMMsgUtil.sendMessageInIM(mGroupId, content, "", sender);
+
+
+
+
         return stringObjectMap;
     }
 
@@ -4149,7 +4153,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
         map.put(Constants.GUEST_ID, guestUserId);
         String predictionKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PREDICTION, map);//讲师
         String finishKey =  MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_FINISH, map);//讲师
-
+        jedis.del(predictionKey);
+        jedis.del(finishKey);
         Map<String,Object> queryMap = new HashMap<String,Object>();
         queryMap.put("user_id",guestUserId);
 
@@ -4177,7 +4182,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 if(course.get("course_status").toString().equals("2")){
                     Long time = MiscUtils.convertObjectToLong(course.get("end_time"));
                     long lpos = MiscUtils.convertInfoToPostion(time, MiscUtils.convertObjectToLong(course.get("position")));
-                    jedis.zadd(predictionKey,lpos,course.get("course_id").toString());
+                    jedis.zadd(finishKey,lpos,course.get("course_id").toString());
                 }
             }
         }
@@ -4220,7 +4225,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }
 
-
         /**
          * 预告
          */
@@ -4228,8 +4232,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             String startIndex ;//坐标起始位
             String endIndex ;//坐标结束位
             String getCourseIdKey;
-
-
             getCourseIdKey = predictionKey;//讲师
             if(MiscUtils.isEmpty(courseId)){
                 long courseScoreByRedis = MiscUtils.convertInfoToPostion(currentTime,0L);
@@ -4255,7 +4257,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 status = 2;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
             }
         }
-
 
         //=========================下面的缓存使用另外一种方式获取====================================
         /**
@@ -4296,11 +4297,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 courseIdList.addAll(transfer);
         }
     }
-
-
-
-
-
         if(courseIdList.size() > 0){
             Map<String,String> queryParam = new HashMap<String,String>();
             Map<String,Object> query = new HashMap<String,Object>();
@@ -4313,8 +4309,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
           //      lectureModuleServer.findGuestCourses()
                 Map<String, String> courseInfoMap = CacheUtils.readCourse(course_id, this.generateRequestEntity(null, null, null, queryParam), readCourseOperation, jedis, true);//从缓存中读取课程信息
-
-
                 if(!MiscUtils.isEmpty(courseInfoMap)){
                     MiscUtils.courseTranferState(currentTime, courseInfoMap);//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
                     Map<String, Object> stringObjectMap = guestCourseMap.get(course_id);
