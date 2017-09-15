@@ -4083,6 +4083,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.clear();
                 map.put("course_id",courseId);
                 lecturerCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                startTime  = Long.valueOf(lecturerCourseMap.get("start_time"));
             }
 
 
@@ -4094,9 +4095,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.clear();
                 map.put("course_id",courseId);
                 guestCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
             }
 
-            courseMap = Long.valueOf(lecturerCourseMap.get("start_time")) <  Long.valueOf(guestCourseMap.get("start_time"))  ? lecturerCourseMap : guestCourseMap;
+            courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
             if(!MiscUtils.isEmpty(courseMap)){
                 if( now > (  Long.valueOf(courseMap.get("start_time"))- min30)){//当前时间 小于 开始时间 减去30分钟  代表 30分钟后有课程开始
                     resultMap.putAll(courseMap);
@@ -4111,7 +4113,8 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             endIndex = "-inf";//
             Set<String> liveCourseIdSet = jedis.zrevrangeByScore(lecturerCourseAllKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
             Set<String> guestLiveCourseIdSet = jedis.zrevrangeByScore(guestCourseKey,startIndex,endIndex,0,1);//找出最靠近当前时间的正在直播课程
-
+            Long startTime = 0L;
+            Long guestCourseStartTime = 0L;
             if(!MiscUtils.isEmpty(liveCourseIdSet) || !MiscUtils.isEmpty(guestLiveCourseIdSet)) {
                 Map<String, String> lecturerCourseMap = new HashMap<>();
                 Map<String, String> guestCourseMap = new HashMap<>();
@@ -4123,6 +4126,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     map.clear();
                     map.put("course_id",courseId);
                     lecturerCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                    startTime  = Long.valueOf(lecturerCourseMap.get("start_time"));
                 }
 
 
@@ -4134,8 +4138,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     map.clear();
                     map.put("course_id",courseId);
                     guestCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                    guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
                 }
-                courseMap = Long.valueOf(lecturerCourseMap.get("start_time")) <  Long.valueOf(guestCourseMap.get("start_time"))  ? lecturerCourseMap : guestCourseMap;
+
+                courseMap = startTime < guestCourseStartTime  ? lecturerCourseMap : guestCourseMap;
             }
         }
         if(!MiscUtils.isEmpty(courseMap)){
