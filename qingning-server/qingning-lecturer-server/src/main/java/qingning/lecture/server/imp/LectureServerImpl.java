@@ -4182,10 +4182,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }
         if(!MiscUtils.isEmpty(courseMap)){
-            MiscUtils.courseTranferState(now, courseMap);
-            if(courseMap.get("status").toString().equals("4")){
-                if(!courseMap.get("course_updown").toString().equals("2") &&  !courseMap.get("series_course_updown").toString().equals("2")){
-                    resultMap.putAll(courseMap);
+            if(!courseMap.get("status").toString().equals("2")){
+                MiscUtils.courseTranferState(now, courseMap);
+                if(courseMap.get("status").toString().equals("4")){
+                    if(!courseMap.get("course_updown").toString().equals("2") &&  !courseMap.get("series_course_updown").toString().equals("2")){
+                        resultMap.putAll(courseMap);
+                    }
                 }
             }
         }
