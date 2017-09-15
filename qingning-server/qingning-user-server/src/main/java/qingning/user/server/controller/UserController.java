@@ -478,6 +478,44 @@ public class UserController extends AbstractController{
     }
 
 	/**
+	 * 获取提现记录-后台-财务
+	 * @param page_count
+	 * @param accessToken
+	 * @param version
+	 * @return
+	 * @throws Exception
+	 */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/sys/withdraw/finance/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getWithdrawListFinance(
+    		@RequestParam(value="page_count", defaultValue="20") String page_count,
+    		@RequestParam(value="page_num", defaultValue="1") String page_num,
+    		@RequestParam(value="user_name",defaultValue="") String user_name,
+    		@RequestParam(value="user_id",defaultValue="") String user_id,
+    		@RequestParam(value="status",defaultValue="") String status,
+    		@RequestHeader(value="access_token", defaultValue = "") String accessToken,
+    		@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+    		@RequestHeader(value="version",defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListFinance", accessToken, version, appName);
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("page_count", page_count);
+        paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name))
+			paramMap.put("user_name", user_name);
+		if(StringUtils.isNotEmpty(user_id))
+			paramMap.put("user_id", user_id);
+		if(StringUtils.isNotEmpty(status))
+        	paramMap.put("status", status);
+        requestEntity.setParam(paramMap);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+
+	/**
 	 * 获取提现记录-后台
 	 * @param page_count
 	 * @param accessToken
@@ -848,6 +886,115 @@ public class UserController extends AbstractController{
 		CSVUtils.exportFile(resp, file.getName(), file);
 	}
 	
+		/**
+	 * 导出提现记录-后台-运营
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/sys/withdraw/operate/export",method=RequestMethod.GET)
+	public void exportWithdrawOperateList(HttpServletResponse resp, HttpServletRequest req,
+							 @RequestParam(value="page_count", defaultValue="2000") String page_count,
+							 @RequestParam(value="page_num", defaultValue="1") String page_num,
+							  @RequestParam(value="user_name",defaultValue="") String user_name,
+							  @RequestParam(value="user_id",defaultValue="") String user_id,
+							  @RequestParam(value="status",defaultValue="") String status,
+							 @RequestParam(value="access_token", defaultValue = "") String accessToken,
+							 @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+							 @RequestHeader(value="version",defaultValue="") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListAll", accessToken, version, appName);
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("page_count", page_count);
+		paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name)) {
+			paramMap.put("user_name", user_name);
+		}
+		if(StringUtils.isNotEmpty(user_id)) {
+			paramMap.put("user_id", user_id);
+		}
+		if(StringUtils.isNotEmpty(status)) {
+			paramMap.put("status", status);
+		}
+		requestEntity.setParam(paramMap);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		List<Map<String, Object>> exportCourseList = new ArrayList<>();
+		Map<String,Object> res = (Map<String,Object>)responseEntity.getReturnData();
+		if(res.get("user_list") instanceof List){
+			exportCourseList = (List<Map<String, Object>>)res.get("user_list");
+		}
+
+		LinkedHashMap<String,String> headMap = new LinkedHashMap<>();
+		headMap.put("withdraw_cash_id", "提现记录ID");
+		headMap.put("user_name", "真实姓名");
+		headMap.put("nick_name", "用户昵称");
+		headMap.put("alipay_account_number", "支付宝账号");
+		headMap.put("filter_amount", "手续费");
+		headMap.put("initial_amount", "实际提现金额");
+		headMap.put("user_total_amount", "用户总金额");
+		headMap.put("balance", "提现后余额");
+		headMap.put("create_time", "创建时间");
+		headMap.put("status", "状态");
+		headMap.put("remark", "备注");
+		headMap.put("handle_time", "运营处理时间");
+		headMap.put("finance_time", "财务处理时间");
+
+		File file = CSVUtils.createCSVFile(exportCourseList, headMap, null, "提现记录（运营）");
+		CSVUtils.exportFile(resp, file.getName(), file);
+	}
+
+	/**
+	 * 导出提现记录-后台-财务
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value="/sys/withdraw/finance/export",method=RequestMethod.GET)
+	public void exportWithdrawFinanceList(HttpServletResponse resp, HttpServletRequest req,
+							 @RequestParam(value="page_count", defaultValue="2000") String page_count,
+							 @RequestParam(value="page_num", defaultValue="1") String page_num,
+						   @RequestParam(value="user_name",defaultValue="") String user_name,
+						   @RequestParam(value="user_id",defaultValue="") String user_id,
+						   @RequestParam(value="status",defaultValue="") String status,
+							 @RequestParam(value="access_token", defaultValue = "") String accessToken,
+							 @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+							 @RequestHeader(value="version",defaultValue="") String version) throws Exception{
+		RequestEntity requestEntity = this.createResponseEntity("UserServer", "getWithdrawListFinance", accessToken, version, appName);
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("page_count", page_count);
+		paramMap.put("page_num", page_num);
+		if(StringUtils.isNotEmpty(user_name)) {
+			paramMap.put("user_name", user_name);
+		}
+		if(StringUtils.isNotEmpty(user_id)) {
+			paramMap.put("user_id", user_id);
+		}
+		if(StringUtils.isNotEmpty(status)) {
+			paramMap.put("status", status);
+		}
+		requestEntity.setParam(paramMap);
+		ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+		List<Map<String, Object>> exportCourseList = new ArrayList<>();
+		Map<String,Object> res = (Map<String,Object>)responseEntity.getReturnData();
+		if(res.get("user_list") instanceof List){
+			exportCourseList = (List<Map<String, Object>>)res.get("user_list");
+		}
+
+		LinkedHashMap<String,String> headMap = new LinkedHashMap<>();
+		headMap.put("withdraw_cash_id", "提现记录ID");
+		headMap.put("user_name", "真实姓名");
+		headMap.put("nick_name", "用户昵称");
+		headMap.put("alipay_account_number", "支付宝账号");
+		headMap.put("filter_amount", "手续费");
+		headMap.put("initial_amount", "实际提现金额");
+		headMap.put("user_total_amount", "用户总金额");
+		headMap.put("balance", "提现后余额");
+		headMap.put("create_time", "创建时间");
+		headMap.put("status", "状态");
+		headMap.put("remark", "备注");
+		headMap.put("handle_time", "运营处理时间");
+		headMap.put("finance_time", "财务处理时间");
+
+		File file = CSVUtils.createCSVFile(exportCourseList, headMap, null, "提现记录（财务）");
+		CSVUtils.exportFile(resp, file.getName(), file);
+	}
+
+	
 	/***************************** V1.4.0 ********************************/
 	/**
 	 * 获取已购买的单品课程
@@ -880,7 +1027,6 @@ public class UserController extends AbstractController{
 	/**
 	 * 获取已购买的系列课程
 	 * @param shopId
-	 * @param lastCourseId
 	 * @param pageCount
 	 * @param accessToken
 	 * @param appName

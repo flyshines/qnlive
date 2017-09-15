@@ -13,6 +13,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserModuleServer;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,8 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Autowired(required = true)
     private SaaSCourseMapper saasCourseMapper;
+    @Autowired(required = true)
+    private AdminUserMapper adminUserMapper;
 
     @Override
     public Map<String, Object> userFollowRoom(Map<String, Object> reqMap) throws Exception {
@@ -407,7 +410,7 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertWithdrawCash(Map<String, Object> record, int balance) {
+    public int insertWithdrawCash(Map<String, Object> record, long balance) {
         int i = withdrawCashMapper.insertWithdrawCashByNewUser(record);
         if(i>0) {
             Map<String ,Object> withdraw = new HashMap<>();
@@ -432,29 +435,38 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateWithdraw(String withdrawId,String remark,String userId,String result,Long initial_amount) {
+    public int updateWithdraw(String withdrawId, String remark, String userId, String result, Long initial_amount, String adminId, String role, String adminName) {
         //更新提现记录
         Map<String,Object> paramMap = new HashMap<>();
-        if("1".equals(result)){
-            //同意提现
+        //通过
+        boolean pass = "1".equals(result);
+        //财务通过
+        boolean allPass = pass&&("3".equals(role)||"1".equals(role));
+        if(allPass){
+            //财务同意提现
             paramMap.put("state",1);
+            paramMap.put("finance_update_time",new Date());
+            paramMap.put("finance_admin_id",userId);
+            paramMap.put("finance_admin_name",adminName);
+        }else if(pass){
+            //运营同意提现---进行中
+            paramMap.put("state",0);
+            paramMap.put("update_time",new Date());
+            paramMap.put("handle_id",userId);
+            paramMap.put("handle_name",adminName);
         }else{
             //驳回提现
             paramMap.put("state",2);
             //返还用户余额
             Map<String ,Object> user = userGainsMapper.findUserGainsByUserId(userId);
             long balance = Integer.valueOf(user.get("balance").toString());
-            balance = balance + initial_amount;
             Map<String ,Object> reqMap = new HashMap<>();
             reqMap.put("user_id",userId);
-            reqMap.put("balance",balance);
+            reqMap.put("balance",new BigDecimal(balance).add(new BigDecimal(initial_amount)).longValue());
             userGainsMapper.updateUserGains(reqMap);
         }
         paramMap.put("withdraw_cash_id",withdrawId);
-        paramMap.put("update_time",new Date());
         paramMap.put("remark",remark);
-        
-        paramMap.put("handle_id",userId);
         int i = withdrawCashMapper.updateWithdrawCash(paramMap);
         return i;
     }
@@ -475,6 +487,18 @@ public class UserModuleServerImpl implements IUserModuleServer {
 
         }
         Map<String,Object> res = new HashMap<>();
+        if(param.get("is_sys")!=null&&"1".equals(param.get("is_sys").toString())){
+            //查询未处理的条数
+            int i = 0;
+            if(param.get("finance")!=null&&"1".equals(param.get("finance"))){
+                //财务未处理数
+                i = withdrawCashMapper.selectWithdrawCountFinance(param);
+            }else{
+                //运营未处理数
+                i = withdrawCashMapper.selectWithdrawCountOperate(param);
+            }
+            res.put("undo_count",i);
+        }
         res.put("user_list",result);
         res.put("total_count",result.getTotal());
         res.put("total_page",result.getPaginator().getTotalPages());
@@ -554,4 +578,9 @@ public class UserModuleServerImpl implements IUserModuleServer {
 	public List<Map<String, Object>> findSeriesStudentByMap(Map<String, Object> reqMap) {
 		return seriesStudentsMapper.selectSeriesStudentsByMap(reqMap);
 	}
+    @Override
+    public Map<String, Object> selectAdminUserById(String userId) {
+
+        return adminUserMapper.selectAdminUserById(userId);
+    }
 }

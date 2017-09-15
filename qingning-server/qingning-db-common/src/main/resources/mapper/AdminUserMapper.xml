@@ -8,6 +8,12 @@
 		where mobile = #{mobile} and app_name = #{app_name} and status = 1
 		limit 1
 	</select>
+	<!-- 根据ID查询后台登录帐号 -->
+	<select id="selectAdminUserById" parameterType="hashmap" resultType="hashmap">
+		select * from t_admin_user
+		where user_id = #{userId} and status = 1
+		limit 1
+	</select>
 	
 	<!-- 更新后台账户所有字段 -->
 	<update id="updateAdminUserByAllMap" parameterType="hashmap">

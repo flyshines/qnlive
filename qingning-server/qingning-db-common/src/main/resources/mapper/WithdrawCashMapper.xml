@@ -48,6 +48,9 @@
     <if test="web_openid != null" >
       web_openid,
     </if>
+    <if test="balance != null" >
+      balance,
+    </if>
     initial_amount,
     actual_amount,
     state,
@@ -66,6 +69,9 @@
     </if>
     <if test="web_openid != null" >
       #{web_openid},
+    </if>
+    <if test="balance != null" >
+      #{balance},
     </if>
       #{initial_amount},
       #{actual_amount},
@@ -93,6 +99,15 @@
       </if>
       <if test="handle_name != null" >
           handle_name = #{handle_name},
+      </if>
+      <if test="finance_update_time != null" >
+          finance_update_time = #{finance_update_time},
+      </if>
+      <if test="finance_admin_id != null" >
+          finance_admin_id = #{finance_admin_id},
+      </if>
+      <if test="finance_admin_name != null" >
+          finance_admin_name = #{finance_admin_name},
       </if>
     </set>
     where  withdraw_cash_id = #{withdraw_cash_id}
@@ -151,8 +166,10 @@
         t.remark,
       	t.handle_name,
         t.update_time as handle_time,
+        t.handle_id,
         w.user_total_amount,
-        w.balance
+        t.balance,
+        t.finance_update_time as finance_time
       FROM
           `t_withdraw_cash` t
       JOIN t_user_gains w ON w.user_id = t.user_id
@@ -166,13 +183,46 @@
 	      <if test="user_id != null" >
 	        AND t.user_id = #{user_id}
 	      </if>
-      ORDER BY t.state=0 desc, t.create_time DESC
+        <if test="finance != null">
+            and t.handle_id is not NULL
+        </if>
+        ORDER BY t.state=0 desc, t.create_time DESC
 	</select>
-	
+
+	<select id="selectWithdrawCountFinance" resultType="java.lang.Integer" parameterType="hashmap">
+      SELECT
+        count(*)
+      FROM
+          `t_withdraw_cash` t
+      WHERE app_name = #{app_name}
+        and t.handle_id is not NULL
+        and t.state = 0
+	</select>
+
+	<select id="selectWithdrawCountOperate" resultType="java.lang.Integer" parameterType="hashmap">
+      SELECT
+        count(*)
+      FROM
+          `t_withdraw_cash` t
+      WHERE app_name = #{app_name}
+        and t.handle_id is NULL
+        and t.state = 0
+	</select>
+
+	<select id="selectWithdrawCountUser" resultType="java.lang.Integer" parameterType="java.lang.String">
+      SELECT
+        count(*)
+      FROM
+          `t_withdraw_cash` t
+      WHERE
+        t.state = 0
+        AND t.user_id = #{userId}
+	</select>
+
   <!-- 查询-提现记录 -->
 	<select id="selectWithdrawSizeById" resultType="hashmap" parameterType="hashmap">
       SELECT
-          user_id,initial_amount,state
+          user_id,initial_amount,state,handle_id
       FROM
           `t_withdraw_cash` t
       WHERE
