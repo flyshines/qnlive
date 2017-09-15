@@ -867,4 +867,9 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public List<Map<String, Object>> getCourseGuestByMap(Map<String, Object> selectCourseGuestMap) {
 		return courseGuestMapper.findGuestCourseByMap(selectCourseGuestMap);
 	}
+
+	@Override
+	public Map<String, Object> findCourseGuestByUserAndCourse(Map<String, Object> reqMap) {
+		return courseGuestMapper.findCourseGuestByUserAndCourse(reqMap);
+	}
 }

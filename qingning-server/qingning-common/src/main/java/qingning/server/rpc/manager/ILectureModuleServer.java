@@ -226,4 +226,5 @@ public interface ILectureModuleServer {
 	 */
 	List<Map<String, Object>> getCourseGuestByMap(Map<String, Object> selectCourseGuestMap);
 
+	Map<String, Object> findCourseGuestByUserAndCourse(Map<String, Object> reqMap);
 }

@@ -4103,6 +4103,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 map.clear();
                 map.put("course_id",courseId);
                 guestCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                map.put("user_id",lecturer_id);
+                Map<String, Object> courseGuestByUserAndCourse = lectureModuleServer.findCourseGuestByUserAndCourse(map);
+                guestCourseMap.put("guest_tag",courseGuestByUserAndCourse.get("guest_tag").toString());
                 guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
             }
 
@@ -4121,8 +4124,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
             if(!MiscUtils.isEmpty(courseMap)){
                 if( now > (  Long.valueOf(courseMap.get("start_time"))- min30)){//当前时间 小于 开始时间 减去30分钟  代表 30分钟后有课程开始
-                    resultMap.putAll(courseMap);
-                    iskey = false;
+                    if(!courseMap.get("course_updown").toString().equals("2") &&  !courseMap.get("series_course_updown").toString().equals("2")){
+                        resultMap.putAll(courseMap);
+                        iskey = false;
+                    }
                 }
             }
         }
@@ -4158,6 +4163,9 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                     map.clear();
                     map.put("course_id",courseId);
                     guestCourseMap = CacheUtils.readCourse(courseId, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+                    map.put("user_id",lecturer_id);
+                    Map<String, Object> courseGuestByUserAndCourse = lectureModuleServer.findCourseGuestByUserAndCourse(map);
+                    guestCourseMap.put("guest_tag",courseGuestByUserAndCourse.get("guest_tag").toString());
                     guestCourseStartTime = Long.valueOf(guestCourseMap.get("start_time"));
                 }
 
@@ -4174,9 +4182,13 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }
         }
         if(!MiscUtils.isEmpty(courseMap)){
-            MiscUtils.courseTranferState(now, courseMap);
-            if(courseMap.get("status").toString().equals("4")){
-                resultMap.putAll(courseMap);
+            if(!courseMap.get("status").toString().equals("2")){
+                MiscUtils.courseTranferState(now, courseMap);
+                if(courseMap.get("status").toString().equals("4")){
+                    if(!courseMap.get("course_updown").toString().equals("2") &&  !courseMap.get("series_course_updown").toString().equals("2")){
+                        resultMap.putAll(courseMap);
+                    }
+                }
             }
         }
         return resultMap ;
