@@ -4125,8 +4125,10 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(!MiscUtils.isEmpty(courseMap)){
                 if( now > (  Long.valueOf(courseMap.get("start_time"))- min30)){//当前时间 小于 开始时间 减去30分钟  代表 30分钟后有课程开始
                     if(!courseMap.get("course_updown").toString().equals("2") &&  !courseMap.get("series_course_updown").toString().equals("2")){
-                        resultMap.putAll(courseMap);
-                        iskey = false;
+                        if(courseMap.get("status").toString().equals("1")){
+                            resultMap.putAll(courseMap);
+                            iskey = false;
+                        }
                     }
                 }
             }
