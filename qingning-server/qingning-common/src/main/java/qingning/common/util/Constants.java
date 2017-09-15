@@ -1,7 +1,5 @@
 package qingning.common.util;
 
-import java.awt.*;
-
 public final class Constants {
 	private Constants(){}
 

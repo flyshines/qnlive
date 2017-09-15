@@ -2186,7 +2186,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             balance = balance - initialAmount;
             userModuleServer.insertWithdrawCash(insertMap,balance);
         }catch(Exception e){
-            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+initialAmount);
+            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+initialAmount+e.getMessage());
             throw new QNLiveException("000099");
         }
 		return resultMap;
