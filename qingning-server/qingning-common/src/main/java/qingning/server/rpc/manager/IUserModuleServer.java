@@ -115,7 +115,7 @@ public interface IUserModuleServer {
 	 * @param balance
 	 * @return
 	 */
-	int insertWithdrawCash(Map<String, Object> record, int balance);
+	int insertWithdrawCash(Map<String, Object> record, long balance);
 	/**分页查询-用户提现记录
 	 * @param param
 	 * @return
@@ -135,7 +135,7 @@ public interface IUserModuleServer {
 	 * @param initial_amount
 	 * @return
 	 */
-	int updateWithdraw(String withdrawId,String remark,String userId,String result,Long initial_amount);
+	int updateWithdraw(String withdrawId, String remark, String userId, String result, Long initial_amount, String adminId, String role, String adminName);
 	/**分页查询-后台提现记录
 	 * @param param
 	 * @return
@@ -196,4 +196,10 @@ public interface IUserModuleServer {
 	 * @return
 	 */
 	List<Map<String, Object>> findSeriesStudentByMap(Map<String, Object> reqMap);
+
+	/**获取管理员用户信息
+	 * @param adminId
+	 * @return
+	 */
+	Map<String,Object> selectAdminUserById(String adminId);
 }

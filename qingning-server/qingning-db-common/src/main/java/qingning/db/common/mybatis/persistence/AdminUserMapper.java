@@ -16,4 +16,8 @@ public interface AdminUserMapper {
 	 */
 	int updateAdminUserByAllMap(Map<String, Object> adminUserMap);
 
+	/**查找管理员
+	 * @return
+	 */
+	Map<String,Object> selectAdminUserById(String userId);
 }

@@ -23,7 +23,7 @@
        default-lazy-init="false">
     <!-- 启用注解 -->
     <context:annotation-config/>
-    <context:component-scan base-package="qingning.user.db.server.imp,qingning.user.db.persistence.mybatis"/>
+    <context:component-scan base-package="qingning.user.db.server.imp"/>
     <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 
     <context:property-placeholder location="classpath:application.properties"/>
