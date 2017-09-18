@@ -3263,14 +3263,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             }else if(seriesInfoMap.get("series_course_type").equals("2")){
                 requestMap.put("course_type","1");
             }
-
+            long price = 0L;
+            String priceStr = seriesInfoMap.get("series_price");
+            if(priceStr!=null){
+                price = Long.valueOf(priceStr);
+            }
             requestMap.put("update_type","2");
             requestMap.put("update_status",seriesInfoMap.get("series_status"));
             requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
             requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
             requestMap.put("cycle",seriesInfoMap.get("update_plan"));
             requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
-            requestMap.put("course_price",seriesInfoMap.get("series_price"));
+            requestMap.put("course_price",price);
             requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
             requestMap.put("cycle",seriesInfoMap.get("update_plan"));
             requestMap.put("target_user",seriesInfoMap.get("target_user"));
