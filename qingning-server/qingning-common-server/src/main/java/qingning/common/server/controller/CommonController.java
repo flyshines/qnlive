@@ -1392,24 +1392,7 @@ public class CommonController extends AbstractController {
     }
 
 
-    /**
-     *  updateCourse
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/common/updateCourse", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity userGains(
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userGains", null, version,appName);
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-        return responseEntity;
-    }
-    
+
     
     /**
      * 后台_新增轮播
