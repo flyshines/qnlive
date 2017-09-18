@@ -3266,7 +3266,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             long price = 0L;
             String priceStr = seriesInfoMap.get("series_price");
             if(priceStr!=null){
-                price = Long.valueOf(priceStr);
+                price = new BigDecimal(Long.valueOf(priceStr)).multiply(new BigDecimal(100L)).longValue();
             }
             requestMap.put("update_type","2");
             requestMap.put("update_status",seriesInfoMap.get("series_status"));
