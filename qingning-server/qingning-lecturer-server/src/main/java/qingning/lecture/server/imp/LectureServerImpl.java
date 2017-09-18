@@ -1752,7 +1752,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             if(jedis.exists(guestProfitKey)){
                 String profit = jedis.hget(guestProfitKey,course_id);
                 if(StringUtils.isNotEmpty(profit)){
-                    guestProfit = Long.valueOf(guestProfit);
+                    guestProfit = Long.valueOf(profit);
                 }
             }
             result.put("extra_amount",guestProfit);
