@@ -1744,6 +1744,18 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             result.put("user_identity","lecturer");
         }else{
             result.put("user_identity","guest");
+            //嘉宾收益计算
+            Map<String,String> query = new HashMap<>();
+            query.put("user_id",lecturerId);
+            String guestProfitKey = MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PROFIT, query);
+            long guestProfit = 0;
+            if(jedis.exists(guestProfitKey)){
+                String profit = jedis.hget(guestProfitKey,course_id);
+                if(StringUtils.isNotEmpty(profit)){
+                    guestProfit = Long.valueOf(profit);
+                }
+            }
+            result.put("extra_amount",guestProfit);
         }
 
         //直播间ID，V1.4新增嘉宾查询直播间收益（打赏收益）
