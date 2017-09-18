@@ -4158,7 +4158,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
 
 
                 //嘉宾
-                if(!MiscUtils.isEmpty(guestPreviewCourseIdSet)){
+                if(!MiscUtils.isEmpty(guestLiveCourseIdSet)){
                     Object[] objects = guestLiveCourseIdSet.toArray();
                     courseId = objects[0].toString();
                     map.clear();
