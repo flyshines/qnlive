@@ -3234,6 +3234,12 @@ public class LectureServerImpl extends AbstractQNLiveServer {
     public Map<String, Object> updateSeries(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String appName = reqEntity.getAppName();
+        long price = 0L;
+        Object priceStr = reqMap.get("series_price");
+        if(priceStr!=null){
+            price = new BigDecimal(priceStr.toString()).multiply(new BigDecimal(100L)).longValue();
+        }
+        reqMap.put("series_price",price);
         String user_id =  AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String series_id = reqMap.get("series_id").toString();//分类id
         Jedis jedis = jedisUtils.getJedis(appName);
@@ -3262,11 +3268,6 @@ public class LectureServerImpl extends AbstractQNLiveServer {
                 requestMap.put("course_type","0");
             }else if(seriesInfoMap.get("series_course_type").equals("2")){
                 requestMap.put("course_type","1");
-            }
-            long price = 0L;
-            String priceStr = seriesInfoMap.get("series_price");
-            if(priceStr!=null){
-                price = new BigDecimal(Long.valueOf(priceStr)).multiply(new BigDecimal(100L)).longValue();
             }
             requestMap.put("update_type","2");
             requestMap.put("update_status",seriesInfoMap.get("series_status"));
