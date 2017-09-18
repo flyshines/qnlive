@@ -25,13 +25,13 @@ public class ExceptionHanderAdvice {
 			exception = (Exception)((InvocationTargetException)exception).getTargetException();
 		}
 		//-Ddebug=Y
-		//boolean debug = "Y".equalsIgnoreCase(System.getProperty("debug"));
+		boolean debug = "Y".equalsIgnoreCase(System.getProperty("debug"));
 		if(exception instanceof QNLiveException){
 			QNLiveException qnLiveException = (QNLiveException)exception;
 			responseEntity.setCode(qnLiveException.getCode());
 			String msg = message.getMessages(qnLiveException.getCode());
 			String field = qnLiveException.getField();
-			if(/*debug &&*/ !MiscUtils.isEmpty(field)) {
+			if(debug && !MiscUtils.isEmpty(field)) {
 				msg=msg+"("+field+")";
 			}
 			responseEntity.setMsg(msg);
@@ -39,9 +39,9 @@ public class ExceptionHanderAdvice {
 			log.error(exception.getMessage());
 			responseEntity.setCode("000099");
 			String msg = message.getMessages("000099");
-			//if(debug){
+			if(debug){
 				msg=msg+"("+exception.getMessage()+")";
-			//}
+			}
 			responseEntity.setMsg(msg);
 		}
 		return responseEntity;
