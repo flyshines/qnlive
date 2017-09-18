@@ -158,6 +158,7 @@
     <!--数据库SQL日志-->
     <logger name="qingning.db.common.mybatis" level="DEBUG" additivity="false">
         <appender-ref ref="qingning.db.log"/>
+        <appender-ref ref="console" />
     </logger>
     <logger name="java.sql" value="DEBUG">
         <appender-ref ref="qingning.db.log"/>
@@ -169,7 +170,7 @@
         <appender-ref ref="qingning.db.log"/>
     </logger>
 
-    <root level="debug">
+    <root level="ERROR">
         <appender-ref ref="console"/>
     </root>
 
