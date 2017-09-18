@@ -1746,7 +1746,7 @@ public class LectureServerImpl extends AbstractQNLiveServer {
             result.put("user_identity","guest");
             //嘉宾收益计算
             Map<String,String> query = new HashMap<>();
-            query.put("user_id",courseLecturerId);
+            query.put("user_id",lecturerId);
             String guestProfitKey = MiscUtils.getKeyOfCachedData(Constants.SYS_GUEST_COURSE_PROFIT, query);
             long guestProfit = 0;
             if(jedis.exists(guestProfitKey)){
