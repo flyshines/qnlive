@@ -85,16 +85,16 @@ public class WeiXinUtil {
      * @param appsecret 密匙
      * @return
      */
-    public static AccessToken getAccessToken(String appid, String appsecret,Jedis jedis,String appName) {
+    public static AccessToken getAccessToken(String appid, String appsecret,Jedis jedis) {
         AccessToken accessToken = null;
         String token = jedis.get(Constants.CACHED_KEY_WEIXIN_TOKEN);
         if(MiscUtils.isEmpty(appid) || MiscUtils.isEmpty(appsecret)){
-        	appid=MiscUtils.getConfigByKey(Constants.APPID,appName);
-        	appsecret=MiscUtils.getConfigByKey(Constants.APPSECRET,appName);
+        	appid=MiscUtils.getConfigByKey(Constants.APPID);
+        	appsecret=MiscUtils.getConfigByKey(Constants.APPSECRET);
         }
         
         if(token == null){
-            String requestUrl = MiscUtils.getConfigByKey(Constants.ACCESS_TOKEN_URL,appName).replace("APPID", appid).replace("APPSECRET", appsecret);
+            String requestUrl = MiscUtils.getConfigByKey(Constants.ACCESS_TOKEN_URL).replace("APPID", appid).replace("APPSECRET", appsecret);
             String requestResult = HttpTookit.doGet(requestUrl);
             JSONObject jsonObject = JSON.parseObject(requestResult);
             // 如果请求成功
@@ -124,10 +124,10 @@ public class WeiXinUtil {
      * 获取第三方平台component_access_token
      * @return
      */
-    public static JSONObject getComponentAccessToken(String ticket,String appName) {
-        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String componentAppSecret =MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPSECRET,appName) ;
-        String requestUrl =MiscUtils.getConfigByKey(Constants.COMPONENT_ACCESS_TOKEN_URL,appName) ;
+    public static JSONObject getComponentAccessToken(String ticket) {
+        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String componentAppSecret =MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPSECRET) ;
+        String requestUrl =MiscUtils.getConfigByKey(Constants.COMPONENT_ACCESS_TOKEN_URL) ;
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
@@ -142,9 +142,9 @@ public class WeiXinUtil {
      * 获取第三方平台预授权码pre_auth_code
      * @return
      */
-    public static JSONObject getPreAuthCode(String accessToken,String appName) {
-        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String requestUrl = MiscUtils.getConfigByKey(Constants.PRE_AUTH_CODE_URL,appName) .replace("COMPONENT_ACCESS_TOKEN", accessToken);
+    public static JSONObject getPreAuthCode(String accessToken) {
+        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String requestUrl = MiscUtils.getConfigByKey(Constants.PRE_AUTH_CODE_URL) .replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
@@ -157,9 +157,9 @@ public class WeiXinUtil {
      * 获取第三方平台授权重定向到微信url
      * @return
      */
-    public static String getServiceAuthUrl(String preAuthCode,String appName) {
-        String componentAppid =  MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String requestUrl =  MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_URL,appName).replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", MiscUtils.getConfigByKey("weixin_service_redirect_url",appName));
+    public static String getServiceAuthUrl(String preAuthCode) {
+        String componentAppid =  MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String requestUrl =  MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_URL).replace("COMPONENT_APPID", componentAppid).replace("AUTH_CODE", preAuthCode).replace("REDIRECT_URI", MiscUtils.getConfigByKey("weixin_service_redirect_url"));
         log.debug("------微信--服务号重定向URL--  "+requestUrl);
         return requestUrl;
     }
@@ -168,7 +168,7 @@ public class WeiXinUtil {
      * @return
      */
     public static String getWechatRqcodeLoginUrl() {
-        String requestUrl = MiscUtils.getConfigByKey("weixin_login_rqcode_url",Constants.HEADER_APP_NAME);
+        String requestUrl = MiscUtils.getConfigByKey("weixin_login_rqcode_url");
         log.debug("------微信--二维码跳转URL--  "+requestUrl);
         return requestUrl;
     }
@@ -176,9 +176,9 @@ public class WeiXinUtil {
      * 获取第三方平台授权信息
      * @return
      */
-    public static JSONObject getServiceAuthInfo(String accessToken, String authCode,String appName) {
-        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String requestUrl =  MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_INFO_URL,appName) .replace("COMPONENT_ACCESS_TOKEN", accessToken);
+    public static JSONObject getServiceAuthInfo(String accessToken, String authCode) {
+        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String requestUrl =  MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_INFO_URL) .replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
@@ -196,9 +196,9 @@ public class WeiXinUtil {
      * @param authorizerAppid
      * @return
      */
-    public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid,String appName) {
-        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_REFRESH_INFO_URL,appName).replace("COMPONENT_ACCESS_TOKEN", accessToken);
+    public static JSONObject refreshServiceAuthInfo(String accessToken, String refreshToken, String authorizerAppid) {
+        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_REFRESH_INFO_URL).replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
@@ -213,9 +213,9 @@ public class WeiXinUtil {
      * 获取第三方平台账号信息
      * @return
      */
-    public static JSONObject getServiceAuthAccountInfo(String accessToken, String authorizerAppid,String appName) {
-        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID,appName);
-        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_ACCOUNT_INFO_URL,appName).replace("COMPONENT_ACCESS_TOKEN", accessToken);
+    public static JSONObject getServiceAuthAccountInfo(String accessToken, String authorizerAppid) {
+        String componentAppid = MiscUtils.getConfigByKey(Constants.SERVICE_NO_APPID);
+        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_AUTH_ACCOUNT_INFO_URL).replace("COMPONENT_ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("component_appid", componentAppid);
@@ -226,13 +226,13 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
-    public static JSONObject createServiceTemplateInfo(String accessToken, String type,String appName) {
-        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_TEMPLATE_INFO_URL,appName).replace("ACCESS_TOKEN", accessToken);
+    public static JSONObject createServiceTemplateInfo(String accessToken, String type) {
+        String requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_TEMPLATE_INFO_URL).replace("ACCESS_TOKEN", accessToken);
 
         Map<String, String> param = new HashMap<>();
         String template_id_short = null;
         if (type.equals("1")) {
-            template_id_short = MiscUtils.getConfigByKey("wpush_start_course_template_id",appName);
+            template_id_short = MiscUtils.getConfigByKey("wpush_start_course_template_id");
         } else if (type.equals("2")) {
             template_id_short = null;
         }
@@ -248,12 +248,12 @@ public class WeiXinUtil {
      * @param nextOpenId 粉丝的
      * @return
      */
-    public static JSONObject getServiceFansList(String accessToken, String nextOpenId,String appName) {
+    public static JSONObject getServiceFansList(String accessToken, String nextOpenId) {
         String requestUrl = null;
         if (nextOpenId == null) {
-            requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_FANS_URL1,appName).replace("ACCESS_TOKEN", accessToken);
+            requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_FANS_URL1).replace("ACCESS_TOKEN", accessToken);
         } else {
-            requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_FANS_URL2,appName).replace("ACCESS_TOKEN", accessToken).replace("NEXT_OPENID", nextOpenId);
+            requestUrl = MiscUtils.getConfigByKey(Constants.SERVICE_FANS_URL2).replace("ACCESS_TOKEN", accessToken).replace("NEXT_OPENID", nextOpenId);
         }
 
         String requestResult = HttpTookit.doGet(requestUrl);
@@ -269,8 +269,8 @@ public class WeiXinUtil {
      * @param templateId 模板消息id
      * @param templateMap 模板数据
      */
-    public static int sendTemplateMessageToServiceNoFan(String accessToken, String openId, String url, String templateId, Map<String, TemplateData> templateMap,String appName) {
-        String accessUrl = MiscUtils.getConfigByKey(Constants.WEIXIN_TEMPLATE_PUSH_URL,appName).replace("ACCESS_TOKEN", accessToken);
+    public static int sendTemplateMessageToServiceNoFan(String accessToken, String openId, String url, String templateId, Map<String, TemplateData> templateMap) {
+        String accessUrl = MiscUtils.getConfigByKey(Constants.WEIXIN_TEMPLATE_PUSH_URL).replace("ACCESS_TOKEN", accessToken);
         WxTemplate temp = new WxTemplate();
         temp.setUrl(url);
         temp.setTouser(openId);
@@ -299,8 +299,8 @@ public class WeiXinUtil {
      * 获取PC端登录的账号信息
      * @return
      */
-    public static JSONObject getPCUserAccountInfo(String code,String appName) {
-        String requestUrl = MiscUtils.getConfigByKey(Constants.PC_AUTH_ACCOUNT_INFO_URL,appName).replace("APPID", MiscUtils.getConfigByKey(Constants.PC_NO_APPID,appName) ).replace("SECRET", MiscUtils.getConfigByKey(Constants.PC_NO_APPSECRET,appName) ).replace("CODE", code).replace("GRANTTYPE", "authorization_code");
+    public static JSONObject getPCUserAccountInfo(String code) {
+        String requestUrl = MiscUtils.getConfigByKey(Constants.PC_AUTH_ACCOUNT_INFO_URL).replace("APPID", MiscUtils.getConfigByKey(Constants.PC_NO_APPID) ).replace("SECRET", MiscUtils.getConfigByKey(Constants.PC_NO_APPSECRET) ).replace("CODE", code).replace("GRANTTYPE", "authorization_code");
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         return jsonObject;
@@ -309,11 +309,11 @@ public class WeiXinUtil {
     /**
      * 微信登录用code 拉去用户信息
      * @param code
-     * @param appName
+     * @param
      * @return
      */
-    public static JSONObject getUserInfoByCode(String code,String appName) {
-        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL,appName).replace("APPID", MiscUtils.getConfigByKey(Constants.APPID,appName)).replace("APPSECRET",MiscUtils.getConfigByKey(Constants.APPSECRET,appName)).replace("CODE",code);
+    public static JSONObject getUserInfoByCode(String code) {
+        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL).replace("APPID", MiscUtils.getConfigByKey(Constants.APPID)).replace("APPSECRET",MiscUtils.getConfigByKey(Constants.APPSECRET)).replace("CODE",code);
         log.debug("------微信--通过H5传递code获得access_token-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
@@ -321,8 +321,8 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
-    public static JSONObject getUserInfoByCode(String code,String appid,String appsecret,String appName) {
-        String requestUrl =  MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL,appName).replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
+    public static JSONObject getUserInfoByCode(String code,String appid,String appsecret) {
+        String requestUrl =  MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_CODE_URL).replace("APPID", appid).replace("APPSECRET", appsecret).replace("CODE", code);
         log.debug("------微信--通过H5传递code获得access_token-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
@@ -337,9 +337,9 @@ public class WeiXinUtil {
      * @param openId 微信用户的openId
      * @return
      */
-    public static JSONObject getUserByOpenid(String accessToken,String openId,String appName){
+    public static JSONObject getUserByOpenid(String accessToken,String openId){
         log.debug("------微信--获得多媒体URL-请求URL ====================获取当前用户是否关注直播间 ");
-        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_BY_OPENID,appName).replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId);
+        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_BY_OPENID).replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
         log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
@@ -348,9 +348,9 @@ public class WeiXinUtil {
         return jsonObject;
     }
 
-    public static String getMediaURL(String server_id, Jedis jedis,String appName) {
-        String accessToken = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID,appName), MiscUtils.getConfigByKey(Constants.APPSECRET,appName), jedis,appName).getToken();
-        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_MEDIA_URL,appName).replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", server_id);
+    public static String getMediaURL(String server_id, Jedis jedis) {
+        String accessToken = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID), MiscUtils.getConfigByKey(Constants.APPSECRET), jedis).getToken();
+        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_MEDIA_URL).replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", server_id);
         log.debug("------微信--获得多媒体URL-请求URL  "+requestUrl);
         return requestUrl;
     }
@@ -361,8 +361,8 @@ public class WeiXinUtil {
      * @param accessToken
      * @return
      */
-    public static JSONObject getUserInfoByAccessToken(String accessToken, String unionId,String appName) {
-        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_ACCESS_TOKEN,appName).replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
+    public static JSONObject getUserInfoByAccessToken(String accessToken, String unionId) {
+        String requestUrl = MiscUtils.getConfigByKey(Constants.GET_USER_INFO_BY_ACCESS_TOKEN).replace("ACCESS_TOKEN", accessToken).replace("OPENID", unionId);
         log.debug("------微信--通过access_token和openid获得用户详细信息-请求URL  "+requestUrl);
         String requestResult = HttpTookit.doGet(requestUrl);
         JSONObject jsonObject = JSON.parseObject(requestResult);
@@ -375,15 +375,15 @@ public class WeiXinUtil {
      * 获取jsapi_ticket
      * @return
      */
-    public static String getJSApiTIcket(Jedis jedis,String appName){
+    public static String getJSApiTIcket(Jedis jedis){
         String jsApiTicket = null;
         jsApiTicket = jedis.get(Constants.CACHED_KEY_WEIXIN_JS_API_TIKET);
         if(jsApiTicket == null){
-            String accessToken = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID,appName),MiscUtils.getConfigByKey(Constants.APPSECRET,appName) , jedis,appName).getToken();
+            String accessToken = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID),MiscUtils.getConfigByKey(Constants.APPSECRET) , jedis).getToken();
             int result = 0;
 
             //拼装创建菜单Url
-            String url =  MiscUtils.getConfigByKey(Constants.JSAPI_TICKET_URL,appName).replace("ACCESS_TOKEN", accessToken);
+            String url =  MiscUtils.getConfigByKey(Constants.JSAPI_TICKET_URL).replace("ACCESS_TOKEN", accessToken);
             //调用接口获取jsapi_ticket
             String requestResult = HttpTookit.doGet(url);
             JSONObject jsonObject = JSON.parseObject(requestResult);
@@ -404,7 +404,7 @@ public class WeiXinUtil {
     }
 
     //获取计算后的signature，及其它字段 noncestr,timestamp,jsapi_ticket
-    public static Map<String, String> sign(String jsapi_ticket, String url,String appName) {
+    public static Map<String, String> sign(String jsapi_ticket, String url) {
         Map<String, String> ret = new HashMap<String, String>();
         String nonce_str = MiscUtils.getUUId();
         String timestamp = System.currentTimeMillis()/1000 + "";
@@ -439,7 +439,7 @@ public class WeiXinUtil {
         ret.put("nonceStr", nonce_str);
         ret.put("timestamp", timestamp);
         ret.put("signature", signature);
-        ret.put("appId",MiscUtils.getConfigByKey(Constants.APPID,appName) );
+        ret.put("appId",MiscUtils.getConfigByKey(Constants.APPID) );
 
         return ret;
     }
@@ -463,11 +463,11 @@ public class WeiXinUtil {
 	 * @param templateMap  模板内容
 	 * @param jedis  
 	 */
-	public static void send_template_message(String openId, String templateId,String url, Map<String, TemplateData> templateMap,Jedis jedis,String appName) {
+	public static void send_template_message(String openId, String templateId,String url, Map<String, TemplateData> templateMap,Jedis jedis) {
 	
-		AccessToken token = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID,appName),MiscUtils.getConfigByKey(Constants.APPSECRET,appName) ,jedis,appName);
+		AccessToken token = getAccessToken(MiscUtils.getConfigByKey(Constants.APPID),MiscUtils.getConfigByKey(Constants.APPSECRET) ,jedis);
 		String access_token = token.getToken();
-		String accessUrl = MiscUtils.getConfigByKey(Constants.WEIXIN_TEMPLATE_PUSH_URL,appName).replace("ACCESS_TOKEN", access_token);
+		String accessUrl = MiscUtils.getConfigByKey(Constants.WEIXIN_TEMPLATE_PUSH_URL).replace("ACCESS_TOKEN", access_token);
         log.info("微信推送url：" + accessUrl);
 		WxTemplate temp = new WxTemplate();
 		temp.setUrl(url);

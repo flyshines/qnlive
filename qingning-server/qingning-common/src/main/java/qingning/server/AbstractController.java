@@ -38,13 +38,12 @@ public abstract class AbstractController {
 	private List<Map<String,Object>> processRewardConfigurationList;
 	//protected List<Map<String,Object>>  classifyInfoList;
 
-	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version,String appName){
+	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version){
 		RequestEntity requestEntity = new RequestEntity();
 		requestEntity.setAccessToken(accessToken);
 		requestEntity.setVersion(version);
 		requestEntity.setServerName(serviceName);
 		requestEntity.setFunctionName(function);
-		requestEntity.setAppName(appName);
 		requestEntity.setTimeStamp(System.currentTimeMillis());
 		return requestEntity;
 	}
@@ -175,10 +174,8 @@ public abstract class AbstractController {
 	private void generateSystemConfigMap() throws Exception {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
 		systemConfigMap = new HashMap<String,Object>();
-		String[] appNameArray = MiscUtils.getAppName();//获取总共有几个app
-		for(String appName : appNameArray){
 			Map<String,Object>systemConfig = new HashMap<String,Object>();
-			systemConfigList = iCommonModuleServer.findSystemConfigByAppName(appName);
+			systemConfigList = iCommonModuleServer.findSystemConfigBy();
 			for(int i = 0; i < systemConfigList.size(); i++){
 				Map<String,Object> infoMap = systemConfigList.get(i);
 				Map<String,Object> innerMap = new HashMap<String,Object>();
@@ -186,10 +183,7 @@ public abstract class AbstractController {
 				innerMap.put("config_value", infoMap.get("config_value"));
 				systemConfig.put((String)infoMap.get("config_key"), innerMap);
 			}
-			if(!MiscUtils.isEmpty(systemConfig)){
-				systemConfigMap.put(appName,systemConfig);
-			}
-		}
+		systemConfigMap.put("systemConfig",systemConfig);
 	}
 
 	/**
@@ -199,9 +193,7 @@ public abstract class AbstractController {
 	private void generateServerUrlInfoMap() throws Exception {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
 		serverUrlInfoMap = new HashMap<String,Object>();
-		String[] appNameArray = MiscUtils.getAppName();
-		for(String appName : appNameArray){
-			serverUrlInfoList = iCommonModuleServer.getServerUrlByAppName(appName);
+			serverUrlInfoList = iCommonModuleServer.getServerUrlBy();
 			Map<String,Object> serverInfoMap = new HashMap<String,Object>();
 			for(int i = 0; i < serverUrlInfoList.size(); i++){
 				Map<String,Object> infoMap = serverUrlInfoList.get(i);
@@ -214,8 +206,7 @@ public abstract class AbstractController {
 				innerMap.put("protocol", infoMap.get("protocol"));
 				innerMap.put("domain_name", infoMap.get("domain_name"));
 				serverInfoMap.put((String)infoMap.get("server_name"), innerMap);
-			}
-			serverUrlInfoMap.put(appName,serverInfoMap);
+			serverUrlInfoMap.put("serverInfoMap",serverInfoMap);
 		}
 
 

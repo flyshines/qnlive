@@ -31,18 +31,18 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
 		if(messagePushServerImpl==null){
 			messagePushServerImpl = (MessagePushServerImpl)context.getBean("MessagePushServer");
 		}
-		String appName = requestEntity.getAppName();
-		((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
+
+		((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {
 				Set<String> lecturerSet = jedis.smembers(Constants.CACHED_LECTURER_KEY);
-				processCreateCourseNoticeTask(lecturerSet, pipeline, jedis, jedisUtils, context,appName);
+				processCreateCourseNoticeTask(lecturerSet, pipeline, jedis, jedisUtils, context);
 			}    		 
 		});
 	}
 
     private void processCreateCourseNoticeTask(Set<String> lecturerSet, Pipeline pipeline, 
-    		Jedis jedis, JedisUtils jedisUtils, ApplicationContext context,String appName){
+    		Jedis jedis, JedisUtils jedisUtils, ApplicationContext context){
     	for(String lecturerId : lecturerSet){
     		Map<String,Object> map = new HashMap<>();
             map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturerId);
@@ -84,7 +84,7 @@ public class CreateCourseNoticeTaskServerImpl extends AbstractMsgService {
             	map.put("im_course_id", im_course_id);
 				map.put("real_start_time", time);
 				RequestEntity requestEntity = generateRequestEntity("MessagePushServer", Constants.MQ_METHOD_ASYNCHRONIZED, "processCourseNotStartCancelAll", map);
-				requestEntity.setAppName(appName);
+
 				//清除所有定时任务
 				log.debug("清除所有定时任务:"+courseId);
 				messagePushServerImpl.processCourseNotStartCancelAll(requestEntity, jedisUtils, context);

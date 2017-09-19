@@ -154,7 +154,6 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
         int i = bannerMapper.selectUpCount(param.get("user_id").toString());
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("config_key", "saasBannerSize");
-        paramMap.put("appName", Constants.HEADER_APP_NAME);
         Map<String, Object> sysConfig = systemConfigMapper.findCustomerServiceBySystemConfig(paramMap);
         int size = 3;
         if (sysConfig != null && sysConfig.get("config_key") != null) {

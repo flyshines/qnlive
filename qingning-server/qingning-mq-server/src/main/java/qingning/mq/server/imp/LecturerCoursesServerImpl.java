@@ -41,8 +41,8 @@ public class LecturerCoursesServerImpl extends AbstractMsgService {
 
 
     private void processLecturerCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-    	String appName = requestEntity.getAppName();
-        ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
+
+        ((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
         	private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
 				for(String lecturerId : lecturerSet){
 		            //删除缓存中的旧的课程列表及课程信息实体

@@ -622,7 +622,7 @@ public class ZXingUtil {
      * @return
      * @throws Exception
      */
-    public static BufferedImage createLivePng(String user_head_portrait,String userName,String lecturer_name,String qr_code_content,String appName) throws Exception{
+    public static BufferedImage createLivePng(String user_head_portrait,String userName,String lecturer_name,String qr_code_content) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,9)+"...";
         }
@@ -632,7 +632,7 @@ public class ZXingUtil {
         //花图框
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址  不需要变
-        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 70*3;
         //用户头像的长宽
@@ -668,13 +668,13 @@ public class ZXingUtil {
      * @return
      * @throws Exception
      */
-    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Double profit_share_rate,String appName) throws Exception{
+    public static BufferedImage createRoomDistributerPng(String user_head_portrait,String userName,String qr_code_content,Double profit_share_rate) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,8)+"...";
         }
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 70*3;
         //用户头像的长宽
@@ -719,7 +719,7 @@ public class ZXingUtil {
      * @throws Exception
      */
     public static BufferedImage createCoursePng(String user_head_portrait,String userName,String course_name,
-    		String qr_code_content,Long time,String appName) throws Exception{
+    		String qr_code_content,Long time) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,9)+"...";
         }
@@ -735,7 +735,7 @@ public class ZXingUtil {
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 70*3;
         //用户头像的长宽
@@ -781,7 +781,7 @@ public class ZXingUtil {
      * @throws Exception
      */
     public static BufferedImage createShopPng(String user_head_portrait,String userName,String shop_name,
-                                                String qr_code_content,String shop_remark,String appName) throws Exception{
+                                                String qr_code_content,String shop_remark) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,9)+"...";
         }
@@ -800,7 +800,7 @@ public class ZXingUtil {
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 70*3;
         //用户头像的长宽
@@ -840,12 +840,11 @@ public class ZXingUtil {
      * @param userName 登录用户昵称
      * @param series_name 系列课名称
      * @param qr_code_content 二维码内容（分享链接）
-     * @param appName
      * @return 邀请卡的base64
      * @throws Exception
      */
     public static BufferedImage createSeriesPng(String user_head_portrait,String userName,String series_name,
-    		String qr_code_content,String appName) throws Exception{
+    		String qr_code_content) throws Exception{
         if(userName.length()>9){
             userName = userName.substring(0,9)+"...";
         }
@@ -861,7 +860,7 @@ public class ZXingUtil {
 
         BufferedImage bi = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         //镶嵌背景图  七牛云地址
-        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url",appName));
+        bi = convertBG(bi,MiscUtils.getConfigByKey("back_ground_url"));
         //二维码的长宽
         int qr_code_size= 70*3;
         //用户头像的长宽
@@ -1091,7 +1090,7 @@ public class ZXingUtil {
 	    	String qr_code_content="www.baidu.com";
 	    	long time = 1488160472302l;
 //	    	BufferedImage createRoomDistributerPng = createRoomDistributerPng(user_head_portrait, userName, qr_code_content, 2.0);
-            BufferedImage createCoursePng =createShopPng(user_head_portrait,userName,"宫洪深的店铺",qr_code_content,"宫洪深的店铺简介宫洪深,的店铺简介宫洪深的店.铺简介宫洪深的店铺简介","qnlive");
+            BufferedImage createCoursePng =createShopPng(user_head_portrait,userName,"宫洪深的店铺",qr_code_content,"宫洪深的店铺简介宫洪深,的店铺简介宫洪深的店.铺简介宫洪深的店铺简介");
          //   BufferedImage createCoursePng =createCoursePng(user_head_portrait,userName,"宫洪深的课程1111111111111111111111111111111111111",qr_code_content,System.currentTimeMillis(),"qnlive");
 
 //            BufferedImage createLivePng = createLivePng(user_head_portrait, userName,"老师名字", qr_code_content);

@@ -46,8 +46,8 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 
 	@Override
     public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
-    	String appName = requestEntity.getAppName();
-    	Jedis jedis = jedisUtils.getJedis(appName);
+
+    	Jedis jedis = jedisUtils.getJedis();
     	
     	((JedisBatchCallback)jedis).invoke(new JedisBatchOperation(){
 			@Override
@@ -259,7 +259,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					}
 					try{
 						String liveRoomKey = liveRoomKeyMap.get(liveRoomId);
-						String roomAddress = MiscUtils.getConfigByKey("live_room_share_url_pre_fix",appName)+liveRoomId;
+						String roomAddress = MiscUtils.getConfigByKey("live_room_share_url_pre_fix")+liveRoomId;
 						
 						Map<String,Object> liveRoom = new HashMap<String,Object>();
 						liveRoom.put("room_id", liveRoomId);

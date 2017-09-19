@@ -33,22 +33,22 @@ public class QiNiuUpUtils {
     private static OperationManager om;
 
     //转移到新的空间名称
-    private static String audioSpace = MiscUtils.getConfigKey("audio_space");
+    private static String audioSpace = MiscUtils.getConfigByKey("audio_space");
     //转移到新的视频空间名称
-    private static String videoSpace = MiscUtils.getConfigKey("video_space");
+    private static String videoSpace = MiscUtils.getConfigByKey("video_space");
     //音频空间地址
-    private static String autoDomain = MiscUtils.getConfigKey("audio_space_domain_name");
+    private static String autoDomain = MiscUtils.getConfigByKey("audio_space_domain_name");
     //视频空间地址
-    private static String videoDomain = MiscUtils.getConfigKey("video_space_domain_name");
+    private static String videoDomain = MiscUtils.getConfigByKey("video_space_domain_name");
     //七牛回调地址
-    private static String verifyCallback = MiscUtils.getConfigKey("qiniu_verify_callback");
+    private static String verifyCallback = MiscUtils.getConfigByKey("qiniu_verify_callback");
     //七牛处理音视频队列
-    private static String pipeline = MiscUtils.getConfigKey("qiniu_pipeline");
+    private static String pipeline = MiscUtils.getConfigByKey("qiniu_pipeline");
     //七牛默认截取时间长度
-    private static Long cutTimes = Long.valueOf(MiscUtils.getConfigKey("qiniu_cut_timestamp"));
+    private static Long cutTimes = Long.valueOf(MiscUtils.getConfigByKey("qiniu_cut_timestamp"));
 
     static {//利用
-        auth = Auth.create(MiscUtils.getConfigKey("qiniu_AK"), MiscUtils.getConfigKey("qiniu_SK"));
+        auth = Auth.create(MiscUtils.getConfigByKey("qiniu_AK"), MiscUtils.getConfigByKey("qiniu_SK"));
         Configuration cfg = new Configuration(Zone.zone0());
         om = new OperationManager(auth,cfg);
     }
@@ -61,12 +61,12 @@ public class QiNiuUpUtils {
      * @return
      */
     public static String uploadByIO(byte[] uploadBytes, String fileName) throws Exception {
-        String upToken = auth.uploadToken(MiscUtils.getConfigKey("image_space"), fileName); //生成上传凭证 覆盖上传
+        String upToken = auth.uploadToken(MiscUtils.getConfigByKey("image_space"), fileName); //生成上传凭证 覆盖上传
         Configuration cfg = new Configuration(Zone.zone0());//上传链接
         UploadManager uploadManager = new UploadManager(cfg);//生成上传那工具
         Response response = uploadManager.put(uploadBytes, fileName, upToken);//上传类
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);//上传
-        String url = MiscUtils.getConfigKey("images_space_domain_name") + "/" + putRet.key;//文件地址
+        String url = MiscUtils.getConfigByKey("images_space_domain_name") + "/" + putRet.key;//文件地址
 //        CdnManager c = new CdnManager(auth);//刷新缓存工具
 //        String[] urls = new String[]{url};//要刷新缓存的路径
 //        CdnResult.RefreshResult result = c.refreshUrls(urls);//刷新缓存
@@ -134,12 +134,12 @@ public class QiNiuUpUtils {
      * @return
      */
     public static String uploadAuto(byte[] uploadBytes, String fileName) throws Exception {
-        String upToken = auth.uploadToken(MiscUtils.getConfigKey("audio_space"), fileName); //生成上传凭证 覆盖上传
+        String upToken = auth.uploadToken(MiscUtils.getConfigByKey("audio_space"), fileName); //生成上传凭证 覆盖上传
         Configuration cfg = new Configuration(Zone.zone0());//上传链接
         UploadManager uploadManager = new UploadManager(cfg);//生成上传那工具
         Response response = uploadManager.put(uploadBytes, fileName, upToken);//上传类
         DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);//上传
-        String url = MiscUtils.getConfigKey("audio_space_domain_name") + "/" + putRet.key;//文件地址
+        String url = MiscUtils.getConfigByKey("audio_space_domain_name") + "/" + putRet.key;//文件地址
 
         return url;//
     }
@@ -234,7 +234,7 @@ public class QiNiuUpUtils {
         //byte[] file = getFileContent("E:\\transfer.mp3");
         //System.out.println(uploadAuto(file, "transfer.mp3"));
         String newSpace = "qnlive-audio:transfer.wav";
-        String audioSpace = "qnlive-audio";//;MiscUtils.getConfigKey("audio_space_domain_name");
+        String audioSpace = "qnlive-audio";//;MiscUtils.getConfigByKey("audio_space_domain_name");
         //String url = "http://audio.qnhdlive.tsingning.com/transfer.mp3";
         String url = "http://audio.qnhdlive.tsingning.com/lu2cK_qNF_kUOjaxkcsSsOOIHdGt";
         String srcKey = "lu2cK_qNF_kUOjaxkcsSsOOIHdGt";

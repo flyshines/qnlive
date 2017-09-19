@@ -176,7 +176,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
         reqEntity.setParam(param);
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         Map<String,String> shop = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);//saaSModuleServer.getShopInfo(param);
         if(shop.get("open_sharing").equals("1")){
@@ -186,7 +186,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             headerMap.put("Content-Type", "application/json;charset=UTF-8");
             headerMap.put("access_token",reqEntity.getAccessToken());
             //获取知享课程数
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
                     +SharingConstants.SHARING_SERVER_USER_COMMON
                     +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
             String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
@@ -208,10 +208,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
          */
         //从数据库查询url
         String sysKeys = "'shop_preview_url','pc_introduce_url','use_url'";
-        String appName = reqEntity.getAppName();
+
         Map<String, Object> selectSysConfigMap = new HashMap<String, Object>();
         selectSysConfigMap.put("config_key", sysKeys);
-        selectSysConfigMap.put("app_name", appName);
         List<Map<String, Object>> sysConfigList = saaSModuleServer.findSystemConfigByInKey(selectSysConfigMap);
         for(Map<String, Object> sysConfigMap : sysConfigList){
         	String sysConfigKey = sysConfigMap.get("config_key").toString();
@@ -225,7 +224,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	}
         }
         //直播分享URL
-        shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix", appName));
+        shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix"));
         return shop;
     }
     /**
@@ -240,7 +239,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> param = new HashMap<>();
         param.put("user_id",userId);
         reqEntity.setParam(param);
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,String> userMap = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         Map<String,Object> shopInfo = saaSModuleServer.getShopInfo(param);
         if(shopInfo!=null){
@@ -264,7 +263,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         shop.put("user_name",userMap.get("nick_name")+"");
         shop.put("shop_name",userMap.get("nick_name")+"的知识店铺");
         shop.put("shop_remark","");
-        String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index",Constants.HEADER_APP_NAME)+shop.get("shop_id");
+        String shopUrl = MiscUtils.getConfigByKey("share_url_shop_index")+shop.get("shop_id");
         shop.put("shop_url",shopUrl);
         shop.put("status","1");
         shop.put("create_time",new Date());
@@ -298,7 +297,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         }
         param.put("user_id",userId);
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
@@ -319,7 +318,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
-       /* Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+       /* Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //用户信息
         Map<String, String> userInfo = CacheUtils.readUser(userId, reqEntity, readUserOperation, jedis);
         String shopId = userInfo.get("shop_id");*/
@@ -363,7 +362,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         reqMap.put("link_to",linkTo);
 
         reqMap.put("create_time",new Date());
-        reqMap.put("app_name",reqEntity.getAppName());
         //默认下架
         reqMap.put("status","2");
         reqMap.put("banner_id",MiscUtils.getUUId());
@@ -465,8 +463,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         
         //添加状态要求：上架
         reqMap.put("status", "1");
-        reqMap.put("app_name", reqEntity.getAppName());
-        
+
         List<Map<String, Object>> bannerList = saaSModuleServer.getShopBannerListForFront(reqMap);
         
         resultMap.put("banner_info_list", bannerList);
@@ -500,8 +497,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取分页标识
         String lastSeriesId = reqMap.get("last_series_id").toString(); 
         //获取每页数量
@@ -575,8 +572,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取前端上一次刷新时的服务器时间
         long lastUpdateTime = (long) reqMap.get("last_update_time"); 
         //获取前端已经加载的数量
@@ -613,7 +610,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         	resultMap.put("last_update_time", lastUpdateTime);
         }
         reqMap.put("course_updown", '1');	//单品上下架 单品课 1上架 2下架 0没有
-        reqMap.put("app_name", appName);
+
         
         List<Map<String, Object>> liveCourseList = saaSModuleServer.findLiveCourseListByMap(reqMap);
         List<Map<String, String>> resultLiveCourseList = new ArrayList<>();
@@ -658,7 +655,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public void  addShopSingleVideo(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         reqMap.put("user_id",userId);
         //店铺信息
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
@@ -701,7 +698,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             reqMap.put("target_user",reqMap.get("target_user"));
         }
 
-        reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
         //缓存加入讲师创建的课程
@@ -724,7 +720,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String seriesId = (String) reqMap.get("series_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         reqMap.put("user_id",userId);
         
         /*
@@ -778,7 +774,6 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         if(!MiscUtils.isEmpty(reqMap.get("target_user"))){
             reqMap.put("target_user",reqMap.get("target_user"));
         }
-        reqMap.put("app_name",reqEntity.getAppName());
         //插入课程
         saaSModuleServer.addCourse(reqMap);
         log.info("saas_店铺-系列-添加课程>>>>数据库插入子课程成功");
@@ -839,7 +834,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
             courseMap.put("file_path",courseInfoMap.get("course_url"));
             courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")/*"http://192.168.1.197:8088"*/
                 +SharingConstants.SHARING_SERVER_COURSE
                 +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
         String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
@@ -860,10 +855,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         }
         Date now = new Date();
         reqMap.put("update_time",now);
-        reqMap.put("app_name",reqEntity.getAppName());
         reqMap.put("course_price",reqMap.get("price"));
         //更新缓存前操作
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,String> query = new HashMap<>();
         query.clear();
         String courseId = reqMap.get("course_id").toString();
@@ -910,8 +904,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("target_user",MiscUtils.isEmpty(saasCourse.get("target_user"))?"":saasCourse.get("target_user").toString());
             requestMap.put("buy_tips",MiscUtils.isEmpty(saasCourse.get("buy_tips"))?"":saasCourse.get("target_user").toString());
 
-            //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
-            String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME) /*"http://192.168.1.197:8088"*/
+            //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
+            String getUrl =MiscUtils.getConfigByKey("sharing_api_url") /*"http://192.168.1.197:8088"*/
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
@@ -934,7 +928,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             courseMap.put("course_remark",MiscUtils.isEmpty(courseInfoMap.get("course_remark")));
             courseMap.put("file_path",courseInfoMap.get("course_url"));
             courseMap.put("status",Integer.parseInt(courseInfoMap.get("series_course_updown"))-1);
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)/*"http://192.168.1.197:8088"*/
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")/*"http://192.168.1.197:8088"*/
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_CHILD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
@@ -969,8 +963,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取分页标识
         String lastSingleId = reqMap.get("last_single_id").toString(); 
         //获取每页数量
@@ -1040,8 +1034,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的series_id
         String seriesId = (String) reqMap.get("series_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readSeriesMap = new HashMap<String, Object>();
@@ -1103,8 +1097,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String seriesId = (String) reqMap.get("series_id");
         reqMap.put("seried_id", seriesId);
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取分页标识
         String lastCourseId = reqMap.get("last_course_id").toString(); 
         //获取每页数量
@@ -1189,7 +1183,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getSingleList")
     public Map<String, Object> getSingleList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1206,7 +1200,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getNoSeriesList")
     public Map<String, Object> getNoSeriesList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1226,7 +1220,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getLiveList")
     public Map<String, Object> getLiveList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1243,7 +1237,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getUserList")
     public Map<String, Object> getUserList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1263,7 +1257,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getMessageList")
     public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1282,7 +1276,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getFeedbackList")
     public Map<String, Object> getFeedbackList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //获取登录用户user_id
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
@@ -1314,8 +1308,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的single_id
         String singleId = (String) reqMap.get("single_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readSingleMap = new HashMap<String, Object>();
@@ -1401,7 +1395,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String type = reqMap.get("course_updown").toString();
         String courseId = reqMap.get("course_id").toString();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Date now = new Date();
         long timestamp = now.getTime();
         //该用户ID
@@ -1441,8 +1435,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的article_id
         String articleId = (String) reqMap.get("article_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readArticleMap = new HashMap<String, Object>();
@@ -1494,7 +1488,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 拼接分享链接share_url
 		 */
-		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix", appName) + articleId;
+		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix") + articleId;
 		resultMap.put("share_url", shareUrl);
 		
         resultMap.put("article_info", articleMap);
@@ -1521,8 +1515,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的course_id
         String courseId = (String) reqMap.get("course_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         
         //生成用于缓存不存在时调用数据库的requestEntity
     	Map<String, Object> readCourseMap = new HashMap<String, Object>();
@@ -1574,7 +1568,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
 		/*
 		 * 拼接分享链接share_url
 		 */
-		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix", appName) + courseId;
+		String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix") + courseId;
 		resultMap.put("share_url", shareUrl);
 		
         resultMap.put("course_info", courseMap);
@@ -1610,8 +1604,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, String> getSeriesInfo(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, String> resultMap = null;
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
         String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
@@ -1638,8 +1632,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getSeriesCourseList")
     public Map<String, Object> getSeriesCourseList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
         String seriesId = reqMap.get("series_id").toString();
@@ -1669,8 +1663,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的course_id
         String courseId = (String) reqMap.get("course_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取分页标识
         String lastMessageId = reqMap.get("last_message_id").toString(); 
         //获取每页数量
@@ -1734,8 +1728,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     @FunctionName("getShopSingleInfo")
     public Map<String, String> getShopSingleInfo(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);//获取jedis对象
+
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //从缓存获取课程详情
         RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", reqMap);
         Map<String,String> map = CacheUtils.readCourse(reqMap.get("course_id").toString(), readSingleReqEntity, readCourseOperation,jedis,true);
@@ -1755,7 +1749,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             reqMap.remove("keyword");
         }
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         reqMap.put("user_id",userId);
         //店铺信息
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
@@ -1799,8 +1793,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求中的评论内容
         String content = (String) reqMap.get("content");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         Date now = new Date();
         
         /*
@@ -1919,8 +1913,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求中的店铺id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         //获取当前服务器时间
         Date now = new Date();
         
@@ -1977,7 +1971,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         long todayMoney = 0L;
         long todayVisit = 0L;
         long todayPay = 0L;
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,Object> query = new HashMap<>();
         query.put("user_id", userId);
         String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
@@ -2023,7 +2017,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> query = new HashMap<>();
         String shopId = ((Map<String,String>)reqEntity.getParam()).get("shop_id");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //店铺信息
         Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
         //店主ID
@@ -2058,7 +2052,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
         String shopId = query.get("shop_id").toString();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //店铺信息
         Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -2153,7 +2147,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
         String shopId = query.get("shop_id").toString();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //店铺信息
         Map<String, String> shopInfo = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -2204,7 +2198,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         Map<String, Object> resultMap = new HashMap<>();
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         //店铺信息
         //Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         //String shopId = shopInfo.get("shop_id").toString();
@@ -2319,8 +2313,8 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
-        String appName = reqEntity.getAppName();
-        Jedis jedis = jedisUtils.getJedis(appName);
+
+        Jedis jedis = jedisUtils.getJedis();
         
         Map<String, String> shopInfoMap = CacheUtils.readShop(shopId, reqEntity, readShopOperation, jedis);
         resultMap.put("shop_info", shopInfoMap);
@@ -2339,9 +2333,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         String verification_code = reqMap.get("code");
         String phone = reqMap.get("phone");
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
 
-        if(CodeVerifyficationUtil.verifyVerificationCode(reqEntity.getAppName(),userId, verification_code, jedis)){
+        if(CodeVerifyficationUtil.verifyVerificationCode(userId, verification_code, jedis)){
             //if("0000".equals(verification_code)){
             logger.info("绑定手机号码>>验证码验证通过");
             Map<String, Object> userMap = new HashMap<>();
@@ -2374,9 +2368,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, Object>  shelvesQNSharing(RequestEntity reqEntity) throws Exception{
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         Map<String, Object> resultMap = new HashMap<>();
-        String appName = reqEntity.getAppName();
+
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(appName);
+        Jedis jedis = jedisUtils.getJedis();
         String shelves_type = reqMap.get("shelves_type").toString();
         Map<String,Object> queryMap = new HashMap<>();
 
@@ -2435,9 +2429,9 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             requestMap.put("target_user",saasCourse.get("target_user"));
             requestMap.put("buy_tips",saasCourse.get("buy_tips"));
 
-       //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+       //     String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
 
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
@@ -2515,7 +2509,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
             }
             requestMap.put("list",requestCourseList);
 
-            String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
                     +SharingConstants.SHARING_SERVER_COURSE
                     +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
             String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
@@ -2572,7 +2566,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
     public Map<String, Object>  sharingOpen(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        Jedis jedis = jedisUtils.getJedis(reqEntity.getAppName());//获取jedis对象
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         reqMap.put("user_id", userId);
         Map<String, String> shopInfo = CacheUtils.readShopByUserId(userId, reqEntity, readShopOperation, jedis);
         Map<String,String> userMap = CacheUtils.readUser(userId, this.generateRequestEntity(null, null, null, reqMap), readUserOperation, jedis);
@@ -2603,7 +2597,7 @@ public class SaaSServerImpl extends AbstractQNLiveServer {
         map.put("lecturer_remark", shopInfo.get("shop_remark"));
         map.put("open_code", reqMap.get("open_code"));
         //获取知享课程数
-        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
                 + SharingConstants.SHARING_SERVER_USER_COMMON
                 + SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
         String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
@@ -2654,7 +2648,7 @@ class T {
 
 
 //        //获取知享课程数
-//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//      //  String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
 ////        String getUrl = "http://192.168.1.197:8088"
 ////                + SharingConstants.SHARING_SERVER_USER_COMMON
 ////                + SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
@@ -2662,7 +2656,7 @@ class T {
 //
 //        //获取知享课程数
 //        /*//"http://192.168.1.197:8088"*/
-//        String getUrl =MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+//        String getUrl =MiscUtils.getConfigByKey("sharing_api_url")
 //                +SharingConstants.SHARING_SERVER_USER_COMMON
 //                +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
 //        String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
@@ -2676,7 +2670,7 @@ class T {
 ////        map.put("lecturer_remark","123");
 ////        map.put("open_code","125613");
 ////        //获取知享课程数
-////        String getUrl = MiscUtils.getConfigByKey("sharing_api_url", Constants.HEADER_APP_NAME)
+////        String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
 ////                +SharingConstants.SHARING_SERVER_USER_COMMON
 ////                +SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
 ////        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");

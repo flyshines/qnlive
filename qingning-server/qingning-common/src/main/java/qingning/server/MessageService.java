@@ -13,7 +13,7 @@ public interface MessageService {
      * phone:手机号码
      * content:短信内容
      */
-    public boolean sendMessageWithDream(String phone, String content,String appName);
+    public boolean sendMessageWithDream(String phone, String content);
 
 
 

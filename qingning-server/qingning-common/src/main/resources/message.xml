@@ -20,7 +20,7 @@
 				<entry key="000004" value="输入数据格式不正确"/>
 				<entry key="000005" value="用户不存在"/>
 				<entry key="000006" value="分页参数输入错误"/>
-				<entry key="000007" value="appName不存在"/>
+				<entry key="000007" value="不存在"/>
 				<entry key="000099" value="系统错误"/>				
 				<entry key="000100" value="必填参数为空"/>
 				<entry key="000101" value="参数类型错误"/>

@@ -1,12 +1,12 @@
 package qingning.common.util;
- 
+
 import com.alibaba.dubbo.common.utils.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import qingning.common.entity.QNLiveException;
- 
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigDecimal;
@@ -14,7 +14,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,7 +21,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
- 
+
 public final class MiscUtils {
     private MiscUtils(){};
     
@@ -31,7 +30,6 @@ public final class MiscUtils {
     private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
     private static DateFormat dateTimeFormat1 = new SimpleDateFormat("yyyy-MM-dd");
-
     private static Pattern emojiPattern = Pattern.compile("([\\x{10000}-\\x{10ffff}\ud800-\udfff])");
     private static Pattern emojiRecoverPattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
     
@@ -91,7 +89,7 @@ public final class MiscUtils {
                     obj = Integer.parseInt((String)obj);
                 } else if(Constants.SYSLONG.equalsIgnoreCase(type)){
                     obj = Long.parseLong((String)obj);
-                } else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){                    
+                } else if(Constants.SYSDOUBLE.equalsIgnoreCase(type)){
                     if(adjust){
                         BigDecimal bigDecimal = new BigDecimal((String)obj);
                         bigDecimal = bigDecimal.multiply(BigDecimal.valueOf(100));
@@ -156,7 +154,7 @@ public final class MiscUtils {
                     }
                     if(adjust){
                         BigDecimal bigDecimal = new BigDecimal(value.toString());                        
-                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100L), 2, BigDecimal.ROUND_HALF_UP);
+                        bigDecimal = bigDecimal.divide(BigDecimal.valueOf(100l), 2, BigDecimal.ROUND_HALF_UP);
                         ret = bigDecimal.doubleValue();
                     } else {
                         ret = Double.parseDouble(value.toString());
@@ -251,8 +249,6 @@ public final class MiscUtils {
             for(String name : properties.stringPropertyNames()){            	
                 propertiesMap.put(name, properties.getProperty(name));
             }            
-        }catch (IOException e){
-
         }finally{
             if(input!=null){
                 input.close();
@@ -343,7 +339,7 @@ public final class MiscUtils {
     }
  
     public static String getUUId() {
-        return getConfigKey("server.number")+UUID.randomUUID().toString().replace("-", "");
+        return getConfigByKey("server.number")+UUID.randomUUID().toString().replace("-", "");
         //return UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -393,7 +389,7 @@ public final class MiscUtils {
         return oddBuilder.reverse().toString()+evenbuilder.toString();
     }
  
-    public static String getConfigKey(String key) {
+    public static String getConfigByKey(String key) {
         String value="";
         if(isEmptyString(key)){
             return null;
@@ -406,6 +402,7 @@ public final class MiscUtils {
         } catch(Exception e){
             //TODO add log info
         }
+ 
         return value;
     }
     
@@ -422,7 +419,7 @@ public final class MiscUtils {
         Map<String, Object> resMap = null;
          for (Map<String, String> map : inList) {
              resMap = new HashMap<String, Object>();
-             for(Map.Entry<String, String> entry:map.entrySet()){
+             for(Entry<String, String> entry:map.entrySet()){
                  resMap.put(entry.getKey(), entry.getValue());
              }
              resData.add(resMap);
@@ -439,7 +436,7 @@ public final class MiscUtils {
         String totalAmount = String.valueOf(bigDecimal.multiply(amount).longValue());//以分为单位.
         return totalAmount;
     }
-    
+
     /**
      * 格式化string为Date
      *
@@ -458,7 +455,7 @@ public final class MiscUtils {
         }
        return date;
     }
-    
+
     public static String convertDateToString(Date date){
     	if(date != null){
     		return dateTimeFormat.format(date);
@@ -466,7 +463,7 @@ public final class MiscUtils {
     		return "";
     	}
     }
-    
+
     @SuppressWarnings("rawtypes")
     public static String getKeyOfCachedData(String keyTemplate, Map map){
         if(isEmpty(keyTemplate) || isEmpty(map)){
@@ -487,12 +484,12 @@ public final class MiscUtils {
         }
         return build.toString();
     }
- 
+
     public static void converObjectMapToStringMap(Map<String,Object> objectMap, Map<String,String> stringMap){
         if(MiscUtils.isEmpty(objectMap)){
             return;
         }
-        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+        for (Entry<String, Object> entry : objectMap.entrySet()) {
             if(entry.getValue() != null){
                 if(entry.getValue() instanceof Date){
                     stringMap.put(entry.getKey(), ((Date)entry.getValue()).getTime() + "");
@@ -505,7 +502,7 @@ public final class MiscUtils {
             }
         }
     }
-    
+
     public static String specialCharReplace(String value){
         if(isEmpty(value)){
             return value;
@@ -517,8 +514,8 @@ public final class MiscUtils {
         }
         return value;
     }
- 
- 
+
+
     /**
      * 转换课程状态
      * @param currentTime
@@ -548,7 +545,6 @@ public final class MiscUtils {
         }
     }
 
- 
     public static Date getEndTimeOfToday() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -558,7 +554,7 @@ public final class MiscUtils {
         Date end = calendar.getTime();
         return end;
     }
- 
+
     public static Date getEndDateOfToday() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -569,7 +565,7 @@ public final class MiscUtils {
         Date end = calendar.getTime();
         return end;
     }
- 
+
     public static String getIpAddr(HttpServletRequest request){
         String ip = request.getHeader ("X-Real-IP");
         if (!org.apache.commons.lang.StringUtils.isBlank(ip) && !"unknown".equalsIgnoreCase (ip)) { return ip; }
@@ -586,7 +582,7 @@ public final class MiscUtils {
             return request.getRemoteAddr ();
         }
     }
- 
+
     /**
      * 从inputstream 取数据。
      * @param is
@@ -607,17 +603,17 @@ public final class MiscUtils {
         }
         return sb.toString();
     }
- 
- 
+
+
     /**
      * Xml To Map
      * @param resultData
      * @return
-     * @throws org.dom4j.DocumentException
+     * @throws DocumentException
      */
     public static SortedMap<String,String> requestToMap(String resultData) throws DocumentException {
         SortedMap<String,String> map = new TreeMap<String, String>();
- 
+
         Document document = DocumentHelper.parseText(resultData);
         // 得到xml根元素
         Element root = document.getRootElement();
@@ -629,9 +625,9 @@ public final class MiscUtils {
         }
         return map;
     }
- 
+
     public static Date parseDateWinxin(String realPayTimeString) {
-        if(com.alibaba.dubbo.common.utils.StringUtils.isBlank(realPayTimeString)){
+        if(StringUtils.isBlank(realPayTimeString)){
             return null;
         }
         Date date = null;
@@ -720,7 +716,6 @@ public final class MiscUtils {
     /**
      * 生成[min, max]之间的随机数
      * @param min
-     * @param max
      * @return
      */
     public static int getRandomIntNum(int min, int max){
@@ -729,26 +724,8 @@ public final class MiscUtils {
         return resultNum;
     }
     public static long convertInfoToPostion(long timeInMillis,long pos){
-    	long postion = (timeInMillis-1487034415000L)/1000;
-    	return postion*Constants.SEQUENCE+pos;
-    }
-    
-    /**
-     * 未来时间-指定时间：实现指定时间越大，返回值越小
-     * @param timeInMillis 指定时间
-     * @return
-     */
-    public static long convertLongByDesc(long timeInMillis){
-    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    	long futureTime = 0;
-		try {
-			futureTime = sdf.parse("2100-01-01 00:00:00").getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}	
-		//设定一个未来时间，用来做减法实现倒序排列
-    	long postion = futureTime - timeInMillis;	//未来时间-指定时间：实现指定时间越大，返回值越小
-    	return postion;
+    	long postion = (timeInMillis-1487034415000l)/1000;
+    	return postion* Constants.SEQUENCE+pos;
     }
     
 	/** 
@@ -826,70 +803,12 @@ public final class MiscUtils {
 		return result;
 	}
 
-    private static String CONFIG_PROPERTY_PATH="classpath:application.properties";//共有的配置文件路径
-    private static String CONFIG_PROPERTY_APP_PATH="classpath:appservice.properties";//接入几个app
-    private static  Map<String, Map<String, String>> APP_SERVICE_MAP = null;//存入的map
-    private static String[] APP_NAME = null;
-
-    public static String[] getAppName() throws Exception {
-        if(isEmpty(APP_NAME)){
-            Map<String, String> appMap = convertPropertiesFileToMap(CONFIG_PROPERTY_APP_PATH);//先读取app配置 介入几个app
-            String app_service = appMap.get("app_service").toString();//获取总共接入几个app
-            APP_NAME = app_service.split(",");//切分
-        }
-        return APP_NAME;
-    }
-
-    /**
-     * 解析接入app 的配置文件 读取app相关的配置文件和共有配置文件
-     * @return
-     * @throws Exception
-     */
-    private static Map<String, Map<String, String>> convertAppPropertiesFileToMap() throws Exception {
-        Map<String, String> appMap = convertPropertiesFileToMap(CONFIG_PROPERTY_APP_PATH);//先读取app配置 介入几个app
-        String app_service = appMap.get("app_service").toString();//获取总共接入几个app
-        APP_NAME = app_service.split(",");//切分
-
-        Map<String, String> configPropertyMap =  convertPropertiesFileToMap(CONFIG_PROPERTY_PATH);//共有配置
-        Map<String, Map<String, String>> propertiesMap = new HashMap<>();//返回的参数
-        for(String appName : APP_NAME){
-            String path = appMap.get(appName+"_application").toString();//app配置文件
-            Map<String, String> appConfigMap = convertPropertiesFileToMap(path);//读取app的配置
-            //规避配置文件不存在
-            if(appConfigMap!=null)
-                appConfigMap.putAll(configPropertyMap);//加入共有配置
-            propertiesMap.put(appName,appConfigMap);
-        }
-        return propertiesMap;
-    }
-
-    public static String getConfigByKey(String key,String appName) {
-        String value="";
-        if(isEmptyString(key) || isEmptyString(appName) ){
+    public static String formatDate(String datestr) {
+        if(StringUtils.isBlank(datestr)){
             return null;
         }
-        try{
-            if(APP_SERVICE_MAP==null){
-                APP_SERVICE_MAP= MiscUtils.convertAppPropertiesFileToMap();
-            }
-            value = APP_SERVICE_MAP.get(appName).get(key);
-        } catch(Exception e){
-        }
-        return value;
-    }
-
-    /**
-     * 根据appid 获取appname
-     * @param appId
-     * @return
-     */
-    public static String getAppNameByAppid(String appId){
-        for (Map.Entry<String,Map<String,String>> entry : APP_SERVICE_MAP.entrySet()) {
-            if(entry.getValue().get(Constants.APPID).equals(appId) || entry.getValue().get(Constants.APP_APP_ID).equals(appId)){
-                return entry.getKey();
-            }
-        }
-        return null;
+        Date date = new Date(Long.valueOf(datestr));
+        return dateTimeFormat1.format(date);
     }
 
     /**
@@ -905,22 +824,22 @@ public final class MiscUtils {
         return dateTimeFormat.format(date);
     }
 
-    public static String formatDate(String datestr) {
-        if(StringUtils.isBlank(datestr)){
-            return null;
-        }
-        Date date = new Date(Long.valueOf(datestr));
-        return dateTimeFormat1.format(date);
-    }
-
     /**
-     * 判断是否存在appname
-     * @param appName
+     * 未来时间-指定时间：实现指定时间越大，返回值越小
+     * @param timeInMillis 指定时间
      * @return
      */
-    public static boolean isAppName(String appName){
-        return APP_SERVICE_MAP.containsKey(appName);
+    public static long convertLongByDesc(long timeInMillis){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long futureTime = 0;
+        try {
+            futureTime = sdf.parse("2100-01-01 00:00:00").getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //设定一个未来时间，用来做减法实现倒序排列
+        long postion = futureTime - timeInMillis;	//未来时间-指定时间：实现指定时间越大，返回值越小
+        return postion;
     }
-
 
 }

@@ -37,8 +37,8 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
 
 
     private void processPlatformCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-    	String appName = requestEntity.getAppName();
-    	JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
+
+    	JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
     	callBack.invoke(new JedisBatchOperation(){
     		@Override
     		public void batchOperation(Pipeline pipeline, Jedis jedis) {
@@ -54,7 +54,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			queryMap.put("status", "1");//已经发布(预告中)
     			long maxCount =  Constants.PLATFORM_PREDICTION_COURSE_LIST_SIZE;
     			queryMap.put("pageCount", maxCount);
-    			queryMap.put("app_name",appName);
+
     			List<Map<String,Object>> coursePredictionList = coursesMapper.findPlatformCourseList(queryMap);
     			if(!MiscUtils.isEmpty(coursePredictionList)){
     				maxCount=maxCount-coursePredictionList.size();    				
@@ -73,7 +73,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
     			if(maxCount>0){
     				queryMap.put("status", "2");//已经结束
     				queryMap.put("pageCount", maxCount);
-    				queryMap.put("app_name",appName);
+
     				List<Map<String,Object>> courseFinishList = coursesMapper.findPlatformCourseList(queryMap);
     				if(!MiscUtils.isEmpty(courseFinishList)){
     					Map<String,Response<Boolean>> checked = new HashMap<String,Response<Boolean>>();
@@ -138,7 +138,7 @@ public class PlatformCoursesServerImpl extends AbstractMsgService {
 //					}
 //				}
 //				Map<String,Object> map = new HashMap<>();
-//				map.put("appName",appName);
+//
 //				map.put("status","5");
 //				List<Map<String, Object>> courseIdList = coursesMapper.findCourseByStatus(map);
 //				for(Map<String, Object> courseid : courseIdList){

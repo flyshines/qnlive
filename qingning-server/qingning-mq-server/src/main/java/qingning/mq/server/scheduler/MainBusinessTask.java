@@ -153,24 +153,10 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	@Scheduled(cron = "0 0 4 * * ?")//每日凌晨4点执行任务
 	public void backstageMethod() {
 		init();
-		String[] appNames = new String[0];
-		try {
-			appNames = MiscUtils.getAppName();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		for(String appName : appNames){//根据不同的app 执行功能不同的任务
-			logger.debug("执行对应的app定时任务:"+appName);
-			backstageMethod(appName);
-		}
-
-	}
-	public void backstageMethod(String appName){
 		for(AbstractMsgService server : list){
-			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === APP:"+appName);
+			logger.info("===> 执行任务 【"+server.getClass().getName()+"】 === APP:");
 			try {
 				RequestEntity  req = new RequestEntity();
-				req.setAppName(appName);
 				server.process(req, jedisUtils, context);
 			} catch (Exception e) {
 				logger.error("---- 主业务定时任务执行失败!: "+ server.getClass().getName() +" ---- ", e);
@@ -181,17 +167,15 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 
 	/**
 	 * 查询讲师信息
-	 * @param appName app
 	 */
-	public void loadLecturerID(String appName){
-		Jedis jedis = jedisUtils.getJedis(appName);
+	public void loadLecturerID( ){
+		Jedis jedis = jedisUtils.getJedis();
 		if(!jedis.exists(Constants.CACHED_LECTURER_KEY)){//如果不存在
 			int start_pos = 0;
 			int page_count =50000;
 			Map<String,Object> query = new HashMap<String,Object>();
 			query.put("start_pos", start_pos);
 			query.put("page_count", page_count);
-			query.put("app_name",appName);
 			List<Map<String,Object>> list = null;
 			do{
 				list = lecturerMapper.findLectureId(query);
@@ -237,11 +221,8 @@ public class MainBusinessTask implements Lifecycle, ApplicationListener<BackendE
 	@Override
 	public void start() {
 		try {
-            String[] appNames = MiscUtils.getAppName();
-            for(String appName : appNames){
-                backstageMethod();
-                loadLecturerID(appName);
-            }
+			backstageMethod();
+			loadLecturerID();
         } catch (Exception e) {
 			e.printStackTrace();
 		}

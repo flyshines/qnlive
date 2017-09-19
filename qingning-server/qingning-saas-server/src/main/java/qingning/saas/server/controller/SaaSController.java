@@ -21,7 +21,7 @@ public class SaaSController extends AbstractController {
     /**
      * 店铺-获取店铺轮播列表
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -30,9 +30,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity getShopBannerList(
     		@PathVariable("shop_id") String shopId,
     	    @RequestHeader("access_token") String accessToken,
-    	    @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
     	    @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "queryShopBannerList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "queryShopBannerList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         requestEntity.setParam(param);
@@ -57,9 +57,9 @@ public class SaaSController extends AbstractController {
 			@RequestParam(value="last_series_id", defaultValue="0")String lastSeriesId,
 			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopSeriesList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopSeriesList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         param.put("last_series_id", lastSeriesId);
@@ -75,7 +75,7 @@ public class SaaSController extends AbstractController {
      * @param lastSingleId
      * @param pageCount
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -86,9 +86,9 @@ public class SaaSController extends AbstractController {
 			@RequestParam(value="last_single_id", defaultValue="0")String lastSingleId,
 			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopSingleCourseList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopSingleCourseList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         param.put("last_single_id", lastSingleId);
@@ -104,7 +104,7 @@ public class SaaSController extends AbstractController {
      * @param lastLiveId
      * @param pageCount
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -116,9 +116,9 @@ public class SaaSController extends AbstractController {
 			@RequestParam(value="readed_count", defaultValue="0")long readedCount,
 			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopLiveSingleList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopLiveSingleList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         param.put("last_update_time", lastUpdateTime);
@@ -133,7 +133,7 @@ public class SaaSController extends AbstractController {
      * 课程-获取系列课程详情
      * @param seriesId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -142,9 +142,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity getSeriesCourseDetail(
 			@PathVariable("series_id") String seriesId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSeriesCourseDetail", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSeriesCourseDetail", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("series_id", seriesId);
         
@@ -162,9 +162,9 @@ public class SaaSController extends AbstractController {
 			@RequestParam(value = "page_count", defaultValue = "20") long pageCount,
 			@RequestParam(value = "series_type", defaultValue = "") String seriesType,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSeriesCourseList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSeriesCourseList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("series_id", seriesId);
         param.put("last_course_id", lastCourseId);
@@ -179,7 +179,7 @@ public class SaaSController extends AbstractController {
      * 课程-获取单品课程详情
      * @param singleId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -188,9 +188,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity getSingleCourseDetail(
 			@PathVariable("single_id") String singleId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSingleCourseDetail", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findSingleCourseDetail", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("single_id", singleId);
         
@@ -203,7 +203,7 @@ public class SaaSController extends AbstractController {
      * 课程-获取图文课程内容
      * @param articleId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -212,9 +212,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity vodArticleCourse(
 			@PathVariable("article_id") String articleId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodArticleCourse", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodArticleCourse", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("article_id", articleId);
         
@@ -226,7 +226,7 @@ public class SaaSController extends AbstractController {
      * 课程-获取课程内容（音频或视频）
      * @param courseId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -235,9 +235,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity vodCourse(
 			@PathVariable("course_id") String courseId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodCourse", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "vodCourse", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("course_id", courseId);
         
@@ -251,7 +251,7 @@ public class SaaSController extends AbstractController {
      * @param lastMessageId
      * @param pageCount
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -262,9 +262,9 @@ public class SaaSController extends AbstractController {
 			@RequestParam(value="last_message_id", defaultValue="0") String lastMessageId,
 			@RequestParam(value="page_count", defaultValue="20") long pageCount,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findCourseMessageList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findCourseMessageList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("course_id", courseId);
         param.put("last_message_id", lastMessageId);
@@ -279,7 +279,7 @@ public class SaaSController extends AbstractController {
      * @param entity
      * @param courseId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -289,9 +289,9 @@ public class SaaSController extends AbstractController {
     		HttpEntity<Object> entity,
 			@PathVariable("course_id") String courseId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addMessageForCourse", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addMessageForCourse", accessToken, version);
         Map<String, Object> param = (Map<String, Object>) entity.getBody();
         param.put("course_id", courseId);
         
@@ -303,7 +303,7 @@ public class SaaSController extends AbstractController {
      * 用户-提交反馈与建议
      * @param entity
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -313,9 +313,9 @@ public class SaaSController extends AbstractController {
     		HttpEntity<Object> entity,
     		@PathVariable("shop_id") String shopId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addFeedback", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addFeedback", accessToken, version);
         Map<String, Object> param = (Map<String, Object>) entity.getBody();
         param.put("shop_id", shopId);
         requestEntity.setParam(param);
@@ -326,7 +326,7 @@ public class SaaSController extends AbstractController {
      * 用户-访问店铺
      * @param entity
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -335,9 +335,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity userVisit(
     		HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userVisit", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userVisit", accessToken, version);
         Map<String, Object> param = (Map<String, Object>) entity.getBody();
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
@@ -346,7 +346,7 @@ public class SaaSController extends AbstractController {
     /**
      * 用户- 单品已购
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -357,9 +357,9 @@ public class SaaSController extends AbstractController {
             @RequestParam(value = "position", defaultValue = "") String position,
             @RequestParam(value = "page_count", defaultValue = "20") long page_count,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSingleList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSingleList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id",shopId);
         param.put("position",position);
@@ -371,7 +371,7 @@ public class SaaSController extends AbstractController {
     /**
      * 用户-系列已购
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -382,9 +382,9 @@ public class SaaSController extends AbstractController {
             @RequestParam(value = "position", defaultValue = "") String position,
             @RequestParam(value = "page_count", defaultValue = "20") long page_count,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSeriesList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "buiedSeriesList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id",shopId);
         param.put("page_count",page_count);
@@ -397,7 +397,7 @@ public class SaaSController extends AbstractController {
      * 店铺-获取店铺信息
      * @param shopId
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -406,9 +406,9 @@ public class SaaSController extends AbstractController {
     public @ResponseBody ResponseEntity getShopInfo(
 			@PathVariable("shop_id") String shopId,
 			@RequestHeader("access_token") String accessToken,
-			@RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
 			@RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopInfo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "findShopInfo", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         

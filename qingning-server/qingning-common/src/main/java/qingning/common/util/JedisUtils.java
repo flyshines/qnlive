@@ -1,13 +1,8 @@
 package qingning.common.util;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-
 import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import redis.clients.jedis.Jedis;
@@ -15,14 +10,15 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 public final class JedisUtils {
 	private JedisPool jedisPool = null;
 	private Map<String, String> config = null;
 	private JedisProxy jedisProxy = null;
-	private Map<String,Jedis> jedisMap= null;
-
-
-
+	
 	public JedisUtils(String path){
 		Map<String, String> config = null;
 		try {
@@ -42,44 +38,19 @@ public final class JedisUtils {
 		this.config=config;
 	}
 
-
-//	public Jedis getJedis(int index){
-//		Jedis jedis = null;
-//		JedisPool pool = getJedisPool();
-//		if(pool!=null){
-//			if(jedisProxy==null){
-//				jedisProxy = new JedisProxy(this);
-//			}
-//			jedis= jedisProxy.getJedis();
-//			jedis.select(index);
-//		}
-//		return jedis;
-//	}
-
-	public Jedis getJedis(String appName){
+	public Jedis getJedis(){
 		Jedis jedis = null;
 		JedisPool pool = getJedisPool();
 		if(pool!=null){
-		    if(jedisMap == null){
-                jedisMap = new HashMap<>();
-                try {
-                    String[] appNames = MiscUtils.getAppName();
-                    for(String app_name : appNames){
-                        int appRedisDbIndex = Integer.valueOf(MiscUtils.getConfigByKey(Constants.APP_REDIS_INDEX, app_name));
-                        jedisMap.put(app_name,new JedisProxy(this,appRedisDbIndex).getJedis());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-			jedis=jedisMap.get(appName);// jedisProxy.getJedis();
+			if(jedisProxy==null){
+				jedisProxy = new JedisProxy(this);
+			}
+			jedis= jedisProxy.getJedis();
 		}
 		return jedis;
 	}
-
-
-
-	public String getConfigKeyValue(String key){
+	
+	public String getConfigByKeyValue(String key){
 		String value=null;
 		if(!MiscUtils.isEmpty(key) && !MiscUtils.isEmpty(config)){
 			value = MiscUtils.convertString(config.get(key));
@@ -101,13 +72,13 @@ public final class JedisUtils {
 
 		String maxActive = config.get(Constants.REDIS_POOL_MAXACTIVE);
 		String maxIdle = config.get(Constants.REDIS_POOL_MAXIDLE);
-		String maxWait = config.get(Constants.REDIS_POOL_MAXWAIT);        
+		String maxWait = config.get(Constants.REDIS_POOL_MAXWAIT);
 		String testOnBorrow = config.get(Constants.REDIS_POOL_TESTONBORROW);
-		String testOnReturn = config.get(Constants.REDIS_POOL_TESTONRETURN);        
+		String testOnReturn = config.get(Constants.REDIS_POOL_TESTONRETURN);
 		String ip = config.get(Constants.REDIS_IP);
-		String port = config.get(Constants.REDIS_PORT);       
-		String pass = config.get(Constants.REDIS_PASS);  
-		Integer outTime = Integer.valueOf(config.get(Constants.REDIS_POOL_OUTTIME).trim());      
+		String port = config.get(Constants.REDIS_PORT);
+		String pass = config.get(Constants.REDIS_PASS);
+		Integer outTime = Integer.valueOf(config.get(Constants.REDIS_POOL_OUTTIME).trim());
 		if (outTime == null) {
 			outTime=20000;
 		}
@@ -148,53 +119,36 @@ public final class JedisUtils {
 		}
 	}
 
-    /**
-     *
-     */
-	private class JedisProxy extends Jedis implements MethodInterceptor{
-		private int selected;
+	private static class JedisProxy implements MethodInterceptor{
+		
 		private Jedis jedis = null;
 		private JedisUtils jedisUtils = null;
 		private Enhancer enhancer = new Enhancer();	
 		
-
-
-        public JedisProxy(JedisUtils jedisUtils,int index){
-            this.selected = index;
-            enhancer.setSuperclass(Jedis.class);
-            enhancer.setClassLoader(JedisBatchCallback.class.getClassLoader());
-            enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
-            enhancer.setCallback(this);
-            jedis = (Jedis)enhancer.create();
-            this.jedisUtils=jedisUtils;
-
-        }
+		public JedisProxy(JedisUtils jedisUtils){
+			enhancer.setSuperclass(Jedis.class);
+			enhancer.setClassLoader(JedisBatchCallback.class.getClassLoader());
+			enhancer.setInterfaces(new Class[]{JedisBatchCallback.class});
+			enhancer.setCallback(this);
+			jedis = (Jedis)enhancer.create();
+			this.jedisUtils=jedisUtils;			
+		}
 		
 		public Jedis getJedis(){
 			return jedis;
 		}
-
-        /**
-         * 拦截器
-         * @param arg0
-         * @param method
-         * @param parameters
-         * @param proxy
-         * @return
-         * @throws Throwable
-         */
+		
 		@Override
 		public Object intercept(Object arg0, Method method, Object[] parameters, MethodProxy proxy) throws Throwable {
-			JedisPool pool = jedisUtils.getJedisPool();//链接池
+			JedisPool pool = jedisUtils.getJedisPool();
 			if(pool == null){
 				return null;
 			}			
 			Jedis realJedis = null;
 			Object retValue = null;
 			try{
-				realJedis = pool.getResource();//拿到真正的reedis对象
-				realJedis.select(selected);//转换db
-				if(method.getDeclaringClass()==JedisBatchCallback.class){//定义方法所在的类
+				realJedis = pool.getResource();
+				if(method.getDeclaringClass()==JedisBatchCallback.class){
 					if(parameters !=null && parameters.length ==1){
 						JedisBatchOperation jedisBatchOperation = (JedisBatchOperation)parameters[0];
 						if(jedisBatchOperation!=null){

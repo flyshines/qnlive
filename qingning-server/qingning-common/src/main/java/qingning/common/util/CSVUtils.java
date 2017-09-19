@@ -25,7 +25,7 @@ public class CSVUtils {
     		if(os != null && os.toLowerCase().indexOf("windows") > -1){
     			outPutPath = "d:\\export\\";
     		}else{
-    			outPutPath = MiscUtils.getConfigKey("export_path")+MiscUtils.formatDate(String.valueOf(System.currentTimeMillis()));
+    			outPutPath = MiscUtils.getConfigByKey("export_path")+MiscUtils.formatDate(String.valueOf(System.currentTimeMillis()));
     		}
     	}
         File csvFile = null;

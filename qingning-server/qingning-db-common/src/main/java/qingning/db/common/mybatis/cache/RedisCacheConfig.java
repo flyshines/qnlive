@@ -26,9 +26,9 @@ import java.lang.reflect.Method;
 @Configuration
 @EnableCaching
 public class RedisCacheConfig extends CachingConfigurerSupport {
-    private static String redis_ip = CacheUtil.getConfigKey("redis.ip");
-    private static String redis_port = CacheUtil.getConfigKey("redis.port");
-    private static String redis_pass = CacheUtil.getConfigKey("redis.pass");
+    private static String redis_ip = CacheUtil.getConfigByKey("redis.ip");
+    private static String redis_port = CacheUtil.getConfigByKey("redis.port");
+    private static String redis_pass = CacheUtil.getConfigByKey("redis.pass");
     private static long defaultCacheTime = 60 * 60 * 2; //默认缓存2小时，保证缓存热点数据
 
     @Bean

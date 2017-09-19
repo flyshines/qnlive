@@ -35,8 +35,8 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
 
 
     private void processClassIfyCoursesCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        String appName = requestEntity.getAppName();
-        ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
+
+        ((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
                 log.debug("执行课程列表刷新工作");
                 for(String lecturer_id : lecturerSet){
@@ -57,12 +57,11 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
-                String likeAppNmae = "%"+appName+"%";
-                List<Map<String, Object>> classifyList = classifyInfoMapper.findClassifyInfoByAppName(likeAppNmae);
+                List<Map<String, Object>> classifyList = classifyInfoMapper.findClassifyInfoBy();
                 for(Map<String, Object> classify :classifyList ){
                     String classify_id = classify.get("classify_id").toString();
                     Map<String,Object> map = new HashMap<>();
-                    map.put("appName",appName);
+
                     map.put("classify_id",classify_id);
                     String courseClassifyIdFinishKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_FINISH, map);
                     String courseClassifyIdPredictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);//????

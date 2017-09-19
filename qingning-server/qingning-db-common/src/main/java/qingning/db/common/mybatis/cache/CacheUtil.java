@@ -51,7 +51,7 @@ public class CacheUtil {
         }
         return propertiesMap;
     }
-    public static String getConfigKey(String key) {
+    public static String getConfigByKey(String key) {
         String value="";
         if(StringUtils.isEmpty(key)){
             return null;

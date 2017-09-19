@@ -28,13 +28,13 @@ public class SaveCourseMessageService extends AbstractMsgService{
 	@Override
 	public void process(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception {
 		Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-		String appName = requestEntity.getAppName();
+
 		//批量读取缓存中的内容
 		Map<String, Object> map = new HashMap<>();
 		map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
 		String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, map);//COURSE:{course_id}:MESSAGE_LIST
 
-		Jedis jedisObject = jedisUtils.getJedis(appName);
+		Jedis jedisObject = jedisUtils.getJedis();
 
 		//1.从缓存中查询该课程的消息列表
 		Set<String> messageIdList = jedisObject.zrange(messageListKey, 0, -1);//jedisObject.zrevrange(messageListKey, 0 , -1);
@@ -46,7 +46,7 @@ public class SaveCourseMessageService extends AbstractMsgService{
 		//2.批量从缓存中读取消息详细信息
 		List<Map<String,Object>> messageList = new ArrayList<>();
 		List<String> messageKeyList = new ArrayList<>();
-		JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis(appName);
+		JedisBatchCallback callBack = (JedisBatchCallback)jedisUtils.getJedis();
 		callBack.invoke(new JedisBatchOperation(){
 			@Override
 			public void batchOperation(Pipeline pipeline, Jedis jedis) {

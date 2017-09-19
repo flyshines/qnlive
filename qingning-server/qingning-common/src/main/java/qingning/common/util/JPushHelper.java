@@ -18,7 +18,7 @@ public class JPushHelper {
 	 */
 	public static Map<String, Integer> msgCount = new HashMap<String, Integer>();
 
-	public static void push(JSONObject obj,String appName) {
+	public static void push(JSONObject obj) {
 		logger.debug(obj.toJSONString());
 
 		JSONObject user = JSON.parseObject(obj.getString("user"));
@@ -68,7 +68,7 @@ public class JPushHelper {
 //				msgCount.remove(m_user_id);
 //			}
 			
-			JGMsgUtil.sendMsg("all", audiences, contents, count, msgType,sendType,extras_map,appName);
+			JGMsgUtil.sendMsg("all", audiences, contents, count, msgType,sendType,extras_map);
 			logger.info("====远程推送结束====");
 		} catch (Exception e) {
 			logger.error("远程推送发生错误：", e);

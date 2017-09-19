@@ -8,7 +8,7 @@ import java.util.Map;
 public interface ClassifyInfoMapper {
     List<Map<String, Object>> findClassifyInfo();
 
-    List<Map<String, Object>> findClassifyInfoByAppName(@Param("appName")String appName);
+    List<Map<String, Object>> findClassifyInfoBy();
 
     /**
      * 新增分类

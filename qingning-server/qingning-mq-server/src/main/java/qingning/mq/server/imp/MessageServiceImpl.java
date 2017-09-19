@@ -24,8 +24,8 @@ public class MessageServiceImpl implements MessageService {
 
 
     
-    public boolean sendMessageWithDream(String phone, String content,String appName) {
-        String result = SendMsgUtil.sendMsgCode(phone, content,appName);
+    public boolean sendMessageWithDream(String phone, String content) {
+        String result = SendMsgUtil.sendMsgCode(phone, content);
         logger.info("【梦网】（" + phone + "）发送短信内容（" + content + "）返回结果：" + result);
         if(!"success".equalsIgnoreCase(SendMsgUtil.validateCode(result))){
             return false;
@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
 
 
     public static void main(String[] args) {
-        new MessageServiceImpl().sendMessageWithDream("18676365713","梦网测试成功!","qnlive");
+        new MessageServiceImpl().sendMessageWithDream("18676365713","梦网测试成功!");
     }
 
 

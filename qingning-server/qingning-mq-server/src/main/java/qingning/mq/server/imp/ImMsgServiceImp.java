@@ -69,16 +69,12 @@ public class ImMsgServiceImp implements ImMsgService {
     	try{
 			Map<String,Object> body = imMessage.getBody();
 			String msgType = body.get("msg_type").toString();
-			String appName = body.get("app_name").toString();
-			if(appName == null || appName.equals("")){
-				appName = Constants.HEADER_APP_NAME;
-			}
 			switch (msgType){
 				case "1"://存储聊天消息
-					processSaveCourseMessages(imMessage, jedisUtils, context,appName);
+					processSaveCourseMessages(imMessage, jedisUtils, context);
 					break;
 				case "2"://禁言
-					processCourseBanUser(imMessage, jedisUtils, context,appName);
+					processCourseBanUser(imMessage, jedisUtils, context);
 					break;
 			}
 		}catch(Exception e){
@@ -97,15 +93,15 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param context
 	 */
 	@SuppressWarnings("unchecked")
-	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context,String appName) {
+	private void processSaveCourseMessages(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----聊天消息------"+JSON.toJSONString(imMessage));
-		if(duplicateMessageFilter(imMessage, jedisUtils,appName)){ //判断课程消息是否重复
+		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
 			return;
 		}
 		Map<String,Object> body = imMessage.getBody();
 		final Map<String,Object> information = (Map<String,Object>)body.get("information");//获取信息
 
-		Jedis jedis = jedisUtils.getJedis(appName);//缓存
+		Jedis jedis = jedisUtils.getJedis();//缓存
 		Map<String, Object> map = new HashMap<>();
 		String imid = body.get("mid").toString();
 
@@ -133,7 +129,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //		if(courseMap.get("real_start_time") == null && information.get("creator_id") != null){
 //			if(courseMap.get("lecturer_id").equals(information.get("creator_id"))){
 //				long now = System.currentTimeMillis();
-//				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigKey("course_ready_start_msec"));
+//				long ready_start_time = Long.parseLong(courseMap.get("start_time")) - Long.parseLong(MiscUtils.getConfigByKey("course_ready_start_msec"));
 //				long dealine =  Long.parseLong(courseMap.get("start_time")) + 15*60*1000;
 //				if(now > ready_start_time &&  now <= dealine){
 //					SimpleDateFormat sdf =   new SimpleDateFormat("yyyy年MM月dd日HH:mm");
@@ -141,7 +137,7 @@ public class ImMsgServiceImp implements ImMsgService {
 //					Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
 //					TemplateData first = new TemplateData();
 //					first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-//					first.setValue(MiscUtils.getConfigKey("wpush_start_lesson_first"));
+//					first.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_first"));
 //					templateMap.put("first", first);
 //
 //					TemplateData orderNo = new TemplateData();
@@ -156,20 +152,20 @@ public class ImMsgServiceImp implements ImMsgService {
 //
 //
 //					TemplateData remark = new TemplateData();
-//					if(appName.equals(Constants.HEADER_APP_NAME)){
+//					if(.equals(Constants.HEADER_APP_NAME)){
 //						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
 //					}else{
 //						remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
 //					}
-//					remark.setValue(MiscUtils.getConfigKey("wpush_start_lesson_remark"));
+//					remark.setValue(MiscUtils.getConfigByKey("wpush_start_lesson_remark"));
 //					templateMap.put("remark", remark);
 //					//查询报名了的用户id
 //					List<String> findFollowUserIds =  coursesStudentsMapper.findUserIdsByCourseId(courseMap.get("course_id"));
 //
-//					String url = MiscUtils.getConfigByKey("course_live_room_url",appName);
+//					String url = MiscUtils.getConfigByKey("course_live_room_url");
 //					url=String.format(url,  courseMap.get("course_id"),courseMap.get("room_id"));
 //					if (findFollowUserIds!=null && findFollowUserIds.size()>0) {
-//						weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson",appName),url,templateMap, jedis,appName);
+//						weiPush(findFollowUserIds, MiscUtils.getConfigByKey("wpush_start_lesson"),url,templateMap, jedis);
 //					}
 //
 //				}
@@ -309,10 +305,8 @@ public class ImMsgServiceImp implements ImMsgService {
             Map<String,Object> processMap = new HashMap<>();
             processMap.put("course_id", (String)information.get("course_id"));
             messageRequestEntity.setParam(processMap);
-			messageRequestEntity.setAppName(appName);
             try {
             	SaveCourseMessageService saveCourseMessageService = this.getSaveCourseMessageService(context);
-
             	if(saveCourseMessageService != null){
             		saveCourseMessageService.process(messageRequestEntity, jedisUtils, null);
             	}
@@ -323,7 +317,7 @@ public class ImMsgServiceImp implements ImMsgService {
             //1.8如果存在课程音频信息
 //            RequestEntity audioRequestEntity = new RequestEntity();
 //            audioRequestEntity.setParam(processMap);
-//			messageRequestEntity.setAppName(appName);
+//			message
 //            try {
 //            	SaveCourseAudioService saveCourseAudioService=this.getSaveCourseAudioService(context);
 //            	if(saveCourseAudioService!=null){
@@ -379,12 +373,12 @@ public class ImMsgServiceImp implements ImMsgService {
 	 * @param context
 	 */
 
-	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context,String appName) {
+	private void processCourseBanUser(ImMessage imMessage, JedisUtils jedisUtils, ApplicationContext context) {
 		log.debug("-----禁言信息------"+JSON.toJSONString(imMessage));
-		if(duplicateMessageFilter(imMessage, jedisUtils,appName)){ //判断课程消息是否重复
+		if(duplicateMessageFilter(imMessage, jedisUtils)){ //判断课程消息是否重复
 			return;
 		}
-		Jedis jedis = jedisUtils.getJedis(appName);
+		Jedis jedis = jedisUtils.getJedis();
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String banStatus = information.get("ban_status").toString();
@@ -554,7 +548,7 @@ public class ImMsgServiceImp implements ImMsgService {
      * @param templateId
      * @param templateMap
      */
-    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap,Jedis jedis,String appName){
+    public void weiPush(List<String> findFollowUserIds,String templateId,String url,Map<String, TemplateData> templateMap,Jedis jedis){
     	// 推送   关注的直播间有创建新的课程
         	Map<String, Object> map = new HashMap<String, Object>();
         	map.put("list", findFollowUserIds);
@@ -562,14 +556,14 @@ public class ImMsgServiceImp implements ImMsgService {
 			if (findOpenIds!=null && findOpenIds.size()>0) {
 				for (String openId : findOpenIds) {
 					//TODO
-					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis,appName);
+					WeiXinUtil.send_template_message(openId, templateId,url, templateMap, jedis);
 				} 
 			} 
     }
 
 	//根据course_id和消息id对重复消息进行过滤
-	private boolean duplicateMessageFilter(ImMessage imMessage, JedisUtils jedisUtils,String appName){
-		Jedis jedis = jedisUtils.getJedis(appName);
+	private boolean duplicateMessageFilter(ImMessage imMessage, JedisUtils jedisUtils){
+		Jedis jedis = jedisUtils.getJedis();
 		Map<String,Object> body = imMessage.getBody();
 		Map<String,Object> information = (Map<String,Object>)body.get("information");
 		String courseId = information.get("course_id").toString();

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.SaaSBannerMapper" >
   <sql id="Base_Column_List" >
-    banner_id, banner_img, shop_id ,banner_name, banner_title, link_to,link_id, link_type, create_time, status ,app_name ,position
+    banner_id, banner_img, shop_id ,banner_name, banner_title, link_to,link_id, link_type, create_time, status  ,position
   </sql>
   <select id="selectByPrimaryKey" resultType="java.util.Map" parameterType="java.lang.String" >
     select 

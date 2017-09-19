@@ -6,7 +6,7 @@
 				<auth>
 					<access_token require="Y" />
 					<timesLimit millisecond="100" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -19,7 +19,7 @@
 			<function name="userCourses">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"/>
@@ -54,7 +54,7 @@
 			<function name="roomInfo">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="room_id" type="string" require="Y,000100"  />
@@ -80,7 +80,7 @@
 			<function name="courseDetailInfo">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -131,7 +131,7 @@
 			<function name="roomCourses">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="int" require="N"  />
@@ -168,7 +168,7 @@
 			<function name="joinCourse">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 					<timesLimit millisecond="50" />
 				</auth>
 				<inputs>
@@ -182,7 +182,7 @@
 			<function name="joinSeries">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 					<timesLimit millisecond="50" />
 				</auth>
 				<inputs>
@@ -195,7 +195,7 @@
 			<function name="courseInfo">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -257,7 +257,7 @@
 			<function name="courseStudents">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="course_id" type="string" require="Y,000100"  />
@@ -279,7 +279,7 @@
 			<function name="getUserConsumeRecords">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="N"  />
@@ -311,7 +311,7 @@
 			<function name="getUserIncomeRecords">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N"  />
@@ -334,7 +334,7 @@
 			<function name="noticeRooms">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -359,7 +359,7 @@
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="10" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="int"/>
@@ -386,7 +386,7 @@
 			<function name="getCourseOrLiveRoom">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="id" type="string" require="Y,000100"/>
@@ -400,7 +400,7 @@
 			<function name="insertAllUserGains">
 				<auth>
 					<access_token require="N" />
-					<appName require="N" />
+
 				</auth>
 				<inputs>
 				</inputs>
@@ -411,7 +411,7 @@
 			<function name="userGains">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 				</inputs>
@@ -435,7 +435,7 @@
 				<auth>
 					<accessToken require="Y" />
 					<timesLimit millisecond="2000" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="user_name" type="string" require="true, 000100"/>
@@ -451,7 +451,7 @@
 			<function name="getWithdrawList">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" />
@@ -470,7 +470,7 @@
 			<function name="getWithdrawListAll">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
+					< require="Y, 000100" />
 					<version require="N" />
 				</auth>
 				<inputs>
@@ -509,7 +509,7 @@
 			<function name="getWithdrawListFinance">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
+					< require="Y, 000100" />
 					<version require="N" />
 				</auth>
 				<inputs>
@@ -547,7 +547,7 @@
 			<function name="getWithdrawListSaaS">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
+					< require="Y, 000100" />
 					<version require="N" />
 				</auth>
 				<inputs>
@@ -579,7 +579,7 @@
 			<function name="handleWithDrawResult">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
+					< require="Y, 000100" />
 					<version require="N" />
 				</auth>
 				<inputs>
@@ -593,7 +593,7 @@
 			<function name="userSeries">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="string" />
@@ -620,7 +620,7 @@
 			<function name="getRoomSeries">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="string" />
@@ -648,7 +648,7 @@
 			<function name="getSeriesDetailInfo">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y,000100"  />
@@ -695,7 +695,7 @@
 			<function name="getSerieCourse">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" require="Y,000100"  />
@@ -724,7 +724,7 @@
 			<function name="studySeries">
 				<auth>
 					<access_token require="Y" />
-					<appName require="Y" />
+
 				</auth>
 				<inputs>
 					<param name="series_id" type="string" />
@@ -753,7 +753,7 @@
 			<function name="getOrderListAll">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="Y, 000100" />
+					< require="Y, 000100" />
 					<version require="N" />
 				</auth>
 				<inputs>
@@ -789,7 +789,7 @@
 			<function name="exportOrderListAll">
 				<auth>
 					<accessToken require="Y" />
-					<appName require="N" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="string" require="Y" />
@@ -825,7 +825,7 @@
 			<function name="mySingleCourseList">
 				<auth>
 					<accessToken require="Y, 000100" />
-					<appName require="N" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N" />
@@ -849,7 +849,7 @@
 			<function name="mySeriesCourseList">
 				<auth>
 					<accessToken require="Y, 000100" />
-					<appName require="N" />
+
 				</auth>
 				<inputs>
 					<param name="page_count" type="long" require="N" />

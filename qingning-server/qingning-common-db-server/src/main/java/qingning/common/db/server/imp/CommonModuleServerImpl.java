@@ -121,8 +121,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> getServerUrlByAppName(String appName) {
-		return serverFunctionMapper.getServerUrlByAppName(appName);
+	public List<Map<String, Object>> getServerUrlBy() {
+		return serverFunctionMapper.getServerUrlBy();
 	}
 
 	@Override
@@ -491,7 +491,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			coursesStudentsMapper.insertStudent(student);
 
 		}
-		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
+		countUserGains(distributerId,amount,lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
 		return profitRecord;
 	}
 
@@ -522,7 +522,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 
 	}
-	private Map<String,Object> initGains(String userId,String appName){
+	private Map<String,Object> initGains(String userId){
 		//初始化用户收入信息
 		List<String> ids = new ArrayList<>();
 		ids.add(userId);
@@ -532,7 +532,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 		List<Map<String, Object>> userIdList = new ArrayList<>();
 		Map<String, Object> user = new HashMap<>();
-		user.put("app_name",appName);
 		user.put("user_id",userId);
 		userIdList.add(user);
 
@@ -547,12 +546,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	/**
 	 * @param distributerId		分销ID
 	 * @param amount			支付金额
-	 * @param appName			app名称
 	 * @param lecturerId		讲师ID
 	 * @param distributeRate	分销员收益比例
 	 * @param courseType	            1:直播收入,2:店铺收入（非直播间收入）
 	 */
-	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate,String courseType,Map<String,Object> profitRecord){
+	private void countUserGains(String distributerId,Long amount,String lecturerId,long distributeRate,String courseType,Map<String,Object> profitRecord){
 		double rate = DoubleUtil.divide( (double) distributeRate,10000D);
 		//讲师收益
 		Map<String,Object> lectureGains = new HashMap<>();
@@ -561,7 +559,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> lectureGainsOld = userGainsMapper.findUserGainsByUserId(lecturerId);
 		if(lectureGainsOld == null){
 			//如果统计未找到做规避
-			lectureGainsOld = initGains(lecturerId,appName);
+			lectureGainsOld = initGains(lecturerId);
 		}
 		//讲师收益
 		long lectureTotalAmount;
@@ -574,7 +572,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		//余额统计
 		if(distributerId!=null){
 			//分销课程收益逻辑
-			if(Constants.HEADER_APP_NAME.equals(appName)){
+			//if(Constants.HEADER_APP_NAME.equals()){
 				//qnlive逻辑
 				//分销员总/实际 收益
 				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
@@ -582,30 +580,30 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 				//讲师总/实际 收益
 				lectureTotalAmount = amount - distTotalAmount;
 				lectureRealAmount = lectureTotalAmount;
-			}else{
-				//dlive逻辑
-				//分销员总/实际 收益
-				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
-				distRealAmount = DoubleUtil.mulForLong(DoubleUtil.mulForLong(amount,rate),Constants.USER_RATE);
-				//讲师总/实际 收益
-				lectureTotalAmount = amount - distTotalAmount;
-				lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
-			}
+//			}else{
+//				//dlive逻辑
+//				//分销员总/实际 收益
+//				distTotalAmount = DoubleUtil.mulForLong(amount,rate);
+//				distRealAmount = DoubleUtil.mulForLong(DoubleUtil.mulForLong(amount,rate),Constants.USER_RATE);
+//				//讲师总/实际 收益
+//				lectureTotalAmount = amount - distTotalAmount;
+//				lectureRealAmount = DoubleUtil.mulForLong(lectureTotalAmount,Constants.USER_RATE);
+//			}
 		}else{
 			//直播间收益逻辑
-			if(Constants.HEADER_APP_NAME.equals(appName)){
+//			if(Constants.HEADER_APP_NAME.equals()){
 				//qnlive逻辑
 				//讲师总收益
 				lectureTotalAmount = amount;
 				//讲师实际收益
 				lectureRealAmount = amount;
-			}else{
-				//dlive逻辑
-				//讲师总收益
-				lectureTotalAmount = amount;
-				//讲师实际收益
-				lectureRealAmount = DoubleUtil.mulForLong(amount,Constants.USER_RATE);
-			}
+//			}else{
+//				//dlive逻辑
+//				//讲师总收益
+//				lectureTotalAmount = amount;
+//				//讲师实际收益
+//				lectureRealAmount = DoubleUtil.mulForLong(amount,Constants.USER_RATE);
+//			}
 		}
 		//更新t_user_gains 讲师收益统计
 		//直播间收入
@@ -638,7 +636,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			Map<String,Object> distGainsOld = userGainsMapper.findUserGainsByUserId(distributerId);
 			if(distGainsOld == null){
 				//如果统计未找到做规避
-				distGainsOld = initGains(distributerId,appName);
+				distGainsOld = initGains(distributerId);
 			}
 			//分销收入
 			long distributerTotalAmountOld = Long.valueOf(distGainsOld.get("distributer_total_amount").toString());
@@ -921,8 +919,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findClassifyInfoByAppName(String appName) {
-		return classifyInfoMapper.findClassifyInfoByAppName(appName);
+	public List<Map<String, Object>> findClassifyInfoBy() {
+		return classifyInfoMapper.findClassifyInfoBy();
 	}
 
 	@Override
@@ -941,8 +939,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findBannerInfoAllByAppName(String appName) {
-		return bannerInfoMapper.findBannerInfoAllByAppName(appName);
+	public List<Map<String, Object>> findBannerInfoAllBy() {
+		return bannerInfoMapper.findBannerInfoAllBy();
 	}
 
 
@@ -968,8 +966,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findSystemConfigByAppName(String appName) {
-		return systemConfigMapper.findSystemConfigByAppName(appName);
+	public List<Map<String, Object>> findSystemConfigBy( ) {
+		return systemConfigMapper.findSystemConfigBy();
 	}
 
 	@Override
@@ -1285,7 +1283,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		//1.插入直播间表
 		Map<String,Object> liveRoom = new HashMap<String,Object>();
 		liveRoom.put("room_id", reqMap.get("room_id"));
-		liveRoom.put("appName",reqMap.get("appName"));
+		liveRoom.put("",reqMap.get(""));
 		liveRoom.put("user_id", reqMap.get("user_id"));
 		liveRoom.put("rq_code", reqMap.get("room_id"));
 		liveRoom.put("room_address", reqMap.get("room_address"));

@@ -41,8 +41,8 @@ public class SeriesCourseServerImpl extends AbstractMsgService {
 
 
     private void processSeriesCourseCache(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) {
-        String appName = requestEntity.getAppName();
-        ((JedisBatchCallback)jedisUtils.getJedis(appName)).invoke(new JedisBatchOperation(){
+
+        ((JedisBatchCallback)jedisUtils.getJedis()).invoke(new JedisBatchOperation(){
             private void processCached(Set<String> lecturerSet, Pipeline pipeline, Jedis jedis){
                 jedis.del( Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM);
                 for(String lecturerId : lecturerSet) {

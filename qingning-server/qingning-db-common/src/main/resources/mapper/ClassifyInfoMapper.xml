@@ -6,8 +6,8 @@
     select * from t_classify_info where is_use=1
   </select>
 
-  <select id="findClassifyInfoByAppName" resultType="hashmap">
-    select * from t_classify_info where is_use=1 and app_names like #{appName}
+  <select id="findClassifyInfoBy" resultType="hashmap">
+    select * from t_classify_info where is_use=1 and app_names like #{}
   </select>
   
   <!-- 后台_新增分类 -->
@@ -65,7 +65,7 @@
   <select id="findClassifyListByMap" resultType="hashmap" parameterType="hashmap">
     select * from t_classify_info
     <where>
-    	app_names like '%${appName}%'
+    	app_names like '%${}%'
     	<if test="is_use != null">
     		and is_use = #{is_use}
     	</if>

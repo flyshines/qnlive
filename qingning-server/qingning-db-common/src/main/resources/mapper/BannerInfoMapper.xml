@@ -7,9 +7,9 @@
     select * from t_banner_info where  `status` = 1
   </select>
 
-  <select id="findBannerInfoAllByAppName" resultType="hashmap">
+  <select id="findBannerInfoAllBy" resultType="hashmap">
     SELECT * FROM t_banner_info
-	WHERE `status` = 1 AND app_name = #{appName}
+	WHERE `status` = 1 AND app_name = #{}
 	ORDER BY score ASC, create_time DESC 
   </select>
   

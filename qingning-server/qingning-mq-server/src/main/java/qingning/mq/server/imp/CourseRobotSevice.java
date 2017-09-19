@@ -317,7 +317,7 @@ public class CourseRobotSevice extends AbstractMsgService {
         if (!didInitRobots) {
             robotInit();
         }
-        robotManage(course_id, jedisUtils.getJedis(requestEntity.getAppName()));
+        robotManage(course_id, jedisUtils.getJedis());
     }
 
     @FunctionName("courseHaveStudentIn")
@@ -327,7 +327,7 @@ public class CourseRobotSevice extends AbstractMsgService {
         if (!didInitRobots) {
             robotInit();
         }
-        robotInByStudent(course_id, jedisUtils.getJedis(requestEntity.getAppName()));
+        robotInByStudent(course_id, jedisUtils.getJedis());
     }
 
 }

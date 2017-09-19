@@ -20,8 +20,6 @@ public class RequestEntity {
 	private Object param  = null;	
 	@JsonProperty("timeStamp")
 	private long timeStamp;
-	@JsonProperty("appName")
-	private String appName;
 	public long getTimeStamp() {
 		return timeStamp;
 	}
@@ -69,12 +67,6 @@ public class RequestEntity {
 				//throw Exception
 			}
 		}
-	}
-	public String getAppName() {
-		return appName;
-	}
-	public void setAppName(String appName) {
-		this.appName = appName;
 	}
 
 }

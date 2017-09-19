@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ICommonModuleServer {
 	List<Map<String, Object>> getServerUrls();
-	List<Map<String, Object>> getServerUrlByAppName(String appName);
+	List<Map<String, Object>> getServerUrlBy();
 	Map<String,Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap);
 
 	Map<String,String> initializeRegisterUser(Map<String, Object> reqMap);
@@ -122,14 +122,14 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
 	List<Map<String,Object>> findClassifyInfo();
-	List<Map<String,Object>> findClassifyInfoByAppName(String appName);
+	List<Map<String,Object>> findClassifyInfoBy();
 
 	List<Map<String,Object>> findCourseBySearch(Map<String, Object> reqMap);
 
 	List<Map<String, Object>> findLiveRoomBySearch(Map<String,Object> record);
 
 	List<Map<String, Object>> findBannerInfoAll();
-	List<Map<String,Object>> findBannerInfoAllByAppName(String appName);
+	List<Map<String,Object>> findBannerInfoAllBy();
 
 
 	List<Map<String, Object>> findCourseByClassifyId(Map<String,Object> record);
@@ -139,7 +139,7 @@ public interface ICommonModuleServer {
 
 	public List<Map<String,Object>> findSystemConfig();
 
-	public List<Map<String,Object>> findSystemConfigByAppName(String appName);
+	public List<Map<String,Object>> findSystemConfigBy();
 
     void updateCourse(Map<String, Object> course);
 

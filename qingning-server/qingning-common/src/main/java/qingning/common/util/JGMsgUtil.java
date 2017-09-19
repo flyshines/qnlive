@@ -36,15 +36,15 @@ public class JGMsgUtil {
 //	private static String appKey = null;
 //	private static boolean apnsProduction = false;
 //	static {
-//		masterSecret = MiscUtils.getConfigKey("jg_master_secret");
-//		appKey = MiscUtils.getConfigKey("jg_app_key");
-//		apnsProduction = Boolean.valueOf(MiscUtils.getConfigKey("apns_production"));
+//		masterSecret = MiscUtils.getConfigByKey("jg_master_secret");
+//		appKey = MiscUtils.getConfigByKey("jg_app_key");
+//		apnsProduction = Boolean.valueOf(MiscUtils.getConfigByKey("apns_production"));
 //	}
 	
 	public static void sendMsg(String plat, List<String> audiences, String contents,  Integer count,
-			String msgType, String recipient, Map<String,String> extrasMap,String appName) {
+			String msgType, String recipient, Map<String,String> extrasMap) {
 
-		JPushClient jpushClient = new JPushClient(MiscUtils.getConfigByKey("jg_master_secret",appName),  MiscUtils.getConfigByKey("jg_app_key",appName));
+		JPushClient jpushClient = new JPushClient(MiscUtils.getConfigByKey("jg_master_secret"),  MiscUtils.getConfigByKey("jg_app_key"));
 		if (plat == null) {
 			plat = Platforms.all.getName();
 		}
@@ -87,7 +87,7 @@ public class JGMsgUtil {
 			audience = Audience.tag(audiences);
 		}
 
-		Options options = Options.newBuilder().setApnsProduction( Boolean.valueOf(MiscUtils.getConfigKey("apns_production"))).build();
+		Options options = Options.newBuilder().setApnsProduction( Boolean.valueOf(MiscUtils.getConfigByKey("apns_production"))).build();
 		Message message = null;
 		if(MiscUtils.isEmpty(extrasMap)){
 			message = Message.newBuilder().setMsgContent(contents).build();
@@ -154,6 +154,6 @@ public class JGMsgUtil {
 		extrasMap.put("course_id","0000df343ef902404d74b4b8a62394e9f69c");//courseId
 		extrasMap.put("im_course_id","424");//im_course_id
 		obj.put("extras_map", extrasMap);
-		JPushHelper.push(obj,"qnlive");
+		JPushHelper.push(obj);
 	}
 }

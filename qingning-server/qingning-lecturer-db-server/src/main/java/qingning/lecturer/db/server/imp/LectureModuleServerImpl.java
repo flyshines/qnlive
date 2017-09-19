@@ -96,7 +96,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		//1.插入直播间表
 		Map<String,Object> liveRoom = new HashMap<String,Object>();
 		liveRoom.put("room_id", reqMap.get("room_id"));
-		liveRoom.put("appName",reqMap.get("appName"));
+		liveRoom.put("",reqMap.get(""));
 		liveRoom.put("user_id", reqMap.get("user_id"));
 		liveRoom.put("rq_code", reqMap.get("room_id"));
 		liveRoom.put("room_address", reqMap.get("room_address"));
@@ -174,7 +174,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 	public Map<String,Object> createCourse(Map<String, Object> reqMap) {
 		Map<String,Object> course = new HashMap<String,Object>();
 		course.put("course_id", MiscUtils.getUUId());
-		course.put("appName",reqMap.get("appName"));
+		course.put("",reqMap.get(""));
 		course.put("room_id", reqMap.get("room_id"));
 		course.put("lecturer_id", reqMap.get("user_id"));
 		course.put("course_title", reqMap.get("course_title"));
@@ -633,7 +633,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("series_remark", reqMap.get("series_remark"));
 		series.put("update_plan", reqMap.get("update_plan"));
 
-		series.put("series_pay_remark", String.format(MiscUtils.getConfigKey("series_pay_remark"),  reqMap.get("update_plan").toString()));
+		series.put("series_pay_remark", String.format(MiscUtils.getConfigByKey("series_pay_remark"),  reqMap.get("update_plan").toString()));
 		series.put("series_type", reqMap.get("series_type"));
 		series.put("series_status", reqMap.get("series_status"));
 		series.put("series_price", reqMap.get("series_price"));
@@ -645,7 +645,7 @@ public class LectureModuleServerImpl implements ILectureModuleServer {
 		series.put("classify_id", reqMap.get("classify_id"));
 		series.put("rq_code",  series.get("series_id"));
 		series.put("series_course_type", reqMap.get("series_course_type"));
-		series.put("appName",reqMap.get("appName"));
+		series.put("",reqMap.get(""));
 
 		if(!MiscUtils.isEmpty( reqMap.get("target_user"))){
 			series.put("target_user",reqMap.get("target_user"));

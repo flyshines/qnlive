@@ -18,7 +18,7 @@ public final class Constants {
 	public static final String WE_CHAT_PUSH_COLOR_QNCOLOR = "#5AD1A1"; //青柠绿 字体颜色 色码
 	public static final String WE_CHAT_PUSH_COLOR_DLIVE = "#FD6924";//dlive 橙色 字体颜色 色码
 	public static final String COURSE_DEFAULT_CLASSINFY="9";//课程默认属性
-	public static final String HEADER_APP_NAME = "qnlive";//默认appName
+	public static final String HEADER_APP_NAME = "qnlive";//默认
 	public static final String SYS_QN_SHARING_VERSION ="1.2";//请求头参数
 	public static final String SYS_QN_SHARING_CONTENT_TYPE ="application/json;charset=UTF-8";//请求头参数
 	public static final int LECTURER_PREDICTION_COURSE_LIST_SIZE = 20;
@@ -137,7 +137,7 @@ public final class Constants {
 	public static final String INPUTS = "inputs";
 	public static final String OUTPUTS = "outputs";
 	public static final String ACCESSTOKEN = "accessToken";
-	public static final String APP_NAME = "appname";
+	public static final String APP_NAME = "";
 	public static final String REQUIRE = "require";
 	public static final String TIMESLIMIT = "timesLimit";
 	public static final String MILLISECOND = "millisecond";

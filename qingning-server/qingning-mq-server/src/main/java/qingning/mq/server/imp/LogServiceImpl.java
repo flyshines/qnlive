@@ -94,7 +94,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		Map<String,Object> clientSideInfo = (Map<String,Object>)requestEntity.getParam();
     		if(MiscUtils.isEmpty(clientSideInfo)) return;
     		
-    		preparedLoginUserInfoData(clientSideInfo, jedisUtils,requestEntity.getAppName());
+    		preparedLoginUserInfoData(clientSideInfo, jedisUtils);
     		
     		Map<String,String> clientSideInfoStrMap = new HashMap<String,String>();
     		MiscUtils.converObjectMapToStringMap(clientSideInfo, clientSideInfoStrMap);
@@ -102,7 +102,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		if("0".equals(clientSideInfo.get("status"))){
     			insertActiveDeviceDB(clientSideInfoStrMap);
     		} else if(!"2".equals(clientSideInfo.get("status"))){
-    			insertUserDB(clientSideInfoStrMap,jedisUtils,requestEntity.getAppName());
+    			insertUserDB(clientSideInfoStrMap,jedisUtils);
     		}
     		
     	}catch(Exception e){
@@ -110,12 +110,12 @@ public class LogServiceImpl extends AbstractMsgService {
     	}
     }
     
-    private void preparedLoginUserInfoData(Map<String,Object> map, JedisUtils jedisUtils,String appName){
+    private void preparedLoginUserInfoData(Map<String,Object> map, JedisUtils jedisUtils){
     	if("2".equals(map.get("status"))){
     		return;
     	}
     	
-    	Jedis jedis = jedisUtils.getJedis(appName);
+    	Jedis jedis = jedisUtils.getJedis();
     	String web_country=null;
     	String web_province=null;
     	String web_city=null;
@@ -124,7 +124,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		do{
     			try{
     				JSONObject jsonObject = WeiXinUtil.getUserByOpenid(
-    						WeiXinUtil.getAccessToken(null, null, jedis,appName).getToken(), (String) map.get("web_openid"),appName);
+    						WeiXinUtil.getAccessToken(null, null, jedis).getToken(), (String) map.get("web_openid"));
     				map.put("subscribe", jsonObject.getString("subscribe"));
     				web_country = (String)map.get("country");
     				web_province = (String)map.get("province");
@@ -160,7 +160,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		loaction = commonLocationUtils.getLocationByGeographic(longitude,latitude);
     		if(!MiscUtils.isEmpty(loaction)){ 
     			if("1".equals(loaction.get(Constants.SYS_FIELD_COUNTRY_SHORT))){    		
-	    			String coutry = jedisUtils.getConfigKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
+	    			String coutry = jedisUtils.getConfigByKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
 	    			if(MiscUtils.isEmpty(coutry)){
 	    				loaction.put(Constants.SYS_FIELD_COUNTRY, coutry);
 	    			} 
@@ -172,7 +172,7 @@ public class LogServiceImpl extends AbstractMsgService {
     	if(MiscUtils.isEmpty(loaction) && !MiscUtils.isEmpty(ip)){
     		loaction = commonLocationUtils.getLocationByIp(ip);
     		if(!MiscUtils.isEmpty(loaction) && "1".equals(loaction.get(Constants.SYS_FIELD_COUNTRY_SHORT))){
-    			String coutry = jedisUtils.getConfigKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
+    			String coutry = jedisUtils.getConfigByKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
     			if(MiscUtils.isEmpty(coutry)){
     				loaction.put(Constants.SYS_FIELD_COUNTRY, coutry);
     			}    			
@@ -183,7 +183,7 @@ public class LogServiceImpl extends AbstractMsgService {
     	if(MiscUtils.isEmpty(loaction) && !MiscUtils.isEmpty(phone_num)){    		
     		loaction = commonLocationUtils.getLocationByPhoneNumber(phone_num);
     		if(!MiscUtils.isEmpty(loaction) && "1".equals(loaction.get(Constants.SYS_FIELD_COUNTRY_SHORT))){
-    			String coutry = jedisUtils.getConfigKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
+    			String coutry = jedisUtils.getConfigByKeyValue(loaction.get(Constants.SYS_FIELD_COUNTRY));
     			if(MiscUtils.isEmpty(coutry)){
     				loaction.put(Constants.SYS_FIELD_COUNTRY, coutry);
     			}    			
@@ -197,8 +197,8 @@ public class LogServiceImpl extends AbstractMsgService {
 		}
     }
     
-    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils,String appName){
-    	Jedis jedis = jedisUtils.getJedis(appName);
+    private void insertUserDB(Map<String,String> values,JedisUtils jedisUtils){
+    	Jedis jedis = jedisUtils.getJedis();
     	String user_id = (String)values.get("user_id");
     	if(MiscUtils.isEmpty(user_id)){
     		return;

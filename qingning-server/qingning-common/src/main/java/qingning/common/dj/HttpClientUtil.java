@@ -4,25 +4,16 @@ import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -38,7 +29,7 @@ public class HttpClientUtil {
             httpClient = new SSLClient();  
             httpPost = new HttpPost(url);
             if(headerParams != null && !headerParams.isEmpty()){
-                for(Map.Entry<String,String> entry : headerParams.entrySet()){
+                for(Entry<String,String> entry : headerParams.entrySet()){
                     String value = entry.getValue();
                     if(value != null){
                         httpPost.addHeader(entry.getKey(),value);
@@ -64,16 +55,16 @@ public class HttpClientUtil {
 
 
             HttpResponse response = httpClient.execute(httpPost);
-            if(response != null){  
+            if(response != null){
                 HttpEntity resEntity = response.getEntity();
-                if(resEntity != null){  
+                if(resEntity != null){
                     result = EntityUtils.toString(resEntity,charset);
-                }  
-            }  
-        }catch(Exception ex){  
-            ex.printStackTrace();  
-        }  
-        return result;  
+                }
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return result;
     }
     public static String doPostUrl(String url,Map<String,String> headerParams,Map<String,Object> map,String charset){
         HttpClient httpClient = null;
@@ -83,7 +74,7 @@ public class HttpClientUtil {
             httpClient = new SSLClient();
             httpPost = new HttpPost(url);
             if(headerParams != null && !headerParams.isEmpty()){
-                for(Map.Entry<String,String> entry : headerParams.entrySet()){
+                for(Entry<String,String> entry : headerParams.entrySet()){
                     String value = entry.getValue();
                     if(value != null){
                         httpPost.addHeader(entry.getKey(),value);
@@ -140,7 +131,7 @@ public class HttpClientUtil {
             HttpClient httpClient = new SSLClient();
             HttpGet httpGet = new HttpGet(url);
             if(headerParams != null && !headerParams.isEmpty()){
-                for(Map.Entry<String,String> entry : headerParams.entrySet()){
+                for(Entry<String,String> entry : headerParams.entrySet()){
                     String value = entry.getValue();
                     if(value != null){
                         httpGet.addHeader(entry.getKey(),value);
@@ -197,7 +188,7 @@ public class HttpClientUtil {
             httpClient = new SSLClient();
             httpPost = new HttpPut(url);
             if(headerParams != null && !headerParams.isEmpty()){
-                for(Map.Entry<String,String> entry : headerParams.entrySet()){
+                for(Entry<String,String> entry : headerParams.entrySet()){
                     String value = entry.getValue();
                     if(value != null){
                         httpPost.addHeader(entry.getKey(),value);

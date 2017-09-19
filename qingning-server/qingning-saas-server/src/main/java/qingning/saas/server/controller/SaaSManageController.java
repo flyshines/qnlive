@@ -27,7 +27,7 @@ public class SaaSManageController extends AbstractController {
      */
     @RequestMapping(value = "/wechat/login/rqcode", method = RequestMethod.GET)
     public void wechatLogin(HttpServletResponse resp) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatLogin", null, null, null);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "wechatLogin", null, null);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
 
@@ -47,9 +47,9 @@ public class SaaSManageController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity openShop(@RequestHeader(value = "access_token") String accessToken,
-                            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
                             @RequestHeader(value = "version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "openShop", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "openShop", accessToken, version);
         return this.process(requestEntity, serviceManger, message);
     }
 
@@ -64,9 +64,9 @@ public class SaaSManageController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity shopInfo(@RequestHeader(value = "access_token") String accessToken,
-                             @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
                              @RequestHeader(value = "version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopInfo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopInfo", accessToken, version);
         return this.process(requestEntity, serviceManger, message);
     }
 
@@ -85,9 +85,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shopEdit(
             HttpEntity<Object> entity,
             @RequestHeader(value = "access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader(value = "version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopEdit", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopEdit", accessToken, version);
         if(((Map)entity.getBody()).isEmpty()){
             throw new QNLiveException("000100");
         }
@@ -108,9 +108,9 @@ public class SaaSManageController extends AbstractController {
             @RequestHeader("access_token") String accessToken,
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_count", pageSize);
         paramCode.put("page_num", pageNum);
@@ -133,9 +133,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shopBannerAdd(
             HttpEntity<Object> entity,
             @RequestHeader(value = "access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader(value = "version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerAdd", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerAdd", accessToken, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -154,9 +154,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity shopBannerInfo(
             @PathVariable(value = "banner_id") String bannerId,
             @RequestHeader(value = "access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader(value = "version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerInfo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerInfo", accessToken, version);
         Map<String,String> param = new HashMap<>();
         param.put("banner_id",bannerId);
         requestEntity.setParam(param);
@@ -180,9 +180,9 @@ public class SaaSManageController extends AbstractController {
             HttpEntity<Object> entity,
             @PathVariable("banner_id") String bannerId,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerEdit", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerEdit", accessToken, version);
         Map<String,String> param = (Map)entity.getBody();
         param.put("banner_id",bannerId);
         requestEntity.setParam(param);
@@ -205,9 +205,9 @@ public class SaaSManageController extends AbstractController {
             @PathVariable("banner_id") String bannerId,
             @PathVariable("type") String type,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerUpdown", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shopBannerUpdown", accessToken, version);
         Map<String,String> param = new HashMap<>();
         param.put("banner_id",bannerId);
         param.put("type",type);
@@ -230,9 +230,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity addShopSingleVideo(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -251,9 +251,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity addSeriesSingleCourse(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addSeriesSingleCourse", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addSeriesSingleCourse", accessToken, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -272,9 +272,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity editShopSingleVideo(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -294,9 +294,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity addShopSingleImages(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "addShopSingleVideo", accessToken, version);
         Map<String,String> param = (Map)entity.getBody();
         param.put("type","3");
         requestEntity.setParam(param);
@@ -317,9 +317,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity editShopSingleImages(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "editShopSingleVideo", accessToken, version);
         requestEntity.setParam(entity.getBody());
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
@@ -339,9 +339,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity getShopSingleInfo(
             @PathVariable("course_id") String courseId,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShopSingleInfo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShopSingleInfo", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("course_id",courseId);
         requestEntity.setParam(paramCode);
@@ -365,9 +365,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "type",defaultValue = "") String type,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-            RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version, appName);
+            RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSingleList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -395,9 +395,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "type",defaultValue = "4") String type,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getNoSeriesList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getNoSeriesList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -424,9 +424,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "type",defaultValue = "") String type,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getLiveList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getLiveList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -456,9 +456,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "type",defaultValue = "") String type,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "phone",defaultValue = "") String phone,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getUserList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getUserList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -486,9 +486,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "course_name",defaultValue = "") String courseName,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getMessageList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getMessageList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -515,9 +515,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "nick_name",defaultValue = "") String keyword,
             @RequestParam(value = "comment",defaultValue = "") String comment,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getFeedbackList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getFeedbackList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -545,9 +545,9 @@ public class SaaSManageController extends AbstractController {
             @PathVariable("course_id") String courseId,
             @PathVariable("type") String type,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "goodsSingleUpdown", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "goodsSingleUpdown", accessToken, version);
         Map<String,String> param = new HashMap<>();
         param.put("course_id",courseId);
         param.put("course_updown",type);
@@ -572,9 +572,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
             @RequestParam(value = "status",defaultValue = "") String status,
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesList", accessToken, version);
         Map<String, Object> paramCode = new HashMap<>();
         paramCode.put("page_size", pageSize);
         paramCode.put("page_num", pageNum);
@@ -599,9 +599,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity getSeriesDetailInfo(
             @PathVariable("series_id") String series_id,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesInfo", accessToken, version,appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesInfo", accessToken, version);
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("series_id", series_id);
         requestEntity.setParam(param);
@@ -622,9 +622,9 @@ public class SaaSManageController extends AbstractController {
             @PathVariable(value = "series_id") String series_id,
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesCourseList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesCourseList", accessToken, version);
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("series_id", series_id);
         param.put("page_size", pageSize);
@@ -647,9 +647,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getBannerCourseList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getBannerCourseList", accessToken, version);
         Map<String,Object> param = new HashMap<>();
         param.put("type",type);
         param.put("page_size", pageSize);
@@ -673,9 +673,9 @@ public class SaaSManageController extends AbstractController {
             @PathVariable(value = "series_id") String series_id,
             @RequestParam(value = "user_id") String user_id,
             @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesUserList", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getSeriesUserList", accessToken, version);
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("series_id", series_id);
         param.put("user_id", user_id);
@@ -694,9 +694,9 @@ public class SaaSManageController extends AbstractController {
     @RequestMapping(value="/user/gains",method=RequestMethod.GET)
     public @ResponseBody ResponseEntity  userGains(
             @RequestHeader("access_token") String access_token,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userGains", access_token, version,appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "userGains", access_token, version);
         Map<String, Object> parMap = new HashMap<>();
         requestEntity.setParam(parMap);
         return this.process(requestEntity, serviceManger, message);
@@ -712,7 +712,7 @@ public class SaaSManageController extends AbstractController {
      * @param user_id       用户ID
      * @param goods_id      商品ID
      * @param access_token
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -728,9 +728,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "user_id",defaultValue = "") String user_id,
             @RequestParam(value = "goods_id",defaultValue = "") String goods_id,
             @RequestHeader("access_token") String access_token,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "gainsOrdersList", access_token, version,appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "gainsOrdersList", access_token, version);
         Map<String, Object> parMap = new HashMap<>();
         parMap.put("page_size",pageSize);
         parMap.put("page_num",pageNum);
@@ -760,9 +760,9 @@ public class SaaSManageController extends AbstractController {
     public @ResponseBody ResponseEntity  verifyVerificationCode(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name",defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version)throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bindPhone", accessToken, version,appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bindPhone", accessToken, version);
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
     }
@@ -774,7 +774,7 @@ public class SaaSManageController extends AbstractController {
      * @param shelves_id  上架id
      * @param shelves_type 上架类型  0课程 1系列
      * @param classify_id 分类id
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -787,9 +787,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "shelves_type", defaultValue = "1") int shelves_type,
             @RequestParam(value = "classify_id") Integer classify_id,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shelvesQNSharing", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "shelvesQNSharing", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shelves_id",shelves_id);
         param.put("shelves_type",shelves_type);
@@ -807,7 +807,7 @@ public class SaaSManageController extends AbstractController {
      * @param lecturer_identity 讲师身份 讲师身份  0:普通讲师  1:签约讲师
      * @param create_from 创建来源  0:saas 1:内部
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -822,9 +822,9 @@ public class SaaSManageController extends AbstractController {
             @RequestParam(value = "lecturer_identity", defaultValue = "") String lecturer_identity,
             @RequestParam(value = "create_from", defaultValue = "") String create_from,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShops", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "getShops", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("page_size",page_size);
         param.put("page_num",page_num);
@@ -844,7 +844,7 @@ public class SaaSManageController extends AbstractController {
     /**
      * 讲师详情
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -855,9 +855,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity getShops(
             @RequestParam(value = "lecturer_id", defaultValue = "") String lecturer_id,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "lecturerInfo", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "lecturerInfo", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("lecturer_id",lecturer_id);
         requestEntity.setParam(param);
@@ -869,7 +869,7 @@ public class SaaSManageController extends AbstractController {
      * 开通知享
      * @param open_code 邀请码(当前邀请码：137258)
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -880,9 +880,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity sharingOpen(
             @RequestParam(value = "open_code") String open_code,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "sharingOpen", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "sharingOpen", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("open_code",open_code);
         requestEntity.setParam(param);
@@ -893,7 +893,7 @@ public class SaaSManageController extends AbstractController {
     /**
      * 删除店铺轮播图
      * @param accessToken
-     * @param appName
+     * @param
      * @param version
      * @return
      * @throws Exception
@@ -904,9 +904,9 @@ public class SaaSManageController extends AbstractController {
     ResponseEntity bannerRemove(
             HttpEntity<Object> entity,
             @RequestHeader("access_token") String accessToken,
-            @RequestHeader(value = "app_name", defaultValue = Constants.HEADER_APP_NAME) String appName,
+
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bannerRemove", accessToken, version, appName);
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bannerRemove", accessToken, version);
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
     }
