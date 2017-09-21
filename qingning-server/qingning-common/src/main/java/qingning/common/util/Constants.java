@@ -67,6 +67,10 @@ public final class Constants {
 	public static final String CACHED_KEY_CLASSIFY = "classify_id";//分类id
 	public static final String FIELD_MESSAGE_ID="message_imid";//消息id
 
+
+
+
+	public static final String PAGING_NUMBER = "paging_number";
 	public static final String MSG_BODY_ELEMENT = "body";
 	public static final String CACHED_KEY_COURSE_PPTS_FIELD = "ppt_list";
 	public static final String CACHED_KEY_COURSE_AUDIOS_FIELD = "audio_list";
@@ -104,6 +108,9 @@ public final class Constants {
 	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";//讲师直播间
 	public static final String FUNCTION_DISTRIBUTERS_ROOM_RQ = "FUNCTION_DISTRIBUTERS_ROOM_RQ";//直播间分销
 
+
+	public static final String SYS_READ_NON_LIVE_COURSE_LIST = "SYS_READ_NON_LIVE_COURSE_LIST";//非直播课程
+	public static final String SYS_READ_FINISH_LIVE_COURSE_LIST = "SYS_READ_FINISH_LIVE_COURSE_LIST";//直播课程
 	/** Operation 公共参数 end ********************************/
 	//</editor-fold>
 
@@ -389,6 +396,54 @@ public final class Constants {
 	/*********************************嘉宾END**************************/
 	//</editor-fold>
 
+	/********************************排序的KEY***********************************/
+
+	public static final String UP="UP";
+	public static final String DOWN="DOWN";
+
+	public static final String SYS_SORT_SHOP_NON_LIVE_COUSE_UP ="SYS:SORT:SHOP:{shop_id}:NON_LIVE_COUSE:UP";//店铺 非直播 上架
+	public static final String SYS_SORT_SHOP_NON_LIVE_COUSE_UP_PAGING ="SYS:SORT:SHOP:{shop_id}:NON_LIVE_COUSE:UP:{paging_number}";//店铺 非直播 上架 分页
+
+	public static final String SYS_SORT_SHOP_GOODS_TYPE_UP ="SYS:SORT:SHOP:{shop_id}:GOODS_TYPE:{goods_type}:UP";//店铺 课程内容 上架
+	public static final String SYS_SORT_SHOP_GOODS_TYPE_UP_PAGING ="SYS:SORT:SHOP:{shop_id}:GOODS_TYPE:{goods_type}:UP:{paging_number}";//店铺 课程内容 上架 分页
+
+	public static final String SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN ="SYS:SORT:SHOP:{shop_id}:NON_LIVE_COUSE:DOWN";//店铺 非直播 下架
+	public static final String SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:NON_LIVE_COUSE:DOWN:{paging_number}";//店铺 非直播 下架 分页
 
 
+	//goods_type = 0直播 1语音 2视频 3图文
+
+	public static final String SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN ="SYS:SORT:SHOP:{shop_id}:GOODS_TYPE:{goods_type}:DOWN";//店铺 课程内容 下架
+	public static final String SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:GOODS_TYPE:{goods_type}:DOWN:{paging_number}";//店铺 课程内容 下架 分页
+
+
+
+
+
+	/*************************直播课*********************************/
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:PREDICTION:UP";//店铺 直播课 预告/正在直播 上架
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP_PAGING ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:PREDICTION:UP:{paging_number}";//店铺 直播 预告/正在直播 上架 分页
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:PREDICTION:DOWN";//店铺 直播 预告/正在直播 下架
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:PREDICTION:DOWN:{paging_number}";//店铺 直播 预告/正在直播 下架 分页
+
+
+
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:FINISH:UP";//店铺 直播课 结束 上架
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP_PAGING ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:FINISH:UP:{paging_number}";//店铺 直播 结束 上架 分页
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:FINISH:DOWN";//店铺 直播 结束 下架
+
+	public static final String SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:FINISH:DOWN:{paging_number}";//店铺 直播 结束 下架 分页
+
+
+
+
+
+	/********************************排序的KEY***********************************/
 }

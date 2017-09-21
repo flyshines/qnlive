@@ -291,6 +291,30 @@ public final class CacheUtils {
 		return values;
 	}
 
+//	/**
+//	 * 获取课程列表 并插入缓存
+//	 * @param redisKey key值
+//	 * @param requestEntity 参数
+//	 * @param operation 读取数据库
+//	 * @param score 排序值
+//	 * @param jedis 排序值
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public static void readCourseList(String redisKey,RequestEntity requestEntity, CommonReadOperation operation,String score,Jedis jedis ) throws Exception{
+//		if(!jedis.exists(redisKey)){
+//			List<HashMap<String,Object>> courseList = (List<HashMap<String, Object>>) operation.invokeProcess(requestEntity);
+//			if(MiscUtils.isEmpty(courseList)){
+//				for(HashMap<String,Object> course : courseList){
+//
+//				}
+//
+//			}
+//		}
+//		return values;
+//	}
+
+
 	public static Map<String,String> readSeries(String series_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis,boolean cachedValue) throws Exception{
 		Map<String,String> values = readData(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
 		String seriesId = values.get(Constants.CACHED_KEY_SERIES_FIELD);
