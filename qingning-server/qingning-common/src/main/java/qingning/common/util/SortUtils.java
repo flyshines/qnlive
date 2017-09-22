@@ -43,7 +43,7 @@ public class SortUtils {
     }
 
     /**
-     * 更改非直播课程缓存
+     * 更改课程缓存
      * 上架或下架
      * @param course
      * @param jedis
