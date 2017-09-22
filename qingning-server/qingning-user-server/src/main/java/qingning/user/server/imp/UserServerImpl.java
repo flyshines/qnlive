@@ -16,8 +16,8 @@ import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.CommonReadOperation;
+import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.IUserUserModuleServer;
-import qingning.user.server.other.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -32,14 +32,6 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
     private IUserUserModuleServer userModuleServer;
 
-    private ReadLiveRoomOperation readLiveRoomOperation;
-    private ReadCourseOperation readCourseOperation;
-    private ReadUserOperation readUserOperation;
-    private ReadRoomDistributer readRoomDistributer;
-    private ReadLecturerOperation readLecturerOperation;
-    private ReadRoomDistributerOperation readRoomDistributerOperation;
-    private ReadSeriesOperation readSeriesOperation;
-    private ReadShopOperation readShopOperation;
     private static Logger logger = LoggerFactory.getLogger(UserServerImpl.class);
 
     @Override
@@ -47,12 +39,9 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if (userModuleServer == null) {
             userModuleServer = this.getRpcService("userModuleServer");
 
-            readLiveRoomOperation = new ReadLiveRoomOperation(userModuleServer);
             readCourseOperation = new ReadCourseOperation(userModuleServer);
             readUserOperation = new ReadUserOperation(userModuleServer);
-            readRoomDistributer = new ReadRoomDistributer(userModuleServer);
             readLecturerOperation = new ReadLecturerOperation(userModuleServer);
-            readRoomDistributerOperation = new ReadRoomDistributerOperation(userModuleServer);
             readSeriesOperation = new ReadSeriesOperation(userModuleServer);
             readShopOperation = new ReadShopOperation(userModuleServer);
         }
@@ -75,7 +64,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         String roomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
         //查询直播间是否存在
         if (!jedis.exists(roomKey)) {
-        	readLiveRoom(roomid, this.generateRequestEntity(null, null, null, map), readLiveRoomOperation, jedis, true);
+            //TODO 店铺逻辑
+        	readLiveRoom(roomid, this.generateRequestEntity(null, null, null, map), readShopOperation, jedis, true);
         	if (!jedis.exists(roomKey)) {
         		throw new QNLiveException("100002");
         	}
@@ -462,7 +452,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         
         //查询出直播间基本信息
-        Map<String, String> infoMap = readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readLiveRoomOperation, jedis, true);
+        //TODO 店铺逻辑
+        Map<String, String> infoMap = readLiveRoom(reqMap.get("room_id").toString(), reqEntity, readShopOperation, jedis, true);
         if (CollectionUtils.isEmpty(infoMap)) {
             throw new QNLiveException("100002");
         }
@@ -492,7 +483,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Map<String,Object> queryMap = new HashMap<>();
             queryMap.put("distributer_id", userId);
             queryMap.put("room_id", reqMap.get("room_id").toString());
-            Map<String,String> roomDistributer = readDistributerRoom(userId, (String)reqMap.get("room_id"), readRoomDistributer, jedis);
+            //TODO 店铺逻辑
+            Map<String,String> roomDistributer = readDistributerRoom(userId, (String)reqMap.get("room_id"), readShopOperation, jedis);
 
             if (! MiscUtils.isEmpty(roomDistributer)) {
                roles.add("4");
@@ -514,7 +506,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         Map<String,Object> queryMap = new HashMap<>();
         queryMap.put("distributer_id", userId);
         queryMap.put("room_id", roomId);
-        Map<String,String> distributerRoom = readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
+        //TODO 分销去除
+        Map<String,String> distributerRoom = null;//readDistributerRoom(userId, roomId, readRoomDistributerOperation, jedis);
 
         boolean isDistributer = false;
         String recommend_code = null;
@@ -600,7 +593,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
         resultMap.put("student_list", userModuleServer.findLatestStudentAvatarAddList(queryMap));
         //从缓存中获取直播间信息
         reqMap.put("room_id",room_id);
-        Map<String, String> liveRoomMap = readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedis, true);
+        //TODO 店铺逻辑
+        Map<String, String> liveRoomMap = readLiveRoom(room_id, reqEntity, readShopOperation, jedis, true);
         resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
         resultMap.put("room_name", liveRoomMap.get("room_name"));
         resultMap.put("room_remark", liveRoomMap.get("room_remark"));
@@ -656,8 +650,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
                 roles.add("1");
             }
         }
-
-        Map<String,String> roomDistributer = readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedis);
+        //TODO 分销去除
+        Map<String,String> roomDistributer = null;//readDistributerRoom(userId, courseMap.get("room_id"), readRoomDistributerOperation, jedis);
         if(! MiscUtils.isEmpty(roomDistributer)){
             if(roomDistributer.get("end_date") != null){
                 Date endDate = new Date(Long.parseLong(roomDistributer.get("end_date")));
@@ -2562,7 +2556,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //从缓存中获取直播间信息
         if(!MiscUtils.isEmpty(room_id)){
-            Map<String, String> liveRoomMap = readLiveRoom(room_id, reqEntity, readLiveRoomOperation, jedis, true);
+            //TODO 店铺逻辑
+            Map<String, String> liveRoomMap = readLiveRoom(room_id, reqEntity, readShopOperation, jedis, true);
             resultMap.put("avatar_address", liveRoomMap.get("avatar_address"));
             resultMap.put("room_name", liveRoomMap.get("room_name"));
             resultMap.put("room_remark", liveRoomMap.get("room_remark"));
@@ -2607,7 +2602,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             }
         }
         if(!MiscUtils.isEmpty(room_id)){
-            Map<String,String> roomDistributer = readDistributerRoom(userId, seriesMap.get("room_id"), readRoomDistributerOperation, jedis);
+            //TODO 分销去除
+            Map<String,String> roomDistributer = null;//readDistributerRoom(userId, seriesMap.get("room_id"), readRoomDistributerOperation, jedis);
             if(! MiscUtils.isEmpty(roomDistributer)){
                 if(roomDistributer.get("end_date") != null){
                     Date endDate = new Date(Long.parseLong(roomDistributer.get("end_date")));

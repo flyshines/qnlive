@@ -10,10 +10,7 @@ import qingning.server.JedisBatchCallback;
 import qingning.server.JedisBatchOperation;
 import qingning.server.JedisServer;
 import qingning.server.rpc.CommonReadOperation;
-import qingning.server.rpc.initcache.ReadCourseOperation;
-import qingning.server.rpc.initcache.ReadSeriesOperation;
-import qingning.server.rpc.initcache.ReadShopOperation;
-import qingning.server.rpc.initcache.ReadUserOperation;
+import qingning.server.rpc.initcache.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -26,6 +23,9 @@ public class CacheUtils extends JedisServer{
 	protected ReadShopOperation readShopOperation;
 	protected ReadCourseOperation readCourseOperation;
 	protected ReadSeriesOperation readSeriesOperation;
+	protected ReadVersionOperation readAPPVersionOperation;
+	protected ReadVersionForceOperation readForceVersionOperation;
+	protected ReadLecturerOperation readLecturerOperation;
 
 	protected JedisUtils jedisUtils;
 

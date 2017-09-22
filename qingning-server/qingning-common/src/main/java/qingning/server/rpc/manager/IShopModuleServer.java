@@ -68,12 +68,6 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @return
 	 */
 	List<String> findLoginInfoByUserIds(Map<String, Object> map);
-	/**
-	 * 根据unionid 获取 userinfo
-	 * @param
-	 * @return
-	 */
-	Map<String,Object> getLoginInfoByLoginId(String unionID);
 
 	int insertLecturerDistributionLink(Map<String, Object> map);
 

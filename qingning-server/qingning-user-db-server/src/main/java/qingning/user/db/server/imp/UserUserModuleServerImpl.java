@@ -326,6 +326,11 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
+    public Map<String, Object> getLoginInfoByLoginId(String unionID) {
+        return null;
+    }
+
+    @Override
     public Map<String, Object> findCourseRecommendUserNum(Map<String, Object> reqMap) {
         return coursesStudentsMapper.findCourseRecommendUserNum(reqMap);
     }
@@ -506,6 +511,11 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
+    public List<Map<String, Object>> findSeriesStudentListBySeriesId(String seriesId) {
+        return null;
+    }
+
+    @Override
     public Map<String, Object> findSeriesBySeriesId(String series_id) {
         return seriesMapper.findSeriesBySeriesId(series_id);
     }
@@ -555,15 +565,6 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
         return tradeBillMapper.findUserOrderByCourse(queryTradeMap);
     }
 
-    @Override
-    public Map<String, Object> getShopInfo(String shopId) {
-        return shopMapper.selectByPrimaryKey(shopId);
-    }
-
-    @Override
-    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
-        return saasCourseMapper.selectByPrimaryKey(courseId);
-    }
     /**
      * 获取用户加入的单品课程列表
      */
@@ -582,5 +583,36 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     public Map<String, Object> selectAdminUserById(String userId) {
 
         return adminUserMapper.selectAdminUserById(userId);
+    }
+
+    //TODO 实现缓存方法
+    @Override
+    public List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id) {
+        return null;
+    }
+    //TODO 实现缓存方法
+    @Override
+    public Map<String, Object> getShopInfo(String shopId) {
+        return shopMapper.selectByPrimaryKey(shopId);
+    }
+    //TODO 实现缓存方法
+    @Override
+    public Map<String, Object> findLastestFinishCourse(Map<String, Object> record) {
+        return null;
+    }
+    //TODO 实现缓存方法
+    @Override
+    public List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap) {
+        return null;
+    }
+    //TODO 实现缓存方法
+    @Override
+    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+        return saasCourseMapper.selectByPrimaryKey(courseId);
+    }
+    //TODO 实现缓存方法
+    @Override
+    public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
+        return null;
     }
 }

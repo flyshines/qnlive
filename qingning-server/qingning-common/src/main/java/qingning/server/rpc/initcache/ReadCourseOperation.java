@@ -35,6 +35,10 @@ public class ReadCourseOperation implements CommonReadOperation {
         } else {
             return courseModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
         }
+
+        /*if(course==null){
+            course = commonModuleServer.findSaaSCourseByCourseId(reqMap.get("course_id").toString());
+        }*/
     }
 
     @Override

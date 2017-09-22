@@ -13,4 +13,10 @@ public interface UserModuleServer {
     List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> param);
     List<Map<String, Object>> findRoomIdByFans(Map<String, Object> param);
     List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> param);
+    /**
+     * 根据unionid 获取 userinfo
+     * @param
+     * @return
+     */
+    Map<String,Object> getLoginInfoByLoginId(String unionID);
 }

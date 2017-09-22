@@ -1,8 +1,10 @@
-package qingning.lecture.server.other;
+package qingning.server.rpc.initcache;
 
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
-import qingning.server.rpc.manager.IShopModuleServer;
+import qingning.server.rpc.VersionModuleServer;
+import qingning.server.rpc.manager.ICommonModuleServer;
+
 import java.util.Map;
 
 /**
@@ -10,20 +12,18 @@ import java.util.Map;
  * 描 述:
  * 创建日期: 2016/12/4
  */
-public class ReadLiveRoomOperation implements CommonReadOperation {
-    private IShopModuleServer lectureModuleServer;
+public class ReadVersionOperation implements CommonReadOperation {
+    private VersionModuleServer versionModuleServer;
 
-    public ReadLiveRoomOperation(IShopModuleServer lectureModuleServer) {
-        this.lectureModuleServer = lectureModuleServer;
+    public ReadVersionOperation(VersionModuleServer versionModuleServer) {
+        this.versionModuleServer = versionModuleServer;
     }
-
 
     @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-
-        return lectureModuleServer.findLiveRoomByRoomId(reqMap.get("room_id").toString());
+        return versionModuleServer.findVersionInfoByOS(reqMap);
     }
 
     @Override

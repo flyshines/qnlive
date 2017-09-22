@@ -39,19 +39,14 @@ public class ShopServerImpl extends AbstractQNLiveServer {
 	private static Logger log = LoggerFactory.getLogger(ShopServerImpl.class);
 
     private IShopModuleServer shopModuleServer;
-	//private ReadRoomDistributerOperation readRoomDistributerOperation;
-    //private ReadDistributerOperation readDistributerOperation;
 
     @Override
     public void initRpcServer() {
         if (shopModuleServer == null) {
             shopModuleServer = this.getRpcService("shopModuleServer");
-            //readShopOperation = new readShopOperation(shopModuleServer);
             readCourseOperation = new ReadCourseOperation(shopModuleServer);
             readShopOperation = new ReadShopOperation(shopModuleServer);
             readUserOperation = new ReadUserOperation(shopModuleServer);
-            //readRoomDistributerOperation = new ReadRoomDistributerOperation(shopModuleServer);
-            //readDistributerOperation = new ReadDistributerOperation(shopModuleServer);
             readSeriesOperation = new ReadSeriesOperation(shopModuleServer);
         }
     }

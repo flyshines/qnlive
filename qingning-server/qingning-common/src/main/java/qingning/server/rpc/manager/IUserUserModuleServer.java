@@ -1,12 +1,12 @@
 package qingning.server.rpc.manager;
 
 
-import qingning.server.rpc.UserModuleServer;
+import qingning.server.rpc.*;
 
 import java.util.List;
 import java.util.Map;
 
-public interface IUserUserModuleServer extends UserModuleServer {
+public interface IUserUserModuleServer extends UserModuleServer,CourseModuleServer,LecturerModuleServer,ShopModuleServer,SeriesModuleServer {
 
 	Map<String,Object> userFollowRoom(Map<String, Object> reqMap) throws Exception;
 
@@ -16,8 +16,6 @@ public interface IUserUserModuleServer extends UserModuleServer {
 
 
 	Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
-
-	Map<String,Object> findCourseByCourseId(String string);
 
 	List<Map<String,Object>> findCourseListForLecturer(Map<String, Object> queryMap);
 
@@ -53,8 +51,6 @@ public interface IUserUserModuleServer extends UserModuleServer {
 	Map<String,Object> findAvailableRoomDistributer(Map<String, Object> queryMap);
 
 	boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap);
-	
-	Map<String,Object> findLectureByLectureId(String lecture_id);
 	
 	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 	
@@ -139,8 +135,6 @@ public interface IUserUserModuleServer extends UserModuleServer {
 	 */
 	Map<String, Object>  findWithdrawListAll(Map<String, Object> param);
 
-    Map<String,Object> findSeriesBySeriesId(String course_id);
-
 	boolean isStudentOfTheSeries(Map<String, Object> queryMap);
 
 	Map<String,Object> joinSeries(Map<String, String> courseMap);
@@ -171,14 +165,6 @@ public interface IUserUserModuleServer extends UserModuleServer {
 	Map<String,Object> findOrderListAll(Map<String, Object> param);
 
 	Map<String,Object> findUserOrderByCourse(Map<String, Object> queryTradeMap);
-
-	/**获取店铺信息
-	 * @param shopId
-	 * @return
-	 */
-	Map<String,Object> getShopInfo(String shopId);
-
-	Map<String, Object> findSaasCourseByCourseId(String courseId);
 
 	/**获取管理员用户信息
 	 * @param adminId

@@ -23,13 +23,7 @@ public class ReadShopOperation implements CommonReadOperation {
     @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        String functionName = requestEntity.getFunctionName();
-        if(LECTURER_ROOM_LOAD.equals(functionName)){
-        	return shopModuleServer.findLiveRoomByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
-        } else {
-        	return shopModuleServer.findLectureByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
-        }
+        return null;
     }
 
     @Override

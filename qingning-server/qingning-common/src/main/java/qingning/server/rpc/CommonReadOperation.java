@@ -18,7 +18,14 @@ public interface CommonReadOperation {
 
 
 	String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";//讲师直播间
-	String CACHE_READ_SHOP = "1";//讲师直播间
+
+	//店铺
+	String CACHE_READ_SHOP = "101";//店铺
+
+
+	//系列
+	String CACHE_SERIES_STUDENTLIST ="findSeriesStudentListBySeriesId";
+
 	String FUNCTION_DISTRIBUTERS_ROOM_RQ = "FUNCTION_DISTRIBUTERS_ROOM_RQ";//直播间分销
 
 	Object invokeProcess(RequestEntity requestEntity) throws Exception;

@@ -786,6 +786,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	public Map<String, Object> getLoginInfoByLoginId(String unionID) {
+		return null;
+	}
+
+	@Override
 	public Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap) {
 		return lecturerCoursesProfitMapper.findCoursesSumInfo(queryMap);
 	}
@@ -1036,8 +1041,18 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
+	public List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id) {
+		return null;
+	}
+
+	@Override
 	public Map<String, Object> getShopInfo(String shopId) {
 		return shopMapper.selectByPrimaryKey(shopId);
+	}
+
+	@Override
+	public List<Map<String, Object>> findSeriesStudentListBySeriesId(String seriesId) {
+		return null;
 	}
 
 	@Override
@@ -1230,6 +1245,34 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	public String findLiveRoomIdByLectureId(String lecturer_id) {
 		return liveRoomMapper.findLiveRoomIdByLectureId(lecturer_id);
 	}
-
-
+	//TODO 实现缓存方法
+	@Override
+	public List<Map<String, Object>> findSeriesStudentByMap(Map<String, Object> param) {
+		return null;
+	}
+	//TODO 实现缓存方法
+	@Override
+	public List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> param) {
+		return null;
+	}
+	//TODO 实现缓存方法
+	@Override
+	public Map<String, Object> findLastestFinishCourse(Map<String, Object> record) {
+		return null;
+	}
+	//TODO 实现缓存方法
+	@Override
+	public List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap) {
+		return null;
+	}
+	//TODO 实现缓存方法
+	@Override
+	public Map<String, Object> findSaasCourseByCourseId(String courseId) {
+		return null;
+	}
+	//TODO 实现缓存方法
+	@Override
+	public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
+		return null;
+	}
 }

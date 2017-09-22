@@ -25,10 +25,10 @@ public class ReadSeriesOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
-        if("findSeriesStudentListBySeriesId".equals(functionName)){
-        	return seriesModuleServer.findSeriesStudentListBySeriesId(reqMap.get("series_id").toString());
+        if(CACHE_SERIES_STUDENTLIST.equals(functionName)){
+            return seriesModuleServer.findSeriesStudentListBySeriesId(reqMap.get("series_id").toString());
         }else{
-        	return seriesModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            return seriesModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
         }
     }
 
