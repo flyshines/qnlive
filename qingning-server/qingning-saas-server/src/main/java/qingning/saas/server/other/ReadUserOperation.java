@@ -1,7 +1,6 @@
 package qingning.saas.server.other;
 
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.ISaaSModuleServer;
 
@@ -21,18 +20,23 @@ public class ReadUserOperation implements CommonReadOperation {
     @Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        Object  result = null;
+        Object  result;
         String userId =(String)reqMap.get("user_id");
-        if(Constants.SYS_READ_USER_COURSE_LIST.equals(requestEntity.getFunctionName())){
+        if(SYS_READ_USER_COURSE_LIST.equals(requestEntity.getFunctionName())){
             result = saaSModuleServer.findCourseIdByStudent(reqMap);
-        } else  if(Constants.SYS_READ_USER_ROOM_LIST.equals(requestEntity.getFunctionName())){
+        } else  if(SYS_READ_USER_ROOM_LIST.equals(requestEntity.getFunctionName())){
             result = saaSModuleServer.findRoomIdByFans(reqMap);
-        }else if (Constants.SYS_READ_USER_SERIES_LIST.equals(requestEntity.getFunctionName())){
+        }else if (SYS_READ_USER_SERIES_LIST.equals(requestEntity.getFunctionName())){
             result = saaSModuleServer.findSeriesIdByStudent(reqMap);
         } else{
             result = saaSModuleServer.findUserInfoByUserId(userId);
         }
         return result;
+    }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
     }
 
 }

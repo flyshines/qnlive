@@ -21,16 +21,21 @@ public class ReadUserOperation implements CommonReadOperation {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         Object  result = null;
         String userId =(String)reqMap.get("user_id");
-        if(Constants.SYS_READ_USER_COURSE_LIST.equals(requestEntity.getFunctionName())){
+        if(SYS_READ_USER_COURSE_LIST.equals(requestEntity.getFunctionName())){
         	result = commonModuleServer.findCourseIdByStudent(reqMap);
-        } else  if(Constants.SYS_READ_USER_ROOM_LIST.equals(requestEntity.getFunctionName())){
+        } else  if(SYS_READ_USER_ROOM_LIST.equals(requestEntity.getFunctionName())){
             result = commonModuleServer.findRoomIdByFans(reqMap);
-        }else if (Constants.SYS_READ_USER_SERIES_LIST.equals(requestEntity.getFunctionName())){
+        }else if (SYS_READ_USER_SERIES_LIST.equals(requestEntity.getFunctionName())){
             result = commonModuleServer.findSeriesIdByStudent(reqMap);
         } else{
         	result = commonModuleServer.findUserInfoByUserId(userId);
         }
         
         return result;
+    }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
     }
 }

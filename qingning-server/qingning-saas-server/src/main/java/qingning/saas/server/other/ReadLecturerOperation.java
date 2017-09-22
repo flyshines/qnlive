@@ -24,4 +24,9 @@ public class ReadLecturerOperation implements CommonReadOperation {
     	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
     	return null;//userModuleServer.findLectureByLectureId((String)reqMap.get("lecture_id"));
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

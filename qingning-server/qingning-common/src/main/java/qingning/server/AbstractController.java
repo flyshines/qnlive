@@ -9,10 +9,9 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.MessageEntity;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
-import qingning.common.util.MiscUtils;
 import qingning.common.util.MqUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
-import qingning.server.rpc.manager.IUserModuleServer;
+import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.*;
 
@@ -138,7 +137,7 @@ public abstract class AbstractController {
 	 * userServer加载打赏信息
 	 */
 	private void generateRewardConfigurationMap(){
-		IUserModuleServer userModuleServer = (IUserModuleServer)applicationContext.getBean("userModuleServer");
+		IUserUserModuleServer userModuleServer = (IUserUserModuleServer)applicationContext.getBean("userModuleServer");
 		rewardConfigurationList = userModuleServer.findRewardConfigurationList();
 		rewardConfigurationMap = new HashMap<>();
 		processRewardConfigurationList = new ArrayList<>();

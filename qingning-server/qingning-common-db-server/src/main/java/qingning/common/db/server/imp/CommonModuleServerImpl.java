@@ -100,7 +100,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private SeriesMapper seriesMapper;
 	@Autowired(required = true)
-	private SaaSShopMapper shopMapper;
+	private ShopMapper shopMapper;
 	@Autowired(required = true)
 	private SaaSShopUserMapper shopUserMapper;
 
@@ -115,11 +115,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 	@Autowired(required = true)
 	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
-	@Override
-	public List<Map<String, Object>> getServerUrls() {
-		return serverFunctionMapper.getServerUrls();
-	}
-
 	@Override
 	public List<Map<String, Object>> getServerUrlBy() {
 		return serverFunctionMapper.getServerUrlBy();
@@ -269,11 +264,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findRewardInfoByRewardId(String reward_id) {
-		return rewardConfigurationMapper.findRewardInfoByRewardId(MiscUtils.convertObjectToLong(reward_id));
-	}
-
-	@Override
 	public void insertTradeBill(Map<String, Object> insertMap) {
 		//插入t_trade_bill表
 		Date now = new Date();
@@ -300,17 +290,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Override
 	public void insertPaymentBill(Map<String, Object> insertPayMap) {
 		paymentBillMapper.insertPaymentBill(insertPayMap);
-	}
-
-	@Override
-	public boolean isTradebillFinish(String outTradeNo) {
-		Map<String,Object> value = tradeBillMapper.findByOutTradeNo(outTradeNo);
-		//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
-		if(value != null && "2".equals(value.get("status"))){
-			return true;
-		}else {
-			return false;
-		}
 	}
 
 	@Override
@@ -671,11 +650,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomDistributerRecommendInfo(Map<String, Object> parameters) {
-		return distributerMapper.findRoomDistributerRecommendInfo(parameters);
-	}
-
-	@Override
 	public List<Map<String, Object>> findRoomDistributerCourseInfo(Map<String, Object> parameters) {
 		return distributerMapper.findRoomDistributerCourseInfo(parameters);
 	}
@@ -716,21 +690,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		roomDistributerRecommendDetailMapper.insertRoomDistributerRecommend(insertMap);
 	}
 
-	@Override
-	public Map<String, Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap) {
-		queryMap.put("current_date", MiscUtils.getEndTimeOfToday());
-		return roomDistributerMapper.findRoomDistributer(queryMap);
-	}
-
-	/*@Override
-	public void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap) {
-		roomDistributerMapper.increteRecommendNumForRoomDistributer(updateMap);
-	}*/
-
-	@Override
-	public void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap) {
-		coursesMapper.updateAfterStudentBuyCourse(updateCourseMap);
-	}
 
 	@Override
 	public void insertFeedback(Map<String, Object> reqMap) {
@@ -740,11 +699,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		reqMap.put("status", "1"); //处理状态，1：未处理 2：已经处理
 		feedbackMapper.insertFeedBack(reqMap);
 
-	}
-
-	@Override
-	public Map<String, Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap) {
-		return lecturerCoursesProfitMapper.findRewardByUserIdAndCourseId(rewardQueryMap);
 	}
 
 	@Override
@@ -767,26 +721,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		loginInfo.put("m_user_id", updateIMAccountMap.get("m_user_id"));
 		loginInfo.put("m_pwd", updateIMAccountMap.get("m_pwd"));
 		return loginInfoMapper.updateLoginInfo(loginInfo);
-	}
-
-	@Override
-	public Map<String, Object> findUserDistributionInfo(Map<String, Object> queryuserDistribution) {
-		Map<String,Object> userDistributionInfoForDoneNum = coursesStudentsMapper.findUserDistributionInfoForDoneNum(queryuserDistribution);
-		Map<String,Object> userDistributionInfoForLastDoneNum = lecturerCoursesProfitMapper.findUserDistributionInfoForLastDoneNum(queryuserDistribution);
-		Map<String,Object> resultMap = new HashMap<>();
-		if(MiscUtils.isEmpty(userDistributionInfoForDoneNum)){
-			resultMap.put("userDistributionInfoForDoneNum",false);
-		}else {
-			resultMap.put("userDistributionInfoForDoneNum",true);
-		}
-
-		if(MiscUtils.isEmpty(userDistributionInfoForLastDoneNum)){
-			resultMap.put("userDistributionInfoForLastDoneNum",false);
-		}else {
-			resultMap.put("userDistributionInfoForLastDoneNum",true);
-		}
-
-		return resultMap;
 	}
 
 	@Override
@@ -876,11 +810,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public void updateCourseByCourseId(Map<String, Object> queryMap) {
-		coursesMapper.updateCourse(queryMap);
-	}
-
-	@Override
 	public List<Map<String, Object>> findPPTListByCourseId(String course_id) {
 		return courseImageMapper.findPPTListByCourseId(course_id);
 	}
@@ -914,16 +843,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findClassifyInfo() {
-		return classifyInfoMapper.findClassifyInfo();
-	}
-
-	@Override
-	public List<Map<String, Object>> findClassifyInfoBy() {
-		return classifyInfoMapper.findClassifyInfoBy();
-	}
-
-	@Override
 	public List<Map<String, Object>> findCourseBySearch(Map<String, Object> reqMap) {
 		return coursesMapper.findCourseBySearch(reqMap);
 	}
@@ -938,31 +857,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return bannerInfoMapper.findBannerInfoAll();
 	}
 
-	@Override
-	public List<Map<String, Object>> findBannerInfoAllBy() {
-		return bannerInfoMapper.findBannerInfoAllBy();
-	}
-
-
-	@Override
-	public List<Map<String, Object>> findCourseByClassifyId(Map<String, Object> record) {
-		return coursesMapper.findCourseByClassifyId(record);
-	}
-
-	@Override
-	public List<Map<String, Object>> findCourseByStatus(Map<String, Object> record) {
-		return coursesMapper.findCourseByStatus(record);
-	}
-
 
 	@Override
 	public Integer insertCourseMessageList(List<Map<String, Object>> messageList) {
 		return courseMessageMapper.insertCourseMessageList(messageList);
-	}
-
-	@Override
-	public List<Map<String, Object>> findSystemConfig() {
-		return systemConfigMapper.findSystemConfig();
 	}
 
 	@Override
@@ -1020,20 +918,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		coursesMapper.updateCourse(course);
 	}
 
-	@Override
-	public List<Map<String, Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap) {
-		return coursesMapper.findLecturerCourseListByStatus(queryMap);
-	}
-
-	@Override
-	public Map<String, Object> findUserNumberByCourse(Map<String, Object> map) {
-		return tradeBillMapper.findUserNumberByCourse(map);
-	}
-
-	@Override
-	public List<Map<String, Object>> findLecturerCourseList(Map<String,Object> record) {
-		return coursesMapper.findLecturerCourseList(record);
-	}
 
 	@Override
 	@Transactional(rollbackFor=Exception.class)
@@ -1152,8 +1036,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> getShopInfo(Map<String, Object> reqMap) {
-		return shopMapper.selectByPrimaryKey(reqMap);
+	public Map<String, Object> getShopInfo(String shopId) {
+		return shopMapper.selectByPrimaryKey(shopId);
 	}
 
 	@Override
@@ -1166,30 +1050,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
 	}
 
-	@Override
-	public List<Map<String, Object>> findSeriesByLecturer(String lecturerId) {
-		return seriesMapper.findSeriesByLecturer(lecturerId);
-	}
-
-	@Override
-	public List<Map<String, Object>> findCourseListBySeriesId(String series_id) {
-		return coursesMapper.findCourseListBySeriesId(series_id);
-	}
-	@Override
-	public List<Map<String, Object>> findSaasCourseListBySeriesId(String series_id) {
-		return saaSCourseMapper.findCourseListBySeriesId(series_id);
-	}
-
-	@Override
-	public void updateSeries(Map<String, Object> map) {
-		seriesMapper.updateSeries(map);
-	}
-
-
-	@Override
-	public List<Map<String, Object>> findCourseListAllByLecturerId(String lecturerId) {
-		return coursesMapper.findCourseListAllByLecturerId(lecturerId);
-	}
 
 	@Override
 	public Map<String, Object> findSaaSCourseByCourseId(String course_id) {
@@ -1364,21 +1224,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		map.put("user_id",user_id);
 		map.put("course_id",course_id);
 		return courseGuestMapper.findCourseGuestByUserAndCourse(map);
-	}
-
-	@Override
-	public void updateLoginInfo(Map<String, Object> queryMap) {
-		loginInfoMapper.updateLoginInfo(queryMap);
-	}
-
-	@Override
-	public void updateUserCommonInfo(Map<String, Object> queryMap) {
-		userMapper.updateUser(queryMap);
-	}
-
-	@Override
-	public List<Map<String, Object>> findLiveRoomByLectureId(String lecturer_id) {
-		return liveRoomMapper.findLiveRoomByLectureId(lecturer_id);
 	}
 
 	@Override

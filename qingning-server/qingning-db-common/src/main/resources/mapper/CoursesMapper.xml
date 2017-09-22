@@ -136,18 +136,17 @@
     <if test="search_text != null">
       and course_title like #{search_text}
     </if>
-    and app_name = #{}
     order by start_time limit #{page_num},#{page_count}
   </select>
 
 
 
   <select id="findCourseByClassifyId" resultType="hashmap" parameterType="hashmap" >
-    SELECT * FROM t_courses WHERE app_name = #{} and classify_id = #{classify_id}
+    SELECT * FROM t_courses WHERE classify_id = #{classify_id}
   </select>
 
   <select id="findCourseByStatus" resultType="hashmap" parameterType="hashmap" >
-    SELECT course_id FROM t_courses WHERE app_name = #{} and `status` = #{status} and course_updown = 1
+    SELECT course_id FROM t_courses WHERE `status` = #{status} and course_updown = 1
   </select>
 
   <insert id="insertCourse" parameterType="hashmap" >
@@ -239,9 +238,6 @@
         course_updown,
       </if>
 
-      <if test=" != null" >
-        app_name,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -330,9 +326,7 @@
         #{course_updown},
       </if>
 
-      <if test=" != null" >
-        #{},
-      </if>
+
     </trim>
   </insert>
 

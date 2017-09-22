@@ -2,7 +2,7 @@ package qingning.user.server.other;
 
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
-import qingning.server.rpc.manager.IUserModuleServer;
+import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.Map;
 
@@ -12,9 +12,9 @@ import java.util.Map;
  * 创建日期: 2016/12/4
  */
 public class ReadLiveRoomOperation implements CommonReadOperation {
-    private IUserModuleServer userModuleServer;
+    private IUserUserModuleServer userModuleServer;
 
-    public ReadLiveRoomOperation(IUserModuleServer userModuleServer) {
+    public ReadLiveRoomOperation(IUserUserModuleServer userModuleServer) {
         this.userModuleServer = userModuleServer;
     }
 
@@ -25,5 +25,10 @@ public class ReadLiveRoomOperation implements CommonReadOperation {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
 
         return userModuleServer.findLiveRoomByRoomId(reqMap.get("room_id").toString());
+    }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
     }
 }

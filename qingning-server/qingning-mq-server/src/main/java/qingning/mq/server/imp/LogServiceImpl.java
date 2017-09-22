@@ -261,7 +261,7 @@ public class LogServiceImpl extends AbstractMsgService {
     		if(!MiscUtils.isEmpty(district)){
     			info.put("district", district);
     		}
-    		CacheUtils.readUser(user_id, null, new CommonReadOperation(){
+    		readUser(user_id, null, new CommonReadOperation(){
     			public Object invokeProcess(RequestEntity requestEntity) throws Exception {
     				Object result = null;
     				if(requestEntity != null){
@@ -271,7 +271,12 @@ public class LogServiceImpl extends AbstractMsgService {
     				}
     				return result;
     			}
-    		}, jedis);
+
+				@Override
+				public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+					return null;
+				}
+			}, jedis);
     		Map<String,Object> query = new HashMap<String,Object>();
     		query.put("user_id", user_id);
     		String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, query);

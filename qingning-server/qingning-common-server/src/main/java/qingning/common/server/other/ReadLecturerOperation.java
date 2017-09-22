@@ -26,4 +26,9 @@ public class ReadLecturerOperation implements CommonReadOperation {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
        	return iCommonModuleServer.findLectureByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

@@ -23,6 +23,11 @@ public class ReadShopOperation implements CommonReadOperation {
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-        return saaSModuleServer.getShopInfo(reqMap);
+        return saaSModuleServer.getShopInfo(reqMap.get("shop_id").toString());
+    }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
     }
 }

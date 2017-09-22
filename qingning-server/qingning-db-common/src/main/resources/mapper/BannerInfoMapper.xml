@@ -3,16 +3,10 @@
 <mapper namespace="qingning.db.common.mybatis.persistence.BannerInfoMapper" >
 
 
-  <select id="findBannerInfoAll" resultType="hashmap"  >
+  <select id="findBannerInfoAll" resultType="hashmap">
     select * from t_banner_info where  `status` = 1
   </select>
 
-  <select id="findBannerInfoAllBy" resultType="hashmap">
-    SELECT * FROM t_banner_info
-	WHERE `status` = 1 AND app_name = #{}
-	ORDER BY score ASC, create_time DESC 
-  </select>
-  
   <!-- 新增轮播 -->
   <insert id="insertBanner" parameterType="hashmap">
   	insert into t_banner_info

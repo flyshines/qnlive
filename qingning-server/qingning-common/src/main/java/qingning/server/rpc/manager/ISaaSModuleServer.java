@@ -36,10 +36,10 @@ public interface ISaaSModuleServer {
 	List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap);
 
     /**获取店铺信息
-     * @param param
+     * @param shopId
      * @return
      */
-    Map<String,Object> getShopInfo(Map<String, Object> param);
+    Map<String,Object> getShopInfo(String shopId);
 
     /**
      * 根据系列id获取系列详情

@@ -25,4 +25,9 @@ public class ReadForceVersionOperation implements CommonReadOperation {
 
         return iCommonModuleServer.findForceVersionInfoByOS(reqMap.get("force_version_key").toString());
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

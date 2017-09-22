@@ -1,10 +1,8 @@
 package qingning.user.server.other;
 
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
-import qingning.server.rpc.manager.ILectureModuleServer;
-import qingning.server.rpc.manager.IUserModuleServer;
+import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.Map;
 
@@ -14,9 +12,9 @@ import java.util.Map;
  * 创建日期: 2016/12/4
  */
 public class ReadLecturerOperation implements CommonReadOperation {
-	private IUserModuleServer userModuleServer;
+	private IUserUserModuleServer userModuleServer;
 
-    public ReadLecturerOperation(IUserModuleServer userModuleServer) {
+    public ReadLecturerOperation(IUserUserModuleServer userModuleServer) {
         this.userModuleServer = userModuleServer;
     }
 
@@ -26,5 +24,10 @@ public class ReadLecturerOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
     	Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
     	return userModuleServer.findLectureByLectureId((String)reqMap.get("lecture_id"));
+    }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
     }
 }

@@ -26,4 +26,9 @@ public class ReadLiveRoomOperation implements CommonReadOperation {
 
         return null;//userModuleServer.findLiveRoomByRoomId(reqMap.get("room_id").toString());
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

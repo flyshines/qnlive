@@ -20,4 +20,9 @@ public class ReadSingleListOperation implements CommonReadOperation {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         return saaSModuleServer.findShopUpList(reqMap.get("shop_id").toString());
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

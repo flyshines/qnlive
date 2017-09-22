@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="qingning.db.common.mybatis.persistence.SaaSShopMapper" >
+<mapper namespace="qingning.db.common.mybatis.persistence.ShopMapper" >
   <sql id="Base_Column_List" >
-    shop_id,room_id, user_id, user_name, shop_name, shop_url, shop_remark, shop_logo, open_url,
+    shop_id,room_id, lecturer_id, user_name, shop_name, shop_url, shop_remark, shop_logo, open_url,
     weixin_code, status, create_time,open_sharing,lecturer_title,lecturer_identity
   </sql>
-  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="hashmap" >
-    select * from t_saas_shop
+  <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
+    select * from t_shop
     <where>
       <if test="shop_id != null" >
-        shop_id = #{shop_id,jdbcType=VARCHAR}
-      </if>
-      <if test="user_id != null" >
-       user_id = #{user_id,jdbcType=VARCHAR}
+        shop_id = #{shop_id}
       </if>
     </where>
   </select>
   <select id="selectUserIdByShopId" resultType="java.lang.String" parameterType="java.lang.String" >
-    select user_id from t_saas_shop where shop_id = #{shopId} limit 1
+    select lecturer_id from t_shop where shop_id = #{shopId} limit 1
   </select>
 
   <select id="getShopInfoList" resultType="hashmap" parameterType="hashmap" >
-    SELECT tshop.*,tlogin.account FROM t_saas_shop tshop,t_login_info tlogin
-    WHERE tshop.user_id = tlogin.user_id
+    SELECT tshop.*,tlogin.account FROM t_shop tshop,t_login_info tlogin
+    WHERE tshop.lecturer_id = tlogin.lecturer_id
     <if test='lecturer_identity != null and lecturer_identity != ""' >
       AND tshop.lecturer_identity = #{lecturer_identity}
     </if>
@@ -40,27 +37,21 @@
 
 
   <select id="selectShopIdByUserId" resultType="java.lang.String" parameterType="java.lang.String" >
-    select shop_id from t_saas_shop where user_id = #{userId} limit 1
+    select shop_id from t_shop where lecturer_id = #{userId} limit 1
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
-    delete from t_saas_shop
+    delete from t_shop
     where shop_id = #{shop_id,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="hashmap" >
-    insert into t_saas_shop
+    insert into t_shop
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="shop_id != null" >
         shop_id,
       </if>
-      <if test="room_id != null" >
-        room_id,
-      </if>
-      <if test="user_id != null" >
-        user_id,
-      </if>
-      <if test="user_name != null" >
-        user_name,
+      <if test="lecturer_id != null" >
+        lecturer_id,
       </if>
       <if test="shop_name != null" >
         shop_name,
@@ -83,28 +74,34 @@
       <if test="status != null" >
         status,
       </if>
-      <if test="create_time != null" >
-        create_time,
-      </if>
       <if test="lecturer_identity != null" >
         lecturer_identity,
       </if>
       <if test="lecturer_title != null" >
         lecturer_title,
       </if>
+      <if test="fans_num != null" >
+        fans_num,
+      </if>
+      <if test="open_sharing != null" >
+        open_sharing,
+      </if>
+      <if test="course_num != null" >
+        course_num,
+      </if>
+      <if test="series_num != null" >
+        series_num,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="shop_id != null" >
         #{shop_id,jdbcType=VARCHAR},
       </if>
-      <if test="room_id != null" >
-        #{room_id,jdbcType=VARCHAR},
-      </if>
-      <if test="user_id != null" >
-        #{user_id,jdbcType=VARCHAR},
-      </if>
-      <if test="user_name != null" >
-        #{user_name,jdbcType=VARCHAR},
+      <if test="lecturer_id != null" >
+        #{lecturer_id,jdbcType=VARCHAR},
       </if>
       <if test="shop_name != null" >
         #{shop_name,jdbcType=VARCHAR},
@@ -127,22 +124,34 @@
       <if test="status != null" >
         #{status,jdbcType=CHAR},
       </if>
-      <if test="create_time != null" >
-        #{create_time,jdbcType=TIMESTAMP},
-      </if>
       <if test="lecturer_identity != null" >
         #{lecturer_identity},
       </if>
       <if test="lecturer_title != null" >
         #{lecturer_title},
       </if>
+      <if test="fans_num != null" >
+        #{fans_num},
+      </if>
+      <if test="open_sharing != null" >
+        #{open_sharing},
+      </if>
+      <if test="course_num != null" >
+        #{course_num},
+      </if>
+      <if test="series_num != null" >
+        #{series_num},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKey" parameterType="hashmap" >
-    update t_saas_shop
+    update t_shop
     <set >
-      <if test="user_id != null" >
-        user_id = #{user_id},
+      <if test="lecturer_id != null" >
+        lecturer_id = #{lecturer_id},
       </if>
       <if test="room_id != null" >
         room_id = #{room_id},
@@ -188,8 +197,8 @@
     <if test="shop_id != null" >
       shop_id = #{shop_id}
     </if>
-    <if test="user_id != null" >
-      user_id = #{user_id}
+    <if test="lecturer_id != null" >
+      lecturer_id = #{lecturer_id}
     </if>
   </update>
 

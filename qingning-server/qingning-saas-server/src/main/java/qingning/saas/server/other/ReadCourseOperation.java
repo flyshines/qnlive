@@ -27,4 +27,9 @@ public class ReadCourseOperation implements CommonReadOperation {
         
         return null;
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

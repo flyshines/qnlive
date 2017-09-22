@@ -57,7 +57,7 @@ public class ClassIfyCourseServerImpl  extends AbstractMsgService {
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_PREDICTION);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_FINISH);
                 jedis.del(Constants.SYS_COURSES_RECOMMEND_LIVE);
-                List<Map<String, Object>> classifyList = classifyInfoMapper.findClassifyInfoBy();
+                List<Map<String, Object>> classifyList = classifyInfoMapper.findClassifyInfo();
                 for(Map<String, Object> classify :classifyList ){
                     String classify_id = classify.get("classify_id").toString();
                     Map<String,Object> map = new HashMap<>();

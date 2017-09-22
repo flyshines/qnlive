@@ -6,13 +6,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import qingning.common.util.Constants;
-import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
 import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ISaaSModuleServer;
-import redis.clients.jedis.Jedis;
 
 import java.util.*;
 
@@ -25,7 +22,7 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     @Autowired(required = true)
     private FansMapper fansMapper;
     @Autowired(required = true)
-    private SaaSShopMapper shopMapper;
+    private ShopMapper shopMapper;
     @Autowired(required = true)
     private SaaSBannerMapper bannerMapper;
     @Autowired(required = true)
@@ -129,8 +126,8 @@ public class SaaSModuleServerImpl implements ISaaSModuleServer {
     }
 
     @Override
-    public Map<String, Object> getShopInfo(Map<String, Object> param) {
-        return shopMapper.selectByPrimaryKey(param);
+    public Map<String, Object> getShopInfo(String shopId) {
+        return shopMapper.selectByPrimaryKey(shopId);
     }
 
     /**

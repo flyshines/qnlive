@@ -17,21 +17,22 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.InputParameter;
 import qingning.common.entity.OutputParameter;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.Constants;
-import qingning.common.util.JedisUtils;
-import qingning.common.util.MiscUtils;
-import qingning.common.util.MqUtils;
+import qingning.common.util.*;
 import qingning.server.annotation.FunctionName;
+import qingning.server.rpc.initcache.ReadCourseOperation;
+import qingning.server.rpc.initcache.ReadSeriesOperation;
+import qingning.server.rpc.initcache.ReadShopOperation;
+import qingning.server.rpc.initcache.ReadUserOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
-public abstract class AbstractQNLiveServer implements QNLiveServer {
-	private Map<String, FunctionInfo> functionInfoMap = new HashMap<String, FunctionInfo>(); 
-	private Map<String, Method> functionInfoMethodMap = new HashMap<String, Method>();
+public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveServer {
+
+	private Map<String, FunctionInfo> functionInfoMap = new HashMap<>();
+	private Map<String, Method> functionInfoMethodMap = new HashMap<>();
 	
 	protected ApplicationContext context;
-	protected JedisUtils jedisUtils;
 	protected MqUtils mqUtils;
 	
 	
@@ -46,33 +47,30 @@ public abstract class AbstractQNLiveServer implements QNLiveServer {
 	protected List<Map<String, String>> sysPagedQuery(String keyIds, String objectKeyId, Long num, Long pageCount) {
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 		JedisBatchCallback jedisBatchCallback = (JedisBatchCallback) jedisUtils.getJedis();
-		jedisBatchCallback.invoke(new JedisBatchOperation() {
-			@Override
-			public void batchOperation(Pipeline pipeline, Jedis jedis) {
-				// 开始记录数
-				Long startCount = (num - 1) * pageCount;
-				List<String> lrange = jedis.lrange(keyIds, startCount, startCount + pageCount - 1);
-				if (startCount.intValue() != 0 && lrange.size() != pageCount) {
-					// 当缓存中数据不够时直接返回空
-					return;
-				}
-				// 使用pipeline 批量获取数据
-				// Pipeline p = jedis.pipelined();
-				Map<String, Response<Map<String, String>>> responses = new HashMap<String, Response<Map<String, String>>>();
-				for (String key : lrange) {
-					String objectKey = objectKeyId + key;
-					responses.put(key, pipeline.hgetAll(objectKey));
-				}
-				// 同步数据
-				pipeline.sync();
-				for (String key : responses.keySet()) {
-					Map<String, String> map = new HashMap<String, String>();
-					// 获取订单对象
-					map = responses.get(key).get();
-					list.add(map);
-				}
-			}
-		});
+		jedisBatchCallback.invoke((pipeline, jedis) -> {
+            // 开始记录数
+            Long startCount = (num - 1) * pageCount;
+            List<String> lrange = jedis.lrange(keyIds, startCount, startCount + pageCount - 1);
+            if (startCount.intValue() != 0 && lrange.size() != pageCount) {
+                // 当缓存中数据不够时直接返回空
+                return;
+            }
+            // 使用pipeline 批量获取数据
+            // Pipeline p = jedis.pipelined();
+            Map<String, Response<Map<String, String>>> responses = new HashMap<>();
+            for (String key : lrange) {
+                String objectKey = objectKeyId + key;
+                responses.put(key, pipeline.hgetAll(objectKey));
+            }
+            // 同步数据
+            pipeline.sync();
+            for (String key : responses.keySet()) {
+                Map<String, String> map = new HashMap<>();
+                // 获取订单对象
+                map = responses.get(key).get();
+                list.add(map);
+            }
+        });
 
 		return list;
 	}

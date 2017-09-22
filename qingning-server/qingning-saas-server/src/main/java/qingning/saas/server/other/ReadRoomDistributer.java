@@ -21,4 +21,9 @@ public class ReadRoomDistributer implements CommonReadOperation {
         reqMap.put("current_date", MiscUtils.getEndTimeOfToday());
         return null;//userModuleServer.findAvailableRoomDistributer(reqMap);
     }
+
+    @Override
+    public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+        return null;
+    }
 }

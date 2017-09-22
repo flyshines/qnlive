@@ -4,10 +4,11 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import org.springframework.context.ApplicationContext;
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.JedisUtils;
 import qingning.server.annotation.FunctionName;
 
-public abstract class AbstractMsgService {
+public abstract class AbstractMsgService extends CacheUtils{
 	private HashMap<String, Method> methodMap = new HashMap<String, Method>();
 	public void invoke(RequestEntity requestEntity, JedisUtils jedisUtils, ApplicationContext context) throws Exception{
 		if(requestEntity==null){

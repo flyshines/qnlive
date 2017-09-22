@@ -25,7 +25,7 @@
 	<dubbo:registry protocol="zookeeper" address="${zookeeper.address}" />
 	
 
-	<dubbo:reference id="userModuleServer" interface="qingning.server.rpc.manager.IUserModuleServer" timeout="1200000"/>
+	<dubbo:reference id="userModuleServer" interface="qingning.server.rpc.manager.IUserUserModuleServer" timeout="1200000"/>
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	<bean class="qingning.server.advice.exception.ServiceExceptionAspect" />
 	<!--<bean class="qingning.server.advice.exception.WebExceptionAspect" />-->

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util-4.0.xsd
+    http://www.springframework.org/schema/rabbit
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
+    http://code.alibabatech.com/schema/dubbo
+    http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+	default-lazy-init="false">
+	<!-- 启用注解 -->
+	<context:annotation-config />
+	<context:component-scan base-package="qingning.lecturer.db.server.imp,qingning.lecturer.db.persistence.mybatis" />
+	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>  
+	
+	<context:property-placeholder location="classpath:application.properties" />
+	<!-- Application name -->
+	<dubbo:application name="qingning-shop-db-server" />
+	<!-- 使用zookeeper注册中心暴露服务地址 -->
+	<dubbo:registry protocol="zookeeper"	address="${zookeeper.address}" />
+	<!-- 用dubbo协议在zookeeper.common.rpc.port端口暴露服务 -->
+	<dubbo:protocol name="dubbo" port="${zookeeper.lecturer.rpc.port}"/>
+	<!-- 
+	<dubbo:service interface="gcw.server.rpc.manager.ICourseManagerServer" ref="courseManagerServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="gcw.server.rpc.manager.IBillsManagerServer" ref="billsManagerServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="gcw.server.rpc.manager.IChoreographerServer" ref="choreographerServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="gcw.server.rpc.manager.IUserManagerServer" ref="userManagerServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="gcw.server.rpc.manager.IIncomeManagerServer" ref="incomeManagerServer"  timeout="1200000" delay="-1" retries="0"/>
+	<dubbo:service interface="gcw.server.rpc.manager.IDistributorManagerServer" ref="distributorManagerServer"  timeout="1200000" delay="-1" retries="0"/>
+	
+	<bean id="distributorManagerServer"  class="gcw.manager.db.server.imp.DistributorManagerServerImpl"/>
+	<bean id="incomeManagerServer"  class="gcw.manager.db.server.imp.IncomeManagerServerImpl"/>
+	<bean id="billsManagerServer"  class="gcw.manager.db.server.imp.BillsManagerServerImpl"/>
+	<bean id="courseManagerServer"  class="gcw.manager.db.server.imp.CourseManagerServerImpl"/>
+	<bean id="choreographerServer"  class="gcw.manager.db.server.imp.ChoreographerServerImpl"/>
+	<bean id="userManaigerServer"  class="gcw.manager.db.server.imp.UserManagerServerImpl"/>
+	 -->
+
+
+	<dubbo:service interface="qingning.server.rpc.manager.IShopModuleServer" ref="shopModuleServer" timeout="1200000" delay="-1" retries="0"/>
+	<bean id="shopModuleServer"  class="qingning.lecturer.db.server.imp.ShopModuleServerImpl"/>
+	<import resource="classpath:db-config.xml"/>
+		
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="qingning.lecturer.db.persistence.mybatis" p:sqlSessionFactoryBeanName="sqlSessionFactory" />
+	
+</beans>
+
+

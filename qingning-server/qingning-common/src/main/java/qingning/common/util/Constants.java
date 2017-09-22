@@ -92,17 +92,6 @@ public final class Constants {
 	//</editor-fold>
 
 	//<editor-fold desc="Operation 公共参数">
-	/** Operation 公共参数 start ********************************/
-	public static final String SYS_INSERT_DISTRIBUTER ="INSERT_DISTRIBUTER";//增加分销这
-	public static final String SYS_READ_LAST_COURSE ="SYS_READ_LAST_COURSE";//直播课程
-	public static final String SYS_READ_SAAS_COURSE ="SYS_READ_SAAS_COURSE";//saas课程
-	public static final String SYS_READ_LAST_SERIES ="SYS_READ_LAST_SERIES";
-	public static final String SYS_READ_USER_COURSE_LIST = "SYS_READ_USER_COURSE_LIST";//用户课程列表
-	public static final String SYS_READ_USER_ROOM_LIST = "SYS_READ_USER_ROOM_LIST";//用户直播间列表
-	public static final String SYS_READ_USER_SERIES_LIST = "SYS_READ_USER_SERIES_LIST";//用户系列列表
-	public static final String SYS_READ_USER_BY_UNIONID = "SYS_READ_USER_BY_UNIONID";//用户 unionId
-	public static final String LECTURER_ROOM_LOAD = "LECTURER_ROOM_LOAD";//讲师直播间
-	public static final String FUNCTION_DISTRIBUTERS_ROOM_RQ = "FUNCTION_DISTRIBUTERS_ROOM_RQ";//直播间分销
 
 	/** Operation 公共参数 end ********************************/
 	//</editor-fold>
@@ -236,7 +225,7 @@ public final class Constants {
 
 	//<editor-fold desc="店铺">
 	/** 店铺 start **************************************/
-	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{shop_id}";	//店铺缓存
+	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{user_id}";	//店铺缓存
 	public static final String SHOP_DAY_COUNT = "SYS:SHOP:COUNT:{user_id}";	//店铺每日统计
 	public static final String USER_SHOP_COURSE_ZSET = "USER:{user_id}:SHOP:{shop_id}:COURSES";//用户在指定店铺加入的单品课程
 	public static final String USER_SHOP_SERIES_ZSET = "USER:{user_id}:SHOP:{shop_id}:SERIES";//用户在指定店铺加入的系列课程

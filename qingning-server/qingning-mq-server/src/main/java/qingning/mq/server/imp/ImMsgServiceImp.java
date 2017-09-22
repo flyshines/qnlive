@@ -28,7 +28,7 @@ import redis.clients.jedis.Jedis;
 
 import com.alibaba.fastjson.JSON;
 
-public class ImMsgServiceImp implements ImMsgService {
+public class ImMsgServiceImp extends CacheUtils implements ImMsgService {
 
 	private static Logger log = LoggerFactory.getLogger(ImMsgServiceImp.class);
 
@@ -177,10 +177,15 @@ public class ImMsgServiceImp implements ImMsgService {
 		//如果课程为已经结束，则不能发送消息，将该条消息抛弃
 		courseMap = null;
 		try{
-			courseMap = CacheUtils.readCourse((String)information.get("course_id"), null, new CommonReadOperation(){
+			courseMap = readCourse((String)information.get("course_id"), null, new CommonReadOperation(){
 				@Override
 				public Object invokeProcess(RequestEntity requestEntity) throws Exception {
 					return coursesMapper.findCourseByCourseId((String)information.get("course_id"));
+				}
+
+				@Override
+				public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
+					return null;
 				}
 			}, jedis, false);//jedis.hgetAll(courseKey);
 		} catch(Exception e){

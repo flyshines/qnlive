@@ -1,15 +1,10 @@
 package qingning.server.rpc.manager;
 
 
-import qingning.common.util.MiscUtils;
-
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface ICommonModuleServer {
-	List<Map<String, Object>> getServerUrls();
 	List<Map<String, Object>> getServerUrlBy();
 	Map<String,Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap);
 
@@ -23,15 +18,11 @@ public interface ICommonModuleServer {
 
 	Map<String,Object> findCourseByCourseId(String courseId);
 
-	Map<String,Object> findRewardInfoByRewardId(String reward_id);
-
 	void insertTradeBill(Map<String, Object> insertMap);
 
 	void closeTradeBill(Map<String, Object> failUpdateMap);
 
 	void insertPaymentBill(Map<String, Object> insertPayMap);
-
-	boolean isTradebillFinish(String outTradeNo);
 
 	void updateUserWebOpenIdByUserId(Map<String, Object> updateMap);
 
@@ -44,7 +35,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findByDistributerId(String distributer_id);
 	
 	List<Map<String,Object>> findDistributionInfoByDistributerId(Map<String,Object> parameters);
-	List<Map<String,Object>> findRoomDistributerRecommendInfo(Map<String,Object> parameters);
 	List<Map<String,Object>> findRoomDistributerCourseInfo(Map<String,Object> parameters);
 	List<Map<String,Object>> findCourseWithRoomDistributerCourseInfo(Map<String,Object> parameters);
 	List<Map<String,Object>> findRoomDistributerCourseDetailsInfo(Map<String,Object> parameters);
@@ -59,23 +49,13 @@ public interface ICommonModuleServer {
 
 	void insertRoomDistributerRecommend(Map<String, Object> insertMap);
 
-	Map<String,Object> findRoomDistributionInfoByDistributerId(Map<String, Object> queryMap);
-
-	//void increteRecommendNumForRoomDistributer(Map<String, Object> updateMap);
-
-	void updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap);
-
 	void insertFeedback(Map<String, Object> reqMap);
-
-	Map<String,Object> findRewardByUserIdAndCourseId(Map<String, Object> rewardQueryMap);
 
 	Map<String,Object> findVersionInfoByOS(Map<String, Object> plateform);
 	Map<String,Object> findAvailableRoomDistributer(Map<String,Object> record);
 	Map<String,Object> findForceVersionInfoByOS(String force_version_key);
 
 	Integer updateIMAccount(Map<String, Object> updateIMAccountMap);
-
-	Map<String,Object> findUserDistributionInfo(Map<String, Object> queryuserDistribution);
 
 	List<Map<String,Object>> findcourseRecommendUsers(Map<String, Object> reqMap);
 
@@ -106,8 +86,6 @@ public interface ICommonModuleServer {
 
 	int findCourseMessageSum(Map<String,Object> queryMap);
 
-	void updateCourseByCourseId(Map<String,Object> queryMap);
-
 
 	List<Map<String,Object>> findPPTListByCourseId(String course_id);
 
@@ -121,33 +99,17 @@ public interface ICommonModuleServer {
 
 	List<Map<String,Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
-	List<Map<String,Object>> findClassifyInfo();
-	List<Map<String,Object>> findClassifyInfoBy();
-
 	List<Map<String,Object>> findCourseBySearch(Map<String, Object> reqMap);
 
 	List<Map<String, Object>> findLiveRoomBySearch(Map<String,Object> record);
 
 	List<Map<String, Object>> findBannerInfoAll();
-	List<Map<String,Object>> findBannerInfoAllBy();
-
-
-	List<Map<String, Object>> findCourseByClassifyId(Map<String,Object> record);
-	List<Map<String, Object>> findCourseByStatus(Map<String,Object> record);
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
 
-	public List<Map<String,Object>> findSystemConfig();
-
-	public List<Map<String,Object>> findSystemConfigBy();
+	List<Map<String,Object>> findSystemConfigBy();
 
     void updateCourse(Map<String, Object> course);
-
-    List<Map<String,Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap);
-
-	Map<String,Object> findUserNumberByCourse(Map<String, Object> map);
-
-	List<Map<String,Object>> findLecturerCourseList(Map<String,Object> record);
 
 	/**
 	 * 新增分类
@@ -243,10 +205,10 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findSeriesBySearch(Map<String,Object> record);
 
 	/**获取店铺信息
-	 * @param reqMap
+	 * @param shopId
 	 * @return
 	 */
-	Map<String,Object> getShopInfo(Map<String, Object> reqMap);
+	Map<String,Object> getShopInfo(String shopId);
 
 	/**
 	 * 根据系列id查询系列
@@ -256,15 +218,6 @@ public interface ICommonModuleServer {
 	Map<String,Object> findSeriesBySeriesId(String series_id);
 	List<Map<String,Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
 
-    List<Map<String,Object>> findSeriesByLecturer(String lecturerId);
-
-	List<Map<String,Object>> findCourseListBySeriesId(String series_id);
-
-	List<Map<String,Object>> findSaasCourseListBySeriesId(String series_id);
-
-	void updateSeries(Map<String, Object> map);
-
-    List<Map<String,Object>> findCourseListAllByLecturerId(String lecturerId);
 
 	/**查找SaaS课程
 	 * @param course_id
@@ -311,16 +264,6 @@ public interface ICommonModuleServer {
 	List<Map<String,Object>> findLoginInfo();
 
 	Map<String,Object> findCourseGuestByUserAndCourse(String user_id,String course_id);
-
-    void updateLoginInfo(Map<String, Object> queryMap);
-
-	void updateUserCommonInfo(Map<String, Object> queryMap);
-
-	/**查找直播间信息
-	 * @param lecturer_id
-	 * @return
-	 */
-	List<Map<String, Object>> findLiveRoomByLectureId(String lecturer_id);
 
 	/**查找直播间ID
 	 * @param lecturer_id
