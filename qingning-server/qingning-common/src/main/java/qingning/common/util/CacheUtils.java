@@ -289,7 +289,6 @@ public class CacheUtils extends JedisServer{
 		}
 		return values;
 	}
-
 	public Map<String,String> readSeries(String series_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis,boolean cachedValue) throws Exception{
 		Map<String,String> values = readData(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
 		String seriesId = values.get(Constants.CACHED_KEY_SERIES_FIELD);
