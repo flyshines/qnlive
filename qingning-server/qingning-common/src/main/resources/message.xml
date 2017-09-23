@@ -28,6 +28,9 @@
 				<entry key="000103" value="功能的返回参数定义错误"/>
 				<entry key="000104" value="信息已经被其他用户更新，请刷新重试"/>
 				<entry key="000105" value="数据已经处理，不可以再次处理"/>
+
+				<entry key="100001" value="当前用户不是讲师"/>
+
 				
 				<entry key="100002" value="直播间不存在"/>
 				<entry key="100003" value="直播间信息已经被修改，请刷新同步"/>
@@ -40,6 +43,7 @@
 				<entry key="100010" value="课程状态不正确，无法修改"/>
 				<entry key="100011" value="课程状态不正确，无法进行编辑"/>
 				<entry key="100012" value="课程状态不正确，无法上传PPT"/>
+
 				<entry key="100013" value="该课程不属于当前用户"/>
 				<entry key="100014" value="已经上传PPT，无法再次上传"/>
 				<entry key="100015" value="创建IM群组失败"/>
