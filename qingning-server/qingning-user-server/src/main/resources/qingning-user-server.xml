@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <servers>
 	<server name="UserServer">
-		<default class="qingning.user.server.imp.UserServerImpl">
+		<default class="qingning.user.server.imp.UserServerImpl1">
 			<function name="userFollowRoom">
 				<auth>
 					<access_token require="Y" />

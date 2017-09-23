@@ -2,7 +2,7 @@
 <servers>
 
 	<server name="CommonServer">
-		<default class="qingning.common.server.imp.CommonServerImpl">
+		<default class="qingning.common.server.imp.CommonServerImpl1">
 			<function name="serverTime">
 				<auth>
 					<accessToken require="N" />

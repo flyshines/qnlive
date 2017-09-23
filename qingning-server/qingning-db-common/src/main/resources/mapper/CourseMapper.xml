@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="qingning.db.common.mybatis.persistence.CourseMapper" >
+
+  <select id="findCourse" parameterType="hashmap" resultType="hashmap" >
+    SELECT * FROM t_course
+    <where >
+      <if test="course_id != null" >
+        course_id = #{course_id},
+      </if>
+      <if test="shop_id != null" >
+        shop_id = #{shop_id},
+      </if>
+      <if test="classify_id != null" >
+        classify_id = #{classify_id},
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id = #{lecturer_id},
+      </if>
+      <if test="series_id != null" >
+        series_id = #{series_id},
+      </if>
+      <if test="course_title != null" >
+        course_title LIKE #{course_title},
+      </if>
+      <if test="course_type != null" >
+        course_type = #{course_type},
+      </if>
+      <if test="goods_type != null" >
+        goods_type = #{goods_type},
+      </if>
+      <if test="series_course_updown != null" >
+        series_course_updown = #{series_course_updown},
+      </if>
+      <if test="course_updown != null" >
+        course_updown = #{course_updown},
+      </if>
+      <if test="shelves_sharing != null" >
+        shelves_sharing = #{shelves_sharing},
+      </if>
+    </where>
+  </select>
+
+  <select id="findCourseByCourseId" parameterType="java.lang.String" resultType="hashmap" >
+    select * from t_course where course_id = #{course_id}
+  </select>
+
+  <insert id="insertCourse" parameterType="hashmap" >
+    insert into t_course
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="course_id != null" >
+        course_id,
+      </if>
+      <if test="shop_id != null" >
+        shop_id,
+      </if>
+      <if test="classify_id != null" >
+        classify_id,
+      </if>
+      <if test="lecturer_id != null" >
+        lecturer_id,
+      </if>
+      <if test="series_id != null" >
+        series_id,
+      </if>
+      <if test="course_title != null" >
+        course_title,
+      </if>
+      <if test="course_image != null" >
+        course_image,
+      </if>
+      <if test="course_remark != null" >
+        course_remark,
+      </if>
+      <if test="course_abstract != null" >
+        course_abstract,
+      </if>
+      <if test="buy_tips != null" >
+        buy_tips,
+      </if>
+      <if test="target_user != null" >
+        target_user,
+      </if>
+      <if test="share_url != null" >
+        share_url,
+      </if>
+      <if test="course_url != null" >
+        course_url,
+      </if>
+      <if test="live_start_time != null" >
+        live_start_time,
+      </if>
+      <if test="course_duration != null" >
+        course_duration,
+      </if>
+      <if test="live_course_status != null" >
+        live_course_status,
+      </if>
+      <if test="course_type != null" >
+        course_type,
+      </if>
+      <if test="goods_type != null" >
+        goods_type,
+      </if>
+      <if test="rq_code != null" >
+        rq_code,
+      </if>
+      <if test="course_password != null" >
+        course_password,
+      </if>
+      <if test="course_price != null" >
+        course_price,
+      </if>
+      <if test="series_course_updown != null" >
+        series_course_updown,
+      </if>
+      <if test="course_updown != null" >
+        course_updown,
+      </if>
+      <if test="updown_time != null" >
+        updown_time,
+      </if>
+      <if test="shelves_sharing != null" >
+        shelves_sharing,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="details != null" >
+        details,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="course_id != null" >
+        #{course_id},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id},
+      </if>
+      <if test="classify_id != null" >
+        #{classify_id},
+      </if>
+      <if test="lecturer_id != null" >
+        #{lecturer_id},
+      </if>
+      <if test="series_id != null" >
+        #{series_id},
+      </if>
+      <if test="course_title != null" >
+        #{course_title},
+      </if>
+      <if test="course_image != null" >
+        #{course_image},
+      </if>
+      <if test="course_remark != null" >
+        #{course_remark},
+      </if>
+      <if test="course_abstract != null" >
+        #{course_abstract},
+      </if>
+      <if test="buy_tips != null" >
+        #{buy_tips},
+      </if>
+      <if test="target_user != null" >
+        #{target_user},
+      </if>
+      <if test="share_url != null" >
+        #{share_url},
+      </if>
+      <if test="course_url != null" >
+        #{course_url},
+      </if>
+      <if test="live_start_time != null" >
+        #{live_start_time},
+      </if>
+      <if test="course_duration != null" >
+        #{course_duration},
+      </if>
+      <if test="live_course_status != null" >
+        #{live_course_status},
+      </if>
+      <if test="course_type != null" >
+        #{course_type},
+      </if>
+      <if test="goods_type != null" >
+        #{goods_type},
+      </if>
+      <if test="rq_code != null" >
+        #{rq_code},
+      </if>
+      <if test="course_password != null" >
+        #{course_password},
+      </if>
+      <if test="course_price != null" >
+        #{course_price},
+      </if>
+      <if test="series_course_updown != null" >
+        #{series_course_updown},
+      </if>
+      <if test="course_updown != null" >
+        #{course_updown},
+      </if>
+      <if test="updown_time != null" >
+        #{updown_time},
+      </if>
+      <if test="shelves_sharing != null" >
+        #{shelves_sharing},
+      </if>
+      <if test="create_time != null" >
+        #{create_time},
+      </if>
+      <if test="update_time != null" >
+        #{update_time},
+      </if>
+      <if test="details != null" >
+        #{details},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateCourse" parameterType="hashmap" >
+    update t_course
+    <set >
+      <if test="classify_id != null" >
+        classify_id = #{classify_id},
+      </if>
+      <if test="series_id != null" >
+        series_id = #{series_id},
+      </if>
+      <if test="course_title != null" >
+        course_title = #{course_title},
+      </if>
+      <if test="course_image != null" >
+        course_image = #{course_image},
+      </if>
+      <if test="course_abstract != null" >
+        course_abstract = #{course_abstract},
+      </if>
+      <if test="buy_tips != null" >
+        buy_tips = #{buy_tips},
+      </if>
+      <if test="target_user != null" >
+        target_user = #{target_user},
+      </if>
+      <if test="share_url != null" >
+        share_url = #{share_url},
+      </if>
+      <if test="course_url != null" >
+        course_url = #{course_url},
+      </if>
+      <if test="live_start_time != null" >
+        live_start_time = #{live_start_time},
+      </if>
+      <if test="live_end_time != null" >
+        live_end_time = #{live_end_time},
+      </if>
+      <if test="live_course_status != null" >
+        live_course_status = #{live_course_status},
+      </if>
+      <if test="course_duration != null" >
+        course_duration = #{course_duration},
+      </if>
+      <if test="course_type != null" >
+        course_type = #{course_type},
+      </if>
+      <if test="goods_type != null" >
+        goods_type = #{goods_type},
+      </if>
+      <if test="rq_code != null" >
+        rq_code = #{rq_code},
+      </if>
+      <if test="course_password != null" >
+        course_password = #{course_password},
+      </if>
+      <if test="course_price != null" >
+        course_price = #{course_price},
+      </if>
+      <if test="student_num != null" >
+        student_num = #{student_num},
+      </if>
+      <if test="course_amount != null" >
+        course_amount = #{course_amount},
+      </if>
+      <if test="extra_num != null" >
+        extra_num = #{extra_num},
+      </if>
+      <if test="extra_amount != null" >
+        extra_amount = #{extra_amount},
+      </if>
+      <if test="comment_num != null" >
+        comment_num = #{comment_num},
+      </if>
+      <if test="click_num != null" >
+        click_num = #{click_num},
+      </if>
+      <if test="series_course_updown != null" >
+        series_course_updown = #{series_course_updown},
+      </if>
+      <if test="course_updown != null" >
+        course_updown = #{course_updown},
+      </if>
+      <if test="updown_time != null" >
+        updown_time = #{updown_time},
+      </if>
+      <if test="shelves_sharing != null" >
+        shelves_sharing = #{shelves_sharing},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time},
+      </if>
+      <if test="course_remark != null" >
+        course_remark = #{course_remark},
+      </if>
+      <if test="details != null" >
+        details = #{details},
+      </if>
+    </set>
+    where course_id = #{course_id}
+  </update>
+
+</mapper>

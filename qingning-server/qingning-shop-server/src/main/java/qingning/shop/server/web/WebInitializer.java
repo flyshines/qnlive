@@ -1,4 +1,4 @@
-package qingning.lecture.server.web;
+package qingning.shop.server.web;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -18,7 +18,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import qingning.lecture.server.configuration.SystemConfiguration;
+import qingning.shop.server.configuration.SystemConfiguration;
 
 public class WebInitializer implements WebApplicationInitializer{
 

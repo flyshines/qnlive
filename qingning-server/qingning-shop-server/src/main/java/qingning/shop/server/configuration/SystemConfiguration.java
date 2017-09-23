@@ -1,4 +1,4 @@
-package qingning.lecture.server.configuration;
+package qingning.shop.server.configuration;
 
 import java.nio.charset.Charset;
 import java.util.LinkedList;
