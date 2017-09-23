@@ -104,16 +104,14 @@ public class ShopController extends AbstractController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/lecturer/rooms/{room_id}/courses", method = RequestMethod.POST)
+	@RequestMapping(value = "/shop/lecturer/courses", method = RequestMethod.POST)
 	public
 	@ResponseBody ResponseEntity createCourse(
 			HttpEntity<Object> entity,
 			@PathVariable("room_id") String room_id,
 			@RequestHeader("access_token") String accessToken,
-
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("ShopServer", "createCourse", accessToken, version);
-		((Map<String,Object>)entity.getBody()).put("room_id", room_id);
 		requestEntity.setParam(entity.getBody());
 		return this.process(requestEntity, serviceManger, message);
 	}
@@ -157,7 +155,6 @@ public class ShopController extends AbstractController {
 			HttpEntity<Object> entity,
 			@PathVariable("course_id") String course_id,
 			@RequestHeader("access_token") String accessToken,
-
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("ShopServer", "updateCourse", accessToken, version);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);
@@ -180,7 +177,6 @@ public class ShopController extends AbstractController {
 				@RequestParam(value = "page_count", defaultValue = "20") String page_count,
 				@RequestParam(value = "course_id", defaultValue = "") String course_id,
 				@RequestHeader("access_token") String accessToken,
-
 				@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("ShopServer", "courseList", accessToken, version);
 		Map<String, Object> parMap = new HashMap<String, Object>();
@@ -206,7 +202,6 @@ public class ShopController extends AbstractController {
 			@PathVariable("course_id") String course_id,
 			HttpEntity<Object> entity,
 			@RequestHeader("access_token") String accessToken,
-
 			@RequestHeader("version") String version) throws Exception {
 		RequestEntity requestEntity = this.createResponseEntity("ShopServer", "processCoursePPTs", accessToken, version);
 		((Map<String,Object>)entity.getBody()).put("course_id", course_id);

@@ -356,402 +356,412 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         }
     }
  
- 
+//
+//    @SuppressWarnings("unchecked")
+//    @FunctionName("createCourse")
+//    public Map<String, Object> createCourse(RequestEntity reqEntity) throws Exception {
+//        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
+//        Long startTime = (Long)reqMap.get("start_time");
+//        boolean pass=true;
+//        if(MiscUtils.isEmpty(startTime)){
+//            pass=false;
+//        } else {
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTime(new Date());
+//            cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
+//            if(cal.getTimeInMillis()>startTime){
+//                pass=false;
+//            }
+//        }
+//        if(!pass){
+//            throw new QNLiveException("100019");
+//        }
+//
+//        //1.判断直播间是否属于当前讲师
+//        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
+//
+//        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+//        String liveRoomOwner = readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readShopOperation, jedis, true);
+//        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
+//            throw new QNLiveException("100002");
+//        }
+//
+//        Map<String,Object> query = new HashMap<String,Object>();
+//        query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+//
+//        //课程之间需要间隔三十分钟
+//        String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
+//        long startIndex = startTime-30*60*1000;
+//        long endIndex = startTime+30*60*1000;
+//        long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
+//        long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
+//        Set<String> aLong = jedis.zrangeByScore(lecturerCoursesAllKey, start, end);
+//        for(String course_id : aLong){
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("course_id",course_id);
+//            Map<String, String> course = readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
+//            if(course.get("status").equals("1")){
+//                throw new QNLiveException("100029");
+//            }
+//        }
+//
+//        reqMap.put("user_id", userId);
+//
+//        //2.1创建IM 聊天群组
+//        Map<String,String> queryParam = new HashMap<>();
+//        queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+//        String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, queryParam);
+//        Map<String,String> userMap = jedis.hgetAll(accessTokenKey);
+//        try {
+//            Map<String,String> groupMap = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
+//            if(groupMap == null || StringUtils.isBlank(groupMap.get("groupid"))){
+//                throw new QNLiveException("100015");
+//            }
+//            reqMap.put("im_course_id",groupMap.get("groupid"));
+//            //2.1.1将讲师加入到该群组中
+//            IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
+//        }catch (Exception e){
+//        }
+//        //创建课程url
+//        if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
+//            String default_course_cover_url_original = MiscUtils.getConfigByKey("default_course_cover_url");
+//            JSONArray default_course_cover_url_array = JSON.parseArray(default_course_cover_url_original);
+//            int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
+//            reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
+//        }
+//        //创建课程到数据库
+//        Map<String, Object> dbResultMap = shopModuleServer.createCourse(reqMap);
+//        //4 修改相关缓存
+//        //4.1修改讲师个人信息缓存中的课程数 讲师个人信息SYS: lecturer:{lecturer_id}
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
+//        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map);
+//        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+//        String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+//        jedis.hincrBy(lectureKey, "course_num", 1);
+//        //4.2 修改讲师直播间信息中的课程数  讲师直播间信息SYS: room:{room_id}
+//        jedis.hincrBy(liveRoomKey, "course_num", 1);
+//
+//        String course_type = (String)reqMap.get("course_type");
+//        if("1".equals(course_type)){
+//            jedis.hincrBy(liveRoomKey, "private_course_num", 1);
+//            jedis.hincrBy(lectureKey, "private_course_num", 1);
+//        } else if("2".equals(course_type)){
+//            jedis.hincrBy(liveRoomKey, "pay_course_num", 1);
+//            jedis.hincrBy(lectureKey, "pay_course_num", 1);
+//        }
+//        //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
+//        Map<String, String> course = readCourse((String)dbResultMap.get("course_id"),
+//        		generateRequestEntity(null, null, null, dbResultMap), readCourseOperation, jedis, true);
+//        if("1".equals(reqMap.get("updown"))){
+//            //<editor-fold desc="上架">
+//            String courseId = (String)course.get("course_id");
+//            String roomId = course.get("room_id");
+//            if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
+//                map.clear();
+//                String series_id = reqMap.get("series_id").toString();
+//                map.put("series_id",series_id);
+//                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+//                String lecturer_id = jedis.hget(seriesKey, "lecturer_id");
+//                if(!lecturer_id.equals(userId)){
+//                    throw new QNLiveException("210001");
+//                }
+//                String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
+//                long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
+//                jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
+//                shopModuleServer.increaseSeriesCourse(series_id);
+//                jedis.del(seriesKey);
+//                //获取系列课程详情
+//                Map<String, String> series = readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
+//                //更新排序
+//                jedis.zrem(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,series_id);
+//                long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));
+//                jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,lpos,series_id);
+//                //TODO 订阅的系列发布了新的课程 推送提醒
+//                map.put("lecturer_id", userId);
+//                Map<String, String> lecturer = readLecturer(userId, generateRequestEntity(null, null, null, map), readShopOperation, jedis);
+//                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
+//                List<Map<String, Object>> seriesStudentList = shopModuleServer.findSeriesStudentListBySeriesId(series_id);
+//                if(!MiscUtils.isEmpty(seriesStudentList)){
+//                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+//                    TemplateData first = new TemplateData();
+//                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    first.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_series_first"),MiscUtils.RecoveryEmoji(series.get("series_title"))));
+//                    templateMap.put("first", first);
+//                    TemplateData name = new TemplateData();
+//                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    name.setValue(MiscUtils.RecoveryEmoji(course.get("course_title")));
+//                    templateMap.put("keyword1", name);
+//                    TemplateData wuliu = new TemplateData();
+//                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    String content = "";
+//                    wuliu.setValue(content);
+//                    templateMap.put("keyword2", wuliu);
+//                    TemplateData orderNo = new TemplateData();
+//                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
+//                    templateMap.put("keyword3", orderNo);
+//                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+//                    TemplateData receiveAddr = new TemplateData();
+//                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
+//                    templateMap.put("keyword4", receiveAddr);
+//                    TemplateData remark = new TemplateData();
+//                    //if(.equals(Constants.HEADER_APP_NAME)){
+//                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+////                    }else{
+////                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+////                    }
+//                    remark.setValue(MiscUtils.getConfigByKey("wpush_follow_series_remark"));
+//                    templateMap.put("remark", remark);
+//
+//                    Map<String, Object> wxPushParam = new HashMap<>();
+//                    wxPushParam.put("templateParam", templateMap);//模板消息
+//                    course.put("series_title", series.get("series_title"));
+//                    wxPushParam.put("course", course);//课程ID
+//                    wxPushParam.put("followers", seriesStudentList);//直播间关注者
+//                    wxPushParam.put("pushType", "3");//1创建课程 2更新课程 3系列更新课程
+//                    RequestEntity mqRequestEntity = new RequestEntity();
+//                    mqRequestEntity.setServerName("MessagePushServer");
+//                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+//                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
+//                    mqRequestEntity.setParam(wxPushParam);
+//
+//                    this.mqUtils.sendMessage(mqRequestEntity);
+//                }
+//            }else{
+//                /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
+//                map.clear();
+//                map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+//                String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
+//                String classify_id = "";
+//                if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
+//                    classify_id= Constants.COURSE_DEFAULT_CLASSINFY;
+//                }else{
+//                    classify_id = reqMap.get("classify_id").toString();
+//                }
+//                long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+//                //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
+//                String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
+//                jedis.zadd(platformCourseList, lpos, courseId);
+//                jedis.zadd(predictionKey, lpos, courseId);
+//                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 0, courseId);//热门推荐 预告
+//                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
+//                String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
+//                jedis.zadd(classifyCourseKey, lpos, courseId);
+//
+//                //</editor-fold>
+//                //<editor-fold desc="单品课推送">
+//                map.clear();
+//                map.put("lecturer_id", userId);
+//                Map<String, String> lecturer = readLecturer(userId, generateRequestEntity(null, null, null, map), readShopOperation, jedis);
+//                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
+//                String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
+//                //取出粉丝列表
+//                List<Map<String,Object>> findFollowUser = shopModuleServer.findRoomFanListWithLoginInfo(roomId);
+//                Map<String,Object> queryNo = new HashMap<String,Object>();
+//                queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
+//                String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
+//                Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
+//                if (MiscUtils.isEmpty(serviceNoMap)) {
+//                    Map<String, Object> serviceNoMapObj = shopModuleServer.findServiceNoInfoByLecturerId(userId); //查找授权信息
+//                    MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
+//                }
+//                //关注的直播间有新的课程，推送提醒
+//                if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
+//                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
+//                    TemplateData first = new TemplateData();
+//                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first"));
+//                    templateMap.put("first", first);
+//                    TemplateData name = new TemplateData();
+//                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
+//                    templateMap.put("keyword1", name);
+//                    TemplateData wuliu = new TemplateData();
+//                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
+//                    if(MiscUtils.isEmpty(content)){
+//                        content = "";
+//                    }
+//                    wuliu.setValue(content);
+//                    templateMap.put("keyword2", wuliu);
+//
+//                    TemplateData orderNo = new TemplateData();
+//                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
+//                    templateMap.put("keyword3", orderNo);
+//                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
+//                    TemplateData receiveAddr = new TemplateData();
+//                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
+//                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
+//                    templateMap.put("keyword4", receiveAddr);
+//                    TemplateData remark = new TemplateData();
+//                    //if(.equals(Constants.HEADER_APP_NAME)){
+//                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
+////                    }else{
+////                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
+////                    }
+//                    remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),MiscUtils.RecoveryEmoji(nickName)));
+//                    templateMap.put("remark", remark);
+//
+//                    if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
+//                        Map<String, Object> wxPushParam = new HashMap<>();
+//                        wxPushParam.put("templateParam", templateMap);//模板消息
+//                        course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
+//                        wxPushParam.put("course", course);//课程ID
+//                        wxPushParam.put("followers", findFollowUser);//直播间关注者
+//                        wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+//                        RequestEntity mqRequestEntity = new RequestEntity();
+//                        mqRequestEntity.setServerName("MessagePushServer");
+//                        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+//                        mqRequestEntity.setFunctionName("noticeCourseToFollower");
+//                        mqRequestEntity.setParam(wxPushParam);
+//
+//                        this.mqUtils.sendMessage(mqRequestEntity);
+//                    }
+//                    if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
+//                        log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
+//                        String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis);
+//                        log.debug("验证讲师服务号token--------------------");
+//                        if (authorizer_access_token != null) {
+//                            Map<String, Object> wxPushParam = new HashMap<>();
+//                            wxPushParam.put("templateParam", templateMap);//模板消息
+//                            wxPushParam.put("course_id", courseId);//课程ID
+//                            wxPushParam.put("lecturer_id", userId);
+//                            wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));//第三方服务号的
+//                            wxPushParam.put("accessToken", authorizer_access_token);//课程ID
+//                            wxPushParam.put("pushType", "1");//1创建课程 2更新课程
+//                            String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
+//                            log.debug("发送mq消息进行异步处理--------------------");
+//                            Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam);
+//                            RequestEntity mqRequestEntity = new RequestEntity();
+//                            mqRequestEntity.setServerName("MessagePushServer");
+//                            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
+//                            mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
+//                            mqRequestEntity.setParam(weCatTemplateInfo);
+//
+//                            noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
+//                        }
+//                    }
+//                }
+//                if ("0".equals(course_type)){//公开课才开启机器人
+//                    log.info("创建课程，开始机器人加入功能");
+//                    map.clear();
+//                    map.put("course_id", courseId);
+//                    RequestEntity mqRequestEntity = new RequestEntity();
+//                    mqRequestEntity.setServerName("CourseRobotService");
+//                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+//                    mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
+//                    mqRequestEntity.setParam(map);
+//
+//                    this.mqUtils.sendMessage(mqRequestEntity);
+//                    jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
+//                }
+//                //</editor-fold>
+//
+//            }
+//            //4.6 将课程插入到平台分类列表 分类列表
+//            map.clear();
+//            //<editor-fold desc="加入定时任务">
+//            resultMap.put("course_id", courseId);
+//            Map<String,Object> timerMap = new HashMap<>();
+//            timerMap.put("course_id", courseId);
+//            timerMap.put("room_id", roomId);
+//            timerMap.put("lecturer_id", userId);
+//            timerMap.put("course_title", course.get("course_title"));
+//            timerMap.put("start_time", startTime);
+//            timerMap.put("position", course.get("position"));
+//            timerMap.put("im_course_id", course.get("im_course_id"));
+//            timerMap.put("real_start_time",  startTime);
+//            if(true){
+//                RequestEntity mqRequestEntity = new RequestEntity();
+//                mqRequestEntity.setServerName("MessagePushServer");
+//                mqRequestEntity.setParam(timerMap);
+//
+//                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+//                log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseId);
+//                mqRequestEntity.setFunctionName("processCourseLiveOvertime");
+//                this.mqUtils.sendMessage(mqRequestEntity);
+//                log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
+//                mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+//                this.mqUtils.sendMessage(mqRequestEntity);
+//                if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+//                    log.debug("提前五分钟开课提醒 course_id:"+courseId);
+//                    if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+//                        mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+//                        this.mqUtils.sendMessage(mqRequestEntity);
+//                    }
+//                    //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+//                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+//                    this.mqUtils.sendMessage(mqRequestEntity);
+//                    log.debug("直播间开始发送IM  course_id:"+courseId);
+//                    mqRequestEntity.setFunctionName("processCourseStartIM");
+//                    this.mqUtils.sendMessage(mqRequestEntity);
+//                }
+//                //提前24小时开课提醒
+//                if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+//                    mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+//                    this.mqUtils.sendMessage(mqRequestEntity);
+//                }
+//            }
+//
+//            //</editor-fold>
+//        }else if("2".equals(reqMap.get("updown"))){
+//            map.clear();
+//            map.put(Constants.CACHED_KEY_LECTURER_FIELD,course.get(Constants.CACHED_KEY_LECTURER_FIELD));
+//            long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position")));
+//            //加入讲师下架课程列表
+//            resultMap.put("course_id", course.get("course_id"));
+//            if(!MiscUtils.isEmpty(course.get("series_id"))){
+//                map.put("series_id",course.get("series_id"));
+//                String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
+//                jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
+//            }else{
+//                String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
+//                jedis.zadd(lectureCourseKey, lpos, course.get("course_id"));
+//            }
+//        }
+//        //给课程里面推消息
+//        Map<String, Object> userInfo = shopModuleServer.findUserInfoByUserId(course.get("lecturer_id"));
+//        Map<String,Object> startLecturerMessageInformation = new HashMap<>();
+//        startLecturerMessageInformation.put("creator_id",userInfo.get("user_id"));//发送人id
+//        startLecturerMessageInformation.put("course_id", course.get("course_id"));//课程id
+//        startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
+//        startLecturerMessageInformation.put("message_type", "1");
+//        startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
+//        startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
+//        startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
+//        startLecturerMessageInformation.put("send_type","0");
+//        startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
+//        startLecturerMessageInformation.put("creator_nick_name",userInfo.get("nick_name"));
+//
+//        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
+////					//1.将聊天信息id插入到redis zsort列表中
+//        jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_imid"));
+////					//添加到老师发送的集合中
+//        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
+//        jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
+//        String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
+//        Map<String,String> result = new HashMap<String,String>();
+//        MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
+//        jedis.hmset(messageKey, result);
+//        //</editor-fold>
+//        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+//        //设置讲师更新课程 30分钟
+//        jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
+//        return resultMap;
+//    }
+
+
+
+
     @SuppressWarnings("unchecked")
     @FunctionName("createCourse")
     public Map<String, Object> createCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        Long startTime = (Long)reqMap.get("start_time");
-        boolean pass=true;
-        if(MiscUtils.isEmpty(startTime)){
-            pass=false;
-        } else {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            cal.add(Calendar.MINUTE, Constants.COURSE_MAX_INTERVAL);
-            if(cal.getTimeInMillis()>startTime){
-                pass=false;
-            }
-        }
-        if(!pass){
-            throw new QNLiveException("100019");
-        }
- 
-        //1.判断直播间是否属于当前讲师
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取userid
-
-        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
-        String liveRoomOwner = readLiveRoomInfoFromCached((String)reqMap.get("room_id"), "lecturer_id", reqEntity, readShopOperation, jedis, true);
-        if (liveRoomOwner == null || !liveRoomOwner.equals(userId)) {
-            throw new QNLiveException("100002");
-        }
-
-        Map<String,Object> query = new HashMap<String,Object>();
-        query.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-
-        //课程之间需要间隔三十分钟
-        String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
-        long startIndex = startTime-30*60*1000;
-        long endIndex = startTime+30*60*1000;
-        long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
-        long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
-        Set<String> aLong = jedis.zrangeByScore(lecturerCoursesAllKey, start, end);
-        for(String course_id : aLong){
-            Map<String,Object> map = new HashMap<>();
-            map.put("course_id",course_id);
-            Map<String, String> course = readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
-            if(course.get("status").equals("1")){
-                throw new QNLiveException("100029");
-            }
-        }
-
-        reqMap.put("user_id", userId);
-
-        //2.1创建IM 聊天群组
-        Map<String,String> queryParam = new HashMap<>();                
-        queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
-        String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, queryParam);
-        Map<String,String> userMap = jedis.hgetAll(accessTokenKey);
-        try {
-            Map<String,String> groupMap = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
-            if(groupMap == null || StringUtils.isBlank(groupMap.get("groupid"))){
-                throw new QNLiveException("100015");
-            }
-            reqMap.put("im_course_id",groupMap.get("groupid"));
-            //2.1.1将讲师加入到该群组中
-            IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
-        }catch (Exception e){
-        }
-        //创建课程url
-        if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
-            String default_course_cover_url_original = MiscUtils.getConfigByKey("default_course_cover_url");
-            JSONArray default_course_cover_url_array = JSON.parseArray(default_course_cover_url_original);
-            int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
-            reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
-        }
-        //创建课程到数据库
-        Map<String, Object> dbResultMap = shopModuleServer.createCourse(reqMap);
-        //4 修改相关缓存
-        //4.1修改讲师个人信息缓存中的课程数 讲师个人信息SYS: lecturer:{lecturer_id}     
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(Constants.FIELD_ROOM_ID, (String)reqMap.get("room_id"));
-        String liveRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ROOM, map); 
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String lectureKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-        jedis.hincrBy(lectureKey, "course_num", 1);
-        //4.2 修改讲师直播间信息中的课程数  讲师直播间信息SYS: room:{room_id}
-        jedis.hincrBy(liveRoomKey, "course_num", 1);
-
-        String course_type = (String)reqMap.get("course_type");
-        if("1".equals(course_type)){
-            jedis.hincrBy(liveRoomKey, "private_course_num", 1);
-            jedis.hincrBy(lectureKey, "private_course_num", 1);
-        } else if("2".equals(course_type)){
-            jedis.hincrBy(liveRoomKey, "pay_course_num", 1);
-            jedis.hincrBy(lectureKey, "pay_course_num", 1);
-        }
-        //4.3 生成该课程缓存 课程基本信息：SYS: course:{course_id}
-        Map<String, String> course = readCourse((String)dbResultMap.get("course_id"), 
-        		generateRequestEntity(null, null, null, dbResultMap), readCourseOperation, jedis, true);
-        if("1".equals(reqMap.get("updown"))){
-            //<editor-fold desc="上架">
-            String courseId = (String)course.get("course_id");
-            String roomId = course.get("room_id");
-            if(!MiscUtils.isEmpty(reqMap.get("series_id"))){
-                map.clear();
-                String series_id = reqMap.get("series_id").toString();
-                map.put("series_id",series_id);
-                String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
-                String lecturer_id = jedis.hget(seriesKey, "lecturer_id");
-                if(!lecturer_id.equals(userId)){
-                    throw new QNLiveException("210001");
-                }
-                String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_UP, map);
-                long seriesLpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis() , MiscUtils.convertObjectToLong(course.get("position")));
-                jedis.zadd(lectureSeriesKey, seriesLpos, course.get("course_id"));
-                shopModuleServer.increaseSeriesCourse(series_id);
-                jedis.del(seriesKey);
-                //获取系列课程详情
-                Map<String, String> series = readSeries(series_id, generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                //更新排序
-                jedis.zrem(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,series_id);
-                long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(series.get("position")));
-                jedis.zadd(Constants.CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM,lpos,series_id);
-                //TODO 订阅的系列发布了新的课程 推送提醒
-                map.put("lecturer_id", userId);
-                Map<String, String> lecturer = readLecturer(userId, generateRequestEntity(null, null, null, map), readShopOperation, jedis);
-                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
-                List<Map<String, Object>> seriesStudentList = shopModuleServer.findSeriesStudentListBySeriesId(series_id);
-                if(!MiscUtils.isEmpty(seriesStudentList)){
-                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                    TemplateData first = new TemplateData();
-                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    first.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_series_first"),MiscUtils.RecoveryEmoji(series.get("series_title"))));
-                    templateMap.put("first", first);
-                    TemplateData name = new TemplateData();
-                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    name.setValue(MiscUtils.RecoveryEmoji(course.get("course_title")));
-                    templateMap.put("keyword1", name);
-                    TemplateData wuliu = new TemplateData();
-                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    String content = "";
-                    wuliu.setValue(content);
-                    templateMap.put("keyword2", wuliu);
-                    TemplateData orderNo = new TemplateData();
-                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
-                    templateMap.put("keyword3", orderNo);
-                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-                    TemplateData receiveAddr = new TemplateData();
-                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
-                    templateMap.put("keyword4", receiveAddr);
-                    TemplateData remark = new TemplateData();
-                    //if(.equals(Constants.HEADER_APP_NAME)){
-                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
-//                    }else{
-//                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
-//                    }
-                    remark.setValue(MiscUtils.getConfigByKey("wpush_follow_series_remark"));
-                    templateMap.put("remark", remark);
-
-                    Map<String, Object> wxPushParam = new HashMap<>();
-                    wxPushParam.put("templateParam", templateMap);//模板消息
-                    course.put("series_title", series.get("series_title"));
-                    wxPushParam.put("course", course);//课程ID
-                    wxPushParam.put("followers", seriesStudentList);//直播间关注者
-                    wxPushParam.put("pushType", "3");//1创建课程 2更新课程 3系列更新课程
-                    RequestEntity mqRequestEntity = new RequestEntity();
-                    mqRequestEntity.setServerName("MessagePushServer");
-                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                    mqRequestEntity.setFunctionName("noticeCourseToFollower");
-                    mqRequestEntity.setParam(wxPushParam);
-
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                }
-            }else{
-                /*4.4 将课程插入到 我的课程列表预告课程列表 SYS: lecturer:{lecturer_id}courses:prediction*/
-                map.clear();
-                map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-                String predictionKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);
-                String classify_id = "";
-                if(MiscUtils.isEmpty(reqMap.get("classify_id"))){
-                    classify_id= Constants.COURSE_DEFAULT_CLASSINFY;
-                }else{
-                    classify_id = reqMap.get("classify_id").toString();
-                }
-                long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
-                //4.5 将课程插入到平台课程列表 预告课程列表 SYS:courses:prediction
-                String platformCourseList = Constants.CACHED_KEY_PLATFORM_COURSE_PREDICTION;
-                jedis.zadd(platformCourseList, lpos, courseId);
-                jedis.zadd(predictionKey, lpos, courseId);
-                jedis.zadd(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 0, courseId);//热门推荐 预告
-                map.put(Constants.CACHED_KEY_CLASSIFY, classify_id);
-                String classifyCourseKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_PLATFORM_COURSE_CLASSIFY_PREDICTION, map);
-                jedis.zadd(classifyCourseKey, lpos, courseId);
-
-                //</editor-fold>
-                //<editor-fold desc="单品课推送">
-                map.clear();
-                map.put("lecturer_id", userId);
-                Map<String, String> lecturer = readLecturer(userId, generateRequestEntity(null, null, null, map), readShopOperation, jedis);
-                String nickName = MiscUtils.RecoveryEmoji(lecturer.get("nick_name"));
-                String courseTitle = MiscUtils.RecoveryEmoji(course.get("course_title"));
-                //取出粉丝列表
-                List<Map<String,Object>> findFollowUser = shopModuleServer.findRoomFanListWithLoginInfo(roomId);
-                Map<String,Object> queryNo = new HashMap<String,Object>();
-                queryNo.put(Constants.CACHED_KEY_SERVICE_LECTURER_FIELD, userId);
-                String serviceNoKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERVICE_LECTURER, queryNo);
-                Map<String, String> serviceNoMap = jedis.hgetAll(serviceNoKey);
-                if (MiscUtils.isEmpty(serviceNoMap)) {
-                    Map<String, Object> serviceNoMapObj = shopModuleServer.findServiceNoInfoByLecturerId(userId); //查找授权信息
-                    MiscUtils.converObjectMapToStringMap(serviceNoMapObj, serviceNoMap);
-                }
-                //关注的直播间有新的课程，推送提醒
-                if (!MiscUtils.isEmpty(findFollowUser) || !MiscUtils.isEmpty(serviceNoMap)) {
-                    Map<String, TemplateData> templateMap = new HashMap<String, TemplateData>();
-                    TemplateData first = new TemplateData();
-                    first.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    first.setValue(MiscUtils.getConfigByKey("wpush_follow_course_first"));
-                    templateMap.put("first", first);
-                    TemplateData name = new TemplateData();
-                    name.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    name.setValue(MiscUtils.RecoveryEmoji(courseTitle));
-                    templateMap.put("keyword1", name);
-                    TemplateData wuliu = new TemplateData();
-                    wuliu.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    String content = MiscUtils.RecoveryEmoji(course.get("course_remark"));
-                    if(MiscUtils.isEmpty(content)){
-                        content = "";
-                    }
-                    wuliu.setValue(content);
-                    templateMap.put("keyword2", wuliu);
-
-                    TemplateData orderNo = new TemplateData();
-                    orderNo.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    orderNo.setValue(MiscUtils.RecoveryEmoji(nickName));
-                    templateMap.put("keyword3", orderNo);
-                    Date  startTime1 = new Date(Long.parseLong(reqMap.get("start_time").toString()));
-                    TemplateData receiveAddr = new TemplateData();
-                    receiveAddr.setColor(Constants.WE_CHAT_PUSH_COLOR);
-                    receiveAddr.setValue(MiscUtils.parseDateToFotmatString(startTime1, "yyyy-MM-dd HH:mm"));
-                    templateMap.put("keyword4", receiveAddr);
-                    TemplateData remark = new TemplateData();
-                    //if(.equals(Constants.HEADER_APP_NAME)){
-                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_QNCOLOR);
-//                    }else{
-//                        remark.setColor(Constants.WE_CHAT_PUSH_COLOR_DLIVE);
-//                    }
-                    remark.setValue(String.format(MiscUtils.getConfigByKey("wpush_follow_course_remark"),MiscUtils.RecoveryEmoji(nickName)));
-                    templateMap.put("remark", remark);
-
-                    if (!MiscUtils.isEmpty(findFollowUser) ) { //有关注者
-                        Map<String, Object> wxPushParam = new HashMap<>();
-                        wxPushParam.put("templateParam", templateMap);//模板消息
-                        course.put("room_name", jedis.hget(liveRoomKey, "room_name"));
-                        wxPushParam.put("course", course);//课程ID
-                        wxPushParam.put("followers", findFollowUser);//直播间关注者
-                        wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-                        RequestEntity mqRequestEntity = new RequestEntity();
-                        mqRequestEntity.setServerName("MessagePushServer");
-                        mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                        mqRequestEntity.setFunctionName("noticeCourseToFollower");
-                        mqRequestEntity.setParam(wxPushParam);
-
-                        this.mqUtils.sendMessage(mqRequestEntity);
-                    }
-                    if (!MiscUtils.isEmpty(serviceNoMap)) { //该讲师绑定服务号，推送提醒给粉丝 1.判断不为空
-                        log.debug("进入讲师有绑定服务号--------------------:"+serviceNoMap);
-                        String authorizer_access_token = getWeServiceNo(serviceNoMap, userId, serviceNoKey, jedis);
-                        log.debug("验证讲师服务号token--------------------");
-                        if (authorizer_access_token != null) {
-                            Map<String, Object> wxPushParam = new HashMap<>();
-                            wxPushParam.put("templateParam", templateMap);//模板消息
-                            wxPushParam.put("course_id", courseId);//课程ID
-                            wxPushParam.put("lecturer_id", userId);
-                            wxPushParam.put("authorizer_appid", serviceNoMap.get("authorizer_appid"));//第三方服务号的
-                            wxPushParam.put("accessToken", authorizer_access_token);//课程ID
-                            wxPushParam.put("pushType", "1");//1创建课程 2更新课程
-                            String url = MiscUtils.getConfigByKey("course_share_url_pre_fix")+courseId;//推送url
-                            log.debug("发送mq消息进行异步处理--------------------");
-                            Map<String, Object> weCatTemplateInfo = getWeCatTemplateInfo(wxPushParam);
-                            RequestEntity mqRequestEntity = new RequestEntity();
-                            mqRequestEntity.setServerName("MessagePushServer");
-                            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);//异步进行处理
-                            mqRequestEntity.setFunctionName("noticeCourseToServiceNoFollow");
-                            mqRequestEntity.setParam(weCatTemplateInfo);
-
-                            noticeCourseToServiceNoFollow(mqRequestEntity,jedisUtils,null);
-                        }
-                    }
-                }
-                if ("0".equals(course_type)){//公开课才开启机器人
-                    log.info("创建课程，开始机器人加入功能");
-                    map.clear();
-                    map.put("course_id", courseId);
-                    RequestEntity mqRequestEntity = new RequestEntity();
-                    mqRequestEntity.setServerName("CourseRobotService");
-                    mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                    mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
-                    mqRequestEntity.setParam(map);
-
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                    jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, userId);
-                }
-                //</editor-fold>
-
-            }
-            //4.6 将课程插入到平台分类列表 分类列表
-            map.clear();
-            //<editor-fold desc="加入定时任务">
-            resultMap.put("course_id", courseId);
-            Map<String,Object> timerMap = new HashMap<>();
-            timerMap.put("course_id", courseId);
-            timerMap.put("room_id", roomId);
-            timerMap.put("lecturer_id", userId);
-            timerMap.put("course_title", course.get("course_title"));
-            timerMap.put("start_time", startTime);
-            timerMap.put("position", course.get("position"));
-            timerMap.put("im_course_id", course.get("im_course_id"));
-            timerMap.put("real_start_time",  startTime);
-            if(true){
-                RequestEntity mqRequestEntity = new RequestEntity();
-                mqRequestEntity.setServerName("MessagePushServer");
-                mqRequestEntity.setParam(timerMap);
-
-                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
-                log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+courseId);
-                mqRequestEntity.setFunctionName("processCourseLiveOvertime");
-                this.mqUtils.sendMessage(mqRequestEntity);
-                log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+courseId);
-                mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
-                this.mqUtils.sendMessage(mqRequestEntity);
-                if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
-                    log.debug("提前五分钟开课提醒 course_id:"+courseId);
-                    if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
-                        mqRequestEntity.setFunctionName("processCourseStartShortNotice");
-                        this.mqUtils.sendMessage(mqRequestEntity);
-                    }
-                    //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
-                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                    log.debug("直播间开始发送IM  course_id:"+courseId);
-                    mqRequestEntity.setFunctionName("processCourseStartIM");
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                }
-                //提前24小时开课提醒
-                if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
-                    mqRequestEntity.setFunctionName("processCourseStartLongNotice");
-                    this.mqUtils.sendMessage(mqRequestEntity);
-                }
-            }
-
-            //</editor-fold>
-        }else if("2".equals(reqMap.get("updown"))){
-            map.clear();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD,course.get(Constants.CACHED_KEY_LECTURER_FIELD));
-            long lpos = MiscUtils.convertInfoToPostion(System.currentTimeMillis(), MiscUtils.convertObjectToLong(course.get("position")));
-            //加入讲师下架课程列表
-            resultMap.put("course_id", course.get("course_id"));
-            if(!MiscUtils.isEmpty(course.get("series_id"))){
-                map.put("series_id",course.get("series_id"));
-                String lectureSeriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES_COURSE_DOWN, map);
-                jedis.zadd(lectureSeriesKey, lpos, course.get("course_id"));
-            }else{
-                String lectureCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_DOWN, map);
-                jedis.zadd(lectureCourseKey, lpos, course.get("course_id"));
-            }
-        }
-        //给课程里面推消息
-        Map<String, Object> userInfo = shopModuleServer.findUserInfoByUserId(course.get("lecturer_id"));
-        Map<String,Object> startLecturerMessageInformation = new HashMap<>();
-        startLecturerMessageInformation.put("creator_id",userInfo.get("user_id"));//发送人id
-        startLecturerMessageInformation.put("course_id", course.get("course_id"));//课程id
-        startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
-        startLecturerMessageInformation.put("message_type", "1");
-        startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
-        startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
-        startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
-        startLecturerMessageInformation.put("send_type","0");
-        startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
-        startLecturerMessageInformation.put("creator_nick_name",userInfo.get("nick_name"));
-
-        String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
-//					//1.将聊天信息id插入到redis zsort列表中
-        jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_imid"));
-//					//添加到老师发送的集合中
-        String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
-        jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
-        String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
-        Map<String,String> result = new HashMap<String,String>();
-        MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
-        jedis.hmset(messageKey, result);
-        //</editor-fold>
-        long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
-        //设置讲师更新课程 30分钟
-        jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
-        return resultMap;
+        return null;
     }
 
 
