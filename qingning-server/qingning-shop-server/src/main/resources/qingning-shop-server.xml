@@ -2,7 +2,7 @@
 <servers>
 
 	<server name="ShopServer">
-		<default class="qingning.lecture.server.imp.ShopServerImpl1">
+		<default class="qingning.shop.server.imp.ShopServerImpl">
 			<!--开通店铺-->
 			<function name="shopOpen">
 				<auth>
