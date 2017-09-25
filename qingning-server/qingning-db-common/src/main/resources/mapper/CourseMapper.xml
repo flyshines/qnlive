@@ -39,6 +39,10 @@
         shelves_sharing = #{shelves_sharing},
       </if>
     </where>
+    <if test="">
+
+    </if>
+
   </select>
 
   <select id="findCourseByCourseId" parameterType="java.lang.String" resultType="hashmap" >
@@ -323,5 +327,8 @@
     </set>
     where course_id = #{course_id}
   </update>
+
+
+
 
 </mapper>
