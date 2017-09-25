@@ -10,7 +10,7 @@
     select * from t_system_config
   </select>
 
-  <select id="findSystemConfigBy" resultType="hashmap" parameterType="java.lang.String">
+  <select id="findSystemConfig" resultType="hashmap" parameterType="java.lang.String">
     select * from t_system_config
   </select>
   

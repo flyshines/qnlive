@@ -17,8 +17,6 @@ public interface SystemConfigMapper {
 
     List<Map<String,Object>> findSystemConfig();
 
-    List<Map<String,Object>> findSystemConfigBy();
-
     /**
      * 根据config_key IN 查询系统配置
      * @param selectSysConfigMap

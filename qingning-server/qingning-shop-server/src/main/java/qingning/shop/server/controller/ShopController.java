@@ -8,6 +8,9 @@ import qingning.common.entity.ResponseEntity;
 import qingning.common.util.wxEncrypt.WXBizMsgCrypt;
 import qingning.server.AbstractController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
+
 @RestController
 public class ShopController extends AbstractController {
 
@@ -35,5 +38,52 @@ public class ShopController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
+    /**
+     * 开通店铺
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/open", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity openShop(@RequestHeader(value = "access_token") String accessToken,
 
+                            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "openShop", accessToken, version);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 微信扫码 获取扫码链接
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/wechat/login/rqcode", method = RequestMethod.GET)
+    public void wechatLogin(HttpServletResponse resp) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "wechatLogin", null, null);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+
+        Object redirectUrl = resultMap.get("redirectUrl");
+        if (redirectUrl != null) {
+            resp.sendRedirect(redirectUrl.toString());
+        }
+    }
+
+    /**
+     * 店铺-店铺信息
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/info", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity shopInfo(@RequestHeader(value = "access_token") String accessToken,
+
+                            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopInfo", accessToken, version);
+        return this.process(requestEntity, serviceManger, message);
+    }
 }

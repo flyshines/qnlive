@@ -232,7 +232,7 @@ public final class Constants {
 
 	//<editor-fold desc="店铺">
 	/** 店铺 start **************************************/
-	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{user_id}";	//店铺缓存
+	public static final String CACHED_KEY_SHOP = "SYS:SHOP:{shop_id}";	//店铺缓存
 	public static final String SHOP_DAY_COUNT = "SYS:SHOP:COUNT:{user_id}";	//店铺每日统计
 	public static final String USER_SHOP_COURSE_ZSET = "USER:{user_id}:SHOP:{shop_id}:COURSES";//用户在指定店铺加入的单品课程
 	public static final String USER_SHOP_SERIES_ZSET = "USER:{user_id}:SHOP:{shop_id}:SERIES";//用户在指定店铺加入的系列课程

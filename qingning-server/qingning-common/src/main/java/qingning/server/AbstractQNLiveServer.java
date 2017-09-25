@@ -31,7 +31,6 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 
 	private Map<String, FunctionInfo> functionInfoMap = new HashMap<>();
 	private Map<String, Method> functionInfoMethodMap = new HashMap<>();
-	
 	protected ApplicationContext context;
 	protected MqUtils mqUtils;
 	

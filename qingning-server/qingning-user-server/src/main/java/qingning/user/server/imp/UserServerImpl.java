@@ -23,6 +23,8 @@ public class UserServerImpl extends AbstractQNLiveServer {
             readLecturerOperation = new ReadLecturerOperation(userModuleServer);
             readSeriesOperation = new ReadSeriesOperation(userModuleServer);
             readShopOperation = new ReadShopOperation(userModuleServer);
+            readConfigOperation = new ReadConfigOperation(userModuleServer);
+
         }
     }
 
