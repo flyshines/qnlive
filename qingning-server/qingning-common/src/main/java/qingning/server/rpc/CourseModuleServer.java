@@ -21,6 +21,18 @@ public interface CourseModuleServer {
      * @return
      */
     List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap);
+
     Map<String,Object> findCourseByCourseId(String courseId);
+
+
+
+
+
+
+
+
+
+
+
 
 }

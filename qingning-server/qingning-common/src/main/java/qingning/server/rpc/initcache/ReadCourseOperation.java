@@ -1,6 +1,7 @@
 package qingning.server.rpc.initcache;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.CourseModuleServer;
 import qingning.server.rpc.manager.IShopModuleServer;
@@ -24,6 +25,27 @@ public class ReadCourseOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
+        if(Constants.SYS_SHOP_NON_LIVE_COUSE_UP.equals(functionName)){//店铺 非直播 上架
+
+        }else if(Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN.equals(functionName)){//店铺 非直播 下架
+
+        }else if(Constants.SYS_SHOP_GOODS_TYPE_UP.equals(functionName)){//店铺 课程内容 上架
+
+        }else if(Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN.equals(functionName)){//店铺 课程内容 下架
+
+        }else if(Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_UP.equals(functionName)){//店铺 直播课 预告/正在直播 上架
+
+        }else if(Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN.equals(functionName)){//店铺 直播 预告/正在直播 下架
+
+        }else if(Constants.SYS_SHOP_LIVE_COUSE_FINISH_UP.equals(functionName)){//店铺 直播课 结束 上架
+
+        }else if(Constants.SYS_SHOP_LIVE_COUSE_FINISH_DOWN.equals(functionName)){//店铺 直播 结束 下架
+
+        }
+
+
+
+
         if (SYS_READ_LAST_COURSE.equals(functionName)) {
             return courseModuleServer.findLastestFinishCourse(reqMap);
         } else if (SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程

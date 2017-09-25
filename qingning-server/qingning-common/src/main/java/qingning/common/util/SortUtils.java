@@ -47,53 +47,59 @@ public class SortUtils {
      * @return
      * @throws Exception
      */
-    private List<String> refreshCourseListByRedis(String shop_id,Jedis jedis, String functionName,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
+    private void refreshCourseListByRedis(String shop_id,String goods_type,Jedis jedis, String pageKey,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
         String redisKey = "";
-        String pageKey = "";
+        String functionName = "";
         String lposKey = "";
-
-        switch (functionName){
-            case Constants.SYS_SHOP_NON_LIVE_COUSE_UP://店铺 非直播 上架
-                pageKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP;
+        switch (pageKey){
+            case Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP://店铺 非直播 上架
+                functionName = Constants.SYS_SHOP_NON_LIVE_COUSE_UP;
+                redisKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP_PAGING;
                 lposKey = Constants.FIRST_UP_TIME;
                 break;
 
-            case Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN://店铺 非直播 下架
-                pageKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN;
+            case Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN://店铺 非直播 下架
+                functionName = Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN;
+                redisKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN_PAGING;
                 lposKey = Constants.CREATE_TIME;
                 break;
 
-            case Constants.SYS_SHOP_GOODS_TYPE_UP://店铺 课程内容 上架
-                pageKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_UP;
+            case Constants.SYS_SORT_SHOP_GOODS_TYPE_UP://店铺 课程内容 上架
+                functionName = Constants.SYS_SHOP_GOODS_TYPE_UP;
+                redisKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_UP_PAGING;
                 lposKey = Constants.FIRST_UP_TIME;
                 break;
 
-            case Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN://店铺 课程内容 下架
-                pageKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN;
+            case Constants.SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN://店铺 课程内容 下架
+                functionName = Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN;
+                redisKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN_PAGING;
                 lposKey = Constants.CREATE_TIME;
                 break;
 
-            case Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_UP://店铺 直播课 预告/正在直播 上架
-                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP;
+            case Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP://店铺 直播课 预告/正在直播 上架
+                functionName = Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_UP;
+                redisKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP_PAGING;
                 lposKey = Constants.LIVE_START_TIME;
                 break;
 
-            case Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN://店铺 直播 预告/正在直播 下架
-                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN;
+            case Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN://店铺 直播 预告/正在直播 下架
+                functionName = Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN;
+                redisKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN_PAGING;
                 lposKey = Constants.LIVE_START_TIME;
                 break;
 
-            case Constants.SYS_SHOP_LIVE_COUSE_FINISH_UP://店铺 直播课 结束 上架
-                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP;
+            case Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP://店铺 直播课 结束 上架
+                functionName = Constants.SYS_SHOP_LIVE_COUSE_FINISH_UP;
+                redisKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP_PAGING;
                 lposKey = Constants.LIVE_END_TIME;
                 break;
 
-            case Constants.SYS_SHOP_LIVE_COUSE_FINISH_DOWN://店铺 直播 结束 下架
-                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN;
+            case Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN://店铺 直播 结束 下架
+                functionName = Constants.SYS_SHOP_LIVE_COUSE_FINISH_DOWN;
+                redisKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN_PAGING;
                 lposKey = Constants.LIVE_END_TIME;
                 break;
         }
-
 
         Long page = jedis.zcard(pageKey);
         if(!MiscUtils.isEmpty(page) && page != 0){
@@ -111,23 +117,30 @@ public class SortUtils {
             }
         }
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
-        queryMap.put("page",page * Constants.SORT_PANGE_NUMBER);
-        requestEntity.setFunctionName(functionName);
-        requestEntity.setParam(queryMap);
-        List<Map<String,String>> courseList = (List<Map<String, String>>) operation.invokeProcess(requestEntity);
-
-        
-
-
-
-
-
-
-
-
-        return null;
-
+        List<Map<String,String>> courseList = null;
+        do{
+            queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
+            queryMap.put("page",page * Constants.SORT_PANGE_NUMBER);
+            requestEntity.setFunctionName(functionName);
+            requestEntity.setParam(queryMap);
+            courseList = (List<Map<String, String>>) operation.invokeProcess(requestEntity);
+            Map<String,Object> map = new HashMap<>();
+            map.put(Constants.PAGING_NUMBER,page+1);
+            if(functionName.equals(Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN) || functionName.equals(Constants.SYS_SHOP_GOODS_TYPE_UP) ){
+                map.put("goods_type",goods_type);
+            }
+            map.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
+            String coursePageKey = MiscUtils.getKeyOfCachedData(redisKey,map);//页码key
+            for(int i=0;i<=courseList.size();i++){
+                Map<String, String> course = courseList.get(i);
+                long lpos = MiscUtils.convertInfoToPostion(Long.valueOf(course.get(lposKey)),Long.valueOf(course.get("position")));//算出位置
+                if(i == 0){
+                    jedis.zadd(pageKey, lpos,coursePageKey);
+                }
+                jedis.zadd(coursePageKey,lpos,course.get("course_id"));
+            }
+            page+=1;
+        }while (courseList.size() == 20);
     }
 
 
@@ -142,13 +155,12 @@ public class SortUtils {
      * @param jedis
      * @throws Exception
      */
-    private void updateCourseListByRedis(Map<String,String> course,Jedis jedis,boolean is_live) throws Exception{
+    private void updateCourseListByRedis(Map<String,String> course,Jedis jedis,boolean is_live,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
         Long position = Long.valueOf(course.get("position"));
         Map<String,String> keysMap = new HashMap<>();
         if(is_live){//直播课
-            MiscUtils.courseTranferState(System.currentTimeMillis(), course);
             String live_course_status = course.get("live_course_status");
-            if(live_course_status.equals("4") || live_course_status.equals("1")){
+            if(live_course_status.equals("1")){
                 keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP,course));
                 keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN,course));
             }
@@ -221,10 +233,8 @@ public class SortUtils {
                     jedis.del(pagingKey);
                 }
             }
+            refreshCourseListByRedis(course.get(Constants.CACHED_KEY_SHOP_FIELD),course.get("goods_type"),jedis,key,operation,requestEntity);
         }
-
-
-
 
     }
 
