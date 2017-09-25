@@ -22,10 +22,6 @@ public class SortUtils {
      */
     private List<String> getNonLiveCourses(String redisKey, int pageCount, String lpos, Jedis jedis, CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
 
-
-
-
-
         int offset = 0;//偏移值
         Set<String> courseIdSet;//查询的课程idset
         List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
@@ -36,11 +32,108 @@ public class SortUtils {
         if(!MiscUtils.isEmpty(lpos)){
             startIndex = "("+lpos;
         }
-
-
         courseIdSet = jedis.zrangeByScore(redisKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
         return new ArrayList(courseIdSet);
     }
+
+
+
+    /**
+     * 刷新缓存
+     * @param shop_id
+     * @param jedis
+     * @param operation
+     * @param requestEntity
+     * @return
+     * @throws Exception
+     */
+    private List<String> refreshCourseListByRedis(String shop_id,Jedis jedis, String functionName,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
+        String redisKey = "";
+        String pageKey = "";
+        String lposKey = "";
+
+        switch (functionName){
+            case Constants.SYS_SHOP_NON_LIVE_COUSE_UP://店铺 非直播 上架
+                pageKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP;
+                lposKey = Constants.FIRST_UP_TIME;
+                break;
+
+            case Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN://店铺 非直播 下架
+                pageKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN;
+                lposKey = Constants.CREATE_TIME;
+                break;
+
+            case Constants.SYS_SHOP_GOODS_TYPE_UP://店铺 课程内容 上架
+                pageKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_UP;
+                lposKey = Constants.FIRST_UP_TIME;
+                break;
+
+            case Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN://店铺 课程内容 下架
+                pageKey = Constants.SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN;
+                lposKey = Constants.CREATE_TIME;
+                break;
+
+            case Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_UP://店铺 直播课 预告/正在直播 上架
+                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP;
+                lposKey = Constants.LIVE_START_TIME;
+                break;
+
+            case Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN://店铺 直播 预告/正在直播 下架
+                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN;
+                lposKey = Constants.LIVE_START_TIME;
+                break;
+
+            case Constants.SYS_SHOP_LIVE_COUSE_FINISH_UP://店铺 直播课 结束 上架
+                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP;
+                lposKey = Constants.LIVE_END_TIME;
+                break;
+
+            case Constants.SYS_SHOP_LIVE_COUSE_FINISH_DOWN://店铺 直播 结束 下架
+                pageKey = Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN;
+                lposKey = Constants.LIVE_END_TIME;
+                break;
+        }
+
+
+        Long page = jedis.zcard(pageKey);
+        if(!MiscUtils.isEmpty(page) && page != 0){
+            Set<String> coursePageKeys = jedis.zrevrangeByScore(pageKey,"+inf","-inf",0,1);
+            String coursePageKey = "";
+            for(String coursePage : coursePageKeys){
+                coursePageKey = coursePage;
+            }
+            //判断最后一个key 是否有20条 如果没有 就删掉重新加载
+            Long coursePageCount = jedis.zcard(coursePageKey);
+            if(coursePageCount < 20){
+                jedis.del(coursePageKey);
+                jedis.zrem(pageKey,coursePageKey);
+                page-=1;
+            }
+        }
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
+        queryMap.put("page",page * Constants.SORT_PANGE_NUMBER);
+        requestEntity.setFunctionName(functionName);
+        requestEntity.setParam(queryMap);
+        List<Map<String,String>> courseList = (List<Map<String, String>>) operation.invokeProcess(requestEntity);
+
+        
+
+
+
+
+
+
+
+
+        return null;
+
+    }
+
+
+
+
+
 
     /**
      * 更改课程缓存
@@ -97,7 +190,6 @@ public class SortUtils {
                 map.put(Constants.PAGING_NUMBER,i);//页码
                 map.put(Constants.CACHED_KEY_SHOP_FIELD,course.get(Constants.CACHED_KEY_SHOP_FIELD));//shop_id
 
-
                 if(key.equals(Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP)){//店铺 非直播 上架
                     constantsPagingKey = Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP_PAGING;//店铺 非直播 上架 分页
 
@@ -130,6 +222,10 @@ public class SortUtils {
                 }
             }
         }
+
+
+
+
     }
 
     /**
