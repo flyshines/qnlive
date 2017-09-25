@@ -16,7 +16,7 @@ import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.*;
 
-public abstract class AbstractController extends CacheUtils{
+public abstract class AbstractController extends JedisServer{
 	protected MqUtils mqUtils; 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;	

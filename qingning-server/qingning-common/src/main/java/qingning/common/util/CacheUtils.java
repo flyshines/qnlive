@@ -27,23 +27,6 @@ public class CacheUtils extends JedisServer{
 	protected ReadVersionForceOperation readForceVersionOperation;
 	protected ReadLecturerOperation readLecturerOperation;
 
-	/**
-	 * 系统配置key-Map
-	 */
-	protected Map<String,Object> systemConfigMap;
-	/**
-	 * 系统配置key-value
-	 */
-	protected Map<String,String> systemConfigStringMap;
-	protected ReadConfigOperation readConfigOperation;
-
-	public ReadConfigOperation getReadConfigOperation(){
-		return readConfigOperation;
-	}
-	public void setReadConfigOperation(ReadConfigOperation readConfigOperation){
-		this.readConfigOperation=readConfigOperation;
-	}
-
 	protected JedisUtils jedisUtils;
 
 	private static Logger log = LoggerFactory.getLogger(CacheUtils.class);
