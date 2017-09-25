@@ -869,8 +869,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findSystemConfigBy( ) {
-		return systemConfigMapper.findSystemConfigBy();
+	public List<Map<String, Object>> findSystemConfig( ) {
+		return systemConfigMapper.findSystemConfig();
 	}
 
 	@Override

@@ -23,6 +23,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             readForceVersionOperation = new ReadVersionForceOperation(commonModuleServer);
             readLecturerOperation = new ReadLecturerOperation(commonModuleServer);
             readSeriesOperation = new ReadSeriesOperation(commonModuleServer);
+            readConfigOperation = new ReadConfigOperation(commonModuleServer);
         }
     }
 

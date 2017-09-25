@@ -15,7 +15,7 @@ import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.*;
 
-public abstract class AbstractController {
+public abstract class AbstractController extends JedisServer{
 	protected MqUtils mqUtils; 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;	
@@ -28,7 +28,6 @@ public abstract class AbstractController {
 
 	protected Map<String,Object> serverUrlInfoMap;
 	private List<Map<String,Object>> serverUrlInfoList;
-	protected Map<String,Object> systemConfigMap;
 	private List<Map<String,Object>> systemConfigList;
 	protected Long serverUrlInfoUpdateTime;
 	private List<Map<String,Object>> rewardConfigurationList;
@@ -88,7 +87,7 @@ public abstract class AbstractController {
 		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
 			generateRewardConfigurationMapByCommonServer();
 		}
-		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(systemConfigMap)){
+		if(CollectionUtils.isEmpty(systemConfigMap)){
 			generateSystemConfigMap();
 		}
 
@@ -171,18 +170,18 @@ public abstract class AbstractController {
 	 * commonServer加载SystemConfig
 	 */
 	private void generateSystemConfigMap() throws Exception {
-		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
-		systemConfigMap = new HashMap<String,Object>();
-			Map<String,Object>systemConfig = new HashMap<String,Object>();
-			systemConfigList = iCommonModuleServer.findSystemConfigBy();
-			for(int i = 0; i < systemConfigList.size(); i++){
-				Map<String,Object> infoMap = systemConfigList.get(i);
-				Map<String,Object> innerMap = new HashMap<String,Object>();
-				innerMap.put("config_name", infoMap.get("config_name"));
-				innerMap.put("config_value", infoMap.get("config_value"));
-				systemConfig.put((String)infoMap.get("config_key"), innerMap);
-			}
-		systemConfigMap.put("systemConfig",systemConfig);
+		systemConfigMap = new HashMap<>();
+		systemConfigStringMap = new HashMap<>();
+		systemConfigList = (List<Map<String,Object>>)readConfigOperation.invokeProcess(null);
+		for(int i = 0; i < systemConfigList.size(); i++){
+			Map<String,Object> infoMap = systemConfigList.get(i);
+			Map<String,Object> innerMap = new HashMap<String,Object>();
+			innerMap.put("config_name", infoMap.get("config_name"));
+			innerMap.put("config_value", infoMap.get("config_value"));
+			innerMap.put("config_description", infoMap.get("config_description"));
+			systemConfigMap.put((String)infoMap.get("config_key"), innerMap);
+			systemConfigStringMap.put((String)infoMap.get("config_key"),infoMap.get("config_value").toString());
+		}
 	}
 
 	/**
@@ -191,7 +190,7 @@ public abstract class AbstractController {
 	 */
 	private void generateServerUrlInfoMap() throws Exception {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
-		serverUrlInfoMap = new HashMap<String,Object>();
+		serverUrlInfoMap = new HashMap<>();
 			serverUrlInfoList = iCommonModuleServer.getServerUrlBy();
 			Map<String,Object> serverInfoMap = new HashMap<String,Object>();
 			for(int i = 0; i < serverUrlInfoList.size(); i++){

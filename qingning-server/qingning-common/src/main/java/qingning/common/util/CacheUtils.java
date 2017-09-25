@@ -658,9 +658,9 @@ public class CacheUtils extends JedisServer{
 		}
 	}
 
-	public Map<String,String> readShopByUserId(String user_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis) throws Exception{
-
-		Map<String,String> values = readData(user_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, operation, jedis, false);
+	public Map<String,String> readShopByUserId(String user_id, RequestEntity requestEntity, Jedis jedis) throws Exception{
+		String shopId = this.getAccessInfoByToken(requestEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedis);
+		Map<String,String> values = readData(shopId, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, readShopOperation, jedis, false);
 		if(!values.isEmpty()){
 			String curShop_id = values.get(Constants.CACHED_KEY_SHOP_FIELD);
 

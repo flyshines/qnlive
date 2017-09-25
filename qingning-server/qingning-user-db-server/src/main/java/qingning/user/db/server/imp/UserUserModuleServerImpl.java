@@ -336,11 +336,6 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
-    public Map<String, Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap) {
-        return systemConfigMapper.findCustomerServiceBySystemConfig(reqMap);
-    }
-
-    @Override
     public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
         return fansMapper.findRoomIdByFans(reqMap);
     }
@@ -614,5 +609,10 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     @Override
     public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
         return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> findSystemConfig() {
+        return systemConfigMapper.findSystemConfig();
     }
 }

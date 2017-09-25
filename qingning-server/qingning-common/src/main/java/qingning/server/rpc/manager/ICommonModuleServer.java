@@ -6,7 +6,7 @@ import qingning.server.rpc.*;
 import java.util.List;
 import java.util.Map;
 
-public interface ICommonModuleServer extends VersionModuleServer, CourseModuleServer, UserModuleServer, ShopModuleServer, VersionForceModuleServer, LecturerModuleServer,SeriesModuleServer {
+public interface ICommonModuleServer extends VersionModuleServer, CourseModuleServer, UserModuleServer, ShopModuleServer, VersionForceModuleServer, LecturerModuleServer,SeriesModuleServer,ConfigModuleServer {
     List<Map<String, Object>> getServerUrlBy();
 
     Map<String, Object> getLoginInfoByLoginIdAndLoginType(Map<String, Object> reqMap);
@@ -16,7 +16,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Map<String, Object> findLoginInfoByUserId(String user_id);
 
-    Map<String, Object> findUserInfoByUserId(String user_id);
 
     void insertTradeBill(Map<String, Object> insertMap);
 
@@ -56,7 +55,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Map<String, Object> findAvailableRoomDistributer(Map<String, Object> record);
 
-    Map<String, Object> findForceVersionInfoByOS(String force_version_key);
 
     Integer updateIMAccount(Map<String, Object> updateIMAccountMap);
 
@@ -74,7 +72,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Map<String, Object> findDistributionRoomDetail(Map<String, Object> reqMap);
 
-    List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap);
 
     Map<String, Object> findCoursesSumInfo(Map<String, Object> queryMap);
 
@@ -100,7 +97,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Map<String, Object> findByPhone(Map<String, Object> record);
 
-    List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap);
 
     List<Map<String, Object>> findCourseBySearch(Map<String, Object> reqMap);
 
@@ -110,7 +106,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Integer insertCourseMessageList(List<Map<String, Object>> messageList);
 
-    List<Map<String, Object>> findSystemConfigBy();
 
     void updateCourse(Map<String, Object> course);
 
@@ -233,24 +228,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
      * @return
      */
     List<Map<String, Object>> findSeriesBySearch(Map<String, Object> record);
-
-    /**
-     * 获取店铺信息
-     *
-     * @param shopId
-     * @return
-     */
-    Map<String, Object> getShopInfo(String shopId);
-
-    /**
-     * 根据系列id查询系列
-     *
-     * @param series_id
-     * @return
-     */
-    Map<String, Object> findSeriesBySeriesId(String series_id);
-
-    List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap);
 
 
     /**

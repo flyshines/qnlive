@@ -6,7 +6,7 @@ import qingning.server.rpc.*;
 import java.util.List;
 import java.util.Map;
 
-public interface IUserUserModuleServer extends UserModuleServer,CourseModuleServer,LecturerModuleServer,ShopModuleServer,SeriesModuleServer {
+public interface IUserUserModuleServer extends UserModuleServer,CourseModuleServer,LecturerModuleServer,ShopModuleServer,SeriesModuleServer,ConfigModuleServer {
 
 	Map<String,Object> userFollowRoom(Map<String, Object> reqMap) throws Exception;
 
@@ -55,11 +55,6 @@ public interface IUserUserModuleServer extends UserModuleServer,CourseModuleServ
 	List<Map<String,Object>> findFinishCourseListForLecturer(Map<String,Object> record);
 	
 	Map<String,Object> findCourseRecommendUserNum(Map<String, Object> reqMap);
-
-	/**
-	 * 获取客服信息
-	 */
-	Map<String,Object> findCustomerServiceBySystemConfig(Map<String, Object> reqMap);
 
 	/**
 	 * 获取没有t_user_gains记录的user_id
