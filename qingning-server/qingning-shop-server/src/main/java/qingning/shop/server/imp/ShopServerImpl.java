@@ -6,10 +6,7 @@ import org.slf4j.LoggerFactory;
 import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
-import qingning.common.util.AccessTokenUtil;
-import qingning.common.util.Constants;
-import qingning.common.util.MiscUtils;
-import qingning.common.util.SharingConstants;
+import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.CommonReadOperation;
@@ -63,26 +60,25 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         shop.put("status","1");
         shop.put("create_time",new Date());
         shop.put("shop_logo",userInfo.get("avatar_address"));
-        shopModuleServer.insertShop(shop);
+        int i = shopModuleServer.insertShop(shop);
+        if(i>0){
+            String user_role = this.getAccessInfoByToken(reqEntity.getAccessToken(),"user_role",jedis);
+            //3.缓存修改
+            //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
+            Map<String,Object> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
 
-        String user_role = this.getAccessInfoByToken(reqEntity.getAccessToken(),"user_role",jedis);
-
-        //3.缓存修改
-        //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
-        Map<String,Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
-
-        RequestEntity queryOperation = this.generateRequestEntity(null,null, null, map);
-        this.readLecturer(userId, queryOperation, readShopOperation, jedis);
-        this.updateAccessInfoByToken(reqEntity.getAccessToken(),"user_role",user_role+","+Constants.USER_ROLE_LECTURER,jedis);
-        this.updateAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,shopId,jedis);
-        //4.增加讲师直播间信息缓存
-        jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
-        map.clear();
-        map.put("shop_id", shopId);
-        this.readShop(shopId, map, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
-
-        resultMap.put("shop_id", shopId);
+            RequestEntity queryOperation = this.generateRequestEntity(null,null, null, map);
+            this.readLecturer(userId, queryOperation, readShopOperation, jedis);
+            this.updateAccessInfoByToken(reqEntity.getAccessToken(),"user_role",user_role+","+Constants.USER_ROLE_LECTURER,jedis);
+            this.updateAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,shopId,jedis);
+            //4.增加讲师直播间信息缓存
+            jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
+            map.clear();
+            map.put("shop_id", shopId);
+            this.readShop(shopId, map, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
+            resultMap.put("shop_id", shopId);
+        }
         return resultMap;
     }
     /**
@@ -132,6 +128,47 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         //直播分享URL
         shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix"));
         return shop;
+    }
+
+    /**
+     * 店铺设置
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopEdit")
+    public void shopEdit(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
+        String userId = "";
+        if(!MiscUtils.isEmpty(param.get("user_id"))){
+            userId = param.get("user_id").toString();
+        }else{
+            userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        }
+        param.put("user_id",userId);
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Map<String, String> shopInfo = this.readShopByUserId(userId, reqEntity, jedis);
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
+        //清空店铺缓存
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
+        jedis.del(shopKey);
+        shopModuleServer.updateShop(param);
+    }
+
+    /**
+     * 获取扫码URL
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("wechatLogin")
+    public Map<String, Object>  wechatLogin(RequestEntity reqEntity) throws Exception{
+        //重定向微信URL
+        String requestUrl = WeiXinUtil.getWechatRqcodeLoginUrl();
+        Map<String, Object> result = new HashMap<>();
+        result.put("redirectUrl", requestUrl);
+        return result;
     }
 
     @SuppressWarnings("unchecked")

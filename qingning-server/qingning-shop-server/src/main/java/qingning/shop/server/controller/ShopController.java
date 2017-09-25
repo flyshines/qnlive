@@ -85,4 +85,5 @@ public class ShopController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopInfo", accessToken, version);
         return this.process(requestEntity, serviceManger, message);
     }
+
 }

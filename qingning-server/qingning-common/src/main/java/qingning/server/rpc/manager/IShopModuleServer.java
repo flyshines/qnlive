@@ -13,4 +13,9 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @return
 	 */
 	int insertShop(Map<String, Object> shop);
+
+	/**更新店铺信息
+	 * @param param
+	 */
+	int updateShop(Map<String, Object> param);
 }

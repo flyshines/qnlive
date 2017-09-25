@@ -20,7 +20,6 @@ public class ReadShopOperation implements CommonReadOperation {
     }
 
 
-    @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         return null;
