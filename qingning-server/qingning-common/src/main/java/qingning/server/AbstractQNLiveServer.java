@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.context.ApplicationContext;
 
+import org.springframework.util.CollectionUtils;
 import qingning.common.entity.FunctionInfo;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.InputParameter;
@@ -33,7 +34,7 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 	private Map<String, Method> functionInfoMethodMap = new HashMap<>();
 	protected ApplicationContext context;
 	protected MqUtils mqUtils;
-	
+	private List<Map<String,Object>> systemConfigList;
 	
 	/**
 	 * 查询系统级别缓存
@@ -402,12 +403,32 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 	public final Object invoke(RequestEntity reqEntity) throws Exception{
 		Method method = functionInfoMethodMap.get(reqEntity.getFunctionName());
 		if(method != null){
+			if(CollectionUtils.isEmpty(systemConfigMap)) {
+				generateSystemConfigMap();
+			}
 			return method.invoke(this, reqEntity);
 		} else {
 			return this.process(reqEntity);
 		}
 	}
-	
+
+	/**
+	 * commonServer加载SystemConfig
+	 */
+	private void generateSystemConfigMap() throws Exception {
+		systemConfigMap = new HashMap<>();
+		systemConfigStringMap = new HashMap<>();
+		systemConfigList = (List<Map<String,Object>>)super.readConfigOperation.invokeProcess(null);
+		for(int i = 0; i < systemConfigList.size(); i++){
+			Map<String,Object> infoMap = systemConfigList.get(i);
+			Map<String,Object> innerMap = new HashMap<String,Object>();
+			innerMap.put("config_name", infoMap.get("config_name"));
+			innerMap.put("config_value", infoMap.get("config_value"));
+			innerMap.put("config_description", infoMap.get("config_description"));
+			systemConfigMap.put((String)infoMap.get("config_key"), innerMap);
+			systemConfigStringMap.put((String)infoMap.get("config_key"),infoMap.get("config_value").toString());
+		}
+	}
 	public String getAutoNumber(String key){
 		String result = null;
 		Jedis jedis = jedisUtils.getJedis();

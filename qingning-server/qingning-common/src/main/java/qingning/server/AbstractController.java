@@ -9,13 +9,14 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.MessageEntity;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.CacheUtils;
 import qingning.common.util.MqUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.*;
 
-public abstract class AbstractController extends JedisServer{
+public abstract class AbstractController extends CacheUtils{
 	protected MqUtils mqUtils; 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;	
@@ -28,13 +29,11 @@ public abstract class AbstractController extends JedisServer{
 
 	protected Map<String,Object> serverUrlInfoMap;
 	private List<Map<String,Object>> serverUrlInfoList;
-	private List<Map<String,Object>> systemConfigList;
 	protected Long serverUrlInfoUpdateTime;
 	private List<Map<String,Object>> rewardConfigurationList;
 	protected Map<String,Object> rewardConfigurationMap;
 	protected Long rewardConfigurationTime;
 	private List<Map<String,Object>> processRewardConfigurationList;
-	//protected List<Map<String,Object>>  classifyInfoList;
 
 	public RequestEntity createResponseEntity(String serviceName, String function, String accessToken, String version){
 		RequestEntity requestEntity = new RequestEntity();
@@ -86,9 +85,6 @@ public abstract class AbstractController extends JedisServer{
 		}
 		if(reqEntity.getServerName().toString().equals("CommonServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
 			generateRewardConfigurationMapByCommonServer();
-		}
-		if(CollectionUtils.isEmpty(systemConfigMap)){
-			generateSystemConfigMap();
 		}
 
 		if(reqEntity.getServerName().toString().equals("UserServer") && CollectionUtils.isEmpty(rewardConfigurationMap)){
@@ -165,24 +161,6 @@ public abstract class AbstractController extends JedisServer{
 		}
 	}
 
-
-	/**
-	 * commonServer加载SystemConfig
-	 */
-	private void generateSystemConfigMap() throws Exception {
-		systemConfigMap = new HashMap<>();
-		systemConfigStringMap = new HashMap<>();
-		systemConfigList = (List<Map<String,Object>>)readConfigOperation.invokeProcess(null);
-		for(int i = 0; i < systemConfigList.size(); i++){
-			Map<String,Object> infoMap = systemConfigList.get(i);
-			Map<String,Object> innerMap = new HashMap<String,Object>();
-			innerMap.put("config_name", infoMap.get("config_name"));
-			innerMap.put("config_value", infoMap.get("config_value"));
-			innerMap.put("config_description", infoMap.get("config_description"));
-			systemConfigMap.put((String)infoMap.get("config_key"), innerMap);
-			systemConfigStringMap.put((String)infoMap.get("config_key"),infoMap.get("config_value").toString());
-		}
-	}
 
 	/**
 	 * commonServer加载ServerUrl
