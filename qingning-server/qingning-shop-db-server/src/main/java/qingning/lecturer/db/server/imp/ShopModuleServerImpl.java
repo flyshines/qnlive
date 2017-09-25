@@ -5,11 +5,8 @@ package qingning.lecturer.db.server.imp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
-import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.*;
-import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.IShopModuleServer;
 
 import java.util.*;
@@ -172,8 +169,8 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
-    public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
-        return fansMapper.findRoomIdByFans(reqMap);
+    public List<Map<String, Object>> findShopIdByFans(Map<String, Object> reqMap) {
+        return fansMapper.findShopIdByFans(reqMap);
     }
 
     @Override

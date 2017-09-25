@@ -37,7 +37,7 @@ public class CacheUtils extends JedisServer{
 		return readData(searchKey, keyFormat, keyField, requestEntity, operation, jedis, cachedValue, -1);
 	}
 
-	private Map<String,String> readData(String searchKey, String keyFormat, String keyField,
+	private Map<String,String> readDataByFunction(String searchKey, String keyFormat, String keyField,
 			Map<String,Object> param, String functionName,CommonReadOperation operation, Jedis jedis, boolean cachedValue) throws Exception{
 		String[] searchKeys={searchKey};
 		String[] keyFields={keyField};
@@ -115,7 +115,7 @@ public class CacheUtils extends JedisServer{
 			CommonReadOperation operation,Jedis jedis) throws Exception{
 		Map<String,String> result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedis, true, 60*60*72);
 		if(!MiscUtils.isEmpty(result)){
-			Map<String,Object> query = new HashMap<String,Object>();
+			Map<String,Object> query = new HashMap<>();
 			query.put(Constants.CACHED_KEY_USER_FIELD, userId);
 			//<editor-fold desc="用户加入的课程">
 			final String coursesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);
@@ -126,7 +126,7 @@ public class CacheUtils extends JedisServer{
 				entity.setFunctionName(CommonReadOperation.SYS_READ_USER_COURSE_LIST);
 				entity.setParam(query);
 				query.put("size", Constants.MAX_QUERY_LIMIT);	
-				final Set<String> userCourseSet = new HashSet<String>();
+				final Set<String> userCourseSet = new HashSet<>();
 				int readCount = 0;
 				long student_pos=0;
 				do{
@@ -253,6 +253,8 @@ public class CacheUtils extends JedisServer{
 				}
 			}
 			result = readData(userId, Constants.CACHED_KEY_USER, Constants.CACHED_KEY_USER_FIELD, requestEntity, operation, jedis, true, 60*60*72);
+		}else{
+			throw new QNLiveException("000005");
 		}
 		return result;
 	}
@@ -591,7 +593,7 @@ public class CacheUtils extends JedisServer{
 
 
 	public Map<String,String> readShop(String shop_id, Map<String,Object> param,String functionName,Boolean force,Jedis jedis) throws Exception{
-		Map<String,String> values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param , functionName, readShopOperation, jedis, force);
+		Map<String,String> values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param , functionName, readShopOperation, jedis, force);
 
 		if(values.isEmpty()){
 			//店铺不存在
@@ -603,7 +605,7 @@ public class CacheUtils extends JedisServer{
 			keyMap.put(Constants.CACHED_KEY_SHOP_FIELD, shop_id);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, keyMap);
 			jedis.del(key);
-			values = readData(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD,  param , functionName, readShopOperation, jedis, true);
+			values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD,  param , functionName, readShopOperation, jedis, true);
 		}
 		return values;
 	}
@@ -660,7 +662,9 @@ public class CacheUtils extends JedisServer{
 
 	public Map<String,String> readShopByUserId(String user_id, RequestEntity requestEntity, Jedis jedis) throws Exception{
 		String shopId = this.getAccessInfoByToken(requestEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedis);
-		Map<String,String> values = readData(shopId, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, requestEntity, readShopOperation, jedis, false);
+		Map<String,Object> param = new HashMap<>();
+		param.put("shop_id",shopId);
+		Map<String,String> values = readDataByFunction(shopId, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param,CommonReadOperation.CACHE_READ_SHOP, readShopOperation, jedis, false);
 		if(!values.isEmpty()){
 			String curShop_id = values.get(Constants.CACHED_KEY_SHOP_FIELD);
 

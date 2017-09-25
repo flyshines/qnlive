@@ -5,8 +5,6 @@ package qingning.common.db.server.imp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import qingning.common.entity.QNLiveException;
-import qingning.common.util.*;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.ICommonModuleServer;
 
@@ -147,8 +145,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
-		return fansMapper.findRoomIdByFans(reqMap);
+	public List<Map<String, Object>> findShopIdByFans(Map<String, Object> reqMap) {
+		return fansMapper.findShopIdByFans(reqMap);
 	}
 
 

@@ -44,9 +44,9 @@
   </select>
 
   <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
-    select a.*,b.course_title,b.course_type,b.course_url,b.status,b.start_time,b.student_num
+    select a.*,b.course_title,b.course_type,b.course_url,b.live_course_status as status,b.start_time,b.student_num
     from t_courses_students a, t_courses b
-    where a.course_id=b.course_id and a.user_id=#{user_id} and b.status <![CDATA[ <> ]]> 5
+    where a.course_id=b.course_id and a.user_id=#{user_id} and b.live_course_status <![CDATA[ <> ]]> 5
     <if test="create_time != null">
       and a.create_time <![CDATA[<]]> #{create_time}
     </if>
@@ -85,10 +85,10 @@
   </select>
   
   <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
-  	select student.course_id, student.student_pos ,course.status 
-  	from t_courses_students student,t_courses course 
-  	where course.status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
-    and student.course_id=course.course_id and student.value_from = 0
+  	select student.course_id, student.student_pos ,course.live_course_status
+  	from t_courses_students student,t_course course
+  	where course.live_course_status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
+    and student.course_id=course.course_id /*and student.value_from = 0*/
   	<if test="student_pos != null">
   	   and student.student_pos <![CDATA[ < ]]> #{student_pos}
   	</if> 

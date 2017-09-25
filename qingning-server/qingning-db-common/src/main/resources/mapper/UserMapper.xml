@@ -7,7 +7,7 @@
         t.*,s.shop_id
     FROM
         t_user t
-    LEFT JOIN t_saas_shop s ON t.user_id = s.user_id
+    LEFT JOIN t_shop s ON t.user_id = s.lecturer_id
     where t.user_id = #{user_id}
   </select>
   <select id="existByPhone" resultType="java.lang.Integer" parameterType="hashmap" >

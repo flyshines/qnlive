@@ -38,8 +38,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
     @FunctionName("shopOpen")
     public Map<String, Object> shopOpen(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-
+        Map<String, Object> reqMap = new HashMap<>();
+        reqEntity.setParam(reqMap);
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -53,7 +53,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         //2.插入店铺信息
         Map<String,String> userInfo = readUser(userId,reqEntity,readUserOperation,jedis);
         Map<String,Object> shop = new HashMap<>();
-        shop.put("user_id",userId);
+        shop.put("lecturer_id",userId);
         shop.put("shop_id",shopId);
         shop.put("user_name",userInfo.get("nick_name")+"");
         shop.put("shop_name",userInfo.get("nick_name")+"的知识店铺");
@@ -100,7 +100,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,String> userMap = this.readUser(userId, reqEntity,readUserOperation, jedis);
         Map<String,String> shop = this.readShopByUserId(userId, reqEntity, jedis);
-        if(shop.get("open_sharing").equals("1")){
+        /*if(shop.get("open_sharing").equals("1")){
             log.debug("同步讲师token  user_id : "+userId +" token : "+reqEntity.getAccessToken());
             Map<String, String> headerMap = new HashMap<>();
             headerMap.put("version", "1.2.0");
@@ -112,7 +112,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
                     +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
             String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
             shop.put("synchronization_token",result);
-        }
+        }*/
 
         shop.put("avatar_address",userMap.get("avatar_address"));
         shop.put("user_id",userId);

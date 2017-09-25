@@ -3,7 +3,6 @@ package qingning.server.rpc.initcache;
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.UserModuleServer;
-import qingning.server.rpc.manager.IUserUserModuleServer;
 
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class ReadUserOperation implements CommonReadOperation {
         if(SYS_READ_USER_COURSE_LIST.equals(functionName)){
         	result = userModuleServer.findCourseIdByStudent(reqMap);
         } else if(SYS_READ_USER_ROOM_LIST.equals(functionName)){
-            result = userModuleServer.findRoomIdByFans(reqMap);
+            result = userModuleServer.findShopIdByFans(reqMap);
         } else if (SYS_READ_USER_SERIES_LIST.equals(functionName)){
             result = userModuleServer.findSeriesIdByStudent(reqMap);
         } else if ("getCourseStudentListByMap".equals(functionName)) {	//根据条件获取课程学员列表

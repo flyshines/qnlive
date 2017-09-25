@@ -3,19 +3,10 @@ package qingning.user.db.server.imp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 
-import org.springframework.transaction.annotation.Transactional;
-import qingning.common.entity.QNLiveException;
-import qingning.common.util.MiscUtils;
-import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
-import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserUserModuleServer;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,8 +86,8 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
-    public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
-        return fansMapper.findRoomIdByFans(reqMap);
+    public List<Map<String, Object>> findShopIdByFans(Map<String, Object> reqMap) {
+        return fansMapper.findShopIdByFans(reqMap);
     }
 
     @Override
