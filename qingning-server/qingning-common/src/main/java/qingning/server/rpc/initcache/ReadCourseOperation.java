@@ -25,38 +25,58 @@ public class ReadCourseOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
+        reqMap.put("functionName",functionName);
         if(Constants.SYS_SHOP_NON_LIVE_COUSE_UP.equals(functionName)){//店铺 非直播 上架
+            reqMap.put("course_updown",1);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN.equals(functionName)){//店铺 非直播 下架
+            reqMap.put("course_updown",2);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_GOODS_TYPE_UP.equals(functionName)){//店铺 课程内容 上架
+            reqMap.put("course_updown",1);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_GOODS_TYPE_COUSE_DOWN.equals(functionName)){//店铺 课程内容 下架
+            reqMap.put("course_updown",2);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_UP.equals(functionName)){//店铺 直播课 预告/正在直播 上架
+            reqMap.put("course_updown",1);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN.equals(functionName)){//店铺 直播 预告/正在直播 下架
+            reqMap.put("course_updown",2);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_LIVE_COUSE_FINISH_UP.equals(functionName)){//店铺 直播课 结束 上架
+            reqMap.put("course_updown",1);
+            return courseModuleServer.findCourse(reqMap);
 
         }else if(Constants.SYS_SHOP_LIVE_COUSE_FINISH_DOWN.equals(functionName)){//店铺 直播 结束 下架
-
-        }
-
-
-
-
-        if (SYS_READ_LAST_COURSE.equals(functionName)) {
-            return courseModuleServer.findLastestFinishCourse(reqMap);
-        } else if (SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程
-            return courseModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
-        } else if ("getCourseByMap".equals(functionName)) {	//根据条件获取直播课程详情
-        	return courseModuleServer.getCourseListByMap(reqMap);
+            reqMap.put("course_updown",2);
+            return courseModuleServer.findCourse(reqMap);
         } else if ("getGuestAndCourseInfoByMap".equals(functionName)) {	//根据条件获取嘉宾课程列表，并关联查询出课程详情
-        	return courseModuleServer.getGuestAndCourseInfoByMap(reqMap);
+            return courseModuleServer.getGuestAndCourseInfoByMap(reqMap);
         } else {
             return courseModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
         }
+
+
+
+//
+//        if (SYS_READ_LAST_COURSE.equals(functionName)) {
+//            return courseModuleServer.findLastestFinishCourse(reqMap);
+//        } else if (SYS_READ_SAAS_COURSE.equals(functionName)) {    //根据课程id数据库查询saas课程
+//            return courseModuleServer.findSaasCourseByCourseId(reqMap.get("course_id").toString());
+//        } else if ("getCourseByMap".equals(functionName)) {	//根据条件获取直播课程详情
+//        	return courseModuleServer.getCourseListByMap(reqMap);
+//        } else if ("getGuestAndCourseInfoByMap".equals(functionName)) {	//根据条件获取嘉宾课程列表，并关联查询出课程详情
+//        	return courseModuleServer.getGuestAndCourseInfoByMap(reqMap);
+//        } else {
+//            return courseModuleServer.findCourseByCourseId(reqMap.get("course_id").toString());
+//        }
 
         /*if(course==null){
             course = commonModuleServer.findSaaSCourseByCourseId(reqMap.get("course_id").toString());

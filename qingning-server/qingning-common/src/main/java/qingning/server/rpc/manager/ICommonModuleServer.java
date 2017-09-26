@@ -13,4 +13,6 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
     List<Map<String, Object>> findRewardConfigurationList();
 
     Map<String, Object> createLiveRoom(Map<String, Object> reqMap);
+
+
 }

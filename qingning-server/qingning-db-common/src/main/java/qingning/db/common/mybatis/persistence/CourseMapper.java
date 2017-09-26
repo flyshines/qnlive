@@ -51,7 +51,6 @@ public interface CourseMapper {
      *  live_course_status = 直播课程状态 0:草稿 1：已发布 2:已结束 3:已撤销 4直播中（4状态不会出现在数据库中，仅出现在缓存中）
      *  course_type = 课程收费类型 0:公开课程 1:加密课程 2:收费课程
      *  goods_type = 课程内容类型 0直播 1语音 2视频 3图文
-     *  rq_code = 课程二维码
      *  course_password = 课程密码
      *  course_price = 课程价格(分)
      *  series_course_updown = 系列课程上下架 系列上下架 1上架  2下架 针对系列里面这一个课程
@@ -61,6 +60,7 @@ public interface CourseMapper {
      *  create_time = 创建时间
      *  update_time = 更新时间
      *  details = 课程详情
+     *  distribution_proportion = 分销比例
      * @return
      */
     int insertCourse(Map<String, Object> record);

@@ -1,5 +1,7 @@
 package qingning.shop.server.imp;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -445,19 +447,20 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String lecturer_id = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//通过token 获取讲师id
         Jedis jedis = jedisUtils.getJedis();
-        Map query = new HashMap();
+        Map<String,Object> query = new HashMap();
         query.put(Constants.CACHED_KEY_LECTURER_FIELD,lecturer_id);
         Map<String,String> lecturerMap = readLecturer(lecturer_id,this.generateRequestEntity(null, null, null, query),readLecturerOperation,jedis);
+
         //判断当前用户是否是讲师
         if(MiscUtils.isEmpty(lecturerMap)){
             throw new QNLiveException("100001");
         }
-
-
+        String shop_id = lecturerMap.get("shop_id");
+        reqMap.put("shop_id",shop_id);
+        String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
         if(reqMap.get("good_type").toString().equals("0")){
             //课程之间需要间隔三十分钟
             Long startTime = (Long)reqMap.get("start_time");
-            String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
             long startIndex = startTime-30*60*1000;
             long endIndex = startTime+30*60*1000;
             long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
@@ -471,9 +474,109 @@ public class ShopServerImpl extends AbstractQNLiveServer {
                     throw new QNLiveException("100029");
                 }
             }
+            //2.1创建IM 聊天群组
+            Map<String,String> queryParam = new HashMap<>();
+            queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
+            String accessTokenKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, queryParam);
+            Map<String,String> userMap = jedis.hgetAll(accessTokenKey);
+            try {
+                Map<String,String> groupMap = IMMsgUtil.createIMGroup(userMap.get("m_user_id").toString());
+                if(groupMap == null || StringUtils.isBlank(groupMap.get("groupid"))){
+                    throw new QNLiveException("100015");
+                }
+                reqMap.put("im_course_id",groupMap.get("groupid"));
+                //2.1.1将讲师加入到该群组中
+                IMMsgUtil.joinGroup(groupMap.get("groupid"), userMap.get("m_user_id").toString(), userMap.get("m_user_id").toString());
+            }catch (Exception e){
+            }
         }
 
+        //创建课程url
+        if(reqMap.get("course_url") == null || StringUtils.isBlank(reqMap.get("course_url").toString())){
+            String default_course_cover_url_original = MiscUtils.getConfigByKey("default_course_cover_url");
+            JSONArray default_course_cover_url_array = JSON.parseArray(default_course_cover_url_original);
+            int randomNum = MiscUtils.getRandomIntNum(0, default_course_cover_url_array.size() - 1);
+            reqMap.put("course_url", default_course_cover_url_array.get(randomNum));
+        }
 
+        //创建课程到数据库
+        Map<String, Object> dbCourseMap = shopModuleServer.createCourse(reqMap);
+        Map<String, String> course = readCourse((String)dbCourseMap.get("course_id"),
+                generateRequestEntity(null, null, null, dbCourseMap), readCourseOperation, jedis, true);//把课程刷新到缓存
+        if(reqMap.get("good_type").toString().equals("0")){
+            String course_type = course.get("course_type");
+            String course_id = course.get("course_id");
+            Map<String,Object> map = new HashMap<>();
+            if ("0".equals(course_type)){//公开课才开启机器人
+                log.info("创建课程，开始机器人加入功能");
+                map.clear();
+                map.put("course_id", course_id);
+                RequestEntity mqRequestEntity = new RequestEntity();
+                mqRequestEntity.setServerName("CourseRobotService");
+                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqRequestEntity.setFunctionName("courseCreateAndRobotStart");
+                mqRequestEntity.setParam(map);
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
+            Long startTime = Long.valueOf(course.get("start_time"));
+            RequestEntity mqRequestEntity = new RequestEntity();
+            mqRequestEntity.setServerName("MessagePushServer");
+            mqRequestEntity.setParam(course);
+
+            mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+            log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:"+course_id);
+            mqRequestEntity.setFunctionName("processCourseLiveOvertime");
+            this.mqUtils.sendMessage(mqRequestEntity);
+            log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:"+course_id);
+            mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+            this.mqUtils.sendMessage(mqRequestEntity);
+            if(MiscUtils.isTheSameDate(new Date(startTime), new Date())){
+                log.debug("提前五分钟开课提醒 course_id:"+course_id);
+                if(startTime-System.currentTimeMillis()> 5 * 60 *1000){
+                    mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+                //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+                mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+                this.mqUtils.sendMessage(mqRequestEntity);
+                log.debug("直播间开始发送IM  course_id:"+course_id);
+                mqRequestEntity.setFunctionName("processCourseStartIM");
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
+            //提前24小时开课提醒
+            if(MiscUtils.isTheSameDate(new Date(startTime- 60 * 60 *1000*24), new Date()) && startTime-System.currentTimeMillis()> 60 * 60 *1000*24){
+                mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+                this.mqUtils.sendMessage(mqRequestEntity);
+            }
+            //给课程里面推消息
+            Map<String, Object> userInfo = shopModuleServer.findUserInfoByUserId(course.get("lecturer_id"));
+            Map<String,Object> startLecturerMessageInformation = new HashMap<>();
+            startLecturerMessageInformation.put("creator_id",userInfo.get("user_id"));//发送人id
+            startLecturerMessageInformation.put("course_id", course.get("course_id"));//课程id
+            startLecturerMessageInformation.put("message",MiscUtils.getConfigByKey("start_lecturer_message"));
+            startLecturerMessageInformation.put("message_type", "1");
+            startLecturerMessageInformation.put("message_id",MiscUtils.getUUId());
+            startLecturerMessageInformation.put("message_imid",startLecturerMessageInformation.get("message_id"));
+            startLecturerMessageInformation.put("create_time",  System.currentTimeMillis());
+            startLecturerMessageInformation.put("send_type","0");
+            startLecturerMessageInformation.put("creator_avatar_address",userInfo.get("avatar_address"));
+            startLecturerMessageInformation.put("creator_nick_name",userInfo.get("nick_name"));
+
+            String messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST, startLecturerMessageInformation);
+//					//1.将聊天信息id插入到redis zsort列表中
+            jedis.zadd(messageListKey,  System.currentTimeMillis(), (String)startLecturerMessageInformation.get("message_imid"));
+//					//添加到老师发送的集合中
+            String messageLecturerListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, startLecturerMessageInformation);
+            jedis.zadd(messageLecturerListKey,  System.currentTimeMillis(),startLecturerMessageInformation.get("message_imid").toString());
+            String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, startLecturerMessageInformation);//直播间开始于
+            Map<String,String> result = new HashMap<String,String>();
+            MiscUtils.converObjectMapToStringMap(startLecturerMessageInformation, result);
+            jedis.hmset(messageKey, result);
+            //</editor-fold>
+            long lpos = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("start_time")) , MiscUtils.convertObjectToLong(course.get("position")));
+            //设置讲师更新课程 30分钟
+            jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
+        }
 
 
         return null;

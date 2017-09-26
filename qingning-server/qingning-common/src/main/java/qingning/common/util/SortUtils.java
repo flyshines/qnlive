@@ -10,30 +10,48 @@ import java.util.*;
 public class SortUtils {
 
     /**
-     * 获取非直播课程 列表id
-     * @param redisKey
-     * @param pageCount
-     * @param lpos
-     * @param jedis
-     * @param operation
-     * @param requestEntity
+     * 获取课程雷彪
+     * @param redisKey 获取总列表分页
+     * @param coursePageKey 具体分页列表
+     * @param pageCount 要多少数
+     * @param shop_id 店铺id
+     * @param lpos  分页参数
+     * @param jedis jedis 对象
      * @return
      * @throws Exception
      */
-    private List<String> getNonLiveCourses(String redisKey, int pageCount, String lpos, Jedis jedis, CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
-
-        int offset = 0;//偏移值
-        Set<String> courseIdSet;//查询的课程idset
-        List<Map<String,String>> courseList = new LinkedList<>();//课程对象列表
-        Map<String, Object> resultMap = new HashMap<String, Object>();//最后返回的结果对象
-        //判断传过来的课程状态
-        String startIndex = "+inf";//坐标起始位
-        String endIndex = "-inf";//坐标结束位
-        if(!MiscUtils.isEmpty(lpos)){
-            startIndex = "("+lpos;
+    public static  List<String> getCourses(String redisKey,String coursePageKey, int pageCount,String shop_id,String lpos, Jedis jedis) throws Exception{
+        Long page = 0L;
+        List<String> courseIdList = null;
+        if(!MiscUtils.isEmpty(lpos)){//传null
+            TreeSet<String> keySet = (TreeSet<String>) jedis.zrangeByScore(redisKey, "(" + lpos, "+inf", 0, 1);//获取位置
+            String firstKey =  keySet.first();//拿到第一个值
+            Long keyRank = jedis.zrank(redisKey,firstKey);//拿到这个key 的值
+            page = keyRank-1;
+        }else{
+            page = jedis.zcard(redisKey);
         }
-        courseIdSet = jedis.zrangeByScore(redisKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
-        return new ArrayList(courseIdSet);
+        Map<String,Object> queryMap = new HashMap<String,Object>();
+        queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
+        queryMap.put(Constants.PAGING_NUMBER,page);//页码
+        String course_page_key = MiscUtils.getKeyOfCachedData(coursePageKey, queryMap);//分类
+        Set<String> courseIds = jedis.zrevrangeByScore(course_page_key,lpos,"-inf",0,pageCount);
+        for(String course_id : courseIds){
+            courseIdList.add(course_id);
+        }
+        if(courseIds.size() < pageCount){
+            page-=1;
+            if(page > 0){
+                courseIds.clear();
+                queryMap.put(Constants.PAGING_NUMBER,page);//页码
+                course_page_key = MiscUtils.getKeyOfCachedData(coursePageKey, queryMap);//分类
+                courseIds = jedis.zrevrangeByScore(course_page_key,lpos,"-inf",0,(pageCount-courseIdList.size()));
+                for(String course_id : courseIds){
+                    courseIdList.add(course_id);
+                }
+            }
+        }
+        return courseIdList;
     }
 
 
@@ -47,7 +65,7 @@ public class SortUtils {
      * @return
      * @throws Exception
      */
-    private void refreshCourseListByRedis(String shop_id,String goods_type,Jedis jedis, String pageKey,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
+    public static  void refreshCourseListByRedis(String shop_id,String goods_type,Jedis jedis, String pageKey,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
         String redisKey = "";
         String functionName = "";
         String lposKey = "";
@@ -121,6 +139,7 @@ public class SortUtils {
         do{
             queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
             queryMap.put("page",page * Constants.SORT_PANGE_NUMBER);
+            queryMap.put("lposKey",lposKey);
             requestEntity.setFunctionName(functionName);
             requestEntity.setParam(queryMap);
             courseList = (List<Map<String, String>>) operation.invokeProcess(requestEntity);
@@ -155,7 +174,7 @@ public class SortUtils {
      * @param jedis
      * @throws Exception
      */
-    private void updateCourseListByRedis(Map<String,String> course,Jedis jedis,boolean is_live,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
+    public static  void updateCourseListByRedis(Map<String,String> course,Jedis jedis,boolean is_live,CommonReadOperation operation,RequestEntity requestEntity) throws Exception{
         Long position = Long.valueOf(course.get("position"));
         Map<String,String> keysMap = new HashMap<>();
         if(is_live){//直播课
@@ -178,16 +197,16 @@ public class SortUtils {
         for (String key : keysMap.keySet()) {
             Long score_time = null;
             if(key.equals(Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP) || key.equals(Constants.SYS_SORT_SHOP_GOODS_TYPE_UP)){//非直播课 和 课程类型 上架
-                score_time = Long.valueOf(course.get("first_up_time"));//第一次上架时间
+                score_time = Long.valueOf(course.get(Constants.FIRST_UP_TIME));//第一次上架时间
 
             }else  if(key.equals(Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_DOWN) || key.equals(Constants.SYS_SORT_SHOP_GOODS_TYPE_COUSE_DOWN)){//非直播课 和 课程类型 下架
-                score_time = Long.valueOf(course.get("last_down_time"));//最后一次下架时间
+                score_time = Long.valueOf(course.get(Constants.CREATE_TIME));//创建时间
 
             }else if(key.equals(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP) || key.equals(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN)){ //直播课 正在直播和预告 上架 下架
-                score_time = Long.valueOf(course.get("start_time"));//课程开始时间
+                score_time = Long.valueOf(Constants.LIVE_START_TIME);//课程开始时间
 
             }else if(key.equals(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP) || key.equals(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN)){//直播课 结束 上架 下架
-                score_time = Long.valueOf(course.get("end_time"));//课程结束时间
+                score_time = Long.valueOf(course.get(Constants.LIVE_END_TIME));//课程结束时间
             }
             long lpos = MiscUtils.convertInfoToPostion(score_time,position);//算出位置
             String redisKey = keysMap.get(key);

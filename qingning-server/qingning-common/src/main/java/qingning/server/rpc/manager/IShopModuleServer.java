@@ -19,7 +19,12 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 */
 	int updateShop(Map<String, Object> param);
 
-	/**获取店铺轮播图列表
+
+	List<Map<String,Object>> findCourse(Map<String, Object> record);
+
+
+	Map<String,Object> createCourse(Map<String, Object> reqMap);
+/**获取店铺轮播图列表
 	 * @param param
 	 */
 	Map<String,Object> getShopBannerList(Map<String, Object> param);
@@ -44,5 +49,4 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @param reqMap
 	 * @return
 	 */
-	List<Map<String,Object>> getShopBannerListForFront(Map<String, Object> reqMap);
-}
+	List<Map<String,Object>> getShopBannerListForFront(Map<String, Object> reqMap);}
