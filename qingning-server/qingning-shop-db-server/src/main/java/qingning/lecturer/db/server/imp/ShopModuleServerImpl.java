@@ -68,9 +68,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     private ShopMapper shopMapper;
 
     @Autowired(required = true)
-    private SaaSCourseMapper saasCourseMapper;
-
-    @Autowired(required = true)
     private CourseGuestMapper courseGuestMapper;
 
     /**
@@ -211,6 +208,34 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return bannerMapper.selectBannerListByMap(paramMap);
     }
 
+    @Override
+    public int addSingleCourse(Map<String, Object> reqMap) {
+        return coursesMapper.insertCourse(reqMap);
+    }
+    /**
+     * 根据非空字段更新系列课详情
+     */
+    @Override
+    public int updateSeriesByMap(Map<String, Object> updateSeriesMap) {
+        return seriesMapper.updateSeries(updateSeriesMap);
+    }
+    @Override
+    public int updateCourse(Map<String, Object> param) {
+        return coursesMapper.updateCourse(param);
+    }
+
+    /**
+     * 判断用户是否是指定课程的学员
+     */
+    @Override
+    public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
+        String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+        if ("1".equals(isCourseStudent)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     @Override
     public Map<String, Object> findCourseByCourseId(String courseId) {
         return coursesMapper.findCourseByCourseId(courseId);

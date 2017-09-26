@@ -49,4 +49,31 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @param reqMap
 	 * @return
 	 */
-	List<Map<String,Object>> getShopBannerListForFront(Map<String, Object> reqMap);}
+	List<Map<String,Object>> getShopBannerListForFront(Map<String, Object> reqMap);
+
+	/**添加单品课程
+	 * @param reqMap
+	 * @return
+	 */
+	int addSingleCourse(Map<String, Object> reqMap);
+
+	/**
+	 * 根据非空字段更新系列课详情
+	 * @param updateSeriesMap
+	 * @return
+	 */
+	int updateSeriesByMap(Map<String, Object> updateSeriesMap);
+
+	/**更新课程
+	 * @param param
+	 * @return
+	 */
+	int updateCourse(Map<String, Object> param);
+
+	/**
+	 * 判断用户是否是指定课程的学员
+	 * @param selectIsStudentMap
+	 * @return
+	 */
+	boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap);
+}

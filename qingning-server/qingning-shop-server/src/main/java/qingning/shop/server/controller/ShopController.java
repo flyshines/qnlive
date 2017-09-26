@@ -195,6 +195,63 @@ public class ShopController extends AbstractController {
     }
 
     /**
+     * PC_店铺-添加课程（音频，视频，图文）
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/add", method = RequestMethod.POST)
+    public  @ResponseBody ResponseEntity addShopSingleVideo(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "addSingleGoods", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * PC_店铺-系列-添加子课程
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/series/course/add", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity addSeriesCourseChild(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "addSeriesCourseChild", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
+     * PC_店铺-单品-编辑
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/edit", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity editShopSingleVideo(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "editSingleGoods", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
      * H5_店铺-获取店铺轮播列表
      * @param accessToken
      * @param version
@@ -260,6 +317,31 @@ public class ShopController extends AbstractController {
         param.put("shop_id", shopId);
         param.put("last_update_time", lastUpdateTime);
         param.put("readed_count", readedCount);
+        param.put("page_count", pageCount);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * H5_店铺-获取店铺单品课程（直播除外）列表
+     * @param shopId
+     * @param lastSingleId
+     * @param pageCount
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/course/single/list/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopSingleList(
+            @PathVariable("shop_id") String shopId,
+            @RequestParam(value="last_single_id", defaultValue="0")String lastSingleId,
+            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopSingleCourseList", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        param.put("last_single_id", lastSingleId);
         param.put("page_count", pageCount);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);

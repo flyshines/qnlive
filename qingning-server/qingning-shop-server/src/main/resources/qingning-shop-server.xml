@@ -169,6 +169,67 @@
 					</param>
 				</outputs>
 			</function>
+			<!--店铺-单品-添加视频、音频、图文-->
+			<function name="addSingleGoods">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="course_title" type="string" require="Y,000100"/>
+					<param name="course_url" type="string" />
+					<param name="course_type" type="string" />
+					<param name="type" type="string" format="1|2|3,000004"/><!--0直播(其他接口添加) 1语音 2视频 3图文-->
+					<param name="course_image" type="string"  require="Y,000100"/>
+					<param name="price" type="double" default="0" />
+					<param name="details" type="string" />
+					<param name="course_remark" type="string" />
+					<param name="course_abstract" type="string" />
+					<param name="course_duration" type="long" />
+					<param name="course_updown" type="string" default="1" /><!--默认上架-->
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-系列-添加子课程-->
+			<function name="addSeriesCourseChild">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="series_id" type="string" require="Y,000100"/>
+					<param name="course_title" type="string" require="Y,000100"/>
+					<param name="course_url" type="string" />
+					<param name="type" type="string" format="1|2|3,000004"/>
+					<param name="course_image" type="string"  require="Y,000100"/>
+					<param name="price" type="double" default="0" />
+					<param name="details" type="string" />
+					<param name="course_duration" type="long" />
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
+			<!--店铺-单品-编辑-->
+			<function name="editSingleGoods">
+				<auth>
+					<accessToken require="Y" />
+					<version require="N" />
+				</auth>
+				<inputs>
+					<param name="course_id" type="string" require="Y,000100"/>
+					<param name="course_type" type="string" />
+					<param name="course_title" type="string" require="N"/>
+					<param name="course_url" type="string"  require="N"/>
+					<param name="course_image" type="string"  require="N"/>
+					<param name="price" type="double"  require="N"/>
+					<param name="details" type="string"  require="N"/>
+					<param name="course_abstract" type="string"  require="N"/>
+					<param name="course_remark" type="string"  require="N"/>
+				</inputs>
+				<outputs>
+				</outputs>
+			</function>
 			<!-- 店铺-获取店铺系列课程列表 -->
 			<function name="findShopSeriesList">
 				<auth>
@@ -219,7 +280,29 @@
 					<param name="last_update_time" type="long" />
 				</outputs>
 			</function>
-
+			<!-- 店铺-获取店铺单品课程（直播除外）列表 -->
+			<function name="findShopSingleCourseList">
+				<auth>
+					<accessToken require="Y" />
+				</auth>
+				<inputs>
+					<param name="shop_id" type="string" require="Y,000100"/>
+					<param name="last_single_id" type="string" require="N"/>
+					<param name="page_count" type="long" require="N"/>
+				</inputs>
+				<outputs>
+					<param name="single_info_list" type="list">
+						<param name="single_id" type="string" fieldname="course_id" />
+						<param name="single_img_url" type="string" fieldname="course_image" />
+						<param name="single_type" type="string" fieldname="goods_type" />
+						<param name="is_join" type="string" />
+						<param name="single_title" type="string" fieldname="course_title" />
+						<param name="browse_count" type="long" fieldname="click_num" />
+						<param name="message_count" type="long" fieldname="comment_num" />
+						<param name="price" type="double" fieldname="course_price" />
+					</param>
+				</outputs>
+			</function>
 			<function name="createCourse">
 				<auth>
 					<accessToken require="Y" />
