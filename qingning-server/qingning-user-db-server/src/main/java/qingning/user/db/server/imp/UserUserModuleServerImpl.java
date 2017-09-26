@@ -137,22 +137,7 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
     //TODO 实现缓存方法
     @Override
-    public Map<String, Object> findLastestFinishCourse(Map<String, Object> record) {
-        return null;
-    }
-    //TODO 实现缓存方法
-    @Override
     public List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap) {
-        return null;
-    }
-    //TODO 实现缓存方法
-    @Override
-    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
-        return saasCourseMapper.selectByPrimaryKey(courseId);
-    }
-    //TODO 实现缓存方法
-    @Override
-    public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
         return null;
     }
 

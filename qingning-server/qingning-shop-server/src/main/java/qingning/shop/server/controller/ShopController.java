@@ -246,6 +246,7 @@ public class ShopController extends AbstractController {
      * @return
      * @throws Exception
      */
+    //TODO 待完善
     @RequestMapping(value = "/shop/course/live_single/list/{shop_id}", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopLiveSingleList(
             @PathVariable("shop_id") String shopId,

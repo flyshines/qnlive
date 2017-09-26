@@ -257,10 +257,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return loginInfoMapper.getLoginInfoByLoginId(unionID);
     }
 
-    @Override
-    public Map<String, Object> findLastestFinishCourse(Map<String, Object> record) {
-        return coursesMapper.findLastestFinishCourse(record);
-    }
 
     @Override
     public List<Map<String, Object>> findCourseIdByStudent(Map<String, Object> reqMap) {
@@ -295,22 +291,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         Map<String, Object> selectMap = new HashMap<>();
         selectMap.put("series_id", seriesId);
         return seriesStudentsMapper.selectSeriesStudentsByMap(selectMap);
-    }
-
-
-    @Override
-    public Map<String, Object> findSaasCourseByCourseId(String courseId) {
-        return saasCourseMapper.selectByPrimaryKey(courseId);
-    }
-
-
-    /**
-     * 根据条件查询课程列表
-     */
-    @Override
-    public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
-        return coursesMapper.findCourseByMap(reqMap);
-
     }
 
     /**
