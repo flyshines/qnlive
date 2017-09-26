@@ -15,8 +15,8 @@
   	<module>qingning-user-db-server</module>
   	<module>qingning-user-server</module>
   	<module>qingning-mq-server</module>
-    <module>qingning-saas-db-server</module>
-    <module>qingning-saas-server</module>
+<!--    <module>qingning-saas-db-server</module>
+    <module>qingning-saas-server</module>-->
    <!-- <module>qingning-es-search</module>-->
   </modules>
   

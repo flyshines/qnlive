@@ -7,7 +7,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import java.util.List;
 import java.util.Map;
 
-public interface SaaSBannerMapper {
+public interface ShopBannerMapper {
     int deleteByPrimaryKey(String bannerId);
 
     int insert(Map<String,Object> record);

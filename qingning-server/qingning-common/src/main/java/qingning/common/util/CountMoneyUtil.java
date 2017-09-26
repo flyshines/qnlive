@@ -1,7 +1,6 @@
 package qingning.common.util;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +63,6 @@ public class CountMoneyUtil {
 		List<Map<String, Object>> insertList = new ArrayList<Map<String, Object>>();
 		try{
 			for(Map<String, Object> user : userIdList){
-				boolean isQnlive = Constants.HEADER_APP_NAME.equals(user.get("app_name"));
 				Map<String, Object> gainsMap = new HashMap<>();
 				gainsMap.put("user_id", user.get("user_id"));
 				/*
@@ -79,7 +77,7 @@ public class CountMoneyUtil {
 				 * 计算直播间实际收益
 				 */
 				double roomReal = Double.parseDouble(live_room_total_amount)/100;
-				double live_room_real_incomes = isQnlive?roomReal:getCashInAmount(String.valueOf(roomReal));
+				double live_room_real_incomes = roomReal;
 				gainsMap.put("live_room_real_incomes", (long)(live_room_real_incomes*100));
 				
 				/*
@@ -94,7 +92,7 @@ public class CountMoneyUtil {
 				 * 计算分销实际收益
 				 */
 				double distributerReal = Double.parseDouble(distributer_total_amount)/100;
-				double distributer_real_incomes = isQnlive?distributerReal:getCashInAmount(String.valueOf(distributerReal));
+				double distributer_real_incomes = distributerReal;
 				gainsMap.put("distributer_real_incomes", (long)(distributer_real_incomes*100));
 				
 				/*

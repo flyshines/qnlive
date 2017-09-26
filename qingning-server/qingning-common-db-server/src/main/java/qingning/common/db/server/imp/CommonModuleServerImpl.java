@@ -109,6 +109,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return coursesMapper.findCourseByCourseId(courseId);
 	}
 
+	@Override
+	public List<Map<String, Object>> findCourse(Map<String, Object> record) {
+		return null;
+	}
 
 
 	@Override
@@ -244,22 +248,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 	//TODO 实现缓存方法
 	@Override
-	public Map<String, Object> findLastestFinishCourse(Map<String, Object> record) {
-		return null;
-	}
-	//TODO 实现缓存方法
-	@Override
 	public List<Map<String, Object>> getGuestAndCourseInfoByMap(Map<String, Object> reqMap) {
-		return null;
-	}
-	//TODO 实现缓存方法
-	@Override
-	public Map<String, Object> findSaasCourseByCourseId(String courseId) {
-		return null;
-	}
-	//TODO 实现缓存方法
-	@Override
-	public List<Map<String, Object>> getCourseListByMap(Map<String, Object> reqMap) {
 		return null;
 	}
 }
