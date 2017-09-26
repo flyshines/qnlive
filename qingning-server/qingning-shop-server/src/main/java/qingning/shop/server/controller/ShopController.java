@@ -3,6 +3,7 @@ package qingning.shop.server.controller;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.Constants;
@@ -85,6 +86,28 @@ public class ShopController extends AbstractController {
                             @RequestHeader(value = "version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopInfo", accessToken, version);
         return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 店铺-店铺设置
+     *
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/edit", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity shopEdit(
+            HttpEntity<Object> entity,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopEdit", accessToken, version);
+        if(((Map)entity.getBody()).isEmpty()){
+            throw new QNLiveException("000100");
+        }
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
     }
     /**
      * PC_店铺-轮播图列表

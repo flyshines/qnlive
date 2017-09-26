@@ -106,6 +106,7 @@ public class ServiceManger {
 					if(!MiscUtils.isEmpty(parameters)){
 						for(Element parameter : parameters){						
 							String parameterName = parameter.getAttributeValue(Constants.NAME);
+							String defaultName = parameter.getAttributeValue(Constants.DEFAULT);
 							if(MiscUtils.isEmpty(parameterName)){
 								continue;
 							}
@@ -120,6 +121,7 @@ public class ServiceManger {
 							functionInfo.addInputParameter(inputParamter);
 							inputParamter.setName(parameterName);
 							inputParamter.setFormat(format);
+							inputParamter.setDefaultValue(defaultName);
 							inputParamter.setType(type);
 							inputParamter.setValidate(validate);
 							inputParamter.setRequire(require);

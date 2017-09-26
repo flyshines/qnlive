@@ -133,9 +133,6 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         shop.put("shop_preview_url", systemConfigStringMap.get("shop_preview_url"));
         shop.put("pc_introduce_url", systemConfigStringMap.get("pc_introduce_url"));
         shop.put("use_url", systemConfigStringMap.get("use_url"));
-
-        //直播分享URL
-        shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix"));
         return shop;
     }
 
@@ -148,21 +145,16 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     @FunctionName("shopEdit")
     public void shopEdit(RequestEntity reqEntity) throws Exception{
         Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
-        String userId = "";
-        if(!MiscUtils.isEmpty(param.get("user_id"))){
-            userId = param.get("user_id").toString();
-        }else{
-            userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        }
-        param.put("user_id",userId);
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, String> shopInfo = this.readCurrentUserShop(reqEntity, jedis);
         Map<String, Object> map = new HashMap<>();
         map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
-        //清空店铺缓存
+        param.put("shop_id",shopInfo.get("shop_id"));
         String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
-        jedis.del(shopKey);
-        shopModuleServer.updateShop(param);
+        if(shopModuleServer.updateShop(param)>0){
+            //清空店铺缓存
+            jedis.del(shopKey);
+        }
     }
 
     /**
@@ -308,16 +300,9 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         //0:公开课程 1:加密课程 2:收费课程
         reqMap.put("course_type","0".equals(coursePrice)?"0":"2");
         reqMap.put("goods_type",reqMap.get("type"));
-
-        if(MiscUtils.isEmpty(reqMap.get("updown"))){
-            if(reqMap.get("updown").toString().equals("2")){
-                reqMap.put("course_updown","2");
-            }
-        }
         reqMap.put("course_duration",reqMap.get("course_duration"));
         //默认下列下架
         reqMap.put("series_course_updown","0");
-        reqMap.put("course_updown",reqMap.get("course_updown"));
         //首次上架时间
         if(courseUp)reqMap.put("first_up_time",now);
 

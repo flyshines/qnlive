@@ -32,9 +32,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     private LoginInfoMapper loginInfoMapper;
 
     @Autowired(required = true)
-    private CoursesMapper coursesMapper;
-
-    @Autowired(required = true)
     private CourseMapper courseMapper;
 
     @Autowired(required = true)
@@ -210,7 +207,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
 
     @Override
     public int addSingleCourse(Map<String, Object> reqMap) {
-        return coursesMapper.insertCourse(reqMap);
+        return courseMapper.insertCourse(reqMap);
     }
     /**
      * 根据非空字段更新系列课详情
@@ -221,7 +218,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
     @Override
     public int updateCourse(Map<String, Object> param) {
-        return coursesMapper.updateCourse(param);
+        return courseMapper.updateCourse(param);
     }
 
     /**
@@ -238,7 +235,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
     @Override
     public Map<String, Object> findCourseByCourseId(String courseId) {
-        return coursesMapper.findCourseByCourseId(courseId);
+        return courseMapper.findCourseByCourseId(courseId);
     }
 
     @Override

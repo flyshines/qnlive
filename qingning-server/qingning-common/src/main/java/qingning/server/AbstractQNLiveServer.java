@@ -120,6 +120,9 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 						}
 					}
 				}
+				if(MiscUtils.isEmpty(value)&&inputParamter.getDefaultValue()!=null){
+					inputParameterMap.put(inputParamter.getName(),inputParamter.getDefaultValue());
+				}
 				List<String> condition= inputParamter.getCheckCondition();
 				if(!condition.isEmpty()){
 					boolean check=false;
