@@ -291,15 +291,15 @@ public class CacheUtils extends JedisServer{
 		}
 		return values;
 	}
-	public Map<String,String> readSeries(String series_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis,boolean cachedValue) throws Exception{
-		Map<String,String> values = readData(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
+	public Map<String,String> readSeries(String series_id, Map<String,Object> param, String functionName, Jedis jedis,boolean cachedValue) throws Exception{
+		Map<String,String> values = readDataByFunction(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, param,functionName, readSeriesOperation, jedis, cachedValue);
 		String seriesId = values.get(Constants.CACHED_KEY_SERIES_FIELD);
 		if(!series_id.equals(seriesId)){
 			Map<String, String> keyMap = new HashMap<String, String>();
 			keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, keyMap);
 			jedis.del(key);
-			values = readData(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
+			values = readDataByFunction(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD,  param,functionName, readSeriesOperation, jedis, cachedValue);
 		}
 		return values;
 	}
@@ -660,7 +660,7 @@ public class CacheUtils extends JedisServer{
 		}
 	}
 
-	public Map<String,String> readShopByUserId(String user_id, RequestEntity requestEntity, Jedis jedis) throws Exception{
+	public Map<String,String> readCurrentUserShop(RequestEntity requestEntity, Jedis jedis) throws Exception{
 		String shopId = this.getAccessInfoByToken(requestEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedis);
 		Map<String,Object> param = new HashMap<>();
 		param.put("shop_id",shopId);

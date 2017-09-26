@@ -840,5 +840,37 @@ public final class MiscUtils {
         long postion = futureTime - timeInMillis;	//未来时间-指定时间：实现指定时间越大，返回值越小
         return postion;
     }
-
+    /**根据课程类型生成课程链接
+     * @param reqMap
+     * @param linkType
+     * @return
+     * @throws Exception
+     */
+    public static String getLinkTo(Map<String, Object> reqMap,String linkType) throws Exception{
+        //数据库类型(0:无跳转，1:单品，2，系列ID，3:外部链接，4：语音直播)
+        String linkTo = null;
+        if("3".equals(linkType)){
+            //外部链接
+            linkTo = reqMap.get("link_to").toString();
+            reqMap.put("link_type","3");
+        }else if("1".equals(linkType)||"2".equals(linkType)||"4".equals(linkType)){
+            if(reqMap.get("link_id")==null){
+                //课程ID为空判断
+                throw new QNLiveException("000004");
+            }
+            //课程，系列ID
+            String linkId = reqMap.get("link_id").toString();
+            if("2".equals(linkType)||"3".equals(linkType)||"4".equals(linkType)){
+                //单品ID
+                linkTo = "/course/single/detail/"+linkId;
+            }else if("5".equals(linkType)){
+                //系列ID
+                linkTo = "/course/series/detail/"+linkId;
+            }else if("1".equals(linkType)){
+                //直播
+                linkTo = "/user/courses/"+linkId;
+            }
+        }
+        return linkTo;
+    }
 }

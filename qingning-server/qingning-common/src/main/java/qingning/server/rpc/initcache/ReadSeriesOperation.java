@@ -34,6 +34,10 @@ public class ReadSeriesOperation implements CommonReadOperation {
 
     @Override
     public Object invokeProcessByFunction(Map<String, Object> reqMap, String functionName) throws Exception {
-        return null;
+        if(CACHE_SERIES_STUDENTLIST.equals(functionName)){
+            return seriesModuleServer.findSeriesStudentListBySeriesId(reqMap.get("series_id").toString());
+        }else{
+            return seriesModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+        }
     }
 }

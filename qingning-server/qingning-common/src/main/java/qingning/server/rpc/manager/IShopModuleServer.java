@@ -24,4 +24,29 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 
 
 	Map<String,Object> createCourse(Map<String, Object> reqMap);
-}
+/**获取店铺轮播图列表
+	 * @param param
+	 */
+	Map<String,Object> getShopBannerList(Map<String, Object> param);
+	/**新增店铺轮播图
+	 * @param param
+	 */
+	int addShopBanner(Map<String, Object> param);
+
+	/**获取店铺轮播图详情
+	 * @param bannerId
+	 * @return
+	 */
+	Map<String,Object> getShopBannerInfo(String bannerId);
+
+	/**编辑店铺轮播图
+	 * @param reqMap
+	 * @return
+	 */
+	int updateBanner(Map<String, Object> reqMap);
+	/**
+	 * 前端获取店铺轮播列表
+	 * @param reqMap
+	 * @return
+	 */
+	List<Map<String,Object>> getShopBannerListForFront(Map<String, Object> reqMap);}

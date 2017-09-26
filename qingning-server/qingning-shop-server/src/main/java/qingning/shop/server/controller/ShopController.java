@@ -5,10 +5,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.Constants;
 import qingning.common.util.wxEncrypt.WXBizMsgCrypt;
 import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -84,5 +86,181 @@ public class ShopController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopInfo", accessToken, version);
         return this.process(requestEntity, serviceManger, message);
     }
+    /**
+     * PC_店铺-轮播图列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/list", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerList(
+            @RequestHeader("access_token") String accessToken,
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopBannerList", accessToken, version);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_count", pageSize);
+        paramCode.put("page_num", pageNum);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * PC_店铺-添加轮播图
+     *
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/add", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity shopBannerAdd(
+            HttpEntity<Object> entity,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopBannerAdd", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
+     * PC_店铺-轮播图编辑
+     *
+     * @param accessToken
+     * @param entity
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/edit", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity shopBannerEdit(
+            HttpEntity<Object> entity,
+            @PathVariable("banner_id") String bannerId,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopBannerEdit", accessToken, version);
+        Map<String,String> param = (Map)entity.getBody();
+        param.put("banner_id",bannerId);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+    /**
+     * PC_店铺-轮播图详情
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/info", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity shopBannerInfo(
+            @PathVariable(value = "banner_id") String bannerId,
+            @RequestHeader(value = "access_token") String accessToken,
+            @RequestHeader(value = "version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopBannerInfo", accessToken, version);
+        Map<String,String> param = new HashMap<>();
+        param.put("banner_id",bannerId);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
 
+    /**
+     * PC_店铺-轮播图上下架
+     *
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/{banner_id}/updown/{type}", method = RequestMethod.PUT)
+    public @ResponseBody ResponseEntity shopBannerUpdown(
+            @PathVariable("banner_id") String bannerId,
+            @PathVariable("type") String type,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "shopBannerUpdown", accessToken, version);
+        Map<String,String> param = new HashMap<>();
+        param.put("banner_id",bannerId);
+        param.put("type",type);
+        requestEntity.setParam(param);
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * H5_店铺-获取店铺轮播列表
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/list/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopBannerList(
+            @PathVariable("shop_id") String shopId,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "queryShopBannerList", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        requestEntity.setParam(param);
+
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * H5_店铺-获取店铺系列课程列表
+     * @param shopId
+     * @param pageCount
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/course/series/list/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopSeriesList(
+            @PathVariable("shop_id") String shopId,
+            @RequestParam(value="last_series_id", defaultValue="0")String lastSeriesId,
+            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopSeriesList", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        param.put("last_series_id", lastSeriesId);
+        param.put("page_count", pageCount);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * H5_店铺-获取店铺单品直播课程列表
+     * @param shopId
+     * @param pageCount
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/course/live_single/list/{shop_id}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getShopLiveSingleList(
+            @PathVariable("shop_id") String shopId,
+            @RequestParam(value="last_update_time", defaultValue="0")long lastUpdateTime,
+            @RequestParam(value="readed_count", defaultValue="0")long readedCount,
+            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopLiveSingleList", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("shop_id", shopId);
+        param.put("last_update_time", lastUpdateTime);
+        param.put("readed_count", readedCount);
+        param.put("page_count", pageCount);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 }
