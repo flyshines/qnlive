@@ -109,6 +109,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return coursesMapper.findCourseByCourseId(courseId);
 	}
 
+	@Override
+	public List<Map<String, Object>> findCourse(Map<String, Object> record) {
+		return null;
+	}
 
 
 	@Override

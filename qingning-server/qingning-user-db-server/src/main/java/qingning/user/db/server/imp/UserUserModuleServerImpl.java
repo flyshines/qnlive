@@ -66,6 +66,11 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
+    public List<Map<String, Object>> findCourse(Map<String, Object> record) {
+        return null;
+    }
+
+    @Override
     public List<Map<String, Object>> findRewardConfigurationList() {
         return rewardConfigurationMapper.findRewardConfigurationList();
     }

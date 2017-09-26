@@ -20,7 +20,7 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	int updateShop(Map<String, Object> param);
 
 
-	List<Map<String,Object>> findCourse(Map<String, Object> record);
+
 
 
 	Map<String,Object> createCourse(Map<String, Object> reqMap);

@@ -24,6 +24,8 @@ public interface CourseModuleServer {
 
     Map<String,Object> findCourseByCourseId(String courseId);
 
+    List<Map<String,Object>> findCourse(Map<String, Object> record);
+
 
 
 
