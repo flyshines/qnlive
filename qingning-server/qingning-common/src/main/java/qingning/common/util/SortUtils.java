@@ -1,9 +1,11 @@
 package qingning.common.util;
 
 import org.apache.solr.common.util.Hash;
+import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Tuple;
 
 import java.util.*;
 
@@ -133,6 +135,8 @@ public class SortUtils {
                 jedis.zrem(pageKey,coursePageKey);
                 page-=1;
             }
+        }else{
+            page = 0L;
         }
         Map<String,Object> queryMap = new HashMap<>();
         List<Map<String,String>> courseList = null;
@@ -212,7 +216,10 @@ public class SortUtils {
             String redisKey = keysMap.get(key);
             TreeSet<String> keySet = (TreeSet<String>) jedis.zrangeByScore(redisKey, "(" + lpos, "+inf", 0, 1);//获取位置
             String firstKey =  keySet.first();//拿到第一个值
-            Long keyRank = jedis.zrank(redisKey,firstKey);//拿到这个key 的值
+            Long keyRank = jedis.zrank(redisKey,firstKey);//拿到这个key 排序
+            if(keyRank != 0){
+                keyRank-=1;
+            }
             Long keyAmount = jedis.zcard(redisKey);
 
             for(long i=keyRank;i<=keyAmount;i++){
@@ -258,33 +265,27 @@ public class SortUtils {
     }
 
     /**
-     * 更改直播课程缓存
-     * 上架或下架
-     * @param course
-     * @param jedis
+     *  上课时间 课程之间需要间隔三十分钟
      * @throws Exception
      */
-    private void updateLiveCourseListByRedis(Map<String,String> course,Jedis jedis) throws Exception{
-//        MiscUtils.courseTranferState(System.currentTimeMillis(), course);
-//        String live_course_status = course.get("live_course_status");
-//        Map<String,String> keysMap = new HashMap<>();
-//
-//        if(live_course_status.equals("4") || live_course_status.equals("1")){
-//            keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP,course));
-//            keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_DOWN,course));
-//        }
-//
-//        if(live_course_status.equals("2")){
-//            keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_UP,course));
-//            keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN,MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN  ,course));
-//        }
-//
-
-
-
-
-
-
+    public static void whetherCreateLiveCourse(String shop_id,Long live_start_time,Jedis jedis) throws Exception{
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
+        long lpos = MiscUtils.convertInfoToPostion(live_start_time,0L);//算出位置
+        String catalogKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP,queryMap);
+        TreeSet<String> keySet = (TreeSet<String>) jedis.zrangeByScore(catalogKey, "(" + lpos, "+inf", 0, 1);//获取位置
+        String firstKey =  keySet.first();//拿到第一个值
+        Long keyRank = jedis.zrank(catalogKey,firstKey);//拿到这个key 的排序
+        queryMap.put(Constants.PAGING_NUMBER,keyRank-1);
+        String pageKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP_PAGING,queryMap);
+        long startIndex = live_start_time-30*60*1000;
+        long endIndex = live_start_time+30*60*1000;
+        long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
+        long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
+        Set<String> aLong = jedis.zrangeByScore(pageKey, start, end);
+        if(!MiscUtils.isEmpty(aLong)){
+            throw new QNLiveException("100029");
+        }
     }
 
 

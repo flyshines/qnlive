@@ -24,4 +24,9 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 
 
 	Map<String,Object> createCourse(Map<String, Object> reqMap);
+
+	Map<String,Object> updateCourse(Map<String, Object> reqMap);
+
+
+
 }

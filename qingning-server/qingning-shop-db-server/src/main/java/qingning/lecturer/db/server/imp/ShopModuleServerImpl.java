@@ -167,6 +167,46 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
+    public Map<String, Object> updateCourse(Map<String, Object> reqMap) {
+        Integer updateCount = 0;
+        Date now = (Date)reqMap.get("now");
+        Map<String,Object> course = new HashMap<String,Object>();
+        course.put("course_id", reqMap.get("course_id"));
+        Object start_time = reqMap.get("live_start_time");
+        if(!MiscUtils.isEmpty(start_time)){
+            course.put("live_start_time", new Date(MiscUtils.convertObjectToLong(start_time)));
+        }
+        course.put("classify_id", reqMap.get("classify_id"));
+        course.put("series_id", reqMap.get("series_id"));
+        course.put("course_title", reqMap.get("course_title"));
+        course.put("course_image", reqMap.get("course_image"));
+        course.put("course_remark", reqMap.get("course_remark"));
+        course.put("course_abstract", reqMap.get("course_abstract"));
+        course.put("buy_tips", reqMap.get("buy_tips"));
+        course.put("target_user", reqMap.get("target_user"));
+        course.put("share_url", reqMap.get("share_url"));
+        course.put("course_url", reqMap.get("course_url"));
+        course.put("live_start_time", reqMap.get("live_start_time"));
+        course.put("live_end_time", reqMap.get("live_end_time"));
+        course.put("course_duration", reqMap.get("course_duration"));
+        course.put("course_type", reqMap.get("course_type"));
+        course.put("course_password", reqMap.get("course_password"));
+        course.put("course_price", reqMap.get("course_price"));
+        course.put("series_course_updown", reqMap.get("series_course_updown"));
+        course.put("course_updown", reqMap.get("course_updown"));
+        course.put("updown_time", reqMap.get("updown_time"));
+        course.put("shelves_sharing", reqMap.get("shelves_sharing"));
+        course.put("details", reqMap.get("details"));
+        course.put("update_time", now);
+        updateCount=courseMapper.updateCourse(course);
+
+        Map<String, Object> dbResultMap = new HashMap<String, Object>();
+        dbResultMap.put("update_count", updateCount);
+        dbResultMap.put("update_time", now);
+        return dbResultMap;
+    }
+
+    @Override
     public List<Map<String, Object>> findLiveRoomByLectureId(String lecture_id) {
         return liveRoomMapper.findLiveRoomByLectureId(lecture_id);
     }

@@ -59,17 +59,27 @@
 			<function name="createCourse">
 				<auth>
 					<accessToken require="Y" />
-
 					<!--<timesLimit millisecond="100" />-->
 				</auth>
 				<inputs>
 					<param name="course_title" type="rstring" require="Y,000100" />
 					<param name="classify_id" type="string" require="N" />
-					<param name="start_time" type="long" require="Y,000100"  />
+					<param name="live_start_time" type="long" require="N"/>
 					<param name="course_type" type="string" require="Y,000100"  format="^[0-2]$,100008"/>
-					<param name="room_id" type="string" require="Y,000100"  />
-					<param name="series_id" type="string" />
-					<param name="updown" type="string" />
+					<param name="shop_id" type="string" require="Y,000100"  />
+					<param name="series_id" type="string" require="N"/>
+					<param name="buy_tips" type="string" require="N"/>
+					<param name="course_abstract" type="string" require="N"/>
+					<param name="course_duration" type="string" require="N"/>
+					<param name="course_image" type="string" require="N"/>
+					<param name="course_remark" type="string" require="N" />
+					<param name="course_updown" type="string" require="N"/>
+					<param name="course_url" type="string" require="N"/>
+					<param name="details" type="string" require="N"/>
+					<param name="distribution_proportion" type="string" require="N"/>
+					<param name="goods_type" type="string" format="^[0-3]$,100008"/>
+					<param name="series_course_updown" type="string"  require="N"/>
+					<param name="target_user" type="string"  require="N"/>
 					<param name="course_price" type="double" require="N" validate="(course_type,course_price,course_password)=>{
 						if(utils.isEqual('1', course_type)){
 							if(utils.isEmpty(course_password)){
@@ -94,7 +104,6 @@
 						}
 						return true;
 					},000100"/>
-					<param name="course_url" type="string" require="N"  />
 				</inputs>
 				<outputs>
 					<param name="course_id" type="string"/>
