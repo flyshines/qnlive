@@ -16,6 +16,7 @@ import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.IShopModuleServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Tuple;
 
 import java.util.*;
 
@@ -705,20 +706,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         String lecturerCoursesAllKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_ALL, query);
         if(reqMap.get("good_type").toString().equals("0")){
             //课程之间需要间隔三十分钟
-            Long startTime = (Long)reqMap.get("start_time");
-            long startIndex = startTime-30*60*1000;
-            long endIndex = startTime+30*60*1000;
-            long start = MiscUtils.convertInfoToPostion(startIndex , 0L);
-            long end = MiscUtils.convertInfoToPostion(endIndex , 0L);
-            Set<String> aLong = jedis.zrangeByScore(lecturerCoursesAllKey, start, end);
-            for(String course_id : aLong){
-                Map<String,Object> map = new HashMap<>();
-                map.put("course_id",course_id);
-                Map<String, String> course = readCourse(course_id, generateRequestEntity(null, null, null, map), readCourseOperation, jedis, true);
-                if(course.get("status").equals("1")){
-                    throw new QNLiveException("100029");
-                }
-            }
+            SortUtils.whetherCreateLiveCourse(shop_id,Long.valueOf(reqMap.get("live_start_time").toString()),jedis);
             //2.1创建IM 聊天群组
             Map<String,String> queryParam = new HashMap<>();
             queryParam.put(Constants.CACHED_KEY_ACCESS_TOKEN_FIELD, reqEntity.getAccessToken());
@@ -822,12 +810,95 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             //设置讲师更新课程 30分钟
             jedis.zadd(lecturerCoursesAllKey,lpos,course.get("course_id"));
         }
-
-
-        return null;
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.putAll(course);
+        return resultMap;
     }
 
+
     /**
+     * 修改课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("updateCourse")
+    public Map<String, Object> updateCourse(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();//传过来的参数
+        Map<String, Object> resultMap = new HashMap<String, Object>();//返回的参数
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        String lecturerId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//获取讲师id
+        String courseId = (String) reqMap.get("course_id");
+
+        Map<String, String> course = readCourse(courseId, generateRequestEntity(null, null, null, reqMap), readCourseOperation, jedis, true);//课程信息
+        if (MiscUtils.isEmpty(course)) {//如果没有课程
+            throw new QNLiveException("100004");//课程不存在 抛异常
+        }
+        if (!lecturerId.equals(course.get("lecturer_id"))) {//判断 这个课程是否是这个讲师的
+            throw new QNLiveException("100013");
+        }
+
+        if (course.get("goods_type").equals("0")) {
+            if (reqMap.get("live_start_time") != null) {                //如果要更改直播课 上课时间 课程之间需要间隔三十分钟
+                SortUtils.whetherCreateLiveCourse(course.get("shop_id"), Long.valueOf(reqMap.get("live_start_time").toString()), jedis);
+            }
+        }
+        Map<String, Object> dbResultMap = shopModuleServer.updateCourse(reqMap);
+        if (course.get("goods_type").equals("0")) {
+            if (reqMap.get("live_start_time") != null) { //开课时间修改
+                Map<String, Object> query = new HashMap<String, Object>();
+                query.put("course_id", courseId);
+                course = readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, true);
+                long startTime = MiscUtils.convertObjectToLong(reqMap.get("start_time"));
+                Map<String, Object> timerMap = new HashMap<>();
+                timerMap.put("course_id", courseId);
+                timerMap.put("start_time", new Date(startTime));
+                timerMap.put("lecturer_id", lecturerId);
+                timerMap.put("course_title", course.get("course_title"));
+                timerMap.put("course_id", course.get("course_id"));
+                timerMap.put("start_time", startTime + "");
+                timerMap.put("position", course.get("position"));
+
+                RequestEntity mqRequestEntity = new RequestEntity();
+                mqRequestEntity.setServerName("MessagePushServer");
+                mqRequestEntity.setMethod(Constants.MQ_METHOD_ASYNCHRONIZED);
+                mqRequestEntity.setParam(timerMap);
+
+                log.debug("清除所有定时任务 course_id:" + courseId);
+                mqRequestEntity.setFunctionName("processCourseNotStartCancelAll"); //课程未开播所有清除所有定时任务
+                this.mqUtils.sendMessage(mqRequestEntity);
+
+                log.debug("课程直播超时处理 服务端逻辑 定时任务 course_id:" + courseId);
+                mqRequestEntity.setFunctionName("processCourseLiveOvertime");
+                this.mqUtils.sendMessage(mqRequestEntity);
+                log.debug("进行超时预先提醒定时任务 提前60分钟 提醒课程结束 course_id:" + courseId);
+                mqRequestEntity.setFunctionName("processLiveCourseOvertimeNotice");
+                this.mqUtils.sendMessage(mqRequestEntity);
+                if (MiscUtils.isTheSameDate(new Date(startTime), new Date())) {
+                    log.debug("提前五分钟开课提醒 course_id:" + courseId);
+                    if (startTime - System.currentTimeMillis() > 5 * 60 * 1000) {
+                        mqRequestEntity.setFunctionName("processCourseStartShortNotice");
+                        this.mqUtils.sendMessage(mqRequestEntity);
+                    }
+                    //如果该课程为今天内的课程，则调用MQ，将其加入课程超时未开播定时任务中  结束任务 开课时间到但是讲师未出现提醒  推送给参加课程者
+                    mqRequestEntity.setFunctionName("processCourseStartLecturerNotShow");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                    log.debug("直播间开始发送IM  course_id:" + courseId);
+                    mqRequestEntity.setFunctionName("processCourseStartIM");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+                //提前24小时开课提醒
+                if (MiscUtils.isTheSameDate(new Date(startTime - 60 * 60 * 1000 * 24), new Date()) && startTime - System.currentTimeMillis() > 60 * 60 * 1000 * 24) {
+                    mqRequestEntity.setFunctionName("processCourseStartLongNotice");
+                    this.mqUtils.sendMessage(mqRequestEntity);
+                }
+            }
+        }
+        return dbResultMap;
+    }
+
+  /**
      * 判断用户是否加入某系列
      * @param userId
      * @param seriesId
@@ -867,5 +938,6 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             return false;
         }
     }
+
 
 }

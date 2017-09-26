@@ -20,26 +20,6 @@ public class ShopController extends AbstractController {
     private WXBizMsgCrypt cryptUtil = null;
 
 
-    /**
-     * 创建课程
-     * @param entity
-     * @param accessToken
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/shop/lecturer/courses", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    ResponseEntity createCourse(
-            HttpEntity<Object> entity,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "createCourse", accessToken, version);
-        requestEntity.setParam(entity.getBody());
-        return this.process(requestEntity, serviceManger, message);
-    }
 
     /**
      * 开通店铺
@@ -195,6 +175,49 @@ public class ShopController extends AbstractController {
     }
 
     /**
+     * 创建课程
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/shop/lecturer/courses", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity createCourse(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "createCourse", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 编辑课程
+     * @param entity
+     * @param course_id
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/shop/lecturer/courses/{course_id}", method = RequestMethod.PUT)
+    public
+    @ResponseBody ResponseEntity updateCourse(
+            HttpEntity<Object> entity,
+            @PathVariable("course_id") String course_id,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "updateCourse", accessToken, version);
+        ((Map<String,Object>)entity.getBody()).put("course_id", course_id);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+  /**
      * PC_店铺-轮播图上下架
      *
      * @param accessToken

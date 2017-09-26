@@ -263,9 +263,6 @@
       <if test="target_user != null" >
         target_user = #{target_user},
       </if>
-      <if test="share_url != null" >
-        share_url = #{share_url},
-      </if>
       <if test="course_url != null" >
         course_url = #{course_url},
       </if>
@@ -283,12 +280,6 @@
       </if>
       <if test="course_type != null" >
         course_type = #{course_type},
-      </if>
-      <if test="goods_type != null" >
-        goods_type = #{goods_type},
-      </if>
-      <if test="rq_code != null" >
-        rq_code = #{rq_code},
       </if>
       <if test="course_password != null" >
         course_password = #{course_password},
@@ -320,14 +311,8 @@
       <if test="course_updown != null" >
         course_updown = #{course_updown},
       </if>
-      <if test="updown_time != null" >
-        updown_time = #{updown_time},
-      </if>
       <if test="shelves_sharing != null" >
         shelves_sharing = #{shelves_sharing},
-      </if>
-      <if test="create_time != null" >
-        create_time = #{create_time},
       </if>
       <if test="update_time != null" >
         update_time = #{update_time},
