@@ -8,7 +8,7 @@ import qingning.server.rpc.ShopModuleServer;
 import java.util.Map;
 
 /**
- * 包名: qingning.lecture.server.other
+ * 包名: qingning.shop.server.other
  * 描 述:
  * 创建日期: 2016/12/4
  */
@@ -20,7 +20,6 @@ public class ReadShopOperation implements CommonReadOperation {
     }
 
 
-    @SuppressWarnings("unchecked")
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         return null;

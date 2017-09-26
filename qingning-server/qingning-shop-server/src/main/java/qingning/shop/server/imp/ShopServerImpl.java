@@ -37,8 +37,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
     @FunctionName("shopOpen")
     public Map<String, Object> shopOpen(RequestEntity reqEntity) throws Exception {
-        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-
+        Map<String, Object> reqMap = new HashMap<>();
+        reqEntity.setParam(reqMap);
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String, Object> resultMap = new HashMap<>();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
@@ -52,7 +52,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         //2.插入店铺信息
         Map<String,String> userInfo = readUser(userId,reqEntity,readUserOperation,jedis);
         Map<String,Object> shop = new HashMap<>();
-        shop.put("user_id",userId);
+        shop.put("lecturer_id",userId);
         shop.put("shop_id",shopId);
         shop.put("user_name",userInfo.get("nick_name")+"");
         shop.put("shop_name",userInfo.get("nick_name")+"的知识店铺");
@@ -62,26 +62,25 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         shop.put("status","1");
         shop.put("create_time",new Date());
         shop.put("shop_logo",userInfo.get("avatar_address"));
-        shopModuleServer.insertShop(shop);
+        int i = shopModuleServer.insertShop(shop);
+        if(i>0){
+            String user_role = this.getAccessInfoByToken(reqEntity.getAccessToken(),"user_role",jedis);
+            //3.缓存修改
+            //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
+            Map<String,Object> map = new HashMap<>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
 
-        String user_role = this.getAccessInfoByToken(reqEntity.getAccessToken(),"user_role",jedis);
-
-        //3.缓存修改
-        //如果是刚刚成为讲师，则增加讲师信息缓存，并且修改access_token缓存中的身份
-        Map<String,Object> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, reqMap.get("user_id").toString());
-
-        RequestEntity queryOperation = this.generateRequestEntity(null,null, null, map);
-        this.readLecturer(userId, queryOperation, readShopOperation, jedis);
-        this.updateAccessInfoByToken(reqEntity.getAccessToken(),"user_role",user_role+","+Constants.USER_ROLE_LECTURER,jedis);
-        this.updateAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,shopId,jedis);
-        //4.增加讲师直播间信息缓存
-        jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
-        map.clear();
-        map.put("shop_id", shopId);
-        this.readShop(shopId, map, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
-
-        resultMap.put("shop_id", shopId);
+            RequestEntity queryOperation = this.generateRequestEntity(null,null, null, map);
+            this.readLecturer(userId, queryOperation, readShopOperation, jedis);
+            this.updateAccessInfoByToken(reqEntity.getAccessToken(),"user_role",user_role+","+Constants.USER_ROLE_LECTURER,jedis);
+            this.updateAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,shopId,jedis);
+            //4.增加讲师直播间信息缓存
+            jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
+            map.clear();
+            map.put("shop_id", shopId);
+            this.readShop(shopId, map, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
+            resultMap.put("shop_id", shopId);
+        }
         return resultMap;
     }
     /**
@@ -99,7 +98,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Jedis jedis = jedisUtils.getJedis();//获取jedis对象
         Map<String,String> userMap = this.readUser(userId, reqEntity,readUserOperation, jedis);
         Map<String,String> shop = this.readShopByUserId(userId, reqEntity, jedis);
-        if(shop.get("open_sharing").equals("1")){
+        /*if(shop.get("open_sharing").equals("1")){
             log.debug("同步讲师token  user_id : "+userId +" token : "+reqEntity.getAccessToken());
             Map<String, String> headerMap = new HashMap<>();
             headerMap.put("version", "1.2.0");
@@ -111,7 +110,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
                     +SharingConstants.SHARING_USER_COMMON_GENERATE_TOKEN;
             String result = HttpClientUtil.doGet(getUrl, headerMap, null, "UTF-8");
             shop.put("synchronization_token",result);
-        }
+        }*/
 
         shop.put("avatar_address",userMap.get("avatar_address"));
         shop.put("user_id",userId);
@@ -131,6 +130,47 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         //直播分享URL
         shop.put("live_url",MiscUtils.getConfigByKey("course_share_url_pre_fix"));
         return shop;
+    }
+
+    /**
+     * 店铺设置
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shopEdit")
+    public void shopEdit(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> param = (Map<String, Object>) reqEntity.getParam();
+        String userId = "";
+        if(!MiscUtils.isEmpty(param.get("user_id"))){
+            userId = param.get("user_id").toString();
+        }else{
+            userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        }
+        param.put("user_id",userId);
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Map<String, String> shopInfo = this.readShopByUserId(userId, reqEntity, jedis);
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
+        //清空店铺缓存
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
+        jedis.del(shopKey);
+        shopModuleServer.updateShop(param);
+    }
+
+    /**
+     * 获取扫码URL
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("wechatLogin")
+    public Map<String, Object>  wechatLogin(RequestEntity reqEntity) throws Exception{
+        //重定向微信URL
+        String requestUrl = WeiXinUtil.getWechatRqcodeLoginUrl();
+        Map<String, Object> result = new HashMap<>();
+        result.put("redirectUrl", requestUrl);
+        return result;
     }
 
     @SuppressWarnings("unchecked")

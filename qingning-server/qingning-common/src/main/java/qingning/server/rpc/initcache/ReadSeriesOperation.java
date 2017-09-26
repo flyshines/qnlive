@@ -8,7 +8,7 @@ import qingning.server.rpc.manager.IShopModuleServer;
 import java.util.Map;
 
 /**
- * 包名: qingning.lecture.server.other
+ * 包名: qingning.shop.server.other
  * 描 述:
  * 创建日期: 2016/12/4
  */

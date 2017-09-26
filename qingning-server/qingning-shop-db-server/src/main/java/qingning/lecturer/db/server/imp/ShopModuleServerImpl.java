@@ -5,11 +5,9 @@ package qingning.lecturer.db.server.imp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import qingning.common.entity.QNLiveException;
 import qingning.common.util.Constants;
 import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.*;
-import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.manager.IShopModuleServer;
 
 import java.util.*;
@@ -123,9 +121,24 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return resultMap;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int insertShop(Map<String, Object> shop) {
-        return shopMapper.insert(shop);
+        //店铺插入
+        if(shopMapper.insert(shop)>0){
+            //讲师信息插入
+            Map<String,Object> lecturerInfo = new HashMap<>();
+            lecturerInfo.put("lecturer_id",shop.get("lecturer_id"));
+            lecturerInfo.put("create_time",new Date());
+            lecturerInfo.put("shop_id",shop.get("shop_id"));
+            return(lecturerMapper.insertLecture(lecturerInfo));
+        }
+        return 0;
+    }
+
+    @Override
+    public int updateShop(Map<String, Object> param) {
+        return shopMapper.updateByPrimaryKey(param);
     }
 
     @Override
@@ -190,8 +203,8 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
-    public List<Map<String, Object>> findRoomIdByFans(Map<String, Object> reqMap) {
-        return fansMapper.findRoomIdByFans(reqMap);
+    public List<Map<String, Object>> findShopIdByFans(Map<String, Object> reqMap) {
+        return fansMapper.findShopIdByFans(reqMap);
     }
 
     @Override

@@ -14,11 +14,14 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 */
 	int insertShop(Map<String, Object> shop);
 
+	/**更新店铺信息
+	 * @param param
+	 */
+	int updateShop(Map<String, Object> param);
+
+
 	List<Map<String,Object>> findCourse(Map<String, Object> record);
 
 
 	Map<String,Object> createCourse(Map<String, Object> reqMap);
-
-
-
 }

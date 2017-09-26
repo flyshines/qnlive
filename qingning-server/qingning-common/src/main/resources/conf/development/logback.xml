@@ -2,7 +2,7 @@
 <configuration debug="false" scan="true" scanPeriod="1 seconds">
     <contextName>logback</contextName>
     <property name="qingning.common.server.log.path" value="/usr/local/qingning-live/logs/qingning.server.common.log"/>
-    <property name="qingning.lecture.server.log.path" value="/usr/local/qingning-live/logs/qingning.server.lecture.log"/>
+    <property name="qingning.shop.server.log.path" value="/usr/local/qingning-live/logs/qingning.server.shop.log"/>
     <property name="qingning.saas.server.log.path" value="/usr/local/qingning-live/logs/qingning.server.saas.log"/>
     <property name="qingning.user.server.log.path" value="/usr/local/qingning-live/logs/qingning.server.user.log"/>
     <property name="qingning.mq.log.path" value="/usr/local/qingning-live/logs/qingning.mq.log"/>
@@ -74,13 +74,13 @@
     </appender>
 
     <!--讲师模块日志-->
-    <appender name="qingning.lecture.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="qingning.shop.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${qingning.lecture.server.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>DEBUG</level>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${qingning.lecture.server.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
+            <fileNamePattern>${qingning.shop.server.log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n</pattern>
@@ -131,8 +131,8 @@
         <appender-ref ref="qingning.common.server.log"/>
     </logger>
 
-    <logger name="qingning.lecture.server" level="DEBUG" additivity="false">
-        <appender-ref ref="qingning.lecture.server.log"/>
+    <logger name="qingning.shop.server" level="DEBUG" additivity="false">
+        <appender-ref ref="qingning.shop.server.log"/>
     </logger>
 
     <logger name="qingning.saas.server" level="DEBUG" additivity="false">

@@ -18,5 +18,4 @@ public class JedisServer {
      */
     protected Map<String,String> systemConfigStringMap;
     protected ReadConfigOperation readConfigOperation;
-
 }

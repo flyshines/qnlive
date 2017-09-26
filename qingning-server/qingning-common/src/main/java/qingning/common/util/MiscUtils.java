@@ -27,15 +27,13 @@ public final class MiscUtils {
     
     private static Map<String, String> configProperty = null;
     private static String configPropertyPath="classpath:application.properties";
+    private static String configPropertyPathQnlive="classpath:qnlive_application.properties";
     private static DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static DateFormat dateTimeFormatWinxin = new SimpleDateFormat("yyyyMMddHHmmss");
     private static DateFormat dateTimeFormat1 = new SimpleDateFormat("yyyy-MM-dd");
     private static Pattern emojiPattern = Pattern.compile("([\\x{10000}-\\x{10ffff}\ud800-\udfff])");
     private static Pattern emojiRecoverPattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
-    
-    public static void setConfigPropertyPath(String configPropertyPath){
-        MiscUtils.configPropertyPath=configPropertyPath;
-    }
+
     public static boolean isEmptyString(String value){
         return value==null?true:(value.trim().length()<1?true:false);
     }
@@ -397,6 +395,7 @@ public final class MiscUtils {
         try{
             if(configProperty==null){
                 configProperty= MiscUtils.convertPropertiesFileToMap(configPropertyPath);
+                configProperty.putAll(MiscUtils.convertPropertiesFileToMap(configPropertyPathQnlive));
             }
             value = configProperty.get(key);
         } catch(Exception e){
