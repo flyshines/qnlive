@@ -112,6 +112,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 
+
 	@Override
 	public Map<String, Object> findVersionInfoByOS(Map<String, Object> plateform) {
 		return versionMapper.findVersionInfoByOS(plateform);

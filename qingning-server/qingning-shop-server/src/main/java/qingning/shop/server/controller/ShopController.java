@@ -48,7 +48,6 @@ public class ShopController extends AbstractController {
     public
     @ResponseBody
     ResponseEntity openShop(@RequestHeader(value = "access_token") String accessToken,
-
                             @RequestHeader(value = "version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("ShopServer", "openShop", accessToken, version);
         return this.process(requestEntity, serviceManger, message);

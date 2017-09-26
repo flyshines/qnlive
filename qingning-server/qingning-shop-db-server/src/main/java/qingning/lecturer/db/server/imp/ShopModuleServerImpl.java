@@ -35,6 +35,9 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     private CoursesMapper coursesMapper;
 
     @Autowired(required = true)
+    private CourseMapper courseMapper;
+
+    @Autowired(required = true)
     private CourseImageMapper courseImageMapper;
 
     @Autowired(required = true)
@@ -133,6 +136,21 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     @Override
     public Map<String, Object> findCourseByCourseId(String courseId) {
         return coursesMapper.findCourseByCourseId(courseId);
+    }
+
+    @Override
+    public List<Map<String, Object>> findCourse(Map<String, Object> record) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> createCourse(Map<String, Object> reqMap) {
+        reqMap.put(Constants.CACHED_KEY_COURSE_FIELD, MiscUtils.getUUId());
+        if(reqMap.get("goods_type").toString().equals("0")){
+            reqMap.put("status", "1");
+        }
+        courseMapper.insertCourse(reqMap);
+        return null;
     }
 
     @Override
