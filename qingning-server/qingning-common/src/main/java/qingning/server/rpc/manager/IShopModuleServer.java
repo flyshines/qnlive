@@ -62,7 +62,10 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> reqMap);
 
 
-
+	/**店铺轮播图列表
+	 * @param param
+	 * @return
+	 */
 	Map<String,Object> getShopBannerList(Map<String, Object> param);
 
 

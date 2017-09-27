@@ -175,6 +175,22 @@ public class ShopController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+    /**
+     * PC_店铺-删除店铺轮播图
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/shop/banner/remove", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity bannerRemove(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bannerRemove", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
 
     /**
      * 创建课程
@@ -658,22 +674,6 @@ public class ShopController extends AbstractController {
         return this.process(requestEntity, serviceManger, message);
     }
 
-    /**
-     * PC_店铺-删除店铺轮播图
-     * @param accessToken
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/shop/banner/remove", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity bannerRemove(
-            HttpEntity<Object> entity,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("SaaSServer", "bannerRemove", accessToken, version);
-        requestEntity.setParam(entity.getBody());
-        return this.process(requestEntity, serviceManger, message);
-    }
 
     /**
      * H5_店铺-获取店铺轮播列表
