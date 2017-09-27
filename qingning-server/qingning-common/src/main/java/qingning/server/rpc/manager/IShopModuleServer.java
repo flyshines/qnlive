@@ -164,4 +164,10 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @param queryMap
 	 */
 	int deleteBanner(Map<String, Object> queryMap);
+
+	/**获取店铺非直播课程列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getSingleList(Map<String, Object> reqMap);
 }

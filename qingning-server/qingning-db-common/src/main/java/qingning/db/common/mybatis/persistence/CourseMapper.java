@@ -121,4 +121,18 @@ public interface CourseMapper {
      * @return
      */
     int selectCountByUserId(String userId);
+
+    /**店铺直播中的课程
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> findLiveListByLiturere(Map<String, Object> param, PageBounds page);
+
+    /**店铺非直播课程
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> selectCourseByShopId(Map<String, Object> param, PageBounds page);
 }

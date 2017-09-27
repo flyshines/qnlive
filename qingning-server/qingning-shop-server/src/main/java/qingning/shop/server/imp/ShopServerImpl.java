@@ -16,7 +16,6 @@ import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.IShopModuleServer;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Tuple;
 
 import java.util.*;
 
@@ -600,7 +599,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return userList;
     }
     /**
-     * 店铺-单品上下架
+     * PC_店铺-单品上下架
      * @param reqEntity
      * @return
      * @throws Exception
@@ -631,8 +630,26 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         reqMap.put("updown_time",now);
         shopModuleServer.updateCourse(reqMap);
     }
+
     /**
-     * 店铺-系列列表
+     * PC_店铺-单品列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSingleList")
+    public Map<String, Object> getSingleList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        Map<String,String> shopInfo = readCurrentUserShop(reqEntity, jedis);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        return shopModuleServer.getSingleList(reqMap);
+    }
+    /**
+     * PC_店铺-系列列表
      * @param reqEntity
      * @return
      * @throws Exception
@@ -649,7 +666,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 店铺-系列-详情
+     * PC_店铺-系列-详情
      * @param reqEntity
      * @return
      * @throws Exception
@@ -677,7 +694,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 店铺-系列-详情
+     * PC_店铺-系列-详情
      * @param reqEntity
      * @return
      * @throws Exception
@@ -696,7 +713,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return shopModuleServer.getSeriesChildCourseList(reqMap);
     }
     /**
-     * 轮播图-获取课程列表
+     * PC_店铺-轮播图-获取课程列表
      * @param reqEntity
      * @return
      * @throws Exception
@@ -731,7 +748,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return result;
     }
     /**
-     * 用户-余额明细
+     * PC_店铺-用户-余额明细
      * @param reqEntity
      * @return
      * @throws Exception
@@ -775,7 +792,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return userGains;
     }
     /**
-     * 店铺-订单记录
+     * PC_店铺-订单记录
      * @param reqEntity
      * @return
      * @throws Exception
@@ -986,7 +1003,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 获取店铺
+     * PC_店铺-获取店铺
      * @param reqEntity
      * @return
      * @throws Exception
@@ -997,7 +1014,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return shopModuleServer.getShopInfoList(reqMap);
     }
     /**
-     * 获取讲师详情
+     * PC_店铺-获取讲师详情
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1012,7 +1029,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return userInfo;
     }
     /**
-     * 开通知享
+     * PC_店铺-开通知享
      * @param reqEntity
      * @return
      * @throws Exception
@@ -1069,7 +1086,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         }
     }
     /**
-     * 删除店铺轮播图
+     * PC_店铺-删除店铺轮播图
      * @param reqEntity
      * @return
      * @throws Exception

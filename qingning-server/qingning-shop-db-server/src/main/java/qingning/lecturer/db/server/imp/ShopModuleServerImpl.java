@@ -436,6 +436,28 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
+    public Map<String, Object> getSingleList(Map<String, Object> param) {
+        if ("0".equals(param.get("type"))) {
+            //直播
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = courseMapper.findLiveListByLiturere(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
+            return res;
+        } else {
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = courseMapper.selectCourseByShopId(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
+            return res;
+        }
+    }
+
+    @Override
     public Map<String, Object> findCourseByCourseId(String courseId) {
         return courseMapper.findCourseByCourseId(courseId);
     }

@@ -235,6 +235,34 @@ public class ShopController extends AbstractController {
         requestEntity.setParam(entity.getBody());
         return this.process(requestEntity, serviceManger, message);
     }
+    /**
+     * PC_店铺-单品列表
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/goods/single/list", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity getSingleList(
+            @RequestParam(value = "page_size", defaultValue = "10") long pageSize,
+            @RequestParam(value = "page_num", defaultValue = "1") long pageNum,
+            @RequestParam(value = "status",defaultValue = "") String status,
+            @RequestParam(value = "type",defaultValue = "") String type,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "getSingleList", accessToken, version);
+        Map<String, Object> paramCode = new HashMap<>();
+        paramCode.put("page_size", pageSize);
+        paramCode.put("page_num", pageNum);
+        if(StringUtils.isNotEmpty(status))
+            paramCode.put("status", status);
+        if(StringUtils.isNotEmpty(type))
+            paramCode.put("type", type);
+        if(StringUtils.isNotEmpty(keyword))
+            paramCode.put("keyword", keyword);
+        requestEntity.setParam(paramCode);
+        return this.process(requestEntity, serviceManger, message);
+    }
   /**
      * PC_店铺-轮播图上下架
      *

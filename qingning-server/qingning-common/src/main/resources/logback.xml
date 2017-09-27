@@ -76,7 +76,7 @@
 
 
     <appender name="qingning.shop.server.log" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${qingning.lecture.server.log.path}</file>
+        <file>${qingning.shop.server.log.path}</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
               <level>DEBUG</level>
         </filter>

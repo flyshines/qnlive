@@ -389,5 +389,55 @@
     t.lecturer_id = #{userId}
     AND t.goods_type !=0
   </select>
+  <select id="findLiveListByLiturere" resultType="hashmap" parameterType="hashmap" >
+    SELECT
+    t.course_id,
+    t.course_title,
+    t.course_url AS course_image,
+    t.create_time,
+    t.course_price,
+    t.course_amount,
+    t.student_num AS sale_num,
+    t.course_updown,
+    (t.start_time &lt; SYSDATE()) AS is_start,
+    t.end_time
+    FROM
+    t_course t
+    WHERE
+    t.lecturer_id = #{user_id}
+    <if test="keyword != null" >
+      and t.course_title like '%${keyword}%'
+    </if>
+    <if test="course_updown != null" >
+      AND course_updown = #{course_updown}
+    </if>
+    <if test="course_updown == null" >
+      AND course_updown !=0
+    </if>
+    AND live_course_status !=3
+    ORDER BY
+    t.create_time DESC
+  </select>
+
+  <select id="selectCourseByShopId" resultType="hashmap" parameterType="hashmap" >
+    select
+    <include refid="Base_Column_List" />
+    from t_course res
+    where res.shop_id = #{shop_id,jdbcType=VARCHAR}
+    <if test="status != null" >
+      and course_updown = #{status,jdbcType=CHAR}
+    </if>
+    <if test="type != null" >
+      and goods_type = #{type,jdbcType=CHAR}
+    </if>
+    <if test="keyword != null" >
+      and course_title like '%${keyword}%'
+    </if>
+    <if test="noseries != null" >
+      and res.series_course_updown = '0'
+    </if>
+    AND  res.course_updown != '0'
+    order by res.course_updown , res.updown_time desc
+  </select>
 
 </mapper>
