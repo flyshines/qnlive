@@ -225,7 +225,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
      */
     @Override
     public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
-        String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+            String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
         if ("1".equals(isCourseStudent)) {
             return true;
         } else {

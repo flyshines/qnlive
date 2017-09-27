@@ -682,6 +682,7 @@ public class ShopController extends AbstractController {
      * @return
      * @throws Exception
      */
+    //TODO
     @RequestMapping(value = "/shop/banner/list/{shop_id}", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopBannerList(
             @PathVariable("shop_id") String shopId,
@@ -694,6 +695,7 @@ public class ShopController extends AbstractController {
 
         return this.process(requestEntity, serviceManger, message);
     }
+
     /**
      * H5_店铺-获取店铺系列课程列表
      * @param shopId
@@ -703,69 +705,55 @@ public class ShopController extends AbstractController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/shop/course/series/list/{shop_id}", method = RequestMethod.GET)
+    //TODO
+    @RequestMapping(value = "/shop/course/series/list", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopSeriesList(
-            @PathVariable("shop_id") String shopId,
-            @RequestParam(value="last_series_id", defaultValue="0")String lastSeriesId,
+            @RequestParam(value = "shop_id", defaultValue = "") String shopId,
+            @RequestParam(value = "goods_type", defaultValue = "") String goodsType,
+            @RequestParam(value = "classify_id", defaultValue = "") String classifyId,
+            @RequestParam(value = "last_series_id", defaultValue = "")String lastSeriesId,
             @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopSeriesList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
+        param.put("goods_type", goodsType);
+        param.put("classify_id", classifyId);
         param.put("last_series_id", lastSeriesId);
         param.put("page_count", pageCount);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
     /**
-     * H5_店铺-获取店铺单品直播课程列表
+     * H5_店铺-获取店铺单品课程列表
      * @param shopId
-     * @param pageCount
+     * @param classifyId
+     * @param goodsType
+     * @param lastCourseId
      * @param accessToken
      * @param version
      * @return
      * @throws Exception
      */
-    //TODO 待完善
-    @RequestMapping(value = "/shop/course/live_single/list/{shop_id}", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity getShopLiveSingleList(
-            @PathVariable("shop_id") String shopId,
-            @RequestParam(value="last_update_time", defaultValue="0")long lastUpdateTime,
-            @RequestParam(value="readed_count", defaultValue="0")long readedCount,
-            @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
-            @RequestHeader("access_token") String accessToken,
-            @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopLiveSingleList", accessToken, version);
-        Map<String, Object> param = new HashMap<>();
-        param.put("shop_id", shopId);
-        param.put("last_update_time", lastUpdateTime);
-        param.put("readed_count", readedCount);
-        param.put("page_count", pageCount);
-        requestEntity.setParam(param);
-        return this.process(requestEntity, serviceManger, message);
-    }
-    /**
-     * H5_店铺-获取店铺单品课程（直播除外）列表
-     * @param shopId
-     * @param lastSingleId
-     * @param pageCount
-     * @param accessToken
-     * @param version
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/shop/course/single/list/{shop_id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/shop/course/single/list", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopSingleList(
-            @PathVariable("shop_id") String shopId,
-            @RequestParam(value="last_single_id", defaultValue="0")String lastSingleId,
+            @RequestParam(value = "shop_id", defaultValue = "") String shopId,
+            @RequestParam(value = "is_live", defaultValue = "0") String isLive,
+            @RequestParam(value = "classify_id", defaultValue = "") String classifyId,
+            @RequestParam(value = "goods_type", defaultValue = "") String goodsType,
+            @RequestParam(value="last_course_id", defaultValue="")String lastCourseId,
             @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
-        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopSingleCourseList", accessToken, version);
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "findShopSingleList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
-        param.put("last_single_id", lastSingleId);
+        param.put("is_live", isLive);
+        param.put("classify_id", classifyId);
+        param.put("goods_type", goodsType);
+        param.put("last_course_id", lastCourseId);
         param.put("page_count", pageCount);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);

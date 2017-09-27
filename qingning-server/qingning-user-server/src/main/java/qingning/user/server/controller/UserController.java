@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 public class UserController extends AbstractController {
-    /***************************** V1.4.0 ********************************/
+    /***************************** V2.0.0 ********************************/
     /**
      * 获取已购买的单品课程
      * @param shopId
@@ -49,7 +49,8 @@ public class UserController extends AbstractController {
      * @throws Exception
      */
     @RequestMapping(value = "/user/my_course/series/list", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity mySeriesCourseList(
+    public @ResponseBody
+    ResponseEntity mySeriesCourseList(
             @RequestParam(value = "shop_id", defaultValue = "") String shopId,
             @RequestParam(value = "last_series_id", defaultValue = "") String lastSeriesId,
             @RequestParam(value = "page_count", defaultValue = "20") long pageCount,

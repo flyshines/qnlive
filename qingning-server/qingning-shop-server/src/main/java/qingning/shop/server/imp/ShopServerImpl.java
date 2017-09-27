@@ -1105,6 +1105,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         resultMap.put("banner_info_list", bannerList);
         return resultMap;
     }
+
     /**
      * H5_店铺-获取店铺系列课程列表
      * @param reqEntity
@@ -1112,7 +1113,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("findShopSeriesList")
-    public Map<String, Object>  findShopSeriesList(RequestEntity reqEntity) throws Exception{
+    public Map<String, Object> findShopSeriesList(RequestEntity reqEntity) throws Exception{
     	/*
     	 * 逻辑：
     	 * 1.根据shop_id获得讲师id
@@ -1126,7 +1127,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     	 */
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         //获取登录用户user_id
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String loginedUserId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
         //获取缓存jedis
@@ -1135,8 +1136,12 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         String lastSeriesId = reqMap.get("last_series_id").toString();
         //获取每页数量
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //读取缓存必备参数
+        Map<String, Object> readCacheMap = new HashMap<>();
+        RequestEntity readCacheReqEntity = this.generateRequestEntity(null, null, null, readCacheMap);
+
         /*
-         * 从缓存中获取店铺信息
+         * 从缓存中获取店铺信息，用于获取该店铺的讲师id
          */
         Map<String, String> shopMap = readShop(shopId, reqMap, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
         //获取讲师id
@@ -1152,76 +1157,145 @@ public class ShopServerImpl extends AbstractQNLiveServer {
                 //获取系列课程详情
                 Map<String, String> seriesMap = this.readSeries(seriesId, readSeriesMap,null, jedis, true);
                 //判断是否加入了该课程
-                seriesMap.put("is_join",isJoinSeries(userId, seriesId, jedis)?"1":"0");
+                seriesMap.put("is_join",isJoinSeries(loginedUserId, seriesId, jedis)?"1":"0");
                 seriesInfoList.add(seriesMap);
             }
         }
         resultMap.put("series_info_list", seriesInfoList);
         return resultMap;
     }
+
     /**
-     * H5_店铺-获取店铺单品课程（直播除外）列表
+     * H5_店铺 - 获取店铺单品直播课程列表
      * @param reqEntity
      * @return
      * @throws Exception
      */
-    @FunctionName("findShopSingleCourseList")
-    public Map<String, Object>  findShopSingleCourseList(RequestEntity reqEntity) throws Exception{
-    	/*
-    	 * 逻辑：
-    	 * 1.根据shop_id获得讲师id
-    	 * 2.根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
-    	 */
-
+    @FunctionName("findShopSingleList")
+    public Map<String, Object>  findShopNoLiveSingleList(RequestEntity reqEntity) throws Exception{
         //返回结果集
         Map<String, Object> resultMap = new HashMap<>();
-        List<Map<String, String>> singleInfoList = new ArrayList<>();
-    	/*
-    	 * 获取请求参数
-    	 */
+        List<Map<String, String>> courseInfoList = new ArrayList<>();
+        /*
+         * 获取请求参数
+         */
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         //获取登录用户user_id
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("user_id",userId);
+        String loginedUserId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+//        reqMap.put("user_id",userId);
         //获取请求查看的shop_id
         String shopId = (String) reqMap.get("shop_id");
+        //获取请求中的上一页最后一门课程id
+        String lastCourseId = (String) reqMap.get("last_course_id");
+        //获取请求中的课程分类id
+        String classifyId = (String) reqMap.get("classify_id");
+        //获取请求中的课程内容goods_type
+        String goodsType = (String) reqMap.get("goods_type");
+        //获取请求中的是否直播课标识
+        String isLive = (String) reqMap.get("is_live");
         //获取缓存jedis
         Jedis jedis = jedisUtils.getJedis();
-        //获取分页标识
-        String lastSingleId = reqMap.get("last_single_id").toString();
         //获取每页数量
         int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //获取当前服务器时间
+        Date now = new Date();
+        //读取缓存必备参数
+        Map<String, Object> readCacheMap = new HashMap<>();
+        RequestEntity readCacheReqEntity = this.generateRequestEntity(null, null, null, readCacheMap);
 
         /*
-         * 从缓存中获取店铺信息
+         * 获取上一页最后一条课程详情，用于获取分页起始score
          */
-        Map<String, String> shopMap = readShop(shopId, reqMap,CommonReadOperation.CACHE_READ_SHOP, false,jedis);
-        if(shopMap == null || shopMap.isEmpty()){
-            log.error("saas店铺-获取店铺单品课程（直播除外）列表>>>>请求的店铺不存在");
-            throw new QNLiveException("190001");
+        readCacheMap.clear();
+        readCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, lastCourseId);
+        readCacheReqEntity.setFunctionName(null);   //读取course时当operation不设置functionName默认读取课程详情
+        Map<String, String> lastCourseInfo = readCourse(lastCourseId, readCacheReqEntity, readCourseOperation, jedis, true);
+        //计算课程分页的score
+        long lastCourseScore = 0;
+        if (!MiscUtils.isEmpty(lastCourseInfo)) {
+            lastCourseScore = MiscUtils.convertInfoToPostion(Long.valueOf(lastCourseInfo.get(Constants.FIRST_UP_TIME)), Long.valueOf(lastCourseInfo.get("position")));//算出位置
         }
-        //获取讲师id
-        String lecturerId = shopMap.get("user_id");
 
-        //根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
-        //TODO 完善缓存
-        Set<String> singleSet = readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount,reqEntity,readSeriesOperation,jedis);
-        if(singleSet != null){
-            log.info("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
-            //生成用于缓存不存在时调用数据库的requestEntity
-            Map<String, Object> readSaasCourseMap = new HashMap<>();
-            for(String singleId : singleSet){
-                readSaasCourseMap.put("course_id", singleId);
-                //获取系列课程详情
-                Map<String, String> singleMap = readCourse(singleId, this.generateRequestEntity(null, null, null, readSaasCourseMap), readCourseOperation, jedis, true);
-            	/*
-                 * 判断是否加入了课程
+        /*
+         * 拼接读取课程id列表的key
+         */
+        readCacheMap.clear();
+        readCacheMap.put(Constants.CACHED_KEY_SHOP_FIELD, shopId);
+        String indexKey = null, pageKey = null;
+        if ("0".equals(isLive)) {   //获取非直播课程
+            if (MiscUtils.isEmpty(goodsType)) { //请求中没有传递课程内容，则不用根据goods_type进行筛选
+                indexKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP, readCacheMap);
+                pageKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_NON_LIVE_COUSE_UP_PAGING, readCacheMap);
+            } else {
+                readCacheMap.put("goods_type", goodsType);
+                indexKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_GOODS_TYPE_UP, readCacheMap);
+                pageKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_GOODS_TYPE_UP_PAGING, readCacheMap);
+            }
+        } else if ("1".equals(isLive)) {    //获取直播课程
+            readCacheMap.put("goods_type", 0);  //直播的goods_type为0
+            indexKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_GOODS_TYPE_UP, readCacheMap);
+            pageKey = MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_GOODS_TYPE_UP_PAGING, readCacheMap);
+        } else if (MiscUtils.isEmpty(classifyId)) { //根据分类获取课程
+            //TODO
+        }
+
+        /*
+         * 分页读取课程id集合
+         */
+        List<String> shopGoodsTypeCourseIdList = null;
+        if (0 == lastCourseScore) { //获取首页
+            shopGoodsTypeCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, null, jedis);
+        } else {    //不是获取首页
+            shopGoodsTypeCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, String.valueOf(lastCourseScore), jedis);
+        }
+        if (MiscUtils.isEmpty(shopGoodsTypeCourseIdList)) {
+            log.info("H5_店铺 - 获取店铺单品课程列表>>>>获取课程id列表为空");
+            return resultMap;
+        }
+
+        /*
+         * 根据课程id列表获取课程详情
+         */
+        readCacheMap.clear();
+        readCacheReqEntity.setFunctionName(null);   //读取course时当operation不设置functionName默认读取课程详情
+        Map<String, String> courseInfo;
+        for (String courseId : shopGoodsTypeCourseIdList) {
+            readCacheMap.put(Constants.CACHED_KEY_COURSE_FIELD, courseId);
+            courseInfo = readCourse(courseId, readCacheReqEntity, readCourseOperation, jedis, true);
+            if (!MiscUtils.isEmpty(courseInfo)) {
+                /*
+                 * 直播课和非直播课分开处理
                  */
-                singleMap.put("is_join", isJoinCourse(userId, singleId, jedis)?"1":"0");
-                singleInfoList.add(singleMap);
+                if ("0".equals(courseInfo.get("goods_type"))) { //直播课
+                    //进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                    MiscUtils.courseTranferState(now.getTime(), courseInfo);
+                    /*
+                     * 判断是否加入了课程
+                     */
+                    boolean isStudent = isJoinLiveCourse(loginedUserId, courseId, jedis);
+                    //加入课程状态 0未加入 1已加入
+                    if (isStudent) {
+                        courseInfo.put("is_join", "1");
+                    } else {
+                        courseInfo.put("is_join", "0");
+                    }
+                } else {    //非直播课
+                    /*
+                     * 判断是否加入了课程
+                     */
+                    boolean isStudent = isJoinCourse(loginedUserId, courseId, jedis);
+                    //加入课程状态 0未加入 1已加入
+                    if(isStudent){
+                        courseInfo.put("is_join", "1");
+                    }else {
+                        courseInfo.put("is_join", "0");
+                    }
+                }
+                courseInfoList.add(courseInfo);
             }
         }
-        resultMap.put("single_info_list", singleInfoList);
+
+        resultMap.put("course_info_list", courseInfoList);
         return resultMap;
     }
 
@@ -1476,5 +1550,18 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         }
     }
 
-
+    /**
+     * 判断用户是否加入某直播课程
+     * @param userId
+     * @param liveCourseId
+     * @param jedis
+     * @return
+     */
+    private boolean isJoinLiveCourse(String userId, String liveCourseId, Jedis jedis){
+        Map<String, Object> keyField = new HashMap<String, Object>();
+        keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, keyField);
+        Boolean result = !MiscUtils.isEmpty(jedis.zrank(key, liveCourseId));
+        return result;
+    }
 }
