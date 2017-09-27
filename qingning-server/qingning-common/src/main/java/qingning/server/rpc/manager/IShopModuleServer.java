@@ -87,4 +87,78 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @return
 	 */
 	boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap);
+	/**用户管理-获取店铺用户列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getShopUsers(Map<String, Object> reqMap);
+
+	/**消息管理-获取店铺评论列表
+	 * @param param
+	 * @return
+	 */
+	Map<String,Object> getCourseComment(Map<String, Object> param);
+	/**消息管理-获取用户反馈列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getUserFeedBack(Map<String, Object> reqMap);
+
+	/**查询系列课列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getSeriesListByLecturerId(Map<String, Object> reqMap);
+
+	/**查询系列子课
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getSeriesChildCourseList(Map<String, Object> reqMap);
+
+	/**查询店铺已上架的课程列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> findBannerUpCourseList(Map<String, Object> reqMap);
+	/**查询店铺已上架的系列课程列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> findBannerUpSeriesList(Map<String, Object> reqMap);
+
+	/**用户收入明细
+	 * @param userId
+	 * @return
+	 */
+	Map<String,Object> findUserGainsByUserId(String userId);
+
+	/**获取订单记录
+	 * @param query
+	 * @return
+	 */
+	Map<String,Object> getOrdersList(Map<String, Object> query);
+
+	/**查找系列课
+	 * @param seriesId
+	 * @return
+	 */
+	List<Map<String,Object>> findCourseBySeriesId(String seriesId);
+
+	/**获取店铺列表
+	 * @param reqMap
+	 * @return
+	 */
+	Map<String,Object> getShopInfoList(Map<String, Object> reqMap);
+
+	/**讲师收益详情
+	 * @param lecturerId
+	 * @return
+	 */
+	Map<String,Object> getLecturerImcome(String lecturerId);
+
+	/**删除轮播图
+	 * @param queryMap
+	 */
+	int deleteBanner(Map<String, Object> queryMap);
 }

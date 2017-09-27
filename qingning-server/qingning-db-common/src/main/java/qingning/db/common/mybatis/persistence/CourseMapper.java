@@ -1,5 +1,8 @@
 package qingning.db.common.mybatis.persistence;
 
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
+
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +96,29 @@ public interface CourseMapper {
     int updateCourse(Map<String, Object> record);
 
 
+    /**根据系列ID查询子课程列表
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> findCourseBySeriesId(Map<String, Object> param, PageBounds page);
 
+    /**轮播图选择非直播课程列表
+     * @param param
+     * @param page
+     * @return
+     */
+    PageList<Map<String,Object>> selectUpCourseListByShopId(Map<String, Object> param, PageBounds page);
 
+    /**查找所有系列子课
+     * @param seriesId
+     * @return
+     */
+    List<Map<String,Object>> findAllCourseBySeriesId(String seriesId);
+
+    /**查找讲师课程数量
+     * @param userId
+     * @return
+     */
+    int selectCountByUserId(String userId);
 }

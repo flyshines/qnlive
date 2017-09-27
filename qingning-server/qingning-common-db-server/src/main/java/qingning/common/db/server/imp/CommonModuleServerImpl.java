@@ -82,7 +82,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private ShopMapper shopMapper;
 	@Autowired(required = true)
-	private SaaSShopUserMapper shopUserMapper;
+	private ShopUserMapper shopUserMapper;
 
 	@Autowired(required = true)
 	private SeriesStudentsMapper seriesStudentsMapper;
@@ -234,6 +234,16 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> resultMap = new HashMap<>();
 		resultMap.put("room_id", reqMap.get("room_id"));
 		return resultMap;
+	}
+
+	@Override
+	public int updateUserById(Map<String, Object> userMap) {
+		//手机号码已经绑定
+		if (userMapper.existByPhone(userMap) > 0) {
+			return 1;
+		}
+		userMapper.updateUser(userMap);
+		return 0;
 	}
 
 	//TODO 实现缓存方法

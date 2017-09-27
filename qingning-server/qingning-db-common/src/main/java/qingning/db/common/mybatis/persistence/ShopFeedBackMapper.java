@@ -6,7 +6,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
 import java.util.Map;
 
-public interface SaaSFeedBackMapper {
+public interface ShopFeedBackMapper {
     int deleteByPrimaryKey(String backId);
 
     int insert(Map<String,Object> record);

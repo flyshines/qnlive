@@ -7,7 +7,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
 import java.util.Map;
 
-public interface SaaSShopUserMapper {
+public interface ShopUserMapper {
     int deleteByPrimaryKey(Integer id);
 
     int insert(Map<String,Object> record);

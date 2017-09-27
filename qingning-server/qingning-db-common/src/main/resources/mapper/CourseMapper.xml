@@ -56,6 +56,26 @@
   <select id="findCourseByCourseId" parameterType="java.lang.String" resultType="hashmap" >
     select * from t_course where course_id = #{course_id}
   </select>
+  <select id="findCourseBySeriesId" parameterType="java.lang.String" resultType="hashmap" >
+    SELECT
+      t.course_id,
+      t.course_title,
+      t.course_url AS course_image,
+      '0' AS type,
+      t.create_time,
+      t.student_num AS view_num,
+      '' AS comment_num,
+      t.series_course_updown AS 'status',
+      t.course_updown AS is_single
+    FROM
+    `t_courses` t
+    WHERE
+    t.series_id = #{series_id}
+    <if test="goods_type != null" >
+      t.goods_type = #{series_id}
+    </if>
+    ORDER BY t.create_time DESC
+   </select>
 
   <insert id="insertCourse" parameterType="hashmap" >
     insert into t_course
@@ -147,6 +167,9 @@
       <if test="distribution_proportion != null" >
         distribution_proportion,
       </if>
+      <if test="first_up_time != null" >
+        first_up_time,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="course_id != null" >
@@ -235,6 +258,9 @@
       </if>
       <if test="distribution_proportion != null" >
         #{distribution_proportion},
+      </if>
+      <if test="first_up_time != null" >
+        #{first_up_time},
       </if>
     </trim>
   </insert>
@@ -327,7 +353,41 @@
     where course_id = #{course_id}
   </update>
 
+  <select id="selectUpCourseListByShopId" parameterType="java.util.Map" resultType="hashmap" >
+    SELECT
+    t.course_id,
+    t.course_title,
+    t.course_updown AS status
+    FROM
+    `t_course` t
+    WHERE
+    t.shop_id = #{shop_id,jdbcType=VARCHAR}
+    AND course_updown = '1'
+    <if test="not_live != null">
+      AND goods_type !=0
+    </if>
+    <if test="live != null">
+      AND goods_type = 0
+    </if>
+    <if test="keyword != null" >
+      and course_title like '%${keyword}%'
+    </if>
+    ORDER BY
+    t.update_time DESC
+  </select>
 
-
+  <select id="findAllCourseBySeriesId" parameterType="java.util.Map" resultType="hashmap" >
+    SELECT * FROM t_course WHERE series_id = #{series_id} ORDER BY create_time
+  </select>
+  <!--查询讲师总非直播课程数-->
+  <select id="selectCountByUserId" parameterType="java.lang.String" resultType="java.lang.Integer">
+    SELECT
+    count(*)
+    FROM
+    t_course t
+    WHERE
+    t.lecturer_id = #{userId}
+    AND t.goods_type !=0
+  </select>
 
 </mapper>

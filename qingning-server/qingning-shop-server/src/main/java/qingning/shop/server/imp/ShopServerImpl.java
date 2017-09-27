@@ -335,7 +335,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     }
 
     /**
-     * 店铺-系列-添加子课程
+     * PC_店铺-系列-添加子课程
      * @param reqEntity
      * @throws Exception
      */
@@ -458,7 +458,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         }
     }
     /**
-     * 店铺-单品-编辑
+     * PC_店铺-单品-编辑
      * @param reqEntity
      * @return
      * @throws Exception
@@ -547,6 +547,543 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             String result = HttpClientUtil.doPostUrl(getUrl, headerMap, courseMap, "UTF-8");
         }
 
+    }
+    /**
+     * PC_店铺-用户列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getUserList")
+    public Map<String, Object> getUserList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获取店铺信息
+        Map<String,String> shopInfo = readCurrentUserShop(reqEntity, jedis);//saaSModuleServer.getShopInfo(param);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //TODO 付费用户存入缓存   其他普通和所有放入数据库
+        Map<String, Object> userList = shopModuleServer.getShopUsers(reqMap);
+        return userList;
+    }
+
+    /**
+     * PC_店铺-消息列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getMessageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获取店铺信息
+        Map<String,String> shopInfo = readCurrentUserShop(reqEntity, jedis);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        //获取所有课程评论列表
+        Map<String, Object> userList = shopModuleServer.getCourseComment(reqMap);
+        return userList;
+    }
+    /**
+     * PC_店铺-用户反馈列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getFeedbackList")
+    public Map<String, Object> getFeedbackList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获取店铺信息
+        Map<String,String> shopInfo = readCurrentUserShop(reqEntity, jedis);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        Map<String, Object> userList = shopModuleServer.getUserFeedBack(reqMap);
+        return userList;
+    }
+    /**
+     * 店铺-单品上下架
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("goodsSingleUpdown")
+    public void  goodsSingleUpdown(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String type = reqMap.get("course_updown").toString();
+        String courseId = reqMap.get("course_id").toString();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Date now = new Date();
+        long timestamp = now.getTime();
+        //该用户ID
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
+        //该讲师所有上架的单品ID
+        String lecturerSingleSetKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_COURSES_NOT_LIVE_UP, keyMap);
+        if("1".equals(type)){
+            //上架
+            jedis.zadd(lecturerSingleSetKey,timestamp,courseId);
+        }else{
+            //下架
+            jedis.zrem(lecturerSingleSetKey,courseId);
+        }
+        //更新时间
+        reqMap.put("update_time",now);
+        reqMap.put("updown_time",now);
+        shopModuleServer.updateCourse(reqMap);
+    }
+    /**
+     * 店铺-系列列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesList")
+    public Map<String, Object> getSeriesList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取所有系列列表
+        Map<String, Object> userList = shopModuleServer.getSeriesListByLecturerId(reqMap);
+        return userList;
+    }
+
+    /**
+     * 店铺-系列-详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesInfo")
+    public Map<String, String> getSeriesInfo(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, String> resultMap = null;
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, map);
+        //1.先从缓存中查询课程详情，如果有则从缓存中读取课程详情
+        if (jedis.exists(seriesKey)) {
+            resultMap = jedis.hgetAll(seriesKey);
+        } else {
+            //2.如果缓存中没有课程详情，则读取数据库
+            Map<String, Object> seriesDBMap = shopModuleServer.findSeriesBySeriesId(reqMap.get("series_id").toString());
+            if(seriesDBMap==null){
+                throw new QNLiveException("210004");
+            }
+            MiscUtils.converObjectMapToStringMap(seriesDBMap, resultMap);
+        }
+        return resultMap;
+    }
+
+    /**
+     * 店铺-系列-详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getSeriesCourseList")
+    public Map<String, Object> getSeriesCourseList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
+        String seriesId = reqMap.get("series_id").toString();
+        //系列详情
+        Map<String,String> seriesInfo = readSeries(seriesId,reqMap,null,jedis,true);
+        //系列类型，直播-商品
+        reqMap.put("series_course_type",seriesInfo.get("series_course_type"));
+        return shopModuleServer.getSeriesChildCourseList(reqMap);
+    }
+    /**
+     * 轮播图-获取课程列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getBannerCourseList")
+    public Map<String, Object> getBannerCourseList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String keyword = reqMap.get("keyword").toString();
+        if(StringUtils.isEmpty(keyword)){
+            reqMap.remove("keyword");
+        }
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        reqMap.put("user_id",userId);
+        //店铺信息
+        Map<String, String> shopInfo = readCurrentUserShop(reqEntity, jedis);
+        reqMap.put("shop_id",shopInfo.get("shop_id"));
+        String type = reqMap.get("type").toString();
+        Map<String,Object> result = null;
+        if("1".equals(type)){
+            //单品课程
+            reqMap.put("not_live","1");
+            result = shopModuleServer.findBannerUpCourseList(reqMap);
+        }else if("2".equals(type)){
+            //系列课
+            result = shopModuleServer.findBannerUpSeriesList(reqMap);
+        }else if("4".equals(type)){
+            //直播课
+            reqMap.put("live","1");
+            result = shopModuleServer.findBannerUpCourseList(reqMap);
+        }
+        return result;
+    }
+    /**
+     * 用户-余额明细
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userGains")
+    public Map<String, Object> userGains(RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> userGains = shopModuleServer.findUserGainsByUserId(userId);
+        long todayMoney = 0L;
+        long todayVisit = 0L;
+        long todayPay = 0L;
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        Map<String,Object> query = new HashMap<>();
+        query.put("user_id", userId);
+        String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
+        if(jedis.exists(userCountKey)){
+            String amount = jedis.hget(userCountKey,"day_amount");
+            String visit = jedis.hget(userCountKey,"day_visit");
+            String dayPayUser = jedis.hget(userCountKey,"day_pay_user");
+            if(StringUtils.isNotEmpty(amount)){
+                todayMoney = Long.valueOf(amount);
+            }
+            if(StringUtils.isNotEmpty(visit)){
+                todayVisit = Long.valueOf(visit);
+            }
+            if(StringUtils.isNotEmpty(dayPayUser)){
+                todayPay = Long.valueOf(dayPayUser);
+            }
+        }
+        userGains.put("today_amount",todayMoney);
+        userGains.put("today_visit",todayVisit);
+        userGains.put("today_pay",todayPay);
+
+        Long user_total_real_incomes = Long.valueOf(userGains.get("user_total_real_incomes").toString());
+        Long distributer_real_incomes = Long.valueOf(userGains.get("distributer_real_incomes").toString());
+        userGains.put("user_total_amount",user_total_real_incomes-distributer_real_incomes);
+
+        if(MiscUtils.isEmpty(userGains)){
+            throw new QNLiveException("170001");
+        }
+        return userGains;
+    }
+    /**
+     * 店铺-订单记录
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("gainsOrdersList")
+    public Map<String, Object> gainsOrdersList(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> resultMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //店主ID
+        query.put("lecturer_id",userId);
+        Map<String,Object> records = shopModuleServer.getOrdersList(query);
+
+        resultMap.put("total_count",records.get("total_count"));
+        resultMap.put("total_page",records.get("total_page"));
+
+        List<Map<String,Object>> list = (List<Map<String,Object>>)records.get("list");
+        for(Map<String,Object> recordMap : list){
+            String course_id =  recordMap.get("course_id").toString();
+            Map<String ,Object> queryMap = new HashMap<>();
+
+            Map<String, String> courseMap;
+            if("2".equals(recordMap.get("profit_type")+"")){
+                queryMap.put("series_id",course_id);
+                courseMap = readSeries(course_id, queryMap, null, jedis, true);
+            }else{
+                queryMap.put("course_id",course_id);
+                courseMap = readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
+            }
+            if("2".equals(recordMap.get("profit_type")+"")){
+                recordMap.put("goods_name", courseMap.get("series_title"));
+                recordMap.put("price",  courseMap.get("series_price"));
+                recordMap.put("create_time", courseMap.get("create_time"));
+            }else{
+                recordMap.put("goods_name", courseMap.get("course_title"));
+                recordMap.put("price",  courseMap.get("course_price"));
+                recordMap.put("create_time", courseMap.get("create_time"));
+            }
+
+
+        }
+        resultMap.put("list", list);
+
+        return resultMap;
+    }
+    /**
+     * PC_店铺-上架到知享
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("shelvesQNSharing")
+    public Map<String, Object>  shelvesQNSharing(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();
+        String shelves_type = reqMap.get("shelves_type").toString();
+        Map<String,Object> queryMap = new HashMap<>();
+
+        Map<String,String> headerParams = new HashMap<>();
+        headerParams.put("version", Constants.SYS_QN_SHARING_VERSION);
+        headerParams.put("Content-Type",Constants.SYS_QN_SHARING_CONTENT_TYPE);
+        headerParams.put("access_token",reqEntity.getAccessToken());
+
+        Map<String,Object> requestMap = new HashMap<>();
+
+
+        if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+            queryMap.put("classify_id",reqMap.get("classify_id"));
+        }
+        queryMap.put("shelves_sharing","1");
+        if(shelves_type.equals("0")){//课程
+            queryMap.put("course_id",reqMap.get("shelves_id"));
+            RequestEntity entity = new RequestEntity();
+            entity.setFunctionName("findSaasCourseByCourseId");
+            entity.setParam(reqMap);
+
+            Map<String, String> saasCourse = readCourse(reqMap.get("shelves_id").toString(), generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
+            if(!saasCourse.get("lecturer_id").equals(userId)){
+                throw new QNLiveException("310007");
+            }
+            if(saasCourse.get("goods_type").equals("0") || saasCourse.get("goods_type").equals("3")){
+                throw new QNLiveException("310003");
+            }
+
+
+            requestMap.put("course_id",saasCourse.get("course_id"));
+            requestMap.put("course_title",saasCourse.get("course_title"));
+            requestMap.put("course_url",saasCourse.get("course_image"));
+            if((saasCourse.get("goods_type")).equals("1")){
+                requestMap.put("course_type","0");
+            }else if((saasCourse.get("goods_type")).equals("2")){
+                requestMap.put("course_type","1");
+            }
+            if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+                requestMap.put("classify_id",reqMap.get("classify_id"));
+            }else if(!MiscUtils.isEmpty(saasCourse.get("classify_id"))){
+                requestMap.put("classify_id",saasCourse.get("classify_id"));
+            }else{
+                requestMap.put("classify_id",9);
+            }
+
+            requestMap.put("course_remark",saasCourse.get("course_remark"));
+            requestMap.put("course_price",saasCourse.get("course_price"));
+            requestMap.put("file_path",saasCourse.get("course_url"));
+            requestMap.put("status",Integer.parseInt(saasCourse.get("course_updown"))-1);
+            if(MiscUtils.isEmpty(saasCourse.get("course_duration"))){
+                requestMap.put("course_duration",0);
+            }else{
+                requestMap.put("course_duration",saasCourse.get("course_duration"));
+            }
+            requestMap.put("target_user",saasCourse.get("target_user"));
+            requestMap.put("buy_tips",saasCourse.get("buy_tips"));
+
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
+                    +SharingConstants.SHARING_SERVER_COURSE
+                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_ADD;
+            String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
+            Map<String, Object> resMap = JSON.parseObject(result, new TypeReference<Map<String, Object>>() {});
+            if (resMap.get("code").equals("0")) {
+                resultMap.put("synchronization",result);
+            }else {
+                throw new QNLiveException("310008");
+            }
+            shopModuleServer.updateCourse(queryMap);
+
+
+            jedis.del( MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE,queryMap));
+
+            readCourse(reqMap.get("shelves_id").toString(),generateRequestEntity(null, null, null, queryMap),readCourseOperation, jedis, true);
+        }else if(shelves_type.equals("1")){//系列
+            queryMap.put("series_id",reqMap.get("shelves_id"));
+            requestMap.put("type","add_series");
+            Map<String, String> seriesInfoMap = readSeries(reqMap.get("shelves_id").toString(), queryMap,null, jedis, true);
+            if(!seriesInfoMap.get("lecturer_id").equals(userId)){
+                throw new QNLiveException("310007");
+            }
+            if(seriesInfoMap.get("series_course_type").equals("0") || seriesInfoMap.get("series_course_type").equals("3")){
+                throw new QNLiveException("310003");
+            }
+
+            requestMap.put("course_id",seriesInfoMap.get("series_id"));
+            requestMap.put("course_title",seriesInfoMap.get("series_title"));
+            requestMap.put("course_url",seriesInfoMap.get("series_img"));
+            if(seriesInfoMap.get("series_course_type").equals("1")){
+                requestMap.put("course_type","0");
+            }else if(seriesInfoMap.get("series_course_type").equals("2")){
+                requestMap.put("course_type","1");
+            }
+            requestMap.put("update_type","2");
+            requestMap.put("cycle",seriesInfoMap.get("update_plan"));
+            requestMap.put("update_status",seriesInfoMap.get("series_status"));
+            requestMap.put("updated_course_num",seriesInfoMap.get("course_num"));
+
+            if(!MiscUtils.isEmpty(reqMap.get("classify_id"))){
+                requestMap.put("classify_id",reqMap.get("classify_id"));
+            }else if(!MiscUtils.isEmpty(seriesInfoMap.get("classify_id"))){
+                requestMap.put("classify_id",seriesInfoMap.get("classify_id"));
+            }else{
+                requestMap.put("classify_id",9);
+            }
+
+            requestMap.put("course_remark",seriesInfoMap.get("series_remark"));
+            requestMap.put("target_user",seriesInfoMap.get("target_user"));
+            requestMap.put("course_price",seriesInfoMap.get("series_price"));
+            requestMap.put("buy_tips",seriesInfoMap.get("series_pay_remark"));
+            requestMap.put("status",Integer.parseInt(seriesInfoMap.get("updown"))-1);
+            List<Map<String, Object>> seriesCourseList = shopModuleServer.findCourseBySeriesId(seriesInfoMap.get("series_id"));
+            if(MiscUtils.isEmpty(seriesCourseList)){
+                throw new QNLiveException("310009");
+            }
+
+            List<Map<String, Object>> requestCourseList = new ArrayList<>();
+            for(Map<String, Object> course:seriesCourseList ){
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("course_id",seriesInfoMap.get("series_id"));
+                courseMap.put("s_course_id",course.get("course_id"));
+                courseMap.put("series_id",course.get("series_id"));
+                courseMap.put("course_title",course.get("course_title"));
+                courseMap.put("course_url",course.get("course_image"));
+                courseMap.put("course_duration",course.get("course_duration"));
+                courseMap.put("course_remark",course.get("course_remark"));
+                courseMap.put("file_path",course.get("course_url"));
+                courseMap.put("status",Integer.parseInt(course.get("series_course_updown").toString())-1);
+                requestCourseList.add(courseMap);
+            }
+            requestMap.put("list",requestCourseList);
+
+            String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
+                    +SharingConstants.SHARING_SERVER_COURSE
+                    +SharingConstants.SHARING_COURSE_SYNCHRONIZATION_SERIES_ADD;
+            String result = HttpClientUtil.doPostUrl(getUrl, headerParams, requestMap, "UTF-8");
+            Map<String, String> resMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {});
+            if (resMap.get("code").equals("0")) {
+                resultMap.put("synchronization",result);
+                shopModuleServer.updateSeriesByMap(queryMap);
+            }else {
+                throw new QNLiveException("310008");
+            }
+            String keyOfCachedData = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryMap);
+            jedis.del(keyOfCachedData);
+            readSeries(reqMap.get("shelves_id").toString(), queryMap, null, jedis, true);
+
+        }
+        return resultMap;
+    }
+
+    /**
+     * 获取店铺
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getShops")
+    public Map<String, Object>  getShops(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        return shopModuleServer.getShopInfoList(reqMap);
+    }
+    /**
+     * 获取讲师详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("lecturerInfo")
+    public Map<String, Object>  lecturerInfo(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String lecturerId = reqMap.get("lecturer_id").toString();
+        Map<String,Object> userInfo = shopModuleServer.getLecturerImcome(lecturerId);
+        if(userInfo==null)
+            throw new QNLiveException("120002");
+        return userInfo;
+    }
+    /**
+     * 开通知享
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("sharingOpen")
+    public Map<String, Object>  sharingOpen(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        reqMap.put("user_id", userId);
+        Map<String, String> shopInfo = readCurrentUserShop(reqEntity, jedis);
+        if (shopInfo.get("open_sharing").equals("1")) {
+            throw new QNLiveException("310005");
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put(Constants.CACHED_KEY_SHOP_FIELD, shopInfo.get("shop_id"));
+        //清空店铺缓存
+        String shopKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, map);
+        jedis.del(shopKey);
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("user_id", userId);
+        param.put("open_sharing", 1);
+        shopModuleServer.updateShop(param);
+
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("version", "1.2.0");
+        headerMap.put("Content-Type", "application/json;charset=UTF-8");
+        headerMap.put("access_token", reqEntity.getAccessToken());
+
+        map.clear();
+        map.put("avatar_address", shopInfo.get("shop_logo"));
+        map.put("lecturer_name", shopInfo.get("user_name"));
+        map.put("lecturer_title", shopInfo.get("lecturer_title"));
+        map.put("lecturer_remark", shopInfo.get("shop_remark"));
+        map.put("open_code", reqMap.get("open_code"));
+        //获取知享课程数
+        String getUrl = MiscUtils.getConfigByKey("sharing_api_url")
+                + SharingConstants.SHARING_SERVER_USER_COMMON
+                + SharingConstants.SHARING_USER_COMMON_SHARING_OPEN;
+        String result = HttpClientUtil.doPostUrl(getUrl, headerMap, map, "UTF-8");
+        Map<String, String> resultMap = JSON.parseObject(result, new TypeReference<Map<String, String>>() {
+        });
+        if (resultMap.get("code").equals("0")) {
+            map.clear();
+            map.put("synchronization", result);
+            return map;
+        } else if(resultMap.get("code").equals("120035")){
+            throw new QNLiveException("310005");
+        }else {
+            param.put("open_sharing", 0);
+            shopModuleServer.updateShop(param);
+            throw new QNLiveException(result);
+        }
+    }
+    /**
+     * 删除店铺轮播图
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("bannerRemove")
+    public Map<String, Object>  bannerRemove(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        String banner_id = reqMap.get("banner_id").toString();
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put("user_id",userId);
+        queryMap.put("banner_id",banner_id);
+        shopModuleServer.deleteBanner(queryMap);
+        return null;
     }
 
     /**

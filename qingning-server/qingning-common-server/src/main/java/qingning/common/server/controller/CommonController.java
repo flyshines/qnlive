@@ -1,35 +1,12 @@
 package qingning.common.server.controller;
 
-//import org.apache.commons.fileupload.FileItem;
-//import org.apache.commons.fileupload.FileUploadBase;
-//import org.apache.commons.fileupload.FileUploadException;
-//import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-//import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
-import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
-import qingning.common.server.util.Base64;
-import qingning.common.server.util.ServerUtils;
-import qingning.common.util.Constants;
-import qingning.common.util.HttpTookit;
-import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
-import sun.misc.BASE64Decoder;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
 
 @RestController
 public class CommonController extends AbstractController {
@@ -37,6 +14,21 @@ public class CommonController extends AbstractController {
     private static final Logger logger   = LoggerFactory.getLogger(CommonController.class);
 
 
+    /**
+     * 绑定手机号码（校验验证码）
+     * @param accessToken 用户安全证书
+     * @param version 版本
+     * @throws Exception
+     */
+    @RequestMapping(value = "/bind/phone", method = RequestMethod.PUT)
+    public @ResponseBody ResponseEntity  verifyVerificationCode(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "bindPhone", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
 
 
 }
