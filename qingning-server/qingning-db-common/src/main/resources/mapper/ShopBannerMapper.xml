@@ -10,15 +10,10 @@
     from t_shop_banner
     where banner_id = #{banner_id,jdbcType=VARCHAR}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
-    delete from t_shop_banner
-    where banner_id = #{banner_id,jdbcType=VARCHAR}
-  </delete>
 
   <delete id="deleteBanner" parameterType="java.util.Map" >
     delete from t_shop_banner
     where banner_id = #{banner_id,jdbcType=VARCHAR}
-    and lecturer_id = #{lecturer_id,jdbcType=VARCHAR}
   </delete>
 
   <insert id="insert" parameterType="java.util.Map" >
@@ -147,14 +142,14 @@
     select
     <include refid="Base_Column_List" />
     from t_shop_banner
-    where lecturer_id = #{lecturer_id,jdbcType=VARCHAR}
+    where shop_id = #{shop_id,jdbcType=VARCHAR}
     ORDER BY create_time DESC
   </select>
   <select id="selectUpCount" resultType="java.lang.Integer" parameterType="java.util.Map" >
     select
     count(*)
     from t_shop_banner
-    where lecturer_id = #{lecturer_id,jdbcType=VARCHAR}
+    where shop_id = #{shop_id,jdbcType=VARCHAR}
     AND  status = '1'
   </select>
   

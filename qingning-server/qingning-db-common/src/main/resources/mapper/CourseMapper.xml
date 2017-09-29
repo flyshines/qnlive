@@ -420,8 +420,7 @@
   </select>
 
   <select id="selectCourseByShopId" resultType="hashmap" parameterType="hashmap" >
-    select * from t_course res
-    where res.shop_id = #{shop_id,jdbcType=VARCHAR}
+    select * from t_course res    where res.shop_id = #{shop_id,jdbcType=VARCHAR}
     <if test="status != null" >
       and course_updown = #{status,jdbcType=CHAR}
     </if>

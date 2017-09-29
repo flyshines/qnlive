@@ -180,8 +180,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     @FunctionName("shopBannerList")
     public Map<String, Object>  shopBannerList(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("lecturer_id",userId);
+        String shopId = getAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedisUtils.getJedis());
+        reqMap.put("shop_id",shopId);
         Map<String, Object> result = shopModuleServer.getShopBannerList(reqMap);
         return result;
     }
@@ -222,7 +222,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         reqMap.put("user_id",userId);
-        //String bannerId = reqMap.get("banner_id").toString();
+        String shopId = getAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedisUtils.getJedis());
         //根据类型获取课程链接
         String linkType = reqMap.get("link_type").toString();
         if(linkType!=null){
@@ -234,6 +234,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             bannerMaxSize = Integer.valueOf(systemConfigStringMap.get("shopBannerSize"));
         }
         reqMap.put("shopBannerSize",bannerMaxSize);
+        reqMap.put("shop_id",shopId);
         if(shopModuleServer.updateBanner(reqMap)==0){
             throw new QNLiveException("210007");
         }
@@ -262,8 +263,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
     public void  shopBannerUpdown(RequestEntity reqEntity) throws Exception{
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         reqMap.put("status",reqMap.get("type"));
-        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
-        reqMap.put("user_id",userId);
+        String shopId = getAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedisUtils.getJedis());
+        reqMap.put("shop_id",shopId);
         //读取系统配置
         int bannerMaxSize = 3;
         if(systemConfigStringMap.get("shopBannerSize")!=null){
@@ -1095,8 +1096,9 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Map<String,Object> reqMap = (Map<String, Object>) reqEntity.getParam();
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         String banner_id = reqMap.get("banner_id").toString();
+        String shopId = getAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,jedisUtils.getJedis());
         Map<String,Object> queryMap = new HashMap<>();
-        queryMap.put("user_id",userId);
+        queryMap.put("shop_id",shopId);
         queryMap.put("banner_id",banner_id);
         shopModuleServer.deleteBanner(queryMap);
         return null;

@@ -175,7 +175,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
             }
         });
 
-        int upSize = shopBannerMapper.selectUpCount(param.get("lecturer_id").toString());
+        int upSize = shopBannerMapper.selectUpCount(param.get("shop_id").toString());
 
         Map<String, Object> res = new HashMap<>();
         res.put("list", result);
