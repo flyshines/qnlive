@@ -274,6 +274,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         if(MiscUtils.isEmpty(courseInfoMap)){
             throw new QNLiveException("100004");
         }
+        String shopId = courseInfoMap.get("shop_id");
         //1.2检测该用户是否为讲师，为讲师则不能加入该课程
         String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
         //如果是app 就判断是否是讲师
@@ -331,59 +332,54 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
         //5.将学员信息插入到学员参与表中
         courseInfoMap.put("user_id",userId);
-        courseInfoMap.put("value_from",query_type);
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD,  courseInfoMap.get("lecturer_id"));
-        String lecturerRoomKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-
-        Map<String,String> liveRoomsMap = jedis.hgetAll(lecturerRoomKey);
-
-        for(String roomId :liveRoomsMap.keySet()){
-            courseInfoMap.put("room_id",roomId);
-            break;
-        }
         userModuleServer.joinCourse(courseInfoMap);
 
-            //<editor-fold desc="app">
-            //6.修改讲师缓存中的课程参与人数
-            map.clear();
-            map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id"));
-            String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
-            jedis.hincrBy(lecturerKey, "total_student_num", 1);
-            if("2".equals(course_type)){
-                jedis.hincrBy(lecturerKey, "pay_student_num", 1);
-            }
-            map.clear();
-            map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
-            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        //<editor-fold desc="app">
+        //6.修改讲师缓存中的课程参与人数
+        map.clear();
+        map.put(Constants.CACHED_KEY_LECTURER_FIELD, courseInfoMap.get("lecturer_id"));
+        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, map);
+        jedis.hincrBy(lecturerKey, "total_student_num", 1);
+        if("2".equals(course_type)){
+            jedis.hincrBy(lecturerKey, "pay_student_num", 1);
+        }
+        map.clear();
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, reqMap.get("course_id").toString());
+        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map);
+        userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
+        jedis.del(courseKey);
 
-            Long nowStudentNum = 0L;
-            userModuleServer.increaseStudentNumByCourseId(reqMap.get("course_id").toString());
-            jedis.del(courseKey);
-            HashMap<String,Object> queryMap = new HashMap<>();
-            queryMap.put("course_id",course_id);
-            Map<String,String> courseMap = readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
-            if(courseMap.get("goods_type").equals("0")) {
-                switch (courseMap.get("status")) {
-                    case "1":
-                        MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
-                        if (courseMap.get("status").equals("4")) {
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE, 1, course_id);
-                        } else {
-                            jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 1, course_id);
-                        }
-                        break;
-                    case "2":
-                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH, 1, course_id);
-                        break;
-                }
-            }
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        keyMap.put(Constants.CACHED_KEY_SHOP_FIELD, shopId);
+        String userShopCoursesSetKey = MiscUtils.getKeyOfCachedData(Constants.USER_SHOP_COURSE_ZSET, keyMap);
+        jedis.zadd(userShopCoursesSetKey, System.currentTimeMillis(), map.get("course_id").toString());//用户加入指定店铺的课程列表
+
+//        HashMap<String,Object> queryMap = new HashMap<>();
+//        queryMap.put("course_id",course_id);
+//        Map<String,String> courseMap = readCourse(course_id, generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);
+//        if(courseMap.get("goods_type").equals("0")) {
+//            switch (courseMap.get("status")) {
+//                case "1":
+//                    MiscUtils.courseTranferState(System.currentTimeMillis(), courseMap);//更新时间
+//                    if (courseMap.get("status").equals("4")) {
+//                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_LIVE, 1, course_id);
+//                    } else {
+//                        jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_PREDICTION, 1, course_id);
+//                    }
+//                    break;
+//                case "2":
+//                    jedis.zincrby(Constants.SYS_COURSES_RECOMMEND_FINISH, 1, course_id);
+//                    break;
+//            }
+//        }
 
 
-                //7.修改用户缓存信息中的加入课程数
-                map.clear();
-                map.put(Constants.CACHED_KEY_USER_FIELD, userId);
-                String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);//删除已加入课程的key  在之后登录时重新加入
-                jedis.del(key);//删除
+        //7.修改用户缓存信息中的加入课程数
+        map.clear();
+        map.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, courseInfoMap);//删除已加入课程的key  在之后登录时重新加入
+        jedis.del(key);//删除
 //            nowStudentNum = MiscUtils.convertObjectToLong(courseInfoMap.get("student_num")) + 1;
 //            String levelString = MiscUtils.getConfigByKey("jpush_course_students_arrive_level");
 //            JSONArray levelJson = JSON.parseArray(levelString);
