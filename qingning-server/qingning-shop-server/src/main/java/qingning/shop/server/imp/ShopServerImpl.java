@@ -1167,7 +1167,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
          */
         readCacheMap.clear();
         readCacheMap.put(Constants.CACHED_KEY_SERIES_FIELD, lastCourseId);
-        Map<String, String> lastCourseInfo = readSeries(lastCourseId, readCacheMap, null, jedis, true); //读取series时当operation不设置functionName默认读取系列详情
+        readCacheReqEntity.setFunctionName(null);
+        Map<String, String> lastCourseInfo = readSeries(lastCourseId, readCacheReqEntity, readSeriesOperation, jedis, true); //读取series时当operation不设置functionName默认读取系列详情
         //计算课程分页的score
         long lastCourseScore = 0;
         if (!MiscUtils.isEmpty(lastCourseInfo)) {
@@ -1201,11 +1202,13 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         /*
          * TODO 分页读取课程id集合
          */
-        List<String> shopCourseIdList = null;
+        readCacheMap.clear();
+        readCacheMap.put("shop_id", shopId);
+        List<String> shopCourseIdList;
         if (0 == lastCourseScore) { //获取首页
-            shopCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, null, jedis);
+            shopCourseIdList = SortUtils.getList(indexKey, pageKey, pageCount, null, jedis);
         } else {    //不是获取首页
-            shopCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, String.valueOf(lastCourseScore), jedis);
+            shopCourseIdList = SortUtils.getList(indexKey, pageKey, pageCount, String.valueOf(lastCourseScore), jedis);
         }
         if (MiscUtils.isEmpty(shopCourseIdList)) {
             log.info("H5_店铺 - 获取店铺单品课程列表>>>>获取课程id列表为空");
@@ -1216,10 +1219,11 @@ public class ShopServerImpl extends AbstractQNLiveServer {
          * 根据课程id列表获取课程详情
          */
         readCacheMap.clear();
+        readCacheReqEntity.setFunctionName(null);
         Map<String, String> courseInfo;
         for (String courseId : shopCourseIdList) {
             readCacheMap.put(Constants.CACHED_KEY_SERIES_FIELD, courseId);
-            courseInfo = readSeries(courseId, readCacheMap, null, jedis, true); //读取series时当operation不设置functionName默认读取系列详情
+            courseInfo = readSeries(courseId, readCacheReqEntity, readSeriesOperation, jedis, true); //读取series时当operation不设置functionName默认读取系列详情
             if (!MiscUtils.isEmpty(courseInfo)) {
                 //判断是否加入了该课程
                 boolean joinStatus = isJoinSeries(loginedUserId, courseId, jedis);
@@ -1315,9 +1319,9 @@ public class ShopServerImpl extends AbstractQNLiveServer {
          */
         List<String> shopCourseIdList = null;
         if (0 == lastCourseScore) { //获取首页
-            shopCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, null, jedis);
+            shopCourseIdList = SortUtils.getList(indexKey, pageKey, pageCount, null, jedis);
         } else {    //不是获取首页
-            shopCourseIdList = SortUtils.getCourses(indexKey, pageKey, pageCount, shopId, String.valueOf(lastCourseScore), jedis);
+            shopCourseIdList = SortUtils.getList(indexKey, pageKey, pageCount, String.valueOf(lastCourseScore), jedis);
         }
         if (MiscUtils.isEmpty(shopCourseIdList)) {
             log.info("H5_店铺 - 获取店铺单品课程列表>>>>获取课程id列表为空");
