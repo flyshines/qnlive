@@ -251,6 +251,11 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return null;
     }
 
+    /**
+     * 创建课程
+     * @param reqMap
+     * @return
+     */
     @Override
     public Map<String,Object> updateCourse(Map<String, Object> reqMap) {
         Integer updateCount = 0;

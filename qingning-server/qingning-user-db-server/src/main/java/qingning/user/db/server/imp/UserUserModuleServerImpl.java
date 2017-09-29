@@ -4,9 +4,12 @@ package qingning.user.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import qingning.common.util.MiscUtils;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserUserModuleServer;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +76,11 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     @Override
     public List<Map<String, Object>> findRewardConfigurationList() {
         return rewardConfigurationMapper.findRewardConfigurationList();
+    }
+
+    @Override
+    public boolean isStudentOfTheCourse(Map<String, Object> studentQueryMap) {
+        return !MiscUtils.isEmpty(coursesStudentsMapper.isStudentOfTheCourse(studentQueryMap));
     }
 
     @Override
@@ -144,5 +152,43 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     @Override
     public List<Map<String, Object>> findSystemConfig() {
         return systemConfigMapper.findSystemConfig();
+    }
+
+    /**
+     * 查看订单
+     * @param record
+     * Created by DavidGong on 2017/7/4.
+     * @return
+     */
+    @Override
+    public boolean findUserWhetherToPay(Map<String, Object> record) {
+        return  !MiscUtils.isEmpty(tradeBillMapper.findUserWhetherToPay(record)) ;
+    }
+
+    /**
+     * 加入课程
+     * @param courseMap
+     * @return
+     */
+    @Override
+    public Map<String, Object> joinCourse(Map<String, String> courseMap) {
+        Date now = new Date();
+        Map<String, Object> student = new HashMap<String, Object>();
+        student.put("student_id", MiscUtils.getUUId());
+        student.put("user_id", courseMap.get("user_id"));
+        student.put("distributer_id", courseMap.get("distributer_id"));
+        student.put("lecturer_id", courseMap.get("lecturer_id"));
+        student.put("shop_id", courseMap.get("shop_id"));
+        student.put("course_id", courseMap.get("course_id"));
+        student.put("payment_amount", courseMap.get("payment_amount"));
+        student.put("course_password", courseMap.get("course_password"));
+        student.put("student_type", "0"); //TODO distribution case
+        student.put("create_time", now);
+        student.put("create_date", now);
+        //students.setPaymentAmount();//TODO
+        Integer insertCount = coursesStudentsMapper.insertStudent(student);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("insertCount", insertCount);
+        return resultMap;
     }
 }

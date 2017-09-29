@@ -501,7 +501,6 @@ public class ShopServerImpl extends AbstractQNLiveServer {
 
         //编辑课程
         shopModuleServer.updateCourse(reqMap);
-
         Map<String, String> course = readCourse(courseId, generateRequestEntity(null,null,null,reqMap), readCourseOperation, jedis, true);
         Map<String,Object> requestMap = new HashMap<>();
         if(course.get("goods_type").equals("0") || course.get("goods_type").equals("3")){
@@ -703,6 +702,12 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         return resultMap;
     }
 
+    /**
+     * 创建课程
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
     @FunctionName("createCourse")
     public Map<String, Object> createCourse(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
@@ -931,6 +936,8 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             return true;
         }
     }
+
+
     /**
      * 判断用户是否加入某单品课程（包括直播、非直播）
      * @param userId
