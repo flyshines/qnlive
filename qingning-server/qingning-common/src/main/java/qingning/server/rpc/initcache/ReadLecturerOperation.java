@@ -15,16 +15,16 @@ import java.util.Map;
  * 创建日期: 2016/12/4
  */
 public class ReadLecturerOperation implements CommonReadOperation {
-	private ShopModuleServer shopModuleServer;
+	private LecturerModuleServer lecturerModuleServer;
 
-    public ReadLecturerOperation(ShopModuleServer shopModuleServer) {
-        this.shopModuleServer = shopModuleServer;
+    public ReadLecturerOperation(LecturerModuleServer lecturerModuleServer) {
+        this.lecturerModuleServer = lecturerModuleServer;
     }
 
 	@Override
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
-       	return shopModuleServer.findLectureByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
+       	return lecturerModuleServer.findLectureByLectureId((String)reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD));
     }
 
     @Override

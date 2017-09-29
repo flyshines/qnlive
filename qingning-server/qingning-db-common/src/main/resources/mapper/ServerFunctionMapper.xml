@@ -9,10 +9,4 @@
     <include refid="Base_Column_List" />
     from t_server_function
   </select>
-
-  <select id="getServerUrlBy" parameterType="java.lang.String" resultType="hashmap" >
-    select
-    <include refid="Base_Column_List" />
-    from t_server_function where app_name=#{app_name}
-  </select>
 </mapper>

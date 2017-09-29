@@ -66,11 +66,11 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        //同步讲师数据
 			        updateLecturerData(lecturerSet,pipeline);		        
 			        //同步直播间
-			        updateLiveRoomData(lecturerSet,pipeline);
+			        //updateLiveRoomData(lecturerSet,pipeline);
 			        //同步课程数据
 			        updateCourseData(lecturerSet,pipeline);
 			        //更新讲师分销信息
-			        updateLecturerDistributionLink(lecturerSet, jedis);
+			        //updateLecturerDistributionLink(lecturerSet, jedis);
 					//更新讲师saas课程
 					updateSaasCourseData(lecturerSet,jedis);
 
@@ -224,7 +224,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 		        }
 			}
 
-			private void updateLiveRoomData(Set<String> lecturerSet, Pipeline pipeline){
+			/*private void updateLiveRoomData(Set<String> lecturerSet, Pipeline pipeline){
 		    	Map<String,Object> queryParam = new HashMap<String,Object>();
 		    	Map<String,Response<Set<String>>> roomKeyMap = new HashMap<String,Response<Set<String>>>();
 				for(String lecturerId : lecturerSet){
@@ -276,9 +276,9 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 					}
 				}
 				pipeline.sync();
-			}
+			}*/
 			
-			private void updateLecturerDistributionLink(Set<String> lecturerSet, Jedis jedis){
+			/*private void updateLecturerDistributionLink(Set<String> lecturerSet, Jedis jedis){
 				Map<String,Object> queryParam = new HashMap<String,Object>();
 				
 				Set<String> available = new HashSet<String>();				
@@ -323,7 +323,7 @@ public class CacheSyncDatabaseServerImpl extends AbstractMsgService {
 			        	jedis.sadd(Constants.CACHED_UPDATE_LECTURER_KEY, lecturerId);
 			        }
 				}
-			}
+			}*/
 
 			private void updateSaasCourseData(Set<String> lecturerSet, Jedis jedis){
 				Map<String,Set<String>> preCourseKeyMap = new HashMap<>();

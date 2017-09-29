@@ -93,8 +93,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	@Autowired(required = true)
 	private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
 	@Override
-	public List<Map<String, Object>> getServerUrlBy() {
-		return serverFunctionMapper.getServerUrlBy();
+	public List<Map<String, Object>> getServerUrls() {
+		return serverFunctionMapper.getServerUrls();
 	}
 
 
@@ -244,6 +244,21 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		userMapper.updateUser(userMap);
 		return 0;
+	}
+	/**
+	 * 根据map中的参数查询banner
+	 */
+	@Override
+	public List<Map<String, Object>> findBannerInfoByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerInfoByMap(reqMap);
+	}
+
+	/**
+	 * 根据map中的参数查询banner总数量
+	 */
+	@Override
+	public int findBannerCountByMap(Map<String, Object> reqMap) {
+		return bannerInfoMapper.selectBannerCountByMap(reqMap);
 	}
 
 	//TODO 实现缓存方法

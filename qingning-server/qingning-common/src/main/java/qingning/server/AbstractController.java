@@ -9,7 +9,6 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.MessageEntity;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
-import qingning.common.util.CacheUtils;
 import qingning.common.util.MqUtils;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import qingning.server.rpc.manager.IUserUserModuleServer;
@@ -169,20 +168,18 @@ public abstract class AbstractController extends JedisServer{
 	private void generateServerUrlInfoMap() throws Exception {
 		ICommonModuleServer iCommonModuleServer = (ICommonModuleServer)applicationContext.getBean("commonModuleServer");
 		serverUrlInfoMap = new HashMap<>();
-			serverUrlInfoList = iCommonModuleServer.getServerUrlBy();
-			Map<String,Object> serverInfoMap = new HashMap<String,Object>();
+			serverUrlInfoList = iCommonModuleServer.getServerUrls();
 			for(int i = 0; i < serverUrlInfoList.size(); i++){
 				Map<String,Object> infoMap = serverUrlInfoList.get(i);
 				if(i == 0){
 					serverUrlInfoUpdateTime = new Date().getTime();
 				}
-				Map<String,Object> innerMap = new HashMap<String,Object>();
+				Map<String,Object> innerMap = new HashMap<>();
 				innerMap.put("server_url", infoMap.get("server_url"));
 				innerMap.put("method", infoMap.get("method"));
 				innerMap.put("protocol", infoMap.get("protocol"));
 				innerMap.put("domain_name", infoMap.get("domain_name"));
-				serverInfoMap.put((String)infoMap.get("server_name"), innerMap);
-			serverUrlInfoMap.put("serverInfoMap",serverInfoMap);
+				serverUrlInfoMap.put((String)infoMap.get("server_name"), innerMap);
 		}
 
 

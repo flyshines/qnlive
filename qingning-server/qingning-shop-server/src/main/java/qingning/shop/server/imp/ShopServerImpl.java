@@ -352,7 +352,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Map<String, Object> readSeriesMap = new HashMap<>();
         readSeriesMap.put("series_id", seriesId);
         jedis.del(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES,readSeriesMap));
-        Map<String, String> seriesInfoMap = this.readSeries(seriesId, readSeriesMap, null,jedis, true);
+        Map<String, String> seriesInfoMap = this.readSeries(seriesId, this.generateRequestEntity(null,null,null,readSeriesMap), readSeriesOperation,jedis, true);
         if(MiscUtils.isEmpty(seriesInfoMap)){
             log.error("saas_店铺-系列-添加课程>>>>系列课程不存在");
             throw new QNLiveException("210004");
@@ -707,7 +707,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         map.put(Constants.CACHED_KEY_SERIES_FIELD, reqMap.get("series_id").toString());
         String seriesId = reqMap.get("series_id").toString();
         //系列详情
-        Map<String,String> seriesInfo = readSeries(seriesId,reqMap,null,jedis,true);
+        Map<String,String> seriesInfo = readSeries(seriesId,this.generateRequestEntity(null,null,null,reqMap), readSeriesOperation,jedis,true);
         //系列类型，直播-商品
         reqMap.put("series_course_type",seriesInfo.get("series_course_type"));
         return shopModuleServer.getSeriesChildCourseList(reqMap);
@@ -818,7 +818,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             Map<String, String> courseMap;
             if("2".equals(recordMap.get("profit_type")+"")){
                 queryMap.put("series_id",course_id);
-                courseMap = readSeries(course_id, queryMap, null, jedis, true);
+                courseMap = readSeries(course_id, this.generateRequestEntity(null,null,null,queryMap), readSeriesOperation, jedis, true);
             }else{
                 queryMap.put("course_id",course_id);
                 courseMap = readCourse(course_id, this.generateRequestEntity(null, null, null, queryMap), readCourseOperation, jedis, true);//从缓存中读取课程信息
@@ -928,7 +928,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         }else if(shelves_type.equals("1")){//系列
             queryMap.put("series_id",reqMap.get("shelves_id"));
             requestMap.put("type","add_series");
-            Map<String, String> seriesInfoMap = readSeries(reqMap.get("shelves_id").toString(), queryMap,null, jedis, true);
+            Map<String, String> seriesInfoMap = readSeries(reqMap.get("shelves_id").toString(), this.generateRequestEntity(null,null,null,queryMap), readSeriesOperation, jedis, true);
             if(!seriesInfoMap.get("lecturer_id").equals(userId)){
                 throw new QNLiveException("310007");
             }
@@ -996,7 +996,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             }
             String keyOfCachedData = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, queryMap);
             jedis.del(keyOfCachedData);
-            readSeries(reqMap.get("shelves_id").toString(), queryMap, null, jedis, true);
+            readSeries(reqMap.get("shelves_id").toString(), this.generateRequestEntity(null,null,null,queryMap), readSeriesOperation, jedis, true);
 
         }
         return resultMap;

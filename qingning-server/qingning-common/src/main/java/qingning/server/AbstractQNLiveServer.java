@@ -20,15 +20,19 @@ import qingning.common.entity.OutputParameter;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.server.annotation.FunctionName;
-import qingning.server.rpc.initcache.ReadCourseOperation;
-import qingning.server.rpc.initcache.ReadSeriesOperation;
-import qingning.server.rpc.initcache.ReadShopOperation;
-import qingning.server.rpc.initcache.ReadUserOperation;
+import qingning.server.rpc.*;
+import qingning.server.rpc.initcache.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 
 public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveServer {
+	protected CourseModuleServer courseModuleServer = null;
+	protected UserModuleServer userServer = null;
+	protected LecturerModuleServer lecturerModuleServer = null;
+	protected SeriesModuleServer seriesModuleServer = null;
+	protected ShopModuleServer shopModuleServer = null;
+	protected ConfigModuleServer configModuleServer = null;
 
 	private Map<String, FunctionInfo> functionInfoMap = new HashMap<>();
 	private Map<String, Method> functionInfoMethodMap = new HashMap<>();
@@ -223,11 +227,15 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 
 	@SuppressWarnings("unchecked")
 	protected <T> T getRpcService(String name){
-		T rpcService = null;
-		if(context!=null && !MiscUtils.isEmpty(name)){
-			rpcService=(T)context.getBean(name);
+		try{
+			T rpcService = null;
+			if(context!=null && !MiscUtils.isEmpty(name)){
+				rpcService=(T)context.getBean(name);
+			}
+			return rpcService;
+		}catch (Exception e){
 		}
-		return rpcService;
+		return null;
 	}
 	
 	
@@ -473,5 +481,14 @@ public abstract class AbstractQNLiveServer extends CacheUtils implements QNLiveS
 		requestEntity.setFunctionName(functionName);
 		requestEntity.setParam(param);
 		return requestEntity;
+	}
+
+	protected void initServer(){
+		readCourseOperation = new ReadCourseOperation(courseModuleServer);
+		readUserOperation = new ReadUserOperation(userServer);
+		readLecturerOperation = new ReadLecturerOperation(lecturerModuleServer);
+		readSeriesOperation = new ReadSeriesOperation(seriesModuleServer);
+		readShopOperation = new ReadShopOperation(shopModuleServer);
+		readConfigOperation = new ReadConfigOperation(configModuleServer);
 	}
 }

@@ -108,10 +108,10 @@ public class UserServerImpl extends AbstractQNLiveServer {
              * 遍历课程id列表获取课程详情
              */
             readCacheMap.clear();
-            Map<String, String> seriesInfo = new HashMap<>();
+            Map<String, String> seriesInfo;
             for (String seriesId : seriesIdSet) {
                 readCacheMap.put("series_id", seriesId);
-                seriesInfo = readSeries(seriesId, readCacheMap, "getSeriesBySeriesId", jedis, true);
+                seriesInfo = readSeries(seriesId, this.generateRequestEntity(null,null,null,readCacheMap), readSeriesOperation, jedis, true);
                 if (!MiscUtils.isEmpty(seriesInfo)) {
                     seriesInfoList.add(seriesInfo);
                 } else {

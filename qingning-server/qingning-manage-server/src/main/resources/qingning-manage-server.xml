@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<servers>
+    <server name="ManageServer">
+        <default class="qingning.manage.server.imp.ManageServerImpl">
+
+            <!-- V1.4.0 -->
+            <!-- 获取已购买的单品课程-->
+            <function name="mySingleCourseList">
+                <auth>
+                    <accessToken require="Y, 000100" />
+                    <appName require="N" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="long" require="N" />
+                    <param name="shop_id" type="string" require="N" />
+                    <param name="last_course_id" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="course_info_list" type="list">
+                        <param name="course_duration" type="long" />
+                        <param name="course_id" type="string" />
+                        <param name="course_image" type="string" />
+                        <param name="course_title" type="string" />
+                        <param name="goods_type" type="string" />
+                        <param name="start_time" type="long" />
+                        <param name="status" type="string" />
+                    </param>
+                </outputs>
+            </function>
+            <!-- 搜索banner列表 -->
+            <function name="getBannerListBySearch">
+                <auth>
+                    <accessToken require="Y" />
+                    <appName require="Y,000100" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="banner_name" type="string" require="N" />
+                    <param name="status" type="int" require="N" />
+                    <param name="banner_type" type="int" require="N" />
+                    <param name="page_count" type="long" require="N" />
+                    <param name="page_num" type="long" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="banner_info_list" type="list">
+                        <param name="banner_id" type="string" />
+                        <param name="banner_name" type="string" />
+                        <param name="banner_img_url" type="string" />
+                        <param name="banner_type" type="int" />
+                        <param name="jump_url" type="string" />
+                        <param name="jump_remark" type="string" fieldname="banner_remark"/>
+                        <param name="create_time" type="long" />
+                        <param name="score" type="int" />
+                        <param name="status" type="int" />
+                    </param>
+                    <param name="total_num" type="long" />
+                </outputs>
+            </function>
+
+        </default>
+    </server>
+
+
+    <version num="1.0.0" class="">
+    </version>
+</servers>
+
