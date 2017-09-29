@@ -421,7 +421,7 @@
 
   <select id="selectCourseByShopId" resultType="hashmap" parameterType="hashmap" >
     select
-    <include refid="Base_Column_List" />
+      *
     from t_course res
     where res.shop_id = #{shop_id,jdbcType=VARCHAR}
     <if test="status != null" >
