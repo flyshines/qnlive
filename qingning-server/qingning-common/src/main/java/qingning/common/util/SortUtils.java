@@ -328,6 +328,22 @@ public class SortUtils {
     }
 
 
+    public static List<String> getList(String redisKey, int pageCount, String lpos, Jedis jedis){
+        String start_index = "+inf";
+        String end_index = "-inf";
+        if(lpos != null){
+            start_index = "("+lpos;
+        }
+        Set<String> goodsIds = jedis.zrevrangeByScore(redisKey, start_index, end_index, 0, pageCount);
+        return new ArrayList<>(goodsIds);
+    }
+
+
+
+
+
+
+
     /**
      * 刷新系列缓存
      *
@@ -352,7 +368,7 @@ public class SortUtils {
                 break;
 
             case Constants.SYS_SORT_SERIES_UP:
-                functionName = Constants.SYS_SHOP_NON_LIVE_COUSE_DOWN;
+                functionName = Constants.SYS_SERIES_COURSE_UP;
                 redisKey = Constants.SYS_SORT_SERIES_UP_PAGING;
                 lposKey = Constants.CREATE_TIME;
                 valueKey = Constants.CACHED_KEY_COURSE_FIELD;
@@ -431,6 +447,10 @@ public class SortUtils {
         }
         return page;
     }
+
+
+
+
 
 
 
