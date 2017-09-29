@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 public class UserController extends AbstractController {
-    /***************************** V2.0.0 ********************************/
+
     /**
      * 获取已购买的单品课程
      * @param shopId
@@ -43,7 +43,7 @@ public class UserController extends AbstractController {
     /**
      * 获取已购买的系列课程
      * @param shopId
-     * @param lastSeriesId
+     * @param lastCourseId
      * @param pageCount
      * @param accessToken
      * @param version
@@ -54,14 +54,14 @@ public class UserController extends AbstractController {
     public @ResponseBody
     ResponseEntity mySeriesCourseList(
             @RequestParam(value = "shop_id", defaultValue = "") String shopId,
-            @RequestParam(value = "last_series_id", defaultValue = "") String lastSeriesId,
+            @RequestParam(value = "last_course_id", defaultValue = "") String lastCourseId,
             @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
         RequestEntity requestEntity = this.createResponseEntity("UserServer", "mySeriesCourseList", accessToken, version);
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id",shopId);
-        param.put("last_series_id",lastSeriesId);
+        param.put("last_course_id",lastCourseId);
         param.put("page_count",pageCount);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
