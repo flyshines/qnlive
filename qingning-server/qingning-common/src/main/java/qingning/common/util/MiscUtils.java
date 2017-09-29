@@ -473,7 +473,10 @@ public final class MiscUtils {
         for(int i=0; i < keySection.length; ++i){
             String section=keySection[i].trim();
             if(section.startsWith("{") && section.endsWith("}")){
-                section = convertString(map.get(section.substring(1, section.length()-1)));
+                Object mapValue = map.get(section.substring(1, section.length() - 1));
+                if (!isEmpty(mapValue)) {
+                    section = convertString(mapValue);
+                }
             }
             if(i==0){
                 build.append(section);

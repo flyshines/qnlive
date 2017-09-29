@@ -32,22 +32,18 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     private LoginInfoMapper loginInfoMapper;
 
     @Autowired(required = true)
-    private CoursesMapper coursesMapper;
-
-    @Autowired(required = true)
     private CourseMapper courseMapper;
 
     @Autowired(required = true)
-    private CourseImageMapper courseImageMapper;
-
+    private ShopUserMapper shopUserMapper;
     @Autowired(required = true)
-    private CourseAudioMapper courseAudioMapper;
-
+    private CourseCommentMapper courseCommentMapper;
     @Autowired(required = true)
-    private CourseMessageMapper courseMessageMapper;
-
+    private UserGainsMapper userGainsMapper;
     @Autowired(required = true)
-    private ShopBannerMapper bannerMapper;
+    private WithdrawCashMapper withdrawCashMapper;
+    @Autowired(required = true)
+    private ShopBannerMapper shopBannerMapper;
 
     @Autowired(required = true)
     private CoursesStudentsMapper coursesStudentsMapper;
@@ -69,6 +65,11 @@ public class ShopModuleServerImpl implements IShopModuleServer {
 
     @Autowired(required = true)
     private CourseGuestMapper courseGuestMapper;
+
+    @Autowired(required = true)
+    private ShopFeedBackMapper shopFeedbackMapper;
+    @Autowired(required = true)
+    private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
 
     /**
      * 创建直播间
@@ -151,7 +152,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     @Override
     public Map<String, Object> getShopBannerList(Map<String, Object> param) {
         PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_count").toString()));
-        PageList<Map<String, Object>> result = bannerMapper.selectListByUserId(param, page);
+        PageList<Map<String, Object>> result = shopBannerMapper.selectListByUserId(param, page);
         //根据优先级排序
         Collections.sort(result, new Comparator() {
             @Override
@@ -174,7 +175,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
             }
         });
 
-        int upSize = bannerMapper.selectUpCount(param.get("lecturer_id").toString());
+        int upSize = shopBannerMapper.selectUpCount(param.get("lecturer_id").toString());
 
         Map<String, Object> res = new HashMap<>();
         res.put("list", result);
@@ -186,31 +187,31 @@ public class ShopModuleServerImpl implements IShopModuleServer {
 
     @Override
     public int addShopBanner(Map<String, Object> param) {
-        return bannerMapper.insert(param);
+        return shopBannerMapper.insert(param);
     }
 
     @Override
     public Map<String, Object> getShopBannerInfo(String bannerId) {
-        return bannerMapper.selectByPrimaryKey(bannerId);
+        return shopBannerMapper.selectByPrimaryKey(bannerId);
     }
 
     @Override
     public int updateBanner(Map<String, Object> param) {
-        int i = bannerMapper.selectUpCount(param.get("user_id").toString());
+        int i = shopBannerMapper.selectUpCount(param.get("user_id").toString());
         int size = (int)param.get("shopBannerSize");
         if (i >= size&& "1".equals(param.get("status")+"")) {
             return 0;
         }
-        return bannerMapper.updateByPrimaryKey(param);
+        return shopBannerMapper.updateByPrimaryKey(param);
     }
     @Override
     public List<Map<String, Object>> getShopBannerListForFront(Map<String, Object> paramMap) {
-        return bannerMapper.selectBannerListByMap(paramMap);
+        return shopBannerMapper.selectBannerListByMap(paramMap);
     }
 
     @Override
     public int addSingleCourse(Map<String, Object> reqMap) {
-        return coursesMapper.insertCourse(reqMap);
+        return courseMapper.insertCourse(reqMap);
     }
     /**
      * 根据非空字段更新系列课详情
@@ -224,16 +225,241 @@ public class ShopModuleServerImpl implements IShopModuleServer {
      */
     @Override
     public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
-        String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+            String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
         if ("1".equals(isCourseStudent)) {
             return true;
         } else {
             return false;
         }
     }
+
+    @Override
+    public Map<String, Object> getShopUsers(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = shopUserMapper.selectUsersByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        //付费用户，免费用户
+        int free = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"0");
+        int paied = shopUserMapper.selectCountByShopId(param.get("shop_id").toString(),"1");
+        res.put("paied_count",paied);
+        res.put("free_count",free);
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getCourseComment(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = courseCommentMapper.selectCommentByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getUserFeedBack(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = shopFeedbackMapper.selectFeedBackByShop(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getSeriesListByLecturerId(Map<String, Object> reqMap) {
+        PageBounds page = new PageBounds(Integer.valueOf(reqMap.get("page_num").toString()), Integer.valueOf(reqMap.get("page_size").toString()));
+        PageList<Map<String, Object>> result = seriesMapper.selectSeriesListByLecturerId(reqMap, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getSeriesChildCourseList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result;
+        if ("0".equals(param.get("series_course_type").toString())) {
+            //直播课程
+            param.put("goods_type","0");
+        }
+        result = courseMapper.findCourseBySeriesId(param, page);
+        //是否是单卖判断
+        result.stream().filter(map -> !"0".equals(map.get("is_single").toString())).forEach(map -> {
+            //非单卖
+            map.put("is_single", "1");
+        });
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+
+    @Override
+    public Map<String, Object> findBannerUpCourseList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = courseMapper.selectUpCourseListByShopId(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> findBannerUpSeriesList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = null;
+        result = seriesMapper.findSeriesListByLiturere(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> findUserGainsByUserId(String userId) {
+        Map<String, Object> result = userGainsMapper.findUserGainsByUserId(userId);
+        //返回提现信息
+        int count = withdrawCashMapper.selectWithdrawCountUser(userId);
+        if (result == null) {
+            //初始化用户余额信息
+            Map<String, Object> gainsMap = new HashMap<>();
+            gainsMap.put("user_id", userId);
+            gainsMap.put("live_room_total_amount", "0");
+            gainsMap.put("live_room_real_incomes", "0");
+            gainsMap.put("distributer_total_amount", "0");
+            gainsMap.put("distributer_real_incomes", "0");
+            gainsMap.put("user_total_amount", "0");
+            gainsMap.put("user_total_real_incomes", "0");
+            gainsMap.put("balance", "0");
+            userGainsMapper.insertUserGainsByNewUser(gainsMap);
+            return gainsMap;
+        }
+        result.put("withdrawing_count",count);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getOrdersList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result;
+        if (param.get("order_type") != null) {
+            if ("1".equals(param.get("order_type").toString())) {
+                param.put("dist", "1");
+            } else if ("2".equals(param.get("order_type").toString())) {
+                param.put("auto", "1");
+            }
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param, page);
+        } else if (param.get("nick_name") != null || param.get("goods_name") != null) {
+            result = lecturerCoursesProfitMapper.searchOrdersListByUserId(param, page);
+        } else {
+            result = lecturerCoursesProfitMapper.selectOrdersListByUserId(param, page);
+        }
+        for (Map<String, Object> map : result) {
+            //订单类型（1:分销订单，2:普通订单）
+            if (map.get("distributer_id") != null) {
+                //分销订单
+                map.put("order_type", "1");
+                Long profitAmount = Long.valueOf(map.get("profit_amount").toString());
+                Long shareAmount = Long.valueOf(map.get("share_amount").toString());
+                map.put("income",profitAmount - shareAmount);
+            } else {
+                //普通订单
+                map.put("order_type", "2");
+                map.put("income",map.get("profit_amount"));
+            }
+            map.remove("distributer_id");
+            //商品类型（1:小圈子，2:系列，3:单品，4:打赏）
+            if ("1".equals(map.get("profit_type").toString())) {
+                map.put("goods_type", "1");
+            } else if ("2".equals(map.get("profit_type").toString())) {
+                //系列课程
+                map.put("goods_type", "2");
+            } else {
+                //单品
+                map.put("goods_type", "0");
+            }
+        }
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public List<Map<String,Object>> findCourseBySeriesId(String seriesId){
+        return courseMapper.findAllCourseBySeriesId(seriesId);
+    }
+
+    @Override
+    public Map<String,Object> getShopInfoList(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+        PageList<Map<String, Object>> result = shopMapper.getShopInfoList(param, page);
+        Map<String, Object> res = new HashMap<>();
+        res.put("list", result);
+        res.put("total_count", result.getTotal());
+        res.put("total_page", result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> getLecturerImcome(String userId) {
+        Map<String,Object> gainsInfo = userGainsMapper.findUserGainsByUserId(userId);
+        if(gainsInfo!=null){
+            int courseCount = courseMapper.selectCountByUserId(userId);
+            int seriesCount = seriesMapper.selectCountByUserId(userId);
+            Map<String,Object> resultMap = new HashMap<>();
+            resultMap.put("course_count",courseCount);
+            resultMap.put("series_count",seriesCount);
+            resultMap.put("real_incomes",gainsInfo.get("user_total_real_incomes"));
+            resultMap.put("total_incomes",gainsInfo.get("user_total_real_incomes"));
+            return resultMap;
+        }
+        return null;
+    }
+
+    @Override
+    public int deleteBanner(Map<String, Object> record) {
+        return shopBannerMapper.deleteBanner(record);
+    }
+
+    @Override
+    public Map<String, Object> getSingleList(Map<String, Object> param) {
+        if ("0".equals(param.get("type"))) {
+            //直播
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = courseMapper.findLiveListByLiturere(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
+            return res;
+        } else {
+            PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()), Integer.valueOf(param.get("page_size").toString()));
+            PageList<Map<String, Object>> result = courseMapper.selectCourseByShopId(param, page);
+            Map<String, Object> res = new HashMap<>();
+            res.put("list", result);
+            res.put("total_count", result.getTotal());
+            res.put("total_page", result.getPaginator().getTotalPages());
+            return res;
+        }
+    }
+
     @Override
     public Map<String, Object> findCourseByCourseId(String courseId) {
-        return coursesMapper.findCourseByCourseId(courseId);
+        return courseMapper.findCourseByCourseId(courseId);
     }
 
     @Override

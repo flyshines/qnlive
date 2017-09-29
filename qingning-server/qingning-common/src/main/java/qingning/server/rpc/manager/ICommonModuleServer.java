@@ -15,4 +15,9 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
     Map<String, Object> createLiveRoom(Map<String, Object> reqMap);
 
 
+    /**更新用户信息
+     * @param userMap
+     * @return
+     */
+    int updateUserById(Map<String, Object> userMap);
 }

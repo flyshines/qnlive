@@ -125,7 +125,8 @@ public class OutputParameter {
 	public Object convertValue(Object value) throws Exception{
 		Object result = defaultValue;
 		if(!Constants.SYSRICHSTR.equals(type)){
-			result= MiscUtils.convertObjToObject(value, type, fieldName, defaultValue, Constants.SYSDOUBLE.equalsIgnoreCase(type));
+			//框架下发String,不下发double
+			result= MiscUtils.convertObjToObject(value, type, fieldName, defaultValue, /*Constants.SYSDOUBLE.equalsIgnoreCase(type)*/false);
 		} else if(!MiscUtils.isEmpty(value)){
 			result = MiscUtils.RecoveryEmoji((String)value);
 		}

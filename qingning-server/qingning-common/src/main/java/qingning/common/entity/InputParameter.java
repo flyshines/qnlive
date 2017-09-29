@@ -23,7 +23,7 @@ public class InputParameter {
 	
 	private boolean require=false;
 	private String requireErrorCode;
-	
+	private String defaultValue;
 	private List<String> checkConditionList = new ArrayList<String>();
 	private String validationFuncName = null;
 	Invocable invoke;
@@ -157,5 +157,13 @@ public class InputParameter {
 		if(!ret){
 			throw new QNLiveException(this.validateErrorCode);
 		}
+	}
+
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 }

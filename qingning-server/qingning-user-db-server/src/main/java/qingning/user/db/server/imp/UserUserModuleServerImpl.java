@@ -58,6 +58,9 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     @Autowired(required = true)
     private AdminUserMapper adminUserMapper;
 
+    @Autowired(required = true)
+    private CourseMapper courseMapper;
+
     @Override
     public Map<String, Object> findUserInfoByUserId(String user_id) {
         return userMapper.findByUserId(user_id);
@@ -190,5 +193,10 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("insertCount", insertCount);
         return resultMap;
+    }
+
+    @Override
+    public void increaseStudentNumByCourseId(String course_id) {
+        courseMapper.increaseStudent(course_id);
     }
 }

@@ -6,7 +6,7 @@ import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 
 import java.util.Map;
 
-public interface SaaSCourseCommentMapper {
+public interface CourseCommentMapper {
     int deleteByPrimaryKey(String commentId);
 
     int insert(Map<String, Object> record);
