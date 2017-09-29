@@ -135,4 +135,11 @@ public interface CourseMapper {
      * @return
      */
     PageList<Map<String,Object>> selectCourseByShopId(Map<String, Object> param, PageBounds page);
+
+    /**
+     * 加入课程学生数
+     * @param course_id
+     * @return
+     */
+    int increaseStudent(String course_id);
 }

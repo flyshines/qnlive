@@ -225,7 +225,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
      */
     @Override
     public boolean isStudentOfTheCourse(Map<String, Object> selectIsStudentMap) {
-        String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
+            String isCourseStudent = coursesStudentsMapper.isStudentOfTheCourse(selectIsStudentMap);
         if ("1".equals(isCourseStudent)) {
             return true;
         } else {
@@ -477,6 +477,11 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return null;
     }
 
+    /**
+     * 创建课程
+     * @param reqMap
+     * @return
+     */
     @Override
     public Map<String,Object> updateCourse(Map<String, Object> reqMap) {
         Integer updateCount = 0;
@@ -534,7 +539,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
 
     @Override
     public List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> param) {
-        return null;
+        return coursesStudentsMapper.selectCourseStudentByMap(param);
     }
 
     //根据union查找登录信息
@@ -591,4 +596,22 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     public List<Map<String, Object>> findSystemConfig() {
         return systemConfigMapper.findSystemConfig();
     }
+
+
+    @Override
+    public Map<String, Object> updateUpdown(Map<String,Object> record) {
+        record.put("update_time",new Date());
+        Integer updateCount = 0;
+        if(!MiscUtils.isEmpty(record.get("series_id"))){	//系列id不为null
+            updateCount = seriesMapper.updateSeries(record);
+        }else if(!MiscUtils.isEmpty(record.get("course_id"))){	//课程id不为null
+            updateCount = courseMapper.updateCourse(record);
+        }
+
+        Map<String, Object> dbResultMap = new HashMap<String, Object>();
+        dbResultMap.put("update_count", updateCount);
+        dbResultMap.put("update_time", new Date());
+        return dbResultMap;
+    }
+
 }

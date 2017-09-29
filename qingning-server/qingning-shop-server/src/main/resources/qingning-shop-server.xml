@@ -573,76 +573,60 @@
 				<outputs>
 				</outputs>
 			</function>
-			<!-- 店铺-获取店铺系列课程列表 -->
+
+			<!-- H5_店铺-获取店铺系列课程列表 -->
 			<function name="findShopSeriesList">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="Y,000100" />
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100"/>
-					<param name="last_series_id" type="string" require="N"/>
+					<param name="goods_type" type="string" require="N"/>
+					<param name="classify_id" type="string" require="N"/>
+					<param name="is_live" type="string" require="N"/>
+					<param name="last_course_id" type="string" require="N"/>
 					<param name="page_count" type="long" require="N"/>
 				</inputs>
 				<outputs>
-					<param name="series_info_list" type="list">
-						<param name="series_id" type="string" />
-						<param name="series_img_url" type="string" fieldname="series_img" />
-						<param name="series_type" type="string" fieldname="series_course_type" />
+					<param name="course_info_list" type="list">
+						<param name="course_id" type="string" fieldname="series_id" />
+						<param name="course_image" type="string" fieldname="series_img" />
+						<param name="course_num" type="int" />
+						<param name="course_title" type="string" fieldname="series_title" />
+						<param name="goods_type" type="string" fieldname="series_course_type" />
 						<param name="is_join" type="string" />
-						<param name="series_title" type="string" />
-						<param name="series_course_count" type="int" fieldname="course_num" />
-						<param name="buyer_count" type="long" fieldname="series_student_num" />
 						<param name="price" type="double" fieldname="series_price" />
+						<param name="student_num" type="long" fieldname="series_student_num" />
 					</param>
 				</outputs>
 			</function>
-			<!-- 店铺-获取店铺单品直播课程列表 -->
-			<function name="findShopLiveSingleList">
+
+			<!-- H5_店铺-获取店铺单品课程列表 -->
+			<function name="findShopSingleList">
 				<auth>
-					<accessToken require="Y" />
+					<accessToken require="Y,000100" />
 				</auth>
 				<inputs>
 					<param name="shop_id" type="string" require="Y,000100"/>
-					<param name="last_update_time" type="long" require="N"/>
-					<param name="readed_count" type="long" require="N"/>
-					<param name="page_count" type="long" require="N"/>
+					<param name="last_course_id" type="string" require="N"/>
+					<param name="classify_id" type="string" require="N"/>
+                    <param name="goods_type" type="string" require="N"/>
+                    <param name="page_count" type="long" require="N"/>
+                    <param name="is_live" type="string" require="N"/>
 				</inputs>
 				<outputs>
-					<param name="live_info_list" type="list">
-						<param name="live_id" type="string" fieldname="course_id" />
-						<param name="live_img_url" type="string" fieldname="course_url" />
-						<param name="live_start_time" type="long" fieldname="start_time" />
-						<param name="live_end_time" type="long" fieldname="end_time" />
-						<param name="live_type" type="string" fieldname="course_type" />
+					<param name="course_info_list" type="list">
+                        <param name="click_num" type="long" />
+                        <param name="course_id" type="string" />
+                        <param name="course_image" type="string" />
+                        <param name="course_title" type="string" />
+                        <param name="goods_type" type="string" />
 						<param name="is_join" type="string" />
-						<param name="live_title" type="string" fieldname="course_title" />
-						<param name="buyer_count" type="long" fieldname="student_num" />
-						<param name="price" type="double" fieldname="course_price" />
-						<param name="live_status" type="string" fieldname="status" />
-					</param>
-					<param name="last_update_time" type="long" />
-				</outputs>
-			</function>
-			<!-- 店铺-获取店铺单品课程（直播除外）列表 -->
-			<function name="findShopSingleCourseList">
-				<auth>
-					<accessToken require="Y" />
-				</auth>
-				<inputs>
-					<param name="shop_id" type="string" require="Y,000100"/>
-					<param name="last_single_id" type="string" require="N"/>
-					<param name="page_count" type="long" require="N"/>
-				</inputs>
-				<outputs>
-					<param name="single_info_list" type="list">
-						<param name="single_id" type="string" fieldname="course_id" />
-						<param name="single_img_url" type="string" fieldname="course_image" />
-						<param name="single_type" type="string" fieldname="goods_type" />
-						<param name="is_join" type="string" />
-						<param name="single_title" type="string" fieldname="course_title" />
-						<param name="browse_count" type="long" fieldname="click_num" />
-						<param name="message_count" type="long" fieldname="comment_num" />
-						<param name="price" type="double" fieldname="course_price" />
+						<param name="comment_num" type="long" />
+						<param name="course_price" type="double" />
+                        <param name="live_start_time" type="long" />
+                        <param name="status" type="string" />
+                        <param name="student_num" type="long" />
 					</param>
 				</outputs>
 			</function>

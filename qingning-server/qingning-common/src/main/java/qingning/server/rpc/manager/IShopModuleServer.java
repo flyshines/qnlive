@@ -170,4 +170,6 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	 * @return
 	 */
 	Map<String,Object> getSingleList(Map<String, Object> reqMap);
+
+    Map<String,Object> updateUpdown(Map<String, Object> updownMap);
 }
