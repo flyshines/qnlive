@@ -1666,7 +1666,6 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         String updown_id = reqMap.get("updown_id").toString();//要进行操作的系列id或者课程id
         Map<String,Object> updownMap = new HashMap<>();
         updownMap.put("update_time",now);
-
         if(query_type.equals("1")){//系列
             //<editor-fold desc="系列">
             updownMap.put("series_id",updown_id);
