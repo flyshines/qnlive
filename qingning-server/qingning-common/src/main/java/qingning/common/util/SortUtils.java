@@ -161,10 +161,10 @@ public class SortUtils {
      * @param jedis
      * @throws Exception
      */
-    public static void updateCourseListByRedis(Map<String, String> course, Jedis jedis, boolean is_live, ReadCourseOperation operation, RequestEntity requestEntity) throws Exception {
+    public static void updateCourseListByRedis(Map<String, String> course, Jedis jedis, ReadCourseOperation operation, RequestEntity requestEntity) throws Exception {
         Long position = Long.valueOf(course.get("position"));
         Map<String, String> keysMap = new HashMap<>();
-        if (is_live) {//直播课
+        if (course.get("goods_type").equals("0")) {//直播课
             String live_course_status = course.get("live_course_status");
             if (live_course_status.equals("1")) {
                 keysMap.put(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP, MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_LIVE_COUSE_PREDICTION_UP, course));
@@ -255,10 +255,10 @@ public class SortUtils {
      * @param jedis
      * @throws Exception
      */
-    public static void updateSeriesListByRedis(Map<String, String> series, Map<String, String> course, Jedis jedis, CommonReadOperation operation, RequestEntity requestEntity, boolean seriesUpdown) throws Exception {
+    public static void updateSeriesListByRedis(Map<String, String> series, Map<String, String> course, Jedis jedis, CommonReadOperation operation, RequestEntity requestEntity) throws Exception {
         Long position = Long.valueOf(series.get("position"));
         Map<String, String> keysMap = new HashMap<>();
-        if (seriesUpdown) {//系列上下架
+        if (course == null) {//系列上下架
             keysMap.put(Constants.SYS_SORT_SHOP_SERIES_UP, MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_SERIES_UP, series));//店铺 系列 上架
             keysMap.put(Constants.SYS_SORT_SHOP_SERIES_DOWN, MiscUtils.getKeyOfCachedData(Constants.SYS_SORT_SHOP_SERIES_DOWN, series));//店铺 系列 下架
         } else {//系列课程上下架
@@ -267,18 +267,25 @@ public class SortUtils {
         }
         for (String key : keysMap.keySet()) {
             Long score_time = null;
+            String shop_id = "";
+            String series_id = "";
             if (key.equals(Constants.SYS_SORT_SHOP_SERIES_UP) ) {
                 score_time = Long.valueOf(series.get("update_course_time"));
+                shop_id = series.get(Constants.CACHED_KEY_SHOP_FIELD);
+                series_id = series.get(Constants.CACHED_KEY_SERIES_FIELD);
 
             } else if (key.equals(Constants.SYS_SORT_SERIES_UP) ) {
                 score_time = Long.valueOf(course.get(Constants.FIRST_UP_TIME));
-
+                shop_id = course.get(Constants.CACHED_KEY_SHOP_FIELD);
+                series_id = course.get(Constants.CACHED_KEY_SERIES_FIELD);
             } else if ( key.equals(Constants.SYS_SORT_SERIES_DOWN)) {
                 score_time = Long.valueOf(series.get(Constants.CREATE_TIME));
-
+                shop_id = series.get(Constants.CACHED_KEY_SHOP_FIELD);
+                series_id = series.get(Constants.CACHED_KEY_SERIES_FIELD);
             }else if ( key.equals(Constants.SYS_SORT_SHOP_SERIES_DOWN)) {
                 score_time = Long.valueOf(course.get(Constants.CREATE_TIME));
-
+                shop_id = course.get(Constants.CACHED_KEY_SHOP_FIELD);
+                series_id = course.get(Constants.CACHED_KEY_SERIES_FIELD);
             }
             long lpos = MiscUtils.convertInfoToPostion(score_time, position);//算出位置
             String redisKey = keysMap.get(key);
@@ -294,7 +301,8 @@ public class SortUtils {
                 String constantsPagingKey = null;
                 Map map = new HashMap<>();
                 map.put(Constants.PAGING_NUMBER, i);//页码
-                map.put(Constants.CACHED_KEY_SHOP_FIELD, course.get(Constants.CACHED_KEY_SHOP_FIELD));//shop_id
+                map.put(Constants.CACHED_KEY_SERIES_FIELD,series_id);
+                map.put(Constants.CACHED_KEY_SHOP_FIELD,shop_id);
 
                 if (key.equals(Constants.SYS_SORT_SHOP_SERIES_UP)) {
                     constantsPagingKey = Constants.SYS_SORT_SHOP_SERIES_UP_PAGING;
@@ -315,6 +323,7 @@ public class SortUtils {
                     jedis.del(pagingKey);
                 }
             }
+            refreshSeriesListByRedis(shop_id,series_id,jedis,key,operation,requestEntity);
         }
     }
 
