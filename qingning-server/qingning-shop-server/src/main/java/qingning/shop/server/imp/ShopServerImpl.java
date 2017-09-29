@@ -1667,28 +1667,22 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         Map<String,Object> updownMap = new HashMap<>();
         updownMap.put("update_time",now);
 
-
         if(query_type.equals("1")){//系列
             //<editor-fold desc="系列">
             updownMap.put("series_id",updown_id);
-            String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, updownMap);
+            Map<String, String> seriesMap = readSeries(updown_id, generateRequestEntity(null, null, null, updownMap), readSeriesOperation, jedis, true);
             //判断当前系列是这个讲师的吗
-            String lecturer_id = jedis.hget(seriesKey, "lecturer_id");
-            if(!lecturer_id.equals(user_id)){
+            if(!seriesMap.get(Constants.CACHED_KEY_LECTURER_FIELD).equals(user_id)){
                 throw new QNLiveException("210001");
             }
             updownMap.put("updown",updown);
             result = shopModuleServer.updateUpdown(updownMap);
-
-            jedis.del(seriesKey);
-            Map<String, String> seriesMap = readSeries(updown_id, generateRequestEntity(null, null, null, updownMap), readSeriesOperation, jedis, true);
+            readSeries(updown_id, generateRequestEntity(null, null, null, updownMap), readSeriesOperation, jedis, true);
             SortUtils.updateSeriesListByRedis(seriesMap,null,jedis,readSeriesOperation,generateRequestEntity(null, null, null, null));
             //</editor-fold>
         }else{
             //<editor-fold desc="课程">
             String courseId = updown_id;
-            updownMap.put("course_id",courseId);
-            String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, updownMap);
             //判断当前系列是这个讲师的吗
             //String lecturer_id = jedis.hget(courseKey, "lecturer_id");
             Map<String, String> course  = readCourse(courseId,
@@ -1700,26 +1694,20 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             if(query_type.equals("0")){
                 updownMap.put("course_updown",updown);
             }else{
-                if(MiscUtils.isEmpty(jedis.hget(courseKey, "series_id"))){
-                    throw new QNLiveException("210003");
-                }
                 updownMap.put("series_course_updown",updown);
             }
             result = shopModuleServer.updateUpdown(updownMap);//更改数据库
-            jedis.del(courseKey);
             Map<String,String> courseMap = readCourse(courseId,
                         generateRequestEntity(null, null, null, updownMap), readCourseOperation, jedis, true);
             if(query_type.equals("0")){//单品
                 SortUtils.updateCourseListByRedis(courseMap,jedis,readCourseOperation, generateRequestEntity(null, null, null, null));
             }else{//系列课
-                //<editor-fold desc="系列课">
                 String series_id = courseMap.get("series_id").toString();
                 Map<String,Object> map = new HashMap<>();
                 map.put("series_id",series_id);
                 Map<String,String> seriesMap = readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
                 SortUtils.updateSeriesListByRedis(seriesMap,courseMap,jedis,readSeriesOperation,generateRequestEntity(null, null, null, null));
                 readSeries(series_id,generateRequestEntity(null, null, null, map), readSeriesOperation, jedis, true);
-                //</editor-fold>
             }
             //</editor-fold>
         }
