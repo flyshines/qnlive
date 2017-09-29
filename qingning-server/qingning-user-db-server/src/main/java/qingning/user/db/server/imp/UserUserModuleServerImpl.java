@@ -4,10 +4,14 @@ package qingning.user.db.server.imp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.transaction.annotation.Transactional;
 import qingning.common.util.MiscUtils;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageBounds;
+import qingning.db.common.mybatis.pageinterceptor.domain.PageList;
 import qingning.db.common.mybatis.persistence.*;
 import qingning.server.rpc.manager.IUserUserModuleServer;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -198,5 +202,189 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     @Override
     public void increaseStudentNumByCourseId(String course_id) {
         courseMapper.increaseStudent(course_id);
+    }
+
+
+    @Override
+    public List<Map<String, Object>> findUserShopRecords(Map<String, Object> queryMap) {
+        String shopId = queryMap.get("shop_id").toString();
+        String shopUser = shopMapper.selectUserIdByShopId(shopId);	//店主的user_id
+        //店铺不存在返回空
+        if(shopUser==null){
+            return null;
+        }
+        queryMap.put("lecturer_id",shopUser);
+        List<Map<String, Object>> res = lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
+        res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+            map.put("course_title", map.get("series_title"));
+        });
+        return res;
+    }
+
+    @Override
+    public List<Map<String, Object>> findUserConsumeRecords(Map<String, Object> queryMap) {
+        List<Map<String, Object>> res;
+        if("2".equals(queryMap.get("type"))){
+            //所有收入明细
+            res = lecturerCoursesProfitMapper.findUserIncomeRecords(queryMap);
+        }else{
+            //系列记录转换
+            res = lecturerCoursesProfitMapper.findUserConsumeRecords(queryMap);
+        }
+        res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+            map.put("course_title", map.get("series_title"));
+        });
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> findUserGainsByUserId(String user_id) {
+        return userGainsMapper.findUserGainsByUserId(user_id);
+    }
+
+    /**
+     * 获得符合条件的首条提现记录
+     */
+    @Override
+    public Map<String, Object> findWithdrawCashByMap(Map<String, Object> selectMap) {
+        List<Map<String, Object>> resultList = withdrawCashMapper.findWithdrawCashByUser(selectMap);
+        if (resultList != null && !resultList.isEmpty()) {
+            return resultList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int insertWithdrawCash(Map<String, Object> record, long balance) {
+        int i = withdrawCashMapper.insertWithdrawCashByNewUser(record);
+        if(i>0) {
+            Map<String ,Object> withdraw = new HashMap<>();
+            withdraw.put("user_id",record.get("user_id"));
+            withdraw.put("balance",balance);
+            if(userGainsMapper.updateUserGains(withdraw)<1){
+                throw new RuntimeException();
+            }
+        }
+        return i;
+    }
+
+    @Override
+    public List<Map<String, Object>> findWithdrawList(Map<String, Object> param) {
+        return withdrawCashMapper.selectWithdrawList(param);
+    }
+    /**
+     * 分页查询-后台提现记录
+     */
+    @Override
+    public Map<String, Object> findWithdrawListAll(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String,Object>> result = withdrawCashMapper.selectWithdrawListAll(param,page);
+        //提现实际提现金额
+        for(Map<String,Object> map:result){
+            long initial_amount = (Long)map.get("initial_amount");
+            long actual_amount = (Long)map.get("actual_amount");
+            long filter_amount = initial_amount - actual_amount;
+            map.put("filter_amount",filter_amount);
+
+        }
+        Map<String,Object> res = new HashMap<>();
+        if(param.get("is_sys")!=null&&"1".equals(param.get("is_sys").toString())){
+            //查询未处理的条数
+            int i = 0;
+            if(param.get("finance")!=null&&"1".equals(param.get("finance"))){
+                //财务未处理数
+                i = withdrawCashMapper.selectWithdrawCountFinance(param);
+            }else{
+                //运营未处理数
+                i = withdrawCashMapper.selectWithdrawCountOperate(param);
+            }
+            res.put("undo_count",i);
+        }
+        res.put("user_list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> selectAdminUserById(String userId) {
+
+        return adminUserMapper.selectAdminUserById(userId);
+    }
+
+    @Override
+    public Map<String, Object> selectWithdrawSizeById(Map<String, Object> selectMap) {
+        return withdrawCashMapper.selectWithdrawSizeById(selectMap);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateWithdraw(String withdrawId, String remark, String userId, String result, Long initial_amount, String adminId, String role, String adminName) {
+        //更新提现记录
+        Map<String,Object> paramMap = new HashMap<>();
+        //通过
+        boolean pass = "1".equals(result);
+        //财务通过
+        boolean allPass = pass&&("3".equals(role)||"1".equals(role));
+        if(allPass){
+            //财务同意提现
+            paramMap.put("state",1);
+            paramMap.put("finance_update_time",new Date());
+            paramMap.put("finance_admin_id",userId);
+            paramMap.put("finance_admin_name",adminName);
+        }else if(pass){
+            //运营同意提现---进行中
+            paramMap.put("state",0);
+            paramMap.put("update_time",new Date());
+            paramMap.put("handle_id",userId);
+            paramMap.put("handle_name",adminName);
+        }else{
+            //驳回提现
+            paramMap.put("state",2);
+            //返还用户余额
+            Map<String ,Object> user = userGainsMapper.findUserGainsByUserId(userId);
+            long balance = Integer.valueOf(user.get("balance").toString());
+            Map<String ,Object> reqMap = new HashMap<>();
+            reqMap.put("user_id",userId);
+            reqMap.put("balance",new BigDecimal(balance).add(new BigDecimal(initial_amount)).longValue());
+            userGainsMapper.updateUserGains(reqMap);
+        }
+        paramMap.put("withdraw_cash_id",withdrawId);
+        paramMap.put("remark",remark);
+        int i = withdrawCashMapper.updateWithdrawCash(paramMap);
+        return i;
+    }
+
+    @Override
+    public Map<String, Object> findOrderListAll(Map<String, Object> param) {
+        PageBounds page = new PageBounds(Integer.valueOf(param.get("page_num").toString()),Integer.valueOf(param.get("page_count").toString()));
+        PageList<Map<String,Object>> result = lecturerCoursesProfitMapper.selectOrderListAll(param,page);
+        Map<String,Object> res = new HashMap<>();
+        for(Map<String,Object> map: result){
+            if("1".equals(map.get("is_dist").toString())){
+                //分销者
+                map.put("profit_type","3");
+                map.put("user_amount",map.get("share_amount"));
+                map.remove("distributer_id");
+            }else if(!"0".equals(map.get("share_amount").toString())){
+                //讲师分销收益
+                map.put("profit_type","2");
+                Long total = Long.valueOf(map.get("amount").toString());
+                Long share = Long.valueOf(map.get("share_amount").toString());
+                map.put("user_amount",total-share);
+            }else if("2".equals(map.get("profit_type").toString())){
+                //门票
+                map.put("profit_type","0");
+                map.put("user_amount",map.get("amount"));
+            }else{
+                map.put("user_amount",map.get("amount"));
+            }
+        }
+        res.put("list",result);
+        res.put("total_count",result.getTotal());
+        res.put("total_page",result.getPaginator().getTotalPages());
+        return res;
     }
 }

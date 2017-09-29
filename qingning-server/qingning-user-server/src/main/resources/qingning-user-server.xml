@@ -48,6 +48,319 @@
                     </param>
                 </outputs>
             </function>
+            <function name="getUserConsumeRecords">
+                <auth>
+                    <accessToken require="Y" />
+                </auth>
+                <inputs>
+                    <param name="shop_id" type="string" require="N"  />
+                    <param name="page_count" type="long" require="N"  />
+                    <param name="position" type="long" require="N"  />
+                </inputs>
+                <outputs>
+                    <param name="record_list" type="list">
+                        <param name="profit_type" type="string" />
+                        <param name="course_id" type="string" />
+                        <param name="profit_amount" type="double" />
+                        <param name="create_time" type="long" />
+                        <param name="position" type="long" />
+                        <param name="course_title" type="string" convert="(course_title,profit_type)=>{
+							if(utils.isEqual(profit_type,'1')){
+								return '打赏课程：' + utils.RecoveryEmoji(course_title);
+							}
+							return utils.RecoveryEmoji(course_title);
+						}"/>
+                        <param name="lecturer_name" type="string" convert="(lecturer_name,profit_type)=>{
+							if(utils.isEqual(profit_type,'0')){
+								return '';
+							}
+							return utils.RecoveryEmoji(lecturer_name);
+						}"/>
+                    </param>
+                </outputs>
+            </function>
+            <function name="getUserIncomeRecords">
+                <auth>
+                    <accessToken require="Y" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="long" require="N"  />
+                    <param name="position" type="long" require="N"  />
+                    <param name="type" type="string" require="N"  />
+                </inputs>
+                <outputs>
+                    <param name="record_list" type="list">
+                        <param name="profit_type" type="string" />
+                        <param name="course_id" type="string" />
+                        <param name="profit_amount" type="double" />
+                        <param name="create_time" type="long" />
+                        <param name="position" type="long" />
+                        <param name="title" type="string" />
+                        <param name="is_share" type="string" />
+                    </param>
+                </outputs>
+            </function>
+            <function name="userGains">
+                <auth>
+                    <accessToken require="Y,000100" />
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                    <param name="today_amount" type="double"/>
+                    <param name="today_visit" type="long"/>
+                    <param name="today_pay" type="long"/>
+                    <param name="total_income" fieldname="user_total_amount" type="double"/>
+                    <param name="balance" type="double"/>
+                    <param name="withdrawing_count" type="long"/>
+                </outputs>
+            </function>
+            <function name="createWithdraw">
+                <auth>
+                    <accessToken require="Y" />
+                    <timesLimit millisecond="2000" />
+                </auth>
+                <inputs>
+                    <param name="user_name" type="string" require="true, 000100"/>
+                    <param name="initial_amount" type="string" require="true, 000100"/>
+                    <param name="alipay_account_number" type="string" require="true, 000100"/>
+                    <param name="verification_code" type="string" require="true, 000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <!-- 获取提现记录 客户度-->
+            <function name="getWithdrawList">
+                <auth>
+                    <accessToken require="Y" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="long" />
+                    <param name="create_time" type="long" />
+                </inputs>
+                <outputs>
+                    <param name="withdraw_info_list" type="list">
+                        <param name="actual_amount" type="double" />
+                        <param name="create_time" type="long" />
+                        <param name="status" type="long" />
+                        <param name="remark" type="string" />
+                    </param>
+                </outputs>
+            </function>
+
+            <!-- 获取提现记录 后台-->
+            <function name="getWithdrawListAll">
+                <auth>
+                    <accessToken require="Y" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" require="N" />
+                    <param name="page_num" type="string" require="N" />
+                    <param name="user_name" type="string" require="N" />
+                    <param name="user_id" type="string" require="N" />
+                    <param name="status" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="user_list" type="list">
+                        <param name="withdraw_cash_id" type="string" />
+                        <param name="user_id" type="string" />
+                        <param name="user_name" type="string" />
+                        <param name="nick_name" type="string" />
+                        <param name="alipay_account_number" type="string" />
+                        <param name="actual_amount" type="double" />
+                        <param name="filter_amount" type="double" />
+                        <param name="initial_amount" type="double" />
+                        <param name="user_total_amount" type="double" />
+                        <param name="balance" type="double" />
+                        <param name="create_time" type="long" />
+                        <param name="status" type="string" />
+                        <param name="remark" type="string" />
+                        <param name="handle_name" type="string" />
+                        <param name="handle_time" type="long" />
+                        <param name="finance_time" type="long" />
+                        <param name="handle_id" type="string" />
+                    </param>
+                    <param name="total_count" type="long" />
+                    <param name="total_page" type="long" />
+                    <param name="undo_count" type="long" />
+                </outputs>
+            </function>
+            <!-- 获取提现记录 后台-->
+            <function name="getWithdrawListFinance">
+                <auth>
+                    <accessToken require="Y" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" require="N" />
+                    <param name="page_num" type="string" require="N" />
+                    <param name="user_name" type="string" require="N" />
+                    <param name="user_id" type="string" require="N" />
+                    <param name="status" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="user_list" type="list">
+                        <param name="withdraw_cash_id" type="string" />
+                        <param name="user_id" type="string" />
+                        <param name="user_name" type="string" />
+                        <param name="nick_name" type="string" />
+                        <param name="alipay_account_number" type="string" />
+                        <param name="actual_amount" type="double" />
+                        <param name="filter_amount" type="double" />
+                        <param name="initial_amount" type="double" />
+                        <param name="user_total_amount" type="double" />
+                        <param name="balance" type="double" />
+                        <param name="create_time" type="long" />
+                        <param name="status" type="string" />
+                        <param name="remark" type="string" />
+                        <param name="handle_name" type="string" />
+                        <param name="handle_time" type="long" />
+                        <param name="finance_time" type="long" />
+                    </param>
+                    <param name="total_count" type="long" />
+                    <param name="total_page" type="long" />
+                    <param name="undo_count" type="long" />
+                </outputs>
+            </function>
+            <!-- 获取提现记录 SaaS-->
+            <function name="getWithdrawListSaaS">
+                <auth>
+                    <accessToken require="Y" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" require="N" />
+                    <param name="page_num" type="string" require="N" />
+                    <param name="user_name" type="string" require="N" />
+                    <param name="user_id" type="string" require="N" />
+                    <param name="status" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="user_list" type="list">
+                        <param name="withdraw_cash_id" type="string" />
+                        <param name="user_id" type="string" />
+                        <param name="user_name" type="string" />
+                        <param name="nick_name" type="string" />
+                        <param name="alipay_account_number" type="string" />
+                        <param name="actual_amount" type="double" fieldname="initial_amount" />
+                        <param name="create_time" type="long" />
+                        <param name="status" type="string" />
+                        <param name="remark" type="string" />
+                        <param name="handle_name" type="string" />
+                        <param name="handle_time" type="long" />
+                    </param>
+                    <param name="total_count" type="long" />
+                </outputs>
+            </function>
+
+            <!-- 处理提现 -->
+            <function name="handleWithDrawResult">
+                <auth>
+                    <accessToken require="Y" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="withdraw_cash_id" type="string" require="true, 000100"/>
+                    <param name="result" type="string" format="0|1,000004" require="Y,000100"/>
+                    <param name="remark" type="string" />
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="userSeries">
+                <auth>
+                    <accessToken require="Y" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" />
+                    <param name="series_id" type="string"/>
+                </inputs>
+                <outputs>
+                    <param name="series_list" type="list">
+                        <param name="series_id" type="string"/>
+                        <param name="lecturer_id" type="string"/>
+                        <param name="series_title" type="rstring"/>
+                        <param name="series_img" type="string"/>
+                        <param name="course_num" type="long"/>
+                        <param name="series_student_num" type="long"/>
+                        <param name="series_price" type="double"/>
+                        <param name="series_amount" type="double"/>
+                        <param name="lecturer_nick_name" type="rstring"/>
+                        <param name="series_status" type="string"/>
+                        <param name="update_plan" type="long"/>
+                        <param name="series_course_type" type="string"/>
+                        <param name="updown" type="string"/>
+                    </param>
+                </outputs>
+            </function>
+            <!-- 获取订单记录 后台-->
+            <function name="getOrderListAll">
+                <auth>
+                    <accessToken require="Y" />
+                    <version require="N" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" require="Y" />
+                    <param name="page_num" type="string" require="Y" />
+                    <param name="user_name" type="string" require="N" />
+                    <param name="user_id" type="string" require="N" />
+                    <param name="order_id" type="string" require="N" />
+                    <param name="pre_pay_no" type="string" require="N" />
+                    <param name="start_time" type="string" require="N" />
+                    <param name="end_time" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="list" type="list">
+                        <param name="order_id" type="string" />
+                        <param name="user_id" type="string" />
+                        <param name="nick_name" type="string" />
+                        <param name="user_amount" type="double" />
+                        <param name="amount" type="double" />
+                        <param name="profit_type" type="string" />
+                        <param name="create_time" type="long" />
+                        <param name="resume_id" type="string" />
+                        <param name="resume_user" type="string" />
+                        <param name="resume_id" type="string" />
+                        <param name="pre_pay_no" type="string" />
+                        <param name="distributer_user" type="string" />
+                    </param>
+                    <param name="total_count" type="long" default="0"/>
+                    <param name="total_page" type="long" default="0"/>
+                </outputs>
+            </function>
+            <function name="exportOrderListAll">
+                <auth>
+                    <accessToken require="Y" />
+                </auth>
+                <inputs>
+                    <param name="page_count" type="string" require="Y" />
+                    <param name="page_num" type="string" require="Y" />
+                    <param name="user_name" type="string" require="N" />
+                    <param name="user_id" type="string" require="N" />
+                    <param name="order_id" type="string" require="N" />
+                    <param name="pre_pay_no" type="string" require="N" />
+                    <param name="start_time" type="string" require="N" />
+                    <param name="end_time" type="string" require="N" />
+                </inputs>
+                <outputs>
+                    <param name="list" type="list">
+                        <param name="order_id" type="string" />
+                        <param name="user_id" type="string" />
+                        <param name="nick_name" type="string" />
+                        <param name="user_amount" type="double" />
+                        <param name="amount" type="double" />
+                        <param name="profit_type" type="string" />
+                        <param name="create_time" type="long" />
+                        <param name="resume_id" type="string" />
+                        <param name="resume_user" type="string" />
+                        <param name="resume_id" type="string" />
+                        <param name="pre_pay_no" type="string" />
+                        <param name="distributer_user" type="string" />
+                        <param name="distributer_id" type="string" />
+                    </param>
+                </outputs>
+            </function>
 
         </default>
     </server>
