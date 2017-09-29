@@ -175,9 +175,9 @@ public final class Constants {
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";//token缓存key
 	public static final String CACHED_KEY_USER = "SYS:USER:{user_id}";//user 具体的信息
 //	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";//需要刷新的用户
-//	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
+	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
 //	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
-//	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
+	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
 	public static final String SYS_USER_BUY_LIST = "SYS:USER:BUY:{user_id}";	//用户已购课程ID set集合
 	public static final double USER_RATE = 0.7;
 	/** 用户相关 end **************************************/

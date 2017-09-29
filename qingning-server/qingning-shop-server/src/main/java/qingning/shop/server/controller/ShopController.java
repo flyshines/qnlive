@@ -788,4 +788,98 @@ public class ShopController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
+
+
+    /**
+     * 上下架
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/shop/updown", method = RequestMethod.PUT)
+    public
+    @ResponseBody ResponseEntity updown(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "updown", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 获取等待直播课程
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     *
+    1、显示当天内将要开始的直播
+    2、如果直播已经开始，而接下去没有其他直播，那么就一直显示这个直播，知道直播结束
+    3、如果上一个直播已经开始，有下一个直播，那么在下一个直播的前30分钟，开始显示下一个直播
+    4、如果当前没有直播，并且今天接下来的时间也没有直播，那么就显示空状态“今天暂无直播，您可以点击上面“新增课程”，以创建直播和系列”
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/lecturer/liveCourse", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity getSingleLecturerLiveCourse(
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("LectureServer", "getSingleLecturerLiveCourse", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+
+
+
+    /**
+     * 编辑学员成为嘉宾 或者取消嘉宾
+     * @param entity
+     * 			query_type = 0创建嘉宾 1取消嘉宾
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/lecturer/guest", method = RequestMethod.POST)
+    public
+    @ResponseBody ResponseEntity editStudentOrGuest(
+            HttpEntity<Object> entity,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("LectureServer", "editStudentOrGuest", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+    /**
+     * 嘉宾直播列表
+     * @param course_id 课程id
+     * @param page_count 分页参数
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/shop/guest/courses", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity guestCourses(
+            @RequestParam(value="course_id",defaultValue="") String course_id,
+            @RequestParam(value = "page_count", defaultValue = "20") String page_count,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("ShopServer", "guestCourses", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("course_id", course_id);
+        param.put("page_count", page_count);
+        requestEntity.setParam(param);
+        return this.process(requestEntity, serviceManger, message);
+    }
 }

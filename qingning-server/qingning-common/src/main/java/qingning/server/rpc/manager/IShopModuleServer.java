@@ -172,4 +172,6 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
 	Map<String,Object> getSingleList(Map<String, Object> reqMap);
 
     Map<String,Object> updateUpdown(Map<String, Object> updownMap);
+
+	Map<String,Object> courseGurest(Map<String, Object> guestMap);
 }

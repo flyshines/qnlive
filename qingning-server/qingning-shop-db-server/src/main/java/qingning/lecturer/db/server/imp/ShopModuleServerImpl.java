@@ -614,4 +614,24 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return dbResultMap;
     }
 
+    @Transactional(rollbackFor=Exception.class)
+    @Override
+    public Map<String, Object> courseGurest(Map<String, Object> reqMap) {
+        Integer updateCount = 0;
+        Date now = new Date();
+        String user_id = reqMap.get("user_id").toString();
+        reqMap.put("create_time",now);
+        reqMap.put("update_time",now);
+        Map<String, Object> courseGuest = courseGuestMapper.findCourseGuestByUserAndCourse(reqMap);
+        if(MiscUtils.isEmpty(courseGuest)){
+            updateCount = courseGuestMapper.insertCourseGurest(reqMap);
+        }else{
+            updateCount = courseGuestMapper.updateCourseGuest(reqMap);
+        }
+        coursesStudentsMapper.updateStudent(reqMap);
+        Map<String, Object> dbResultMap = new HashMap<String, Object>();
+        dbResultMap.put("update_count", updateCount);
+        dbResultMap.put("update_time", new Date());
+        return dbResultMap;
+    }
 }
