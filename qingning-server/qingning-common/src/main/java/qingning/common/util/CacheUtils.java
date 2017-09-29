@@ -132,18 +132,21 @@ public class CacheUtils extends JedisServer{
 		}
 		return values;
 	}
-	public Map<String,String> readSeries(String series_id, Map<String,Object> param, String functionName, Jedis jedis,boolean cachedValue) throws Exception{
-		Map<String,String> values = readDataByFunction(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, param,functionName, readSeriesOperation, jedis, cachedValue);
-		String seriesId = values.get(Constants.CACHED_KEY_SERIES_FIELD);
-		if(!series_id.equals(seriesId)){
+
+	public Map<String,String> readSeries(String course_id, RequestEntity requestEntity, CommonReadOperation operation,Jedis jedis,boolean cachedValue) throws Exception{
+		Map<String,String> values = readData(course_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
+		String curCourse_id = values.get(Constants.CACHED_KEY_SERIES_FIELD);
+		if(!course_id.equals(curCourse_id)){
 			Map<String, String> keyMap = new HashMap<String, String>();
-			keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, series_id);
+			keyMap.put(Constants.CACHED_KEY_SERIES_FIELD, course_id);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, keyMap);
 			jedis.del(key);
-			values = readDataByFunction(series_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD,  param,functionName, readSeriesOperation, jedis, cachedValue);
+			values = readData(course_id, Constants.CACHED_KEY_SERIES, Constants.CACHED_KEY_SERIES_FIELD, requestEntity, operation, jedis, cachedValue);
 		}
 		return values;
 	}
+
+
 	
 	/**
 	 * 获取讲师已上架的所有系列课程id列表

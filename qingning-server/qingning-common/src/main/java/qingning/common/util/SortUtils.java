@@ -18,15 +18,13 @@ public class SortUtils {
      * @param redisKey      获取总列表分页
      * @param pageCount 具体分页列表
      * @param pageCount     要多少数
-     * @param queryMap       shop_id = 店铺id
-     *                        series_id = 系列id
-     *
      * @param lpos          分页参数
      * @param jedis         jedis 对象
      * @return
      * @throws Exception
      */
-    public static List<String> getList(String redisKey, String pageKey, int pageCount,Map<String,Object> queryMap, String lpos, Jedis jedis) throws Exception {
+    public static List<String> getList(String redisKey, String pageKey, int pageCount, String lpos, Jedis jedis) throws Exception {
+        Map<String,Object> queryMap = new HashMap<>();
         Long page = 0L;
         List<String> goodsIdList = null;
         if (!MiscUtils.isEmpty(lpos)) {//传null
