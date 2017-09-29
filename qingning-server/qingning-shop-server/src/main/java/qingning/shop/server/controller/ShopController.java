@@ -733,13 +733,13 @@ public class ShopController extends AbstractController {
      * @return
      * @throws Exception
      */
-    //TODO
     @RequestMapping(value = "/shop/course/series/list", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity getShopSeriesList(
             @RequestParam(value = "shop_id", defaultValue = "") String shopId,
             @RequestParam(value = "goods_type", defaultValue = "") String goodsType,
+            @RequestParam(value = "is_live", defaultValue = "0") String isLive,
             @RequestParam(value = "classify_id", defaultValue = "") String classifyId,
-            @RequestParam(value = "last_series_id", defaultValue = "")String lastSeriesId,
+            @RequestParam(value = "last_course_id", defaultValue = "")String lastCourseId,
             @RequestParam(value = "page_count", defaultValue = "20") long pageCount,
             @RequestHeader("access_token") String accessToken,
             @RequestHeader("version") String version) throws Exception {
@@ -747,8 +747,9 @@ public class ShopController extends AbstractController {
         Map<String, Object> param = new HashMap<>();
         param.put("shop_id", shopId);
         param.put("goods_type", goodsType);
+        param.put("is_live", isLive);
         param.put("classify_id", classifyId);
-        param.put("last_series_id", lastSeriesId);
+        param.put("last_course_id", lastCourseId);
         param.put("page_count", pageCount);
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);

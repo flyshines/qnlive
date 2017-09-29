@@ -574,16 +574,17 @@
 				</outputs>
 			</function>
 
-			<!-- 店铺-获取店铺系列课程列表 -->
+			<!-- H5_店铺-获取店铺系列课程列表 -->
 			<function name="findShopSeriesList">
 				<auth>
 					<accessToken require="Y,000100" />
 				</auth>
 				<inputs>
-					<param name="shop_id" type="string" require="N"/>
+					<param name="shop_id" type="string" require="Y,000100"/>
 					<param name="goods_type" type="string" require="N"/>
 					<param name="classify_id" type="string" require="N"/>
-					<param name="last_series_id" type="string" require="N"/>
+					<param name="is_live" type="string" require="N"/>
+					<param name="last_course_id" type="string" require="N"/>
 					<param name="page_count" type="long" require="N"/>
 				</inputs>
 				<outputs>
@@ -600,7 +601,7 @@
 				</outputs>
 			</function>
 
-			<!-- 店铺-获取店铺非直播单品课程列表 -->
+			<!-- H5_店铺-获取店铺单品课程列表 -->
 			<function name="findShopSingleList">
 				<auth>
 					<accessToken require="Y,000100" />

@@ -534,7 +534,7 @@ public class ShopModuleServerImpl implements IShopModuleServer {
 
     @Override
     public List<Map<String, Object>> findCourseStudentByMap(Map<String, Object> param) {
-        return null;
+        return coursesStudentsMapper.selectCourseStudentByMap(param);
     }
 
     //根据union查找登录信息
