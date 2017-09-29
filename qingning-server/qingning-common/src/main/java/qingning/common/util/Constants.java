@@ -417,11 +417,16 @@ public final class Constants {
 
 	public static final String SYS_SORT_SHOP_LIVE_COUSE_FINISH_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:LIVE_COUSE:FINISH:DOWN:{paging_number}";//店铺 直播 结束 下架 分页
 
+	public static final String SYS_SORT_SHOP_SERIES_UP ="SYS:SORT:SHOP:{shop_id}:SERIES:UP";//店铺 系列 上架
+	public static final String SYS_SORT_SHOP_SERIES_UP_PAGING ="SYS:SORT:SHOP:{shop_id}:SERIES:UP:{paging_number}";//店铺 系列 上架 分页
 
-	public static final String SYS_SORT_SERIES_UP ="SYS:SORT:SERIES:{series_id}:UP";//系列 上架
+	public static final String SYS_SORT_SHOP_SERIES_DOWN ="SYS:SORT:SHOP:{shop_id}:SERIES:DOWN";//店铺 系列 下架
+	public static final String SYS_SORT_SHOP_SERIES_DOWN_PAGING ="SYS:SORT:SHOP:{shop_id}:SERIES:DOWN:{paging_number}";//店铺 系列 下架 分页
+
+	public static final String SYS_SORT_SERIES_UP ="SYS:SORT:SERIES:{series_id}:UP";//系列 课程 上架
 	public static final String SYS_SORT_SERIES_UP_PAGING ="SYS:SORT:SERIES:{series_id}:UP:{paging_number}";//系列 上架 分页
 
-	public static final String SYS_SORT_SERIES_DOWN ="SYS:SORT:SERIES:{series_id}:DOWN";//系列 下架
+	public static final String SYS_SORT_SERIES_DOWN ="SYS:SORT:SERIES:{series_id}:DOWN";//系列 课程 下架
 	public static final String SYS_SORT_SERIES_DOWN_PAGING ="SYS:SORT:SERIES:{series_id}:DOWN:{paging_number}";//系列下架 分页
 
 	/********************************排序的KEY***********************************/
@@ -443,6 +448,15 @@ public final class Constants {
 	public static final String SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN = "SYS_SHOP_LIVE_COUSE_PREDICTION_DOWN";//店铺 直播 预告/正在直播 下架
 	public static final String SYS_SHOP_LIVE_COUSE_FINISH_UP = "SYS_LIVE_COUSE_PREDICTION_DOWN";//店铺 直播课 结束 上架
 	public static final String SYS_SHOP_LIVE_COUSE_FINISH_DOWN ="SYS_SHOP_LIVE_COUSE_FINISH_DOWN";//店铺 直播 结束 下架
+
+
+	public static final String SYS_SHOP_SERIES_UP ="SYS_SHOP_SERIES_UP";//店铺 系列 上架
+
+	public static final String SYS_SHOP_SERIES_DOWN ="SYS_SHOP_SERIES_DOWN";//店铺 系列 下架
+
+	public static final String SYS_SERIES_COURSE_UP ="SYS_SERIES_COURSE_UP";//系列 课程 上架
+
+	public static final String SYS_SERIES_COURSE_DOWN ="SYS_SERIES_COURSE_DOWN";//系列 课程 下架
 
 
 	/*************************** readCourseKey ***********************************************/

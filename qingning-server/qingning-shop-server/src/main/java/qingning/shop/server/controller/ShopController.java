@@ -512,6 +512,7 @@ public class ShopController extends AbstractController {
         requestEntity.setParam(param);
         return this.process(requestEntity, serviceManger, message);
     }
+
     /**
      * PC_店铺-轮播图-选择跳转的课程
      * @return

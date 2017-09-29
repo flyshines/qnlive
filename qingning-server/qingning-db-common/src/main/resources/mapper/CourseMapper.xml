@@ -438,4 +438,10 @@
     order by res.course_updown , res.updown_time desc
   </select>
 
+  <update id="increaseStudent" parameterType="string" >
+    update t_course
+    set
+    student_num = student_num + 1
+    where course_id = #{course_id}
+  </update>
 </mapper>
