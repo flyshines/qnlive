@@ -1,4 +1,4 @@
-package qingning.common.server.util;
+package qingning.common.util;
 
 
 import java.io.ByteArrayOutputStream;

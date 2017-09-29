@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
-import qingning.common.server.util.Base64;
 import qingning.common.server.util.ServerUtils;
-import qingning.common.util.Constants;
+import qingning.common.util.Base64;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
 

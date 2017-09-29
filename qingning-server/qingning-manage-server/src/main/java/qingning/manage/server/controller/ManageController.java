@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
+import qingning.common.util.Constants;
 import qingning.server.AbstractController;
 
 import java.util.HashMap;
@@ -75,4 +76,162 @@ public class ManageController extends AbstractController {
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
     }
+
+
+    /**
+     * 后台_更新banner
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value="/common/banner/update", method=RequestMethod.PUT)
+    public @ResponseBody ResponseEntity updateBannerInfo(
+            HttpEntity<Object> entity,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "updateBannerInfo", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        reqMap.put("bannerJumpCoursePre", ((Map<String, Object>)systemConfigMap.get("bannerJumpCoursePre")).get("config_value").toString());
+        reqMap.put("bannerJumpRoomPre", ((Map<String, Object>)systemConfigMap.get("bannerJumpRoomPre")).get("config_value").toString());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 后台_快速更新banner
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/fast_update", method=RequestMethod.PUT)
+    public @ResponseBody ResponseEntity fastUpdateBannerInfo(
+            HttpEntity<Object> entity,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "fastUpdateBannerInfo", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 后台_移除banner
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/remove", method=RequestMethod.DELETE)
+    public @ResponseBody ResponseEntity removeBannerInfo(
+            HttpEntity<Object> entity,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "removeBannerInfo", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 后台_课程搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/course/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCourseListBySearch(
+            @RequestParam(value="search_param", defaultValue="") String searchParam,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseListBySearch", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 后台_直播间搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/live_room/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getLiveRoomListBySearch(
+            @RequestParam(value="search_param", defaultValue="") String searchParam,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getLiveRoomListBySearch", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+    /**
+     * 管理后台登录
+     * @param entity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/sys/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity adminUserLogin(
+            HttpEntity<Object> entity) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, null);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
+    /**
+     * 后台_新增轮播
+     * @param entity
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value="/common/banner/new", method=RequestMethod.POST)
+    public @ResponseBody ResponseEntity addBanner(
+            HttpEntity<Object> entity,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addBanner", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
+        reqMap.put("bannerJumpCoursePre", ((Map<String, Object>)systemConfigMap.get("bannerJumpCoursePre")).get("config_value").toString());
+        reqMap.put("bannerJumpRoomPre", ((Map<String, Object>)systemConfigMap.get("bannerJumpRoomPre")).get("config_value").toString());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+
 }

@@ -6,6 +6,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import qingning.common.entity.QNLiveException;
+import redis.clients.jedis.Jedis;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -876,4 +877,62 @@ public final class MiscUtils {
         }
         return linkTo;
     }
+    //客户版本号小于系统版本号 true， 否则为false
+    public static boolean compareVersion(String plateform, String systemVersion, String customerVersion) {
+        //1：andriod 2:IOS 3是js
+        if (plateform.equals("1")) {
+            if (customerVersion.compareTo(systemVersion) < 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            String[] systemVersionArray = systemVersion.split("\\.");
+            String[] customerVersionArray = customerVersion.split("\\.");
+
+            if (systemVersionArray.length >= customerVersionArray.length) {
+
+                for (int i = 0; i < systemVersionArray.length; i++) {
+                    if (customerVersionArray.length - 1 >= i) {
+                        Integer systemCode = Integer.parseInt(systemVersionArray[i]);
+                        Integer customerCode = Integer.parseInt(customerVersionArray[i]);
+                        if (customerCode < systemCode) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            if (systemVersionArray.length < customerVersionArray.length) {
+
+                for (int i = 0; i < customerVersionArray.length; i++) {
+                    if (systemVersionArray.length - 1 >= i) {
+                        Integer systemCode = Integer.parseInt(systemVersionArray[i]);
+                        Integer customerCode = Integer.parseInt(customerVersionArray[i]);
+                        if (customerCode < systemCode) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isMobile(final String str) {
+        Pattern p = null;
+        Matcher m = null;
+        boolean b = false;
+        p = Pattern.compile("^[1][3,4,5,7,8][0-9]{9}$"); // 验证手机号
+        m = p.matcher(str);
+        b = m.matches();
+        return b;
+    }
+    public static String encryptIMAccount(String mid, String mpwd) {
+        String name = '\0' + mid + '\0' + mpwd;
+        String keys = "l*c%@)c5";
+        String res = DES.encryptDES(name, keys);
+        return res;
+    }
+
 }
