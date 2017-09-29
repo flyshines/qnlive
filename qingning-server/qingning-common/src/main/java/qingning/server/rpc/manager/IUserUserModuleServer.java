@@ -35,4 +35,31 @@ public interface IUserUserModuleServer extends UserModuleServer,CourseModuleServ
 	 */
 	void increaseStudentNumByCourseId(String course_id);
 
+    List<Map<String,Object>> findUserShopRecords(Map<String, Object> queryMap);
+
+	List<Map<String,Object>> findUserConsumeRecords(Map<String, Object> queryMap);
+
+	Map<String,Object> findUserGainsByUserId(String userId);
+
+	Map<String,Object> findWithdrawCashByMap(Map<String, Object> selectMap);
+
+	/**
+	 * 插入提现申请表
+	 * @param record
+	 * @param balance
+	 * @return
+	 */
+	int insertWithdrawCash(Map<String, Object> record, long balance);
+
+	List<Map<String, Object>> findWithdrawList(Map<String, Object> param);
+
+	Map<String,Object> findWithdrawListAll(Map<String, Object> param);
+
+	Map<String,Object> selectAdminUserById(String adminId);
+
+	Map<String,Object> selectWithdrawSizeById(Map<String, Object> selectMap);
+
+	int updateWithdraw(String withdrawId, String remark, String userId, String result, Long initial_amount, String adminId, String role, String adminName);
+
+	Map<String,Object> findOrderListAll(Map<String, Object> param);
 }

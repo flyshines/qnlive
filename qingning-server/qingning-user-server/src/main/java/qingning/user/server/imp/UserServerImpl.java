@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.CollectionUtils;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.TemplateData;
@@ -18,12 +19,18 @@ import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 
 import qingning.server.AbstractQNLiveServer;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.IUserUserModuleServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 import sun.misc.Request;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,8 +118,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
             Map<String, String> seriesInfo;
             for (String seriesId : seriesIdSet) {
                 readCacheMap.put("series_id", seriesId);
-                seriesInfo = readSeries(seriesId, this.generateRequestEntity(null,null,null,readCacheMap), readSeriesOperation, jedis, true);
-                if (!MiscUtils.isEmpty(seriesInfo)) {
+                seriesInfo = readSeries(seriesId, this.generateRequestEntity(null,null,null,readCacheMap), readSeriesOperation, jedis, true);                if (!MiscUtils.isEmpty(seriesInfo)) {
                     seriesInfoList.add(seriesInfo);
                 } else {
                     logger.error("获取已购买的系列课程>>>>遍历课程id列表获取课程详情发现课程不存在，series_id=" + seriesId);
@@ -413,5 +419,499 @@ public class UserServerImpl extends AbstractQNLiveServer {
             //</editor-fold>
         return resultMap;
     }
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getUserConsumeRecords")
+    public Map<String, Object> getUserConsumeRecords(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获得用户id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        queryMap.put("user_id", userId);
+        //根据page_count、position（如果有）查询数据库
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("position") != null && StringUtils.isNotBlank(reqMap.get("position").toString())){
+            queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
+        }
+        List<Map<String,Object>> records;
+        if(reqMap.get("shop_id")!=null){
+            queryMap.put("shop_id",reqMap.get("shop_id"));
+            //本店铺所有消费记录
+            records = userModuleServer.findUserShopRecords(queryMap);
+        }else {
+            //查询直播间消费记录（不包括SAAS后台）
+            //课程类型(1：直播间，2：店铺（非直播间）)
+            queryMap.put("course_type","1");
+            records = userModuleServer.findUserConsumeRecords(queryMap);
+        }
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.put(Constants.CACHED_KEY_USER_FIELD, recordMap.get("lecturer_id"));
+                        String lecturerKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER, cacheQueryMap);
+                        //获得讲师的昵称
+                        Response<String> cacheLecturerName = pipeline.hget(lecturerKey, "nick_name");
+                        recordMap.put("cacheLecturerName",cacheLecturerName);
+
+                        cacheQueryMap.clear();
+                        cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                        Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                        //获得课程的标题
+                        recordMap.put("courseTitle", courseName);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> cacheLecturerName = (Response)recordMap.get("cacheLecturerName");
+                        Response<String> courseName = (Response)recordMap.get("courseTitle");
+                        recordMap.put("lecturer_name",cacheLecturerName.get());
+                        if(recordMap.get("series_title")==null) {
+                            recordMap.put("course_title", courseName.get());
+                        }
+                        recordMap.remove("cacheLecturerName");
+                        Date recordTime = (Date)recordMap.get("create_time");
+                        recordMap.put("create_time", recordTime);
+                    }
+                }
+            });
+
+            resultMap.put("record_list", records);
+        }
+
+        return resultMap;
+
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @FunctionName("getUserIncomeRecords")
+    public Map<String, Object> getUserIncomeRecords(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> queryMap = new HashMap<>();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //获得用户id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        queryMap.put("user_id", userId);
+        //根据page_count、position（如果有）查询数据库
+        queryMap.put("page_count", Integer.parseInt(reqMap.get("page_count").toString()));
+        if(reqMap.get("position") != null && StringUtils.isNotBlank(reqMap.get("position").toString())){
+            queryMap.put("position", Long.parseLong(reqMap.get("position").toString()));
+        }
+        queryMap.put("type","2");
+        List<Map<String,Object>> records = userModuleServer.findUserConsumeRecords(queryMap);
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.clear();
+                        cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                        String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                        Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                        recordMap.put("courseTitle",courseName);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> courseName = (Response)recordMap.get("courseTitle");
+                        if(recordMap.get("series_title")==null) {
+                            recordMap.put("course_title",courseName.get());
+                        }
+                        //打赏收益
+                        /*if("1".equals(recordMap.get("profit_type").toString())){
+                            ""
+                        }*/
+                        if(recordMap.get("buy_name")==null){
+                            System.out.println(recordMap.get("user_id"));
+                        }
+                        //商品类型
+                        String type;
+                        if(recordMap.get("profit_type").toString().equals("2")){
+                            type = "系列";
+                        }else if("1".equals(recordMap.get("course_type").toString())){
+                            type = "直播";
+                        }else{
+                            type = "单品";
+                        }
+                        //操作类型
+                        String typeIn;
+                        if(recordMap.get("profit_type").toString().equals("1")){
+                            typeIn = "打赏";
+                        }else{
+                            typeIn = "购买";
+                        }
+                        StringBuffer title = new StringBuffer();
+                        if(recordMap.get("distributer_id")!=null){
+                            //分销收入
+                            recordMap.put("is_share","1");
+                            title.append(recordMap.get("buy_name")).append("  通过  ")
+                                    .append(recordMap.get("dist_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】").append("分销比例为");
+                            double rate = 1D-(DoubleUtil.divide(Double.valueOf(recordMap.get("share_amount").toString()),Double.valueOf(recordMap.get("profit_amount").toString()),2));                            title.append(rate*100).append("%");
+                            recordMap.put("profit_amount",(Long.valueOf(recordMap.get("profit_amount").toString())-Long.valueOf(recordMap.get("share_amount").toString())));
+                            recordMap.put("title",title.toString());
+
+                        }else{
+                            //购买，打赏
+                            recordMap.put("is_share","0");
+                            title.append(recordMap.get("buy_name")).append("  ").append(typeIn).append(type).append("【").append(recordMap.get("course_title")).append("】");
+                            recordMap.put("title",title.toString());
+                        }
+                        recordMap.remove("cacheLecturerName");
+                        Date recordTime = (Date)recordMap.get("create_time");
+                        recordMap.put("create_time", recordTime);
+                    }
+                }
+            });
+
+            resultMap.put("record_list", records);
+        }
+
+        return resultMap;
+
+    }
+
+
+    /**
+     * 获取用户收入
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userGains")
+    public  Map<String, Object> userGains(RequestEntity reqEntity) throws Exception{
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Map<String, Object> userGains = userModuleServer.findUserGainsByUserId(userId);
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+
+        Map<String,Object> innerMap = new HashMap<>();
+        innerMap.put("user_id", userId);
+        Map<String,String> userMap = readUser(userId, this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
+        if (userMap.get("shop_id")!=null) {//有店铺
+
+            //直播间信息查询
+            Long user_total_real_incomes = Long.valueOf(userGains.get("user_total_real_incomes").toString());
+            Long distributer_real_incomes = Long.valueOf(userGains.get("distributer_real_incomes").toString());
+
+            userGains.put("shop_total_amount",user_total_real_incomes-distributer_real_incomes);
+
+
+            userGains.put("has_shop","1");
+        }else{//没店铺
+            userGains.put("has_shop","0");
+            //直播间+分销收入计算
+            Long userTotalRealIncome = Long.valueOf(userGains.get("live_room_real_incomes").toString())+Long.valueOf(userGains.get("distributer_real_incomes").toString());
+            Long userTotalIncome = Long.valueOf(userGains.get("live_room_total_amount").toString())+Long.valueOf(userGains.get("distributer_total_amount").toString());
+            userGains.put("user_total_real_incomes",userTotalRealIncome);
+            userGains.put("user_total_amount",userTotalIncome);
+        }
+        userGains.put("phone",userMap.get("phone_number"));
+        if(MiscUtils.isEmpty(userGains)){
+            throw new QNLiveException("170001");
+        }
+        return userGains;
+    }
+
+
+
+    /**
+     * 发起提现申请
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("createWithdraw")
+    public Map<String, Object> createWithdraw(RequestEntity reqEntity) throws Exception{
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowStr = sdf.format(new Date());
+        Map<String, Object> resultMap = new HashMap<>();
+        /*
+    	1.验证登录用户的手机验证码
+    	2.判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
+    	4.判断用户余额是否大于100
+    	5.判断提现金额是否小于等于余额
+    	6.插入提现申请表
+        */
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取请求金额
+        //BigDecimal amount = BigDecimal.valueOf(DoubleUtil.mul(Double.valueOf(reqMap.get("initial_amount").toString()),100D));
+        BigDecimal amount = new BigDecimal(reqMap.get("initial_amount").toString()).multiply(new BigDecimal("100"));
+        //超出最大提现金额
+        if(amount.compareTo(new BigDecimal("100000000"))==1){
+            throw new QNLiveException("170005");
+        }
+         /*
+    	 * 判断提现余额是否大于10000
+    	 */
+        if(amount.compareTo(new BigDecimal("10000"))==-1){
+            logger.error("提现金额不能小于100元");
+            throw new QNLiveException("170003");
+        }else{
+            reqMap.put("actual_amount",amount.longValue());
+        }
+        //获取登录用户userId
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
+
+        //  验证登录用户的手机验证码
+
+        String verification_code = reqMap.get("verification_code").toString();//验证码
+       /* Map<String,String> phoneMap = new HashMap();
+        phoneMap.put("user_id",userId);
+        phoneMap.put("code",verification_code);
+        String codeKey =  MiscUtils.getKeyOfCachedData(Constants.CAPTCHA_KEY_CODE, phoneMap);//根据userId 拿到 key*/
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        CodeVerifyficationUtil.verifyVerificationCode(userId,verification_code,jedis);
+    	/*
+    	 * 判断该登录账户是否拥有至少一笔处理中的提现，是则返回错误码
+    	 */
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("user_id", userId);
+        selectMap.put("state", '0');
+        selectMap.put("page_num", 0);
+        selectMap.put("page_count", 1);
+        //获得该登录用户“提现申请中”的首条记录
+        Map<String, Object> withdrawingMap = userModuleServer.findWithdrawCashByMap(selectMap);
+        if(withdrawingMap != null && !withdrawingMap.isEmpty()){
+            //	logger.error("该用户已经有一条申请中的提现记录");
+            throw new QNLiveException("170002");
+        }
+    	/*
+    	 * 判断提现金额是否小于等于余额
+    	 */
+        //获得登录用户的余额信息
+        Map<String, Object> loginUserGainsMap = userModuleServer.findUserGainsByUserId(userId);
+        int balance = 0;
+        if(loginUserGainsMap != null && !loginUserGainsMap.isEmpty()){
+            balance = Integer.parseInt(loginUserGainsMap.get("balance").toString());
+        }
+        if(amount.compareTo(new BigDecimal(balance))==-1){
+            // logger.error("提现金额大于账户余额");
+            throw new QNLiveException("180001");
+        }
+
+        //从缓存中获取用户信息
+        Map<String, String> loginUserMap = readUser(userId, reqEntity, readUserOperation, jedisUtils.getJedis());
+        if(loginUserMap == null || loginUserMap.isEmpty()){
+            //登录用户不存在
+            throw new QNLiveException("000005");
+        }
+        Map<String, Object> insertMap = new HashMap<>();
+        insertMap.put("withdraw_cash_id", MiscUtils.getUUId());
+        insertMap.put("user_id", userId);
+        insertMap.put("user_name", reqMap.get("user_name"));
+        insertMap.put("nick_name", loginUserMap.get("nick_name"));
+        insertMap.put("user_phone", loginUserMap.get("phone_number"));
+        insertMap.put("alipay_account_number", reqMap.get("alipay_account_number"));
+        insertMap.put("initial_amount", amount);
+        //实际提现金额
+        BigDecimal actualAmount = BigDecimal.valueOf(DoubleUtil.sub(amount.doubleValue() , DoubleUtil.mul(amount.doubleValue(),Constants.SYS_WX_RATE)));
+        insertMap.put("actual_amount", actualAmount.longValue());
+        insertMap.put("state", '0');
+        insertMap.put("create_time", nowStr);
+        // 插入提现申请表
+        try{
+            //balance = balance - initialAmount;
+            userModuleServer.insertWithdrawCash(insertMap,new BigDecimal(balance).subtract(amount).longValue());
+        }catch(Exception e){
+            logger.error("插入提现记录异常,UserID:"+userId+"提现金额:"+amount.toString());
+            throw new QNLiveException("000099");
+        }
+        return resultMap;
+    }
+
+    /**
+     * 获取提现记录列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawList")
+    public Map<String, Object> getWithdrawList(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        param.put("userId",userId);
+        if(param.get("create_time")!=null){
+            Date time = new Date(Long.valueOf(param.get("create_time").toString()));
+            param.put("create_time",time);
+        }
+        resultMap.put("withdraw_info_list",userModuleServer.findWithdrawList(param));
+        return resultMap;
+    }
+
+    /**
+     * 获取提现记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawListFinance")
+    public Map<String, Object> getWithdrawListFinance(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        /*
+         * 查询提现记录列表-财务
+         */
+        //记录数查询标识
+        param.put("is_sys","1");
+        param.put("finance","1");
+        return userModuleServer.findWithdrawListAll(param);
+    }
+    /**
+     * 获取提现记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawListAll")
+    public Map<String, Object> getWithdrawListAll(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        /*
+         * TODO 判断后台是否登录
+         */
+
+        /*
+         * 查询提现记录列表-运营
+         */
+        //记录数查询标识
+        param.put("is_sys","1");
+        Map<String,Object> result = userModuleServer.findWithdrawListAll(param);
+        return result;
+    }
+
+    /**
+     * 获取提现记录列表-SaaS
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getWithdrawListSaaS")
+    public Map<String, Object> getWithdrawListSaaS(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        param.put("user_id",userId);
+        /*
+         * 查询提现记录列表
+         */
+        return userModuleServer.findWithdrawListAll(param);
+    }
+
+
+    /**
+     * 后台_处理提现
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("handleWithDrawResult")
+    public Map<String, Object> handleWithDrawResult(RequestEntity reqEntity) throws Exception{
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> param = (Map)reqEntity.getParam();
+        String withdrawId = param.get("withdraw_cash_id").toString();
+        String remark = "";
+        if(param.get("remark") != null){
+            remark = param.get("remark").toString();
+        }
+        String result = param.get("result").toString();
+
+        //审核人员ID
+        String adminId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        if(adminId == null){
+            throw new QNLiveException("000005","系统用户不存在");
+        }
+        //验证审核人员
+        Map<String,Object> adminInfo = userModuleServer.selectAdminUserById(adminId);
+        if(adminInfo == null){
+            throw new QNLiveException("000005","系统用户不存在");
+        }
+        //角色
+        String role = adminInfo.get("role_id").toString();
+        String adminName = adminInfo.get("username").toString();
+        /*
+         * 查询提现记录
+         */
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("withdraw_cash_id", withdrawId);
+        Map<String, Object> withdraw = userModuleServer.selectWithdrawSizeById(selectMap);
+
+        if("3".equals(role)&&withdraw.get("handle_id")==null){
+            //未经过运营审核
+            throw new QNLiveException("170005","未经过运营审核");
+        }
+
+        if(withdraw==null||!"0".equals(withdraw.get("state"))||(("2").equals(role)&&withdraw.get("handle_id")!=null)){
+            //未找到提现记录或重复提现
+            throw new QNLiveException("170004");
+        }else {
+            //同意提现，更新提现记录，用户余额
+            long initial_amount = Long.valueOf(withdraw.get("initial_amount").toString());
+            userModuleServer.updateWithdraw(withdrawId, remark, withdraw.get("user_id").toString(), result, initial_amount,adminId,role,adminName);
+        }
+        return resultMap;
+    }
+
+
+    /**
+     * 获取订单记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("getOrderListAll")
+    public Map<String, Object> getOrderListAll(RequestEntity reqEntity) throws Exception{
+
+        //获取请求参数
+        Map<String, Object> param = (Map)reqEntity.getParam();
+
+        //查询提现记录列表
+
+        return userModuleServer.findOrderListAll(param);
+    }
+    /**
+     * 导出订单记录列表-后台
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("exportOrderListAll")
+    public Map<String, Object> exportOrderListAll(RequestEntity reqEntity) throws Exception{
+
+        //获取请求参数
+        Map<String, Object> param = (Map)reqEntity.getParam();
+
+        //查询提现记录列表
+        return userModuleServer.findOrderListAll(param);
+    }
+
 
 }
