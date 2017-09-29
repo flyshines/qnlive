@@ -174,10 +174,10 @@ public final class Constants {
 	public static final String CACHED_KEY_ACCESS_TOKEN_FIELD = "access_token";//token
 	public static final String CACHED_KEY_ACCESS_TOKEN = "SYS:ACCESSTOKEN:{access_token}";//token缓存key
 	public static final String CACHED_KEY_USER = "SYS:USER:{user_id}";//user 具体的信息
-	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";//需要刷新的用户
-	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
-	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
-	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
+//	public static final String CACHED_UPDATE_USER_KEY = "SYS:UPDATE:USER:KEYS";//需要刷新的用户
+//	public static final String CACHED_KEY_USER_COURSES = "USER:{user_id}:COURSES";//用户加入的课程
+//	public static final String CACHED_KEY_USER_ROOMS = "USER:{user_id}:ROOMS";//用户关注的直播间
+//	public static final String CACHED_KEY_USER_SERIES = "USER:{user_id}:SERIES";//用户订阅的系列
 	public static final String SYS_USER_BUY_LIST = "SYS:USER:BUY:{user_id}";	//用户已购课程ID set集合
 	public static final double USER_RATE = 0.7;
 	/** 用户相关 end **************************************/
@@ -188,42 +188,42 @@ public final class Constants {
 	public static final String CACHED_UPDATE_LECTURER_KEY="SYS:UPDATE:LECTURER:KEYS";//需要更新的讲师 list
 	public static final String CACHED_LECTURER_KEY="SYS:LECTURER:KEYS";//所有讲师 list
 	public static final String CACHED_KEY_LECTURER = "SYS:LECTURER:{lecturer_id}";//讲师信息
-	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";//讲师直播间列表
-	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程
-	public static final String CACHED_KEY_COURSE_PREDICTION_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION:ALL";//讲师所有预告和直播
-	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
-	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
-	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程  直播
-	public static final String CACHED_KEY_COURSE_SAAS = "SYS:LECTURER:{lecturer_id}:COURSES:SAAS";//讲师saas平台课程
-	public static final String CACHED_KEY_COURSE_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:ALL";//讲师所有的课程 只是判断讲师课程
-	public static final String CACHED_KEY_USER_SHARE_CODES = "USER:SHARE_CODES:{lecturer_id}";//分享share  讲师id
-	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
-	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
-	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
+//	public static final String CACHED_KEY_LECTURER_ROOMS = "SYS:LECTURER:{lecturer_id}:ROOMS";//讲师直播间列表
+//	public static final String CACHED_KEY_COURSE_PREDICTION = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION";//讲师预告和直播的课程
+//	public static final String CACHED_KEY_COURSE_PREDICTION_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:PREDICTION:ALL";//讲师所有预告和直播
+//	public static final String CACHED_KEY_COURSE_FINISH = "SYS:LECTURER:{lecturer_id}:COURSES:FINISH";//讲师结束的课程
+//	public static final String CACHED_KEY_COURSE_DEL = "SYS:LECTURER:{lecturer_id}:COURSES:DEL";//讲师删除的课程
+//	public static final String CACHED_KEY_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:COURSES:DOWN";//讲师下架的课程  直播
+//	public static final String CACHED_KEY_COURSE_SAAS = "SYS:LECTURER:{lecturer_id}:COURSES:SAAS";//讲师saas平台课程
+//	public static final String CACHED_KEY_COURSE_ALL = "SYS:LECTURER:{lecturer_id}:COURSES:ALL";//讲师所有的课程 只是判断讲师课程
+//	public static final String CACHED_KEY_USER_SHARE_CODES = "USER:SHARE_CODES:{lecturer_id}";//分享share  讲师id
+//	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
+//	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
+//	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 	/** 讲师相关 end **************************************/
 	//</editor-fold>
 
 	//<editor-fold desc="分销">
 	/** 分销 start **************************************/
-	public static final String CACHED_UPDATE_DISTRIBUTER_KEY="SYS:UPDATE:DISTRIBUTER:KEYS";//需要更新的分销者
-	public static final String CACHED_UPDATE_RQ_CODE_KEY = "SYS:UPDATE:RQCODE:KEYS";//需要刷新的 rqcode
-	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}";//直播间的分销人员
-	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE="SYS:ROOM:DISTRIBUTER:RQCODE:{rq_code}";//直播间分销者
-	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD="rq_code";//分销码
-	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";//平台分销者 每个分销
-	public static final String CACHED_KEY_USER_DISTRIBUTERS_ROOM_RQ = "USER:{distributer_id}:ROOM:{room_id}:RQ:{rq_code}";//用户分销者 房间 分销code
-	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES = "USER:{user_id}:LECTURER:{room_id}:COURSES:{distributer_id}";
-	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
+//	public static final String CACHED_UPDATE_DISTRIBUTER_KEY="SYS:UPDATE:DISTRIBUTER:KEYS";//需要更新的分销者
+//	public static final String CACHED_UPDATE_RQ_CODE_KEY = "SYS:UPDATE:RQCODE:KEYS";//需要刷新的 rqcode
+//	public static final String CACHED_KEY_ROOM_DISTRIBUTER ="SYS:ROOM:{room_id}:DISTRIBUTER:{distributer_id}";//直播间的分销人员
+//	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE="SYS:ROOM:DISTRIBUTER:RQCODE:{rq_code}";//直播间分销者
+//	public static final String CACHED_KEY_ROOM_DISTRIBUTER_RQ_CODE_FIELD="rq_code";//分销码
+//	public static final String CACHED_KEY_DISTRIBUTER = "SYS:DISTRIBUTER:{distributer_id}";//平台分销者 每个分销
+//	public static final String CACHED_KEY_USER_DISTRIBUTERS_ROOM_RQ = "USER:{distributer_id}:ROOM:{room_id}:RQ:{rq_code}";//用户分销者 房间 分销code
+//	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES = "USER:{user_id}:LECTURER:{room_id}:COURSES:{distributer_id}";
+//	public static final String CACHED_KEY_USER_DISTRIBUTER_COURSES_MIN_TIME = "USER:{user_id}:LECTURER:{room_id}:COURSE:{distributer_id}:MINTIME";
 	/** 分销 end **************************************/
 	//</editor-fold>
 
 
 	//<editor-fold desc="直播间相关">
 	/** 直播间相关 start **************************************/
-	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";//直播间详情
-
-	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";//直播间分享shar code
-	public static final String CACHED_KEY_COURSE_ROBOT_FIELD = "course_id";
+//	public static final String CACHED_KEY_ROOM = "SYS:ROOM:{room_id}";//直播间详情
+//
+//	public static final String CACHED_KEY_USER_ROOM_SHARE = "USER:ROOM_SHARE_CODE:{room_share_code}";//直播间分享shar code
+//	public static final String CACHED_KEY_COURSE_ROBOT_FIELD = "course_id";
 
 	/** 直播间相关 end **************************************/
 	//</editor-fold>
@@ -247,9 +247,9 @@ public final class Constants {
 	public static final String CACHED_KEY_COURSE_AUDIOS = "SYS:COURSE:{course_id}:AUDIOS";//课程语音列表
 	public static final String CACHED_KEY_COURSE_AUDIOS_JSON_STRING = "SYS:COURSE:{course_id}:AUDIOS:JSON_STRING";//课程语音
 	public static final String CACHED_KEY_COURSE_AUDIO = "SYS:COURSE:{course_id}:AUDIO:{audio_id}";//课程语音具体信息
-	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";//预告/正在直播
-	public static final String CACHED_KEY_PLATFORM_COURSE_FINISH = "SYS:COURSES:FINISH";//已结束
-	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
+//	public static final String CACHED_KEY_PLATFORM_COURSE_PREDICTION = "SYS:COURSES:PREDICTION";//预告/正在直播
+//	public static final String CACHED_KEY_PLATFORM_COURSE_FINISH = "SYS:COURSES:FINISH";//已结束
+//	public static final String CACHED_KEY_PLATFORM_COURSE_DEL = "SYS:COURSES:DEL";//已删除
 	//课程内容类型
 	public static final String DEFAULT_SERIES_COURSE_TYPE = "0";//正在直播 默认
 	public static final String DEFAULT_SERIES_COURSE_VOICE_TYPE = "1";//1语音
@@ -284,13 +284,13 @@ public final class Constants {
 
 	//<editor-fold desc="系列相关">
 	/** 系列相关 start **************************************/
-	public static final String CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM = "SYS:SERIES:APP:PLATFORM";// zset 平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用  如果下架直接删掉value (series_id,上架时间)
-	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
-	public static final String CACHED_KEY_SERIES_USERS = "SYS:SERIES:USERS:{series_id}";//系列课已购人员列表(收费课程)
-	public static final String CACHED_KEY_SERIES_COURSE_UP = "SYS:SERIES:COURSE:{series_id}:UP";//zset 系列的课程 (course_id,上架时间)
-	public static final String CACHED_KEY_SERIES_COURSE_DOWN = "SYS:SERIES:COURSE:{series_id}:DOWN";//zset 系列的课程 (course_id,下架时间)下架
-	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:UP";//zset 讲师所有指定类型的上架系列 (series_id,上架时间)
-	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有指定类型的下架系列 (series_id,下架时间)
+//	public static final String CACHED_KEY_PLATFORM_SERIES_APP_PLATFORM = "SYS:SERIES:APP:PLATFORM";// zset 平台系列正在更新的  (series_id,最近更新时间+排序) 在正在直播使用  如果下架直接删掉value (series_id,上架时间)
+//	public static final String CACHED_KEY_SERIES = "SYS:SERIES:DETAIL:{series_id}";//系列 hmap 系列具体信息
+//	public static final String CACHED_KEY_SERIES_USERS = "SYS:SERIES:USERS:{series_id}";//系列课已购人员列表(收费课程)
+//	public static final String CACHED_KEY_SERIES_COURSE_UP = "SYS:SERIES:COURSE:{series_id}:UP";//zset 系列的课程 (course_id,上架时间)
+//	public static final String CACHED_KEY_SERIES_COURSE_DOWN = "SYS:SERIES:COURSE:{series_id}:DOWN";//zset 系列的课程 (course_id,下架时间)下架
+//	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:UP";//zset 讲师所有指定类型的上架系列 (series_id,上架时间)
+//	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有指定类型的下架系列 (series_id,下架时间)
 	/** 系列相关 end **************************************/
 	//</editor-fold>
 
@@ -450,7 +450,7 @@ public final class Constants {
 	public static final String SYS_SHOP_LIVE_COUSE_FINISH_DOWN ="SYS_SHOP_LIVE_COUSE_FINISH_DOWN";//店铺 直播 结束 下架
 
 
-	public static final String SYS_SHOP_SERIES_UP ="SYS_SHOP_SERIES_UP";//店铺 系列 上架
+	public static final String SYS_SHOP_SERIES_UP ="SYS:SORT:SHOP:SERIES:UP";//店铺 系列 上架
 
 	public static final String SYS_SHOP_SERIES_DOWN ="SYS_SHOP_SERIES_DOWN";//店铺 系列 下架
 
