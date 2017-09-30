@@ -284,4 +284,107 @@ public class ManageController extends AbstractController {
         CSVUtils.exportFile(resp, file.getName(), file);
     }
 
+    /**
+     * 后台_课程搜索查询
+     * @param searchParam
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/course/searcher", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity getCourseListBySearch(
+            @RequestParam(value="search_param", defaultValue="") String searchParam,
+            @RequestHeader(value="access_token", defaultValue="") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getCourseListBySearch", accessToken, version);
+        Map<String, Object> param = new HashMap<>();
+        param.put("search_param", searchParam);
+        requestEntity.setParam(param);
+
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 管理后台登录
+     * @param entity
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/sys/login", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity adminUserLogin(
+            HttpEntity<Object> entity) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "adminUserLogin", null, null);
+        requestEntity.setParam(entity.getBody());
+        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+        return responseEntity;
+    }
+
+    /**
+     * 后台_获取所有分类列表
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/classify/list", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity getClassifyList(
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "getClassifyList", accessToken, version);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 后台_编辑分类信息
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/classify/edit", method = RequestMethod.PUT)
+    public @ResponseBody
+    ResponseEntity editClassify(
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
+            HttpEntity<Object> entity,
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "editClassify", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 后台_添加分类信息
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/classify/add", method = RequestMethod.POST)
+    public @ResponseBody
+    ResponseEntity addClassify(
+            @RequestHeader(value = "access_token", defaultValue = "") String accessToken,
+            HttpEntity<Object> entity,
+            @RequestHeader(value="version", defaultValue="") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "addClassify", accessToken, version);
+        requestEntity.setParam(entity.getBody());
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 获取分类信息
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/classifyInfo", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity classifyInfo(
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "classifyInfo", accessToken, null);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
 }

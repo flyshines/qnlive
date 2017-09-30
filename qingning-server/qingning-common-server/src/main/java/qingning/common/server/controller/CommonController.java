@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.server.util.ServerUtils;
+import qingning.common.util.Constants;
 import qingning.common.util.HttpTookit;
 import qingning.common.util.MiscUtils;
 import qingning.server.AbstractController;
@@ -325,5 +326,72 @@ public class CommonController extends AbstractController {
         RequestEntity requestEntity = this.createResponseEntity("CommonServer", "userLoginByUserId", accessToken, version);
         ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
         return responseEntity;
+    }
+
+    /**
+     * 搜索
+     * @param search_text 搜索文本
+     * @param search_type 查询类型 0所有 1直播间 2课程 3系列
+     * @param page_count 分页
+     * @param page_num 分页参数
+     * @param accessToken
+     * @param version
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/common/search", method = RequestMethod.GET)
+    public @ResponseBody
+    ResponseEntity search(
+            @RequestParam(value = "search_text",defaultValue = "") String search_text,
+            @RequestParam(value = "search_type",defaultValue = "0") String search_type,
+            @RequestParam(value = "page_count", defaultValue = "20") int page_count,
+            @RequestParam(value ="page_num",defaultValue = "0") int page_num,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version)throws Exception{
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "search", accessToken, null);
+        Map<String,Object> map = new HashMap<>();
+        map.put("search_text",search_text);
+        map.put("search_type",search_type);
+        map.put("page_count",page_count);
+        map.put("page_num",page_num);
+        requestEntity.setParam(map);
+        return this.process(requestEntity, serviceManger, message);
+    }
+
+    /**
+     * 查询课程消息列表
+     * @param course_id 课程id
+     * @param page_count 分页
+     * @param user_type  用户类型 0老师/顾问  1用户
+     * @param message_type 消息类型:0:音频 1：文字 3：图片 4 附件
+     * @param message_imid 消息id
+     * @param direction  获取那种信息  0旧  1新 默认为1
+     * @param accessToken 后台安全证书
+     * @param version 版本号
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/common/courses/{course_id}/messages", method = RequestMethod.GET)
+    public
+    @ResponseBody ResponseEntity getMessageList(
+            @PathVariable("course_id") String course_id,
+            @RequestParam(value = "page_count", defaultValue = "20") String page_count,
+            @RequestParam(value = "user_type", defaultValue = "0") String user_type,
+            @RequestParam(value = "message_type",defaultValue = "") String message_type,
+            @RequestParam(value = "message_imid", defaultValue = "") String message_imid,
+            @RequestParam(value = "direction", defaultValue = "1") String direction,
+            @RequestHeader("access_token") String accessToken,
+            @RequestHeader("version") String version) throws Exception {
+        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "messageList", accessToken, version);
+        Map<String, Object> parMap = new HashMap<>();
+        parMap.put("course_id", course_id);
+        parMap.put("page_count", page_count);
+        parMap.put("user_type", user_type);
+        parMap.put("message_type", message_type);
+        parMap.put("message_imid", message_imid);
+        parMap.put("direction",direction);
+        requestEntity.setParam(parMap);
+        return this.process(requestEntity, serviceManger, message);
     }
 }

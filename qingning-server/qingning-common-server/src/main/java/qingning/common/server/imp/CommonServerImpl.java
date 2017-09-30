@@ -27,6 +27,7 @@ import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.ICommonModuleServer;
 import redis.clients.jedis.Jedis;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class CommonServerImpl  extends AbstractQNLiveServer {
@@ -2344,5 +2345,271 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         String url = String.format(MiscUtils.getConfigByKey("course_live_shop_url"), courseId, shopId);
         WeiXinUtil.send_template_message(openId, MiscUtils.getConfigByKey("wpush_shop_course"), url, templateMap, jedis);
     }
+    /**
+     * 搜索/类型
+     *
+     * @param reqEntity
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("search")
+    public Map<String, Object> search(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> map = (Map<String, Object>) reqEntity.getParam();
+        reqEntity.getParam();
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());//用安全证书拿userId
+        String search_text = map.get("search_text").toString();//搜索文本
+        if (search_text != null || !search_text.equals("")) {
+            search_text = "%" + search_text + "%";//拼接百分号 进行包含查询
+            map.put("search_text", search_text);
+        }
+        Integer page_num = Integer.valueOf(map.get("page_num").toString());
+        map.put("page_num", page_num);
+        Integer page_count = Integer.valueOf(map.get("page_count").toString());
+        map.put("page_count", page_count);
+        int search_type = Integer.valueOf(map.get("search_type").toString()); //查询类型 0所有 1直播间 2课程 3系列
+        Jedis jedis = jedisUtils.getJedis();
+        //TODO 查询所有 或者 查询店铺
+        if (search_type == 0 || search_type == 1) {
+            //List<Map<String, Object>> liveRoomBySearch = commonModuleServer.findshop(map);
+        }
 
+        //查询所有 或者 查询课程
+        if (search_type == 0 || search_type == 2) {
+            List<Map<String, Object>> courseBySearch = commonModuleServer.findCourseBySearch(map);//查询数据
+            resultMap.put("course_list", this.setStudentAndLecturerNickName(courseBySearch, userId, jedis, Thread.currentThread().getStackTrace()[1].getMethodName()));
+        }
+
+
+        //查询所有 或者 查询系列
+        if (search_type == 0 || search_type == 3) {
+            map.put("series_course_type", Constants.DEFAULT_SERIES_COURSE_TYPE);
+            List<Map<String, Object>> seriesBySearch = commonModuleServer.findSeriesBySearch(map);//查询数据
+            setLecturerNickName(seriesBySearch, jedis);
+            resultMap.put("series_list", seriesBySearch);
+        }
+
+        return resultMap;
+    }
+    private List<Map<String, Object>> setStudentAndLecturerNickName(List<Map<String, Object>> courseBySearch, String userId, Jedis jedis, String methodName) throws Exception {
+        long currentTime = System.currentTimeMillis();//当前时间
+
+        if (!MiscUtils.isEmpty(courseBySearch)) {
+            Map<String, Object> query = new HashMap<String, Object>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+            query.put(Constants.CACHED_KEY_USER_FIELD, userId);
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_USER_COURSES, query);//用来查询当前用户加入了那些课程
+            for (Map<String, Object> course : courseBySearch) {
+                if ("recommendCourse".equals(methodName)) {
+                    MiscUtils.courseTranferState(currentTime, course, Long.valueOf(course.get("start_time").toString()));
+                } else {
+                    Date date = sdf.parse(course.get("start_time").toString());
+                    MiscUtils.courseTranferState(currentTime, course, date.getTime());//进行课程时间判断,如果课程开始时间大于当前时间 并不是已结束的课程  那么就更改课程的状态 改为正在直播
+                }
+
+
+                if (!MiscUtils.isEmpty(jedis.zrank(key, course.get("course_id").toString()))) {//判断当前用户是否有加入这个课程
+                    course.put("student", "Y");
+                } else {
+                    course.put("student", "N");
+                }
+            }
+            this.setLecturerNickName(courseBySearch, jedis);
+
+            return courseBySearch;
+        }
+        return null;
+    }
+    private void setLecturerNickName(List<Map<String, Object>> list, Jedis jedis) throws Exception {
+        Map<String, String> query1 = new HashMap<>();
+        for (Map<String, Object> course : list) {
+            query1.put(Constants.CACHED_KEY_LECTURER_FIELD, course.get("lecturer_id").toString());
+            String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER, query1);
+            String lecturer_nick_name = jedis.hget(key, "nick_name");
+            course.put("lecturer_nick_name", lecturer_nick_name);
+        }
+    }
+    /**
+     * 获取课程消息列表
+     *
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    @FunctionName("messageList")
+    public Map<String, Object> getMessageList(RequestEntity reqEntity) throws Exception {
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());//查询的条数
+        int userType = Integer.parseInt(reqMap.get("user_type").toString());//查询角色类型 0老师/顾问  1用户
+        int direction = Integer.parseInt(reqMap.get("direction").toString());//方向  0旧  1新 默认为1
+        String course_id = reqMap.get("course_id").toString();//课程id
+        Jedis jedis = jedisUtils.getJedis();//获取缓存方法对象
+        Map<String, Object> map = new HashMap<>();//map
+        map.put(Constants.CACHED_KEY_COURSE_FIELD, course_id);//存入map中
+        String messageListKey = null;//查找信息类的key
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("course_id", course_id);
+        queryMap.put("page_count", pageCount);//要查询的记录数据
+        queryMap.put("user_type", userType);//查询角色类型
+        queryMap.put("direction", direction);//方向
+        if (reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())) { //传过来的信息位置
+            queryMap.put("message_imid", reqMap.get("message_imid").toString());
+        }
+        Map<String, String> courseMap = jedis.hgetAll(MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, map));
+        if (courseMap.get("status").equals("2")) { //查询当前课程是否结束
+            List<Map<String, Object>> messageList = commonModuleServer.findCourseMessageListByComm(queryMap);
+            if (!CollectionUtils.isEmpty(messageList)) {
+                for (Map<String, Object> messageMap : messageList) {
+                    if (!MiscUtils.isEmpty(messageMap.get("message")))//信息
+                        messageMap.put("message", MiscUtils.RecoveryEmoji(messageMap.get("message").toString()));
+
+                    if (!MiscUtils.isEmpty(messageMap.get("message_question")))//问题 互动
+                        messageMap.put("message_question", MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
+
+                    if (!MiscUtils.isEmpty(messageMap.get("creator_nick_name")))//名字 表情
+                        messageMap.put("creator_nick_name", MiscUtils.RecoveryEmoji(messageMap.get("creator_nick_name").toString()));
+                }
+
+                if (direction == 1 && reqMap.get("message_imid").toString().equals("")) {
+                    Collections.reverse(messageList);
+                }
+                if (direction == 0 && !reqMap.get("message_imid").toString().equals("")) {
+                    Collections.reverse(messageList);
+                }
+
+
+                resultMap.put("message_list", messageList);
+            }
+            if (queryMap.containsKey("message_imid")) {//如果有imid
+                resultMap.put("this_message", commonModuleServer.findCourseMessageByComm(queryMap));
+            }
+            resultMap.put("message_count", commonModuleServer.findCourseMessageSum(queryMap));
+            return resultMap;
+        } else { //TODO 查询缓存
+            //当前课程没有结束 可以直接查询缓存
+            if (userType == 0) {//查询老师
+                if (reqMap.get("message_type") != null && reqMap.get("message_type").toString().equals("0")) {
+                    messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER_VOICE, map);
+                } else {
+                    messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_LECTURER, map);
+                }
+            } else if (userType == 1) {//查询用户
+                messageListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE_LIST_USER, map);
+            }
+            long message_sum = jedis.zcard(messageListKey);//总共有多少个总数
+            resultMap.put("message_count", message_sum);
+            //缓存中存在，则读取缓存中的内容
+            //初始化下标
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            Set<String> messageImIdList = null;//消息集合你
+            //来确定消息集合 0旧 -> 1...新
+            if (reqMap.get("message_imid") != null && StringUtils.isNotBlank(reqMap.get("message_imid").toString())) {   //message_imid 过来
+
+                long endRank = jedis.zrank(messageListKey, reqMap.get("message_imid").toString());//message_imid 在缓存zset中的排名
+                if (direction == 0) { //获取比当前message旧的消息
+                    endIndex = endRank - 1;
+                    if (endIndex >= 0) {
+                        startIndex = endIndex - pageCount + 1;
+                        if (startIndex < 0) {
+                            startIndex = 0;
+                        }
+                        messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                    } else {
+                        messageImIdList = null;//消息集合
+                    }
+                } else {//获取比当前message新消息
+                    startIndex = endRank + 1;
+                    endIndex = startIndex + pageCount - 1; //消息位置
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                }
+
+                String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, queryMap);
+
+                if (jedis.exists(messageKey)) {
+                    Map<String, String> messageMap = jedis.hgetAll(messageKey);
+                    //更改用户名和昵称
+                    if (!MiscUtils.isEmpty(messageMap)) {
+                        if (messageMap.get("creator_id") != null) {
+                            Map<String, Object> innerMap = new HashMap<>();
+                            innerMap.put("user_id", messageMap.get("creator_id"));
+                            Map<String, String> userMap = readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
+                            if (!MiscUtils.isEmpty(userMap)) {
+                                if (userMap.get("nick_name") != null) {
+                                    messageMap.put("creator_nick_name", userMap.get("nick_name"));
+                                }
+                                if (userMap.get("avatar_address") != null) {
+                                    messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+                                }
+                            }
+                        }
+                        String messageContent = messageMap.get("message");
+                        if (!MiscUtils.isEmpty(messageContent)) {
+                            messageMap.put("message", MiscUtils.RecoveryEmoji(messageContent));
+                        }
+                        if (!MiscUtils.isEmpty(messageMap.get("message_question"))) {
+                            messageMap.put("message_question", MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
+                        }
+                        resultMap.put("this_message", messageMap);
+                    }
+                }
+
+            } else {// 如果没有传过来message_id
+                //判断需求是要新的信息 还是就得信息
+                if (direction == 0) {//从最早的信息开始
+                    startIndex = 0;
+                    endIndex = pageCount - 1;
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                } else {//从最新的信息开始
+                    endIndex = -1;
+                    startIndex = message_sum - pageCount;
+                    if (startIndex < 0) {
+                        startIndex = 0;
+                    }
+                    messageImIdList = jedis.zrange(messageListKey, startIndex, endIndex);//消息集合
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(messageImIdList)) {
+                //缓存中存在则读取缓存内容
+                List<Map<String, String>> messageListCache = new ArrayList<>();
+                for (String messageImId : messageImIdList) {
+                    map.put(Constants.FIELD_MESSAGE_ID, messageImId);
+                    String messageKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_MESSAGE, map);
+                    Map<String, String> messageMap = jedis.hgetAll(messageKey);
+                    messageMap.put("message_pos", startIndex + "");
+                    //更改用户名和昵称
+                    if (MiscUtils.isEmpty(messageMap)) {
+                        continue;
+                    }
+                    if (messageMap.get("creator_id") != null) {
+                        Map<String, Object> innerMap = new HashMap<>();
+                        innerMap.put("user_id", messageMap.get("creator_id"));
+                        Map<String, String> userMap = readUser(messageMap.get("creator_id"), this.generateRequestEntity(null, null, null, innerMap), readUserOperation, jedis);
+                        if (!MiscUtils.isEmpty(userMap)) {
+                            if (userMap.get("nick_name") != null) {
+                                messageMap.put("creator_nick_name", userMap.get("nick_name"));
+                            }
+                            if (userMap.get("avatar_address") != null) {
+                                messageMap.put("creator_avatar_address", userMap.get("avatar_address"));
+                            }
+                        }
+                    }
+                    String messageContent = messageMap.get("message");
+                    if (!MiscUtils.isEmpty(messageContent)) {
+                        messageMap.put("message", MiscUtils.RecoveryEmoji(messageContent));
+                    }
+                    if (!MiscUtils.isEmpty(messageMap.get("message_question"))) {
+                        messageMap.put("message_question", MiscUtils.RecoveryEmoji(messageMap.get("message_question").toString()));
+                    }
+                    messageListCache.add(messageMap);
+                    startIndex++;
+                }
+                resultMap.put("message_list", messageListCache);
+            }
+            return resultMap;
+        }
+    }
 }

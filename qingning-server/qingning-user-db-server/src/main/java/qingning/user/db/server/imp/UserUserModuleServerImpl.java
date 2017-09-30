@@ -121,6 +121,11 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
 
     @Override
+    public List<Map<String, Object>> findSeriesByLecturer(String lecturer_id) {
+        return null;
+    }
+
+    @Override
     public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
         return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
     }
