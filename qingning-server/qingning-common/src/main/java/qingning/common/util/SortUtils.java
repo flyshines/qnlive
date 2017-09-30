@@ -327,7 +327,7 @@ public class SortUtils {
     }
 
 
-    public static List<String> getNonLiveCourseList(String redisKey, int pageCount, String lpos, Jedis jedis){
+    public static List<String> getList(String redisKey, int pageCount, String lpos, Jedis jedis){
         String start_index = "+inf";
         String end_index = "-inf";
         if(lpos != null){
