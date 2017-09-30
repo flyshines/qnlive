@@ -156,7 +156,6 @@ public class SortUtils {
     /**
      * 更改课程缓存
      * 上架或下架
-     *
      * @param course
      * @param jedis
      * @throws Exception
@@ -250,7 +249,6 @@ public class SortUtils {
     /**
      * 更改系列
      * 上架或下架
-     *
      * @param series
      * @param jedis
      * @throws Exception
@@ -337,7 +335,6 @@ public class SortUtils {
         Set<String> goodsIds = jedis.zrevrangeByScore(redisKey, start_index, end_index, 0, pageCount);
         return new ArrayList<>(goodsIds);
     }
-
 
 
 
