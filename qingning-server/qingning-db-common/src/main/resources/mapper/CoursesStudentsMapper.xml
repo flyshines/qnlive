@@ -5,7 +5,7 @@
   <select id="findCourseStudentList" resultType="hashmap" parameterType="hashmap" >
     select
     cs.user_id, cs.create_time, cs.student_pos,cs.guest_tag,cs.guest_status, u.nick_name, u.avatar_address
-    from t_courses_students cs join t_user u on cs.user_id = u.user_id
+    from t_course_students cs join t_user u on cs.user_id = u.user_id
     where 1 = 1
     and cs.course_id = #{course_id}
     <if test="student_pos != null" >
@@ -25,14 +25,14 @@
 
   <select id="findCourseAllStudentList" resultType="hashmap" parameterType="java.lang.String" >
     select a.*,b.m_user_id,b.m_pwd,b.web_openid
-    from t_courses_students a , t_login_info b where a.user_id=b.user_id and a.course_id = #{course_id}
+    from t_course_students a , t_login_info b where a.user_id=b.user_id and a.course_id = #{course_id}
   </select>
 
 
   <select id="findCourseStudentListWithLoginInfo" resultType="hashmap" parameterType="hashmap" >
     select
     cs.user_id, cs.create_time, cs.student_pos, u.m_user_id, u.m_pwd, u.web_openid 
-    from t_courses_students cs join t_login_info u on cs.user_id = u.user_id
+    from t_course_students cs join t_login_info u on cs.user_id = u.user_id
     where 1 = 1
     and cs.course_id = #{course_id}
     <if test="student_pos != null" >
@@ -45,7 +45,7 @@
 
   <select id="findCourseListOfStudent" resultType="hashmap" parameterType="hashmap">
     select a.*,b.course_title,b.course_type,b.course_url,b.live_course_status as status,b.start_time,b.student_num
-    from t_courses_students a, t_courses b
+    from t_course_students a, t_courses b
     where a.course_id=b.course_id and a.user_id=#{user_id} and b.live_course_status <![CDATA[ <> ]]> 5
     <if test="create_time != null">
       and a.create_time <![CDATA[<]]> #{create_time}
@@ -56,7 +56,7 @@
   <select id="findLatestStudentAvatarAddList" resultType="string" parameterType="hashmap" >
     select
     u.avatar_address
-    from t_courses_students cs join t_user u  on cs.user_id = u.user_id
+    from t_course_students cs join t_user u  on cs.user_id = u.user_id
     where 1 = 1
     and course_id = #{course_id}
     order by cs.create_time DESC
@@ -66,7 +66,7 @@
   <select id="findBanUserListInfo" resultType="hashmap" parameterType="java.util.Map" >
     select
     u.user_id, u.nick_name, u.avatar_address, cs.create_time,cs.guest_tag,cs.guest_status
-    from t_courses_students cs join t_user u on cs.user_id = u.user_id
+    from t_course_students cs join t_user u on cs.user_id = u.user_id
     where
     cs.user_id in
     <foreach collection="list" item="item" index="index" open="("
@@ -76,17 +76,17 @@
   </select>
 
   <select id="findUserIdsByCourseId" resultType="string" parameterType="string" >
-    select user_id from t_courses_students where 1 = 1 and course_id = #{course_id}
+    select user_id from t_course_students where 1 = 1 and course_id = #{course_id}
   </select>
   
   <select id="isStudentOfTheCourse" resultType="string" parameterType="hashmap" >
-    select '1' from t_courses_students
+    select '1' from t_course_students
     where course_id = #{course_id} and user_id = #{user_id} limit 1
   </select>
   
   <select id="findCourseIdByStudent" resultType="hashmap" parameterType="hashmap" >
   	select student.course_id, student.student_pos ,course.live_course_status
-  	from t_courses_students student,t_course course
+  	from t_course_students student,t_course course
   	where course.live_course_status <![CDATA[ <> ]]> 5 and student.user_id=#{user_id}
     and student.course_id=course.course_id /*and student.value_from = 0*/
   	<if test="student_pos != null">
@@ -96,7 +96,7 @@
   </select>
 
   <insert id="insertStudent" parameterType="hashmap" >
-    insert into t_courses_students
+    insert into t_course_students
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="student_id != null" >
         student_id,
@@ -109,9 +109,6 @@
       </if>
       <if test="lecturer_id != null" >
         lecturer_id,
-      </if>
-      <if test="room_id != null" >
-        room_id,
       </if>
       <if test="course_id != null" >
         course_id,
@@ -154,9 +151,6 @@
       <if test="lecturer_id != null" >
         #{lecturer_id},
       </if>
-      <if test="room_id != null" >
-        #{room_id},
-      </if>
       <if test="course_id != null" >
         #{course_id},
       </if>
@@ -188,18 +182,16 @@
   </insert>
 
   <select id="findUserDistributionInfoForDoneNum" resultType="hashmap" parameterType="hashmap" >
-    select * from t_courses_students
+    select * from t_course_students
     where
     user_id = #{user_id}
     and distributer_id = #{distributer_id}
-    and room_id = #{room_id}
     limit 1
   </select>
 
   <select id="findCourseRecommendUsers" resultType="hashmap" parameterType="hashmap" >
-  	select b.nick_name, b.avatar_address, a.* from t_courses_students a, t_user b 
+  	select b.nick_name, b.avatar_address, a.* from t_course_students a, t_user b
   	where a.user_id=b.user_id
-  	and a.room_id = #{room_id}
   	<if test="distributer_id !=null">
   		and a.distributer_id = #{distributer_id} 
   	</if>
@@ -215,12 +207,9 @@
   
   <select id="findCourseRecommendUserNum" resultType="hashmap" parameterType="hashmap" >
     select count(1) as recommend_num
-    from t_courses_students
+    from t_course_students
     where
     course_id = #{course_id}
-    <if test="room_id != null">
-    	and room_id = #{room_id}
-    </if>
     <if test="distributer_id != null">
     	and distributer_id = #{distributer_id}
     </if>
@@ -228,7 +217,7 @@
 
   <!-- 根据条件查询课程学员列表 -->
   <select id="selectCourseStudentByMap" parameterType="hashmap" resultType="hashmap">
-  	select * from t_courses_students
+  	select * from t_course_students
   	<where>
   		<if test="user_id != null">
   			and user_id = #{user_id}
@@ -241,7 +230,7 @@
 
 
   <update id="updateStudent" parameterType="hashmap" >
-    update t_courses_students
+    update t_course_students
     <set >
       <if test="guest_tag != null" >
         guest_tag = #{guest_tag},

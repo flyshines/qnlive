@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,CourseModuleServer,SeriesModuleServer,ConfigModuleServer,LecturerModuleServer {
-	Map<String, Object> createLiveRoom(Map<String, Object> reqMap);
 
 	/**
 	 * 开通店铺

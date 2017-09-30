@@ -257,7 +257,7 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     Map<String, String> initializeAccountRegisterUser(Map<String, Object> reqMap);
 
-    void openShop(Map<String, Object> shop);
+    int insertShop(Map<String, Object> shop);
 
 
     void updateAccountUser(Map<String, Object> reqMap);

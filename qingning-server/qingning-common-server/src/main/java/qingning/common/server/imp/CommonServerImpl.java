@@ -1302,7 +1302,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         shop.put("status","1");
         shop.put("create_time",new Date());
         shop.put("shop_logo",reqMap.get("avatar_address"));
-        commonModuleServer.openShop(shop);
+        commonModuleServer.insertShop(shop);
         readCurrentUserShop(reqEntity, jedis);
 
         //更新用户缓存
