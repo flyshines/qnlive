@@ -106,7 +106,7 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     List<Map<String,Object>> findAudioListByCourseId(String course_id);
 
-    Map<String,Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap);
+    Map<String,Object> findFansByUserIdAndShopId(Map<String, Object> reqMap);
 
 
     Map<String,Object> findByPhone(Map<String,Object> record);

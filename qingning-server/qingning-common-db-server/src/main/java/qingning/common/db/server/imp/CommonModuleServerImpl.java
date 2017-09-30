@@ -757,11 +757,11 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> findFansByUserIdAndRoomId(Map<String, Object> reqMap) {
+	public Map<String, Object> findFansByUserIdAndShopId(Map<String, Object> reqMap) {
 		Map<String,Object> fansKey = new HashMap<>();
 		fansKey.put("user_id",reqMap.get("user_id").toString());
-		fansKey.put("room_id", reqMap.get("room_id").toString());
-		return fansMapper.findFansByUserIdAndRoomId(fansKey);
+		fansKey.put("shop_id", reqMap.get("shop_id").toString());
+		return fansMapper.findFansByUserIdAndShopId(fansKey);
 	}
 
 

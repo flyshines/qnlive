@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="qingning.db.common.mybatis.persistence.FansMapper" >
-  <select id="findRoomFanList" resultType="hashmap" parameterType="hashmap" >
-    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.user_id=b.user_id and a.room_id=#{room_id}
+  <select id="findShopFanList" resultType="hashmap" parameterType="hashmap" >
+    select a.*,b.nick_name,b.avatar_address from t_fans a, t_user b where a.user_id=b.user_id and a.shop_id=#{shop_id}
     and a.lecturer_id=#{lecturer_id}
     <if test="position != null">
       and a.position <![CDATA[ > ]]> #{position}
@@ -13,7 +13,7 @@
   </select>
 
   <select id="findRoomFanListWithLoginInfo" resultType="hashmap" parameterType="hashmap" >
-    select a.*,b.m_user_id,b.m_pwd,b.web_openid from t_fans a, t_login_info b where a.user_id=b.user_id and a.room_id=#{room_id}
+    select a.*,b.m_user_id,b.m_pwd,b.web_openid from t_fans a, t_login_info b where a.user_id=b.user_id and a.shop_id=#{shop_id}
     <if test="lecturer_id != null">
     	and a.lecturer_id=#{lecturer_id}
     </if>
@@ -29,17 +29,17 @@
     select shop_id from t_fans  where user_id=#{user_id}
   </select>
 
-  <select id="findFansByUserIdAndRoomId" resultType="hashmap" parameterType="hashmap" >
-    select * from t_fans where user_id = #{user_id} and room_id = #{room_id}
+  <select id="findFansByUserIdAndShopId" resultType="hashmap" parameterType="hashmap" >
+    select * from t_fans where user_id = #{user_id} and shop_id = #{shop_id}
   </select>
 
-  <select id="findFollowUserIdsByRoomId" resultType="string" parameterType="string">
-    select user_id from t_fans where room_id = #{room_id}
+  <select id="findFollowUserIdsByShopId" resultType="string" parameterType="string">
+    select user_id from t_fans where shop_id = #{shop_id}
   </select>
 
   <select id="findFanInfoByUserId" resultType="hashmap" parameterType="hashmap">
     select a.*, b.room_name, b.avatar_address from t_fans a, t_live_room b
-    where a.room_id=b.room_id and a.user_id = #{user_id}
+    where a.shop_id=b.shop_id and a.user_id = #{user_id}
     <if test="notice_create_time != null" >
       and a.create_time <![CDATA[ < ]]> #{notice_create_time}
     </if>
@@ -51,8 +51,8 @@
     <if test="user_id != null">
     	and user_id = #{user_id}
     </if>
-    <if test="room_id != null">
-    	and room_id = #{room_id}
+    <if test="shop_id != null">
+    	and shop_id = #{shop_id}
     </if>      
   </delete>
 
@@ -68,8 +68,8 @@
       <if test="lecturer_id != null" >
         lecturer_id,
       </if>
-      <if test="room_id != null" >
-        room_id,
+      <if test="shop_id != null" >
+        shop_id,
       </if>
       <if test="create_time != null" >
         create_time,
@@ -91,8 +91,8 @@
       <if test="lecturer_id != null" >
         #{lecturer_id},
       </if>
-      <if test="room_id != null" >
-        #{room_id},
+      <if test="shop_id != null" >
+        #{shop_id},
       </if>
       <if test="create_time != null" >
         #{create_time},
