@@ -1,6 +1,7 @@
 package qingning.server.rpc.initcache;
 
 import qingning.common.entity.RequestEntity;
+import qingning.common.util.Constants;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.SeriesModuleServer;
 import qingning.server.rpc.manager.IShopModuleServer;
@@ -25,6 +26,10 @@ public class ReadSeriesOperation implements CommonReadOperation {
     public Object invokeProcess(RequestEntity requestEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) requestEntity.getParam();
         String functionName = requestEntity.getFunctionName();
+        if(Constants.SYS_SHOP_SERIES_ALL.equals(functionName)){
+            return seriesModuleServer.findSeriesByLecturer(reqMap.get(Constants.CACHED_KEY_LECTURER_FIELD).toString());
+        }
+
         if(CACHE_SERIES_STUDENTLIST.equals(functionName)){
             return seriesModuleServer.findSeriesStudentListBySeriesId(reqMap.get("series_id").toString());
         }else{
