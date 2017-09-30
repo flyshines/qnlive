@@ -20,4 +20,11 @@ public interface SeriesModuleServer {
      * @return
      */
     Map<String,Object> findSeriesBySeriesId(String series_id);
+
+    /**
+     * 根据讲师id 查询系列list
+     * @param lecturer_id
+     * @return
+     */
+    List<Map<String,Object>> findSeriesByLecturer(String lecturer_id);
 }

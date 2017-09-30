@@ -327,7 +327,7 @@ public class SortUtils {
     }
 
 
-    public static List<String> getList(String redisKey, int pageCount, String lpos, Jedis jedis){
+    public static List<String> getNonLiveCourseList(String redisKey, int pageCount, String lpos, Jedis jedis){
         String start_index = "+inf";
         String end_index = "-inf";
         if(lpos != null){
@@ -338,6 +338,124 @@ public class SortUtils {
     }
 
 
+    public static List<String> getLiveCourseList(Map<String, String> course,String lecture_id,int pageCount,Jedis jedis){
+
+        int offset = 0;//偏移值
+        Set<String> courseIdSet;//查询的课程idset
+        List<String> courseIdList = new ArrayList<>();//课程id列表
+        Integer live_course_status = 4;
+        if(!MiscUtils.isEmpty(course)){
+            live_course_status = Integer.valueOf(course.get("live_course_status"));
+        }
+
+        //<editor-fold desc="正在直播">
+        if(live_course_status == 4 ){//如果预告或者是正在直播的课程
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+            //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
+            getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//讲师
+
+            if(MiscUtils.isEmpty(course)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
+                startIndex = "-inf";//设置起始位置 '(' 是要求大于这个参数
+                endIndex =courseScoreByRedis+"";//设置结束位置
+            }else{//传了courseid
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("live_start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex =MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L)+"";//设置结束位置
+            }
+            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                courseIdList.add(course_id);
+            }
+
+            pageCount -= courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                course = null;//把课程id设置为null  用来在下面的代码中进行判断
+                live_course_status = 1;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+        //</editor-fold>
+
+        //<editor-fold desc="预告">
+        if(live_course_status == 1 ){//如果预告或者是正在直播的课程
+            String startIndex ;//坐标起始位
+            String endIndex ;//坐标结束位
+            String getCourseIdKey;
+
+            //平台的预告中课程列表 预告和正在直播放在一起  按照直播开始时间顺序排序  根据分类获取不同的缓存
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
+            getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_PREDICTION, map);//讲师
+
+            if(MiscUtils.isEmpty(course)){//如果没有传入courceid 那么就是最开始的查询  进行倒叙查询 查询现在的
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(System.currentTimeMillis(),0L);
+                startIndex = ""+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
+            }else{//传了courseid
+                long courseScoreByRedis = MiscUtils.convertInfoToPostion(MiscUtils.convertObjectToLong(course.get("live_start_time")),  MiscUtils.convertObjectToLong(course.get("position")));//拿到当前课程在redis中的score
+                startIndex = "("+courseScoreByRedis;//设置起始位置 '(' 是要求大于这个参数
+                endIndex ="+inf";//设置结束位置
+            }
+            courseIdSet = jedis.zrangeByScore(getCourseIdKey,startIndex,endIndex,offset,pageCount); //顺序找出couseid  (正在直播或者预告的)
+            for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                courseIdList.add(course_id);
+            }
+
+            pageCount -= courseIdList.size();//用展示数量减去获取的数量  查看是否获取到了足够的课程数
+            if( pageCount > 0){//如果返回的值不够
+                course = null;//把课程id设置为null  用来在下面的代码中进行判断
+                live_course_status = 2;//设置查询课程状态 为结束课程 因为查找出来的正在直播和预告的课程不够数量
+            }
+        }
+        //</editor-fold>
+
+        //<editor-fold desc="结束">
+        if(live_course_status == 2 ){//查询结束课程
+            boolean key = true;//作为开关 用于下面是否需要接着执行方法
+            long startIndex = 0; //开始下标
+            long endIndex = -1;   //结束下标
+            String getCourseIdKey ;
+            Map<String,Object> map = new HashMap<String,Object>();
+            map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecture_id);
+            getCourseIdKey =  MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_FINISH, map);//讲师
+
+            long endCourseSum = jedis.zcard(getCourseIdKey);//获取总共有多少个结束课程
+            if(MiscUtils.isEmpty(course)){//如果课程ID没有 那么就从最近结束的课程找起
+                endIndex = -1;
+                startIndex = endCourseSum - pageCount;//利用总数减去我这边需要获取的数
+                if(startIndex < 0){
+                    startIndex = 0;
+                }
+            }else{ //如果有课程id  先获取课程id 在列表中的位置 然后进行获取其他课程id
+                long endRank = jedis.zrank(getCourseIdKey, course.get("course_id"));
+                endIndex = endRank - 1;
+                if(endIndex >= 0){
+                    startIndex = endIndex - pageCount + 1;
+                    if(startIndex < 0){
+                        startIndex = 0;
+                    }
+                }else{
+                    key = false;//因为已经查到最后的课程没有必要往下查了
+                }
+                if(key){
+                    courseIdSet = jedis.zrange(getCourseIdKey, startIndex, endIndex);
+                    List<String> transfer = new ArrayList<>();
+                    for(String course_id : courseIdSet){//遍历已经查询到的课程在把课程列表加入到课程idlist中
+                        transfer.add(course_id);
+                    }
+                    Collections.reverse(transfer);
+                    courseIdList.addAll(transfer);
+                }
+            }
+        }
+        //</editor-fold>
+
+        return courseIdList;
+    }
 
 
 
@@ -473,7 +591,7 @@ public class SortUtils {
     }
 
 
-    /**
+    /**无分页
      * 刷新系列缓存
      * @param jedis
      * @param operation
@@ -494,7 +612,7 @@ public class SortUtils {
             if(seriesMap.get("updown").equals("1")){
                 String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
                 String seriesCourseTypeUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, seriesMap);//讲师在不同的课程内容下架的系列
-                String seriesNonLiveUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_UP, seriesMap);//讲师在不同的课程内容下架的系列
+                String seriesNonLiveUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_UP, seriesMap);//讲师 不是直播系列 上架
                 lpos = MiscUtils.convertInfoToPostion(Long.valueOf(seriesMap.get("update_course_time")), Long.valueOf(seriesMap.get("position")));//算出位置
                 keyList.add(lecturerSeriesUpKey);
                 keyList.add(seriesCourseTypeUpKey);
@@ -502,7 +620,7 @@ public class SortUtils {
             }else{
                 String lecturerSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, seriesMap);//讲师所有下架系列
                 String seriesCourseTypeDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, seriesMap);//讲师在不同的课程内容上架的系列
-                String seriesNonLiveDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_DOWN, seriesMap);//讲师在不同的课程内容上架的系列
+                String seriesNonLiveDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_DOWN, seriesMap);//讲师 不是直播系列 下架
                 lpos = MiscUtils.convertInfoToPostion(Long.valueOf(seriesMap.get("create_time")), Long.valueOf(seriesMap.get("position")));//算出位置
                 keyList.add(lecturerSeriesDownKey);
                 keyList.add(seriesCourseTypeDownKey);
