@@ -1088,11 +1088,20 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 
 
 
+	@Transactional(rollbackFor = Exception.class)
 	@Override
-	public void openShop(Map<String, Object> shop) {
-		shopMapper.insert(shop);
+	public int insertShop(Map<String, Object> shop) {
+		//店铺插入
+		if(shopMapper.insert(shop)>0){
+			//讲师信息插入
+			Map<String,Object> lecturerInfo = new HashMap<>();
+			lecturerInfo.put("lecturer_id",shop.get("lecturer_id"));
+			lecturerInfo.put("create_time",new Date());
+			lecturerInfo.put("shop_id",shop.get("shop_id"));
+			return(lecturerMapper.insertLecture(lecturerInfo));
+		}
+		return 0;
 	}
-
 	@Override
 	public void updateAccountUser(Map<String, Object> reqMap) {
 		userMapper.updateUser(reqMap);

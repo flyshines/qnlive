@@ -546,8 +546,8 @@
   </select>
   <!-- 后台_搜索课程列表(同时搜索课程名、课程id) -->
   <select id="findCourseListBySearch" parameterType="hashmap" resultType="hashmap">
-    SELECT course_id, course_title, course_type, room_id, lecturer_id
-    FROM t_courses
+    SELECT course_id, course_title, course_type, shop_id,lecturer_id
+    FROM t_course
     <where>
       app_name = #{app_name}
       <if test="search_param != null and search_param != ''">

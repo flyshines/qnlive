@@ -215,8 +215,10 @@ public class CacheUtils extends JedisServer{
 	}
 	
 
-	public Map<String,String> readShop(String shop_id, Map<String,Object> param,String functionName,Boolean force,Jedis jedis) throws Exception{
-		Map<String,String> values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param , functionName, readShopOperation, jedis, force);
+	public Map<String,String> readShop(String shop_id, Boolean force,Jedis jedis) throws Exception{
+		Map<String,Object> param = new HashMap<>();
+		param.put("shop_id",shop_id);
+		Map<String,String> values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param , CommonReadOperation.CACHE_READ_SHOP, readShopOperation, jedis, force);
 
 		if(values.isEmpty()){
 			//店铺不存在
@@ -228,7 +230,7 @@ public class CacheUtils extends JedisServer{
 			keyMap.put(Constants.CACHED_KEY_SHOP_FIELD, shop_id);
 			String key = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SHOP, keyMap);
 			jedis.del(key);
-			values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD,  param , functionName, readShopOperation, jedis, true);
+			values = readDataByFunction(shop_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD,  param , CommonReadOperation.CACHE_READ_SHOP, readShopOperation, jedis, true);
 		}
 		return values;
 	}

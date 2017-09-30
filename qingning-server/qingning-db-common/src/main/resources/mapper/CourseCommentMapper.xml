@@ -8,15 +8,15 @@
   <select id="selectByPrimaryKey" resultType="hashmap" parameterType="java.lang.String" >
     select 
     <include refid="Base_Column_List" />
-    from t_saas_course_comment
+    from t_course_comment
     where comment_id = #{comment_id,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
-    delete from t_saas_course_comment
+    delete from t_course_comment
     where comment_id = #{comment_id,jdbcType=VARCHAR}
   </delete>
   <insert id="insert" parameterType="hashmap" >
-    insert into t_saas_course_comment
+    insert into t_course_comment
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="comment_id != null" >
         comment_id,
@@ -89,7 +89,7 @@
     </trim>
   </insert>
   <update id="updateByPrimaryKey" parameterType="hashmap" >
-    update t_saas_course_comment
+    update t_course_comment
     <set >
       <if test="course_id != null" >
         course_id = #{course_id,jdbcType=VARCHAR},
@@ -134,7 +134,7 @@
         t.avatar_address,
         t.create_time
     FROM
-        `t_saas_course_comment` t
+        `t_course_comment` t
     WHERE
         t.shop_id = #{shop_id,jdbcType=VARCHAR}
     <if test="course_name != null" >

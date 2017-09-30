@@ -49,9 +49,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     private CoursesStudentsMapper coursesStudentsMapper;
 
     @Autowired(required = true)
-    private LecturerDistributionInfoMapper lecturerDistributionInfoMapper;
-
-    @Autowired(required = true)
     private SystemConfigMapper systemConfigMapper;
 
     @Autowired(required = true)
@@ -71,58 +68,6 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     @Autowired(required = true)
     private LecturerCoursesProfitMapper lecturerCoursesProfitMapper;
 
-    /**
-     * 创建直播间
-     */
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public Map<String, Object> createLiveRoom(Map<String, Object> reqMap) {
-        Date now = new Date();
-        //1.插入直播间表
-        Map<String, Object> liveRoom = new HashMap<String, Object>();
-        liveRoom.put("room_id", reqMap.get("room_id"));
-        liveRoom.put("", reqMap.get(""));
-        liveRoom.put("user_id", reqMap.get("user_id"));
-        liveRoom.put("rq_code", reqMap.get("room_id"));
-        liveRoom.put("room_address", reqMap.get("room_address"));
-        liveRoom.put("room_name", reqMap.get("room_name"));
-        liveRoom.put("avatar_address", reqMap.get("avatar_address"));
-        liveRoom.put("room_remark", reqMap.get("room_remark"));
-        liveRoom.put("lecturer_id", reqMap.get("user_id"));
-        liveRoom.put("create_time", now);
-        liveRoom.put("update_time", now);
-        liveRoomMapper.insertLiveRoom(liveRoom);
-
-        //2.如果该用户为普通用户，则需要插入讲师表，并且修改登录信息表中的身份，
-        // 同时插入t_lecturer_distribution_info讲师分销信息表(统计冗余表)
-        boolean isLecturer = (Boolean) reqMap.get("isLecturer");
-        if (isLecturer == false) {
-            //2.1插入讲师表
-            Map<String, Object> lecturer = new HashMap<String, Object>();
-            lecturer.put("lecturer_id", reqMap.get("user_id"));
-            lecturer.put("live_room_num", 1L);
-            lecturer.put("create_time", now);
-            lecturer.put("update_time", now);
-            lecturerMapper.insertLecture(lecturer);
-
-            //2.2修改登录信息表 身份
-            Map<String, Object> updateMap = new HashMap<>();
-            updateMap.put("user_id", reqMap.get("user_id").toString());
-            updateMap.put("add_role", "," + Constants.USER_ROLE_LECTURER);
-            loginInfoMapper.updateUserRole(updateMap);
-
-            //2.3插入讲师分销信息表(统计冗余表)
-            Map<String, Object> lecturerDistributionInfo = new HashMap<String, Object>();
-            lecturerDistributionInfo.put("lecturer_id", reqMap.get("user_id"));
-            lecturerDistributionInfo.put("create_time", now);
-            lecturerDistributionInfo.put("update_time", now);
-            lecturerDistributionInfoMapper.insertLecturerDistributionInfo(lecturerDistributionInfo);
-        }
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("room_id", reqMap.get("room_id"));
-        return resultMap;
-    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -565,6 +510,11 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
+    public List<Map<String, Object>> findSeriesByLecturer(String lecturer_id) {
+        return null;
+    }
+
+    @Override
     public List<Map<String, Object>> findSeriesIdByStudent(Map<String, Object> reqMap) {
         return seriesStudentsMapper.findSeriesIdByStudent(reqMap);
     }
@@ -574,6 +524,39 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return shopMapper.selectByPrimaryKey(id,userId);
     }
 
+    @Override
+    public void userVisitShop(String userId, String shopId) {
+        if (shopUserMapper.selectExistUser(userId, shopId) == 0) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("shop_id", shopId);
+            userMap.put("user_id", userId);
+            userMap.put("user_type", "0");
+            userMap.put("total_consume", 0);
+            userMap.put("total_consume", 0);
+            userMap.put("msg_num", 0);
+            userMap.put("create_time", new Date());
+            shopUserMapper.insert(userMap);
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> findUserBuiedRecords(Map<String, Object> query) {
+        List<Map<String, Object>> res;
+        if ("1".equals(query.get("type"))) {
+            //单品已购
+            query.put("profit_type", "0");
+            res = lecturerCoursesProfitMapper.findUserBuiedSingleRecords(query);
+        } else {
+            //系列已购
+            query.put("profit_type", "2");
+            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+            res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+                map.put("title", map.get("series_title"));
+            });
+
+        }
+        return res;
+    }
     /**
      * 根据系列id获得该系列的所有学员列表
      */

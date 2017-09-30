@@ -98,7 +98,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
 
             Map<String, Object> readShopMap = new HashMap<>();
             readShopMap.put("shop_id", shopId);
-            Map<String, String> shopInfo = readShop(shopId, readShopMap, "getShopInfoByMap", false, jedis);
+            Map<String, String> shopInfo = readShop(shopId, false, jedis);
             if (MiscUtils.isEmpty(shopInfo)) {
                 logger.error("获取已购买的系列课程>>>>请求的店铺不存在");
                 throw new QNLiveException("190001");
@@ -171,9 +171,7 @@ public class UserServerImpl extends AbstractQNLiveServer {
         	/*
         	 * 根据请求店铺获得该店铺的讲师id
         	 */
-            Map<String, Object> readShopMap = new HashMap<>();
-            readShopMap.put("shop_id", shopId);
-            Map<String, String> shopInfo = readShop(shopId, readShopMap, "getShopInfoByMap", false, jedis);
+            Map<String, String> shopInfo = readShop(shopId, false, jedis);
             if (MiscUtils.isEmpty(shopInfo)) {
                 logger.error("获取已购买的单品课程>>>>请求的店铺不存在");
                 throw new QNLiveException("190001");
