@@ -1165,23 +1165,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		userMapper.updateUser(queryMap);
 	}
 
-	@Override
-	public String findLiveRoomIdByLectureId(String lecturer_id) {
-		return liveRoomMapper.findLiveRoomIdByLectureId(lecturer_id);
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	/**

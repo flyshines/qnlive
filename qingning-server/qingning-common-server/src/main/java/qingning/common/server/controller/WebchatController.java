@@ -248,50 +248,50 @@ public class WebchatController extends AbstractController {
      * 如果有就进行正常跳转
      * 如果没有就进行手动授权
      * 1.3 修改：新增SaaS登录回调逻辑17-06-24
-     *
+     *旧的微信登录
      * @param response
      * @throws Exception
      */
-    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
-    public void weixinLogin(
-            @RequestParam("code") String code,
-            @RequestParam(value = "state", defaultValue = "qnlive") String state,
-            @RequestParam(value = "key", defaultValue = "") String paramKey, HttpServletResponse response) throws Exception {
-        Map<String, String> map = new HashMap<>();
-        String appName = state;
-        map.put("code", code);
-        if (state.equals("qnsaas")) {
-            appName = "qnlive";
-        }
-        map.put("state", appName);
-        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "");
-        requestEntity.setParam(map);
-        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
-        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
-        Integer key = Integer.valueOf(resultMap.get("key").toString());
-        if (key == 1) {
-            String userWeixinAccessToken = (String) resultMap.get("access_token");
-            if (state.equals("qnsaas")) {//跳转h5店铺
-                logger.debug("key:" + paramKey);
-                if (StringUtils.isNotEmpty(paramKey)) {
-                    String newUrl = new String(Base64.decode(paramKey));
-                    logger.debug("url:" + newUrl);
-                    response.sendRedirect(newUrl + "token=" + userWeixinAccessToken);
-                } else {
-                    response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index") + userWeixinAccessToken);
-                }
-            } else {//跳转直播
-                response.sendRedirect(MiscUtils.getConfigByKey("web_index") + userWeixinAccessToken);
-            }
-            return;
-        }
-        //如果没有拿到
-        logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
-        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
-        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url")).replace("STATE", state);//修改参数
-        response.sendRedirect(authorizationUrl);
-        return;
-    }
+//    @RequestMapping(value = "/common/weixin/weixinlogin", method = RequestMethod.GET)
+//    public void weixinLogin(
+//            @RequestParam("code") String code,
+//            @RequestParam(value = "state", defaultValue = "qnlive") String state,
+//            @RequestParam(value = "key", defaultValue = "") String paramKey, HttpServletResponse response) throws Exception {
+//        Map<String, String> map = new HashMap<>();
+//        String appName = state;
+//        map.put("code", code);
+//        if (state.equals("qnsaas")) {
+//            appName = "qnlive";
+//        }
+//        map.put("state", appName);
+//        RequestEntity requestEntity = this.createResponseEntity("CommonServer", "weixinCodeUserLogin", null, "");
+//        requestEntity.setParam(map);
+//        ResponseEntity responseEntity = this.process(requestEntity, serviceManger, message);
+//        Map<String, Object> resultMap = (Map<String, Object>) responseEntity.getReturnData();
+//        Integer key = Integer.valueOf(resultMap.get("key").toString());
+//        if (key == 1) {
+//            String userWeixinAccessToken = (String) resultMap.get("access_token");
+//            if (state.equals("qnsaas")) {//跳转h5店铺
+//                logger.debug("key:" + paramKey);
+//                if (StringUtils.isNotEmpty(paramKey)) {
+//                    String newUrl = new String(Base64.decode(paramKey));
+//                    logger.debug("url:" + newUrl);
+//                    response.sendRedirect(newUrl + "token=" + userWeixinAccessToken);
+//                } else {
+//                    response.sendRedirect(MiscUtils.getConfigByKey("qnsaas_index") + userWeixinAccessToken);
+//                }
+//            } else {//跳转直播
+//                response.sendRedirect(MiscUtils.getConfigByKey("web_index") + userWeixinAccessToken);
+//            }
+//            return;
+//        }
+//        //如果没有拿到
+//        logger.info("没有拿到openId 或者 unionid 跳到手动授权页面");
+//        String authorization_url = MiscUtils.getConfigByKey("authorization_userinfo_url");//手动授权url
+//        String authorizationUrl = authorization_url.replace("APPID", MiscUtils.getConfigByKey("appid")).replace("REDIRECTURL", MiscUtils.getConfigByKey("redirect_url")).replace("STATE", state);//修改参数
+//        response.sendRedirect(authorizationUrl);
+//        return;
+//    }
 
 
     /**

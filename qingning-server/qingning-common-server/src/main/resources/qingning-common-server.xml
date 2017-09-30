@@ -2,7 +2,7 @@
 <servers>
 
     <server name="CommonServer">
-        <default class="qingning.common.server.imp.CommonServerImpl1">
+        <default class="qingning.common.server.imp.CommonServerImpl">
             <!-- 绑定手机验证码 -->
             <function name="bindPhone">
                 <auth>

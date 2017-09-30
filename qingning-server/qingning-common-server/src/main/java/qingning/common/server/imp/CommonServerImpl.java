@@ -1092,7 +1092,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         MiscUtils.converObjectMapToStringMap(loginInfoMap, cacheMap);
         //2.根据相关信息生成access_token
         String access_token = AccessTokenUtil.generateAccessToken(user_id, last_login_date);
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("access_token", access_token);
         String process_access_token = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_ACCESS_TOKEN, map);
         jedis.hmset(process_access_token, cacheMap);
@@ -1111,13 +1111,11 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             resultMap.put("user_id", user_id);
         }
 
-
-
         //注册店铺用到
         loginInfoMap.put("user_name", userMap.get("nick_name"));
         loginInfoMap.put("avatar_address", userMap.get("avatar_address"));
+        loginInfoMap.put("lecturer_id", user_id);
 
-        resultMap.put("room_id", getRoomIdFromCache(user_id,jedis));
         //</editor-fold>
         String shop_id = "";
         if (!MiscUtils.isEmpty(userMap.get("shop_id"))) {
@@ -1143,23 +1141,6 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         resultMap.put("shop_id", shop_id);
         resultMap.put("avatar_address", userMap.get("avatar_address"));
         resultMap.put("nick_name", userMap.get("nick_name"));
-    }
-    private String getRoomIdFromCache(String lecturer_id,Jedis jedis){
-        //直播间信息查询
-        Map<String, String> map = new HashMap<>();
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, lecturer_id);
-        String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-        Map<String, String> key = jedis.hgetAll(liveRoomListKey);
-        String roomId = null;
-        if (key != null && !key.isEmpty()) {
-            for (String id : key.keySet()) {
-                roomId = id;
-            }
-        }
-        if(roomId==null){
-            roomId = commonModuleServer.findLiveRoomIdByLectureId(lecturer_id);
-        }
-        return roomId;
     }
 
     private String qiNiuFetchURL(String mediaUrl) throws Exception {
@@ -1342,8 +1323,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
      * @throws Exception
      */
     @FunctionName("pcCodeUserLogin")
-    public Map<String, Object> pcCodeUserLogin(RequestEntity reqEntity) {
-        try {
+    public Map<String, Object> pcCodeUserLogin(RequestEntity reqEntity) throws Exception {
             Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
             Map<String, Object> resultMap = new HashMap<String, Object>();
             Jedis jedis = jedisUtils.getJedis();
@@ -1369,10 +1349,6 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             if (errCode != null) {
                 throw new QNLiveException("120008");
             }
-//        if(userJson.get("subscribe") != null){
-//            subscribe = userJson.get("subscribe").toString();
-//        }
-
             String nickname = userJson.getString("nickname");//昵称
             resultMap.put("name", nickname);
 
@@ -1387,26 +1363,6 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             //1.2.1.1如果用户存在则进行登录流程
             if (loginInfoMap != null) {//有
                 processLoginSuccess(2, null, loginInfoMap, resultMap);//获取后台安全证书 access_token
-                Object phone = loginInfoMap.get("phone_number");
-                if (phone != null) { //有直播间和手机号
-                    resultMap.put("key", "1");
-                } else {
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    map.put(Constants.CACHED_KEY_LECTURER_FIELD, loginInfoMap.get("user_id"));
-                    String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-                    Map<String, String> liveRoomsMap = jedis.hgetAll(liveRoomListKey);
-
-                    if (CollectionUtils.isEmpty(liveRoomsMap)) {//登录过 没有直播间信息
-                        resultMap.put("key", "3");
-                    }
-                }
-                /*if (reqMap.get("is_saas") != null) {
-                    //SaaS登录检查用户店铺逻辑
-                    reqMap.put("user_id", loginInfoMap.get("user_id").toString());
-                    checkShopInfo(loginInfoMap, reqEntity, jedis);
-                }*/
-                //店铺，直播间 信息
-                getRoomAndShop(resultMap, jedis);
                 return resultMap;
             } else {
                 String sex = userJson.getString("sex");//性别
@@ -1442,15 +1398,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
 
                 //微信性别与本系统性别转换
                 //微信用户性别 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-                if (sex.equals("1")) {
-                    reqMap.put("gender", "1");//TODO
-                }
-                if (sex.equals("2")) {
-                    reqMap.put("gender", "0");//TODO
-                }
-                if (sex.equals("0")) {
-                    reqMap.put("gender", "2");//TODO
-                }
+                reqMap.put("gender", sex.equals("2")?"0":(sex.equals("0")?"2":sex));
 
                 union_id = userJson.getString("unionid");
                 reqMap.put("unionid", union_id);
@@ -1466,43 +1414,10 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
                     checkShopInfo(loginInfoMap, reqEntity, jedis);
                 }*/
 
-                //店铺，直播间 信息
-                getRoomAndShop(resultMap, jedis);
-
                 return resultMap;
             }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            System.err.println(e);
-        }
-        return null;
     }
 
-    private void getRoomAndShop(Map<String, Object> map, Jedis jedis) {
-        String userId = map.get("user_id").toString();
-        //直播间信息查询
-        map.put(Constants.CACHED_KEY_LECTURER_FIELD, userId);
-        String liveRoomListKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_ROOMS, map);
-        Map<String, String> key = jedis.hgetAll(liveRoomListKey);
-        String roomId = null;
-        if (key != null && !key.isEmpty()) {
-            for (String id : key.keySet()) {
-                roomId = id;
-            }
-        }
-        map.put("room_id", roomId);
-
-        //讲师店铺查询
-        Map<String, Object> query = new HashMap<>();
-        query.put("user_id", userId);
-        try {
-            //TODO shop
-            //Map<String, String> shop = readshop(userId, query,null, false, jedis);
-            //map.put("shop_id", shop.get("shop_id"));
-        } catch (Exception e) {
-            //店铺不存在
-        }
-    }
     @FunctionName("weiXinConfiguration")
     public Map<String, String> getWeiXinConfiguration(RequestEntity reqEntity) throws Exception {
         Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
@@ -1533,7 +1448,6 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             //系列课
             query.put("series_id", courseId);
             courseMap = readSeries(courseId, generateRequestEntity(null, null, null, query), readSeriesOperation, jedis, true);
-            courseMap.put("room_id",getRoomIdFromCache(courseMap.get("lecturer_id"),jedis));
         } else {
             //打赏，课程收益
             courseMap = readCourse(courseId, generateRequestEntity(null, null, null, query), readCourseOperation, jedis, false);
@@ -1551,7 +1465,8 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         insertMap.put("user_id", userId);
         //判断roomID
         if (courseMap.get("room_id") == null) {
-            courseMap.put("room_id",getRoomIdFromCache(courseMap.get("lecturer_id"),jedis));
+            //TODO roomeID
+            //courseMap.put("room_id",getRoomIdFromCache(courseMap.get("lecturer_id"),jedis));
         }
         //讲师店铺查询
         query.put("user_id", courseMap.get("lecturer_id"));
@@ -1569,7 +1484,8 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             //打赏嘉宾ID
             if(reqMap.get("guest_id")!=null&&!reqMap.get("guest_id").toString().equals(courseMap.get("lecturer_id"))){
                 String guestId = reqMap.get("guest_id").toString();
-                insertMap.put("room_id",getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis));
+                //TODO roomeID
+                //insertMap.put("room_id",getRoomIdFromCache(reqMap.get("guest_id").toString(),jedis));
                 insertMap.put("guest_id", guestId);
             }
             insertMap.put("amount", reqMap.get("reward_amount"));

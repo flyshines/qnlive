@@ -18,7 +18,7 @@ public class ExceptionHanderAdvice {
 	private static Logger log = LoggerFactory.getLogger(ExceptionHanderAdvice.class);
 	@Autowired
 	private MessageEntity message;
-	@ExceptionHandler(value=QNLiveException.class)
+	@ExceptionHandler(value=Exception.class)
 	public @ResponseBody ResponseEntity handException(Exception exception){
 		ResponseEntity responseEntity = new ResponseEntity();
 		if(exception instanceof InvocationTargetException){
