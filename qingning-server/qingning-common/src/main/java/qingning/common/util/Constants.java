@@ -199,6 +199,10 @@ public final class Constants {
 	public static final String CACHED_KEY_USER_SHARE_CODES = "USER:SHARE_CODES:{lecturer_id}";//分享share  讲师id
 	public static final String CACHED_KEY_LECTURER_SERIES_UP = "SYS:LECTURER:{lecturer_id}:SERIES:UP";//zset 讲师所有上架系列 (series_id,上架时间)
 	public static final String CACHED_KEY_LECTURER_SERIES_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:DOWN";//zset 讲师所有下架系列 (series_id,下架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:UP";//zset 讲师所有指定类型的上架系列 (series_id,上架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有指定类型的下架系列 (series_id,下架时间)
+	public static final String CACHED_KEY_LECTURER_SERIES_NON_LIVE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:NON_LIVE:UP";//zset  讲师 直播系列上架
+	public static final String CACHED_KEY_LECTURER_SERIES_NON_LIVE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:NON_LIVE:DOWN";//zset 讲师 直播系列下架
 	public static final String CACHED_KEY_SERVICE_LECTURER = "LECTURER:WEIXIN:{lecturer_id}";
 	/** 讲师相关 end **************************************/
 	//</editor-fold>
@@ -289,8 +293,8 @@ public final class Constants {
 	public static final String CACHED_KEY_SERIES_USERS = "SYS:SERIES:USERS:{series_id}";//系列课已购人员列表(收费课程)
 	public static final String CACHED_KEY_SERIES_COURSE_UP = "SYS:SERIES:COURSE:{series_id}:UP";//zset 系列的课程 (course_id,上架时间)
 	public static final String CACHED_KEY_SERIES_COURSE_DOWN = "SYS:SERIES:COURSE:{series_id}:DOWN";//zset 系列的课程 (course_id,下架时间)下架
-	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_UP = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:UP";//zset 讲师所有指定类型的上架系列 (series_id,上架时间)
-	public static final String CACHED_KEY_LECTURER_SERIES_COURSE_DOWN = "SYS:LECTURER:{lecturer_id}:SERIES:{series_course_type}:DOWN";//zset 讲师所有指定类型的下架系列 (series_id,下架时间)
+
+
 	/** 系列相关 end **************************************/
 	//</editor-fold>
 
@@ -458,7 +462,7 @@ public final class Constants {
 
 	public static final String SYS_SERIES_COURSE_DOWN ="SYS_SERIES_COURSE_DOWN";//系列 课程 下架
 
-
+	public static final String SYS_SHOP_SERIES_ALL ="SYS_SERIES_COURSE_ALL";//系列 课程 下架
 	/*************************** readCourseKey ***********************************************/
 
 

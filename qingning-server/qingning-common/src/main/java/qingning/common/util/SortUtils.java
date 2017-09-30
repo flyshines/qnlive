@@ -5,6 +5,7 @@ import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.initcache.ReadCourseOperation;
+import qingning.server.rpc.initcache.ReadSeriesOperation;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
 
@@ -446,9 +447,72 @@ public class SortUtils {
     }
 
 
+    /**无分页缓存
+     * 更改系列
+     * 上架或下架
+     * @param series
+     * @param jedis
+     * @throws Exception
+     */
+    public static void updateSeriesListByRedis(Map<String, String> series, Jedis jedis, ReadSeriesOperation operation, RequestEntity requestEntity) throws Exception {
+        String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, series);//讲师所有上架系列
+        String lecturerSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, series);//讲师所有下架系列
+        String seriesCourseTypeUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, series);//讲师在不同的课程内容下架的系列
+        String seriesCourseTypeDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, series);//讲师在不同的课程内容上架的系列
+        String seriesNonLiveUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_UP, series);//讲师在不同的课程内容下架的系列
+        String seriesNonLiveDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_DOWN, series);//讲师在不同的课程内容上架的系列
+
+        jedis.del(lecturerSeriesUpKey);
+        jedis.del(lecturerSeriesDownKey);
+        jedis.del(seriesCourseTypeUpKey);
+        jedis.del(seriesCourseTypeDownKey);
+        jedis.del(seriesNonLiveUpKey);
+        jedis.del(seriesNonLiveDownKey);
+        refreshSeriesListByRedis(series.get(Constants.CACHED_KEY_LECTURER_FIELD),jedis,operation,requestEntity);
+
+    }
 
 
-
+    /**
+     * 刷新系列缓存
+     * @param jedis
+     * @param operation
+     * @param requestEntity
+     * @return
+     * @throws Exception
+     */
+    public static void refreshSeriesListByRedis(String lecturer_id,Jedis jedis,ReadSeriesOperation operation, RequestEntity requestEntity) throws Exception{
+        Map<String,Object> queryMap = new HashMap<>();
+        queryMap.put(Constants.CACHED_KEY_LECTURER_FIELD,lecturer_id);
+        requestEntity.setParam(queryMap);
+        requestEntity.setFunctionName(Constants.SYS_SHOP_SERIES_ALL);
+        List<Map<String, String>> seriesList = (List<Map<String, String>>) operation.invokeProcess(requestEntity);
+        for(Map<String, String> seriesMap : seriesList){
+            String seriesId = seriesMap.get(Constants.CACHED_KEY_SERIES_FIELD);
+            long lpos = 0L;
+           List<String> keyList = new ArrayList<>();
+            if(seriesMap.get("updown").equals("1")){
+                String lecturerSeriesUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_UP, seriesMap);//讲师所有上架系列
+                String seriesCourseTypeUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_UP, seriesMap);//讲师在不同的课程内容下架的系列
+                String seriesNonLiveUpKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_UP, seriesMap);//讲师在不同的课程内容下架的系列
+                lpos = MiscUtils.convertInfoToPostion(Long.valueOf(seriesMap.get("update_course_time")), Long.valueOf(seriesMap.get("position")));//算出位置
+                keyList.add(lecturerSeriesUpKey);
+                keyList.add(seriesCourseTypeUpKey);
+                keyList.add(seriesNonLiveUpKey);
+            }else{
+                String lecturerSeriesDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_DOWN, seriesMap);//讲师所有下架系列
+                String seriesCourseTypeDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_COURSE_DOWN, seriesMap);//讲师在不同的课程内容上架的系列
+                String seriesNonLiveDownKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_LECTURER_SERIES_NON_LIVE_DOWN, seriesMap);//讲师在不同的课程内容上架的系列
+                lpos = MiscUtils.convertInfoToPostion(Long.valueOf(seriesMap.get("create_time")), Long.valueOf(seriesMap.get("position")));//算出位置
+                keyList.add(lecturerSeriesDownKey);
+                keyList.add(seriesCourseTypeDownKey);
+                keyList.add(seriesNonLiveDownKey);
+            }
+            for(String key : keyList){
+                jedis.zadd(key,lpos,seriesId);
+            }
+        }
+    }
 
 
 
