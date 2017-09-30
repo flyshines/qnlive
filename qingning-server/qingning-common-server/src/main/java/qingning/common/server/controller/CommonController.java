@@ -88,7 +88,6 @@ public class CommonController extends AbstractController {
     /**
      * 总控开关
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @RequestMapping(value = "/common/client/control", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity control(
             @RequestParam(value = "plateform" ,defaultValue = "0") String plateform,

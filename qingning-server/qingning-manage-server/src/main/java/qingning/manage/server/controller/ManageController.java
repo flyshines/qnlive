@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import qingning.common.entity.RequestEntity;
 import qingning.common.entity.ResponseEntity;
 import qingning.common.util.CSVUtils;
-import qingning.server.AbstractController;
+import qingning.common.util.Constants;import qingning.server.AbstractController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -283,6 +283,5 @@ public class ManageController extends AbstractController {
         File file = CSVUtils.createCSVFile(exportCourseList, headMap, null, "订单记录");
         CSVUtils.exportFile(resp, file.getName(), file);
     }
-
 
 }

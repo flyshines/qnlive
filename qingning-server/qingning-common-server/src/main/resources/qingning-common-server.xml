@@ -1,25 +1,413 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <servers>
 
-	<server name="CommonServer">
-		<default class="qingning.common.server.imp.CommonServerImpl1">
-			<!-- 绑定手机验证码 -->
-			<function name="bindPhone">
-				<auth>
-					<accessToken require="Y" />
-				</auth>
-				<inputs>
-					<param name="phone" type="string" require="Y,000100"/>
-					<param name="code" type="string" require="Y,000100"/>
-				</inputs>
-				<outputs>
-				</outputs>
-			</function>
+    <server name="CommonServer">
+        <default class="qingning.common.server.imp.CommonServerImpl1">
+            <!-- 绑定手机验证码 -->
+            <function name="bindPhone">
+                <auth>
+                    <accessToken require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="phone" type="string" require="Y,000100"/>
+                    <param name="code" type="string" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="logUserInfo">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                    <param name="login_id" type="string"/>
+                    <param name="login_type" type="string" default="0"/>
+                    <param name="user_id" type="string"/>
+                    <param name="phone_num" type="string"/>
+                    <param name="device_id" type="string"/>
+                    <param name="plateform" type="string" require="Y,000100"/>
+                    <param name="device_model" type="string"/>
+                    <param name="device_oem" type="string"/>
+                    <param name="screen_size" type="string"/>
+                    <param name="os_version" type="string"/>
+                    <param name="longitude" type="string"/>
+                    <param name="latitude" type="string"/>
+                    <param name="download_channel" type="string"/>
+                    <param name="net_status" type="string"/>
+                    <param name="network_operators" type="string"/>
+                    <param name="webchat_authorization" type="string"/>
+                    <param name="status" type="string" default="2"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="getVersion">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="plateform" type="int" require="Y,000100"/>
+                    <param name="version" type="String" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="control">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="plateform" type="int" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                    <param name="os_audit_version" type="String"/>
+                </outputs>
+            </function>
+            <function name="serverTime">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="qiNiuUploadToken">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                    <param name="upload_type" type="string" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
 
-		</default>
+            <function name="getShopCard">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="room_id" type="string" require="Y,000100"/>
+                    <param name="png" type="string" require="N"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="createFeedback">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="Y"/>
+                    <timesLimit millisecond="1000"/>
+                </auth>
+                <inputs>
+                    <param name="content" type="string" require="Y,000100"/>
+                    <param name="phone_number" type="string" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="getShareInfo">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="Y"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="png" type="string" require="N"/>
+                    <param name="query_type" type="string" require="Y,000100"/>
+                    <param name="id" type="string" require="N" validate="(query_type,id)=>{
+                                   var isEmpty= id==null || id.length == 0;
+                                   if(!utils.isEqual(query_type,'3') &amp;&amp; isEmpty){
+                                      return false;
+                                   }else{
+                                      return true;
+                                   }
+                                   },000100"/>
+                </inputs>
+                <outputs>
+                    <param name="title" type="string"/>
+                    <param name="content" type="string"/>
+                    <param name="second_content" type="string"/>
+                    <param name="icon_url" type="string"/>
+                    <param name="simple_content" type="string"/>
+                    <param name="share_url" type="string"/>
+                    <param name="png_url" type="string"/>
+                </outputs>
+            </function>
+            <function name="sendVerificationCode">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="phone" type="string" require="Y,000100"/>
+                    <param name="ipAdress" type="string" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+
+            <function name="sendIMError">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <!-- 七牛文件截取 -->
+            <function name="cutMedia">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                    <param name="file_url" type="string" require="Y,000100"/>
+                    <param name="type" type="string" format="1|2,000004" require="Y,000100"/>
+                    <param name="time_second" type="long" default="" require="N"/>
+                </inputs>
+                <outputs>
+                    <param name="persistent_id" type="string"/>
+                    <param name="new_url" type="string"/>
+                </outputs>
+            </function>
+            <!--发送手机验证码-以后手机号码-->
+            <function name="sendVipVerificationCode">
+                <auth>
+                    <accessToken require="Y"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="ipAdress" type="string" require="Y,000100"/>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="userLoginByUserId">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                    <param name="num" type="string"/>
+                    <param name="loginArray" type="list">
+                        <param name="access_token" type="string"/>
+                    </param>
+
+                </outputs>
+            </function>
+
+            <function name="newWeixinCodeUserLogin">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="N"/>
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="userLogin">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                    <param name="login_id" type="string" require="Y,000100"/>
+                    <param name="login_type" type="string" require="Y,000100" format="^[024]$,000004"/>
+                    <param name="certification" type="string" require="Y,000100"/>
+                    <param name="refresh_token" type="string" require="N"/>
+                    <param name="avatar_address" type="string" require="N"/>
+                    <param name="nick_name" type="rstring" require="N"/>
+                    <param name="server_url_update_time" type="long" require="N"/>
+                    <param name="device_id" type="string" require="Y,000100"/>
+                    <param name="gender" type="string" require="N"/>
+                </inputs>
+                <outputs>
+                    <param name="access_token" type="string"/>
+                    <param name="m_user_id" type="string"/>
+                    <param name="user_id" type="string"/>
+                    <param name="room_id" type="string"/>
+                    <param name="shop_id" type="string"/>
+                    <param name="nick_name" type="rstring"/>
+                    <param name="server_url_info_update_time" type="long"/>
+                    <param name="avatar_address" type="string"/>
+                    <param name="im_account_info" type="string"/>
+                    <param name="server_url_info_list" type="map">
+                        <param name="protocol" type="string"/>
+                        <param name="domain_name" type="string"/>
+                        <param name="method" type="string"/>
+                        <param name="server_url" type="string"/>
+                    </param>
+                </outputs>
+            </function>
+            <function name="accountLogin">
+                <auth>
+                    <accessToken require="N"/>
+                    <appName require="Y"/>
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="accountRegister">
+                <auth>
+                    <accessToken require="N" />
+                    <appName require="N" />
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="weixinCodeUserLogin">
+                <auth>
+                    <accessToken require="N" />
+                    <appName require="Y" />
+                </auth>
+                <inputs>
+                    <param name="code" type="string"  validate="(code)=>{
+					       		var isEmpty= code==null || code.length == 0;
+					       		return !isEmpty;},000100"/>
+                </inputs>
+                <outputs>
+                    <param name="access_token" type="string"/>
+                    <param name="key" type="string"/>
+                    <param name="m_user_id" type="string"/>
+                    <param name="user_id" type="string"/>
+                    <param name="nick_name" type="rstring"/>
+                    <param name="server_url_info_update_time" type="long"/>
+                    <param name="avatar_address" type="string"/>
+                    <param name="im_account_info" type="string"/>
+                    <param name="open_sharing" type="string"/>
+                    <param name="web_im_url" type="string"/>
+                    <param name="server_url_info_list" type="map">
+                        <param name="protocol" type="string"/>
+                        <param name="domain_name" type="string"/>
+                        <param name="method" type="string"/>
+                        <param name="server_url" type="string"/>
+                    </param>
+                </outputs>
+            </function>
+            <function name="newWeixinCodeUserLogin">
+                <auth>
+                    <accessToken require="N" />
+                    <appName require="N" />
+                </auth>
+                <inputs>
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+            <function name="pcCodeUserLogin">
+                <auth>
+                    <accessToken require="N" />
+                    <appName require="Y" />
+                </auth>
+                <inputs>
+                    <param name="code" type="string"  validate="(code)=>{
+					       		var isEmpty= code==null || code.length == 0;
+					       		return !isEmpty;},000100"/>
+                </inputs>
+                <outputs>
+                    <param name="access_token" type="string"/>
+                    <param name="key" type="string"/>
+                    <param name="name" type="string"/>
+                    <param name="shop_id" type="string"/>
+                    <param name="open_sharing" type="string"/>
+                    <param name="room_id" type="string"/>
+                    <param name="synchronization_token" type="string"/>
+                    <param name="name" type="string"/>
+                </outputs>
+            </function>
+            <function name="weiXinConfiguration">
+                <auth>
+                    <accessToken require="N" />
+                    <appName require="Y" />
+                </auth>
+                <inputs>
+                    <param name="url" type="string" require="Y,000100"  />
+                </inputs>
+                <outputs>
+                </outputs>
+            </function>
+        <function name="generateWeixinPayBill">
+            <auth>
+                <accessToken require="N" />
+                <appName require="Y" />
+                <timesLimit millisecond="100" />
+            </auth>
+            <inputs>
+                <param name="profit_type" type="string" require="Y,000100"  format="^[0-2]$,120011"/>
+                <param name="course_id" type="string" require="Y,000100"/>
+                <param name="guest_id" type="string" require="N"/>
+                <param name="platform" type="string" require="N"/>
+                <param name="reward_amount" type="double" require="N" validate="(profit_type,reward_amount)=>{
+					       		var isEmpty= reward_amount==null || reward_amount == 0;
+					       		if(utils.isEqual(profit_type,'1') &amp;&amp; isEmpty){
+					       		   return false;
+					       		}else{
+					       		   return true;
+					       		}
+					       		},000100"/>
+            </inputs>
+            <outputs>
+            </outputs>
+        </function>
+        <function name="convertWeixinResource">
+            <auth>
+                <accessToken require="Y" />
+                <appName require="Y" />
+                <timesLimit millisecond="300" />
+            </auth>
+            <inputs>
+                <param name="media_id" type="string" require="Y,000100"/>
+            </inputs>
+            <outputs>
+                <param name="url" type="string"/>
+            </outputs>
+        </function>
+
+        <function name="queryOrder">
+            <auth>
+                <accessToken require="N" />
+                <appName require="N" />
+            </auth>
+            <inputs>
+                <param name="user_id" type="string" require="Y,000100"/>
+                <param name="pre_pay_no" type="string" require="Y,000100"/>
+            </inputs>
+            <outputs>
+            </outputs>
+        </function>
+
+        <function name="queryOrder">
+            <auth>
+                <accessToken require="N" />
+                <appName require="N" />
+            </auth>
+            <inputs>
+                <param name="user_id" type="string" require="Y,000100"/>
+                <param name="pre_pay_no" type="string" require="Y,000100"/>
+            </inputs>
+            <outputs>
+            </outputs>
+        </function>
+        </default>
 
         <version num="1.0.0" class="">
         </version>
     </server>
- 
 </servers>

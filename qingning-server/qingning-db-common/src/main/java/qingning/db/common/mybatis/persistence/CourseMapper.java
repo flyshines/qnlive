@@ -142,4 +142,35 @@ public interface CourseMapper {
      * @return
      */
     int increaseStudent(String course_id);
+    void updateCourseCountByCourseId(Map<String, Object> course);
+
+    int updateAfterStudentBuyCourse(Map<String, Object> updateCourseMap);
+
+    /**查询课程
+     * @param reqMap
+     * @return
+     */
+    List<Map<String,Object>> findCourseBySearch(Map<String, Object> reqMap);
+
+    /**查找课程
+     * @param record
+     * @return
+     */
+    List<Map<String,Object>> findCourseByClassifyId(Map<String, Object> record);
+
+    /**根据状态查找
+     * @param record
+     * @return
+     */
+    List<Map<String,Object>> findCourseByStatus(Map<String, Object> record);
+
+    List<Map<String,Object>> findLecturerCourseListByStatus(Map<String, Object> queryMap);
+
+    List<Map<String,Object>> findLecturerCourseList(Map<String, Object> record);
+
+    List<Map<String,Object>> findCourseListBySearch(Map<String, Object> reqMap);
+
+    List<Map<String,Object>> findCourseListBySeriesId(String series_id);
+
+    List<Map<String,Object>> findCourseListAllByLecturerId(String lecturerId);
 }

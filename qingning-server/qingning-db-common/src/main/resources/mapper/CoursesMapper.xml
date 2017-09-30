@@ -414,7 +414,7 @@
     </set>
     where course_id = #{course_id}
   </update>
-  <update id="updateCourseCmountByCourseId" parameterType="hashmap" >
+  <update id="updateCourseCountByCourseId" parameterType="hashmap" >
     update t_courses
     <set >
       <if test="course_amount != null" >

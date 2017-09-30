@@ -39,22 +39,21 @@ public class CountMoneyUtil {
      * 计算并返回要插入t_user_gains表的数据列表
      * @param userIdList 需要新增的用户id列表
      * @param userRoomAmountList 直播间总收入列表，用于获取直播间收入进行计算
-     * @param userDistributerAmountList 分销总收入列表，用于获取分销总收入进行计算
      * @param userWithdrawSumList 用户提现成功总金额列表，用于计算余额
      * @return 计算后需要插入t_user_gains表的数据列表
      */
     public static List<Map<String, Object>> getGaoinsList(List<Map<String, Object>> userIdList,
     		List<Map<String, Object>> userRoomAmountList, 
-    		List<Map<String, Object>> userDistributerAmountList, 
+    		/*List<Map<String, Object>> userDistributerAmountList, */
     		List<Map<String, Object>> userWithdrawSumList){
     	Map<String, Object> userRoomAmountMap = new HashMap<>();	//userId:roonAmount映射
 		for(Map<String, Object> map : userRoomAmountList){
 			userRoomAmountMap.put(map.get("lecturer_id").toString(), map.get("total_amount"));
 		}
 		Map<String, Object> userDistributerAmountMap = new HashMap<>();	//userId:distributerAmount映射
-		for(Map<String, Object> map : userDistributerAmountList){
+		/*for(Map<String, Object> map : userDistributerAmountList){
 			userDistributerAmountMap.put(map.get("distributer_id").toString(), map.get("total_amount"));
-		}
+		}*/
 		Map<String, Object> userWithdrawSumMap = new HashMap<>();	//userId:withdrawSum映射
 		for(Map<String, Object> map : userWithdrawSumList){
 			userWithdrawSumMap.put(map.get("user_id").toString(), map.get("sum"));
