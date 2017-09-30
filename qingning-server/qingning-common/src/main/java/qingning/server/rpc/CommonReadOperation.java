@@ -21,6 +21,7 @@ public interface CommonReadOperation {
 
 	//店铺
 	String CACHE_READ_SHOP = "101";//店铺
+	String CACHE_READ_SHOP_BY_USER = "102";//店铺
 
 
 	//系列

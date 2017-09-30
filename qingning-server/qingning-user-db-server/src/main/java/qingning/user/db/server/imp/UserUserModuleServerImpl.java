@@ -147,8 +147,8 @@ public class UserUserModuleServerImpl implements IUserUserModuleServer {
     }
     //TODO 实现缓存方法
     @Override
-    public Map<String, Object> getShopInfo(String shopId) {
-        return shopMapper.selectByPrimaryKey(shopId);
+    public Map<String, Object> getShopInfo(String shopId,String userId) {
+        return shopMapper.selectByPrimaryKey(shopId,userId);
     }
     //TODO 实现缓存方法
     @Override

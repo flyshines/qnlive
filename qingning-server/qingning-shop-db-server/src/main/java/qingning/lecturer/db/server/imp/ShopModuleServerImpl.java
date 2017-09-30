@@ -570,8 +570,8 @@ public class ShopModuleServerImpl implements IShopModuleServer {
     }
 
     @Override
-    public Map<String, Object> getShopInfo(String id) {
-        return shopMapper.selectByPrimaryKey(id);
+    public Map<String, Object> getShopInfo(String id,String userId) {
+        return shopMapper.selectByPrimaryKey(id,userId);
     }
 
     /**

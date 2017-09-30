@@ -232,6 +232,16 @@ public class CacheUtils extends JedisServer{
 		}
 		return values;
 	}
+	public Map<String,String> readShopByUserId(String user_id, Jedis jedis) throws Exception{
+		Map<String,Object> param = new HashMap<>();
+		param.put("user_id",user_id);
+		Map<String,String> values = readDataByFunction(user_id, Constants.CACHED_KEY_SHOP, Constants.CACHED_KEY_SHOP_FIELD, param , CommonReadOperation.CACHE_READ_SHOP_BY_USER, readShopOperation, jedis, false);
+		if(values.isEmpty()){
+			//店铺不存在
+			throw new QNLiveException("190001");
+		}
+		return values;
+	}
 
 	/**获取用户accessToken String信息
 	 * @param accessToken

@@ -15,7 +15,7 @@ public interface ShopMapper {
 
     int insert(Map<String,Object> record);
 
-    Map<String,Object> selectByPrimaryKey(@Param("shop_id") String shop_id);
+    Map<String,Object> selectByPrimaryKey(@Param("shop_id") String shopId,@Param("user_id")String userId);
 
     PageList<Map<String,Object>> getShopInfoList(Map<String, Object> param, PageBounds page);
 

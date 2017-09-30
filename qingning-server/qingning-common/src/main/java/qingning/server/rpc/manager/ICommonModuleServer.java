@@ -271,10 +271,4 @@ public interface ICommonModuleServer extends VersionModuleServer, CourseModuleSe
 
     void updateUserCommonInfo(Map<String, Object> queryMap);
 
-
-    /**查找直播间ID
-     * @param lecturer_id
-     * @return
-     */
-    String findLiveRoomIdByLectureId(String lecturer_id);
 }
