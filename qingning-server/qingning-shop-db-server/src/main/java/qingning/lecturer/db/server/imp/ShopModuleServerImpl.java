@@ -574,6 +574,39 @@ public class ShopModuleServerImpl implements IShopModuleServer {
         return shopMapper.selectByPrimaryKey(id,userId);
     }
 
+    @Override
+    public void userVisitShop(String userId, String shopId) {
+        if (shopUserMapper.selectExistUser(userId, shopId) == 0) {
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("shop_id", shopId);
+            userMap.put("user_id", userId);
+            userMap.put("user_type", "0");
+            userMap.put("total_consume", 0);
+            userMap.put("total_consume", 0);
+            userMap.put("msg_num", 0);
+            userMap.put("create_time", new Date());
+            shopUserMapper.insert(userMap);
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> findUserBuiedRecords(Map<String, Object> query) {
+        List<Map<String, Object>> res;
+        if ("1".equals(query.get("type"))) {
+            //单品已购
+            query.put("profit_type", "0");
+            res = lecturerCoursesProfitMapper.findUserBuiedSingleRecords(query);
+        } else {
+            //系列已购
+            query.put("profit_type", "2");
+            res = lecturerCoursesProfitMapper.findUserBuiedRecords(query);
+            res.stream().filter(map -> map.get("series_title") != null).forEach(map -> {
+                map.put("title", map.get("series_title"));
+            });
+
+        }
+        return res;
+    }
     /**
      * 根据系列id获得该系列的所有学员列表
      */

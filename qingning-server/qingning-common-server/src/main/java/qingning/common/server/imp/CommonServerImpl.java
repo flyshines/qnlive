@@ -1121,9 +1121,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         String shop_id = "";
         if (!MiscUtils.isEmpty(userMap.get("shop_id"))) {
             query.clear();
-            shop_id = userMap.get("shop_id");
-            query.put("shop_id", shop_id);
-            Map<String, String> shopInfo = readShop(shop_id, query, null,false, jedis);
+            Map<String, String> shopInfo = readShop(shop_id,false, jedis);
             if(shopInfo.get("open_sharing").equals("1")){
                 logger.debug("同步讲师token  user_id : "+user_id +" token : "+access_token);
                 Map<String, String> headerMap = new HashMap<>();
@@ -1542,7 +1540,7 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
         Map<String, String> payResultMap = TenPayUtils.sendPrePay(goodName, totalFee, terminalIp, outTradeNo, openid, platform);
 
         //5.处理生成微信预付单接口
-        if (false) {
+        if (payResultMap.get("return_code").equals("FAIL")) {
             //更新交易表
             Map<String, Object> failUpdateMap = new HashMap<>();
             failUpdateMap.put("status", "3");
@@ -1940,8 +1938,8 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             logger.debug("====>　已经处理完成, 不需要继续。流水号是: " + outTradeNo);
             return TenPayConstant.SUCCESS;
         }
-        //if (TenPayUtils.isValidSign(requestMapData)) {// MD5签名成功，处理课程打赏\购买课程等相关业务
-            if(true){
+        if (TenPayUtils.isValidSign(requestMapData)) {// MD5签名成功，处理课程打赏\购买课程等相关业务
+            //if(true){
             logger.debug(" ===> 微信notify Md5 验签成功 <=== ");
 
             if ("SUCCESS".equals(requestMapData.get("return_code")) && "SUCCESS".equals(requestMapData.get("result_code"))) {
@@ -2186,19 +2184,12 @@ public class CommonServerImpl  extends AbstractQNLiveServer {
             sumInfo = commonModuleServer.findCoursesSumInfo(param);
             String lecturer_profit = MiscUtils.convertObjectToLong(sumInfo.get("lecturer_profit")) + "";
             logger.error("series_test_13006660" + seriesKey + "  " + lecturer_profit);
-            long ibak = jedis.hset(seriesKey, "series_amount", lecturer_profit);
 
             Map<String, Object> course = new HashMap<>();
             course.put("series_id", courseId);
             course.put("series_amount", lecturer_profit);
             //同步系列课收入到数据库
             commonModuleServer.updateSeriesCmountByCourseId(course);
-
-            if (!lecturer_profit.equals(jedis.hget(seriesKey, "series_amount"))) {
-                logger.error("setAgain!!!!!!!!!!");
-                jedis.hset(seriesKey, "series_amount", lecturer_profit);
-            }
-            logger.error(ibak + "");
         }
         //TODO 系列课除外 暂时不做热门推荐
         if (courseMap.get("live_course_status")!=null) {

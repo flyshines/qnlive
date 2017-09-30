@@ -174,4 +174,16 @@ public interface IShopModuleServer extends UserModuleServer,ShopModuleServer,Cou
     Map<String,Object> updateUpdown(Map<String, Object> updownMap);
 
 	Map<String,Object> courseGurest(Map<String, Object> guestMap);
+
+	/**访问店铺
+	 * @param userId
+	 * @param shopId
+	 */
+	void userVisitShop(String userId, String shopId);
+
+	/**用户已购
+	 * @param query
+	 * @return
+	 */
+	List<Map<String,Object>> findUserBuiedRecords(Map<String, Object> query);
 }

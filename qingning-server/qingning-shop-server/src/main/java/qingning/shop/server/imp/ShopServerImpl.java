@@ -4,18 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import qingning.common.dj.HttpClientUtil;
 import qingning.common.entity.QNLiveException;
 import qingning.common.entity.RequestEntity;
 import qingning.common.util.*;
 import qingning.server.AbstractQNLiveServer;
+import qingning.server.JedisBatchCallback;
+import qingning.server.JedisBatchOperation;
 import qingning.server.annotation.FunctionName;
 import qingning.server.rpc.CommonReadOperation;
 import qingning.server.rpc.initcache.*;
 import qingning.server.rpc.manager.IShopModuleServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 import java.util.*;
 
@@ -83,9 +89,7 @@ public class ShopServerImpl extends AbstractQNLiveServer {
             this.updateAccessInfoByToken(reqEntity.getAccessToken(),Constants.CACHED_KEY_SHOP_FIELD,shopId,jedis);
             //4.增加讲师直播间信息缓存
             jedis.sadd(Constants.CACHED_LECTURER_KEY, userId);
-            map.clear();
-            map.put("shop_id", shopId);
-            this.readShop(shopId, map, CommonReadOperation.CACHE_READ_SHOP, false,jedis);
+            this.readShop(shopId, false,jedis);
             resultMap.put("shop_id", shopId);
         }
         return resultMap;
@@ -1373,7 +1377,864 @@ public class ShopServerImpl extends AbstractQNLiveServer {
         resultMap.put("course_info_list", courseInfoList);
         return resultMap;
     }
+    /**
+     * H5_店铺-获取店铺信息
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findShopInfo")
+    public Map<String, Object>  findShopInfo(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        Map<String, String> shopInfoMap = readShop(shopId, false, jedis);
+        resultMap.put("shop_info", shopInfoMap);
+        return resultMap;
+    }
+    /**
+     * H5_店铺-获取店铺单品课程（直播除外）列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findShopSingleCourseList")
+    public Map<String, Object>  findShopSingleCourseList(RequestEntity reqEntity) throws Exception{
+    	/*
+    	 * 逻辑：
+    	 * 1.根据shop_id获得讲师id
+    	 * 2.根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
+    	 */
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+        List<Map<String, String>> singleInfoList = new ArrayList<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的shop_id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        //获取分页标识
+        String lastSingleId = reqMap.get("last_single_id").toString();
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        /*
+         * 从缓存中获取店铺信息
+         */
+        Map<String, String> shopMap = readShop(shopId, false,jedis);
+        if(shopMap == null || shopMap.isEmpty()){
+            log.error("saas店铺-获取店铺单品课程（直播除外）列表>>>>请求的店铺不存在");
+            throw new QNLiveException("190001");
+        }
+        //获取讲师id
+        String lecturerId = shopMap.get("user_id");
+        //根据讲师id查询缓存中讲师已上架单品课，需要传递分页标识
+        //TODO 缓存
+        Set<String> singleSet = null;//readLecturerSingleNotLiveUp(lecturerId, lastSingleId, pageCount,reqEntity,readSingleListOperation,jedis);
+        if(singleSet != null){
+            log.info("saas店铺-获取店铺单品课程（直播除外）列表>>>>从缓存中获取到讲师的上架单品课（直播除外）");
+            //生成用于缓存不存在时调用数据库的requestEntity
+            Map<String, Object> readSaasCourseMap = new HashMap<>();
+            RequestEntity readSaasCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSaasCourseMap);
+            for(String singleId : singleSet){
+                readSaasCourseMap.put("course_id", singleId);
+                //获取系列课程详情
+                Map<String, String> singleMap = readCourse(singleId, readSaasCourseReqEntity, readCourseOperation, jedis, true);
+            	/*
+                 * 判断是否加入了课程
+                 */
+                boolean isStudent = isJoinCourse(userId, singleId, jedis);
+                //加入课程状态 0未加入 1已加入
+                if(isStudent){
+                    singleMap.put("is_join", "1");
+                }else {
+                    singleMap.put("is_join", "0");
+                }
+                singleInfoList.add(singleMap);
+            }
+        }
+        resultMap.put("single_info_list", singleInfoList);
+        return resultMap;
+    }
+    /**
+     * H5_课程-获取系列课程内容课程列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSeriesCourseList")
+    public Map<String, Object>  findSeriesCourseList(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+        List<Map<String, String>> courseInfoList = new ArrayList<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的series_id
+        String seriesId = (String) reqMap.get("series_id");
+        reqMap.put("seried_id", seriesId);
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        //获取分页标识
+        String lastCourseId = reqMap.get("last_course_id").toString();
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //获取前端传递的系列课程类型	0：直播；1：音频；2：视频；3：图文；
+        String seriesType = reqMap.get("series_type").toString();
 
+        /*
+         * 根据系列id查询缓存中系列内容课程id列表，需要传递分页标识
+         */
+        //read系列课的内容课程列表
+        Set<String> courseSet = readSeriesCourseUp(seriesId, lastCourseId, pageCount, jedis);
+        if(courseSet != null){
+            log.info("saas课程-获取系列课程内容课程列表>>>>从缓存中获取到系列的内容课程列表");
+            String courseDetailKey = null;	//获取内容课程详情的key
+
+            //生成用于缓存不存在时调用数据库的requestEntity
+            Map<String, Object> readCourseMap = new HashMap<>();
+            RequestEntity readCourseReqEntity = null;
+            if("0".equals(seriesType)){	//直播类型的系列课，从t_course中查询
+                log.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为直播类型");
+                readCourseReqEntity = this.generateRequestEntity(null, null, "findCourseByCourseId", readCourseMap);
+
+                for(String courseId : courseSet){
+                    readCourseMap.put("course_id", courseId);
+                    //获取课程详情
+                    Map<String, String> courseMap = readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+                	/*
+                	 * 对直播课程的返回字段进行重命名
+                	 */
+                    courseMap.put("course_image", courseMap.get("course_url").toString());
+                    courseMap.put("course_url", "");	//数据库或缓存“直播课”的course_url表示封面，前面已经存在course_image，所以这里置空
+
+                	/*
+                	 * 判断是否加入课程，直播类
+                	 */
+                    boolean isStudent = isJoinLiveCourse(userId, courseId, jedis);
+                    //加入课程状态 0未加入 1已加入
+                    if(isStudent){
+                        courseMap.put("is_join", "1");
+                    }else {
+                        courseMap.put("is_join", "0");
+                    }
+
+                    courseInfoList.add(courseMap);
+                }
+            }else{	//非直播类型的系列课，从t_saas_course中查询
+                log.info("saas课程-获取系列课程内容课程列表>>>>请求的系列为非直播类型");
+                readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+
+                for(String courseId : courseSet){
+                    readCourseMap.put("course_id", courseId);
+                    //获取课程详情
+                    Map<String, String> courseMap = readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+
+                	/*
+                	 * 判断是否加入课程，非直播类
+                	 */
+                    boolean isStudent = isJoinCourse(userId, courseId, jedis);
+                    //加入课程状态 0未加入 1已加入
+                    if(isStudent){
+                        courseMap.put("is_join", "1");
+                    }else {
+                        courseMap.put("is_join", "0");
+                    }
+
+                    courseInfoList.add(courseMap);
+                }
+            }
+        }
+
+        resultMap.put("course_info_list", courseInfoList);
+        return resultMap;
+    }
+    /**
+     * H5_课程-获取单品课程详情
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findSingleCourseDetail")
+    public Map<String, Object>  findSingleCourseDetail(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id",userId);
+        //获取请求查看的single_id
+        String singleId = (String) reqMap.get("single_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+
+        //生成用于缓存不存在时调用数据库的requestEntity
+        Map<String, Object> readSingleMap = new HashMap<String, Object>();
+        //从产品原型上看，调用该接口获取单品课程详情的来源只有非直播课程，所以直接从t_saas_course查找
+        RequestEntity readSingleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readSingleMap);
+        readSingleMap.put("course_id", singleId);
+        //获取课程详情
+        Map<String, String> singleMap = readCourse(singleId, readSingleReqEntity, readCourseOperation, jedis, true);
+        if(singleMap == null || singleMap.isEmpty()){
+            log.error("saas_H5_课程-获取单品课程详情>>>>课程不存在");
+            throw new QNLiveException("100004");
+        }
+
+		/*
+         * 判断是否加入了课程
+         */
+        boolean isStudent = isJoinCourse(userId, singleId, jedis);
+        //加入课程状态 0未加入 1已加入
+        if(isStudent){
+            resultMap.put("is_join", "1");
+            resultMap.put("is_bought", "1");
+        }else {
+            resultMap.put("is_join", "0");
+            //判断是否购买了该课程
+            boolean buyStatus = isBuySaasCourse(userId, singleId, jedis);
+            if(!buyStatus){	//用户未购买
+                resultMap.put("is_bought", "0");
+            }else{	//用户已购买
+                resultMap.put("is_bought", "1");
+            }
+        }
+
+		/*
+		 * 查找是否属于系列课
+		 */
+        String seriesId = singleMap.get("series_id");
+        if(StringUtils.isNotBlank(seriesId)){
+			/*
+			 * 属于某一门系列课，需要查找到系列id
+			 */
+            resultMap.put("series_id", seriesId);
+            resultMap.put("series_course_updown", singleMap.get("series_course_updown"));
+			/*
+			 * 判断是否订阅系列
+			 */
+            boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
+            if(isJoinSeries){
+                resultMap.put("is_join_series", "1");
+            }else{
+                resultMap.put("is_join_series", "0");
+            }
+        }
+
+
+        //更新缓存
+        Map<String, Object> readCourseMap = new HashMap<String, Object>();
+        readCourseMap.put(Constants.CACHED_KEY_COURSE_FIELD, singleId);
+        String readCourseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, readCourseMap);
+        jedis.hincrBy(readCourseKey, "click_num", 1);	//缓存中点击数+1
+
+        resultMap.put("single_info", singleMap);
+        return resultMap;
+    }
+    /**
+     * 判断用户是否定购某Saas课程
+     * @param userId
+     * @param courseId Saas课程id
+     * @param jedis
+     * @return
+     */
+    private boolean isBuySaasCourse(String userId, String courseId, Jedis jedis){
+        Map<String, Object> keyField = new HashMap<String, Object>();
+        keyField.put(Constants.CACHED_KEY_USER_FIELD, userId);
+        String key = MiscUtils.getKeyOfCachedData(Constants.SYS_USER_BUY_LIST, keyField);
+        Boolean result = jedis.sismember(key, courseId);
+        return result;
+    }
+    /**
+     * H5_课程-获取图文课程内容
+     * @param reqEntity
+     * @throws Exception
+     */
+    @FunctionName("vodArticleCourse")
+    public Map<String, Object> vodArticleCourse(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的article_id
+        String articleId = (String) reqMap.get("article_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+
+        //生成用于缓存不存在时调用数据库的requestEntity
+        Map<String, Object> readArticleMap = new HashMap<String, Object>();
+        //从产品原型上看，调用该接口为图文课程点播，所以直接从t_saas_course查找
+        RequestEntity readArticleReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readArticleMap);
+        readArticleMap.put("course_id", articleId);
+        //获取课程详情
+        Map<String, String> articleMap = readCourse(articleId, readArticleReqEntity, readCourseOperation, jedis, true);
+        if(articleMap == null){
+            log.error("saas_H5_课程-获取图文课程内容>>>>课程不存在");
+            throw new QNLiveException("100004");
+        }
+
+		/*
+		 * 判断登录是否购买该课程
+		 */
+        String lecturerId = articleMap.get("lecturer_id");
+        if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+            boolean isStudent = isJoinCourse(userId, articleId, jedis);
+            if(!isStudent){	//未购买
+                log.error("saas_H5_课程-获取图文课程内容>>>>用户未加入该图文课程(courseId=" + articleId + ")");
+                throw new QNLiveException("120007");
+            }
+        }else{
+            log.info("saas_H5_课程-获取图文课程内容>>>>用户为课程(courseId=" + articleId + ")的讲师，不用判断是否购买");
+        }
+
+		/*
+		 * 查找是否属于系列课
+		 */
+        String seriesId = articleMap.get("series_id");
+        if(StringUtils.isNotBlank(seriesId)){
+			/*
+			 * 属于某一门系列课，需要查找到系列id
+			 */
+            resultMap.put("series_id", articleMap.get("series_id"));
+            resultMap.put("series_course_updown", articleMap.get("series_course_updown"));
+			/*
+			 * 判断是否加入系列课
+			 */
+            boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
+            if(isJoinSeries){
+                resultMap.put("is_join_series", "1");
+            }else{
+                resultMap.put("is_join_series", "0");
+            }
+        }
+
+		/*
+		 * 拼接分享链接share_url
+		 */
+        String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix") + articleId;
+        resultMap.put("share_url", shareUrl);
+
+        resultMap.put("article_info", articleMap);
+
+        return resultMap;
+    }
+    /**
+     * H5_课程-获取课程内容（音频或视频）
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("vodCourse")
+    public Map<String, Object> vodCourse(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+
+        //生成用于缓存不存在时调用数据库的requestEntity
+        Map<String, Object> readCourseMap = new HashMap<String, Object>();
+        //从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
+        RequestEntity readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+        readCourseMap.put("course_id", courseId);
+        //获取课程详情
+        Map<String, String> courseMap = readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+        if(courseMap == null){
+            log.error("saas_H5_课程-获取课程内容（音频或视频）>>>>课程不存在");
+            throw new QNLiveException("100004");
+        }
+
+		/*
+         * 判断是否加入了课程
+         */
+        String lecturerId = courseMap.get("lecturer_id");
+        if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+            boolean isStudent = isJoinCourse(userId, courseId, jedis);
+            if(!isStudent){	//未购买
+                log.error("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户未加入该课程(courseId=" + courseId + ")");
+                throw new QNLiveException("120007");
+            }
+        }else{
+            log.info("Saas_H5_课程-获取课程内容（音频或视频）>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
+        }
+
+		/*
+		 * 查找是否属于系列课
+		 */
+        String seriesId = courseMap.get("series_id");
+        if(StringUtils.isNotBlank(seriesId)){
+			/*
+			 * 属于某一门系列课，需要查找到系列id
+			 */
+            resultMap.put("series_id", courseMap.get("series_id"));
+            resultMap.put("series_course_updown", courseMap.get("series_course_updown"));
+			/*
+			 * 判断是否加入系列课
+			 */
+            boolean isJoinSeries = isJoinSeries(userId, seriesId, jedis);
+            if(isJoinSeries){
+                resultMap.put("is_join_series", "1");
+            }else{
+                resultMap.put("is_join_series", "0");
+            }
+        }
+
+		/*
+		 * 拼接分享链接share_url
+		 */
+        String shareUrl = MiscUtils.getConfigByKey("saas_course_share_url_pre_fix") + courseId;
+        resultMap.put("share_url", shareUrl);
+
+        resultMap.put("course_info", courseMap);
+
+        return resultMap;
+    }
+    /**
+     * H5_课程-获取课程留言列表
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("findCourseMessageList")
+    public Map<String, Object> findCourseMessageList(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        //获取分页标识
+        String lastMessageId = reqMap.get("last_message_id").toString();
+        //获取每页数量
+        int pageCount = Integer.parseInt(reqMap.get("page_count").toString());
+        //课程留言列表
+        List<Map<String, String>> messageInfoList = new ArrayList<>();
+
+        /*
+         * 获取课程讲师id
+         */
+        Map<String, String> courseMap = readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+
+        /*
+         * 判断是否加入了课程
+         */
+        String lecturerId = courseMap.get("lecturer_id");
+        if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+            boolean isStudent = isJoinCourse(userId, courseId, jedis);
+            if(!isStudent){	//未购买
+                log.error("Saas_H5_课程-获取课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
+                throw new QNLiveException("120007");
+            }
+        }else{
+            log.info("Saas_H5_课程-获取课程留言列表>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
+        }
+
+    	/*
+         * 根据课程id查询缓存中课程的留言id列表，需要传递分页标识
+         */
+        //read课程的留言列表，以创建时间倒序排序
+        Set<String> messageSet = readCourseMessageSet(courseId, lastMessageId, pageCount, jedis);
+        if(messageSet != null){
+            log.info("saas课程-获取课程留言列表>>>>从缓存中获取到课程（course_id=" + courseId + "）的留言列表");
+            String messageDetailKey = null;	//获取内容课程详情的key
+            //生成用于缓存不存在时调用数据库的requestEntity
+            Map<String, Object> readMessageMap = new HashMap<String, Object>();
+            //从产品原型上看，调用该接口为非直播类课程点播，所以直接从t_saas_course查找
+            RequestEntity readMessageReqEntity = this.generateRequestEntity(null, null, "findSaasCourseCommentByCommentId", readMessageMap);
+
+            String[] searchKeys = {courseId, ""};	//用于读取课程留言的
+            for(String messageId : messageSet){
+                searchKeys[1] = messageId;
+                readMessageMap.put("message_id", messageId);
+                //获取留言详情
+                //TODO 缓存
+                Map<String, String> messageMap = null;//readSaasCourseComment(searchKeys, readMessageReqEntity, readSaasCourseMessageOperation, jedis, true);
+
+                messageInfoList.add(messageMap);
+            }
+        }
+
+        resultMap.put("message_info_list", messageInfoList);
+        return resultMap;
+    }
+
+    /**
+     * H5_课程-添加课程留言
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("addMessageForCourse")
+    public Map<String, Object> addMessageForCourse(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        //获取请求查看的course_id
+        String courseId = (String) reqMap.get("course_id");
+        //获取请求中的评论内容
+        String content = (String) reqMap.get("content");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        Date now = new Date();
+        /*
+         * 获取课程详情
+         */
+        Map<String, String> courseMap = readCourse(courseId, reqEntity, readCourseOperation, jedis, true);
+        /*
+         * 判断是否加入了课程
+         */
+        String lecturerId = courseMap.get("lecturer_id");
+        if(!userId.equals(lecturerId)){	//登录用户不是课程讲师
+            boolean isStudent = isJoinCourse(userId, courseId, jedis);
+            if(!isStudent){	//未购买
+                log.error("Saas_H5_课程-添加课程留言列表>>>>用户未加入该课程(courseId=" + courseId + ")");
+                throw new QNLiveException("120007");
+            }
+        }else{
+            log.info("Saas_H5_课程-添加课程留言列表>>>>用户为课程(courseId=" + courseId + ")的讲师，不用判断是否购买");
+        }
+
+        /*
+         * 获得课程信息，主要用于后续获取店铺id进行存储
+         */
+        Map<String, Object> readCourseMap = new HashMap<String, Object>();
+        readCourseMap.put("course_id", courseId);
+        RequestEntity readCourseReqEntity = this.generateRequestEntity(null, null, "findSaasCourseByCourseId", readCourseMap);
+
+        Map<String, String> courseInfoMap = readCourse(courseId, readCourseReqEntity, readCourseOperation, jedis, true);
+        if(courseInfoMap == null || courseInfoMap.isEmpty()){
+            log.error("saas课程-添加课程留言>>>>课程不存在");
+            throw new QNLiveException("100004");
+        }
+
+        /*
+         * 获取登录用户信息，主要用于后续获取用户昵称等
+         */
+        reqMap.put("user_id", userId);
+        Map<String, String> loginedUserMap = readUser(userId, reqEntity, readUserOperation, jedis);
+        if(loginedUserMap == null || loginedUserMap.isEmpty()){
+            log.error("saas课程-添加课程留言>>>>登录用户不存在");
+            throw new QNLiveException("000005");
+        }
+        /*
+         * 新增到数据库
+         */
+        //封装要新增的留言map
+        String commentId = MiscUtils.getUUId();
+        Map<String, Object> insertCommentMap = new HashMap<>();
+        insertCommentMap.put("comment_id", commentId);
+        insertCommentMap.put("shop_id", courseInfoMap.get("shop_id"));
+        insertCommentMap.put("series_id", courseInfoMap.get("series_id"));
+        insertCommentMap.put("course_id", courseId);
+        insertCommentMap.put("user_id", loginedUserMap.get("user_id"));
+        insertCommentMap.put("nick_name", loginedUserMap.get("nick_name"));
+        insertCommentMap.put("content", reqMap.get("content"));
+        insertCommentMap.put("course_name", courseInfoMap.get("course_title"));
+        insertCommentMap.put("type", courseInfoMap.get("goods_type"));
+        insertCommentMap.put("avatar_address", loginedUserMap.get("avatar_address"));
+        insertCommentMap.put("create_time", now);
+
+        //封装更新的saas课程评论数量map
+        Map<String, Object> updateCourseMap = new HashMap<>();
+        updateCourseMap.put("course_id", courseId);
+        updateCourseMap.put("comment_num", 1);
+        updateCourseMap.put("update_time", now);
+
+        //用户在该店铺的评论数
+        Map<String, Object> updateSaasShopUserMap = new HashMap<>();
+        updateSaasShopUserMap.put("user_id", userId);
+        updateSaasShopUserMap.put("shop_id", courseInfoMap.get("shop_id"));
+        updateSaasShopUserMap.put("update_time", now);
+        updateSaasShopUserMap.put("comment_num", 1);
+
+        //新增数据库留言、更新数据库课程留言数量；更新缓存中saas课程评论id列表
+        //shopModuleServer.addSaasCourseComment(insertCommentMap, updateCourseMap, updateSaasShopUserMap);
+        /*
+         * 插入到缓存中saas课程评论id列表
+         */
+        Map<String, Object> readSaasCourseCommentMap = new HashMap<>();
+        readSaasCourseCommentMap.put(Constants.CACHED_KEY_COURSE_FIELD, updateCourseMap.get("course_id"));
+        String readSaasCourseCommentKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE_SAAS_COMMENT_ALL, readSaasCourseCommentMap);
+        jedis.zadd(readSaasCourseCommentKey, now.getTime(), insertCommentMap.get("comment_id").toString());
+        /*
+         * 更新缓存中saas课程的评论数量
+         */
+        String readSaasCourseDetailKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, readSaasCourseCommentMap);
+        jedis.hincrBy(readSaasCourseDetailKey, "comment_num", 1);
+        return resultMap;
+    }
+    /**
+     * H5_用户-提交反馈与建议
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("addFeedback")
+    public Map<String, Object> addFeedback(RequestEntity reqEntity) throws Exception{
+        //返回结果集
+        Map<String, Object> resultMap = new HashMap<>();
+    	/*
+    	 * 获取请求参数
+    	 */
+        Map<String, Object> reqMap = (Map<String, Object>) reqEntity.getParam();
+        //获取登录用户user_id
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        reqMap.put("user_id", userId);
+        //获取请求中的反馈内容
+        String content = (String) reqMap.get("content");
+        //获取请求中的联系方式
+        String contact = (String) reqMap.get("contact");
+        //获取请求中的店铺id
+        String shopId = (String) reqMap.get("shop_id");
+        //获取缓存jedis
+        Jedis jedis = jedisUtils.getJedis();
+        //获取当前服务器时间
+        Date now = new Date();
+
+        /*
+         * 从缓存中获取登录用户信息
+         */
+        Map<String, String> loginedUserMap = readUser(userId, reqEntity, readUserOperation, jedis);
+        if(loginedUserMap == null || loginedUserMap.isEmpty()){
+            log.error("Saas_H5_用户-提交反馈与建议>>>>登录用户不存在");
+            throw new QNLiveException("000005");
+        }
+
+        /*
+         * 新增到数据库
+         */
+        Map<String, Object> newFeedbackMap = new HashMap<String, Object>();
+        newFeedbackMap.put("back_id", MiscUtils.getUUId());
+        newFeedbackMap.put("shop_id", shopId);
+        newFeedbackMap.put("user_id", userId);
+        newFeedbackMap.put("avatar_address", loginedUserMap.get("avatar_address"));
+        newFeedbackMap.put("nick_name", loginedUserMap.get("nick_name"));
+        newFeedbackMap.put("content", content);
+        newFeedbackMap.put("phone", contact);
+        newFeedbackMap.put("create_time", now);
+        //shopModuleServer.addFeedback(newFeedbackMap);
+
+        return resultMap;
+    }
+    /**
+     * 用户-访问店铺
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("userVisit")
+    public void userVisit(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query = new HashMap<>();
+        String shopId = ((Map<String,String>)reqEntity.getParam()).get("shop_id");
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = readShop(shopId, false ,jedis);
+        //店主ID
+        String lecturerId = shopInfo.get("user_id");
+        query.put("user_id", lecturerId);
+        String userCountKey = MiscUtils.getKeyOfCachedData(Constants.SHOP_DAY_COUNT, query);
+        //本人访问自己的店铺不做统计
+        if(lecturerId!=null&&!lecturerId.equals(userId)){
+            if(!jedis.exists(userCountKey)){
+                long milliSecondsLeftToday = 86400000 - DateUtils.getFragmentInMilliseconds(Calendar.getInstance(), Calendar.DATE);
+                //今日浏览人数
+                jedis.hincrBy(userCountKey,"day_visit",1);
+                //设置失效时间为今天
+                jedis.expire(userCountKey,Integer.valueOf((milliSecondsLeftToday/1000)+""));
+            }else{
+                jedis.hincrBy(userCountKey,"day_visit",1);
+            }
+
+            //插入t_saas_shop_users表
+            shopModuleServer.userVisitShop(userId,shopId);
+        }
+    }
+    /**
+     * 用户-单品已购
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("buiedSingleList")
+    public Map<String, Object> buiedSingleList(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        String shopId = query.get("shop_id").toString();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = readShop(shopId, false,jedis);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        //店主ID
+        query.put("lecturer_id",shopInfo.get("user_id"));
+        query.put("user_id",userId);
+        query.put("type","1");
+        if(query.get("position") == null||StringUtils.isEmpty(query.get("position").toString())){
+            query.remove("position");
+        }
+        List<Map<String,Object>> records = shopModuleServer.findUserBuiedRecords(query);
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+
+            //从缓存中查询讲师的名字
+            callBack.invoke((pipeline, jedis1) -> {
+                for(Map<String,Object> recordMap : records){
+                    cacheQueryMap.clear();
+                    cacheQueryMap.put(Constants.CACHED_KEY_COURSE_FIELD, recordMap.get("course_id"));
+                    String courseKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_COURSE, cacheQueryMap);
+                    Response<String> courseName = pipeline.hget(courseKey, "course_title");
+                    Response<String> course_updown = pipeline.hget(courseKey, "course_updown");
+                    Response<String> course_image = pipeline.hget(courseKey, "course_image");
+                    Response<String> goods_type = pipeline.hget(courseKey, "goods_type");
+                    Response<String> course_duration = pipeline.hget(courseKey, "course_duration");
+                    Response<String> status = pipeline.hget(courseKey, "status");
+                    Response<String> course_url = pipeline.hget(courseKey, "course_url");
+                    recordMap.put("courseTitle", courseName);
+                    recordMap.put("course_updown", course_updown);
+                    recordMap.put("course_image", course_image);
+                    recordMap.put("course_url", course_url);
+                    recordMap.put("goods_type", goods_type);
+                    recordMap.put("course_duration", course_duration);
+                    recordMap.put("status", status);
+                }
+                pipeline.sync();
+                for(Map<String,Object> recordMap : records){
+                    Response<String> courseName = (Response)recordMap.get("courseTitle");
+                    Response<String> course_updown = (Response)recordMap.get("course_updown");
+                    Response<String> course_image = (Response)recordMap.get("course_image");
+                    Response<String> course_url = (Response)recordMap.get("course_url");
+                    Response<String> goods_type = (Response)recordMap.get("goods_type");
+                    Response<String> course_duration = (Response)recordMap.get("course_duration");
+                    Response<String> status = (Response)recordMap.get("status");
+                    recordMap.put("title", courseName.get());
+                    //recordMap.remove("cacheLecturerName");
+                    if(recordMap.get("start_time") instanceof Date){
+                        Date start_time = (Date)recordMap.get("start_time");
+                        Date end_time = (Date)recordMap.get("end_time");
+                        String liveStatus = status.get();
+                        if(! liveStatus.equals("2")&& !liveStatus.equals("5")){
+                            long courseStartTime = start_time.getTime();
+                            if(System.currentTimeMillis() > courseStartTime){
+                                recordMap.put("live_status", "1");
+                            }else{
+                                recordMap.put("live_status", liveStatus);
+                            }
+                        }else{
+                            recordMap.put("live_status", liveStatus);
+                        }
+                        recordMap.put("start_time", start_time);
+                        recordMap.put("end_time", end_time);
+                        recordMap.put("course_image", course_url.get());
+                        recordMap.put("type", "0");
+                    }else{
+                        recordMap.remove("start_time");
+                        recordMap.remove("end_time");
+                        recordMap.put("course_image", course_image.get());
+                        //非直播
+                        recordMap.put("type", goods_type.get());
+                    }
+                    recordMap.put("status", course_updown.get());
+                    recordMap.put("course_duration", course_duration.get());
+                }
+            });
+            resultMap.put("list", records);
+        }
+        return resultMap;
+    }
+    /**
+     * 用户-系列已购
+     * @param reqEntity
+     * @return
+     * @throws Exception
+     */
+    @FunctionName("buiedSeriesList")
+    public Map<String, Object> buiedSeriesList(RequestEntity reqEntity) throws Exception{
+        Map<String,Object> query =  (Map<String, Object>)reqEntity.getParam();
+        Map<String, Object> resultMap = new HashMap<>();
+        String shopId = query.get("shop_id").toString();
+        Jedis jedis = jedisUtils.getJedis();//获取jedis对象
+        //店铺信息
+        Map<String, String> shopInfo = readShop(shopId, false, jedis);
+        String userId = AccessTokenUtil.getUserIdFromAccessToken(reqEntity.getAccessToken());
+
+        //店主ID
+        query.put("lecturer_id",shopInfo.get("user_id"));
+        query.put("user_id",userId);
+        query.put("type","2");
+        if(query.get("position") == null||StringUtils.isEmpty(query.get("position").toString())){
+            query.remove("position");
+        }
+        List<Map<String,Object>> records = shopModuleServer.findUserBuiedRecords(query);
+
+        if(! CollectionUtils.isEmpty(records)){
+            Map<String,Object> cacheQueryMap = new HashMap<>();
+
+            JedisBatchCallback callBack = (JedisBatchCallback)jedis;
+            //从缓存中查询讲师的名字
+            callBack.invoke(new JedisBatchOperation(){
+                @Override
+                public void batchOperation(Pipeline pipeline, Jedis jedis) {
+                    for(Map<String,Object> recordMap : records){
+                        cacheQueryMap.put(Constants.CACHED_KEY_SERIES_FIELD, recordMap.get(Constants.CACHED_KEY_SERIES_FIELD));
+                        String seriesKey = MiscUtils.getKeyOfCachedData(Constants.CACHED_KEY_SERIES, cacheQueryMap);
+                        Response<String> studentNum = pipeline.hget(seriesKey, "student_num");
+                        recordMap.put("studentNum",studentNum);
+                    }
+                    pipeline.sync();
+
+                    for(Map<String,Object> recordMap : records){
+                        Response<String> studentNum = (Response)recordMap.get("studentNum");
+                        recordMap.put("student_num",studentNum.get());
+                    }
+                }
+            });
+            resultMap.put("list", records);
+        }
+        return resultMap;
+    }
     /**
      * 创建课程
      * @param reqEntity
