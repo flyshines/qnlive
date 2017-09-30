@@ -11,6 +11,9 @@
       <if test="shop_id != null" >
         shop_id = #{shop_id}
       </if>
+      <if test="user_id != null" >
+        lecturer_id = #{user_id}
+      </if>
     </where>
   </select>
   <select id="selectUserIdByShopId" resultType="java.lang.String" parameterType="java.lang.String" >

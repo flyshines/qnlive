@@ -11,8 +11,11 @@
       <if test="course_id != null" >
         course_id,
       </if>
-      <if test="room_id != null" >
-        room_id,
+      <if test="goods_type != null" >
+          goods_type,
+      </if>
+      <if test="shop_id != null" >
+        shop_id,
       </if>
       <if test="lecturer_id != null" >
         lecturer_id,
@@ -64,8 +67,11 @@
       <if test="course_id != null" >
         #{course_id},
       </if>
-      <if test="room_id != null" >
-        #{room_id},
+      <if test="goods_type != null" >
+        #{goods_type},
+      </if>
+      <if test="shop_id != null" >
+        #{shop_id},
       </if>
       <if test="lecturer_id != null" >
         #{lecturer_id},
@@ -244,7 +250,7 @@
     where 1=1
     and user_id = #{user_id}
     and distributer_id = #{distributer_id}
-    and room_id = #{room_id}
+    and shop_id = #{shop_id}
     and rq_code = #{rq_code}
     limit 1
   </select>
@@ -258,8 +264,8 @@
 	<if test="lecturer_id != null" >
 		and lecturer_id= #{lecturer_id}
 	</if>
-	<if test="room_id != null" > 
-		and room_id=#{room_id}
+	<if test="shop_id != null" >
+		and shop_id=#{shop_id}
 	</if>
 	<if test="distributer_id != null" >
 		and distributer_id=#{distributer_id}

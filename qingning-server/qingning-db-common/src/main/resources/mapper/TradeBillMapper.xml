@@ -11,9 +11,6 @@
       <if test="user_id != null" >
         user_id,
       </if>
-      <if test="room_id != null" >
-        room_id,
-      </if>
       <if test="shop_id != null" >
         shop_id,
       </if>
@@ -22,6 +19,9 @@
       </if>
       <if test="course_id != null" >
         course_id,
+      </if>
+      <if test="goods_type != null" >
+        goods_type,
       </if>
       <if test="amount != null" >
         amount,
@@ -58,9 +58,6 @@
       <if test="user_id != null" >
         #{user_id},
       </if>
-      <if test="room_id != null" >
-        #{room_id},
-      </if>
       <if test="shop_id != null" >
         #{shop_id},
       </if>
@@ -69,6 +66,9 @@
       </if>
       <if test="course_id != null" >
         #{course_id},
+      </if>
+      <if test="goods_type != null" >
+        #{goods_type},
       </if>
       <if test="amount != null" >
         #{amount},
@@ -105,9 +105,6 @@
     <set >
       <if test="user_id != null" >
         user_id = #{user_id},
-      </if>
-      <if test="room_id != null" >
-        room_id = #{room_id},
       </if>
       <if test="course_id != null" >
         course_id = #{course_id},

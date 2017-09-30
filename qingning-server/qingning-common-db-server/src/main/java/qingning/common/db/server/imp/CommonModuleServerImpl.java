@@ -169,8 +169,8 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 	}
 
 	@Override
-	public Map<String, Object> getShopInfo(String shopId) {
-		return shopMapper.selectByPrimaryKey(shopId);
+	public Map<String, Object> getShopInfo(String shopId,String userId) {
+		return shopMapper.selectByPrimaryKey(shopId,userId);
 	}
 
 	@Override
@@ -409,14 +409,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		return tradeBill;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class)
 	@Override
 	public Map<String, Object> handleWeixinPayResult(Map<String, Object> requestMapData) throws Exception{
 
 		Date now = new Date();
 		Map<String,Object> tradeBill = (Map<String,Object>)requestMapData.get("tradeBillInCache");
-		Map<String,Object> updateTradeBill = new HashMap<String,Object>();
+		Map<String,Object> updateTradeBill = new HashMap<>();
 		//1.更新t_trade_bill 交易信息表
 		updateTradeBill.put("trade_id", requestMapData.get("out_trade_no"));
 		updateTradeBill.put("status", "2");//交易状态，0：待付款 1：处理中 2：已完成 3：已关闭
@@ -426,12 +425,13 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 		//2.更新t_payment_bill 支付信息表
 		Map<String,Object> paymentBill = paymentBillMapper.findPaymentBillByTradeId((String)requestMapData.get("out_trade_no"));
+
 		String status = (String)paymentBill.get("status");
 		if("2".equals(status)){
 			throw new QNLiveException("000105");
 		}
 		String profitId = MiscUtils.getUUId();
-		Map<String,Object> updatePaymentBill = new HashMap<String,Object>();
+		Map<String,Object> updatePaymentBill = new HashMap<>();
 		updatePaymentBill.put("status", "2");
 		Date realPayTime = new Date(MiscUtils.convertObjectToLong(requestMapData.get("time_end")));
 		updatePaymentBill.put("update_time", realPayTime);
@@ -445,10 +445,10 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		long amount = Long.valueOf(tradeBill.get("amount").toString());
 		String userId = tradeBill.get("user_id").toString();
 		//3.更新 讲师课程收益信息表
-		Map<String,Object> profitRecord = new HashMap<String,Object>();
+		Map<String,Object> profitRecord = new HashMap<>();
 		profitRecord.put("profit_id", profitId);
 		profitRecord.put("course_id", tradeBill.get("course_id"));
-		profitRecord.put("room_id", tradeBill.get("room_id"));
+		profitRecord.put("shop_id", tradeBill.get("shop_id"));
 		profitRecord.put("user_id", userId);
 		profitRecord.put("profit_amount", amount);
 		profitRecord.put("profit_type", tradeBill.get("profit_type"));
@@ -456,9 +456,9 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		profitRecord.put("create_date", now);
 		profitRecord.put("payment_id", paymentBill.get("payment_id"));
 		profitRecord.put("payment_type", paymentBill.get("payment_type"));
+		profitRecord.put("goods_type", tradeBill.get("goods_type"));
 
 		Map<String,String> courseMap = (Map<String,String>)requestMapData.get("courseInCache");
-		Map<String,Object> roomDistributerCache = null;
 		String lecturerId = courseMap.get("lecturer_id");
 		//分销员分成比例（*10000）
 		long distributeRate = 0;
@@ -479,18 +479,6 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			}else{
 				//门票收益
 				profitRecord.put("reward_type","0");
-			}
-		}
-		//课程收益
-		if("0".equals(tradeBill.get("profit_type"))){
-			roomDistributerCache = (Map<String,Object>)requestMapData.get("roomDistributerCache");
-			if(!MiscUtils.isEmpty(roomDistributerCache)){
-				distributeRate = MiscUtils.convertObjectToLong(roomDistributerCache.get("profit_share_rate"));
-				distributerId=(String)roomDistributerCache.get("distributer_id");
-				profitRecord.put("rq_code", roomDistributerCache.get("rq_code"));
-				long shareAmount= (amount * distributeRate)/10000L;
-				profitRecord.put("share_amount", shareAmount);
-				profitRecord.put("distributer_id", distributerId);
 			}
 		}
 		//收益类型（1:直播课，2：店铺课（非直播课））
@@ -520,7 +508,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			coursesStudentsMapper.insertStudent(student);
 
 		}
-		countUserGains(distributerId,amount,requestMapData.get("app_name").toString(),lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
+		countUserGains(distributerId,amount,lecturerId,distributeRate,tradeBill.get("course_type")+"",profitRecord);
 		return profitRecord;
 	}
 
@@ -551,37 +539,28 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		}
 
 	}
-	private Map<String,Object> initGains(String userId,String appName){
-		//初始化用户收入信息
-		List<String> ids = new ArrayList<>();
-		ids.add(userId);
-		List<Map<String, Object>> userRoomAmountList = liveRoomMapper.selectRoomAmount(ids);
-		//List<Map<String, Object>> userDistributerAmountList = distributerMapper.selectDistributerAmount(ids);
-		List<Map<String, Object>> userWithdrawSumList = withdrawCashMapper.selectUserWithdrawSum(ids);
-
-		List<Map<String, Object>> userIdList = new ArrayList<>();
-		Map<String, Object> user = new HashMap<>();
-		user.put("app_name",appName);
-		user.put("user_id",userId);
-		userIdList.add(user);
-
-		List<Map<String, Object>> insertGainsList = CountMoneyUtil.getGaoinsList(userIdList, userRoomAmountList,
-				userWithdrawSumList);
-		userGainsMapper.insertUserGains(insertGainsList);
-		if(insertGainsList!=null){
-			return insertGainsList.get(0);
-		}
-		return null;
+	private Map<String,Object> initGains(String userId){
+		//初始化用户余额信息
+		Map<String,Object> gainsMap = new HashMap<>();
+		gainsMap.put("user_id",userId);
+		gainsMap.put("live_room_total_amount","0");
+		gainsMap.put("live_room_real_incomes","0");
+		gainsMap.put("distributer_total_amount","0");
+		gainsMap.put("distributer_real_incomes","0");
+		gainsMap.put("user_total_amount","0");
+		gainsMap.put("user_total_real_incomes","0");
+		gainsMap.put("balance","0");
+		userGainsMapper.insertUserGainsByNewUser(gainsMap);
+		return gainsMap;
 	}
 	/**
 	 * @param distributerId		分销ID
 	 * @param amount			支付金额
-	 * @param appName			app名称
 	 * @param lecturerId		讲师ID
 	 * @param distributeRate	分销员收益比例
 	 * @param courseType	            1:直播收入,2:店铺收入（非直播间收入）
 	 */
-	private void countUserGains(String distributerId,Long amount,String appName,String lecturerId,long distributeRate,String courseType,Map<String,Object> profitRecord){
+	private void countUserGains(String distributerId,Long amount,String lecturerId,long distributeRate,String courseType,Map<String,Object> profitRecord){
 		double rate = DoubleUtil.divide( (double) distributeRate,10000D);
 		//讲师收益
 		Map<String,Object> lectureGains = new HashMap<>();
@@ -590,7 +569,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 		Map<String,Object> lectureGainsOld = userGainsMapper.findUserGainsByUserId(lecturerId);
 		if(lectureGainsOld == null){
 			//如果统计未找到做规避
-			lectureGainsOld = initGains(lecturerId,appName);
+			lectureGainsOld = initGains(lecturerId);
 		}
 		//讲师收益
 		long lectureTotalAmount;
@@ -638,7 +617,7 @@ public class CommonModuleServerImpl implements ICommonModuleServer {
 			Map<String,Object> distGainsOld = userGainsMapper.findUserGainsByUserId(distributerId);
 			if(distGainsOld == null){
 				//如果统计未找到做规避
-				distGainsOld = initGains(distributerId,appName);
+				distGainsOld = initGains(distributerId);
 			}
 			//分销收入
 			long distributerTotalAmountOld = Long.valueOf(distGainsOld.get("distributer_total_amount").toString());
